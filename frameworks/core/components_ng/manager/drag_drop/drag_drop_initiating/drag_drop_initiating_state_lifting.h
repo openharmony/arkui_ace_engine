@@ -45,6 +45,7 @@ public:
 
     void Init(int32_t currentState) override;
 
+    void HandlePanOnActionEnd(const GestureEvent& info) override;
 private:
     void HandleOnDragStart(RefPtr<FrameNode> frameNode, const GestureEvent& info);
     void DoDragDampingAnimation(const Point& point, int32_t pointerId, bool isReDragStart = false);
@@ -57,6 +58,7 @@ private:
     void SetGatherAnimation(const RefPtr<PipelineBase>& context);
     void SetGatherAnimation();
     void ResetNodeInMultiDrag();
+    void SetTextAnimation();
 };
 } // namespace OHOS::Ace::NG
 

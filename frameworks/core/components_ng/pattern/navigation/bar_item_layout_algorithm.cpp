@@ -88,6 +88,19 @@ void BarItemLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const Ref
     textWrapper->Measure(constraint);
 }
 
+float GetIconOffsetY(const RefPtr<BarItemNode>& hostNode)
+{
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    if (hostNode->IsHideText()) {
+        return theme->GetToolbarItemIconHideTextTopPadding().ConvertToPx();
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return theme->GetToolbarItemIconTopPadding().ConvertToPx();
+    }
+    return 0.0f;
+}
+
 float BarItemLayoutAlgorithm::LayoutIcon(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
     const RefPtr<LayoutProperty>& barItemLayoutProperty, float textHeight)
 {
@@ -103,11 +116,12 @@ float BarItemLayoutAlgorithm::LayoutIcon(LayoutWrapper* layoutWrapper, const Ref
     CHECK_NULL_RETURN(constraint, 0.0f);
     auto offsetX = (constraint->maxSize.Width() - iconSize_.ConvertToPx()) / 2;
 
+    float offsetY = GetIconOffsetY(hostNode);
     if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
         offsetX = 0.0f;
+        offsetY = 0.0f;
     }
-
-    auto offset = OffsetF(offsetX, 0.0f);
+    OffsetF offset = OffsetF(offsetX, offsetY);
     geometryNode->SetMarginFrameOffset(offset);
     iconWrapper->Layout();
     return 0.0f;
@@ -130,9 +144,21 @@ void BarItemLayoutAlgorithm::LayoutText(LayoutWrapper* layoutWrapper, const RefP
     auto textWidth = geometryNode->GetFrameSize().Width();
     auto offsetX = (constraint->maxSize.Width() - textWidth) / 2;
 
-    if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
-        offsetX = 0.0f;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
+            offsetX = 0.0f;
+        }
+    } else {
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        Dimension offsetY = theme->GetToolbarItemIconTopPadding();
+        if (!hostNode->IsBarItemUsedInToolbarConfiguration()) {
+            offsetX = 0.0f;
+            offsetY = 0.0_vp;
+        }
+        textOffsetY += offsetY;
     }
+
     auto offset = OffsetF(offsetX, iconOffsetY + static_cast<float>(textOffsetY.ConvertToPx()));
     geometryNode->SetMarginFrameOffset(offset);
     textWrapper->Layout();

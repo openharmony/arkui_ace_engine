@@ -167,6 +167,15 @@ void FrontendDelegate::SetAutoFocusTransfer(bool isAutoFocusTransfer)
     focusManager->SetIsAutoFocusTransfer(isAutoFocusTransfer);
 }
 
+void FrontendDelegate::SetKeyProcessingMode(int32_t keyProcessingMode)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetKeyProcessingMode(static_cast<NG::KeyProcessingMode>(keyProcessingMode));
+}
+
 bool FrontendDelegate::ConfigWindowMask(bool enable)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();

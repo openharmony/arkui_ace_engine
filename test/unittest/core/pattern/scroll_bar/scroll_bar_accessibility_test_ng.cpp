@@ -64,6 +64,44 @@ HWTEST_F(ScrollBarAccessibilityTestNg, IsScrollable001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsScrollable002
+ * @tc.desc: Test IsScrollable without child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarAccessibilityTestNg, IsScrollable002, TestSize.Level1)
+{
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    CreateDone();
+    FlushUITasks();
+    EXPECT_NE(pattern_->scrollBar_, nullptr);
+    EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), UINT8_MAX);
+
+    EXPECT_TRUE(accessibilityProperty_->IsScrollable());
+}
+
+/**
+ * @tc.name: IsScrollable003
+ * @tc.desc: Test IsScrollable of scrollBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarAccessibilityTestNg, IsScrollable003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. child height greater than scrollbar height
+     * @tc.expected: Scrollable
+     */
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild(2000.f);
+    CreateDone();
+    EXPECT_FALSE(accessibilityProperty_->IsScrollable());
+}
+
+/**
  * @tc.name: ScrollBarAccessibilityPropertyGetAccessibilityValue001
  * @tc.desc: Test GetAccessibilityValue of scrollBar.
  * @tc.type: FUNC
@@ -109,9 +147,8 @@ HWTEST_F(ScrollBarAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Lev
      */
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     accessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_FORWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step2. Scroll to middle.
@@ -120,10 +157,8 @@ HWTEST_F(ScrollBarAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Lev
     FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 1.f);
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_FORWARD, AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step3. Scroll to bottom.
@@ -132,9 +167,8 @@ HWTEST_F(ScrollBarAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Lev
     FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 640.f);
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -153,7 +187,8 @@ HWTEST_F(ScrollBarAccessibilityTestNg, SetSpecificSupportAction002, TestSize.Lev
     CreateScrollBarChild();
     CreateDone();
     accessibilityProperty_->ResetSupportAction();
-    EXPECT_EQ(GetActions(accessibilityProperty_), 0);
+    std::unordered_set<AceAction> expectedActions = {};
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -367,7 +368,9 @@ std::optional<float> GetContainerModalTitleHeightIfNeeded(
     CHECK_NULL_RETURN(navigationNode, titleHeight);
     auto pipeline = navigationNode->GetContext();
     CHECK_NULL_RETURN(pipeline, titleHeight);
-    if (!NavigationTitleUtil::NeedAvoidContainerModal(pipeline)) {
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, titleHeight);
+    if (!avoidInfoMgr->NeedAvoidContainerModal()) {
         return titleHeight;
     }
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
@@ -380,8 +383,7 @@ std::optional<float> GetContainerModalTitleHeightIfNeeded(
     if (!NearEqual(navigationSize.Height(), navDestSize.Height())) {
         return titleHeight;
     }
-
-    auto height = pipeline->GetContainerModalTitleHeight();
+    auto height = avoidInfoMgr->GetContainerModalTitleHeight();
     if (height <= 0) {
         return titleHeight;
     }

@@ -329,6 +329,26 @@ public:
         }
     }
 
+    void SetIsDragEndPending(bool isDragEndPending)
+    {
+        isDragEndPending_ = isDragEndPending;
+    }
+
+    bool IsDragEndPending() const
+    {
+        return isDragEndPending_;
+    }
+
+    void SetRequestIdentify(int32_t requestId)
+    {
+        requestId_ = requestId;
+    }
+
+    int32_t GetRequestIdentify() const
+    {
+        return requestId_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -354,6 +374,8 @@ private:
     std::vector<KeyCode> pressedKeyCodes_;
     bool isCapi_ = false;
     std::function<void()> executeDropAnimation_;
+    int32_t requestId_ = -1;
+    bool isDragEndPending_ = false;
 };
 
 class NotifyDragEvent : public DragEvent {

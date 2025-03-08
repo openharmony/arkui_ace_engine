@@ -36,6 +36,18 @@ public:
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
 
+    void SetAngle(double angle)
+    {
+        angle_ = angle;
+    }
+
+    double GetAngle()
+    {
+        return angle_;
+    }
+
+    void CheckCallbackState() override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;

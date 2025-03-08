@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#include "base/memory/ref_counter.h"
 #include "test/unittest/core/pattern/test_ng.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
-#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+
 #include "base/utils/utils.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/memory/ref_counter.h"
 
 #define private public
 #define protectd public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/flex/wrap_layout_algorithm.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/property/grid_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -176,7 +178,7 @@ HWTEST_F(WrapLayoutAlgorithmTest, FlexWrapFrameNodeLayout005, TestSize.Level1)
     list.push_back(layoutWrapper);
     ContentInfo content(362.2, 362.2, 362, list);
     auto layoutNode = CreateLayoutWrapper();
-    wrapLayoutAlgorithm->StretchItemsInContent(layoutNode.GetRawPtr(), content);
+    wrapLayoutAlgorithm->StretchItemsInContent(Referenced::RawPtr(layoutNode), content);
 
     float height = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()->selfIdealSize.Height().value_or(0.0);
     EXPECT_TRUE(NearEqual<float>(content.crossLength, height));
@@ -202,7 +204,7 @@ HWTEST_F(WrapLayoutAlgorithmTest, FlexWrapFrameNodeLayout006, TestSize.Level1)
 
     ContentInfo content(362.2, 362.2, 362, list);
     auto layoutNode = CreateLayoutWrapper();
-    wrapLayoutAlgorithm->StretchItemsInContent(layoutNode.GetRawPtr(), content);
+    wrapLayoutAlgorithm->StretchItemsInContent(Referenced::RawPtr(layoutNode), content);
 
     float width = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()->selfIdealSize.Width().value_or(0.0);
     EXPECT_TRUE(NearEqual<float>(content.crossLength, width));
@@ -228,7 +230,7 @@ HWTEST_F(WrapLayoutAlgorithmTest, FlexWrapFrameNodeLayout007, TestSize.Level1)
 
     ContentInfo content(362.2, 362.2, 362, list);
     auto layoutNode = CreateLayoutWrapper();
-    wrapLayoutAlgorithm->StretchItemsInContent(layoutNode.GetRawPtr(), content);
+    wrapLayoutAlgorithm->StretchItemsInContent(Referenced::RawPtr(layoutNode), content);
 
     float width = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()->selfIdealSize.Width().value_or(0.0);
     EXPECT_FALSE(NearEqual<float>(content.crossLength, width));

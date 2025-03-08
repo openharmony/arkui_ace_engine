@@ -20,9 +20,18 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
+enum class ExpandMode : uint32_t {
+    NOT_EXPAND = 0,
+    EXPAND,
+    LAZY_EXPAND,
+};
+
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -127,18 +136,57 @@ ArkUI_Uint32 GetChildrenCount(ArkUINodeHandle node, ArkUI_Bool isExpanded)
                       : frameNode->GetTotalChildCountWithoutExpanded();
 }
 
-ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool isExpanded)
+ArkUINodeHandle GetChild(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 expandMode)
 {
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     CHECK_NULL_RETURN(index >= 0, nullptr);
-    if (isExpanded) {
+    auto expandModeResult = static_cast<ExpandMode>(expandMode);
+    if (expandModeResult == ExpandMode::EXPAND) {
         frameNode->GetAllChildrenWithBuild(false);
     }
-    auto child = frameNode->GetFrameNodeChildByIndex(index, false, isExpanded);
+    FrameNode* child = nullptr;
+    if (expandModeResult == ExpandMode::EXPAND || expandModeResult == ExpandMode::NOT_EXPAND) {
+        child = frameNode->GetFrameNodeChildByIndex(index, false, expandModeResult == ExpandMode::EXPAND);
+    } else if (expandModeResult == ExpandMode::LAZY_EXPAND) {
+        child = frameNode->GetFrameNodeChildByIndexWithoutBuild(index);
+        if (child == nullptr) {
+            return GetChild(node, index, static_cast<ArkUI_Uint32>(ExpandMode::EXPAND));
+        }
+    }
     return reinterpret_cast<ArkUINodeHandle>(child);
+}
+
+ArkUI_Int32 GetFirstChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto child = frameNode->GetFrameNodeChildByIndex(0, false, false);
+    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    auto* childNode = reinterpret_cast<FrameNode*>(child);
+    auto childRef = Referenced::Claim<FrameNode>(childNode);
+    *index = frameNode->GetFrameNodeIndex(childRef, true);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 GetLastChildIndexWithoutExpand(ArkUINodeHandle node, ArkUI_Uint32* index)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    size_t size = static_cast<size_t>(frameNode->GetTotalChildCountWithoutExpanded());
+    CHECK_NULL_RETURN(size > 0, ERROR_CODE_PARAM_INVALID);
+    auto child = frameNode->GetFrameNodeChildByIndex(size - 1, false, false);
+    CHECK_NULL_RETURN(child, ERROR_CODE_PARAM_INVALID);
+    auto* childNode = reinterpret_cast<FrameNode*>(child);
+    auto childRef = Referenced::Claim<FrameNode>(childNode);
+    *index = frameNode->GetFrameNodeIndex(childRef, true);
+    return ERROR_CODE_NO_ERROR;
 }
 
 ArkUINodeHandle GetFirst(ArkUINodeHandle node, ArkUI_Bool isExpanded)
@@ -383,8 +431,11 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
         return nullptr;
     }
 
-    if (!AceType::InstanceOf<NG::FrameNode>(node)) {
+    if (!AceType::InstanceOf<NG::FrameNode>(node) || AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
         auto parent = node->GetParent();
+        if (parent && parent->GetTag() == V2::RECYCLE_VIEW_ETS_TAG) {
+            parent = parent->GetParent();
+        }
         if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
             node = parent;
         } else {
@@ -405,8 +456,7 @@ ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGF("GetAttachedNodeHandleById doesn't run on UI thread");
-        abort();
+        LOGF_ABORT("GetAttachedNodeHandleById doesn't run on UI thread");
     }
     auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(key);
     CHECK_NULL_RETURN(node, nullptr);
@@ -798,8 +848,7 @@ ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
     auto context = frameNode->GetAttachedContext();
     CHECK_NULL_RETURN(context, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
     if (!context->CheckThreadSafe()) {
-        LOGF("GetWindowInfoByNode doesn't run on UI thread");
-        abort();
+        LOGF_ABORT("GetWindowInfoByNode doesn't run on UI thread");
     }
     auto window = context->GetWindow();
     CHECK_NULL_RETURN(window, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
@@ -817,10 +866,18 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     auto* toNode = reinterpret_cast<UINode*>(target_parent);
     CHECK_NULL_RETURN(moveNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(toNode, ERROR_CODE_PARAM_INVALID);
+    static const std::vector<const char*> nodeTypeArray = {
+        OHOS::Ace::V2::STACK_ETS_TAG,
+        OHOS::Ace::V2::XCOMPONENT_ETS_TAG,
+        OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG,
+    };
+    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), moveNode->GetTag());
+    if (pos == nodeTypeArray.end()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     auto pipeline = moveNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGF("MoveNodeTo doesn't run on UI thread");
-        abort();
+        LOGF_ABORT("MoveNodeTo doesn't run on UI thread");
     }
     auto oldParent = moveNode->GetParent();
     moveNode->setIsMoving(true);
@@ -840,6 +897,15 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     return ERROR_CODE_NO_ERROR;
 }
 
+void SetKeyProcessingMode(ArkUI_Int32 instanceId, ArkUI_Int32 mode)
+{
+    auto container = Container::GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    auto delegate = EngineHelper::GetDelegateByContainer(container);
+    CHECK_NULL_VOID(delegate);
+    delegate->SetKeyProcessingMode(mode);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -854,6 +920,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .clearChildren = ClearChildrenInFrameNode,
         .getChildrenCount = GetChildrenCount,
         .getChild = GetChild,
+        .getFirstChildIndexWithoutExpand = GetFirstChildIndexWithoutExpand,
+        .getLastChildIndexWithoutExpand = GetLastChildIndexWithoutExpand,
         .getFirst = GetFirst,
         .getNextSibling = GetNextSibling,
         .getPreviousSibling = GetPreviousSibling,
@@ -913,6 +981,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .setCrossLanguageOptions = SetCrossLanguageOptions,
         .getCrossLanguageOptions = GetCrossLanguageOptions,
         .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
+        .setKeyProcessingMode = SetKeyProcessingMode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

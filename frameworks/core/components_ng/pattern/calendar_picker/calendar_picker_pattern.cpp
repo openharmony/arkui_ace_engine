@@ -23,8 +23,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -440,8 +439,20 @@ bool CalendarPickerPattern::IsInNodeRegion(const RefPtr<FrameNode>& node, const 
     return rect.IsInRegion(point);
 }
 
+bool CalendarPickerPattern::ReportChangeEvent(const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    PickerDate pickerDate;
+    CHECK_NULL_RETURN(CalendarDialogView::GetReportChangeEventDate(pickerDate, eventData), false);
+    CHECK_NULL_RETURN(CalendarDialogView::CanReportChangeEvent(reportedPickerDate_, pickerDate), false);
+    return CalendarDialogView::ReportChangeEvent(host->GetId(), compName, eventName, pickerDate);
+}
+
 void CalendarPickerPattern::FireChangeEvents(const std::string& info)
 {
+    ReportChangeEvent("CalendarPicker", "onChange", info);
     auto eventHub = GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateInputChangeEvent(info);
@@ -464,6 +475,7 @@ void CalendarPickerPattern::ShowDialog()
     auto changeId = [weak = WeakClaim(this)](const std::string& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->ReportChangeEvent("CalendarPicker", "onChange", info);
         pattern->SetDate(info);
     };
     auto acceptId = [weak = WeakClaim(this)](const std::string& /* info */) {
@@ -1401,13 +1413,32 @@ void CalendarPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     if (filter.IsFastFilter()) {
         return;
     }
-    json->PutExtAttr("start", calendarData_.startDate.ToString(false).c_str(), filter);
-    json->PutExtAttr("end", calendarData_.endDate.ToString(false).c_str(), filter);
+    json->PutExtAttr("markToday", calendarData_.markToday ? "true" : "false", filter);
+    std::string disabledDateRangeStr = "";
+    for (const auto& range : calendarData_.disabledDateRange) {
+        disabledDateRangeStr += range.first.ToString(false) + "," + range.second.ToString(false) + ",";
+    }
+    if (!disabledDateRangeStr.empty() && disabledDateRangeStr.back() == ',') {
+        disabledDateRangeStr.pop_back();
+    }
+    json->PutExtAttr("disabledDateRange", disabledDateRangeStr.c_str(), filter);
+
+    if (calendarData_.startDate.ToDays() == PickerDate().ToDays()) {
+        json->PutExtAttr("start", "undefined", filter);
+    } else {
+        json->PutExtAttr("start", calendarData_.startDate.ToString(false).c_str(), filter);
+    }
+    if (calendarData_.endDate.ToDays() == PickerDate().ToDays()) {
+        json->PutExtAttr("end", "undefined", filter);
+    } else {
+        json->PutExtAttr("end", calendarData_.endDate.ToString(false).c_str(), filter);
+    }
 }
 
 void CalendarPickerPattern::SetMarkToday(bool isMarkToday)
 {
     isMarkToday_ = isMarkToday;
+    calendarData_.markToday = isMarkToday;
 }
 
 bool CalendarPickerPattern::GetMarkToday()

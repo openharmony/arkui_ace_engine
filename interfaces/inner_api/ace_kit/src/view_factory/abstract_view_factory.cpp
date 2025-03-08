@@ -19,17 +19,24 @@
 #include "interfaces/inner_api/ace_kit/src/view/extend_pattern.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 
+#include "core/components_ng/base/frame_node.h"
+
 namespace OHOS::Ace::Kit {
 RefPtr<FrameNode> AbstractViewFactory::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
 {
-    auto acePattern = AceType::MakeRefPtr<ExtendPattern>(pattern);
-    auto aceFrameNode = AceType::MakeRefPtr<NG::FrameNode>(tag, nodeId, acePattern, isRoot, isLayoutNode);
-
-    auto frameNode = AceType::MakeRefPtr<FrameNodeImpl>(aceFrameNode, pattern);
-    aceFrameNode->SetKitNode(frameNode);
-    frameNode->InitializePatternAndContext();
-    pattern->SetHost(frameNode);
+    auto aceFrameNode = NG::FrameNode::GetOrCreateFrameNode(
+        tag, nodeId, [pattern]() { return AceType::MakeRefPtr<ExtendPattern>(pattern); });
+    CHECK_NULL_RETURN(aceFrameNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNodeImpl>(aceFrameNode->GetKitNode());
+    if (frameNode == nullptr) {
+        frameNode = AceType::MakeRefPtr<FrameNodeImpl>(aceFrameNode, pattern);
+        aceFrameNode->SetKitNode(frameNode);
+        frameNode->InitializePatternAndContext();
+        pattern->SetHost(frameNode);
+    } else {
+        frameNode->PushAceNode(aceFrameNode);
+    }
 
     return frameNode;
 }

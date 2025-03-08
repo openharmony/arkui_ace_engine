@@ -61,6 +61,7 @@ ACE_EXPORT extern const char STAGE_ETS_TAG[];
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // overlay view
 ACE_EXPORT extern const char OVERLAY_ETS_TAG[];
+ACE_EXPORT extern const char ORDER_OVERLAY_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
 
@@ -355,6 +356,12 @@ ACE_EXPORT extern const char FORM_ETS_TAG[];
 ACE_EXPORT extern const char FORM_LINK_TAG[];
 ACE_EXPORT extern const char FORM_LINK_ETS_TAG[];
 
+// formButton
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+ACE_EXPORT extern const char FORM_BUTTON_TAG[];
+ACE_EXPORT extern const char FORM_BUTTON_ETS_TAG[];
+#endif
+
 // PluginComponent
 ACE_EXPORT extern const char PLUGIN_COMPONENT_TAG[];
 ACE_EXPORT extern const char PLUGIN_ETS_TAG[];
@@ -454,6 +461,7 @@ ACE_EXPORT extern const char MENU_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char MENU_ITEM_GROUP_ETS_TAG[];
 ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[];
 ACE_EXPORT extern const char MENU_PREVIEW_ETS_TAG[];
+ACE_EXPORT extern const char MENU_DIVIDER_TAG[];
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
@@ -648,5 +656,8 @@ ACE_EXPORT extern const char ARC_SCROLL_BAR_ETS_TAG[];
 // ArcAlphabetIndexer
 ACE_EXPORT extern const char ARC_INDEXER_COMPONENT_TAG[];
 ACE_EXPORT extern const char ARC_INDEXER_ETS_TAG[];
+
+// Magnifier
+ACE_EXPORT extern const char MAGNIFIER_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

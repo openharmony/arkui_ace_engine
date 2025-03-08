@@ -32,7 +32,7 @@ void InspectDivider::PackAttrAndStyle()
         styles_.insert(std::make_pair("color", "#08000000"));
     } else if (deviceType == DeviceType::TV) {
         styles_.insert(std::make_pair("color", "#33ffffff"));
-    } else if (deviceType == DeviceType::WATCH) {
+    } else if (deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) {
         styles_.insert(std::make_pair("color", "#33ffffff"));
     }
     styles_.insert(std::make_pair("stroke-width", "1"));

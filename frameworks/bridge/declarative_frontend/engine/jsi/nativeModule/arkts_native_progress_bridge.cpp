@@ -722,4 +722,35 @@ ArkUINativeModuleValue ProgressBridge::SetProgressInitialize(ArkUIRuntimeCallInf
         nativeNode, value, total, static_cast<int>(g_progressType));
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ProgressBridge::SetProgressPrivacySensitive(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    uint32_t sensitive = false;
+    if (secondArg->IsBoolean()) {
+        sensitive = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+    }
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getCommonModifier()->setPrivacySensitive(nativeNode, sensitive);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ProgressBridge::ResetProgressPrivacySensitive(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getCommonModifier()->resetPrivacySensitive(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

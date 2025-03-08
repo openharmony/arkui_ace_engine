@@ -40,6 +40,19 @@ constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
 constexpr Dimension INLINE_MIN_WITH = 16.0_vp;
+
+bool IsNeedUpdateCounterWidth(const LayoutConstraintF& contentConstraint,
+    float maxParagraphWidth, float contentWidth)
+{
+    auto maxContentWidth = contentConstraint.maxSize.Width();
+    auto minContentWidth = contentConstraint.minSize.Width();
+    if (GreatNotEqual(minContentWidth, 0.0) && GreatNotEqual(maxContentWidth, minContentWidth) &&
+        GreatNotEqual(maxParagraphWidth, 0.0) && GreatNotEqual(contentWidth, maxParagraphWidth)) {
+        return true;
+    } else {
+        return false;
+    }
+}
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
     const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, std::u16string& textContent, bool& showPlaceHolder)
@@ -384,8 +397,12 @@ float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& c
     } else {
         paragraph_->Layout(std::max(std::ceil(paragraph_->GetLongestLineWithIndent()), textFieldWidth));
     }
-
-    CounterNodeMeasure(contentWidth, layoutWrapper);
+    auto counterWidth = contentWidth;
+    auto maxParagraphWidth = paragraph_->GetMaxWidth();
+    if (autoWidth_ || IsNeedUpdateCounterWidth(contentConstraint, maxParagraphWidth, contentWidth)) {
+        counterWidth = maxParagraphWidth;
+    }
+    CounterNodeMeasure(counterWidth, layoutWrapper);
     if (autoWidth_) {
         double minWidth = INLINE_MIN_WITH.ConvertToPx();
         contentWidth = GreatNotEqual(contentWidth, minWidth) ? contentWidth : minWidth;

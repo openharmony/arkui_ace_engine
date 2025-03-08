@@ -41,9 +41,9 @@ namespace OHOS::Ace::NG {
             ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             std::pair<std::string, RefPtr<UINode>> itemInfo;
             if (useNewInterface_) {
-                itemInfo = OnGetChildByIndexNew(ConvertFormToIndex(index), cachedItems_, expiringItem_);
+                itemInfo = OnGetChildByIndexNew(ConvertFromToIndex(index), cachedItems_, expiringItem_);
             } else {
-                itemInfo = OnGetChildByIndex(ConvertFormToIndex(index), expiringItem_);
+                itemInfo = OnGetChildByIndex(ConvertFromToIndex(index), expiringItem_);
             }
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             if (isCache) {
@@ -834,7 +834,7 @@ namespace OHOS::Ace::NG {
         moveFromTo_.reset();
     }
 
-    int32_t LazyForEachBuilder::ConvertFormToIndex(int32_t index)
+    int32_t LazyForEachBuilder::ConvertFromToIndex(int32_t index)
     {
         if (!moveFromTo_) {
             return index;
@@ -947,7 +947,7 @@ namespace OHOS::Ace::NG {
         const std::optional<LayoutConstraintF>& itemConstraint, int64_t deadline, bool& isTimeout)
     {
         ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
-        auto itemInfo = OnGetChildByIndex(ConvertFormToIndex(index), expiringItem_);
+        auto itemInfo = OnGetChildByIndex(ConvertFromToIndex(index), expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         auto pair = cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
         auto context = itemInfo.second->GetContext();
@@ -1013,8 +1013,13 @@ namespace OHOS::Ace::NG {
         const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         if (GetSysTimestamp() > deadline) {
-            if (!DeleteExpiringItemImmediately()) {
-                cache.merge(expiringItem_);
+            if (DeleteExpiringItemImmediately()) {
+                return false;
+            }
+            for (const auto& [key, node] : expiringItem_) {
+                if (node.first == -1) {
+                    cache.try_emplace(key, node);
+                }
             }
             return false;
         }
@@ -1132,6 +1137,30 @@ namespace OHOS::Ace::NG {
                 continue;
             }
             node.second.second->PaintDebugBoundaryTreeAll(flag);
+        }
+    }
+    void LazyForEachBuilder::SetDestroying(bool isDestroying, bool cleanStatus)
+    {
+        for (const auto& node : cachedItems_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            if (node.second.second->IsReusableNode()) {
+                node.second.second->SetDestroying(isDestroying, false);
+            } else {
+                node.second.second->SetDestroying(isDestroying, cleanStatus);
+            }
+        }
+
+        for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
+            if (node.second.second->IsReusableNode()) {
+                node.second.second->SetDestroying(isDestroying, false);
+            } else {
+                node.second.second->SetDestroying(isDestroying, cleanStatus);
+            }
         }
     }
 }

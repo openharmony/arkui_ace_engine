@@ -27,6 +27,8 @@ public:
     static RefPtr<FrameNode> CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<UINode> builder,
         RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle);
     static RefPtr<FrameNode> CreateScrollNode(const NG::SheetStyle& sheetStyle);
+    static RefPtr<FrameNode> CreateSheetMaskShowInSubwindow(const RefPtr<FrameNode>& sheetPageNode,
+        const RefPtr<FrameNode>& sheetWrapperNode, const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
 
 private:
     static RefPtr<FrameNode> CreateOperationColumnNode(

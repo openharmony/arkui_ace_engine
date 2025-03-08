@@ -48,11 +48,46 @@ void DragDropInitiatingStateIdle::Init(int32_t currentState)
         !gestureHub->GetTextDraggable()) {
         DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
     }
+
+    AsyncDragEnd();
     ResetBorderRadiusAnimation();
     UnRegisterDragListener();
-    HideEventColumn();
-    HidePixelMap();
+    if (params.isNeedGather) {
+        DragDropFuncWrapper::ResetNode(frameNode);
+    }
+    if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::READY)) {
+        if (gestureHub->GetTextDraggable()) {
+            params.preScaledPixelMap = nullptr;
+            HideTextAnimation();
+        } else {
+            HidePixelMap();
+        }
+        HideEventColumn();
+    }
     params.Reset();
+}
+
+void DragDropInitiatingStateIdle::StartCreateTextThumbnailPixelMap()
+{
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto& params = machine->GetDragDropInitiatingParams();
+    auto&& getThumbnailCallback = [weakMachine = AceType::WeakClaim(AceType::RawPtr(machine))]() {
+        auto machine = weakMachine.Upgrade();
+        CHECK_NULL_VOID(machine);
+        auto& params = machine->GetDragDropInitiatingParams();
+        auto frameNode = params.frameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        if (params.getTextThumbnailPixelMapCallback) {
+            params.getTextThumbnailPixelMapCallback(params.touchOffset);
+        }
+    };
+    auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    params.getThumbnailPixelMapCallback.Reset(getThumbnailCallback);
+    taskExecutor.PostDelayedTask(
+        params.getThumbnailPixelMapCallback, SNAPSHOT_DELAY_TIME, "ArkUIDragDropTextSnapShotThumbnailTimer");
 }
 
 void DragDropInitiatingStateIdle::StartCreateSnapshotTask(int32_t fingerId)
@@ -117,10 +152,18 @@ void DragDropInitiatingStateIdle::StartGatherTask()
         params.showGatherCallback.Cancel();
         return;
     }
-    auto&& showGatherCallback = [weakNode = AceType::WeakClaim(RawPtr(frameNode))]() {
-        auto frameNode = weakNode.Upgrade();
+    auto&& showGatherCallback = [weakMachine = WeakPtr<DragDropInitiatingStateMachine>(machine)]() {
+        auto machine = weakMachine.Upgrade();
+        CHECK_NULL_VOID(machine);
+        auto& params = machine->GetDragDropInitiatingParams();
+        auto frameNode = params.frameNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        DragAnimationHelper::ShowGatherNodeAnimation(frameNode);
+        if (DragDropFuncWrapper::CheckIfNeedGetThumbnailPixelMap(frameNode, params.idleFingerId)) {
+            return;
+        }
+        if (DragAnimationHelper::ShowGatherNodeAnimation(frameNode)) {
+            params.hasGatherNode = true;
+        }
     };
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
@@ -128,6 +171,32 @@ void DragDropInitiatingStateIdle::StartGatherTask()
     params.showGatherCallback.Reset(showGatherCallback);
     taskExecutor.PostDelayedTask(
         params.showGatherCallback, SNAPSHOT_DELAY_TIME, "ArkUIDragDropStartGather");
+}
+
+void DragDropInitiatingStateIdle::StartPreDragStatusCallback(const TouchEvent& touchEvent)
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto& params = machine->GetDragDropInitiatingParams();
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto&& preDragStatusCallback = [weakNode = AceType::WeakClaim(RawPtr(frameNode))]() {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 350ms..");
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        if (!gestureHub->GetTextDraggable()) {
+            DragEventActuator::ExecutePreDragAction(PreDragStatus::PREPARING_FOR_DRAG_DETECTION, frameNode);
+        }
+    };
+
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    params.preDragStatusCallback.Reset(preDragStatusCallback);
+    taskExecutor.PostDelayedTask(
+        params.preDragStatusCallback, GetCurDuration(touchEvent, DEALY_TASK_DURATION), "ArkUIPreDragLongPressTimer");
 }
 
 void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
@@ -141,11 +210,27 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
     params.triggeredSourceType = touchEvent.sourceType;
     params.idleFingerId = touchEvent.id;
     params.isNeedGather = DragDropFuncWrapper::CheckIsNeedGather(frameNode);
+    params.touchOffset = Offset(touchEvent.x, touchEvent.y);
     RegisterDragListener();
     if (touchEvent.sourceType != SourceType::MOUSE) {
-        StartCreateSnapshotTask(touchEvent.id);
+        if (DragDropFuncWrapper::IsTextCategoryComponent(frameNode->GetTag())) {
+            StartCreateTextThumbnailPixelMap();
+        } else {
+            StartCreateSnapshotTask(touchEvent.id);
+        }
         StartPreDragDetectingStartTask();
         StartGatherTask();
+        StartPreDragStatusCallback(touchEvent);
+    } else {
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        dragDropManager->SetIsAnyDraggableHit(gestureHub->IsAllowedDrag(eventHub));
     }
     machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::READY));
 }
@@ -193,5 +278,12 @@ void DragDropInitiatingStateIdle::UnRegisterDragListener()
     CHECK_NULL_VOID(dragDropManager);
     eventManager->UnRegisterDragTouchEventListener(nodeId);
     dragDropManager->UnRegisterPullEventListener(nodeId);
+}
+
+void DragDropInitiatingStateIdle::AsyncDragEnd()
+{
+    if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::WAITING) {
+        FireCustomerOnDragEnd();
+    }
 }
 } // namespace OHOS::Ace::NG

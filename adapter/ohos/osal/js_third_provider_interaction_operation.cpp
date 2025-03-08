@@ -15,19 +15,8 @@
 
 #include "js_third_provider_interaction_operation.h"
 
-#include <algorithm>
-
-#include "accessibility_constants.h"
-#include "accessibility_event_info.h"
 #include "accessibility_system_ability_client.h"
 
-#include "adapter/ohos/entrance/ace_application_info.h"
-#include "adapter/ohos/entrance/ace_container.h"
-#include "base/log/ace_trace.h"
-#include "base/log/dump_log.h"
-#include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "js_third_provider_interaction_operation_utils.h"
 
@@ -138,6 +127,23 @@ void CopyNativeInfosToAccessibilityElementInfos(
         infos.push_back(info);
     }
 }
+
+bool CheckEventIgnoreHostOffset(
+    const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent)
+{
+    auto eventType = nativeAccessibilityEvent.GetEventType();
+    bool ignoreHostOffset = false;
+    switch (eventType) {
+        case ArkUI_AccessibilityEventType::
+            ARKUI_ACCESSIBILITY_NATIVE_EVENT_TYPE_FOCUS_NODE_UPDATE:
+            TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "ignoreHostOffset keep false by focus update");
+            ignoreHostOffset = true;
+            break;
+        default:
+            TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "ignoreHostOffset keep false by other eventType");
+    }
+    return ignoreHostOffset;
+}
 } // namespace
 
 JsThirdProviderInteractionOperation::JsThirdProviderInteractionOperation(
@@ -193,7 +199,7 @@ void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
 
 bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByIdFromProvider(
     const int64_t splitElementId, const int32_t mode, const int32_t requestId,
-    std::list<Accessibility::AccessibilityElementInfo>& infos)
+    std::list<Accessibility::AccessibilityElementInfo>& infos, bool ignoreHostOffset)
 {
     auto provider = accessibilityProvider_.Upgrade();
     CHECK_NULL_RETURN(provider, false);
@@ -207,6 +213,7 @@ bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByIdFromProv
     }
 
     NodeConfig config;
+    config.ignoreHostOffset = ignoreHostOffset;
     GetNodeConfig(config);
     CopyNativeInfosToAccessibilityElementInfos(nativeInfos, config, infos);
     return !infos.empty();
@@ -379,14 +386,27 @@ void JsThirdProviderInteractionOperation::FocusMoveSearch(
     Accessibility::AccessibilityElementInfo info;
     bool ret = FocusMoveSearchProvider(
         splitElementId, direction, requestId, info);
-    if (!ret) {
-        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
-            "FocusMoveSearch failed.");
-        info.SetValidElement(false);
-    }
-
     // 3. Return result
-    SetFocusMoveSearchResult(callback, info, requestId);
+    if (!ret) {
+        auto jsAccessibilityManager = jsAccessibilityManager_.Upgrade();
+        CHECK_NULL_VOID(jsAccessibilityManager);
+        auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+        CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(context->GetTaskExecutor());
+        context->GetTaskExecutor()->PostTask(
+            [jsMgr = jsAccessibilityManager_, weakHost = host_, &callback, requestId] () {
+                auto jsAccessibilityManager = jsMgr.Upgrade();
+                if ((!jsAccessibilityManager) || (!jsAccessibilityManager->IsRegister())) {
+                    AccessibilityElementInfo nodeInfo;
+                    nodeInfo.SetValidElement(false);
+                    callback.SetFocusMoveSearchResult(nodeInfo, requestId);
+                    return;
+                }
+                jsAccessibilityManager->SetFocusMoveResultWithNode(weakHost, callback, requestId);
+            }, TaskExecutor::TaskType::UI, "AccessibilityThirdPartyFocusMoveSearchFail");
+    } else {
+        SetFocusMoveSearchResult(callback, info, requestId);
+    }
 }
 
 bool JsThirdProviderInteractionOperation::FocusMoveSearchProvider(
@@ -421,6 +441,14 @@ void JsThirdProviderInteractionOperation::SetFocusMoveSearchResult(
     callback.SetFocusMoveSearchResult(info, requestId);
 }
 
+void JsThirdProviderInteractionOperation::HandleActionWhenFindNodeFail(const int32_t action)
+{
+    if (action == static_cast<int32_t>(
+        Accessibility::ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS)) {
+        ClearDrawBound();
+    }
+}
+
 void JsThirdProviderInteractionOperation::ExecuteAction(
     const int64_t elementId, const int32_t action,
     const std::map<std::string, std::string>& actionArguments, const int32_t requestId,
@@ -439,10 +467,11 @@ void JsThirdProviderInteractionOperation::ExecuteAction(
     // 2. FindNextFocusAccessibilityNode from provider
     std::list<Accessibility::AccessibilityElementInfo> infos;
     bool ret = FindAccessibilityNodeInfosByIdFromProvider(
-        splitElementId, 0, requestId, infos);
+        splitElementId, 0, requestId, infos, true); // for drawbound, no need fix host offset
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "Find info failed when ExecuteAction.");
         SetExecuteActionResult(callback, false, requestId);
+        HandleActionWhenFindNodeFail(action);
         return;
     }
 
@@ -556,14 +585,15 @@ void JsThirdProviderInteractionOperation::GetCursorPosition(
     callback.SetCursorPositionResult(cursorPosition, requestId);
 }
 
-void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
+void JsThirdProviderInteractionOperation::GetHostRectTranslateInfo(NodeConfig& config)
 {
     auto host = host_.Upgrade();
-    CHECK_NULL_VOID(host);
-    auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
-    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
+    if ((!host) || config.ignoreHostOffset) {
+        config.offset = NG::OffsetF(0, 0);
+        config.scaleX = 1.0f;
+        config.scaleY = 1.0f;
+        return;
+    }
     auto rect = host->GetTransformRectRelativeToWindow();
     NG::VectorF finalScale = host->GetTransformScaleRelativeToWindow();
     auto pipeline = host->GetContextRefPtr();
@@ -586,11 +616,23 @@ void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
     
     config.scaleX = finalScale.x;
     config.scaleY = finalScale.y;
+}
+
+void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto jsAccessibilityManager = GetHandler().Upgrade();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(context);
     config.pageId = host->GetPageId();
     config.windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.belongTreeId = belongTreeId_;
     config.parentWindowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+
+    GetHostRectTranslateInfo(config);
 }
 
 void JsThirdProviderInteractionOperation::SetChildTreeIdAndWinId(
@@ -640,7 +682,7 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird
     event.SetElementInfo(infos.front());
 
     // 3. change event info by host info
-    GetAccessibilityEventInfoFromNativeEvent(event);
+    GetAccessibilityEventInfoFromNativeEvent(event, false);
 
     // 4. SendEvent
     auto host = host_.Upgrade();
@@ -686,10 +728,11 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEvent(
     const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
     void (*callback)(int32_t errorCode))
 {
+    bool ignoreHostOffset = CheckEventIgnoreHostOffset(nativeAccessibilityEvent);
     // 1. Get OHOS::Accessibility::AccessibilityEventInfo
     OHOS::Accessibility::AccessibilityEventInfo accessibilityEventInfo;
     GetAccessibilityEventInfoFromNativeEvent(
-        nativeAccessibilityEvent, accessibilityEventInfo);
+        nativeAccessibilityEvent, accessibilityEventInfo, ignoreHostOffset);
 
     // 2. handleEvent by frame work
     bool needSendEvent =  HandleEventByFramework(
@@ -709,10 +752,12 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEvent(
 }
 
 void JsThirdProviderInteractionOperation::GetAccessibilityEventInfoFromNativeEvent(
-    OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
+    OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo,
+    bool ignoreHostOffset)
 {
     // 1. Fill node config
     NodeConfig config;
+    config.ignoreHostOffset = ignoreHostOffset;
     GetNodeConfig(config);
 
     // 1.1. Fill elementInfo config
@@ -735,14 +780,15 @@ void JsThirdProviderInteractionOperation::GetAccessibilityEventInfoFromNativeEve
 
 void JsThirdProviderInteractionOperation::GetAccessibilityEventInfoFromNativeEvent(
     const ArkUI_AccessibilityEventInfo& nativeEventInfo,
-    OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
+    OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo,
+    bool ignoreHostOffset)
 {
     // 1. Transform native event to OHOS::Accessibility::AccessibilityEventInfo
     TransformAccessbilityEventInfo(
         nativeEventInfo, accessibilityEventInfo);
 
     // 2. Transform Accessibility::AccessibilityEventInfo with host info
-    GetAccessibilityEventInfoFromNativeEvent(accessibilityEventInfo);
+    GetAccessibilityEventInfoFromNativeEvent(accessibilityEventInfo, ignoreHostOffset);
 }
 
 bool JsThirdProviderInteractionOperation::SendAccessibilitySyncEventToService(

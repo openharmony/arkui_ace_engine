@@ -51,11 +51,11 @@ constexpr double SELECT_OPTION_INTERVAL = 6.0;
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
  * using SelectTheme::Builder.
  */
-class SelectTheme final : public virtual Theme {
+class SelectTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SelectTheme, Theme);
 
 public:
-    class Builder final {
+    class Builder {
     public:
         Builder() = default;
         ~Builder() = default;
@@ -579,6 +579,10 @@ public:
         }
         return backgroundColor_;
     }
+    void SetButtonBackgroundColor(const Color& value)
+    {
+        backgroundColorButton_ = value;
+    }
 
     const Color& GetDisabledBackgroundColor() const
     {
@@ -657,6 +661,17 @@ public:
     {
         return secondaryFontColor_;
     }
+
+    const Color& GetLabelColor() const
+    {
+        return labelColor_;
+    }
+
+    void SetLabelColor(const Color& value)
+    {
+        labelColor_ = value;
+    }
+
 
     const std::string& GetFontFamily() const
     {
@@ -1488,7 +1503,7 @@ private:
     Color disabledColor_;
     Color clickedColor_;
     Color selectedColor_;
-
+    Color labelColor_;
     Color backgroundColor_ = Color::WHITE;
     Color backgroundColorButton_ = Color::WHITE;
     Color disabledBackgroundColor_;

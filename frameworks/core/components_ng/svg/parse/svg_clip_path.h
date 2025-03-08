@@ -29,6 +29,7 @@ public:
     ~SvgClipPath() override = default;
     static RefPtr<SvgNode> Create();
     void OnClipEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) override;
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
 };
 
 } // namespace OHOS::Ace::NG

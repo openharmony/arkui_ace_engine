@@ -29,7 +29,8 @@ enum DCResultCode : int32_t {
     DC_INTERNAL_ERROR = 10011,
     DC_WORKER_HAS_USED_ERROR = 10012,
     DC_ONLY_RUN_ON_SCB = 10013,
-    DC_PARAM_ERROE = 10014
+    DC_PARAM_ERROE = 10014,
+    DC_NOT_SUPPORT_UI_CONTENT_TYPE = 10015
 };
 
 struct DynamicDumpInfo {
@@ -57,6 +58,7 @@ public:
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
     void DumpDynamicRenderer(int32_t depth, bool hasJson);
+    void SetIsReportFrameEvent(bool isReportFrameEvent);
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
@@ -74,6 +76,10 @@ public:
     void ResetAccessibilityChildTreeCallback();
 
     void SetBackgroundTransparent(bool backgroundTransparent);
+
+    void OnVisibleChange(bool visible) override;
+    void OnWindowShow() override;
+    void OnWindowHide() override;
 
 private:
     void InitializeRender(void* runtime);
@@ -99,6 +105,7 @@ private:
     int32_t uiExtensionId_ = 0;
     RefPtr<AccessibilitySessionAdapterIsolatedComponent> accessibilitySessionAdapter_;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_ = nullptr;
+    bool isVisible_ = true;
 
     static int32_t dynamicGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(DynamicPattern);

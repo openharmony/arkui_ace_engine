@@ -143,6 +143,7 @@ void SliderModifierTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
 }
 
 void SliderModifierTestNg::TearDown()
@@ -1098,6 +1099,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest021, TestSize.Level1)
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->trackBgColor_ = Color::RED;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
 
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
@@ -1712,6 +1714,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest029, TestSize.Level1)
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->focusedScaleValue_ = 1.5;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
      */
@@ -1757,6 +1760,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest030, TestSize.Level1)
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->focusedScaleValue_ = 1.5;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
      */
@@ -1801,6 +1805,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest031, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
      */
@@ -1836,6 +1841,7 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest032, TestSize.Level1)
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     sliderTheme->focusedScaleValue_ = 1.5;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step1. create frameNode and sliderContentModifier.
      */

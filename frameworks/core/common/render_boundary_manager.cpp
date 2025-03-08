@@ -46,8 +46,8 @@ void RenderBoundaryManager::PostTaskRenderBoundary(bool isDebugBoundary, const R
             renderBoundaryManager->RemoveCurrentRenderBoundaryTask();
         });
     renderLayoutBoundaryTaskQueue_.push_back(renderTask);
-    taskExecutor->PostTask(renderLayoutBoundaryTaskQueue_.back().updateTask, TaskExecutor::TaskType::UI,
-        "ArkUIRenderLayoutBoundary", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    taskExecutor->PostTask(
+        renderLayoutBoundaryTaskQueue_.back().updateTask, TaskExecutor::TaskType::UI, "ArkUIRenderLayoutBoundary");
 }
 
 bool RenderBoundaryManager::ResetTaskQueue(bool isDebugBoundary)

@@ -82,6 +82,12 @@ struct ViewData;
 enum class AutoFillType;
 } // namespace AbilityBase
 
+namespace Global {
+namespace Resource {
+class ResourceManager;
+}
+} // namespace Global
+
 class RefBase;
 class Parcelable;
 class IRemoteObject;
@@ -149,6 +155,8 @@ public:
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void SetIsFocusActive(bool isFocusActive) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
+    virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
@@ -210,6 +218,7 @@ public:
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
     virtual void SetFormRenderingMode(int8_t renderMode) {};
+    virtual void SetFormEnableBlurBackground(bool enableBlurBackground) {};
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
@@ -312,6 +321,8 @@ public:
     virtual void RecoverForm(const std::string &statusData) {}
 
     virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
+
+    virtual bool GetContainerModalTitleVisible(bool isImmersive) { return false; }
 
     virtual void SetContainerModalTitleHeight(int height) {}
 
@@ -496,6 +507,19 @@ public:
     {
         return nullptr;
     }
+
+    virtual void ActiveWindow() {};
+
+    virtual void UnActiveWindow() {};
+
+    virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
+
+    virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+    {
+        return false;
+    }
+
+    virtual void EnableContainerModalCustomGesture(bool enable) {};
 };
 
 } // namespace OHOS::Ace

@@ -128,7 +128,7 @@ public:
 
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override {}
 
-    void PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priorityType) override;
+    void PostJsTask(std::function<void()>&& task, const std::string& name) override;
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;
     const std::string& GetVersionName() const override;
@@ -154,6 +154,8 @@ public:
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) override;
     void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
         std::function<void(int32_t)> &&callback) override;
+    std::optional<double> GetTopOrder() override;
+    std::optional<double> GetBottomOrder() override;
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override;
 
@@ -242,6 +244,7 @@ public:
 
     void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;
+    void AddFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node, std::optional<double> levelOrder) override;
     void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;

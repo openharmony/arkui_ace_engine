@@ -111,17 +111,12 @@ RefPtr<OverlayManager> DialogManager::GetEmbeddedOverlayWithNode(const RefPtr<UI
 RefPtr<UINode> DialogManager::GetDialogNodeByContentNode(const RefPtr<UINode>& currentNode)
 {
     RefPtr<UINode> parent = currentNode;
-    bool getDialogNode = false;
     while (parent) {
         if (parent->GetTag() == V2::DIALOG_ETS_TAG) {
-            getDialogNode = true;
             break;
         }
         parent = parent->GetParent();
     }
-    if (getDialogNode) {
-        return parent;
-    }
-    return nullptr;
+    return parent;
 }
 } // namespace OHOS::Ace::NG

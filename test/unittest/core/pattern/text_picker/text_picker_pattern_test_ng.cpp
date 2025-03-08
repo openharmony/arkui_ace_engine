@@ -74,6 +74,20 @@ const OffsetF CHILD_OFFSET(0.0f, 10.0f);
 const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
 constexpr float DISABLE_ALPHA = 0.6f;
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class TextPickerPatternTestNg : public testing::Test {
@@ -180,16 +194,10 @@ void TextPickerPatternTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -2106,5 +2114,32 @@ HWTEST_F(TextPickerPatternTestNg, SetDisableTextStyleAnimation001, TestSize.Leve
 
     textPickerPattern->SetDisableTextStyleAnimation(true);
     EXPECT_TRUE(textPickerPattern->GetDisableTextStyleAnimation());
+}
+
+/**
+ * @tc.name: TextPickerPatternTest018
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest018, TestSize.Level1)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+
+    CrownEvent crownEvent;
+    crownEvent.action = OHOS::Ace::CrownAction::BEGIN;
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+    crownEvent.action = OHOS::Ace::CrownAction::UPDATE;
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+    crownEvent.action = OHOS::Ace::CrownAction::END;
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+#endif
 }
 } // namespace OHOS::Ace::NG

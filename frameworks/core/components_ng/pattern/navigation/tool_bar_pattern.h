@@ -59,7 +59,15 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void SetToolbarOptions(NavigationToolbarOptions&& opt);
+    void SetToolbarMoreButtonOptions(MoreButtonOptions&& opt);
+
+    MoreButtonOptions GetToolbarMoreButtonOptions() const
+    {
+        return moreButtonOptions_;
+    }
 
     RefPtr<FrameNode> GetDialogNode()
     {
@@ -80,9 +88,10 @@ private:
     void ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNode);
 
     void SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host);
-    void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
+    void UpdateBackgroundStyle();
 
     NavigationToolbarOptions options_;
+    MoreButtonOptions moreButtonOptions_;
     RefPtr<FrameNode> dialogNode_;
     std::optional<int32_t> moveIndex_;
 };

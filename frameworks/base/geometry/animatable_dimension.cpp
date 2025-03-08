@@ -14,9 +14,37 @@
  */
 
 #include "base/geometry/animatable_dimension.h"
+
+#include "core/animation/animator.h"
+#include "core/animation/curve_animation.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
+
+AnimatableDimension::AnimatableDimension() = default;
+
+AnimatableDimension::~AnimatableDimension() = default;
+
+AnimatableDimension::AnimatableDimension(double value, DimensionUnit unit, const AnimationOption& option)
+    : CalcDimension(value, unit), animationOption_(option)
+{}
+
+AnimatableDimension::AnimatableDimension(const std::string& value, DimensionUnit unit, const AnimationOption& option)
+    : CalcDimension(value, unit), animationOption_(option)
+{}
+
+AnimatableDimension::AnimatableDimension(const Dimension& dimension, const AnimationOption& option)
+    : CalcDimension(dimension), animationOption_(option)
+{}
+
+AnimatableDimension::AnimatableDimension(const CalcDimension& dimension, const AnimationOption& option)
+    : CalcDimension(dimension), animationOption_(option)
+{}
+
+AnimatableDimension::AnimatableDimension(const AnimatableDimension& other)
+    : CalcDimension(other.Value(), other.Unit())
+{}
+
 AnimatableDimension& AnimatableDimension::operator=(const Dimension& newDimension)
 {
     ResetAnimatableDimension();
@@ -141,5 +169,13 @@ void AnimatableDimension::ResetAnimatableDimension()
     animationController_ = nullptr;
     context_ = nullptr;
     animationCallback_ = nullptr;
+}
+
+AnimatorStatus AnimatableDimension::GetAnimationStatus() const
+{
+    if (!animationController_) {
+        return AnimatorStatus::IDLE;
+    }
+    return static_cast<AnimatorStatus>(animationController_->GetStatus());
 }
 } // namespace OHOS::Ace

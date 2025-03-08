@@ -87,6 +87,7 @@ public:
 
     static void SetDefaultPickerItemHeight(const JSCallbackInfo& info);
     static void SetCanLoop(const JSCallbackInfo& info);
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 
     static void OnAccept(const JSCallbackInfo& info);
     static void OnCancel(const JSCallbackInfo& info);

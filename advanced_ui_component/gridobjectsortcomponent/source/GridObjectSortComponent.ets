@@ -55,6 +55,7 @@ const DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 8;
 const EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 16;
 // Animation Parameters
 const ENTER_EXIT_ICON_DURATION = 200;
+const SEND_EVENT_DURATION = 10;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1); // Curve of entering and exiting the editing state
 const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38); // Drag to move and fill curves
 const REMOVE_ADD_SPRING = curves.interpolatingSpring(0, 1, 150, 24); // Delete Add Curve
@@ -499,16 +500,18 @@ export struct GridObjectSortComponent {
       let composeTittleBarUniqueId =
         this.getUIContext()?.getFrameNodeById(ADD_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
       let eventInfo: accessibility.EventInfo = ({
-        type: 'requestFocusForAccessibility',
+        type: 'requestFocusForAccessibilityNotInterrupt',
         bundleName: this.bundleName,
         triggerAction: 'common',
         customId: `ComposeTitleBar_ImageMenuItem_${composeTittleBarUniqueId}_0`
       });
-      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-        setTimeout(()=>{
-          this.isPointToAddTitleBarEditButton = false;
-        }, ENTER_EXIT_ICON_DURATION);
-      });
+      setTimeout(() => {
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          setTimeout(() => {
+            this.isPointToAddTitleBarEditButton = false;
+          }, ENTER_EXIT_ICON_DURATION);
+        });
+      }, SEND_EVENT_DURATION);
     }
   }
 
@@ -889,14 +892,15 @@ export struct GridObjectSortComponent {
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
               .width(this.options.imageSize || SYMBOL_DEFAULT)
-              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+              .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
           } else if (url instanceof SymbolGlyphModifier) {
             SymbolGlyph()
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
               .width(this.options.imageSize || SYMBOL_DEFAULT)
               .attributeModifier(url)
-              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+              .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+              .symbolEffect(new SymbolEffect(), false)
           } else {
             Image(url)
               .draggable(false)
@@ -1032,6 +1036,7 @@ export struct GridObjectSortComponent {
             .draggable(false)
             .attributeModifier(select.symbolStyle)
             .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+            .symbolEffect(new SymbolEffect(), false)
         } else {
           if (select.url === undefined) {
             SymbolGlyph()

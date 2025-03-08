@@ -67,6 +67,17 @@ AceContainer::~AceContainer() {}
 
 RefPtr<AceContainer> container_;
 
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    return;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    static const std::string res;
+    return res;
+}
+
 RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
 {
     if (container_) {
@@ -246,7 +257,7 @@ sptr<IRemoteObject> AceContainer::GetParentToken()
 {
     return parentToken_;
 }
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     return {};
 }
@@ -276,9 +287,21 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent) {}
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration) {}
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
+{}
 bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
 {
     return true;
+}
+
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
+}
+
+bool AceContainer::IsCrossAxisWindow()
+{
+    return false;
 }
 } // namespace OHOS::Ace::Platform

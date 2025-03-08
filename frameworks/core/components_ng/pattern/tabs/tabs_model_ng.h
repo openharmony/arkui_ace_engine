@@ -102,6 +102,7 @@ public:
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static void SetCachedMaxCount(FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode);
+    static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

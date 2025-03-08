@@ -18,7 +18,7 @@
  */
 class ObjectProxyHandler {
 
-    private static readonly OB_DATE = '__date__';
+    public static readonly OB_DATE = '__date__';
 
     private isMakeObserved_: boolean;
 
@@ -124,10 +124,31 @@ class ArrayProxyHandler {
         return this.isMakeObserved_ ? RefInfo.get(obj) : obj;
     }
 
-    // shrinkTo and extendTo is collection.Array api.
-    private static readonly arrayLengthChangingFunctions = new Set(['push', 'pop', 'shift', 'splice', 'unshift', 'shrinkTo', 'extendTo']);
-    private static readonly arrayMutatingFunctions = new Set(['copyWithin', 'fill', 'reverse', 'sort']);
+    // return the set of elmtIds that are eligible and scheduled for fast re-layout,
+    // or undefined if none
+    private static tryFastRelayout(target: Array<unknown>, key: string, args?: Array<unknown>): Set<number> | undefined {
+        if (target[__RepeatVirtualScroll2Impl.REF_META] === undefined) {
+            return undefined;
+        }
 
+        const elmtIdSet = new Set<number>();
+        target[__RepeatVirtualScroll2Impl.REF_META]?.forEach(weakRef => {
+            const repeat = weakRef?.deref();
+            const elmtId = repeat?.repeatElmtId_;
+            repeat?.tryFastRelayout(key, args ?? []) && elmtIdSet.add(elmtId);
+        });
+
+        stateMgmtConsole.debug(`EXCLUDE Repeat elmtIds:`, ...elmtIdSet);
+        return elmtIdSet.size ? elmtIdSet : undefined;
+    }
+
+    // shrinkTo and extendTo is collection.Array api.
+    public static readonly arrayLengthChangingFunctions = new Set(['push', 'pop', 'shift', 'splice', 'unshift', 'shrinkTo', 'extendTo']);
+    public static readonly arrayMutatingFunctions = new Set(['copyWithin', 'fill', 'reverse', 'sort']);
+
+    // Note: The code of this function is duplicated with adaptation for enableV2Compatibility
+    // when making changes here, review of these changes are also needed in
+    // SubscribableArrayHandler.getV2Compatible function
     get(target: Array<any>, key: string | symbol, receiver: Array<any>): any {
 
         if (typeof key === 'symbol') {
@@ -170,8 +191,15 @@ class ArrayProxyHandler {
             };
         } else if (ArrayProxyHandler.arrayLengthChangingFunctions.has(key)) {
             return function (...args): any {
+                const originalLength = target.length;
                 const result = ret.call(target, ...args);
-                ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
+                // To detect actual changed range, Repeat needs original length before changes
+                if (key === 'splice') {
+                    args.unshift(originalLength);
+                }
+                
+                let excludeSet = ArrayProxyHandler.tryFastRelayout(conditionalTarget, key, args);
+                ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH, excludeSet);
                 return result;
             };
         } else if (!SendableType.isArray(target)) {
@@ -210,7 +238,10 @@ class ArrayProxyHandler {
         const originalLength = target.length;
         target[key] = value;
         const arrayLenChanged = target.length !== originalLength;
-        ObserveV2.getObserve().fireChange(this.getTarget(target), arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString());
+
+        let excludeSet = ArrayProxyHandler.tryFastRelayout(target, 'set', [key]);
+        ObserveV2.getObserve().fireChange(this.getTarget(target), 
+                arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString(), excludeSet);
         return true;
     }
 };
@@ -220,7 +251,7 @@ class ArrayProxyHandler {
  */
 class SetMapProxyHandler {
 
-    private static readonly OB_MAP_SET_ANY_PROPERTY = '___ob_map_set';
+    public static readonly OB_MAP_SET_ANY_PROPERTY = '___ob_map_set';
 
     private isMakeObserved_: boolean;
 
@@ -237,11 +268,14 @@ class SetMapProxyHandler {
         return this.isMakeObserved_ ? RefInfo.get(obj) : obj;
     }
 
+    // Note: The code of this function is duplicated with adaptation for enableV2Compatibility
+    // when making changes here, review of these changes are also needed in
+    // SubscribableMapSetHandler.getV2Compatible function
     get(target: any, key: string | symbol, receiver: any): any {
         if (typeof key === 'symbol') {
             if (key === Symbol.iterator) {
                 const conditionalTarget = this.getTarget(target);
-                ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
+                ObserveV2.getObserve().addRef(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                 ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
                 return (...args): any => target[key](...args);
             }
@@ -283,9 +317,10 @@ class SetMapProxyHandler {
         if (key === 'delete') {
             return (prop): boolean => {
                 if (target.has(prop)) {
+                    const res: boolean = target.delete(prop)
                     ObserveV2.getObserve().fireChange(conditionalTarget, prop);
                     ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
-                    return target.delete(prop);
+                    return res;
                 } else {
                     return false;
                 }
@@ -295,11 +330,11 @@ class SetMapProxyHandler {
             return (): void => {
                 if (target.size > 0) {
                     target.forEach((_, prop) => {
-                        ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString());
+                        ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString(), undefined, true);
                     });
-                    ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
-                    ObserveV2.getObserve().addRef(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                     target.clear();
+                    ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
+                    ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                 }
             };
         }
@@ -314,12 +349,13 @@ class SetMapProxyHandler {
         if (target instanceof Set || (this.isMakeObserved_ && SendableType.isSet(target))) {
             if (key === 'add') {
                 return (val): any => {
-                    ObserveV2.getObserve().fireChange(conditionalTarget, val.toString());
-                    ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
-                    if (!target.has(val)) {
-                        ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
-                        target.add(val);
+                    if (target.has(val)) {
+                        return receiver;
                     }
+                    target.add(val);
+                    ObserveV2.getObserve().fireChange(conditionalTarget, val);
+                    ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
+                    ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
                     return receiver;
                 };
             }
@@ -353,12 +389,13 @@ class SetMapProxyHandler {
             if (key === 'set') {
                 return (prop, val): any => {
                     if (!target.has(prop)) {
+                        target.set(prop, val);
                         ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
                     } else if (target.get(prop) !== val) {
+                        target.set(prop, val);
                         ObserveV2.getObserve().fireChange(conditionalTarget, prop);
                     }
                     ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
-                    target.set(prop, val);
                     return receiver;
                 };
             }

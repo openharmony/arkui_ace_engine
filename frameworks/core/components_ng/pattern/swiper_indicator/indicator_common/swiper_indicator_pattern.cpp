@@ -28,12 +28,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
-constexpr Dimension INDICATOR_ITEM_SPACE_POINT = 8.0_vp;
 constexpr int32_t MULTIPLIER = 2;
 constexpr int32_t LONG_PRESS_DELAY = 300;
 constexpr float HALF_FLOAT = 0.5f;
@@ -82,14 +80,19 @@ void SwiperIndicatorPattern::InitIndicatorEvent()
     CHECK_NULL_VOID(host);
     RegisterIndicatorChangeEvent();
 
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     if (GetIndicatorType() == SwiperIndicatorType::DOT) {
-        auto gestureHub = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
         InitClickEvent(gestureHub);
         InitHoverMouseEvent();
         InitTouchEvent(gestureHub);
         InitLongPressEvent(gestureHub);
         InitFocusEvent();
+    } else {
+        if (clickEvent_) {
+            gestureHub->RemoveClickEvent(clickEvent_);
+            clickEvent_ = nullptr;
+        }
     }
 
     auto swiperPattern = GetSwiperPattern();
@@ -98,8 +101,6 @@ void SwiperIndicatorPattern::InitIndicatorEvent()
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
-        auto gestureHub = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
         InitTouchEvent(gestureHub);
         InitLongPressEvent(gestureHub);
         InitAccessibilityFocusEvent();
@@ -141,16 +142,11 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
     CHECK_NULL_VOID(swiperEventHub);
 
     swiperEventHub->SetIndicatorOnChange(
-        [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)](int32_t index) {
+        [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)]() {
             auto indicator = weak.Upgrade();
             CHECK_NULL_VOID(indicator);
             auto pipeline = indicator->GetContext();
             CHECK_NULL_VOID(pipeline);
-            auto pattern = context.Upgrade();
-            if (pattern->lastNotifyIndex_ != index && index != pattern->GetCurrentIndex()) {
-                pattern->FireChangeEvent(index);
-                pattern->lastNotifyIndex_ = index;
-            }
             pipeline->AddAfterLayoutTask([weak, context]() {
                 auto indicator = weak.Upgrade();
                 CHECK_NULL_VOID(indicator);
@@ -168,6 +164,16 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
             });
             pipeline->RequestFrame();
         });
+    swiperEventHub->SetIndicatorIndexChangeEvent(
+        [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)](int32_t index) {
+        auto indicator = weak.Upgrade();
+        CHECK_NULL_VOID(indicator);
+        auto pipeline = indicator->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto pattern = context.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireIndicatorIndexChangeEvent(index);
+    });
 }
 
 void SwiperIndicatorPattern::UpdateFocusable() const
@@ -217,7 +223,9 @@ void SwiperIndicatorPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto allPointDiameterSum = isCustomSize ? itemWidth * static_cast<float>(maxDisplayCount - 1) + selectedItemWidth :
         itemWidth * static_cast<float>(maxDisplayCount + 1);
     auto indicatorHeightPadding = swiperTheme->GetIndicatorBgHeight().ConvertToPx();
-    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE_POINT.ConvertToPx()) * (maxDisplayCount - 1);
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(swiperTheme->GetIndicatorDotItemSpace());
+    auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (maxDisplayCount - 1);
     auto paddingSide = swiperTheme->GetIndicatorPaddingDot().ConvertToPx();
     auto focusPadding = swiperTheme->GetIndicatorFocusedPadding().ConvertToPx();
     auto width = allPointDiameterSum + allPointSpaceSum + MULTIPLIER * (paddingSide + focusPadding);
@@ -383,10 +391,12 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
     }
 
     auto isRtl = IsHorizontalAndRightToLeft();
-    auto currentIndex = GetCurrentIndex();
+    auto currentIndex = GetTouchCurrentIndex();
     auto margin = HandleTouchClickMargin();
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
     auto lengthBeforeCurrentIndex = margin + theme->GetIndicatorPaddingDot().ConvertToPx() +
-                                    (INDICATOR_ITEM_SPACE.ConvertToPx() + itemWidth) * currentIndex;
+                                    (indicatorDotItemSpace.ConvertToPx() + itemWidth) * currentIndex;
     auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
     auto axis = GetDirection();
     auto mainClickOffset = axis == Axis::HORIZONTAL ? info.GetLocalLocation().GetX() : info.GetLocalLocation().GetY();
@@ -470,7 +480,7 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
         auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_VOID(swiperLayoutProperty);
         if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
-            swiperPattern->ArrowHover(isHover_);
+            swiperPattern->ArrowHover(isHover_, HOVER_INDICATOR);
         }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -569,7 +579,7 @@ std::pair<int32_t, int32_t> SwiperIndicatorPattern::CalMouseClickIndexStartAndEn
     if (IsHorizontalAndRightToLeft()) {
         end = currentIndex >= 0 ? loopCount * itemCount - 1 : -(loopCount + 1) * itemCount - 1;
         start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
             swiperPattern->IsSwipeByGroup()) {
             start += (1 - swiperPattern->GetDisplayCount());
         }
@@ -597,7 +607,9 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float itemWidth = itemWidthValue * indicatorScale;
     float itemHeight = itemHeightValue * indicatorScale;
     float selectedItemWidth = selectedItemWidthValue * indicatorScale;
-    float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
+    float space = static_cast<float>(indicatorDotItemSpace.ConvertToPx());
     int32_t currentIndex = GetCurrentShownIndex();
     auto [itemCount, step] = CalculateStepAndItemCount();
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
@@ -608,12 +620,12 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
 
     auto [start, end] = CalMouseClickIndexStartAndEnd(itemCount, currentIndex);
     for (int32_t i = start; (start > end ? i > end : i < end); start > end ? i -= step : i += step) {
+        if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
+            hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
+            mouseClickIndex_ = i;
+            break;
+        }
         if (i != currentIndex) {
-            if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
-                hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
-                mouseClickIndex_ = i;
-                break;
-            }
             centerX += itemWidth + space;
         } else {
             centerX += selectedItemWidth + space;
@@ -729,6 +741,7 @@ void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
 {
     dragStartPoint_ =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    UpadateStartAngle();
 }
 
 void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
@@ -788,7 +801,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const GestureEvent& info)
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
+        float endAngle = GetEndAngle(center, dragPoint, startAngle);
         touchOffset = startAngle - endAngle;
         touchOffset = GetDirection() == Axis::HORIZONTAL ? touchOffset : -touchOffset;
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
@@ -841,7 +854,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
+        float endAngle = GetEndAngle(center, dragPoint, startAngle);
         touchOffset = startAngle - endAngle;
         touchOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? touchOffset : -touchOffset;
         touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_ANGLE)
@@ -963,7 +976,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto center = GetCenterPointF();
         float startAngle = GetAngleWithPoint(center, dragStartPoint_);
-        float endAngle = GetAngleWithPoint(center, dragPoint);
+        float endAngle = GetEndAngle(center, dragPoint, startAngle);
         turnPageRateOffset = startAngle - endAngle;
         if (LessNotEqual(std::abs(turnPageRateOffset), GetIndicatorDragAngleThreshold(false))) {
             return;
@@ -986,7 +999,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     swiperPattern->SetTurnPageRate(turnPageRate);
     swiperPattern->SetGroupTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {
-        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
                                 swiperPattern->IsSwipeByGroup()
                             ? swiperPattern->GetDisplayCount()
                             : 1);
@@ -997,6 +1010,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() - step);
         }
         dragStartPoint_ = dragPoint;
+        UpadateStartAngle();
     }
 }
 
@@ -1016,12 +1030,12 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
         itemWidth = theme->GetSize().ConvertToPx();
         selectedItemWidth = theme->GetSize().ConvertToPx();
     }
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_RETURN(swiperNode, 0.0f);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    int32_t itemCount = swiperPattern->DisplayIndicatorTotalCount();
+
+    int32_t itemCount = DisplayIndicatorTotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
-    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount - 1));
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
+    auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx() * (itemCount - 1));
     auto indicatorPadding = static_cast<float>(theme->GetIndicatorPaddingDot().ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
     auto geometryNode = host->GetGeometryNode();
@@ -1141,7 +1155,8 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
 
     overlongDotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
     overlongDotIndicatorModifier_->SetLongPointHeadCurve(
-        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+        swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
+    overlongDotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
 
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
@@ -1164,7 +1179,8 @@ RefPtr<DotIndicatorPaintMethod> SwiperIndicatorPattern::CreateDotIndicatorPaintM
 
     dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
     dotIndicatorModifier_->SetLongPointHeadCurve(
-        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+        swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
+    dotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
     auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
@@ -1233,7 +1249,7 @@ void SwiperIndicatorPattern::CheckDragAndUpdate(
 void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod)
 {
-    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
+    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex(true));
     auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
 
     auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
@@ -1301,6 +1317,11 @@ void SwiperIndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
     swiperPattern->ChangeIndex(index, useAnimation);
 }
 
+int32_t SwiperIndicatorPattern::GetTouchCurrentIndex() const
+{
+    return GetCurrentIndex();
+}
+
 int32_t SwiperIndicatorPattern::GetCurrentIndex() const
 {
     auto swiperPattern = GetSwiperPattern();
@@ -1310,7 +1331,7 @@ int32_t SwiperIndicatorPattern::GetCurrentIndex() const
     auto indicatorCount = swiperPattern->DisplayIndicatorTotalCount();
     auto displayCount = swiperPattern->GetDisplayCount();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
         swiperPattern->IsSwipeByGroup() && displayCount != 0) {
         currentIndex /= displayCount;
     }
@@ -1388,13 +1409,9 @@ void SwiperIndicatorPattern::SwipeTo(std::optional<int32_t> mouseClickIndex)
     CHECK_NULL_VOID(swiperPattern);
     if (swiperPattern->IsSwipeByGroup()) {
         auto clickPageIndex = SwiperUtils::ComputePageIndex(mouseClickIndex.value(), swiperPattern->GetDisplayCount());
-        if (clickPageIndex == swiperPattern->GetCurrentIndex()) {
-            mouseClickIndex_ = std::nullopt;
-            return;
-        }
         mouseClickIndex_ = clickPageIndex;
     }
-    swiperPattern->SwipeTo(mouseClickIndex.value());
+    swiperPattern->SwipeTo(mouseClickIndex_.value());
 }
 
 std::pair<int32_t, int32_t> SwiperIndicatorPattern::CalculateStepAndItemCountDefault() const

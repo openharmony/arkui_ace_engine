@@ -66,6 +66,7 @@ public:
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
     virtual bool DownloadSyncWithPreload(
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
+    virtual bool IsContains(const std::string& url);
 
 private:
     static std::unique_ptr<DownloadManager> instance_;

@@ -901,8 +901,8 @@ class TextInputOnSubmitModifier extends ModifierWithKey<(enterKey: EnterKeyType,
   }
 }
 
-class TextInputOnChangeModifier extends ModifierWithKey<(value: string) => void> {
-  constructor(value: (value: string) => void) {
+class TextInputOnChangeModifier extends ModifierWithKey<(value: ChangeValueInfo) => void> {
+  constructor(value: (value: ChangeValueInfo) => void) {
     super(value);
   }
   static identity = Symbol('textInputOnChange');
@@ -1576,7 +1576,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
       TextInputOnSubmitModifier, callback);
     return this;
   }
-  onChange(callback: (value: string) => void): TextInputAttribute {
+  onChange(callback: (value: ChangeValueInfo) => void): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputOnChangeModifier.identity,
       TextInputOnChangeModifier, callback);
     return this;

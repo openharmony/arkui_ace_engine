@@ -35,6 +35,7 @@
 #ifndef _ARKUI_UI_INPUT_EVENT_H_
 #define _ARKUI_UI_INPUT_EVENT_H_
 
+#include "native_type.h"
 #ifdef __cplusplus
 #include <cstdint>
 #else
@@ -228,7 +229,7 @@ enum {
 /**
  * @brief Enumerates the action types for axis events.
  *
- * @since 16
+ * @since 15
  */
 enum {
     /** The axis event is abnormal. */
@@ -246,16 +247,16 @@ enum {
 /**
  * @brief Defines interaction hand for touch event.
  *
- * @since 16
+ * @since 15
  */
 typedef enum {
-    /** None. */
-    HAND_NONE = 0,
+    /** UnKnown. */
+    ARKUI_EVENT_HAND_NONE = 0,
     /** Left hand. */
-    HAND_LEFT = 1,
+    ARKUI_EVENT_HAND_LEFT = 1,
     /** Right hand. */
-    HAND_RIGHT = 2,
-} InteractionHand;
+    ARKUI_EVENT_HAND_RIGHT = 2,
+} ArkUI_InteractionHand;
 
 /**
  * @brief Obtains the type of this UI input event.
@@ -494,6 +495,18 @@ float OH_ArkUI_PointerEvent_GetTiltX(const ArkUI_UIInputEvent* event, uint32_t p
 float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
 
 /**
+ * @brief Obtains the rotation angle of the stylus around the z-axis from a UI input event.
+ *
+ * @param event Pointer to the UI input event.
+ * @param rollAngle Rotation angle of the stylus around the z-axis.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 18
+ */
+int32_t OH_ArkUI_PointerEvent_GetRollAngle(const ArkUI_UIInputEvent* event, double* rollAngle);
+
+/**
  * @brief Obtains the interaction hand of a touch point.
  *
  * @param event Indicates the pointer to the current UI input event.
@@ -501,9 +514,9 @@ float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t p
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 16
+ * @since 15
  */
-int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, InteractionHand *hand);
+int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, ArkUI_InteractionHand *hand);
 
 /**
  * @brief Obtains the interaction hand of a touch point.
@@ -514,10 +527,10 @@ int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 16
+ * @since 15
  */
-int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIdx(
-    const ArkUI_UIInputEvent *event, int32_t pointerIndex, InteractionHand *hand);
+int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIndex(
+    const ArkUI_UIInputEvent *event, int32_t pointerIndex, ArkUI_InteractionHand *hand);
 
 /**
  * @brief Obtains the width of the touch area from a directional input event (for example, a touch event).
@@ -547,7 +560,7 @@ float OH_ArkUI_PointerEvent_GetTouchAreaHeight(const ArkUI_UIInputEvent* event, 
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_PointerEvent_GetChangedPointerId(const ArkUI_UIInputEvent* event, uint32_t* pointerIndex);
 
@@ -778,7 +791,7 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
  *
  * @param event Indicates the pointer to the current UI input event.
  * @return Returns the action type of the current axis event.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event);
 
@@ -870,12 +883,92 @@ double OH_ArkUI_FocusAxisEvent_GetAxisValue(const ArkUI_UIInputEvent* event, int
 int32_t OH_ArkUI_FocusAxisEvent_SetStopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation);
 
 /**
+* @brief Obtains the width of the component hit by an event.
+*
+* @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+* @return Returns the width of the component hit by the event; returns <b>0.0f</b> if any parameter error occurs.
+* @since 18
+*/
+float OH_ArkUI_UIInputEvent_GetEventTargetWidth(const ArkUI_UIInputEvent* event);
+
+/**
+* @brief Obtains the height of the component hit by an event.
+*
+* @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+* @return Returns the height of the component hit by the event; returns <b>0.0f</b> if any parameter error occurs.
+* @since 18
+*/
+float OH_ArkUI_UIInputEvent_GetEventTargetHeight(const ArkUI_UIInputEvent* event);
+
+/**
+* @brief Obtains the X coordinate of the component hit by an event.
+*
+* @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+* @return Returns the X coordinate of the component hit by the event; returns <b>0.0f</b> if any parameter error occurs.
+* @since 18
+*/
+float OH_ArkUI_UIInputEvent_GetEventTargetPositionX(const ArkUI_UIInputEvent* event);
+
+/**
+* @brief Obtains the Y coordinate of the component hit by an event.
+*
+* @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+* @return Returns the Y coordinate of the component hit by the event;
+*         returns <b>0.0f</b> if any parameter error occurs.
+* @since 18
+*/
+float OH_ArkUI_UIInputEvent_GetEventTargetPositionY(const ArkUI_UIInputEvent* event);
+
+/**
+* @brief Obtains the global X coordinate of the component hit by an event.
+*
+* @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+* @return Returns the global X coordinate of the component hit by the event;
+*         returns <b>0.0f</b> if any parameter error occurs.
+* @since 18
+*/
+float OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(const ArkUI_UIInputEvent* event);
+
+/**
+* @brief Obtains the global Y coordinate of the component hit by an event.
+*
+* @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+* @return Returns the global Y coordinate of the component hit by the event;
+*         returns <b>0.0f</b> if any parameter error occurs.
+* @since 18
+*/
+float OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(const ArkUI_UIInputEvent* event);
+
+/**
+* @brief Checks whether the cursor is hovering over this component.
+*
+* @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+* @return Returns <b>true</b> if the cursor is hovering over the current component.
+*         Returns <b>false</b> if the cursor is not hovering over the current component.
+* @since 18
+*/
+bool OH_ArkUI_HoverEvent_IsHovered(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Obtains the state of the modifier keys in a UI input event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param keys Pointer to a variable where the current combination of pressed modifier keys will be returned.
+ *        The application can use bitwise operations to determine the state of each modifier key.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 18
+ */
+int32_t OH_ArkUI_UIInputEvent_GetModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys);
+
+/**
  * @brief Obtains the pressed time of a specific touch point.
  *
  * @param event Indicates the pointer to the current UI input event.
  * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
  * @return Returns the pressed time of a specific touch point; returns <b>0</b> if any parameter error occurs.
- * @since 16
+ * @since 15
  */
 int64_t OH_ArkUI_PointerEvent_GetPressedTimeByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
 
@@ -886,7 +979,7 @@ int64_t OH_ArkUI_PointerEvent_GetPressedTimeByIndex(const ArkUI_UIInputEvent* ev
  * @param event Indicates the pointer to the current UI input event.
  * @return Returns the X axis offset relative to the previous reported mouse pointer position;
  * returns <b>0.0f</b> if any parameter error occurs.
- * @since 16
+ * @since 15
  */
 float OH_ArkUI_MouseEvent_GetRawDeltaX(const ArkUI_UIInputEvent* event);
 
@@ -897,7 +990,7 @@ float OH_ArkUI_MouseEvent_GetRawDeltaX(const ArkUI_UIInputEvent* event);
  * @param event Indicates the pointer to the current UI input event.
  * @return Returns the Y axis offset relative to the previous reported mouse pointer position;
  * returns <b>0.0f</b> if any parameter error occurs.
- * @since 16
+ * @since 15
  */
 float OH_ArkUI_MouseEvent_GetRawDeltaY(const ArkUI_UIInputEvent* event);
 
@@ -911,7 +1004,7 @@ float OH_ArkUI_MouseEvent_GetRawDeltaY(const ArkUI_UIInputEvent* event);
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the giving buffer is not enough.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_MouseEvent_GetPressedButtons(
     const ArkUI_UIInputEvent* event, int32_t* pressedButtons, int32_t* length);
@@ -921,9 +1014,144 @@ int32_t OH_ArkUI_MouseEvent_GetPressedButtons(
  *
  * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
  * @return Returns the screen ID; returns <b>0</b> if any parameter error occurs.
- * @since 16
+ * @since 15
  */
 int32_t OH_ArkUI_UIInputEvent_GetTargetDisplayId(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Sets whether to enable axis event propagation.
+ *
+ * @param event Pointer to the UI input event.
+ * @param propagation Whether to enable event propagation.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 18
+ */
+int32_t OH_ArkUI_AxisEvent_SetPropagation(const ArkUI_UIInputEvent* event, bool propagation);
+
+/**
+ * @brief Obtains the scroll step configuration of the mouse wheel axis event.
+ *
+ * @param event Pointer to the UI input event.
+ * @return Returns the scroll step configuration of the mouse wheel axis event.
+ * @since 18
+ */
+int32_t OH_ArkUI_AxisEvent_GetScrollStep(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Create cloned pointer event from the original pointer event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param clonedEvent Pointer to an <b>ArkUI_UIInputEvent</b> pointer.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_CreateClonedEvent(const ArkUI_UIInputEvent* event, ArkUI_UIInputEvent** clonedEvent);
+
+/**
+ * @brief Destroy the cloned pointer event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NON_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_DestroyClonedEvent(const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Set the position relative to the upper left corner of the current component from a cloned directional
+ * input event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param x The X coordinate relative to the upper left corner of the current component, in px.
+ * @param y The Y coordinate relative to the upper left corner of the current component, in px.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NON_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(const ArkUI_UIInputEvent* event, float x, float y);
+
+/**
+ * @brief Set the position of a specific touch point relative to the upper left corner of the current component
+ * from a cloned directional input event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param x The X coordinate relative to the upper left corner of the current component, in px.
+ * @param y The Y coordinate relative to the upper left corner of the current component, in px.
+ * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NON_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(
+    const ArkUI_UIInputEvent* event, float x, float y, int32_t pointerIndex);
+
+/**
+ * @brief Set the action type of the cloned pointer event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param actionType The action type of pointer event.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NON_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventActionType(const ArkUI_UIInputEvent* event, int32_t actionType);
+
+/**
+ * @brief Set the ID of the touch point that triggers the current cloned pointer event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param fingerId The ID of the touch point that triggers the current pointer event.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NON_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(const ArkUI_UIInputEvent* event, int32_t fingerId);
+
+/**
+ * @brief Set the ID of a touch point from a cloned directional input event.
+ *
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param fingerId The ID of the touch point.
+ * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NON_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(
+    const ArkUI_UIInputEvent* event, int32_t fingerId, int32_t pointerIndex);
+
+/**
+ * @brief Post a cloned event to a specific node.
+ *
+ * @param node Target node.
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @return Returns the result code.
+ *          Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *          Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *          Returns {@link ARKUI_ERROR_CODE_NON_CLONED_POINTER_EVENT} if the event is not the cloned pointer event.
+ *          Returns {@link ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL }
+ *          if the component status abnormal.
+ *          Returns {@link ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT }
+ *          if no component hit to respond to the event.
+ * @since 15
+ */
+int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);
 
 #ifdef __cplusplus
 };

@@ -16,12 +16,7 @@
 #include "core/common/stylus/stylus_detector_callback.h"
 
 #include "core/common/stylus/stylus_detector_mgr.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
-#include "core/components_ng/pattern/text/text_base.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "frameworks/base/log/log_wrapper.h"
 
 namespace OHOS::Ace {
 

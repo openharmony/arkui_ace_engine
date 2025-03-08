@@ -76,6 +76,20 @@ const Dimension FONT_VALUE_NOMARL = Dimension(10);
 const Dimension FONT_SIZE_LIMIT = Dimension(10);
 const Dimension FONT_SIZE_VP = Dimension(10.0_vp);
 const Dimension FONT_SIZE_LIMIT_MORE = Dimension(40);
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 class TimePickerDialogViewTestNg : public testing::Test {
 public:
@@ -123,20 +137,11 @@ void TimePickerDialogViewTestNg::TearDownTestSuite()
 void TimePickerDialogViewTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            if (type == IconTheme::TypeId()) {
-                return AceType::MakeRefPtr<IconTheme>();
-            } else if (type == DialogTheme::TypeId()) {
-                return AceType::MakeRefPtr<DialogTheme>();
-            } else if (type == PickerTheme::TypeId()) {
-                return MockThemeDefault::GetPickerTheme();
-            } else if (type == ButtonTheme::TypeId()) {
-                return AceType::MakeRefPtr<ButtonTheme>();
-            } else {
-                return nullptr;
-            }
-        });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -495,5 +500,56 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest006, TestSize.Level
         V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     TimePickerDialogView::UpdateTimePickerSwitchEvent(timePickerNode, textNode, dialogTheme, buttonNode, switchEvent);
     EXPECT_NE(buttonNode, nullptr);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow044
+ * @tc.desc: Test TimePickerDialogViewShow Show for API 16.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewShow044, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    TimePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.isUseMilitaryTime = false;
+    settingData.isEnableHapticFeedback = true;
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(1, 1, 1);
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto customNode = dialogPattern->GetCustomNode();
+    ASSERT_NE(customNode, nullptr);
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    ASSERT_NE(timePickerNode, nullptr);
+    auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    EXPECT_TRUE(timePickerRowPattern->isEnableHaptic_);
 }
 } // namespace OHOS::Ace::NG

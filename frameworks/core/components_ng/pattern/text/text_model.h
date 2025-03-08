@@ -31,6 +31,7 @@
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -131,6 +132,7 @@ public:
     virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetEllipsisMode(EllipsisMode modal) = 0;
 
+    virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
     virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;
     virtual void SetTextCaretColor(const Color& value) = 0;

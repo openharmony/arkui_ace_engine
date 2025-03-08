@@ -230,6 +230,7 @@ template("declarative_js_engine") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -284,6 +285,7 @@ template("declarative_js_engine") {
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
+      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -313,6 +315,7 @@ template("declarative_js_engine") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
+      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -359,6 +362,7 @@ template("declarative_js_engine") {
       "jsview/js_relative_container.cpp",
       "jsview/js_repeat.cpp",
       "jsview/js_repeat_virtual_scroll.cpp",
+      "jsview/js_repeat_virtual_scroll_2.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_save_button.cpp",
@@ -397,6 +401,7 @@ template("declarative_js_engine") {
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
+      "jsview/js_view_abstract_bridge.cpp",
       "jsview/js_view_context.cpp",
       "jsview/js_view_functions.cpp",
       "jsview/js_view_measure_layout.cpp",
@@ -499,7 +504,6 @@ template("declarative_js_engine") {
     if (!ace_engine_feature_wearable) {
       sources += [
         "jsview/js_column_split.cpp",
-        "jsview/js_content_slot.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
         "jsview/js_select.cpp",
@@ -540,6 +544,9 @@ template("declarative_js_engine") {
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
       ]
+    }
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [ "jsview/js_form_button.cpp" ]
     }
 
     # rich components needed by phone and TV. wearable like watch do not need them
@@ -786,6 +793,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -851,6 +859,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
+      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -878,6 +887,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
+      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
@@ -919,6 +929,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_refresh.cpp",
       "jsview/js_repeat.cpp",
       "jsview/js_repeat_virtual_scroll.cpp",
+      "jsview/js_repeat_virtual_scroll_2.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_save_button.cpp",
@@ -954,6 +965,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
+      "jsview/js_view_abstract_bridge.cpp",
       "jsview/js_view_context.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
@@ -968,7 +980,6 @@ template("declarative_js_engine_ng") {
     if (!ace_engine_feature_wearable) {
       sources += [
         "jsview/js_column_split.cpp",
-        "jsview/js_content_slot.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
         "jsview/js_select.cpp",
@@ -1036,7 +1047,9 @@ template("declarative_js_engine_ng") {
         ]
       }
     }
-
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [ "jsview/js_form_button.cpp" ]
+    }
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
       sources += [

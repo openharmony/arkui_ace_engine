@@ -290,7 +290,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
 
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -300,7 +300,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     auto right = CalcLength(padding.Right().ConvertToPx());
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
-    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     buttonWidth = MeasureTextWidth(textStyle, data);
     // Calculate the width of default option include button padding.
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
@@ -315,7 +315,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
 
     if (callback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
-            [callback, overlayId, isSelectAll, id = Container::CurrentIdSafelyWithCheck()](GestureEvent& /*info*/) {
+            [callback, overlayId, id = Container::CurrentIdSafelyWithCheck()](GestureEvent& /*info*/) {
                 ContainerScope scope(id);
                 auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
                 CHECK_NULL_VOID(pipeline);
@@ -396,7 +396,7 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     // Update button property.
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
-    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(contentWidth), std::nullopt });
     } else {
@@ -416,7 +416,7 @@ void BindCreateMenuItemClickEvent(const RefPtr<FrameNode>& button, const MenuOpt
 {
     auto id = Container::CurrentIdSafelyWithCheck();
     button->GetOrCreateGestureEventHub()->SetUserOnClick(
-        [menuOptionsParam, systemCallback, onCreateCallback, overlayId, id](GestureEvent& /*info*/) {
+        [menuOptionsParam, systemCallback, onCreateCallback, id](GestureEvent& /*info*/) {
             ContainerScope scope(id);
             auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipeline);
@@ -496,7 +496,7 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     // Update button property.
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
-    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(contentWidth), std::nullopt });
     } else {
@@ -540,7 +540,7 @@ void UpdateBackButtonPadding(
             top = isSymbol ? CalcLength(padding.Top().ConvertToPx()) : top;
         }
     }
-    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
 }
 
 RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
@@ -647,9 +647,11 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
     params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
         GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll), theme->GetSelectAllLabelInfo(),
         info->menuInfo.showCopyAll);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE),
             GetMenuCallbackWithContainerId(info->menuCallback.onTranslate), "", info->menuInfo.showTranslate);
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE),
             GetMenuCallbackWithContainerId(info->menuCallback.onShare), "", info->menuInfo.showShare);
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH),
@@ -660,6 +662,7 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
 
 std::unordered_map<std::string, std::function<void()>> GetSystemCallback(const std::shared_ptr<SelectOverlayInfo>& info)
 {
+    CHECK_NULL_RETURN(info, {});
     std::unordered_map<std::string, std::function<void()>> systemCallback = {
         { OH_DEFAULT_CUT, info->menuCallback.onCut }, { OH_DEFAULT_COPY, info->menuCallback.onCopy },
         { OH_DEFAULT_SELECT_ALL, info->menuCallback.onSelectAll }, { OH_DEFAULT_PASTE, info->menuCallback.onPaste },
@@ -748,6 +751,15 @@ std::string GetItemContent(const std::string& id, const std::string& content)
     return content;
 }
 
+void CloseOverlayIfNecessary(const RefPtr<SelectOverlayManager>& overlayManager)
+{
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->DestroySelectOverlay(true);
+    auto contentOverlayManager = overlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(contentOverlayManager);
+    contentOverlayManager->CloseCurrent(true, CloseReason::CLOSE_REASON_TOOL_BAR);
+}
+
 std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOptionsParam>& menuOptionItems,
     const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex)
 {
@@ -788,7 +800,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
                 systemEvent();
             }
             if (!systemEvent && !result) {
-                overlayManager->DestroySelectOverlay(true);
+                CloseOverlayIfNecessary(overlayManager);
             }
         };
         params.emplace_back(
@@ -1363,7 +1375,7 @@ void SelectOverlayNode::MoreAnimation(bool noAnimation)
                 extensionContext->UpdateOpacity(1.0);
             }
             extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-            auto colorMode = SystemProperties::GetColorMode();
+            auto colorMode = Container::CurrentColorMode();
             extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
             selectMenuInnerContext->UpdateOpacity(0.0);
         });
@@ -1504,10 +1516,9 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptions(bool isAttachToMoreButton,
     if (!moreOrBackSymbol_) {
         moreOrBackSymbol_ = BuildMoreOrBackSymbol();
     }
-    if (isAttachToMoreButton) {
-        backButton_->RemoveChild(moreOrBackSymbol_);
-    } else {
-        moreButton_->RemoveChild(moreOrBackSymbol_);
+    auto button = isAttachToMoreButton ? backButton_ : moreButton_;
+    if (button) {
+        button->RemoveChild(moreOrBackSymbol_);
     }
     moreOrBackSymbol_->MountToParent(isAttachToMoreButton ? moreButton_ : backButton_);
     auto layoutProperty = moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
@@ -1582,7 +1593,7 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
         symbol = [symbolId, symbolSize](WeakPtr<NG::FrameNode> weak) {
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
-            auto symbolNode = node.GetRawPtr();
+            auto symbolNode = Referenced::RawPtr(node);
             SymbolModelNG::InitialSymbol(symbolNode, symbolId);
             SymbolModelNG::SetFontSize(symbolNode, symbolSize);
         };
@@ -1715,11 +1726,6 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(props);
-    auto offsetY = 0.0f;
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-    if (textOverlayTheme) {
-        offsetY = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx();
-    }
     props->UpdateMenuOffset(GetPageOffset());
     context->UpdateBackShadow(ShadowConfig::NoneShadow);
     auto menuPattern = menu->GetPattern<MenuPattern>();
@@ -1754,7 +1760,7 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuOptions(const std::vector<Menu
 std::function<void()> SelectOverlayNode::CreateExtensionMenuOptionCallback(int32_t id,
     const OnMenuItemCallback& onCreateCallback, const std::function<void()>& systemEvent, const MenuOptionsParam& item)
 {
-    auto callback = [overlayId = id, onCreateCallback = onCreateCallback, systemEvent, item,
+    auto callback = [onCreateCallback = onCreateCallback, systemEvent, item,
                         mainId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(mainId);
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1815,9 +1821,9 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
             auto symbolId = (symbolIdFunc->second)(textOverlayTheme);
             auto symbolSize = textOverlayTheme->GetSymbolSize();
             symbol = [symbolId, symbolSize](WeakPtr<NG::FrameNode> weak) {
-                auto symbolNode = weak.Upgrade().GetRawPtr();
-                SymbolModelNG::InitialSymbol(symbolNode, symbolId);
-                SymbolModelNG::SetFontSize(symbolNode, symbolSize);
+                auto symbolNode = weak.Upgrade();
+                SymbolModelNG::InitialSymbol(RawPtr(symbolNode), symbolId);
+                SymbolModelNG::SetFontSize(RawPtr(symbolNode), symbolSize);
             };
         }
         auto param = OptionParam(content, GetSystemIconPath(item.id, item.icon.value_or(" ")), callback, symbol);
@@ -1869,18 +1875,20 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty()
     selectMenu_->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     selectMenu_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
 
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipeline->GetColorMode();
     selectMenu_->GetRenderContext()->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     selectMenu_->GetRenderContext()->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
     selectMenu_->GetRenderContext()->SetClipToFrame(true);
 
     const auto& border = textOverlayTheme->GetMenuBorder();
     auto borderWidth = Dimension(border.Left().GetWidth().ConvertToPx());
-    selectMenu_->GetLayoutProperty()->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
+    selectMenu_->GetLayoutProperty()->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth,
+        std::nullopt, std::nullopt });
     auto borderRadius = textOverlayTheme->GetMenuToolbarHeight() / 2.0f;
     selectMenu_->GetRenderContext()->UpdateBorderRadius({ borderRadius, borderRadius, borderRadius, borderRadius });
     auto borderColor = border.Left().GetColor();
-    selectMenu_->GetRenderContext()->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
+    selectMenu_->GetRenderContext()->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor,
+        std::nullopt, std::nullopt });
     auto borderStyle = border.Left().GetBorderStyle();
     selectMenu_->GetRenderContext()->UpdateBorderStyle({ borderStyle, borderStyle, borderStyle, borderStyle });
 
@@ -1894,7 +1902,7 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty()
     auto right = CalcLength(padding.Right().ConvertToPx());
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
-    selectMenuInner_->GetLayoutProperty()->UpdatePadding({ left, right, top, bottom });
+    selectMenuInner_->GetLayoutProperty()->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     SetSelectMenuInnerSize();
 }
 
@@ -2062,7 +2070,7 @@ void SelectOverlayNode::ShowCopyAll(float maxWidth, float& allocatedSize, std::s
 
 void SelectOverlayNode::ShowTranslate(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
 {
-    if (!IsShowOnTargetAPIVersion()) {
+    if (!IsShowTranslateOnTargetAPIVersion()) {
         isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
         return;
     }
@@ -2187,7 +2195,16 @@ void SelectOverlayNode::ShowCamera(float maxWidth, float& allocatedSize, std::sh
 bool SelectOverlayNode::IsShowOnTargetAPIVersion()
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return false;
+    }
+    return true;
+}
+
+bool SelectOverlayNode::IsShowTranslateOnTargetAPIVersion()
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         return false;
     }
     return true;
@@ -2304,11 +2321,13 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SELECT_ALL, BUTTON_COPY_ALL);
         systemItemParams.emplace_back(param);
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         if (info->menuInfo.showTranslate || info->isUsingMouse) {
             MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_TRANSLATE, BUTTON_TRANSLATE);
             systemItemParams.emplace_back(param);
         }
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (info->menuInfo.showShare || info->isUsingMouse) {
             MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SHARE, BUTTON_SHARE);
             systemItemParams.emplace_back(param);
@@ -2412,8 +2431,10 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
         (noAnimation) ? HideFrameNodeImmediately(FrameNodeType::SELECTMENU)
                       : ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
+        FireCustomMenuChangeEvent(false);
     } else {
         ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
+        FireCustomMenuChangeEvent(true);
     }
 
     if (isExtensionMenu_ && extensionMenu_) {
@@ -2900,7 +2921,7 @@ void SelectOverlayNode::UpdateSelectMenuBg()
     CHECK_NULL_VOID(textOverlayTheme);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_VOID(shadowTheme);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipelineContext->GetColorMode();
     auto renderContext = selectMenu_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
@@ -2951,6 +2972,9 @@ void SelectOverlayNode::OnCustomSelectMenuAppear()
     auto info = pattern->GetSelectOverlayInfo();
     CHECK_NULL_VOID(info);
     bool isHideMenu = info->menuInfo.menuDisable || !info->menuInfo.menuIsShow;
+    if (isHideMenu) {
+        eventHub->FireMenuVisibilityChangeEvent(true);
+    }
     eventHub->FireMenuVisibilityChangeEvent(!isHideMenu);
 }
 

@@ -27,6 +27,18 @@ class KeyEvent;
 }
 
 namespace OHOS::Ace {
+enum class ModifierKeyName {
+    /** Ctrl. */
+    ModifierKeyCtrl = 1 << 0,
+    /** Shift. */
+    ModifierKeyShift = 1 << 1,
+    /** Alt. */
+    ModifierKeyAlt = 1 << 2,
+    /** Fn. */
+    ModifierKeyFn = 1 << 3,
+};
+
+uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status);
 
 enum class KeyCode : int32_t {
     KEY_UNKNOWN = -1,

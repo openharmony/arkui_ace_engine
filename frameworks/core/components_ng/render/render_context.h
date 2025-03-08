@@ -18,7 +18,6 @@
 
 #include <cstdint>
 #include <functional>
-#include "base/geometry/ng/offset_t.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -32,16 +31,16 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shared_transition_option.h"
+#include "core/components/common/properties/effect_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
-#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/attraction_effect.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/particle_property.h"
+#include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_forward.h"
@@ -53,6 +52,10 @@ class VisualEffect;
 class Filter;
 enum class Gravity;
 class BrightnessBlender;
+} // namespace OHOS::Rosen
+
+namespace OHOS::Ace {
+struct SharedTransitionOption;
 }
 
 namespace OHOS::Ace::Kit {
@@ -104,7 +107,6 @@ public:
 
     virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
-    FrameNode* GetUnsafeHost() const;
 
     virtual void SetNeedDebugBoundary(bool flag) {}
     virtual bool NeedDebugBoundary() const
@@ -299,7 +301,6 @@ public:
     virtual void SetSecurityLayer(bool isSecure) {}
     virtual void SetHDRBrightness(float hdrBrightness) {}
     virtual void SetTransparentLayer(bool isTransparentLayer) {}
-    
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
@@ -317,6 +318,7 @@ public:
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
     virtual void UpdateWindowFocusState(bool isFocused) {}
+    virtual void UpdateWindowActiveState(bool isActive) {}
     /**
      * @brief Only clip the content & foreground layer by @c rect.
      * @param rect - offset of @c rect is relative to FrameRect.
@@ -364,7 +366,7 @@ public:
     {
         return {};
     }
-
+    virtual int32_t GetRotateDegree() { return 0; }
     virtual void SavePaintRect(bool isRound = true, uint16_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
     virtual void UpdatePaintRect(const RectF& paintRect) {}
@@ -768,6 +770,16 @@ public:
     {
         return OffsetF();
     }
+
+    virtual bool AddNodeToRsTree()
+    {
+        return false;
+    }
+
+    virtual void SetDrawNode() {}
+
+    virtual void SetDrawNodeChangeCallback() {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

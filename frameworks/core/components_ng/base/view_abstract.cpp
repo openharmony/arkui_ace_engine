@@ -14,15 +14,18 @@
  */
 
 #include "core/components_ng/base/view_abstract.h"
+#include <cstdint>
+#include <functional>
+#include <unordered_map>
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -372,7 +375,7 @@ void ViewAbstract::SetLayoutWeight(float value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
-void ViewAbstract::SetLayoutWeight(const NG::LayoutWeightPair& value)
+void ViewAbstract::SetChainWeight(const NG::ChainWeightPair& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -909,6 +912,13 @@ void ViewAbstract::DisableOnHover()
     eventHub->ClearUserOnHover();
 }
 
+void ViewAbstract::DisableOnHoverMove()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnHoverMove();
+}
+
 void ViewAbstract::DisableOnAccessibilityHover()
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -921,6 +931,13 @@ void ViewAbstract::DisableOnMouse()
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnMouse();
+}
+
+void ViewAbstract::DisableOnAxisEvent()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAxisEvent();
 }
 
 void ViewAbstract::DisableOnAppear()
@@ -1071,11 +1088,25 @@ void ViewAbstract::DisableOnHover(FrameNode* frameNode)
     eventHub->ClearUserOnHover();
 }
 
+void ViewAbstract::DisableOnHoverMove(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnHoverMove();
+}
+
 void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
 {
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->ClearUserOnMouse();
+}
+
+void ViewAbstract::DisableOnAxisEvent(FrameNode* frameNode)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAxisEvent();
 }
 
 void ViewAbstract::DisableOnAppear(FrameNode* frameNode)
@@ -1195,11 +1226,25 @@ void ViewAbstract::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
 }
 
+void ViewAbstract::SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAxisEvent(std::move(onAxisEventFunc));
+}
+
 void ViewAbstract::SetOnHover(OnHoverFunc&& onHoverEventFunc)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverMoveEvent(std::move(onHoverMoveEventFunc));
 }
 
 void ViewAbstract::SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc)
@@ -1288,6 +1333,20 @@ void ViewAbstract::SetFocusOnTouch(bool isSet)
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetIsFocusOnTouch(isSet);
+}
+
+void ViewAbstract::SetNextFocus(FocusIntension key, const std::string& nextFocus)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetNextFocus(key, nextFocus);
+}
+
+void ViewAbstract::ResetNextFocus()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ResetNextFocus();
 }
 
 void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
@@ -1771,7 +1830,7 @@ void ViewAbstract::CheckIfParentNeedMarkDirty(FrameNode* frameNode)
         parentNode->GetTag() == V2::FLEX_ETS_TAG) {
         auto renderContext = frameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        if (!renderContext->HasPositionEdges() || !renderContext->HasPosition()) {
+        if (!renderContext->HasPositionEdges() && !renderContext->HasPosition()) {
             parentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     }
@@ -1915,7 +1974,7 @@ void ViewAbstract::BindPopup(
         showInSubWindow = false;
     } else {
         // subwindow model needs to use subContainer to get popupInfo
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
         if (subwindow) {
             subwindow->GetPopupInfoNG(targetId, popupInfo);
         }
@@ -1957,8 +2016,8 @@ void ViewAbstract::BindPopup(
         }
         if (!showInSubWindow) {
             // erase popup when target node destroy
-            auto destructor = [id = targetNode->GetId()]() {
-                auto pipeline = NG::PipelineContext::GetCurrentContext();
+            auto destructor = [id = targetNode->GetId(), weak = AceType::WeakClaim(context)]() {
+                auto pipeline = weak.Upgrade();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
@@ -1969,7 +2028,8 @@ void ViewAbstract::BindPopup(
         } else {
             // erase popup in subwindow when target node destroy
             auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                    containerId, SubwindowType::TYPE_POPUP);
                 CHECK_NULL_VOID(subwindow);
                 auto overlayManager = subwindow->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
@@ -1992,6 +2052,7 @@ void ViewAbstract::BindPopup(
     popupInfo.popupId = popupId;
     popupInfo.popupNode = popupNode;
     popupInfo.isBlockEvent = param->IsBlockEvent();
+    popupInfo.isAvoidKeyboard = param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT;
     if (popupNode) {
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
@@ -2024,83 +2085,143 @@ void ViewAbstract::BindPopup(
     }
 }
 
-PopupInfo ViewAbstract::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode)
+void ViewAbstract::BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode)
 {
-    PopupInfo popupInfoError;
-    popupInfoError.popupNode = nullptr;
-    auto context = customNode->GetContextWithCheck();
-    CHECK_NULL_RETURN(context, popupInfoError);
+    CHECK_NULL_VOID(param);
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto context = targetNode->GetContext();
+    CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto tipsInfo = overlayManager->GetPopupInfo(targetId);
+    auto showInSubWindow = param->IsShowInSubWindow();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
     if (subwindow) {
-        auto overlayManager = subwindow->GetOverlayManager();
-        if (overlayManager) {
-            auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
-            if (popupInfo.popupNode) {
-                return popupInfo;
-            }
-        }
+        subwindow->GetPopupInfoNG(targetId, tipsInfo);
     }
-    auto overlayManager = context->GetOverlayManager();
-    if (overlayManager) {
-        auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
-        if (popupInfo.popupNode) {
-            return popupInfo;
-        }
+    if (tipsInfo.popupNode) {
+        showInSubWindow = true;
     }
-    return popupInfoError;
+    HandleHoverTipsInfo(param, targetNode, tipsInfo, showInSubWindow, instanceId);
 }
 
-PopupInfo ViewAbstract::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId)
+void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
+    PopupInfo& tipsInfo, bool showInSubWindow, int32_t instanceId)
 {
-    PopupInfo popupInfoError;
-    popupInfoError.popupNode = nullptr;
-    auto context = customNode->GetContextWithCheck();
-    CHECK_NULL_RETURN(context, popupInfoError);
-    auto instanceId = context->GetInstanceId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
-    if (subwindow) {
-        auto overlayManager = subwindow->GetOverlayManager();
-        if (overlayManager) {
-            auto popupInfo = overlayManager->GetPopupInfo(targetId);
-            if (popupInfo.popupNode) {
-                return popupInfo;
-            }
-        }
+    CHECK_NULL_VOID(param);
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = tipsInfo.popupId;
+    auto popupNode = tipsInfo.popupNode;
+    RefPtr<BubblePattern> popupPattern;
+    tipsInfo.markNeedUpdate = true;
+    popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
+    if (popupNode) {
+        popupId = popupNode->GetId();
     }
-    auto overlayManager = context->GetOverlayManager();
-    if (overlayManager) {
-        auto popupInfo = overlayManager->GetPopupInfo(targetId);
-        if (popupInfo.popupNode) {
-            return popupInfo;
-        }
+    if (!showInSubWindow) {
+        auto destructor = [id = targetNode->GetId()]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ErasePopup(id);
+            SubwindowManager::GetInstance()->HideSubWindowNG();
+        };
+        targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
+    } else {
+        auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            CHECK_NULL_VOID(subwindow);
+            auto overlayManager = subwindow->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ErasePopup(id);
+            SubwindowManager::GetInstance()->HideSubWindowNG();
+        };
+        targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
     }
-    return popupInfoError;
+    tipsInfo.popupId = popupId;
+    tipsInfo.popupNode = popupNode;
+    tipsInfo.isBlockEvent = param->IsBlockEvent();
+    if (popupNode) {
+        popupNode->MarkModifyDone();
+    }
+    AddHoverEventForTips(param, targetNode, tipsInfo, showInSubWindow);
 }
 
-RefPtr<OverlayManager> ViewAbstract::GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId)
+void ViewAbstract::AddHoverEventForTips(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo, bool showInSubWindow)
 {
-    auto context = customNode->GetContextWithCheck();
+    tipsInfo.disappearingTimeWithContinuousOperation = param->GetDisappearingTimeWithContinuousOperation();
+    tipsInfo.focusable = param->GetFocusable();
+    tipsInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    tipsInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
+    tipsInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
+    auto popupId = tipsInfo.popupId;
+    auto popupNode = tipsInfo.popupNode;
+    auto targetId = targetNode->GetId();
+    auto context = targetNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [targetNode, targetId, tipsInfo, param, overlayManager, showInSubWindow, popupId, popupNode](
+                         bool isHover) {
+        if (isHover) {
+            BubbleView::UpdatePopupParam(popupId, param, targetNode);
+            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (showInSubWindow) {
+                SubwindowManager::GetInstance()->ShowTipsNG(
+                    targetNode, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation());
+                return;
+            }
+            overlayManager->ShowTips(
+                targetId, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation());
+        } else {
+            if (showInSubWindow) {
+                SubwindowManager::GetInstance()->HideTipsNG(targetId, param->GetDisappearingTime());
+                return;
+            }
+            overlayManager->HideTips(targetId, tipsInfo, param->GetDisappearingTime());
+        }
+    };
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
+}
+
+RefPtr<OverlayManager> ViewAbstract::GetCurOverlayManager(const RefPtr<UINode>& node)
+{
+    auto context = node->GetContextWithCheck();
     CHECK_NULL_RETURN(context, nullptr);
-    auto instanceId = context->GetInstanceId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
-    if (subwindow) {
-        auto overlayManager = subwindow->GetOverlayManager();
-        if (overlayManager) {
-            auto popupInfo = overlayManager->GetPopupInfo(targetId);
-            if (popupInfo.popupNode) {
-                return overlayManager;
-            }
+    if (GetTargetNodeIsInSubwindow(node)) {
+        auto instanceId = context->GetInstanceId();
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_MENU);
+        if (subwindow) {
+            auto overlayManager = subwindow->GetOverlayManager();
+            return overlayManager;
+        } else {
+            return nullptr;
         }
     }
     auto overlayManager = context->GetOverlayManager();
-    if (overlayManager) {
-        auto popupInfo = overlayManager->GetPopupInfo(targetId);
-        if (popupInfo.popupNode) {
-            return overlayManager;
-        }
-    }
-    return nullptr;
+    return overlayManager;
+}
+
+bool ViewAbstract::GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto instanceId = pipelineContext->GetInstanceId();
+    auto aceContainer = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(aceContainer, false);
+    return aceContainer->IsSubContainer();
 }
 
 int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode)
@@ -2125,20 +2246,23 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
     }
     if (!targetNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
-        return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
+        return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
-    auto popupInfo = GetPopupInfoWithCustomNode(customNode);
+    auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
     if (popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is already existed.");
         return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
     }
-    popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
-    if (popupInfo.popupNode) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId of popup is already existed.");
-        return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
+    auto overlayManager = BubbleView::GetPopupOverlayManager(customNode, targetId);
+    if (overlayManager) {
+        auto popupInfo = overlayManager->GetPopupInfo(targetId);
+        if (popupInfo.popupNode) {
+            popupInfo.markNeedUpdate = true;
+            overlayManager->HidePopup(targetId, popupInfo, true);
+        }
     }
     BindPopup(param, targetNode, customNode);
-    popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
+    popupInfo = BubbleView::GetPopupInfoWithTargetId(customNode, targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -2172,7 +2296,7 @@ int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist when update popup.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    auto popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
+    auto popupInfo = BubbleView::GetPopupInfoWithTargetId(customNode, targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -2207,21 +2331,21 @@ int32_t ViewAbstract::ClosePopup(const RefPtr<UINode>& customNode)
         return ERROR_CODE_INTERNAL_ERROR;
     }
     int32_t targetId = std::stoi(param->GetTargetId());
-    auto popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
+    auto overlayManager = BubbleView::GetPopupOverlayManager(customNode, targetId);
+    if (!overlayManager) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto popupInfo = overlayManager->GetPopupInfo(targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
     if (!popupInfo.isCurrentOnShow) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popup is not on show.");
-        return ERROR_CODE_INTERNAL_ERROR;
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
     }
     popupInfo.markNeedUpdate = true;
-    auto overlayManager = GetPopupOverlayManager(customNode, targetId);
-    if (!overlayManager) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
     overlayManager->HidePopup(targetId, popupInfo);
     return ERROR_CODE_NO_ERROR;
 }
@@ -2230,7 +2354,7 @@ int32_t ViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINo
 {
     CHECK_NULL_RETURN(param, ERROR_CODE_INTERNAL_ERROR);
     CHECK_NULL_RETURN(customNode, ERROR_CODE_DIALOG_CONTENT_ERROR);
-    auto popupInfo = GetPopupInfoWithCustomNode(customNode);
+    auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
     CHECK_NULL_RETURN(popupInfo.popupNode, ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
     auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(popupPattern, ERROR_CODE_INTERNAL_ERROR);
@@ -2278,10 +2402,156 @@ void ViewAbstract::DismissDialog()
     auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
     if (dialogPattern) {
         dialogPattern->OverlayDismissDialog(dialogNode);
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "destroy");
     }
+}
+
+void ViewAbstract::ShowMenuPreview(
+    const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode, NG::MenuParam& menuParam)
+{
+#ifdef PREVIEW
+    menuParam.previewMode = MenuPreviewMode::NONE;
+#endif
+    CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
+        auto context = targetNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        auto eventHub = targetNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureHub = eventHub->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto pixelMap = context->GetThumbnailPixelMap();
+        CHECK_NULL_VOID(pixelMap);
+        gestureHub->SetPixelMap(pixelMap);
+        menuWrapperPattern->SetIsShowFromUser(true);
+        MenuView::GetMenuPixelMap(targetNode, menuParam, wrapperNode);
+    }
+}
+
+int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
+{
+    if (!customNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
+    if (!targetNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist.");
+        return ERROR_CODE_TARGET_INFO_NOT_EXIST;
+    }
+    if (!targetNode->IsOnMainTree()) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
+        return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
+    }
+    auto overlayManager = GetCurOverlayManager(customNode);
+    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_INTERNAL_ERROR);
+    if (overlayManager->GetMenuNodeWithExistContent(customNode)) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "Content of menu already existed.");
+        return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
+    }
+    auto isShowMenu = overlayManager->GetMenuNode(targetNode->GetId());
+    if (isShowMenu) {
+        // The menu is already opened, close the previous menu and open the new menu
+        overlayManager->HideMenu(isShowMenu, targetNode->GetId(), false);
+    }
+    auto wrapperNode = NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam);
+    CHECK_NULL_RETURN(wrapperNode, ERROR_CODE_INTERNAL_ERROR);
+    ShowMenuPreview(targetNode, wrapperNode, menuParam);
+    auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, ERROR_CODE_INTERNAL_ERROR);
+    menuWrapperPattern->RegisterMenuCallback(wrapperNode, menuParam);
+    menuWrapperPattern->SetMenuTransitionEffect(wrapperNode, menuParam);
+    auto menu = menuWrapperPattern->GetMenu();
+    CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
+    auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+    CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
+    auto node = WeakPtr<UINode>(customNode);
+    menuPattern->SetCustomNode(node);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
+    auto theme = pipelineContext->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
+    CHECK_NULL_RETURN(theme, ERROR_CODE_INTERNAL_ERROR);
+    auto expandDisplay = theme->GetExpandDisplay();
+    menuWrapperPattern->SetIsOpenMenu(true);
+    if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+        SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuParam.positionOffset);
+        return ERROR_CODE_NO_ERROR;
+    }
+    overlayManager->ShowMenu(targetNode->GetId(), menuParam.positionOffset, wrapperNode);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode)
+{
+    if (!customNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto overlayManager = GetCurOverlayManager(customNode);
+    if (!overlayManager) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(customNode);
+    if (!menuWrapperNode) {
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
+    }
+    auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menuWrapperNode->GetPattern());
+    CHECK_NULL_RETURN(wrapperPattern, ERROR_CODE_INTERNAL_ERROR);
+    auto menu = wrapperPattern->GetMenu();
+    CHECK_NULL_RETURN(menu, ERROR_CODE_INTERNAL_ERROR);
+    wrapperPattern->SetMenuParam(menuParam);
+    MenuView::UpdateMenuParam(menuWrapperNode, menu, menuParam);
+    MenuView::UpdateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
+    auto pipeline = menuWrapperNode->GetContextRefPtr();
+    if (pipeline) {
+        wrapperPattern->SetForceUpdateEmbeddedMenu(true);
+    }
+    auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+    CHECK_NULL_RETURN(menuPattern, ERROR_CODE_INTERNAL_ERROR);
+    auto embeddedMenuItems = menuPattern->GetEmbeddedMenuItems();
+    for (auto iter = embeddedMenuItems.begin(); iter != embeddedMenuItems.end(); ++iter) {
+        auto menuItemPattern = (*iter)->GetPattern<MenuItemPattern>();
+        if (!menuItemPattern) {
+            continue;
+        }
+        menuItemPattern->HideEmbedded(false);
+    }
+    uint32_t minChildrenSize = 1;
+    if (menuWrapperNode->GetChildren().size() > minChildrenSize) {
+        auto subMenu = menuWrapperNode->GetChildren().back();
+        if (subMenu && subMenu->GetTag() == V2::MENU_ETS_TAG) {
+            wrapperPattern->HideSubMenu();
+        }
+    }
+    menuWrapperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    if (pipeline) {
+        pipeline->FlushUITasks();
+        wrapperPattern->SetForceUpdateEmbeddedMenu(false);
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t ViewAbstract::CloseMenu(const RefPtr<UINode>& customNode)
+{
+    if (!customNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Content of menu is null.");
+        return ERROR_CODE_DIALOG_CONTENT_ERROR;
+    }
+    auto overlayManager = GetCurOverlayManager(customNode);
+    if (!overlayManager) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(customNode);
+    if (!menuWrapperNode) {
+        return ERROR_CODE_DIALOG_CONTENT_NOT_FOUND;
+    }
+    overlayManager->HideMenu(menuWrapperNode, customNode->GetId(), false);
+    return ERROR_CODE_NO_ERROR;
 }
 
 void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
@@ -2302,7 +2572,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
 
@@ -2332,7 +2602,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter %{public}d", menuParam.type);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     auto pipelineContext = targetNode->GetContext();
@@ -3205,6 +3475,13 @@ void ViewAbstract::SetPrivacySensitive(bool flag)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void ViewAbstract::SetPrivacySensitive(FrameNode* frameNode, bool flag)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(flag);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -3518,9 +3795,9 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (useEffect && effectType == EffectType::WINDOW_EFFECT) {
-        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+        pipeline->AddWindowActivateChangedCallback(frameNode->GetId());
     } else {
-        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+        pipeline->RemoveWindowActivateChangedCallback(frameNode->GetId());
     }
     const auto& target = frameNode->GetRenderContext();
     if (target) {
@@ -3821,7 +4098,7 @@ void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, float value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, value, frameNode);
 }
 
-void ViewAbstract::SetLayoutWeight(FrameNode* frameNode, const NG::LayoutWeightPair& value)
+void ViewAbstract::SetChainWeight(FrameNode* frameNode, const NG::ChainWeightPair& value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, ChainWeight, value, frameNode);
@@ -4281,11 +4558,25 @@ void ViewAbstract::SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEv
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
 }
 
+void ViewAbstract::SetOnAxisEvent(FrameNode* frameNode, OnAxisEventFunc&& onAxisEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAxisEvent(std::move(onAxisEventFunc));
+}
+
 void ViewAbstract::SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc)
 {
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc &&onHoverMoveEventFunc)
+{
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverMoveEvent(std::move(onHoverMoveEventFunc));
 }
 
 void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback)
@@ -4453,7 +4744,8 @@ double ViewAbstract::GetOpacity(FrameNode* frameNode)
 BorderWidthProperty ViewAbstract::GetBorderWidth(FrameNode* frameNode)
 {
     Dimension defaultDimension(0);
-    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    BorderWidthProperty borderWidths = { defaultDimension, defaultDimension, defaultDimension, defaultDimension,
+        std::nullopt, std::nullopt};
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderWidths);
     return target->GetBorderWidthValue(borderWidths);
@@ -4490,7 +4782,8 @@ BorderRadiusProperty ViewAbstract::GetBorderRadius(FrameNode* frameNode)
 BorderColorProperty ViewAbstract::GetBorderColor(FrameNode* frameNode)
 {
     Color defaultColor(0xff000000);
-    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor,
+        std::nullopt, std::nullopt };
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderColors);
     return target->GetBorderColorValue(borderColors);
@@ -5145,6 +5438,22 @@ void ViewAbstract::ClearJSFrameNodeOnHover(FrameNode* frameNode)
     eventHub->ClearJSFrameNodeOnHover();
 }
 
+void ViewAbstract::SetJSFrameNodeOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc&& onHoverMoveEventFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetJSFrameNodeOnHoverMoveEvent(std::move(onHoverMoveEventFunc));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnHoverMove(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearJSFrameNodeOnHoverMove();
+}
+
 void ViewAbstract::SetJSFrameNodeOnMouse(FrameNode* frameNode, OnMouseEventFunc&& onMouseEventFunc)
 {
     CHECK_NULL_VOID(frameNode);
@@ -5242,6 +5551,23 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
+}
+
+void ViewAbstract::SetNextFocus(FrameNode* frameNode, FocusIntension key,
+    std::variant<WeakPtr<AceType>, std::string> nextFocus)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetNextFocus(key, nextFocus);
+}
+
+void ViewAbstract::ResetNextFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ResetNextFocus();
 }
 
 void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
@@ -5378,7 +5704,8 @@ RenderFit ViewAbstract::GetRenderFit(FrameNode* frameNode)
 BorderColorProperty ViewAbstract::GetOuterBorderColor(FrameNode* frameNode)
 {
     Color defaultColor(0xff000000);
-    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor };
+    BorderColorProperty borderColors = { defaultColor, defaultColor, defaultColor, defaultColor,
+        std::nullopt, std::nullopt };
     CHECK_NULL_RETURN(frameNode, borderColors);
     const auto& target = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(target, borderColors);
@@ -5401,6 +5728,48 @@ void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(b
     CHECK_NULL_VOID(pipeline);
     frameNode->CleanVisibleAreaUserCallback();
     pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
+}
+
+void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
+    int32_t expectedUpdateInterval)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (expectedUpdateInterval < 0 || static_cast<uint32_t>(expectedUpdateInterval) < minInterval) {
+        expectedUpdateInterval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(onVisibleChange);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
+}
+
+void ViewAbstract::SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+    const std::vector<double>& ratioList, int32_t expectedUpdateInterval)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CleanVisibleAreaUserCallback(true);
+
+    constexpr uint32_t minInterval = 100; // 100ms
+    if (expectedUpdateInterval < 0 || static_cast<uint32_t>(expectedUpdateInterval) < minInterval) {
+        expectedUpdateInterval = minInterval;
+    }
+    VisibleCallbackInfo callback;
+    callback.callback = std::move(onVisibleChange);
+    callback.isCurrentVisible = false;
+    callback.period = static_cast<uint32_t>(expectedUpdateInterval);
+    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    frameNode->SetVisibleAreaUserCallback(ratioList, callback);
 }
 
 Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
@@ -5494,6 +5863,29 @@ void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+}
+
+void ViewAbstract::FreezeUINodeById(const std::string& id, bool isFreeze)
+{
+    auto targetNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(id, true);
+    CHECK_NULL_VOID(targetNode);
+    auto pipeline = targetNode->GetContext();
+    if (pipeline != nullptr) {
+        pipeline->SetOpenInvisibleFreeze(true);
+    }
+    targetNode->SetFreeze(isFreeze, true, true);
+}
+
+void ViewAbstract::FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze)
+{
+    auto targetNodeElement = ElementRegister::GetInstance()->GetNodeById(uniqueId);
+    auto targetNode = AceType::DynamicCast<NG::FrameNode>(targetNodeElement);
+    CHECK_NULL_VOID(targetNode);
+    auto pipeline = targetNode->GetContext();
+    if (pipeline != nullptr) {
+        pipeline->SetOpenInvisibleFreeze(true);
+    }
+    targetNode->SetFreeze(isFreeze, true, true);
 }
 
 uint32_t ViewAbstract::GetSafeAreaExpandType(FrameNode* frameNode)

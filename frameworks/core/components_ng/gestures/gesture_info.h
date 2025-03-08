@@ -28,7 +28,7 @@
 #include "core/gestures/gesture_type.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
-#include "core/components/common/properties/common_decoration.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/shadow.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +42,13 @@ enum class DragPreviewMode : int32_t {
     ENABLE_DEFAULT_RADIUS = 4,
     ENABLE_DRAG_ITEM_GRAY_EFFECT = 5,
     ENABLE_MULTI_TILE_EFFECT  = 6,
+    ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW = 7,
+};
+
+enum class DraggingSizeChangeEffect : int32_t {
+    DEFAULT = 0,
+    SIZE_TRANSITION = 1,
+    SIZE_CONTENT_TRANSITION = 2,
 };
 
 struct BlurBackGroundInfo {
@@ -86,9 +93,12 @@ struct DragPreviewOption {
     bool enableEdgeAutoScroll = true;
     bool enableHapticFeedback = false;
     bool isMultiTiled = false;
+    bool isLiftingDisabled = false;
+    bool isTouchPointCalculationBasedOnFinalPreviewEnable = false;
+    NG::DraggingSizeChangeEffect sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
     union {
         int32_t badgeNumber;
-        bool isShowBadge;
+        bool isShowBadge = true;
     };
     std::optional<int32_t> GetCustomerBadgeNumber()
     {
@@ -172,6 +182,11 @@ public:
     void SetLimitFingerCount(bool limitFingerCount)
     {
         isLimitFingerCount_ = limitFingerCount;
+    }
+
+    bool GetLimitFingerCount() const
+    {
+        return isLimitFingerCount_;
     }
 
     void SetTag(std::string tag)

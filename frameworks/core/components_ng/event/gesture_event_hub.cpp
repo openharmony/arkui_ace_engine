@@ -1252,4 +1252,9 @@ void GestureEventHub::SetExcludedAxisForPanEvent(bool isExcludedAxis)
     panEventActuator_->SetExcludedAxis(isExcludedAxis);
 }
 
+void GestureEventHub::DumpVelocityInfoFroPanEvent(int32_t fingerId)
+{
+    CHECK_NULL_VOID(panEventActuator_);
+    panEventActuator_->DumpVelocityInfo(fingerId);
+}
 } // namespace OHOS::Ace::NG

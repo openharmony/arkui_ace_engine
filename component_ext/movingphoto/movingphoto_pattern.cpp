@@ -21,6 +21,7 @@
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -51,10 +52,6 @@ MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& cont
 void MovingPhotoPattern::OnModifyDone()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto onModifydone start.");
-    if (isRefreshMovingPhoto_) {
-        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto onModifydone isRefreshing return.");
-        return;
-    }
     Pattern::OnModifyDone();
     UpdateImageNode();
     UpdateVideoNode();
@@ -480,13 +477,16 @@ void MovingPhotoPattern::ResetMediaPlayer()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (isRefreshMovingPhoto_ && isUsedMediaPlayerStatusChanged_) {
-        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "ArkUIMovingPhotoResetMediaPlayerAsync.");
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "ArkUIMovingPhotoResetMediaPlayerAsync.");
         auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
         bgTaskExecutor.PostTask(
-            [weak = WeakClaim(RawPtr(mediaPlayer_))] {
+            [weak = WeakClaim(RawPtr(mediaPlayer_)), fd = fd_] {
                 auto mediaPlayer = weak.Upgrade();
                 CHECK_NULL_VOID(mediaPlayer);
                 mediaPlayer->ResetMediaPlayer();
+                if (!mediaPlayer->SetSourceByFd(fd)) {
+                    TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer Async failed.");
+                }
             },
             "ArkUIMovingPhotoResetMediaPlayerAsync");
     } else {
@@ -502,7 +502,7 @@ void MovingPhotoPattern::ResetMediaPlayer()
                     ContainerScope scope(pattern->instanceId_);
                     pattern->FireMediaPlayerError();
                 },
-                "ArkUIMovingPhotoReset");
+                "ArkUIMovingPhotoResetMediaPlayer");
             return;
         }
     }
@@ -889,7 +889,6 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::IDLE:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is IDLE.");
-            OnMediaPlayerIdle();
             break;
         case PlaybackStatus::INITIALIZED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is INITIALIZED.");
@@ -922,32 +921,6 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
         default:
             TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "Invalid player status.");
             break;
-    }
-}
-
-void MovingPhotoPattern::OnMediaPlayerIdle()
-{
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnMediaPlayerIdle.");
-    CHECK_NULL_VOID(mediaPlayer_);
-    if (isRefreshMovingPhoto_) {
-        if (!mediaPlayer_->SetSourceByFd(fd_)) {
-            TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer failed.");
-            ContainerScope scope(instanceId_);
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-
-            auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
-                [weak = WeakClaim(this)] {
-                    auto pattern = weak.Upgrade();
-                    CHECK_NULL_VOID(pattern);
-                    ContainerScope scope(pattern->instanceId_);
-                    pattern->FireMediaPlayerError();
-                },
-                "ArkUIMovingPhotoResetAsyncError");
-            return;
-        }
-        SelectPlaybackMode(autoAndRepeatLevel_);
     }
 }
 
@@ -1193,13 +1166,12 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
-    autoAndRepeatLevel_ = PlaybackMode::NONE;
-    historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         Pause();
     }
+    autoAndRepeatLevel_ = PlaybackMode::NONE;
+    historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     ResetMediaPlayer();
-    currentPlayStatus_ = PlaybackStatus::IDLE;
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
         UpdateAnalyzerOverlay();
     }

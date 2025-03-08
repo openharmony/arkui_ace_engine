@@ -379,8 +379,16 @@ void RichEditorDragOverlayModifier::StartFloatingSelBackgroundAnimate()
 Color RichEditorDragOverlayModifier::GetDragBackgroundColor(const Color& defaultColor)
 {
     CHECK_NULL_RETURN(!dragBackgroundColor_.has_value(), dragBackgroundColor_.value());
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto hostPattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(hostPattern, defaultColor);
+    auto host = hostPattern->GetHost();
+    CHECK_NULL_RETURN(host, defaultColor);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, defaultColor);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>(hostPattern->GetThemeScopeId());
+        CHECK_NULL_RETURN(richEditorTheme, defaultColor);
+    }
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, defaultColor);
     return richEditorTheme->GetDragBackgroundColor();

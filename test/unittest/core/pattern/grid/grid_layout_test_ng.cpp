@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -582,5 +583,98 @@ HWTEST_F(GridLayoutTestNg, LargeDelta001, TestSize.Level1)
 
     UpdateCurrentOffset(-35000.0f);
     EXPECT_EQ(info.startIndex_, EstimateIndex(45050.0f));
+}
+
+/**
+ * @tc.name: SpringEffect001
+ * @tc.desc: change dataSource when overScroll at bottom, test the edgeEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, SpringEffect001, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(1);
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(40);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(pattern_->info_.startIndex_, 32);
+    EXPECT_EQ(pattern_->info_.endIndex_, 39);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-400.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 38);
+    EXPECT_EQ(pattern_->info_.endIndex_, 39);
+    EXPECT_EQ(GetChildY(frameNode_, 39), 0);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 19);
+
+    // remove the last child.
+    frameNode_->RemoveChildAtIndex(39);
+    frameNode_->ChildrenUpdatedFrom(39);
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 38), -100.02943);
+    EXPECT_EQ(pattern_->info_.startIndex_, 38);
+    EXPECT_EQ(pattern_->info_.endIndex_, 38);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 19);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 32);
+    EXPECT_EQ(pattern_->info_.endIndex_, 38);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 38), 300);
+    EXPECT_EQ(GetChildRect(frameNode_, 38).Bottom(), 400.0f);
+    EXPECT_TRUE(GetItem(38, true)->IsActive());
+    EXPECT_TRUE(GetItem(34, true)->IsActive());
+}
+
+/**
+ * @tc.name: EstimateHeight001
+ * @tc.desc: Test EstimateHeight when have bigItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, EstimateHeight001, TestSize.Level1)
+{
+    /*
+     * 0 0
+     * 0 0
+     * 1 2
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    CreateBigItem(0, 1, 0, 1, 240.0f, 150.0f);
+    CreateFixedItems(10);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.lineHeightMap_[0], 72.5f);
+    EXPECT_EQ(pattern_->info_.lineHeightMap_[1], 72.5f);
+    EXPECT_EQ(pattern_->info_.lineHeightMap_[2], ITEM_MAIN_SIZE);
+
+    UpdateCurrentOffset(-100.0f);
+    ;
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -22.5);
+
+    pattern_->isSmoothScrolling_ = true;
+    pattern_->isConfigScrollable_ = true;
+    auto tempGridLayoutInfo = pattern_->info_;
+    pattern_->infoCopy_ = std::make_unique<GridLayoutInfo>(pattern_->info_);
+    pattern_->info_ = tempGridLayoutInfo;
+    EXPECT_EQ(pattern_->EstimateHeight(), 100.0f);
 }
 } // namespace OHOS::Ace::NG

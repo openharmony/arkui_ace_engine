@@ -65,7 +65,11 @@ void LongPressRecognizer::OnAccepted()
     UpdateFingerListInfo();
     SendCallbackMsg(onActionUpdate_, false);
     SendCallbackMsg(onAction_, false, true);
+    if (isLimitFingerCount_ && hasRepeated_) {
+        return;
+    }
     if (repeat_) {
+        hasRepeated_ = true;
         StartRepeatTimer();
     }
 }
@@ -174,8 +178,12 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
+        if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+            SendCallbackMsg(onAction_, false, true);
+        }
         SendCallbackMsg(onActionUpdate_, false);
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
+            hasRepeated_ = false;
             SendCallbackMsg(onActionEnd_, false);
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
@@ -369,6 +377,9 @@ void LongPressRecognizer::SendCallbackMsg(
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
+        if (lastTouchEvent_.rollAngle.has_value()) {
+            info.SetRollAngle(lastTouchEvent_.rollAngle.value());
+        }
         info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPointerEvent(lastPointEvent_);
         Platform::UpdatePressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
@@ -497,6 +508,9 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     }
     if (trackPoint.tiltY.has_value()) {
         info->SetTiltY(trackPoint.tiltY.value());
+    }
+    if (trackPoint.rollAngle.has_value()) {
+        info->SetRollAngle(trackPoint.rollAngle.value());
     }
     info->SetSourceTool(trackPoint.sourceTool);
     if (gestureRecognizerJudgeFunc) {

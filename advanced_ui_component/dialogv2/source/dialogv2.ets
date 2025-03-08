@@ -165,7 +165,7 @@ export struct TipsDialogV2 {
   private contentScroller: Scroller = new Scroller();
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   // themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = 160;
   private imageIndex: number = 0;
   private textIndex: number = 1;
@@ -182,10 +182,6 @@ export struct TipsDialogV2 {
         this.contentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -269,8 +265,12 @@ export struct TipsDialogV2 {
           maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE,
           maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE
         })
-        .borderColor(this.imageBorderColor?.color)
-        .borderWidth(toLengthString(this.imageBorderWidth))
+        .outline({
+          width: `${lengthMetricsToPX(this.imageBorderWidth)}px`,
+          radius: `${lengthMetricsToPX(LengthMetrics.resource($r('sys.float.corner_radius_level6'))) +
+          lengthMetricsToPX(this.imageBorderWidth)}px`,
+          color: this.imageBorderColor?.color
+        })
     }
     .width('100%')
   }
@@ -436,7 +436,7 @@ export struct SelectDialogV2 {
   @Local dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
   // the controller of content list
   private contentScroller: Scroller = new Scroller();
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   @Computed
@@ -521,6 +521,7 @@ export struct SelectDialogV2 {
                       .focusable(false)
                       .accessibilityLevel('no')
                       .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
+                      .radioStyle({ uncheckedBorderColor: Color.Transparent })
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -601,10 +602,6 @@ export struct SelectDialogV2 {
       },
       buttons: this.buttons,
       contentAreaPadding: this.contentPadding,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -696,7 +693,7 @@ export struct ConfirmDialogV2 {
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
   private contentScroller: Scroller = new Scroller();
   private marginOffset: number = 0 - PADDING_LEVEL_8;
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
   private textIndex: number = 0;
   private checkboxIndex: number = 1;
@@ -814,10 +811,6 @@ export struct ConfirmDialogV2 {
       },
       minContentHeight: this.minContentHeight!!,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -837,7 +830,7 @@ export struct AlertDialogV2 {
   // the controller of content area
   private contentScroller: Scroller = new Scroller();
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   @Computed
@@ -863,10 +856,6 @@ export struct AlertDialogV2 {
         this.AlertDialogContentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -918,7 +907,7 @@ export struct CustomContentDialogV2 {
   @BuilderParam contentBuilder: CustomBuilder;
   @Param contentAreaPadding?: LocalizedPadding = undefined;
   @Param buttons?: AdvancedDialogV2Button[] = undefined;
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   build() {
@@ -932,10 +921,6 @@ export struct CustomContentDialogV2 {
       },
       contentAreaPadding: this.contentAreaPadding,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale,
-      onFontSizeScaleChange: (fontSizeScale: number) => {
-        this.fontSizeScale = fontSizeScale;
-      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -1040,8 +1025,7 @@ struct CustomDialogContentComponent {
   @Local titleHeight: number = 0;
   @Local buttonHeight: number = 0;
   @Local contentMaxHeight: Length = '100%';
-  @Param fontSizeScale: number = -1;
-  @Param onFontSizeScaleChange?: (val: number) => void = undefined;
+  @Consumer() fontSizeScale: number = -1;
   @Local customStyle: boolean | undefined = undefined;
   @Local buttonMaxFontSize: Length = `${BODY_L}fp`;
   @Local buttonMinFontSize: Length = 9;
@@ -1098,7 +1082,7 @@ struct CustomDialogContentComponent {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
-    this.onFontSizeScaleChange?.(this.updateFontScale());
+    this.fontSizeScale = this.updateFontScale();
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
     let height: number = 0;
@@ -1125,7 +1109,7 @@ struct CustomDialogContentComponent {
     let uiContext: UIContext = this.getUIContext();
     this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
     this.appMaxFontScale = uiContext.getMaxFontScale();
-    this.onFontSizeScaleChange?.(this.updateFontScale());
+    this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
   }
 
@@ -1664,7 +1648,7 @@ export struct LoadingDialogV2 {
   @Param content?: ResourceStr = '';
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Local loadingProgressIconColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   build() {
@@ -1672,10 +1656,6 @@ export struct LoadingDialogV2 {
       CustomDialogContentComponent({
         contentBuilder: () => {
           this.contentBuilder();
-        },
-        fontSizeScale: this.fontSizeScale,
-        onFontSizeScaleChange: (fontSizeScale: number) => {
-          this.fontSizeScale = fontSizeScale;
         },
         minContentHeight: this.minContentHeight!!,
       }).constraintSize({ maxHeight: '100%' });
@@ -1819,4 +1799,24 @@ function toLengthString(value?: LengthMetrics): string | undefined {
   }
   return lengthString;
 }
+
+function lengthMetricsToPX(value?: LengthMetrics): number {
+  if (!value) {
+    return 0;
+  }
+  const length: number = value.value;
+  switch (value.unit) {
+    case LengthUnit.PX:
+      return length;
+    case LengthUnit.FP:
+      return fp2px(length);
+    case LengthUnit.LPX:
+      return lpx2px(length);
+    case LengthUnit.VP:
+      return vp2px(length);
+    default:
+      return 0;
+  }
+}
+
 export declare interface PopoverDialogV2Options extends CustomPopupOptions {}

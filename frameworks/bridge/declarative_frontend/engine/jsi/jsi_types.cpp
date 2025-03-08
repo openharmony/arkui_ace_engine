@@ -453,7 +453,7 @@ JsiCallbackInfo::JsiCallbackInfo(panda::JsiRuntimeCallInfo* info) : info_(info) 
 
 JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
 {
-    if (static_cast<int32_t>(index) < Length()) {
+    if (index < Length()) {
         return JsiRef<JsiValue>::FastMake(info_->GetVM(), info_->GetCallArgRef(index));
     }
     return JsiRef<JsiValue>::FastMake(info_->GetVM(), panda::JSValueRef::Undefined(info_->GetVM()));
@@ -466,7 +466,7 @@ JsiRef<JsiObject> JsiCallbackInfo::This() const
     return ref;
 }
 
-int JsiCallbackInfo::Length() const
+uint32_t JsiCallbackInfo::Length() const
 {
     return info_->GetArgsNumber();
 }

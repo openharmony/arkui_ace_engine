@@ -15,13 +15,12 @@
 
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/common/ime/input_method_manager.h"
+#include "base/ressched/ressched_report.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"
@@ -41,7 +40,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(pagePattern);
     auto eventHub = page->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
             eventHub->SetEnabled(false);
         }
@@ -62,6 +61,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(pagePattern);
                 pagePattern->FinishOutPage(animationId, transitionType);
             }, transitionType);
+        pagePattern->RemoveJsChildImmediately(page, transitionType);
         return;
     }
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
@@ -147,9 +147,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         CHECK_NULL_RETURN(pageInfo, false);
         auto pagePath = pageInfo->GetFullPath();
         ACE_SCOPED_TRACE_COMMERCIAL("Router Main Page: %s", pagePath.c_str());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().OnRouterChange(pagePath, "routerPushPage");
-#endif
+        UiSessionManager::GetInstance()->OnRouterChange(pagePath, "routerPushPage");
     }
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
@@ -616,6 +614,7 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     CHECK_NULL_VOID(destPageInfo);
     auto destFullPath = destPageInfo->GetFullPath();
 
+    ResSchedReport::GetInstance().HandlePageTransition(GetPagePath(srcPage), destPageInfo->GetPagePath(), "Rounter");
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
@@ -639,6 +638,9 @@ void StageManager::SyncPageSafeArea(bool keyboardSafeArea)
 bool StageManager::CheckPageFocus()
 {
     auto pageNode = GetLastPage();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        pageNode = GetLastPageWithTransition();
+    }
     CHECK_NULL_RETURN(pageNode, true);
     return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
@@ -736,4 +738,15 @@ std::vector<std::string> StageManager::GetTopPagePaths() const
     }
     return paths;
 }
+
+std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
+{
+    CHECK_NULL_RETURN(pageNode, "");
+    auto pattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pattern, "");
+    auto info = pattern->GetPageInfo();
+    CHECK_NULL_RETURN(info, "");
+    return info->GetPagePath();
+}
+
 } // namespace OHOS::Ace::NG

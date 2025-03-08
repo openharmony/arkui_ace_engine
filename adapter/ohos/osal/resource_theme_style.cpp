@@ -78,6 +78,7 @@ static const std::unordered_set<std::string> stringAttrs = {
     "multiple_dialog_display",
     "menu_expand_display",
     "popup_double_border_enable",
+    "tips_double_border_enable",
     "dialog_expand_display",
     "show_password_directly",
     "textfield_show_handle",
@@ -131,7 +132,9 @@ static const std::unordered_set<std::string> stringAttrs = {
     "general_next_year",
     "general_next_month",
     "general_pre_year",
-    "general_pre_month"
+    "general_pre_month",
+    "prev_arrow_accessibility_text",
+    "next_arrow_accessibility_text",
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

@@ -19,6 +19,7 @@
 #define private public
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
@@ -104,6 +105,7 @@ void ToolBarTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
 }
 
 void ToolBarTestNg::CreateNavBar()
@@ -145,6 +147,7 @@ void ToolBarTestNg::InitializationParameters(TestParameters& testParameters)
     testParameters.theme = AceType::MakeRefPtr<NavigationBarTheme>();
     ASSERT_NE(testParameters.theme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(testParameters.theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(testParameters.theme));
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(SelectTheme::TypeId())).WillRepeatedly(Return(selectTheme));
@@ -371,7 +374,9 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest003, TestSize.Level1)
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
     opt.bgOptions.color = std::make_optional(FRONT_COLOR);
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     navToolbarPattern->SetToolbarOptions(std::move(opt));
 }
 
@@ -388,7 +393,9 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest004, TestSize.Level1)
     auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
     EXPECT_NE(navToolbarPattern, nullptr);
     NavigationToolbarOptions opt;
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     navToolbarPattern->SetToolbarOptions(std::move(opt));
 }
 
@@ -465,13 +472,17 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest007, TestSize.Level1)
  */
 HWTEST_F(ToolBarTestNg, ToolBarPatternTest008, TestSize.Level1)
 {
-    auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
-    EXPECT_NE(frameNode, nullptr);
-    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 201, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    auto navToolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
     EXPECT_NE(navToolbarPattern, nullptr);
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
 
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    auto gestureHub = toolbarNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     auto imageNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -485,6 +496,23 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest008, TestSize.Level1)
     ASSERT_NE(navToolbarPattern->dialogNode_, nullptr);
     navToolbarPattern->HandleLongPressActionEnd();
     EXPECT_EQ(navToolbarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: ToolBarPatternTest009
+ * @tc.desc: Test the SetToolbarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternTest009, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+    NavigationToolbarOptions opt;
+    opt.brOptions.textHideOptions = true;
+    navToolbarPattern->SetToolbarOptions(std::move(opt));
 }
 
 /**
@@ -638,6 +666,40 @@ HWTEST_F(ToolBarTestNg, HandleTitleBarAndToolBarAnimation001, TestSize.Level1)
     auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty();
     ASSERT_NE(toolBarLayoutProperty, nullptr);
     EXPECT_EQ(toolBarLayoutProperty->propVisibility_, VisibleType::GONE);
+}
+
+/**
+ * @tc.name: SetIsHideItemText001
+ * @tc.desc: Test the SetIsHideItemText function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, SetIsHideItemText001, TestSize.Level1)
+{
+    bool hideText = true;
+    bool showText = false;
+    toolBarNode_->SetIsHideItemText(hideText);
+    bool result = toolBarNode_->isHideItemText_;
+    EXPECT_EQ(result, hideText);
+    toolBarNode_->SetIsHideItemText(showText);
+    result = toolBarNode_->isHideItemText_;
+    EXPECT_EQ(result, showText);
+}
+
+/**
+ * @tc.name: IsHideTextTest001
+ * @tc.desc: Test the IsHideText function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, IsHideTextTest001, TestSize.Level1)
+{
+    bool hideText = true;
+    bool showText = false;
+    toolBarNode_->SetIsHideItemText(hideText);
+    bool result = toolBarNode_->IsHideItemText();
+    EXPECT_EQ(result, hideText);
+    toolBarNode_->SetIsHideItemText(showText);
+    result = toolBarNode_->IsHideItemText();
+    EXPECT_EQ(result, showText);
 }
 
 /**

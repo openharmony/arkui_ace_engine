@@ -14,9 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
@@ -27,6 +25,7 @@
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
@@ -133,9 +132,7 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("Tabs.onTabBarClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Tabs.onTabBarClick");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onTabBarClick");
     };
     TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
 }
@@ -193,9 +190,7 @@ void JSTabs::SetOnAnimationEnd(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         ACE_SCORING_EVENT("Tabs.onAnimationEnd");
         func->Execute(index, info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Tabs.onAnimationEnd");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onAnimationEnd");
     };
     TabsModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
 }
@@ -317,6 +312,9 @@ void JSTabs::Create(const JSCallbackInfo& info)
 
 void JSTabs::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSTabs][pop]", &JSTabs::Pop);
+    }
     TabsModel::GetInstance()->Pop();
 }
 

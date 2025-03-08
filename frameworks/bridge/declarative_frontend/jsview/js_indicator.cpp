@@ -110,8 +110,14 @@ void JSIndicator::SetVertical(const JSCallbackInfo& info)
 
 void JSIndicator::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
-    JSRef<JSVal> size = obj->GetProperty("size");
+    JSRef<JSVal> size;
+    JSRef<JSVal> weight;
+    if (font->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
+        size = obj->GetProperty("size");
+        weight = obj->GetProperty("weight");
+    }
+
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -131,7 +137,7 @@ void JSIndicator::GetFontContent(const JSRef<JSVal>& font, bool isSelected, Swip
     } else {
         digitalParameters.fontSize = fontSize;
     }
-    JSRef<JSVal> weight = obj->GetProperty("weight");
+    
     if (!weight->IsNull()) {
         std::string weightValue;
         if (weight->IsNumber()) {
@@ -219,6 +225,7 @@ void JSIndicator::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParamete
     JSRef<JSVal> colorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR_VALUE));
     JSRef<JSVal> selectedColorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_COLOR_VALUE));
     JSRef<JSVal> maxDisplayCountVal = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::MAX_DISPLAY_COUNT_VALUE));
+    JSRef<JSVal> spaceValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SPACE_VALUE));
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
@@ -228,6 +235,11 @@ void JSIndicator::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParamete
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = ParseJsColor(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    auto defalutSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
+    CalcDimension dimSpace;
+    auto parseSpaceOk = ParseLengthMetricsToDimension(spaceValue, dimSpace) &&
+        (dimSpace.Unit() != DimensionUnit::PERCENT);
+    swiperParameters.dimSpace =  (parseSpaceOk && !(dimSpace < 0.0_vp)) ? dimSpace : defalutSpace;
     if (maxDisplayCountVal->IsUndefined()) {
         return;
     }

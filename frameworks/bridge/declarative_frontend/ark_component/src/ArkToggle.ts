@@ -42,7 +42,8 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     return this;
   }
   onChange(callback: (isOn: boolean) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ToggleOnChangeModifier.identity, ToggleOnChangeModifier, callback);
+    return this;
   }
   selectedColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, ToggleSelectedColorModifier.identity, ToggleSelectedColorModifier, value);
@@ -106,6 +107,21 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     return this.toggleNode.getFrameNode();
   }
 }
+
+class ToggleOnChangeModifier extends ModifierWithKey<(isOn:boolean) => void> {
+  constructor(value: (isOn:boolean) => void) {
+    super(value);
+  }
+  static identity = Symbol('toggleOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().toggle.resetOnChange(node);
+    } else {
+      getUINativeModule().toggle.setOnChange(node, this.value);
+    }
+  }
+}
+
 class ToggleSelectedColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);

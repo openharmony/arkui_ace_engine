@@ -15,6 +15,8 @@
 #include "core/components_ng/manager/memory/memory_manager.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/common/container.h"
 
 namespace {
 constexpr int32_t BACKGROUND_RECYCLE_WAIT_TIME_MS = 500;
@@ -54,7 +56,7 @@ void MemoryManager::RemoveRecyclePageNode(int32_t nodeId)
 void MemoryManager::RecycleImage(const RefPtr<UINode>& node, int& recycleNum)
 {
     CHECK_NULL_VOID(node);
-    const auto& children = node->GetChildren();
+    const auto& children = node->GetChildren(true);
     if (children.empty() || (recycleNum <= 0)) {
         return;
     }
@@ -91,14 +93,13 @@ void MemoryManager::RebuildImageByPage(const RefPtr<FrameNode>& node)
     }
     ACE_SCOPED_TRACE("memory manager rebuild image by page");
     node->SetTrimMemRecycle(false);
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "start rebuild image from page nodeid: %{public}d", node->GetId());
     RebuildImage(node);
 }
 
 void MemoryManager::RebuildImage(const RefPtr<UINode>& node)
 {
     CHECK_NULL_VOID(node);
-    const auto& children = node->GetChildren();
+    const auto& children = node->GetChildren(true);
     if (children.empty()) {
         return;
     }
@@ -109,6 +110,7 @@ void MemoryManager::RebuildImage(const RefPtr<UINode>& node)
             if ((!imagePattern) || (!childNode->IsTrimMemRecycle())) {
                 continue;
             }
+            TAG_LOGI(AceLogTag::ACE_IMAGE, "start rebuild image: %{public}d", childNode->GetId());
             imagePattern->LoadImageDataIfNeed();
             childNode->SetTrimMemRecycle(false);
         } else {
@@ -149,7 +151,7 @@ void MemoryManager::TrimMemRecycle()
             iter = pageNodes_.erase(iter);
             continue;
         }
-        if (frameNode->IsVisible()) {
+        if (frameNode->IsVisible() || frameNode->IsTrimMemRecycle()) {
             continue;
         }
         RecycleImageByPage(frameNode);

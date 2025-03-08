@@ -174,7 +174,8 @@ public:
     void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
     void InitSystemTransitionPop(bool isTransitionIn);
     void StartSystemTransitionPop(bool transitionIn);
-    bool SystemTransitionPopCallback(const int32_t animationId);
+    bool CheckTransitionPop(const int32_t animationId);
+    bool SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent = true);
     void InitDialogTransition(bool isZeroY);
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
@@ -235,6 +236,8 @@ public:
     {
         userSetOpacity_ = opacity;
     }
+
+    RefPtr<UINode> GetNavigationNode() override;
 
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);

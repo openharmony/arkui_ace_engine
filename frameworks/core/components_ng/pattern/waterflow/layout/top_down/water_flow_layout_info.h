@@ -72,8 +72,8 @@ public:
      */
     FlowItemIndex GetCrossIndexForNextItem(int32_t segmentIdx) const;
 
-    bool OverScrollTop() override;
-    bool OverScrollBottom() override;
+    bool IsAtTopWithDelta() override;
+    bool IsAtBottomWithDelta() override;
     
     float GetMainHeight(int32_t crossIndex, int32_t itemIndex) const;
     float GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const;

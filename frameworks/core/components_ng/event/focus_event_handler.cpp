@@ -61,7 +61,12 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
             return FocusIntension::SPACE;
         default:;
     }
-    switch (keyEvent.keyIntention) {
+    return GetFocusIntensionFromKey(keyEvent.keyIntention);
+}
+
+FocusIntension FocusEvent::GetFocusIntensionFromKey(KeyIntention keyIntention)
+{
+    switch (keyIntention) {
         case KeyIntention::INTENTION_SELECT:
             return FocusIntension::SELECT;
         case KeyIntention::INTENTION_ESCAPE:
@@ -151,7 +156,23 @@ bool FocusEventHandler::OnFocusEventNode(const FocusEvent& focusEvent)
         const CrownEvent& crownEvent = static_cast<const CrownEvent&>(focusEvent.event);
         return HandleCrownEvent(crownEvent);
     }
+
+    auto keyProcessingMode = static_cast<KeyProcessingMode>(GetKeyProcessingMode());
+    if (keyProcessingMode == KeyProcessingMode::ANCESTOR_EVENT) {
+        return ret;
+    }
     return ret ? true : HandleFocusTravel(focusEvent);
+}
+
+int32_t FocusEventHandler::GetKeyProcessingMode()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    return static_cast<int32_t>(focusManager->GetKeyProcessingMode());
 }
 
 bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension intension)
@@ -181,7 +202,7 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
     // Handle on click
     auto appTheme = pipeline->GetTheme<AppTheme>();
     CHECK_NULL_RETURN(appTheme, false);
-    if (!pipeline->GetIsFocusActive() && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ||
+    if (!pipeline->GetIsFocusActive() && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ||
                                              !appTheme->NeedFocusHandleClick())) {
         return false;
     }
@@ -208,7 +229,7 @@ bool FocusEventHandler::HandleFocusAxisEvent(const FocusAxisEvent& event)
     auto onFocusAxisCallback = GetOnFocusAxisCallback();
     CHECK_NULL_RETURN(onFocusAxisCallback, false);
     auto info = FocusAxisEventInfo(event);
-    auto eventHub = eventHub_.Upgrade();
+    auto eventHub = node->GetEventHub<EventHub>();
     if (eventHub) {
         auto targetImpl = eventHub->CreateGetEventTargetImpl();
         info.SetTarget(targetImpl().value_or(EventTarget()));
@@ -299,7 +320,7 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
             info.SetScreenLocation(windowOffset);
         }
         info.SetSourceTool(SourceTool::UNKNOWN);
-        auto eventHub = eventHub_.Upgrade();
+        auto eventHub = node->GetEventHub<EventHub>();
         if (eventHub) {
             auto targetImpl = eventHub->CreateGetEventTargetImpl();
             info.SetTarget(targetImpl().value_or(EventTarget()));

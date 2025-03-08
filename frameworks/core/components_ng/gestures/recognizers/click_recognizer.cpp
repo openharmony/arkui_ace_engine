@@ -142,6 +142,9 @@ ClickInfo ClickRecognizer::GetClickInfo()
     if (touchPoint.tiltY.has_value()) {
         info.SetTiltY(touchPoint.tiltY.value());
     }
+    if (touchPoint.rollAngle.has_value()) {
+        info.SetRollAngle(touchPoint.rollAngle.value());
+    }
     info.SetSourceTool(touchPoint.sourceTool);
     return info;
 }
@@ -348,6 +351,9 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         // Turn off the multi-finger lift deadline timer
         fingerDeadlineTimer_.Cancel();
         tappedCount_++;
+        if (CheckLimitFinger()) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
         if (tappedCount_ == count_) {
             TriggerClickAccepted(event);
             return;
@@ -359,6 +365,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
         if (fingersNumberSatisfied) {
             Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+            AboutToAddToPendingRecognizers(event);
         } else {
             extraInfo_ += "finger number not satisfied.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -491,6 +498,9 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     if (touchPoint.tiltY.has_value()) {
         info.SetTiltY(touchPoint.tiltY.value());
     }
+    if (touchPoint.rollAngle.has_value()) {
+        info.SetRollAngle(touchPoint.rollAngle.value());
+    }
     info.SetSourceTool(touchPoint.sourceTool);
 #ifdef SECURITY_COMPONENT_ENABLE
     info.SetDisplayX(touchPoint.screenX);
@@ -571,6 +581,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     if (touchPoint.tiltY.has_value()) {
         info->SetTiltY(touchPoint.tiltY.value());
     }
+    if (touchPoint.rollAngle.has_value()) {
+        info->SetRollAngle(touchPoint.rollAngle.value());
+    }
     info->SetSourceTool(touchPoint.sourceTool);
     if (sysJudge_) {
         return sysJudge_(gestureInfo_, info);
@@ -638,5 +651,17 @@ OnAccessibilityEventFunc ClickRecognizer::GetOnAccessibilityEventFunc()
         node->OnAccessibilityEvent(eventType);
     };
     return callback;
+}
+
+void ClickRecognizer::AboutToAddToPendingRecognizers(const TouchEvent& event)
+{
+    if (event.sourceType == SourceType::MOUSE &&
+        (refereeState_ == RefereeState::PENDING || refereeState_ == RefereeState::PENDING_BLOCKED)) {
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto eventManager = pipeline->GetEventManager();
+        CHECK_NULL_VOID(eventManager);
+        eventManager->AddToMousePendingRecognizers(AceType::WeakClaim(this));
+    }
 }
 } // namespace OHOS::Ace::NG

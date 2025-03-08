@@ -40,9 +40,46 @@ public:
     {
         controller_ = controller;
     }
+    void GetLayoutManager(int64_t layoutId);
 
 private:
     RefPtr<TextControllerBase> controller_;
+};
+
+struct CPositionWithAffinity {
+    int32_t position_;
+    int32_t affinity_;
+};
+
+class ACE_EXPORT NativeLayoutManager: public OHOS::FFI::FFIData {
+    DECL_TYPE(NativeLayoutManager, OHOS::FFI::FFIData)
+
+public:
+    
+    NativeLayoutManager();
+
+    void SetLayoutManager(const RefPtr<NG::LayoutInfoInterface>& layout)
+    {
+        layout_ = layout;
+    }
+
+    int32_t GetLineCount()
+    {
+        return static_cast<int32_t>(layout_->GetLineCount());
+    }
+
+    OHOS::Ace::Framework::CPositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
+    {
+        auto value = layout_->GetGlyphPositionAtCoordinate(x, y);
+        OHOS::Ace::Framework::CPositionWithAffinity  cPositionWithAffinity =
+            {static_cast<int32_t>(value.position_), static_cast<int32_t>(value.affinity_)};
+        return cPositionWithAffinity;
+    }
+
+private:
+     RefPtr<NG::LayoutInfoInterface> layout_;
+
+
 };
 } // namespace OHOS::Ace::Framework
 
@@ -118,6 +155,11 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextDraggable(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextPrivacySensitive(bool value);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkTextControllerCtor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextControllerCloseSelectionMenu(int64_t selfID);
+CJ_EXPORT void FfiOHOSAceFrameworkTextControllerGetLayoutManager(int64_t selfID, int64_t layoutID);
+CJ_EXPORT int64_t FfiOHOSAceFrameworkLayoutManager();
+CJ_EXPORT int32_t FfiOHOSAceFrameworkLayoutManagerGetLineCount(int64_t selfID);
+CJ_EXPORT void FfiOHOSAceFrameworkLayoutManagerGetGlyphPositionAtCoordinate(
+    int64_t selfID, int32_t x, int32_t y, OHOS::Ace::Framework::CPositionWithAffinity* retPtr);
 #ifdef __cplusplus
 }
 #endif

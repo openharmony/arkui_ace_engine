@@ -489,6 +489,7 @@ public:
 
     bool HandleEvent(const NonPointerEvent& event);
     bool HandleFocusTravel(const FocusEvent& event) override;
+    bool HandleFocusNavigation(const FocusEvent& event);
     bool RequestFocusImmediately(FocusReason reason = FocusReason::DEFAULT);
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode, FocusReason focusReason = FocusReason::DEFAULT);
@@ -875,6 +876,11 @@ public:
     {
         return onGetNextFocusNodeFunc_;
     }
+
+    void SetNextFocus(FocusIntension key, const std::variant<WeakPtr<AceType>, std::string>& nextFocus)
+    {
+        FocusState::SetNextFocus(static_cast<int32_t>(key), nextFocus);
+    }
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
@@ -945,6 +951,7 @@ private:
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
     bool RequestFocusImmediatelyInner(FocusReason reason = FocusReason::DEFAULT);
+    bool RequestUserNextFocus(const FocusEvent& event);
     bool RequestNextFocusByKey(const FocusEvent& event);
 
     bool IsComponentDirectionRtl();

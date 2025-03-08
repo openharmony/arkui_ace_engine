@@ -59,6 +59,10 @@ public:
     {
         return false;
     }
+    bool IsContains(const std::string& /* url */) override
+    {
+        return false;
+    }
 };
 
 DownloadManager* DownloadManager::GetInstance()

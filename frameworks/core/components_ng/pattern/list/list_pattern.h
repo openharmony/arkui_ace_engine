@@ -111,6 +111,11 @@ public:
         return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
     }
 
+    int32_t GetEndIndexInItemPosition() const
+    {
+        return itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
+    }
+
     bool IsScrollable() const override
     {
         return isScrollable_;
@@ -388,6 +393,11 @@ public:
         isNeedDividerAnimation_ = isNeedDividerAnimation;
     }
 
+    bool IsStackFromEnd() const
+    {
+        return isStackFromEnd_;
+    }
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -411,7 +421,8 @@ protected:
     virtual void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex) {}
     virtual float GetStartOverScrollOffset(float offset, float startMainPos) const;
     virtual float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
-
+    void SetLayoutAlgorithmParams(
+        const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -446,6 +457,7 @@ protected:
 
     int32_t itemStartIndex_ = 0;
     float scrollSnapVelocity_ = 0.0f;
+    bool isStackFromEnd_ = true;
 private:
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
@@ -454,6 +466,7 @@ private:
     void ChangeAxis(RefPtr<UINode> node);
     bool HandleTargetIndex(bool isJump);
     float CalculateTargetPos(float startPos, float endPos);
+    bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -465,7 +478,11 @@ private:
     bool HandleDisplayedChildFocus(int32_t nextIndex, int32_t curIndex);
     bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
         int32_t curIndexInGroup, int32_t moveStep, FocusStep step, bool isScrollIndex);
+    ScrollAlign CalcAlignForFocusToGroupItem(int32_t moveStep, FocusStep step) const;
+    int32_t CalcNextIndexInGroup(int32_t nextIndex, int32_t curIndex, int32_t curIndexInGroup, int32_t moveStep,
+        ListItemGroupPara& nextListItemGroupPara) const;
     void VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param);
+    int32_t GetNextLineFocusIndex(int32_t currIndex);
 
     SizeF GetContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
@@ -473,6 +490,9 @@ private:
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     bool IsScrollSnapAlignCenter() const;
+    void SetLayoutAlgorithmJumpAlign(
+        const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    void SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm);
     void SetChainAnimationCallback();
     bool NeedScrollSnapAlignEffect() const;
     ScrollAlign GetInitialScrollAlign() const;
@@ -485,7 +505,7 @@ private:
 
     // multiSelectable
     void ClearMultiSelect() override;
-    bool IsItemSelected(const GestureEvent& info) override;
+    bool IsItemSelected(float offsetX, float offsetY) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void HandleCardModeSelectedEvent(
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, const OffsetF& groupOffset);
@@ -523,6 +543,7 @@ private:
     std::map<int32_t, int32_t> lanesItemRange_;
     std::set<int32_t> pressedItem_;
     int32_t lanes_ = 1;
+    int32_t laneIdx4Divider_ = 0;
     float laneGutter_ = 0.0f;
     bool dragFromSpring_ = false;
     RefPtr<SpringProperty> springProperty_;

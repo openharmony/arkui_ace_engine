@@ -41,7 +41,6 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
-#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
@@ -119,6 +118,8 @@ public:
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         std::shared_ptr<TaskWrapper> taskWrapper, bool useCurrentEventRunner = false, bool isSubContainer = false,
         bool useNewPipeline = false);
+
+    AceContainer(int32_t instanceId, FrontendType type);
 
     ~AceContainer() override;
 
@@ -409,7 +410,7 @@ public:
         return sharedRuntime_;
     }
 
-    void SetParentId(int32_t parentId)
+    void SetParentId(int32_t parentId) override
     {
         parentId_ = parentId;
     }
@@ -432,7 +433,7 @@ public:
         return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
 
-    int32_t GetParentId() const
+    int32_t GetParentId() const override
     {
         return parentId_;
     }
@@ -485,6 +486,8 @@ public:
     static void OnHide(int32_t instanceId);
     static void OnActive(int32_t instanceId);
     static void OnInactive(int32_t instanceId);
+    static void ActiveWindow(int32_t instanceId);
+    static void UnActiveWindow(int32_t instanceId);
     static void OnNewWant(int32_t instanceId, const std::string& data);
     static bool OnStartContinuation(int32_t instanceId);
     static std::string OnSaveData(int32_t instanceId);
@@ -512,6 +515,9 @@ public:
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
     static bool RemoveOverlayBySubwindowManager(int32_t instanceId);
+
+    static bool CloseWindow(int32_t instanceId);
+    static bool HideWindow(int32_t instanceId);
 
     // ArkTsCard
     static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
@@ -556,6 +562,10 @@ public:
         isFormRender_ = isFormRender;
     }
 
+    void SetAppRunningUniqueId(const std::string& uniqueId) override;
+
+    const std::string& GetAppRunningUniqueId() const override;
+
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -567,7 +577,7 @@ public:
     void ProcessColorModeUpdate(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
-        const ParsedConfig& parsedConfig, const std::string& configuration);
+        const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel = false);
     void UpdateConfigurationSyncForAll(
         const ParsedConfig& parsedConfig, const std::string& configuration);
 
@@ -613,7 +623,7 @@ public:
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
-    Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
+    Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion = Rosen::API_VERSION_INVALID);
 
     uint32_t GetStatusBarHeight();
 
@@ -636,6 +646,7 @@ public:
 
     bool IsLauncherContainer() override;
     bool IsScenceBoardWindow() override;
+    bool IsCrossAxisWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
     bool IsMainWindow() const override;
@@ -757,7 +768,7 @@ public:
     }
 
     void UpdateResourceOrientation(int32_t orientation);
-    void UpdateResourceDensity(double density);
+    void UpdateResourceDensity(double density, bool isUpdateResConfig);
     void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override
@@ -785,16 +796,6 @@ public:
         isTouchEventsPassThrough_ = isTouchEventsPassThrough;
     }
 
-    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
-    {
-        containerHandler_ = containerHandler;
-    }
-
-    WeakPtr<ContainerHandler> GetContainerHandler()
-    {
-        return containerHandler_;
-    }
-
     void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
     {
         singleHandTransform_ = singleHandTransform;
@@ -807,6 +808,16 @@ public:
 
     bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
 
+    Rect GetDisplayAvailableRect() const override;
+
+    void GetExtensionConfig(AAFwk::WantParams& want);
+
+    void SetIsFocusActive(bool isFocusActive);
+
+    void SetFontScaleAndWeightScale(int32_t instanceId);
+
+    sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -817,7 +828,6 @@ private:
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
         float height, uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
-    sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> GetRuntimeContextInner() const;
 
@@ -835,10 +845,15 @@ private:
     void RegisterUIExtDataConsumer();
     void UnRegisterUIExtDataConsumer();
     void DispatchUIExtDataConsume(
-        NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
     void RegisterUIExtDataSendToHost();
-    bool FireUIExtDataSendToHost(NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type);
-    bool FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool FireUIExtDataSendToHost(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, NG::BusinessDataSendType type);
+    bool FireUIExtDataSendToHostReply(
+        NG::UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply);
+
+    void RegisterAvoidInfoCallback();
+    void RegisterAvoidInfoDataProcessCallback();
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -904,6 +919,8 @@ private:
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
+    std::string uniqueId_;
+
     // For custom drag event
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
@@ -916,8 +933,6 @@ private:
     std::vector<std::string> paramUie_;
     std::optional<bool> isTouchEventsPassThrough_;
 
-    // for common handler
-    WeakPtr<ContainerHandler> containerHandler_;
     SingleHandTransform singleHandTransform_;
 };
 

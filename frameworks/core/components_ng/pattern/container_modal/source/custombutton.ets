@@ -53,7 +53,7 @@ const recoverNormalResource: Resource = {
   type: 20000
 }
 
-const buttonNormalBackgroundColor: Color =  Color.Transparent
+const buttonNormalBackgroundColor: Color = Color.Transparent
 
 const buttonNormalIconFillColor: Resource = {
   bundleName: '',
@@ -79,7 +79,7 @@ const buttonHoverIconFillColor: Resource = {
   type: 10001
 }
 
-const closeNormalBackgroundColor : Color =  Color.Transparent
+const closeNormalBackgroundColor: Color = Color.Transparent
 
 const closeNormalIconFillColor: Resource = {
   bundleName: '',
@@ -131,7 +131,7 @@ class ColorGroup {
     this.light = light;
   }
 }
-const colorMap:Map<Resource,ColorGroup> = new Map<Resource,ColorGroup>([
+const colorMap: Map<Resource, ColorGroup> = new Map<Resource, ColorGroup>([
   [buttonNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
   [buttonHoverBackgroundColor, new ColorGroup('#0C000000', '#26FFFFFF')],
   [buttonHoverIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
@@ -271,20 +271,22 @@ struct custombutton {
   }
 
   //设置底板的间距
-  setButtonSpacing(param:string) {
+  setButtonSpacing(param: string) {
     this.buttonSpacing = parseInt(param);
   }
+
   //设置底板的大小
-  setButtonButtonSize(param:string) {
+  setButtonButtonSize(param: string) {
     this.buttonSize = parseInt(param);
   }
-  //最后一个按键离右侧的距离
-  setButtonRightOffset(param:string) {
+
+  // 最后一个按键离右侧的距离
+  setButtonRightOffset(param: string) {
     this.buttonRightOffset = parseInt(param);
   }
 
   // 锁定当前三键的颜色
-  setColorModeLocked(param:string) {
+  setColorModeLocked(param: string) {
     const colorMode = parseInt(param);
     if (colorMode === -1) {
       this.colorConfigurationLocked = false;
@@ -298,8 +300,8 @@ struct custombutton {
     this.closeFillColor = this.getResourceColor(buttonNormalIconFillColor)
   }
 
-  //适配三键相关的颜色资源锁定深色模式
-  getResourceColor(resource: Resource) : Resource | string  {
+  // 适配三键相关的颜色资源锁定深色模式
+  getResourceColor(resource: Resource): Resource | string {
     if (this.colorConfigurationLocked && colorMap.has(resource)) {
       const colorGroup = colorMap.get(resource);
       if (colorGroup) {
@@ -336,7 +338,7 @@ struct custombutton {
 
   }
 
-  onAreaChangeEvent(oldValue: Area, newValue: Area) {
+  onAreaChangeEvent(oldValue: SizeOptions, newValue: SizeOptions) {
 
   }
 
@@ -401,7 +403,7 @@ struct custombutton {
 
   onHoverMaximizeButton(isHover: boolean) {
     if (isHover) {
-      this.maximizeBackgroundColor =  this.getResourceColor(buttonHoverBackgroundColor)
+      this.maximizeBackgroundColor = this.getResourceColor(buttonHoverBackgroundColor)
       this.maximizeFillColor = this.getResourceColor(buttonHoverIconFillColor)
     } else {
       this.maximizeBackgroundColor = buttonNormalBackgroundColor
@@ -433,7 +435,6 @@ struct custombutton {
     if (!this.hideSplit && this.isFocused) {
       this.showMenuTimeoutId = setTimeout(() => {
         this.isShowMenu = true
-        this.menuDisappearTimer(MENU_AUTO_DISAPPEAR_TIME)
       }, HOVER_TIME)
     }
   }
@@ -535,7 +536,7 @@ struct custombutton {
     })
   }
 
-  menuDisappearTimer(disappearTime : number ) {
+  menuDisappearTimer(disappearTime: number) {
     this.cancelMenuDisappearTimer()
     this.menuDisappearTimeoutId = setTimeout(() => {
       this.isShowMenu = false
@@ -585,6 +586,7 @@ struct custombutton {
         .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
           this.onMenuWidthChange()
           this.isShowMenu = !this.hideSplit
+          this.menuDisappearTimer(MENU_AUTO_DISAPPEAR_TIME)
         }), TapGesture().onAction(() => {
           this.onMaximizeButtonClick()
         })))
@@ -593,8 +595,10 @@ struct custombutton {
           if (isHover) {
             this.onMenuWidthChange()
             this.onShowMenuWithTimer()
+            this.cancelMenuDisappearTimer()
           } else {
             this.onCancelMenuTimer()
+            this.menuDisappearTimer(MENU_MOUSEOUT_DISAPPEAR_TIME)
           }
           this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
@@ -683,8 +687,8 @@ struct custombutton {
 
       }.id('containerModalButtonRowId')
       .height('100%')
-      .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset +'vp'})
-      .onAreaChange((oldValue: Area, newValue: Area) => {
+      .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset + 'vp' })
+      .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
         this.onAreaChangeEvent(oldValue, newValue)
       })
       .gesture(PanGesture())

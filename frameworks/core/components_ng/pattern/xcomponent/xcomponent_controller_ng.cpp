@@ -18,6 +18,21 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 namespace OHOS::Ace::NG {
+extern "C" ACE_FORCE_EXPORT XComponentControllerErrorCode OHOS_ACE_ChangeXComponentSurfaceCallbackMode(
+    void* frameNode, char mode)
+{
+    auto* xcFrameNode = reinterpret_cast<NG::FrameNode*>(frameNode);
+    if (!xcFrameNode) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    auto* xcPattern = xcFrameNode->GetPatternPtr<NG::XComponentPattern>();
+    if (!xcPattern) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    xcPattern->ChangeSurfaceCallbackMode(static_cast<SurfaceCallbackMode>(mode));
+    return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR;
+}
+
 XComponentControllerErrorCode XComponentControllerNG::GetGlobalPosition(float& offsetX, float& offsetY)
 {
     auto pattern = pattern_.Upgrade();

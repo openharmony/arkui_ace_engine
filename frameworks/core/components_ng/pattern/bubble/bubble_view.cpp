@@ -35,7 +35,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DOUBLENESS = 2.0;
 constexpr Dimension OUT_RANGE_SPACE = 40.0_vp;
+constexpr Dimension MAX_WIDTH = 400.0_vp;
 constexpr Dimension MIN_BUTTON_FONT_SIZE = 9.0_vp;
+constexpr int32_t TIPS_MAX_LINE = 1;
 constexpr int32_t BUTTON_MAX_LINE = 2;
 constexpr float AGE_FONT_MAX_SIZE_SCALE = 2.0f;
 constexpr float AGE_SCALE_NUMBER = 1.0f;
@@ -152,6 +154,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     auto primaryButton = param->GetPrimaryButtonProperties();
     auto secondaryButton = param->GetSecondaryButtonProperties();
     // Update props
+    popupProp->UpdateIsTips(param->IsTips());
     popupProp->UpdateUseCustom(useCustom);
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
@@ -178,6 +181,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     auto displayWindowOffset = GetDisplayWindowRectOffset(popupId);
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
+    popupPaintProp->UpdateIsTips(param->IsTips());
     if (param->GetArrowOffset().has_value()) {
         popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());
     }
@@ -231,6 +235,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         auto popupTheme = GetPopupTheme();
         auto padding = popupTheme->GetPadding();
         auto layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();
+        if (param->IsTips()) {
+            layoutProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            layoutProps->UpdateMaxLines(TIPS_MAX_LINE);
+        }
         PaddingProperty textPadding;
         textPadding.left = CalcLength(padding.Left());
         textPadding.right = CalcLength(padding.Right());
@@ -278,6 +286,13 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetDefaultBGColor());
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
+            if (param->IsTips() && param->EnableArrow()) {
+                styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::BACKGROUND_REGULAR));
+            } else if (param->IsTips() && !(param->EnableArrow())) {
+                styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            } else {
+                styleOption.blurStyle = param->GetBlurStyle();
+            }
             styleOption.blurStyle = param->GetBlurStyle();
             styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
             renderContext->UpdateBackBlurStyle(styleOption);
@@ -287,6 +302,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         }
         if (param->GetShadow().has_value()) {
             renderContext->UpdateBackShadow(param->GetShadow().value());
+        }
+        if (param->IsTips()) {
+            auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+            renderContext->UpdateBackShadow(shadow);
         }
     }
     child->MountToParent(popupNode);
@@ -559,7 +578,12 @@ void BubbleView::GetPopupMaxWidthAndHeight(
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto isFreeMultiWindow = container->IsFreeMultiWindow();
-    auto isExpandDisplay = theme->GetPopupDoubleBorderEnable() || isFreeMultiWindow;
+    bool isExpandDisplay;
+    if (param->IsTips()) {
+        isExpandDisplay = theme->GetTipsDoubleBorderEnable() || isFreeMultiWindow;
+    } else {
+        isExpandDisplay = theme->GetPopupDoubleBorderEnable() || isFreeMultiWindow;
+    }
     if (param->IsShowInSubWindow()) {
         if (isExpandDisplay) {
             maxHeight = SystemProperties::GetDeviceHeight();
@@ -573,6 +597,9 @@ void BubbleView::GetPopupMaxWidthAndHeight(
     }
     popupMaxHeight = maxHeight - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx() - bottom - top;
     popupMaxWidth = GetMaxWith().Value();
+    if (param->IsTips()) {
+        popupMaxWidth = (popupMaxWidth > MAX_WIDTH.ConvertToPx()) ? MAX_WIDTH.ConvertToPx() : popupMaxWidth;
+    }
 }
 
 void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param, bool custom)
@@ -931,7 +958,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     } else {
         buttonProp->UpdatePadding(buttonPadding);
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonProp->UpdateType(ButtonType::CAPSULE);
@@ -980,5 +1007,70 @@ bool BubbleView::IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool i
         return renderContext->IsUniRenderEnabled();
     }
     return true;
+}
+
+PopupInfo GetPopupInfoHelper(
+    const RefPtr<UINode>& customNode, const std::function<PopupInfo(const RefPtr<OverlayManager>&)>& getPopupInfoFunc)
+{
+    PopupInfo popupInfoError;
+    auto context = customNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, popupInfoError);
+    auto instanceId = context->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+    if (subwindow) {
+        auto overlayManager = subwindow->GetOverlayManager();
+        if (overlayManager) {
+            auto popupInfo = getPopupInfoFunc(overlayManager);
+            if (popupInfo.popupNode) {
+                return popupInfo;
+            }
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    if (overlayManager) {
+        auto popupInfo = getPopupInfoFunc(overlayManager);
+        if (popupInfo.popupNode) {
+            return popupInfo;
+        }
+    }
+    return popupInfoError;
+}
+
+PopupInfo BubbleView::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode)
+{
+    return GetPopupInfoHelper(customNode, [customNode](const RefPtr<OverlayManager>& overlayManager) {
+        return overlayManager->GetPopupInfoWithExistContent(customNode);
+    });
+}
+
+PopupInfo BubbleView::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId)
+{
+    return GetPopupInfoHelper(customNode,
+        [targetId](const RefPtr<OverlayManager>& overlayManager) { return overlayManager->GetPopupInfo(targetId); });
+}
+
+RefPtr<OverlayManager> BubbleView::GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId)
+{
+    auto context = customNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+    if (subwindow) {
+        auto overlayManager = subwindow->GetOverlayManager();
+        if (overlayManager) {
+            auto popupInfo = overlayManager->GetPopupInfo(targetId);
+            if (popupInfo.popupNode) {
+                return overlayManager;
+            }
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    if (overlayManager) {
+        auto popupInfo = overlayManager->GetPopupInfo(targetId);
+        if (popupInfo.popupNode) {
+            return overlayManager;
+        }
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

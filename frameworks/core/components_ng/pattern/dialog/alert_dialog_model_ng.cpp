@@ -14,14 +14,13 @@
  */
 
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 void AlertDialogModelNG::SetParseButtonObj(
@@ -82,6 +81,10 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                     Maskarg.autoCancel = arg.autoCancel;
                     Maskarg.onWillDismiss = arg.onWillDismiss;
                     Maskarg.shadow = arg.shadow;
+                    Maskarg.onWillAppear = arg.onWillAppear;
+                    Maskarg.onDidAppear = arg.onDidAppear;
+                    Maskarg.onWillDisappear = arg.onWillDisappear;
+                    Maskarg.onDidDisappear = arg.onDidDisappear;
                     auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
                     CHECK_NULL_VOID(mask);
                     overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
@@ -90,9 +93,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                 dialog = overlayManager->ShowDialog(arg, nullptr, false);
                 CHECK_NULL_VOID(dialog);
             }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "show");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show");
             auto hub = dialog->GetEventHub<NG::DialogEventHub>();
             CHECK_NULL_VOID(hub);
             hub->SetOnCancel(arg.onCancel);
@@ -100,6 +101,6 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             CHECK_NULL_VOID(pattern);
             pattern->SetOnWillDismiss(arg.onWillDismiss);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowAlertDialog", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowAlertDialog");
 }
 } // namespace OHOS::Ace::NG

@@ -536,7 +536,7 @@ void FfiOHOSAceFrameworkSwiperCustomContentTransition(
             .index = proxy->GetIndex(),
             .position = proxy->GetPosition(),
             .mainAxisLength = proxy->GetMainAxisLength(),
-            .proxy = reinterpret_cast<void*>(proxy.GetRawPtr()),
+            .proxy = reinterpret_cast<void*>(Referenced::RawPtr(proxy)),
             .finishTransition = finishTransitionLambda };
         lambda(swiperProxy);
     };

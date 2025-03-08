@@ -69,6 +69,22 @@ namespace {
         { "/data/resource/1.svg", "share" },
         { "/data/resource/2.svg", "translate" }
     };
+    RefPtr<Theme> GetTheme(ThemeType type)
+    {
+        if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == DialogTheme::TypeId()) {
+            return AceType::MakeRefPtr<DialogTheme>();
+        } else if (type == PickerTheme::TypeId()) {
+            return MockThemeDefault::GetPickerTheme();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else {
+            return nullptr;
+        }
+    }
 } // namespace
 
 class TextPickerModelTestNg : public TestNG {
@@ -94,18 +110,10 @@ void TextPickerModelTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else if (type == TextTheme::TypeId()) {
-            return AceType::MakeRefPtr<TextTheme>();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -262,58 +270,6 @@ HWTEST_F(TextPickerModelTestNg, SetValue001, TestSize.Level1)
     auto props = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(props, nullptr);
     EXPECT_STREQ(props->GetValueValue("").c_str(), DEFAULT_CONTENT_VALUE.c_str());
-}
-
-/**
- * @tc.name: SetColumnWidths001
- * @tc.desc: Test SetColumnWidths
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerModelTestNg, SetColumnWidths001, TestSize.Level1)
-{
-    auto pipeline = MockPipelineContext::GetCurrent();
-    ASSERT_NE(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
-    std::vector<Dimension> width;
-    width.emplace_back(Dimension(50.0f, DimensionUnit::PERCENT));
-    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
-
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto widthSize = pattern->GetColumnWidths().size();
-    EXPECT_EQ(widthSize, 1);
-    EXPECT_EQ(pattern->GetColumnWidths().at(0).Value(), 50.0f);
-}
-
-/**
- * @tc.name: SetColumnWidths002
- * @tc.desc: Test SetColumnWidths
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerModelTestNg, SetColumnWidths002, TestSize.Level1)
-{
-    auto pipeline = MockPipelineContext::GetCurrent();
-    ASSERT_NE(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
-    std::vector<Dimension> width;
-    width.emplace_back(Dimension(50.0f, DimensionUnit::PERCENT));
-    width.emplace_back(Dimension(20.0f, DimensionUnit::PERCENT));
-    width.emplace_back(Dimension(30.0f, DimensionUnit::PERCENT));
-    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
-
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto widthSize = pattern->GetColumnWidths().size();
-    EXPECT_EQ(widthSize, 3);
-    EXPECT_EQ(pattern->GetColumnWidths().at(0).Value(), 50.0f);
-    EXPECT_EQ(pattern->GetColumnWidths().at(1).Value(), 20.0f);
-    EXPECT_EQ(pattern->GetColumnWidths().at(2).Value(), 30.0f);
 }
 
 /**
@@ -670,25 +626,6 @@ HWTEST_F(TextPickerModelTestNg, StaticSetColumnWidths001, TestSize.Level1)
     EXPECT_EQ(columnWidths.at(2).Value(), 30.0f);
 }
 
-/**
- * @tc.name: StaticGetColumnWidthsSize001
- * @tc.desc: Test static GetColumnWidthsSize
- * @tc.type: FUNC
- */
-HWTEST_F(TextPickerModelTestNg, StaticGetColumnWidthsSize001, TestSize.Level1)
-{
-    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-    ASSERT_NE(frameNode, nullptr);
-    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    ASSERT_NE(textPickerPattern, nullptr);
-    std::vector<Dimension> width;
-    width.emplace_back(Dimension(50.0f, DimensionUnit::PERCENT));
-    width.emplace_back(Dimension(20.0f, DimensionUnit::PERCENT));
-    width.emplace_back(Dimension(30.0f, DimensionUnit::PERCENT));
-    TextPickerModelNG::SetColumnWidths(AceType::RawPtr(frameNode), width);
-    auto columnWidthsSize = TextPickerModelNG::GetColumnWidthsSize(AceType::RawPtr(frameNode));
-    EXPECT_EQ(columnWidthsSize, width.size());
-}
 /**
  * @tc.name: StaticSetDivider001
  * @tc.desc: Test static SetDivider
@@ -1111,5 +1048,56 @@ HWTEST_F(TextPickerModelTestNg, SetDefaultTextStyle003, TestSize.Level1)
     EXPECT_EQ(Dimension(10.0_vp), pickerProperty->GetDefaultMinFontSize().value_or(Dimension()));
     EXPECT_EQ(Dimension(30.0_vp), pickerProperty->GetDefaultMaxFontSize().value_or(Dimension()));
     EXPECT_EQ(TextOverflow::NONE, pickerProperty->GetDefaultTextOverflow().value_or(TextOverflow::CLIP));
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetEnableHapticFeedback001
+ * @tc.desc: Test SetEnableHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelNGSetEnableHapticFeedback001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetEnableHapticFeedback(AceType::RawPtr(frameNode), false);
+    EXPECT_FALSE(textPickerPattern->isEnableHaptic_);
+    auto result = TextPickerModelNG::GetEnableHapticFeedback(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetIsCascade001
+ * @tc.desc: Test SetIsCascade.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetIsCascade001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetIsCascade(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(textPickerPattern->isCascade_);
+}
+
+/**
+ * @tc.name: SetColumnKind001
+ * @tc.desc: Test SetColumnKind.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnKind001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetColumnKind(AceType::RawPtr(frameNode), TEXT);
+    EXPECT_EQ(textPickerPattern->columnsKind_, TEXT);
+    TextPickerModelNG::SetColumnKind(AceType::RawPtr(frameNode), MIXTURE);
+    EXPECT_EQ(textPickerPattern->columnsKind_, MIXTURE);
 }
 } // namespace OHOS::Ace::NG

@@ -16,8 +16,10 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -190,6 +192,7 @@ void UIExtensionManager::RecycleExtensionId(int32_t id)
 void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExtensionPattern>& uiExtension)
 {
     std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+    RegisterListenerIfNeeded();
     aliveUIExtensions_.try_emplace(nodeId, uiExtension);
 }
 
@@ -223,6 +226,9 @@ void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
         auto it = aliveUIExtensions_.find(nodeId);
         if (it != aliveUIExtensions_.end()) {
             aliveUIExtensions_.erase(nodeId);
+        }
+        if (aliveUIExtensions_.empty()) {
+            UnregisterListenerIfNeeded();
         }
     }
 
@@ -341,45 +347,75 @@ bool UIExtensionManager::UIExtBusinessDataSendValid()
 
 // host send data to provider
 void UIExtensionManager::RegisterBusinessDataSendCallback(
-    UIContentBusinessCode code, BusinessDataSendType type, UIExtBusinessDataSendCallback callback)
+    UIContentBusinessCode code, BusinessDataSendType type, const UIExtBusinessDataSendCallback& callback,
+    RSSubsystemId subsystemId)
 {
-    businessDataSendCallbacks_.try_emplace(
-        code, std::pair<BusinessDataSendType, UIExtBusinessDataSendCallback>(type, callback));
+    businessDataSendCallbacks_.try_emplace(code,
+        std::tuple<BusinessDataSendType, UIExtBusinessDataSendCallback, RSSubsystemId>(type, callback, subsystemId));
+}
+
+void UIExtensionManager::UnRegisterBusinessDataSendCallback(UIContentBusinessCode code)
+{
+    auto it = businessDataSendCallbacks_.find(code);
+    if (it == businessDataSendCallbacks_.end()) {
+        return;
+    }
+    businessDataSendCallbacks_.erase(it);
 }
 
 bool UIExtensionManager::TriggerBusinessDataSend(UIContentBusinessCode code)
 {
+    CHECK_RUN_ON(UI);
     auto it = businessDataSendCallbacks_.find(code);
     if (it == businessDataSendCallbacks_.end()) {
         return false;
     }
-    auto type = it->second.first;
-    auto callback = it->second.second;
+    auto& [type, callback, subsystemId] = it->second;
     CHECK_NULL_RETURN(callback, false);
     bool ret = false;
-    {
-        std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
-        for (const auto& pattern : aliveUIExtensions_) {
-            auto uiExtension = pattern.second.Upgrade();
-            if (!uiExtension) {
-                continue;
-            }
-            // data is std::optional<AAFwk::Want>, if data has value then send it.
-            auto data = callback(uiExtension);
-            if (!data.has_value()) {
-                continue;
-            }
-            ret |= uiExtension->SendBusinessData(code, std::move(data.value()), type);
+    decltype(aliveUIExtensions_) tempAliveUIExtensions(aliveUIExtensions_);
+    for (const auto& pattern : tempAliveUIExtensions) {
+        auto uiExtension = pattern.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto frameNode = uiExtension->GetHost();
+        CHECK_NULL_CONTINUE(frameNode);
+        // data is std::optional<AAFwk::Want>, if data has value then send it.
+        auto data = callback(frameNode);
+        if (!data.has_value()) {
+            continue;
         }
+        ret |= uiExtension->SendBusinessData(code, data.value(), type, subsystemId);
+    }
+    decltype(aliveSecurityUIExtensions_) tempAliveSecurityUIExtensions(aliveSecurityUIExtensions_);
+    for (const auto& pattern : aliveSecurityUIExtensions_) {
+        auto uiExtension = pattern.second.Upgrade();
+        CHECK_NULL_CONTINUE(uiExtension);
+        auto frameNode = uiExtension->GetHost();
+        CHECK_NULL_CONTINUE(frameNode);
+        // data is std::optional<AAFwk::Want>, if data has value then send it.
+        auto data = callback(frameNode);
+        if (!data.has_value()) {
+            continue;
+        }
+        ret |= uiExtension->SendBusinessData(code, data.value(), type, subsystemId);
     }
     return ret;
 }
 
 // provider consume data
 void UIExtensionManager::RegisterBusinessDataConsumeCallback(
-    UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback)
+    UIContentBusinessCode code, const UIExtBusinessDataConsumeCallback& callback)
 {
     businessDataConsumeCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionManager::UnRegisterBusinessDataConsumeCallback(UIContentBusinessCode code)
+{
+    auto it = businessDataConsumeCallbacks_.find(code);
+    if (it == businessDataConsumeCallbacks_.end()) {
+        return;
+    }
+    businessDataConsumeCallbacks_.erase(it);
 }
 
 void UIExtensionManager::DispatchBusinessDataConsume(
@@ -395,9 +431,18 @@ void UIExtensionManager::DispatchBusinessDataConsume(
 }
 
 void UIExtensionManager::RegisterBusinessDataConsumeReplyCallback(
-    UIContentBusinessCode code, UIExtBusinessDataConsumeReplyCallback callback)
+    UIContentBusinessCode code, const UIExtBusinessDataConsumeReplyCallback& callback)
 {
     businessDataConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionManager::UnRegisterBusinessDataConsumeReplyCallback(UIContentBusinessCode code)
+{
+    auto it = businessDataConsumeReplyCallbacks_.find(code);
+    if (it == businessDataConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    businessDataConsumeReplyCallbacks_.erase(it);
 }
 
 void UIExtensionManager::DispatchBusinessDataConsumeReply(
@@ -413,34 +458,36 @@ void UIExtensionManager::DispatchBusinessDataConsumeReply(
 }
 
 // provider send data to host
-void UIExtensionManager::RegisterBusinessSendToHostReply(UIExtBusinessSendToHostReplyFunc func)
+void UIExtensionManager::RegisterBusinessSendToHostReply(const UIExtBusinessSendToHostReplyFunc& func)
 {
     businessSendToHostReplyFunc_ = func;
 }
 
-void UIExtensionManager::RegisterBusinessSendToHost(UIExtBusinessSendToHostFunc func)
+void UIExtensionManager::RegisterBusinessSendToHost(const UIExtBusinessSendToHostFunc& func)
 {
     businessSendToHostFunc_ = func;
 }
 
-bool UIExtensionManager::SendBusinessToHost(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+bool UIExtensionManager::SendBusinessToHost(
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type)
 {
     if (!UIExtBusinessDataSendValid()) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SendBusinessToHost callback not set.");
         return false;
     }
     auto callback = businessSendToHostFunc_;
-    return callback(static_cast<uint32_t>(code), std::move(data), type);
+    return callback(static_cast<uint32_t>(code), data, type);
 }
 
-bool UIExtensionManager::SendBusinessToHostSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+bool UIExtensionManager::SendBusinessToHostSyncReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply)
 {
     if (!UIExtBusinessDataSendValid()) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SendBusinessToHost callback not set.");
         return false;
     }
     auto callback = businessSendToHostReplyFunc_;
-    return callback(static_cast<uint32_t>(code), std::move(data), reply);
+    return callback(static_cast<uint32_t>(code), data, reply);
 }
 
 void UIExtensionManager::NotifyWindowMode(Rosen::WindowMode mode)
@@ -455,12 +502,26 @@ void UIExtensionManager::NotifyWindowMode(Rosen::WindowMode mode)
     }
 }
 
+void UIExtensionManager::SendPageModeToProvider(const int32_t nodeId, const std::string& pageMode)
+{
+    auto it = aliveUIExtensions_.find(nodeId);
+    if(it == aliveUIExtensions_.end()) {
+        return;
+    }
+    auto uiExtension = it->second.Upgrade();
+    CHECK_NULL_VOID(uiExtension);
+    AAFwk::Want data;
+    data.SetParam("pageMode", pageMode);
+    uiExtension->SendBusinessData(
+        UIContentBusinessCode::SEND_PAGE_MODE_TO_UEA, std::move(data), BusinessDataSendType::ASYNC);
+}
+
 void UIExtensionManager::SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline)
 {
     AAFwk::Want data;
     data.SetParam("requestPageMode", std::string("yes"));
     AAFwk::Want reply;
-    SendBusinessToHostSyncReply(UIContentBusinessCode::SEND_PAGE_MODE, std::move(data), reply);
+    SendBusinessToHostSyncReply(UIContentBusinessCode::SEND_PAGE_MODE, data, reply);
     if (reply.HasParameter("pageMode")) {
         auto pageMode = reply.GetStringParam("pageMode");
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
@@ -486,6 +547,104 @@ void UIExtensionManager::TransferAccessibilityRectInfo()
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
             uiExtension->TransferAccessibilityRectInfo();
+        }
+    }
+}
+
+void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
+    RSSubsystemId subSystemId)
+{
+    CHECK_RUN_ON(UI);
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+        }
+    }
+}
+
+void UIExtensionManager::RegisterListenerIfNeeded()
+{
+    if (hasRegisterListener_) {
+        return;
+    }
+
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    // Multi-layer nested UEC scenarios are not supported.
+    if (container->IsUIExtensionWindow()) {
+        hasRegisterListener_ = true;
+        return;
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto containerModalListener =
+        [weakMgr = WeakClaim(this)](const RectF&, const RectF&) {
+            auto mgr = weakMgr.Upgrade();
+            CHECK_NULL_VOID(mgr);
+            mgr->NotifyUECProviderIfNeedded();
+        };
+    TAG_LOGI(AceLogTag::ACE_LAYOUT, "UIExtensionManager register listener");
+    containerModalListenerId_ = ContainerModalViewEnhance::AddButtonsRectChangeListener(
+        AceType::RawPtr(pipeline), std::move(containerModalListener));
+    hasRegisterListener_ = true;
+}
+
+void UIExtensionManager::UnregisterListenerIfNeeded()
+{
+    if (!hasRegisterListener_) {
+        return;
+    }
+
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    // Multi-layer nested UEC scenarios are not supported.
+    if (container->IsUIExtensionWindow()) {
+        hasRegisterListener_ = false;
+        return;
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    TAG_LOGI(AceLogTag::ACE_LAYOUT, "UIExtensionManager unregister listener");
+    ContainerModalViewEnhance::RemoveButtonsRectChangeListener(
+        AceType::RawPtr(pipeline), containerModalListenerId_);
+    hasRegisterListener_ = false;
+}
+
+void UIExtensionManager::NotifyUECProviderIfNeedded()
+{
+    if (aliveUIExtensions_.empty()) {
+        return;
+    }
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(avoidInfoMgr);
+    for (const auto& it : aliveUIExtensions_) {
+        auto uecPattern = it.second.Upgrade();
+        CHECK_NULL_CONTINUE(uecPattern);
+        const auto& preAvoidInfo = uecPattern->GetAvoidInfo();
+        auto uecNode = AceType::DynamicCast<FrameNode>(uecPattern->GetHost());
+        CHECK_NULL_CONTINUE(uecNode);
+        ContainerModalAvoidInfo newAvoidInfo;
+        AvoidInfoManager::GetContainerModalAvoidInfoForUEC(uecNode, newAvoidInfo);
+        bool needNotify = AvoidInfoManager::CheckIfNeedNotifyAvoidInfoChange(preAvoidInfo, newAvoidInfo);
+        uecPattern->SetAvoidInfo(newAvoidInfo);
+        if (needNotify) {
+            AAFwk::Want avoidInfoWant;
+            avoidInfoMgr->BuildAvoidInfo(newAvoidInfo, avoidInfoWant);
+            TAG_LOGI(AceLogTag::ACE_LAYOUT, "UECManager send AvoidInfo: %{public}s", newAvoidInfo.ToString().c_str());
+            uecPattern->SendBusinessData(UIContentBusinessCode::NOTIFY_AVOID_INFO_CHANGE,
+                std::move(avoidInfoWant), BusinessDataSendType::ASYNC);
         }
     }
 }

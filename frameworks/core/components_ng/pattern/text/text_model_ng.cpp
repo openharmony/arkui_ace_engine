@@ -162,7 +162,7 @@ void TextModelNG::SetTextColor(const Color& value)
 
 void TextModelNG::ResetTextColor()
 {
-    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextColor);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TextColor, PROPERTY_UPDATE_RENDER);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
@@ -190,7 +190,7 @@ void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
 void TextModelNG::ResetTextColor(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TextColor, PROPERTY_UPDATE_RENDER, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
@@ -462,6 +462,20 @@ void TextModelNG::SetTextCaretColor(const Color& value)
 void TextModelNG::SetSelectedBackgroundColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value);
+}
+
+void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
+{
+    auto dragStart = [dragStartFunc = std::move(onDragStart)](
+                         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        auto dragInfo = dragStartFunc(event, extraParams);
+        DragDropInfo info;
+        info.extraInfo = dragInfo.extraInfo;
+        info.pixelMap = dragInfo.pixelMap;
+        info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
+        return info;
+    };
+    ViewAbstract::SetOnDragStart(std::move(dragStart));
 }
 
 void TextModelNG::InitText(FrameNode* frameNode, std::u16string& value)
@@ -1111,22 +1125,6 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
         textPattern->SetExternalParagraphStyle(std::nullopt);
     } else {
         textPattern->SetExternalParagraph(value->paragraph);
-#ifdef USE_GRAPHIC_TEXT_GINE
-        auto position = 0;
-        for (const auto& item : value->items) {
-            auto spanItem = SpanModelNG::CreateSpanItem(item);
-            if (spanItem) {
-                auto intervalStart = position;
-                position += static_cast<int32_t>(spanItem->content.length());
-                auto intervalEnd = position;
-                spanItem->interval = { intervalStart, intervalEnd };
-                spanItem->position = position;
-                spanItems.emplace_back(spanItem);
-            }
-        }
-        textPattern->SetExternalSpanItem(spanItems);
-        textPattern->SetExternalParagraphStyle(SpanModelNG::CreateParagraphStyle(value));
-#endif
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }

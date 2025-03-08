@@ -86,6 +86,7 @@ void CheckBoxTestNG::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
 
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
@@ -898,6 +899,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
 
     MarginProperty margin;
     margin.left = CalcLength(CHECK_MARK_SIZE.ConvertToPx());

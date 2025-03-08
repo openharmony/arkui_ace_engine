@@ -46,6 +46,7 @@
 #include "core/common/window_animation_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -131,6 +132,8 @@ public:
      * Get density of current pipeline if valid, or return density of default display
      */
     static double GetCurrentDensity();
+
+    static ColorMode GetCurrentColorMode();
 
     virtual void SetupRootElement() = 0;
 
@@ -244,6 +247,8 @@ public:
     virtual void OnHide() = 0;
 
     virtual void WindowFocus(bool isFocus) = 0;
+
+    virtual void WindowActivate(bool isActive) {}
 
     virtual void ContainerModalUnFocus() = 0;
 
@@ -364,6 +369,11 @@ public:
     void SetFormRenderingMode(int8_t renderMode)
     {
         renderingMode_ = renderMode;
+    }
+
+    void SetFormEnableBlurBackground(bool enableBlurBackground)
+    {
+        enableBlurBackground_ = enableBlurBackground;
     }
 
     const Color& GetAppBgColor() const
@@ -682,6 +692,14 @@ public:
         themeManager_ = std::move(theme);
     }
 
+    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter) {
+        std::unique_lock<std::shared_mutex> lock(themeMtx_);
+        CHECK_NULL_VOID(themeManager_);
+        auto themeConstants = themeManager_->GetThemeConstants();
+        CHECK_NULL_VOID(themeConstants);
+        themeConstants->UpdateResourceAdapter(adapter);
+    }
+
     template<typename T>
     RefPtr<T> GetTheme() const
     {
@@ -775,6 +793,11 @@ public:
     bool IsFormRender() const
     {
         return isFormRender_;
+    }
+
+    bool IsFormRenderExceptDynamicComponent() const
+    {
+        return isFormRender_ && !isDynamicRender_;
     }
 
     void SetIsDynamicRender(bool isDynamicRender)
@@ -1085,11 +1108,12 @@ public:
     }
     virtual void NotifyMemoryLevel(int32_t level) {}
 
-    void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
+    virtual void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
     {
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
+    virtual void SetWindowSizeChangeReason(WindowSizeChangeReason reason) {}
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
@@ -1157,8 +1181,6 @@ public:
     {
         parentPipeline_ = pipeline;
     }
-
-    virtual void SetupSubRootElement() = 0;
 
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
@@ -1268,19 +1290,14 @@ public:
         return hasSupportedPreviewText_;
     }
 
-    void SetUseCutout(bool useCutout)
-    {
-        useCutout_ = useCutout;
-    }
-
-    bool GetUseCutout() const
-    {
-        return useCutout_;
-    }
-
     bool GetOnFoucs() const
     {
         return onFocus_;
+    }
+
+    bool GetOnActive() const
+    {
+        return onActive_;
     }
 
     uint64_t GetVsyncTime() const
@@ -1412,6 +1429,11 @@ public:
         return GetOnFoucs();
     }
 
+    virtual bool IsWindowActivated() const
+    {
+        return GetOnActive();
+    }
+
     void SetDragNodeGrayscale(float dragNodeGrayscale)
     {
         dragNodeGrayscale_ = dragNodeGrayscale;
@@ -1477,6 +1499,26 @@ public:
 
     std::shared_ptr<ArkUIPerfMonitor> GetPerfMonitor();
 
+    void SetApiTargetVersion(int32_t apiTargetVersion)
+    {
+        apiTargetVersion_ = apiTargetVersion;
+    }
+
+    int32_t GetApiTargetVersion() const
+    {
+        return apiTargetVersion_;
+    }
+
+    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const
+    {
+        return apiTargetVersion_ >= static_cast<int32_t>(version);
+    }
+
+    bool LessThanAPITargetVersion(PlatformVersion version) const
+    {
+        return apiTargetVersion_ < static_cast<int32_t>(version);
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1514,6 +1556,8 @@ protected:
 
     std::function<void()> GetWrappedAnimationCallback(const AnimationOption& option,
         const std::function<void()>& finishCallback, const std::optional<int32_t>& count = std::nullopt);
+    
+    bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
 
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
@@ -1559,6 +1603,7 @@ protected:
     Offset pluginEventOffset_ { 0, 0 };
     Color appBgColor_ = Color::WHITE;
     int8_t renderingMode_ = 0;
+    bool enableBlurBackground_ = false;
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
@@ -1604,6 +1649,7 @@ protected:
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;
+    std::atomic<bool> onActive_ = false;
     uint64_t lastTouchTime_ = 0;
     uint64_t lastMouseTime_ = 0;
     uint64_t lastDragTime_ = 0;
@@ -1649,7 +1695,6 @@ private:
     bool halfLeading_ = false;
     bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
-    bool useCutout_ = false;
     // whether visible area need to be calculate at each vsync after approximate timeout.
     bool visibleAreaRealTime_ = false;
     uint64_t vsyncTime_ = 0;
@@ -1659,6 +1704,7 @@ private:
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
+    int32_t apiTargetVersion_ = 0;
 
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;

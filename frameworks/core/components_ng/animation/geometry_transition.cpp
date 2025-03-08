@@ -179,6 +179,10 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "inAnim: %{public}d, outAnim: %{public}d, follow: %{public}d, "
         "inNode: %{public}d, %{public}s, outNode: %{public}d, %{public}s", hasInAnim_, hasOutAnim_, follow,
         inNode->GetId(), inNode->GetTag().c_str(), outNode->GetId(), outNode->GetTag().c_str());
+
+    ACE_SCOPED_TRACE("ACE_GEOMETRY_TRANSITION, inAnim: %d, outAnim: %d, follow: %d, "
+        "inNode: %d, %s, outNode: %d, %s", hasInAnim_, hasOutAnim_, follow,
+        inNode->GetId(), inNode->GetTag().c_str(), outNode->GetId(), outNode->GetTag().c_str());
 }
 
 // Update should be called during node update phase when node exists
@@ -339,6 +343,9 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
             }
         }
     }
+    static std::atomic<int32_t> traceTaskId = 0;
+    auto currentTraceTaskId = traceTaskId.fetch_add(1, std::memory_order_relaxed);
+    auto nodeId = self->GetId();
     auto propertyCallback = [&]() {
         // sync geometry in active state
         renderContext->SetBorderRadius(activeCornerRadius);
@@ -354,15 +361,18 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         } else {
             renderContext->SetSandBox(parentPos);
         }
+        std::string traceTag = "ACE_GEOMETRY_TRANSITION, node " + std::to_string(nodeId) + " animation";
+        AceAsyncTraceBeginCommercial(currentTraceTaskId, traceTag.c_str());
     };
-    auto follow = followWithoutTransition_;
-    auto finishCallback = [follow, nodeWeak = WeakClaim(RawPtr(self))]() {
+    auto finishCallback = [currentTraceTaskId, nodeWeak = WeakClaim(RawPtr(self))]() {
         auto node = nodeWeak.Upgrade();
         CHECK_NULL_VOID(node);
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->SetSandBox(std::nullopt);
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
+        std::string traceTag = "ACE_GEOMETRY_TRANSITION, node " + std::to_string(node->GetId()) + " animation";
+        AceAsyncTraceEndCommercial(currentTraceTaskId, traceTag.c_str());
     };
     if (!isNodeIn && inNodeAbsRect_) {
         AnimationUtils::Animate(animationOption_, propertyCallback, finishCallback);
@@ -371,6 +381,12 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     } else {
         AnimationUtils::AnimateWithCurrentOptions(propertyCallback, finishCallback, false);
     }
+
+    ACE_SCOPED_TRACE("ACE_GEOMETRY_TRANSITION, node: %d, parent: %s, target: %s, "
+        "active frame: %s, identity frame: %s, option: %d",
+        self->GetId(), parentPos.ToString().c_str(), targetPos.ToString().c_str(), activeFrameRect.ToString().c_str(),
+        isNodeIn ? geometryNode->GetFrameRect().ToString().c_str() : "no log",
+        AnimationUtils::IsImplicitAnimationOpen());
 
     TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d, parent: %{public}s, target: %{public}s, "
         "active frame: %{public}s, identity frame: %{public}s, option: %{public}d",

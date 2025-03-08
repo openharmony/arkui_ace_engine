@@ -65,6 +65,7 @@ group("core_pattern_unittest") {
     "movingphoto:movingphoto_test_ng",
     "navigation:navigation_test_ng",
     "navigator:navigator_test_ng",
+    "navrouter:navdestination_test_ng",
     "navrouter:navrouter_test_ng",
     "node_container:node_container_test_ng",
     "overlay:overlay_manager_test_ng",

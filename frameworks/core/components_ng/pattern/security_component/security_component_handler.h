@@ -15,6 +15,7 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H
+#include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_probe.h"
@@ -23,8 +24,13 @@
 #include "save_button.h"
 #include "sec_comp_err.h"
 #include "sec_comp_kit.h"
+#include "ui/base/geometry/dimension.h"
 
 namespace OHOS::Ace::NG {
+struct NodeMaps {
+    std::unordered_map<int32_t, std::pair<std::string, NG::RectF>> nodeId2Rect;
+    std::unordered_map<int32_t, int32_t> nodeId2Zindex;
+};
 class SecurityComponentHandler {
 public:
     static int32_t RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId);
@@ -71,7 +77,8 @@ private:
     static bool CheckDiagonalLinearGradientBlur(const RectF& parentRect, const RectF& rect,
         const NG::GradientDirection direction, const float& ratio, const float& radius);
     static float GetBorderRadius(RefPtr<FrameNode>& node, const NG::GradientDirection direction);
-    static bool CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node);
+    static bool CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node,
+        bool& isBlured, double& blurRadius);
     static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
         std::string& message);
     static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
@@ -105,10 +112,12 @@ private:
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static bool GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
+    static bool GetPaddingInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
-    static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root,
-        std::unordered_map<int32_t, std::pair<std::string, NG::RectF>>& nodeId2Rect, int32_t secNodeId,
-        std::unordered_map<int32_t, int32_t>& nodeId2Zindex, std::string& message);
+    static NG::RectF UpdateClipRect(NG::RectF& clipRect, NG::RectF& paintRect);
+    static NG::RectF UpdatePaintRect(NG::RectF& paintRect, NG::RectF& clipRect);
+    static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root, NodeMaps& maps,
+        int32_t secNodeId, std::string& message, NG::RectF& clipRect);
     static bool CheckRectIntersect(const RectF& dest, int32_t secNodeId,
         const std::unordered_map<int32_t, std::pair<std::string, NG::RectF>>& nodeId2Rect,
         std::unordered_map<int32_t, int32_t>& nodeId2Zindex, std::string& message);

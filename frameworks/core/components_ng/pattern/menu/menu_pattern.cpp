@@ -24,6 +24,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
@@ -270,16 +272,10 @@ void MenuPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     isNeedDivider_ = false;
     auto uiNode = AceType::DynamicCast<UINode>(host);
-    UpdateMenuItemChildren(uiNode);
-
-    auto innerMenuCount = GetInnerMenuCount();
-    if (innerMenuCount == 1) {
-        ResetTheme(host, false);
-    } else if (innerMenuCount > 1) {
-        // multiple inner menus, reset outer container's shadow for desktop UX
-        ResetTheme(host, true);
-    }
-
+    RefPtr<UINode> previousNode = nullptr;
+    UpdateMenuItemChildren(uiNode, previousNode);
+    RemoveLastNodeDivider(previousNode);
+    ResetThemeByInnerMenuCount();
     auto menuWrapperNode = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
@@ -297,7 +293,13 @@ void MenuPattern::OnModifyDone()
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
         UpdateBorderRadius(host, borderRadius);
     }
-    UpdateMenuBorderAndBackgroundBlur();
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>(GetThemeScopeId());
+    CHECK_NULL_VOID(selecTheme);
+    if (selecTheme->GetMenuNeedFocus()) {
+        UpdateMenuBorderAndBackgroundBlur();
+    }
     SetAccessibilityAction();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
@@ -311,6 +313,65 @@ void MenuPattern::OnModifyDone()
         CHECK_NULL_VOID(gestureHub);
         InitPanEvent(gestureHub);
     }
+}
+
+void MenuPattern::ResetThemeByInnerMenuCount()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto innerMenuCount = GetInnerMenuCount();
+    if (innerMenuCount == 1) {
+        ResetTheme(host, false);
+    } else if (innerMenuCount > 1) {
+        // multiple inner menus, reset outer container's shadow for desktop UX
+        ResetTheme(host, true);
+    }
+}
+
+void MenuPattern::UpdateMenuItemDivider()
+{
+    if (!isSelectMenu_) {
+        return;
+    }
+    if (options_.empty()) {
+        return;
+    }
+    auto property = GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto dividerMode = property->GetItemDividerModeValue(DividerMode::FLOATING_ABOVE_MENU);
+    RefPtr<FrameNode> previousNode = nullptr;
+    RefPtr<FrameNode> lastNode = options_.back();
+    for (auto&& option : options_) {
+        CHECK_NULL_VOID(option);
+        auto props = option->GetPaintProperty<MenuItemPaintProperty>();
+        CHECK_NULL_VOID(props);
+        auto optionPattern = option->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        auto frameNode = optionPattern->GetBottomDivider();
+        if (!frameNode) {
+            continue;
+        }
+        if (previousNode) {
+            auto previousPattern = previousNode->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(previousPattern);
+            auto previousBottomDivider = previousPattern->GetBottomDivider();
+            if (previousBottomDivider) {
+                optionPattern->SetTopDivider(previousBottomDivider);
+            }
+        }
+        if (dividerMode == DividerMode::FLOATING_ABOVE_MENU || lastNode == option) {
+            optionPattern->RemoveBottomDivider();
+        } else {
+            optionPattern->AttachBottomDivider();
+        }
+        auto dividerProperty = frameNode->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(dividerProperty);
+        dividerProperty->UpdateHasIcon(props->GetHasIconValue(false));
+        previousNode = option;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
@@ -412,9 +473,27 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     ResetNeedDivider();
     auto uiNode = AceType::DynamicCast<UINode>(host);
-    UpdateMenuItemChildren(uiNode);
+    RefPtr<UINode> previousNode = nullptr;
+    UpdateMenuItemChildren(uiNode, previousNode);
+    RemoveLastNodeDivider(previousNode);
     SetAccessibilityAction();
-    InitDefaultBorder(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selecTheme = pipelineContext->GetTheme<SelectTheme>(GetThemeScopeId());
+    CHECK_NULL_VOID(selecTheme);
+    if (selecTheme->GetMenuNeedFocus()) {
+        InitDefaultBorder(host);
+    }
+}
+
+void MenuPattern::RemoveLastNodeDivider(const RefPtr<UINode>& lastNode)
+{
+    CHECK_NULL_VOID(lastNode);
+    auto lastFrameNode = AceType::DynamicCast<FrameNode>(lastNode);
+    CHECK_NULL_VOID(lastFrameNode);
+    auto lastPattern = lastFrameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(lastPattern);
+    lastPattern->RemoveBottomDivider();
 }
 
 // close menu on touch up
@@ -509,7 +588,7 @@ void MenuPattern::RemoveParentHoverStyle()
     menuItemPattern->OnHover(false);
 }
 
-void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
+void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode)
 {
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<MenuLayoutProperty>();
@@ -524,7 +603,6 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             CHECK_NULL_VOID(itemProperty);
             auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(itemPattern);
-
             auto expandingMode = layoutProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
             if (expandingMode != itemPattern->GetExpandingMode() || IsEmbedded()) {
                 auto expandNode = itemPattern->GetHost();
@@ -533,9 +611,11 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
                 expandNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
             UpdateMenuItemTextNode(layoutProperty, itemProperty, itemPattern);
+            UpdateMenuDividerWithMode(previousNode, child, layoutProperty, index);
             itemPattern->UpdateNeedDivider(isNeedDivider_);
             isNeedDivider_ = true;
             itemPattern->SetIndex(index);
+            previousNode = child;
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
             auto childItemNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(childItemNode);
@@ -545,7 +625,7 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             auto itemGroupNode = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(itemGroupNode);
             isNeedDivider_ = false;
-            UpdateMenuItemChildren(itemGroupNode);
+            UpdateMenuItemChildren(child, previousNode);
             isNeedDivider_ = false;
             auto accessibilityProperty =
                 childItemNode->GetAccessibilityProperty<AccessibilityProperty>();
@@ -553,17 +633,60 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
             ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
-            auto nodesSet = AceType::DynamicCast<UINode>(child);
-            CHECK_NULL_VOID(nodesSet);
-            UpdateMenuItemChildren(nodesSet);
-        } else {
-            // do nothing
+            UpdateMenuItemChildren(child, previousNode);
         }
         index++;
     }
 }
 
-void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
+void MenuPattern::UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+    const RefPtr<MenuLayoutProperty>& property, int32_t& index)
+{
+    CHECK_NULL_VOID(previousNode);
+    CHECK_NULL_VOID(currentNode);
+    CHECK_NULL_VOID(property);
+    auto previousFrameNode = AceType::DynamicCast<FrameNode>(previousNode);
+    CHECK_NULL_VOID(previousFrameNode);
+    auto previousPattern = previousFrameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(previousPattern);
+    auto itemDividerMode = isNeedDivider_ ? property->GetItemDividerModeValue(DividerMode::FLOATING_ABOVE_MENU)
+                                          : property->GetItemGroupDividerModeValue(DividerMode::FLOATING_ABOVE_MENU);
+    UpdateDividerProperty(previousPattern->GetBottomDivider(),
+        isNeedDivider_ ? property->GetItemDivider() : property->GetItemGroupDivider());
+    if (itemDividerMode == DividerMode::FLOATING_ABOVE_MENU) {
+        previousPattern->RemoveBottomDivider();
+    } else {
+        previousPattern->AttachBottomDivider();
+        index++;
+    }
+    auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_VOID(currentFrameNode);
+    auto currentPattern = currentFrameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(currentPattern);
+    currentPattern->SetTopDivider(previousPattern->GetBottomDivider());
+}
+
+void MenuPattern::UpdateDividerProperty(
+    const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider)
+{
+    CHECK_NULL_VOID(dividerNode);
+    auto paintProperty = dividerNode->GetPaintProperty<MenuDividerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!divider.has_value()) {
+        paintProperty->ResetStrokeWidth();
+        paintProperty->ResetDividerColor();
+        paintProperty->ResetStartMargin();
+        paintProperty->ResetEndMargin();
+    } else {
+        auto value = divider.value();
+        paintProperty->UpdateStrokeWidth(value.strokeWidth);
+        paintProperty->UpdateDividerColor(value.color);
+        paintProperty->UpdateStartMargin(value.startMargin);
+        paintProperty->UpdateEndMargin(value.endMargin);
+    }
+}
+
+    void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 {
     if (!isSelectMenu_) {
         return;
@@ -723,7 +846,7 @@ void MenuPattern::HideStackMenu() const
                     menuWrapper->RemoveChild(subMenuNode);
                     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 },
-                TaskExecutor::TaskType::UI, "HideStackMenu", PriorityType::VIP);
+                TaskExecutor::TaskType::UI, "HideStackMenu");
     });
     auto menuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
     if (menuPattern) {
@@ -929,13 +1052,13 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
 
 bool MenuPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto colorMode = SystemProperties::GetColorMode();
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
     auto host = GetHost();
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
@@ -987,7 +1110,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(renderContext);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     expandDisplay_ = expandDisplay;
@@ -1024,7 +1147,7 @@ void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     }
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     // apply default padding from theme on inner menu
     PaddingProperty padding;
@@ -1605,6 +1728,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(theme, false);
     auto renderContext = dirty->GetHostNode()->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
+    renderContext->UpdateClipShape(nullptr);
+    renderContext->ResetClipShape();
 
     auto menuProp = DynamicCast<MenuLayoutProperty>(dirty->GetLayoutProperty());
     CHECK_NULL_RETURN(menuProp, false);
@@ -1755,25 +1880,32 @@ void InnerMenuPattern::ApplyMultiMenuTheme()
 
 void MenuPattern::OnColorConfigurationUpdate()
 {
+    OnThemeScopeUpdate(GetThemeScopeId());
+}
+
+bool MenuPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-
-    auto menuTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(menuTheme);
-
-    auto menuPattern = host->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-
+    CHECK_NULL_RETURN(host, result);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, result);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>(themeScopeId);
+    CHECK_NULL_RETURN(menuTheme, result);
     auto renderContext = host->GetRenderContext();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
-        || menuTheme->GetMenuBlendBgColor()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled() ||
+        menuTheme->GetMenuBlendBgColor()) {
         renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
     } else {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
     }
-
+    auto menuProperty = host->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuProperty, result);
+    if (!activeSetting_ && menuProperty->HasFontColor()) {
+        menuProperty->UpdateFontColor(menuTheme->GetFontColor());
+    }
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, result);
     auto optionNode = menuPattern->GetOptions();
     for (const auto& child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
@@ -1782,7 +1914,8 @@ void MenuPattern::OnColorConfigurationUpdate()
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    host->SetNeedCallChildrenUpdate(false);
+
+    return result;
 }
 
 void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1949,12 +2082,15 @@ void MenuPattern::HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index,
         if (parent->GetParent()->GetChildIndex(parent) == 0 && syntaxNode) {
             prevNode = GetForEachMenuItem(syntaxNode, false);
         }
-        if (parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG && parent->GetParent()->GetChildIndex(parent) == 0 &&
-            parent->GetParent()->GetTag() == V2::JS_IF_ELSE_ETS_TAG) { // the first item in first group in ifElse
+        bool matchFirstItemInIfElse = parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG &&
+            parent->GetParent()->GetChildIndex(parent) == 0 &&
+            parent->GetParent()->GetTag() == V2::JS_IF_ELSE_ETS_TAG;
+        if (matchFirstItemInIfElse) { // the first item in first group in ifElse
             prevNode = GetOutsideForEachMenuItem(parent->GetParent(), false);
         }
-        if (parent->GetParent()->GetChildIndex(parent) > 0 &&
-            parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) { // not first group in menu
+        bool notFirstGroupInMenu = parent->GetParent()->GetChildIndex(parent) > 0 &&
+            parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG;
+        if (notFirstGroupInMenu) {
             prevNode = GetOutsideForEachMenuItem(parent, false);
         }
     }

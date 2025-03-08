@@ -18,8 +18,8 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

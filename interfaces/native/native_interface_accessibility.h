@@ -105,6 +105,14 @@ typedef enum {
     ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_SET_TEXT = 0x00004000,
     /** Cursor position setting action. */
     ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_SET_CURSOR_POSITION = 0x00100000,
+    /** Support action for find next item in focus move operation
+     *  @since 15
+     */
+    ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_NEXT_HTML_ITEM = 0x02000000,
+    /** Support action for find previous item in focus move operation
+     *  @since 15
+     */
+    ARKUI_ACCESSIBILITY_NATIVE_ACTION_TYPE_PREVIOUS_HTML_ITEM = 0x04000000,
 } ArkUI_Accessibility_ActionType;
 
 /**

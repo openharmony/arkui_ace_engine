@@ -54,9 +54,11 @@ public:
     static void SetSelectIcon(FrameNode* frameNode, bool isShow = false);
     static void SetSelectIconSrc(FrameNode* frameNode, const std::string& src);
     static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange);
 
 private:
     void UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
+    void UpdateLabelFontColor(const RefPtr<NG::FrameNode>& menuItem, const Color& color);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H

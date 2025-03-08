@@ -143,6 +143,21 @@ void SetDragEventStrictReportingEnabledWithContext(ArkUI_Int32 instanceId, bool 
     NG::ViewAbstract::SetDragEventStrictReportingEnabled(instanceId, enabled);
 }
 
+ArkUI_Int32 RequestDragEndPending()
+{
+    return NG::DragDropFuncWrapper::RequestDragEndPending();
+}
+
+ArkUI_Int32 NotifyDragResult(ArkUI_Int32 requestId, ArkUI_Int32 result)
+{
+    return NG::DragDropFuncWrapper::NotifyDragResult(requestId, result);
+}
+
+ArkUI_Int32 NotifyDragEndPendingDone(ArkUI_Int32 requestId)
+{
+    return NG::DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
+}
+
 } // namespace
 const ArkUIDragAdapterAPI* GetDragAdapterAPI()
 {
@@ -155,7 +170,10 @@ const ArkUIDragAdapterAPI* GetDragAdapterAPI()
         .createDragActionWithContext = CreateDragActionWithContext,
         .setDragPreview = SetDragPreview,
         .setDragEventStrictReportingEnabledWithNode = SetDragEventStrictReportingEnabledWithNode,
-        .setDragEventStrictReportingEnabledWithContext = SetDragEventStrictReportingEnabledWithContext
+        .setDragEventStrictReportingEnabledWithContext = SetDragEventStrictReportingEnabledWithContext,
+        .requestDragEndPending = RequestDragEndPending,
+        .notifyDragResult = NotifyDragResult,
+        .notifyDragEndPendingDone = NotifyDragEndPendingDone
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;

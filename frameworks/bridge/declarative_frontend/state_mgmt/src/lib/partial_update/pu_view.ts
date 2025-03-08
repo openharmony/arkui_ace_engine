@@ -19,6 +19,7 @@
 
 type DFXCommand = { what: string, viewId: number, isRecursive: boolean };
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
+type PrebuildFunc = () => void;
 
 /**
  * A decorator function that sets the static `isReusable_` property to `true`
@@ -173,7 +174,7 @@ abstract class ViewPU extends PUV2ViewBase
 
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
-    PUV2ViewBase.arkThemeScopeManager?.onViewPUCreate(this)
+    ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this)
 
     if (localStorage) {
       this.localStorage_ = localStorage;
@@ -182,17 +183,6 @@ abstract class ViewPU extends PUV2ViewBase
 
     SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
-  }
-
-  onGlobalThemeChanged(): void {
-    this.onWillApplyThemeInternally();
-    this.forceCompleteRerender(false)
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (child) {
-        child.onGlobalThemeChanged();
-      }
-    });
   }
 
   // inform the subscribed property
@@ -204,14 +194,6 @@ abstract class ViewPU extends PUV2ViewBase
 
   aboutToRecycle(): void { }
 
-  private onWillApplyThemeInternally(): void {
-    const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this)
-    if (theme) {
-        this.onWillApplyTheme(theme)
-    }
-  }
-
-  onWillApplyTheme(theme: Theme): void {}
   // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
@@ -259,8 +241,9 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.getParent()) {
       this.getParent().removeChild(this);
     }
-    PUV2ViewBase.arkThemeScopeManager?.onViewPUDelete(this);
+    ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
+    PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
   }
 
   public purgeDeleteElmtId(rmElmtId: number): boolean {
@@ -393,7 +376,18 @@ abstract class ViewPU extends PUV2ViewBase
 
     // do not process an Element that has been marked to be deleted
     const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
-    const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+    if (!entry) {
+      stateMgmtProfiler.end();
+      return;
+    }
+    let updateFunc: UpdateFunc;
+    // if the element is pending, its updateFunc will not be executed during this function call, instead mark its UpdateFuncRecord as changed
+    // when the pending element is retaken and its UpdateFuncRecord is marked changed, then it will be inserted into dirtRetakenElementIds_
+    if (entry.isPending()) {
+      entry.setIsChanged(true);
+    } else {
+      updateFunc = entry.getUpdateFunc();
+    }
 
     if (typeof updateFunc !== 'function') {
       stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: update function of elmtId ${elmtId} not found, internal error!`);
@@ -447,6 +441,15 @@ abstract class ViewPU extends PUV2ViewBase
     aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size, this.id__(), this.dirtDescendantElementIds_.size, this.runReuse_);
     if (this.isRenderInProgress) {
       stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+    } else if (this.isPrebuilding_) {
+      const propertyChangedFunc: PrebuildFunc = () => {
+        this.viewPropertyHasChanged(varName, dependentElmtIds);
+      };
+      if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
+      }
+      PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
+      return;
     }
 
     this.syncInstanceId();
@@ -491,6 +494,16 @@ abstract class ViewPU extends PUV2ViewBase
  * FIXME will still use in the future?
  */
   public uiNodeNeedUpdateV2(elmtId: number): void {
+    if (this.isPrebuilding_) {
+      const propertyChangedFunc: PrebuildFunc = () => {
+        this.uiNodeNeedUpdateV2(elmtId);
+      };
+      if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
+      }
+      PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
+      return;
+    }
     if (this.isFirstRender()) {
       return;
     }
@@ -664,6 +677,12 @@ abstract class ViewPU extends PUV2ViewBase
       if (this.dirtDescendantElementIds_.size) {
         stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
       }
+
+      for (const dirtRetakenElementId of this.dirtRetakenElementIds_) {
+        this.dirtDescendantElementIds_.add(dirtRetakenElementId);
+      }
+      this.dirtRetakenElementIds_.clear();
+
     } while (this.dirtDescendantElementIds_.size);
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE, dump of ViewPU in next lines`);
     stateMgmtProfiler.end();
@@ -672,6 +691,14 @@ abstract class ViewPU extends PUV2ViewBase
   // executed on first render only
   // kept for backward compatibility with old ace-ets2bundle
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
+    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+      const prebuildFunc: PrebuildFunc = () => {
+        this.observeComponentCreation(compilerAssignedUpdateFunc);
+      };
+      PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+      ViewStackProcessor.PushPrebuildCompCmd();
+      return;
+    }
     if (this.isDeleting_) {
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation `);
       return;
@@ -702,6 +729,14 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: UIClassObject): void {
+    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+      const prebuildFunc: PrebuildFunc = () => {
+        this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
+      };
+      PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+      ViewStackProcessor.PushPrebuildCompCmd();
+      return;
+    }
     if (this.isDeleting_) {
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
       return;
@@ -715,7 +750,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV2 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
-      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
 
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
@@ -729,6 +764,7 @@ abstract class ViewPU extends PUV2ViewBase
       // enable V2 object deep observation
       // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
       if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
+        stateMgmtConsole.debug(`${this.debugInfo__()}: V2 dependency recording is enabled (uses ObserveV2.getObserve().startRecordDependencies, enables addRef)`)
         // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV2.getObserve().startRecordDependencies(this, elmtId);
@@ -753,7 +789,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       ViewStackProcessor.StopGetAccessRecording();
 
-      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateExit(elmtId)
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId)
 
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
       this.restoreInstanceId();
@@ -819,6 +855,14 @@ abstract class ViewPU extends PUV2ViewBase
    * @return void
    */
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+      const prebuildFunc: PrebuildFunc = () => {
+        this.observeRecycleComponentCreation(name, recycleUpdateFunc);
+      };
+      PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+      ViewStackProcessor.PushPrebuildCompCmd();
+      return;
+    }
     // convert recycle update func to update func
     const compilerAssignedUpdateFunc: UpdateFunc = (element, isFirstRender) => {
       recycleUpdateFunc(element, isFirstRender, undefined);

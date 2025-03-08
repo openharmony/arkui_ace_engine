@@ -14,30 +14,9 @@
  */
 #include "js_third_provider_interaction_operation.h"
 
-#include <algorithm>
-
-#include "accessibility_constants.h"
-#include "accessibility_event_info.h"
 #include "accessibility_system_ability_client.h"
-#include "adapter/ohos/entrance/ace_application_info.h"
-#include "adapter/ohos/entrance/ace_container.h"
-#include "base/log/ace_trace.h"
-#include "base/log/dump_log.h"
-#include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/accessibility/accessibility_manager_ng.h"
-#include "core/components_ng/base/inspector.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
-#include "js_accessibility_manager.h"
 #include "js_third_accessibility_hover_ng.h"
-#include "nlohmann/json.hpp"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;
@@ -45,12 +24,25 @@ using namespace std;
 
 namespace OHOS::Ace::Framework {
 constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
+constexpr int64_t INVALID_NODE_ID = -1;
+
+namespace {
+bool IsTouchExplorationEnabled(const RefPtr<NG::PipelineContext>& context)
+{
+    CHECK_NULL_RETURN(context, true);
+    auto jsAccessibilityManager = context->GetAccessibilityManager();
+    CHECK_NULL_RETURN(jsAccessibilityManager, true);
+    auto accessibilityWorkMode = jsAccessibilityManager->GenerateAccessibilityWorkMode();
+    return accessibilityWorkMode.isTouchExplorationEnabled;
+}
+} // namespace
 
 bool AccessibilityHoverManagerForThirdNG::GetElementInfoForThird(
     int64_t elementId,
     AccessibilityElementInfo& info,
     int64_t hostElementId)
 {
+    // this function only for third party hover process
     auto jsThirdProviderOperator =
         GetJsThirdProviderInteractionOperation(hostElementId).lock();
     if (jsThirdProviderOperator == nullptr) {
@@ -62,7 +54,7 @@ bool AccessibilityHoverManagerForThirdNG::GetElementInfoForThird(
 
     std::list<Accessibility::AccessibilityElementInfo> infos;
     bool ret = jsThirdProviderOperator->FindAccessibilityNodeInfosByIdFromProvider(
-        elementId, 0, 0, infos);
+        elementId, 0, 0, infos, true); // offset in hover no need fix host offset
     if ((!ret) || (infos.size() == 0)) {
         TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY,
             "cannot get third elementinfo :%{public}" PRId64 ", ret: %{public}d",
@@ -162,8 +154,7 @@ bool AccessibilityHoverManagerForThirdNG::HoverPathForThirdRecursive(
     const int64_t hostElementId,
     const NG::PointF& hoverPoint,
     const AccessibilityElementInfo& nodeInfo,
-    AccessibilityHoverTestPathForThird& path,
-    NG::OffsetF hostOffset)
+    AccessibilityHoverTestPathForThird& path)
 {
     bool hitTarget = false;
     auto [shouldSearchSelf, shouldSearchChildren]
@@ -174,7 +165,6 @@ bool AccessibilityHoverManagerForThirdNG::HoverPathForThirdRecursive(
     auto width = rectInScreen.GetRightBottomXScreenPostion() - rectInScreen.GetLeftTopXScreenPostion();
     auto height = rectInScreen.GetRightBottomYScreenPostion() - rectInScreen.GetLeftTopYScreenPostion();
     NG::RectF rect { left, right, width, height };
-    rect = rect - hostOffset;
     bool hitSelf = rect.IsInnerRegion(hoverPoint);
     if (hitSelf && shouldSearchSelf) {
         hitTarget = true;
@@ -192,7 +182,7 @@ bool AccessibilityHoverManagerForThirdNG::HoverPathForThirdRecursive(
                 break;
             }
             if (HoverPathForThirdRecursive(
-                hostElementId, hoverPoint, childInfo, path, hostOffset)) {
+                hostElementId, hoverPoint, childInfo, path)) {
                 return true;
             }
         }
@@ -203,43 +193,42 @@ bool AccessibilityHoverManagerForThirdNG::HoverPathForThirdRecursive(
 AccessibilityHoverTestPathForThird AccessibilityHoverManagerForThirdNG::HoverPathForThird(
     const int64_t hostElementId,
     const NG::PointF& point,
-    AccessibilityElementInfo& rootInfo,
-    NG::OffsetF hostOffset)
+    AccessibilityElementInfo& rootInfo)
 {
     AccessibilityHoverTestPathForThird path;
     HoverPathForThirdRecursive(
-        hostElementId, point, rootInfo, path, hostOffset);
+        hostElementId, point, rootInfo, path);
     return path;
 }
 
 void AccessibilityHoverManagerForThirdNG::ResetHoverForThirdState()
 {
     hoverForThirdState_.idle = true;
+    hoverForThirdState_.thirdOperationIdle = true;
     hoverForThirdState_.nodesHovering.clear();
 }
 
-void AccessibilityHoverManagerForThirdNG::HandleAccessibilityHoverForThird(
+void AccessibilityHoverManagerForThirdNG::HandleAccessibilityHoverForThirdInner(
     const AccessibilityHoverForThirdConfig& config)
 {
-    CHECK_NULL_VOID(config.hostNode);
     if (config.eventType == NG::AccessibilityHoverEventType::ENTER) {
         ResetHoverForThirdState();
     }
+    hoverForThirdState_.thirdOperationIdle = false;
     std::vector<int64_t> currentNodesHovering;
     std::vector<int64_t> lastNodesHovering = hoverForThirdState_.nodesHovering;
     if (config.eventType != NG::AccessibilityHoverEventType::EXIT) {
         AccessibilityElementInfo rootInfo;
         if (GetElementInfoForThird(-1, rootInfo, config.hostElementId) == false) {
+            ResetHoverForThirdState();
             return;
         }
-        auto [displayOffset, err] = config.hostNode->GetPaintRectGlobalOffsetWithTranslate();
         AccessibilityHoverTestPathForThird path =
-            HoverPathForThird(config.hostElementId, config.point, rootInfo, displayOffset);
+            HoverPathForThird(config.hostElementId, config.point, rootInfo);
         for (const auto& node: path) {
             currentNodesHovering.push_back(node);
         }
     }
-    static constexpr int64_t INVALID_NODE_ID = -1;
     int64_t lastHoveringId = INVALID_NODE_ID;
     if (!lastNodesHovering.empty()) {
         lastHoveringId = lastNodesHovering.back();
@@ -253,6 +242,7 @@ void AccessibilityHoverManagerForThirdNG::HandleAccessibilityHoverForThird(
     if (jsThirdProviderOperator == nullptr) {
         TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "jsThirdProviderOperator is null, "
             "hostElementId %{public}" PRId64, config.hostElementId);
+        ResetHoverForThirdState();
         return;
     }
     if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
@@ -267,6 +257,24 @@ void AccessibilityHoverManagerForThirdNG::HandleAccessibilityHoverForThird(
     hoverForThirdState_.time = config.time;
     hoverForThirdState_.source = config.sourceType;
     hoverForThirdState_.idle = config.eventType == NG::AccessibilityHoverEventType::EXIT;
+    hoverForThirdState_.thirdOperationIdle = true;
+}
+
+void AccessibilityHoverManagerForThirdNG::HandleAccessibilityHoverForThird(
+    const AccessibilityHoverForThirdConfig& config)
+{
+    if (!hoverForThirdState_.thirdOperationIdle) {
+        return;
+    }
+    CHECK_NULL_VOID(config.context);
+    config.context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), config] {
+            auto accessibilityHoverManagerForThirdNG = weak.Upgrade();
+            CHECK_NULL_VOID(accessibilityHoverManagerForThirdNG);
+            AccessibilityHoverForThirdConfig asyncConfig = config;
+            accessibilityHoverManagerForThirdNG->HandleAccessibilityHoverForThirdInner(asyncConfig);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIHandleAccessibilityHoverForThird");
 }
 
 bool AccessibilityHoverManagerForThirdNG::ClearThirdAccessibilityFocus(
@@ -286,6 +294,11 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
     const RefPtr<NG::PipelineContext>& context,
     bool isNeedClear)
 {
+    if (!isNeedClear && !IsTouchExplorationEnabled(context)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "third Accessibility focus or update focus but is not in touch mode");
+        return true;
+    }
+
     CHECK_NULL_RETURN(hostNode, false);
     RefPtr<NG::RenderContext> renderContext = nullptr;
     renderContext = hostNode->GetRenderContext();
@@ -298,12 +311,19 @@ bool AccessibilityHoverManagerForThirdNG::ActThirdAccessibilityFocus(
         return true;
     }
     renderContext->UpdateAccessibilityFocus(false);
-    auto [displayOffset, err] = hostNode->GetPaintRectGlobalOffsetWithTranslate();
     auto rectInScreen = nodeInfo.GetRectInScreen();
-    auto left = rectInScreen.GetLeftTopXScreenPostion() - static_cast<int32_t>(displayOffset.GetX());
-    auto right = rectInScreen.GetLeftTopYScreenPostion() - static_cast<int32_t>(displayOffset.GetY());
+    auto left = rectInScreen.GetLeftTopXScreenPostion();
+    auto right = rectInScreen.GetLeftTopYScreenPostion();
     auto width = rectInScreen.GetRightBottomXScreenPostion() - rectInScreen.GetLeftTopXScreenPostion();
     auto height = rectInScreen.GetRightBottomYScreenPostion() - rectInScreen.GetLeftTopYScreenPostion();
+    if ((width == 0) && (height == 0)) {
+        renderContext->UpdateAccessibilityFocus(false);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "third act Accessibility element Id %{public}" PRId64 "Focus clear by null rect",
+            nodeInfo.GetAccessibilityId());
+        return true;
+    }
+
     NG::RectT<int32_t> rectInt { static_cast<int32_t>(left), static_cast<int32_t>(right),
         static_cast<int32_t>(width), static_cast<int32_t>(height) };
     
@@ -329,17 +349,6 @@ void AccessibilityHoverManagerForThirdNG::DeregisterJsThirdProviderInteractionOp
 }
 
 namespace {
-struct DumpInfoArgument {
-    bool useWindowId = false;
-    DumpMode mode = DumpMode::TREE;
-    bool isDumpSimplify = false;
-    bool verbose = false;
-    int64_t rootId = -1;
-    int32_t pointX = 0;
-    int32_t pointY = 0;
-    int64_t nodeId = -1;
-    int32_t action = 0;
-};
 
 bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument)
 {

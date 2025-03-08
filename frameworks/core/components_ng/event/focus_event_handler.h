@@ -65,6 +65,7 @@ struct FocusEvent {
     FocusIntension intension;
     const NonPointerEvent& event;
     static FocusIntension GetFocusIntension(const NonPointerEvent& event);
+    static FocusIntension GetFocusIntensionFromKey(KeyIntention keyIntention);
 };
 
 class ACE_EXPORT FocusCallbackEvents : public virtual AceType {
@@ -123,6 +124,7 @@ protected:
     bool OnCrownEvent(const CrownEvent& CrownEvent);
     bool OnFocusEvent(const FocusEvent& event);
     virtual bool HandleFocusTravel(const FocusEvent& event) = 0; // bad design which need to be deleted
+    int32_t GetKeyProcessingMode();
 
     ACE_DEFINE_FOCUS_EVENT(OnFocusCallback, OnFocusFunc, onFocusCallback)
     ACE_DEFINE_FOCUS_EVENT(OnBlurCallback, OnBlurFunc, onBlurCallback)

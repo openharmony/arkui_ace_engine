@@ -19,6 +19,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/base/inspector.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -95,9 +96,6 @@ RefPtr<FocusManager> FocusHub::GetFocusManager() const
     auto focusManager = context->GetOrCreateFocusManager();
     return focusManager;
 }
-
-FocusState::FocusState(const WeakPtr<EventHub>& eventHub, FocusType type) : eventHub_(eventHub), focusType_(type) {}
-FocusState::FocusState(const WeakPtr<FrameNode>& frameNode, FocusType type) : frameNode_(frameNode), focusType_(type) {}
 
 RefPtr<FrameNode> FocusState::GetFrameNode() const
 {
@@ -225,7 +223,23 @@ bool FocusHub::HandleEvent(const NonPointerEvent& event)
     bool rightArrowPressed = focusEvent.intension == FocusIntension::RIGHT;
     hasForwardMovement_ = (tabOnlyPressed || rightArrowPressed);
 
+    auto keyProcessingMode = static_cast<KeyProcessingMode>(GetKeyProcessingMode());
+    if (keyProcessingMode == KeyProcessingMode::ANCESTOR_EVENT) {
+        if (!OnFocusEvent(focusEvent)) {
+            return HandleFocusNavigation(focusEvent);
+        }
+        return true;
+    }
     return OnFocusEvent(focusEvent);
+}
+
+bool FocusHub::HandleFocusNavigation(const FocusEvent& event)
+{
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    if (lastFocusNode && lastFocusNode->IsCurrentFocus() && lastFocusNode->HandleFocusNavigation(event)) {
+        return true;
+    }
+    return HandleFocusTravel(event);
 }
 
 bool FocusHub::HandleFocusTravel(const FocusEvent& event)
@@ -369,9 +383,10 @@ void FocusHub::DumpFocusUie()
 
 bool FocusHub::RequestFocusImmediately(FocusReason focusReason)
 {
+    auto frameNode = GetFrameNode();
     TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d)
-        " RequestFocusImmediately",
-        GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
+        " RequestFocusImmediately isOnMainTree:%{public}d",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()), frameNode ? frameNode->IsOnMainTree() : -1);
     return RequestFocusImmediatelyInner(focusReason);
 }
 
@@ -810,8 +825,33 @@ bool FocusHub::GetNextFocusByStep(const KeyEvent& keyEvent)
     return RequestNextFocusByKey(event);
 }
 
+bool FocusHub::RequestUserNextFocus(const FocusEvent& event)
+{
+    CHECK_EQUAL_RETURN(nextStep_.empty(), true, false);
+    int32_t key = static_cast<int32_t>(event.intension);
+    auto item = nextStep_.find(key);
+    if (item  == nextStep_.end()) {
+        return false;
+    }
+    const auto& input = item->second;
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (std::holds_alternative<std::string>(input)) {
+        frameNode = Inspector::GetFrameNodeByKey(std::get<std::string>(input));
+    } else if (std::holds_alternative<WeakPtr<AceType>>(input)) {
+        frameNode = AceType::DynamicCast<FrameNode>(std::get<WeakPtr<AceType>>(input).Upgrade());
+    }
+    if (frameNode == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Cannot find user specified nextFocus.");
+        return false;
+    }
+    auto focusHub = frameNode->GetFocusHub();
+    return focusHub->RequestFocusImmediately();
+}
+
 bool FocusHub::RequestNextFocusByKey(const FocusEvent& event)
 {
+    CHECK_EQUAL_RETURN(RequestUserNextFocus(event), true, true);
+
     switch (event.intension) {
         case FocusIntension::TAB:
         case FocusIntension::SHIFT_TAB:
@@ -1095,7 +1135,7 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
 
     bool canChildBeFocused = false;
     canChildBeFocused = AnyChildFocusHub(
-        [this, isHead](const RefPtr<FocusHub>& node) {
+        [isHead](const RefPtr<FocusHub>& node) {
             if (GetNextFocusNodeCustom(node, FocusReason::FOCUS_TRAVEL)) {
                 return true;
             }
@@ -1351,6 +1391,8 @@ void FocusHub::OnBlurNode()
         onBlurInternal_();
     }
     if (onBlurReasonInternal_) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) "trigger onBlurReasonInternal by %{public}d",
+            GetFrameName().c_str(), SEC_PARAM(GetFrameId()), blurReason_);
         onBlurReasonInternal_(blurReason_);
     }
     auto frameNode = GetFrameNode();
@@ -1654,6 +1696,7 @@ bool FocusHub::PaintAllFocusState()
         return onPaintFocusStateCallback_();
     }
     if (focusStyleType_ != FocusStyleType::NONE) {
+        focusManager->SetLastFocusStateNode(AceType::Claim(this));
         return false;
     }
 
@@ -1703,10 +1746,12 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     if (NEAR_ZERO(paintWidth.Value())) {
         return true;
     }
-    Dimension focusPaddingVp;
-    GetPaintPaddingVp(focusPaddingVp);
-    renderContext->PaintFocusState(
-        paintRect, focusPaddingVp, paintColor, paintWidth, {false, appTheme->IsFocusBoxGlow()});
+    if (box_.paintStyle_ && box_.paintStyle_->margin) {
+        Dimension focusPaddingVp = box_.paintStyle_->margin.value();
+        renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth, appTheme->IsFocusBoxGlow());
+    } else {
+        renderContext->PaintFocusState(paintRect, paintColor, paintWidth, false, appTheme->IsFocusBoxGlow());
+    }
     return true;
 }
 

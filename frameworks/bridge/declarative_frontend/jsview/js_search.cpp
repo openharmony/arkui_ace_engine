@@ -17,9 +17,7 @@
 
 #include <optional>
 #include <string>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
@@ -316,12 +314,12 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 
         // set button font size, unit FP
         auto fontSize = param->GetProperty("fontSize");
-        CalcDimension size = theme->GetFontSize();
+        CalcDimension size = theme->GetButtonFontSize();
         if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
             GreatOrEqual(size.Value(), 0.0)) {
             ParseJsDimensionFp(fontSize, size);
         } else {
-            size = theme->GetFontSize();
+            size = theme->GetButtonFontSize();
         }
         SearchModel::GetInstance()->SetSearchButtonFontSize(size);
 
@@ -339,7 +337,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
             SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
         }
     } else {
-        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
+        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetButtonFontSize());
         SearchModel::GetInstance()->ResetSearchButtonFontColor();
     }
 }
@@ -941,9 +939,7 @@ void JSSearch::CreateJsSearchCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {stringValue, dataObject};
         func->Execute(param);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit");
     };
     SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
@@ -1064,9 +1060,7 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste");
     };
     SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -1445,8 +1439,8 @@ void JSSearch::SetKeyboardAppearance(const JSCallbackInfo& info)
         return;
     }
     auto keyboardAppearance = info[0]->ToNumber<uint32_t>();
-    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
-        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+    if (keyboardAppearance < static_cast<uint32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<uint32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
         SearchModel::GetInstance()->SetKeyboardAppearance(
             static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
         return;

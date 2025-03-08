@@ -288,7 +288,9 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
         finalOptions.bgOptions.color = Color(options.colorValue.value);
     }
     if (options.blurStyle.isSet) {
-        finalOptions.bgOptions.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        BlurStyleOption blurStyleOption;
+        blurStyleOption.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        finalOptions.bgOptions.blurStyleOption = blurStyleOption;
     }
     if (options.barStyle.isSet) {
         finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);
@@ -446,7 +448,8 @@ void SetOnCoordScrollStartAction(ArkUINodeHandle node, void (*onCoordScrollStart
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
-        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
         onCoordScrollStartAction(nodeHandle);
     };
     NavigationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
@@ -459,7 +462,8 @@ void SetOnCoordScrollUpdateAction(ArkUINodeHandle node,
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollUpdateActionCallBack =
         [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
-            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+            auto frameNode = node.Upgrade();
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
             onCoordScrollUpdateAction(nodeHandle, currentOffset);
         };
     NavigationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
@@ -470,7 +474,8 @@ void SetOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndActi
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
-        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
         onCoordScrollEndAction(nodeHandle);
     };
     NavigationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));
@@ -482,6 +487,20 @@ void SetSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
     CHECK_NULL_VOID(frameNode);
     auto contentColor = Color(value);
     NavigationModelNG::SetSystemBarStyle(frameNode, contentColor);
+}
+
+void SetEnableToolBarAdaptation(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableToolBarAdaptation(frameNode, enable);
+}
+
+void ResetEnableToolBarAdaptation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableToolBarAdaptation(frameNode, false);
 }
 
 namespace NodeModifier {
@@ -535,6 +554,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .setOnCoordScrollUpdateAction = SetOnCoordScrollUpdateAction,
         .setOnCoordScrollEndAction = SetOnCoordScrollEndAction,
         .setSystemBarStyle = SetSystemBarStyle,
+        .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
+        .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -573,6 +594,8 @@ const CJUINavigationModifier* GetCJUINavigationModifier()
         .resetNavBarWidth = ResetNavBarWidth,
         .setNavIgnoreLayoutSafeArea = SetNavIgnoreLayoutSafeArea,
         .resetNavIgnoreLayoutSafeArea = ResetNavIgnoreLayoutSafeArea,
+        .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
+        .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

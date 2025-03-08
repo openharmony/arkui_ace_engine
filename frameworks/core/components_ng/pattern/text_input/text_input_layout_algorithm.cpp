@@ -140,23 +140,22 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize() -
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto size = geometryNode->GetFrameSize() -
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    const auto& content = geometryNode->GetContent();
     CHECK_NULL_VOID(content);
     SizeT<float> contentSize = content->GetRect().GetSize();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    PipelineContext* context = layoutWrapper->GetHostNode()->GetContext();
+    PipelineContext* context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset(false, true) -
-        context->GetRootRect().GetOffset();
+    parentGlobalOffset_ = frameNode->GetPaintRectOffset(false, true) - context->GetRootRect().GetOffset();
     Alignment align = Alignment::CENTER;
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto hasAlign = false;
     if (layoutProperty->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
-        hasAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
     auto border = pattern->GetBorderWidthProperty();
     OffsetF offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(border),

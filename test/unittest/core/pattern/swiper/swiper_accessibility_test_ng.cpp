@@ -69,9 +69,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.expected: ACTION_SCROLL_FORWARD
      */
     accessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_FORWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step2. Show next page, Current is second(middle) page
@@ -79,10 +78,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
      */
     ShowNext();
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_FORWARD, AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step3. Show last page, Current is last page
@@ -90,9 +87,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
      */
     ChangeIndex(3);
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.cases: Swiper is loop
@@ -100,10 +96,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
      */
     model.SetLoop(AceType::RawPtr(frameNode_), true);
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_FORWARD, AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -122,7 +116,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty002, TestSize.Level1)
     CreateSwiperDone();
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
     accessibilityProperty_->ResetSupportAction();
-    EXPECT_EQ(GetActions(accessibilityProperty_), 0);
+    std::unordered_set<AceAction> expectedActions = {};
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**

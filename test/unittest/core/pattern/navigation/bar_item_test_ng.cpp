@@ -262,4 +262,68 @@ HWTEST_F(BarItemTestNg, BarItemPattern001, TestSize.Level1)
     EXPECT_EQ(barItemPattern_->GetCurrentIconStatus(), ToolbarIconStatus::INITIAL);
     DestroyBarItemObject();
 }
+
+/**
+ * @tc.name: SetIsHideItemText001
+ * @tc.desc: Test SetIsHideItemText interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarItemTestNg, SetToolBarItemHideText001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    bool hideText = true;
+    barItemNode->SetIsHideItemText(hideText);
+    bool result = barItemNode->isHideText_;
+    EXPECT_EQ(result, hideText);
+}
+
+/**
+ * @tc.name: SetIsHideItemText002
+ * @tc.desc: Test SetIsHideItemText interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarItemTestNg, SetToolBarItemHideText002, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    bool showText = false;
+    barItemNode->SetIsHideItemText(showText);
+    bool result = barItemNode->isHideText_;
+    EXPECT_EQ(result, showText);
+}
+
+/**
+ * @tc.name: IsHideItemText001
+ * @tc.desc: Test IsHideItemText interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarItemTestNg, IsToolBarItemHideText001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    bool hideText = true;
+    barItemNode->SetIsHideItemText(hideText);
+    bool result = barItemNode->IsHideText();
+    EXPECT_EQ(result, hideText);
+}
+
+/**
+ * @tc.name: IsHideItemText002
+ * @tc.desc: Test IsHideItemText interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarItemTestNg, IsToolBarItemHideText002, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    bool showText = false;
+    barItemNode->SetIsHideItemText(showText);
+    bool result = barItemNode->IsHideText();
+    EXPECT_EQ(result, showText);
+}
 } // namespace OHOS::Ace::NG

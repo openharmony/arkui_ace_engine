@@ -56,10 +56,18 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     CHECK_NULL_VOID(layoutWrapper);
     auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(layoutWrapper->GetHostNode());
     float safeAreaTop = safeAreaInsets.top_.Length();
+    auto toastProp = DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+    Alignment alignment = toastProp->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER || alignment == Alignment::TOP_RIGHT) {
+        auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        CHECK_NULL_VOID(toastTheme);
+        safeAreaTop += toastTheme->GetTop().ConvertToPx();
+    }
     const auto& safeArea = toastProps->GetSafeAreaInsets();
     limitPos_ = Dimension(GreatNotEqual(safeAreaTop, 0) ? safeAreaTop : LIMIT_SPACING.ConvertToPx());
     // Default Toast need to avoid keyboard, but the Top mode doesn't need.
-    auto useOldSafeArea = safeArea && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+    auto useOldSafeArea = safeArea && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     float safeAreaBottom = useOldSafeArea ? safeArea->bottom_.Length() : safeAreaInsets.bottom_.Length();
 
     if (IsSystemTopMost()) {
@@ -145,6 +153,21 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
     }
 }
 
+void ToastPattern::FoldStatusChangedAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+    option.SetCurve(curve);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    AnimationUtils::Animate(option, [host, context]() {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        context->FlushUITasks();
+    });
+}
+
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
     CHECK_NULL_RETURN(dirty, false);
@@ -190,10 +213,7 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         CHECK_NULL_RETURN(subContext, false);
         subContext->Animate(option, option.GetCurve(), func);
     } else {
-        // animation effect of the toast position change
-        AnimationOption option;
-        auto translationCurve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
-        context->Animate(option, translationCurve, func);
+        func();
     }
     return true;
 }
@@ -259,7 +279,8 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     offsetY += Dimension(wrapperRect_.Top());
     bool needResizeBottom = false;
     AdjustOffsetForKeyboard(offsetY, defaultBottom_.ConvertToPx(), textHeight, needResizeBottom);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && needResizeBottom &&
+    needResizeBottom = needResizeBottom || (!toastProp->HasToastAlignment() && toastInfo_.bottom.empty());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && needResizeBottom &&
         !GreatNotEqual(offsetY.Value(), 0)) {
         return limitPos_ + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
     }
@@ -300,7 +321,7 @@ void ToastPattern::AdjustOffsetForKeyboard(
             }
         }
     }
-    if (((IsDefaultToast() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) ||
+    if (((IsDefaultToast() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) ||
             IsTopMostToast()) &&
         GreatNotEqual(keyboardInset, 0) && (offsetY.Value() + textHeight > keyboardOffset)) {
         needResizeBottom = true;
@@ -336,7 +357,9 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void ToastPattern::BeforeCreateLayoutWrapper()
 {
-    PopupBasePattern::BeforeCreateLayoutWrapper();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        PopupBasePattern::BeforeCreateLayoutWrapper();
+    }
 
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
@@ -448,10 +471,8 @@ void ToastPattern::OnAttachToFrameNode()
         pipeline->RegisterHalfFoldHoverChangedCallback([weak = WeakClaim(this)](bool isHoverMode) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
             if (isHoverMode != pattern->isHoverMode_) {
-                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                pattern->FoldStatusChangedAnimation();
             }
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);

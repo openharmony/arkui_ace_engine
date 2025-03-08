@@ -14,10 +14,13 @@
  */
 
 #include "frameworks/core/components_ng/svg/parse/svg_image.h"
+#include "frameworks/core/common/container.h"
 
 #include "base/base64/base64_util.h"
 #include "core/components_ng/svg/parse/svg_constants.h"
 #include "core/image/image_source_info.h"
+#include "core/common/ace_application_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -189,12 +192,28 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
     if (NearEqual(realSize.Width(), 0.0f) || NearEqual(realSize.Height(), 0.0f)) {
         return RSRect(0, 0, 0, 0);
     }
-    auto scaleValue = std::min(viewBox.Width() / realSize.Width(), viewBox.Height() / realSize.Height());
-    auto spaceX = viewBox.Width() - realSize.Width() * scaleValue;
-    auto spaceY = viewBox.Height() - realSize.Height() * scaleValue;
-    auto offsetX = viewBox.Left() + spaceX * 0.5f; // 0.5f Align Center
-    auto offsetY = viewBox.Top() + spaceY * 0.5f; // 0.5f Align Center
-    return RSRect(offsetX, offsetY, realSize.Width() * scaleValue + offsetX, realSize.Height() * scaleValue + offsetY);
+    auto scaleX = 0.0f;
+    auto scaleY = 0.0f;
+    auto offsetX = 0.0f;
+    auto offsetY = 0.0f;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        scaleX = std::min(viewBox.Width() / realSize.Width(), viewBox.Height() / realSize.Height());
+        scaleY = scaleX;
+        auto spaceX = viewBox.Width() - realSize.Width() * scaleX;
+        auto spaceY = viewBox.Height() - realSize.Height() * scaleY;
+        offsetX = viewBox.Left() + spaceX * 0.5f; // 0.5f Align Center
+        offsetY = viewBox.Top() + spaceY * 0.5f; // 0.5f Align Center
+        return RSRect(offsetX, offsetY, realSize.Width() * scaleX + offsetX, realSize.Height() * scaleY + offsetY);
+    }
+    auto translateX = 0.0f;
+    auto translateY = 0.0f;
+    SvgPreserveAspectRatio preserveAspectRatio;
+    SvgAttributesParser::ComputeScale(viewBox.GetSize(), realSize, preserveAspectRatio, scaleX, scaleY);
+    SvgAttributesParser::ComputeTranslate(viewBox.GetSize(), realSize, scaleX, scaleY, preserveAspectRatio.svgAlign,
+        translateX, translateY);
+    offsetX = viewBox.Left() + translateX;
+    offsetY = viewBox.Top() + translateY;
+    return RSRect(offsetX, offsetY, realSize.Width() * scaleX + offsetX, realSize.Height() * scaleY + offsetY);
 }
 
 bool SvgImage::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)

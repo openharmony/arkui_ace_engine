@@ -69,6 +69,27 @@ void EventPassThroughSubscriber::OnReceiveEvent(const CommonEventData& data)
 {
     auto want = data.GetWant();
     std::string action = want.GetAction();
+    std::string bundleName = want.GetBundle();
+    if (bundleName.empty()) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "OnReceiveEvent empty bundleName");
+        return;
+    }
+    bool needPassThrough = false;
+    for (const auto& instanceId : instanceMap_) {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        if (!container) {
+            continue;
+        }
+        if (container->GetBundleName() == bundleName) {
+            needPassThrough = true;
+            break;
+        }
+    }
+    if (!needPassThrough) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "OnReceiveEvent no matched bundleName");
+        return;
+    }
+
     if (action == TOUCH_EVENTS_PASS_THROUGH) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "OnReceiveEvent touch.events.pass.through event");
         AceApplicationInfo::GetInstance().SetTouchEventsPassThroughMode(true);

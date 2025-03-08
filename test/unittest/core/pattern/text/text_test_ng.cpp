@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#include "text_base.h"
-
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "text_base.h"
+#include "ui/base/geometry/dimension.h"
 
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +34,9 @@ const std::string IMAGE_VALUE = "image1";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
 const std::string TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime";
+const std::u16string NORMAL_URL = u"www.baidu.com";
+const std::u16string JUMP_LINK_HTTP = u"http://www.baidu.com";
+const std::u16string JUMP_LINK_HTTPS = u"https://www.baidu.com";
 constexpr uint32_t DEFAULT_NODE_ID = 0;
 constexpr uint32_t UKNOWN_VALUE = 0;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
@@ -40,6 +44,8 @@ constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;
 constexpr uint32_t MAX_LINES_VALUE0 = 3;
 constexpr uint32_t MAX_LINES_VALUE1 = 4;
 constexpr uint32_t MAX_LINES_VALUE2 = 7;
+constexpr uint32_t MAX_LINES_VALUE3 = 10;
+constexpr uint32_t MAX_LINES_VALUE4 = 5;
 void ConstructGestureStyle(GestureStyle& gestureInfo)
 {
     auto onClick = [](const BaseEventInfo* info) {};
@@ -199,6 +205,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
     textModelNG.SetOnClick(onClickFunc, std::numeric_limits<double>::infinity());
     textModelNG.SetRemoteMessage(onRemoteMessage);
     textModelNG.SetCopyOption(copyOption);
+    textModelNG.SetOnDragStart(OnDragStartFunction);
 }
 
 /**
@@ -492,6 +499,231 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
         EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
         EXPECT_EQ(pattern->textSelector_.GetTextEnd(), TEXT_SIZE_INT);
     }
+}
+
+/**
+ * @tc.name: OnWindowHide001
+ * @tc.desc: Test TextPattern OnWindowHide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnWindowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnWindowHide function.
+     */
+    (void)textPattern->GetOrCreateMagnifier();
+    (void)textPattern->CreateNodePaintMethod();
+    textPattern->OnWindowHide();
+    EXPECT_NE(textPattern->GetContentModifier(), nullptr);
+}
+
+/**
+ * @tc.name: OnWindowShow001
+ * @tc.desc: Test TextPattern OnWindowShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnWindowShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnWindowShow function.
+     */
+    (void)textPattern->CreateNodePaintMethod();
+    textPattern->OnWindowShow();
+    EXPECT_NE(textPattern->GetContentModifier(), nullptr);
+}
+
+/**
+ * @tc.name: InitUrlMouseEvent001
+ * @tc.desc: Test TextPattern InitUrlMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, InitUrlMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call InitUrlMouseEvent function.
+     */
+    textPattern->InitUrlMouseEvent();
+    EXPECT_TRUE(textPattern->urlMouseEventInitialized_);
+}
+
+/**
+ * @tc.name: URLOnHover001
+ * @tc.desc: Test TextPattern URLOnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, URLOnHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call URLOnHover function.
+     */
+    textPattern->CreateModifier();
+    textPattern->overlayMod_->SetSelectedForegroundColorAndRects({ { 5, 5, 5, 5 }, { 0, 0, 0, 0 } }, 1);
+    textPattern->URLOnHover(false);
+    EXPECT_TRUE(textPattern->overlayMod_->selectedUrlRects_.empty());
+}
+
+/**
+ * @tc.name: OnHover001
+ * @tc.desc: Test TextPattern OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnHover function.
+     */
+    textPattern->OnHover(true);
+    EXPECT_EQ(textPattern->currentMouseStyle_, MouseFormat::DEFAULT);
+    textPattern->OnHover(false);
+    EXPECT_EQ(textPattern->currentMouseStyle_, MouseFormat::DEFAULT);
+}
+
+/**
+ * @tc.name: CalcAIMenuPosition001
+ * @tc.desc: Test TextPattern CalcAIMenuPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CalcAIMenuPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call CalcAIMenuPosition function.
+     */
+    AISpan aiSpan;
+    bool calledCalculateHandleFunc = false;
+    CalculateHandleFunc calculateHandleFunc = [&calledCalculateHandleFunc]() {
+        calledCalculateHandleFunc = true;
+    };
+    textPattern->textSelector_.firstHandle = RectF(0, 0, 0, 0);
+    textPattern->textSelector_.secondHandle = RectF(1, 1, 5, 5);
+    textPattern->CalcAIMenuPosition(aiSpan, calculateHandleFunc);
+    EXPECT_TRUE(calledCalculateHandleFunc);
+}
+
+/**
+ * @tc.name: TryLinkJump001
+ * @tc.desc: Test TextPattern TryLinkJump.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TryLinkJump001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set link jump callback.
+     */
+    auto pipeline = textFrameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto linkJumpCallback = [](const std::string& link) {};
+    pipeline->SetLinkJumpCallback(linkJumpCallback);
+
+    /**
+     * @tc.steps: step3. get span node and span item.
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    auto spanItem = spanNode->GetSpanItem();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. update spanNode content and call TryLinkJump funciton.
+     * jump link: "www.baidu.com"
+     */
+    spanNode->UpdateContent(NORMAL_URL);
+    EXPECT_FALSE(textPattern->TryLinkJump(spanItem));
+
+    // jump link: "http://www.baidu.com"
+    spanNode->UpdateContent(JUMP_LINK_HTTP);
+    EXPECT_TRUE(textPattern->TryLinkJump(spanItem));
+
+    // jump link: "https://www.baidu.com"
+    spanNode->UpdateContent(JUMP_LINK_HTTPS);
+    EXPECT_TRUE(textPattern->TryLinkJump(spanItem));
+}
+
+/**
+ * @tc.name: ActTextOnClick001
+ * @tc.desc: Test TextPattern ActTextOnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ActTextOnClick001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create GestureEvent and call ActTextOnClick function.
+     */
+    GestureEvent info;
+    textPattern->SetOnClickEvent(nullptr);
+    textPattern->ActTextOnClick(info);
+    EXPECT_EQ(textPattern->onClick_, nullptr);
+
+    auto clickFunc = [](GestureEvent& info) {};
+    textPattern->SetOnClickEvent(clickFunc);
+    textPattern->ActTextOnClick(info);
+    EXPECT_NE(textPattern->onClick_, nullptr);
 }
 
 /**
@@ -3879,7 +4111,7 @@ HWTEST_F(TextTestNg, TextPattern016, TestSize.Level1)
     int32_t newHeight = 1;
     int32_t prevWidth = 0;
     int32_t prevHeight = 0;
-    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, WindowSizeChangeReason::DRAG);
     EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
 
     /**
@@ -3889,7 +4121,7 @@ HWTEST_F(TextTestNg, TextPattern016, TestSize.Level1)
     newHeight = 1;
     prevWidth = 1;
     prevHeight = 1;
-    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, WindowSizeChangeReason::DRAG);
     EXPECT_EQ(pattern->selectOverlay_->IsShowMouseMenu(), false);
 }
 
@@ -4318,5 +4550,208 @@ HWTEST_F(TextTestNg, UpdateParagraphBySpan003, TestSize.Level1)
     EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE0);
     ++paragraphInfo;
     EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE0);
+}
+
+/**
+ * @tc.name: UpdateParagraphBySpan004
+ * @tc.desc: Test the maxlines of UpdateParagraphBySpan with different maxLines settings for each span.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateParagraphBySpan004, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create text.
+    */
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+    * @tc.steps: step2. Use span to construct two paragraphs with different maxLines settings.
+    */
+
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    std::list<RefPtr<SpanItem>> spanList1;
+    RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"span1";
+    span1->textLineStyle->propMaxLines = MAX_LINES_VALUE4; // Set maxLines to 5 for the first span
+    spanList1.emplace_back(span1);
+    spans.emplace_back(spanList1);
+
+    std::list<RefPtr<SpanItem>> spanList2;
+    RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->content = u"span2";
+    span2->textLineStyle->propMaxLines = MAX_LINES_VALUE2; // Set maxLines to 7 for the second span
+    spanList2.emplace_back(span2);
+    spans.emplace_back(spanList2);
+
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(textPattern->CreateLayoutAlgorithm());
+    textLayoutAlgorithm->spans_ = spans;
+    EXPECT_EQ(textLayoutAlgorithm->spans_.size(), 2);
+
+    /**
+    * @tc.steps: step3. Call UpdateParagraphBySpan.
+    * Set the total maximum number of lines to be 10.
+    */
+
+    ParagraphStyle paraStyle;
+    paraStyle.maxLines = MAX_LINES_VALUE3; // Set total maxLines to 10
+    TextStyle textStyle;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLineCount).WillRepeatedly(Return(MAX_LINES_VALUE4)); // Mock line count to 5
+    textLayoutAlgorithm->UpdateParagraphBySpan(AceType::RawPtr(layoutWrapper), paraStyle, 100, textStyle);
+    auto paragraphs = textLayoutAlgorithm->paragraphManager_->GetParagraphs();
+
+    /**
+    * @tc.expected: There are two paragraphs to expect.
+    */
+    EXPECT_EQ(paragraphs.size(), 2);
+
+    /**
+    * @tc.expected: The maximum number of lines in the first segment is expected to be 5,
+    * and the maximum number of lines in the second segment is expected to be 5.
+    */
+    auto paragraphInfo = paragraphs.begin();
+    EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE4);
+    ++paragraphInfo;
+    EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE4);
+}
+
+/**
+* @tc.name: UpdateParagraphBySpan006
+* @tc.desc: Test the maxlines of UpdateParagraphBySpan with different maxLines settings for each span.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNg, UpdateParagraphBySpan006, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create text.
+    */
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+    * @tc.steps: step2. Use span to construct two paragraphs with different maxLines settings.
+    */
+
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    std::list<RefPtr<SpanItem>> spanList1;
+    RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"span1";
+    span1->textLineStyle->propMaxLines = MAX_LINES_VALUE4; // Set maxLines to 5 for the first span
+    spanList1.emplace_back(span1);
+    spans.emplace_back(spanList1);
+
+    std::list<RefPtr<SpanItem>> spanList2;
+    RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->content = u"span2";
+    span2->textLineStyle->propMaxLines = MAX_LINES_VALUE0; // Set maxLines to 3 for the second span
+    spanList2.emplace_back(span2);
+    spans.emplace_back(spanList2);
+
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(textPattern->CreateLayoutAlgorithm());
+    textLayoutAlgorithm->spans_ = spans;
+    EXPECT_EQ(textLayoutAlgorithm->spans_.size(), 2);
+
+    /**
+    * @tc.steps: step3. Call UpdateParagraphBySpan.
+    * Set the total maximum number of lines to be 10.
+    */
+
+    ParagraphStyle paraStyle;
+    paraStyle.maxLines = UINT32_MAX; // Set total maxLines to UINT32_MAX
+    TextStyle textStyle;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLineCount).WillRepeatedly(Return(MAX_LINES_VALUE4)); // Mock line count to 5
+    textLayoutAlgorithm->UpdateParagraphBySpan(AceType::RawPtr(layoutWrapper), paraStyle, 100, textStyle);
+    auto paragraphs = textLayoutAlgorithm->paragraphManager_->GetParagraphs();
+
+    /**
+    * @tc.expected: There are two paragraphs to expect.
+    */
+    EXPECT_EQ(paragraphs.size(), 2);
+
+    /**
+    * @tc.expected: The maximum number of lines in the first segment is expected to be 5,
+    * and the maximum number of lines in the second segment is expected to be 3.
+    */
+    auto paragraphInfo = paragraphs.begin();
+    EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE4);
+    ++paragraphInfo;
+    EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE0);
+}
+
+/**
+* @tc.name: UpdateParagraphBySpan004
+* @tc.desc: Test the maxlines of UpdateParagraphBySpan with different maxLines settings for each span.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNg, UpdateParagraphBySpan005, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create text.
+    */
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+    * @tc.steps: step2. Use span to construct two paragraphs with different maxLines settings.
+    */
+
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    std::list<RefPtr<SpanItem>> spanList1;
+    RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"span1";
+    spanList1.emplace_back(span1);
+    spans.emplace_back(spanList1);
+
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(textPattern->CreateLayoutAlgorithm());
+    textLayoutAlgorithm->spans_ = spans;
+    EXPECT_EQ(textLayoutAlgorithm->spans_.size(), 1);
+
+    /**
+    * @tc.steps: step3. Call UpdateParagraphBySpan.
+    * Set the total maximum number of lines to be 10.
+    */
+
+    ParagraphStyle paraStyle;
+    paraStyle.maxLines = MAX_LINES_VALUE2; // Set total maxLines to UINT32_MAX
+    TextStyle textStyle;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLineCount).WillRepeatedly(Return(MAX_LINES_VALUE4)); // Mock line count to 5
+    textLayoutAlgorithm->UpdateParagraphBySpan(AceType::RawPtr(layoutWrapper), paraStyle, 100, textStyle);
+    auto paragraphs = textLayoutAlgorithm->paragraphManager_->GetParagraphs();
+
+    /**
+    * @tc.expected: There are two paragraphs to expect.
+    */
+    EXPECT_EQ(paragraphs.size(), 1);
+
+    /**
+    * @tc.expected: The maximum number of lines in the first segment is expected to be 5,
+    * and the maximum number of lines in the second segment is expected to be 3.
+    */
+    auto paragraphInfo = paragraphs.begin();
+    EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE2);
 }
 } // namespace OHOS::Ace::NG

@@ -52,7 +52,11 @@ public:
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarOptions(NavigationToolbarOptions&& opt) override;
+    void SetHideItemText(bool isHideItemText) override;
+    void SetEnableToolBarAdaptation(bool enable) override;
+    void SetToolbarMorebuttonOptions(MoreButtonOptions&& opt) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
+    void SetMenuOptions(NG::NavigationMenuOptions&& opt) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) override;
@@ -93,6 +97,7 @@ public:
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
+    static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
 
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);

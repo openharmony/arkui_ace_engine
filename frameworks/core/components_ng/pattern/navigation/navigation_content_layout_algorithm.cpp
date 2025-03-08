@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -51,6 +52,9 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         for (auto index = 0; index < childSize; index++) {
             auto child = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!child) {
+                continue;
+            }
             auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(child->GetHostNode());
             if (!navDestinationNode) {
                 continue;

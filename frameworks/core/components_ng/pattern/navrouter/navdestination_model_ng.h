@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationModel {
+class ACE_FORCE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationModel {
 public:
     void Create() override;
     void Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) override;
@@ -47,7 +47,9 @@ public:
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
+    void SetHideItemText(bool isHideItemText) override;
     void SetToolBarOptions(NavigationToolbarOptions&& opt) override;
+    void SetToolbarMorebuttonOptions(MoreButtonOptions&& opt) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
@@ -64,6 +66,7 @@ public:
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
+    void SetMenuOptions(NavigationMenuOptions&& opt) override;
     void SetBackgroundColor(const Color& color, bool isVaild = true) override;
     void SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
@@ -92,6 +95,7 @@ public:
     static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden);
     static void SetCustomBackButtonNode(FrameNode* frameNode, FrameNode* backButtonNode);
     void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) override;
+    void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

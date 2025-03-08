@@ -65,6 +65,7 @@ constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
 constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;
 constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0;
 constexpr int32_t FLUSH_RELOAD_TRANSITION_DURATION_MS = 400;
+constexpr int32_t ROTATION_DIVISOR = 64; // from adapter/ohos/entrance/ace_view_ohos.cpp
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -716,8 +717,7 @@ void PipelineContext::FlushAnimationTasks()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     if (animationCallback_) {
-        taskExecutor_->PostTask(animationCallback_, TaskExecutor::TaskType::JS, "ArkUIFlushAnimationTask",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor_->PostTask(animationCallback_, TaskExecutor::TaskType::JS, "ArkUIFlushAnimationTask");
     }
 }
 
@@ -859,7 +859,7 @@ void PipelineContext::SetupRootElement()
     requestedRenderNode_.Reset();
 }
 
-void PipelineContext::SetupSubRootElement()
+RefPtr<Element> PipelineContext::SetupSubRootElement()
 {
     LOGI("Set up SubRootElement!");
 
@@ -886,7 +886,7 @@ void PipelineContext::SetupSubRootElement()
     if (!rootElement_) {
         LOGE("Set up SubRootElement failed!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return;
+        return RefPtr<Element>();
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
@@ -903,7 +903,7 @@ void PipelineContext::SetupSubRootElement()
     cardTransitionController_->RegisterTransitionListener();
     requestedRenderNode_.Reset();
     LOGI("Set up SubRootElement success!");
-    return;
+    return rootElement_;
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
@@ -1262,8 +1262,7 @@ void PipelineContext::ExitAnimation()
                     }
                     context->Finish();
                 },
-                TaskExecutor::TaskType::UI, "ArkUIExitAnimation",
-                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+                TaskExecutor::TaskType::UI, "ArkUIExitAnimation");
         } else {
             // return back to desktop
             Finish();
@@ -1629,7 +1628,7 @@ void PipelineContext::FlushTouchEvents()
     }
 }
 
-bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
+bool PipelineContext::OnKeyEvent(const NonPointerEvent& nonPointerEvent)
 {
     CHECK_RUN_ON(UI);
     if (nonPointerEvent.eventType != UIInputEventType::KEY) {
@@ -1642,9 +1641,7 @@ bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
         return false;
     }
     rootElement_->HandleSpecifiedKey(event);
-
     SetShortcutKey(event);
-
     pressedKeyCodes = event.pressedCodes;
     isKeyCtrlPressed_ = !pressedKeyCodes.empty() && (pressedKeyCodes.back() == KeyCode::KEY_CTRL_LEFT ||
                                                         pressedKeyCodes.back() == KeyCode::KEY_CTRL_RIGHT);
@@ -1681,6 +1678,20 @@ bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
     if (rootElement_->HandleKeyEvent(event)) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Default focus system handled this event");
         return true;
+    }
+    return false;
+}
+
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
+{
+    CHECK_RUN_ON(UI);
+    if (nonPointerEvent.eventType == UIInputEventType::KEY) {
+        return OnKeyEvent(nonPointerEvent);
+    } else if (nonPointerEvent.eventType == UIInputEventType::CROWN) {
+        const auto& crownEvent = static_cast<const CrownEvent&>(nonPointerEvent);
+        RotationEvent rotationEvent;
+        rotationEvent.value = crownEvent.degree * ROTATION_DIVISOR;
+        return OnRotationEvent(rotationEvent);
     }
     return false;
 }
@@ -2133,7 +2144,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
                 frontend->OnSurfaceChanged(width, height);
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUISurfaceChanged", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUISurfaceChanged");
 
     // init transition clip size when surface changed.
     const auto& pageElement = GetLastPage();
@@ -2631,7 +2642,7 @@ void PipelineContext::OnShow()
             }
             renderRoot->NotifyOnShow();
         },
-        TaskExecutor::TaskType::UI, "ArkUIRenderRootShow", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIRenderRootShow");
 }
 
 void PipelineContext::OnHide()
@@ -2672,7 +2683,7 @@ void PipelineContext::OnHide()
             }
             renderRoot->NotifyOnHide();
         },
-        TaskExecutor::TaskType::UI, "ArkUIRenderRootHide", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIRenderRootHide");
 }
 #endif
 
@@ -2736,10 +2747,9 @@ void PipelineContext::LoadSystemFont(const std::function<void()>& onFondsLoaded)
                         onFondsLoaded();
                     }
                 },
-                TaskExecutor::TaskType::UI, "ArkUISystemFondsLoaded",
-                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+                TaskExecutor::TaskType::UI, "ArkUISystemFondsLoaded");
         },
-        TaskExecutor::TaskType::IO, "ArkUILoadSystemFont", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::IO, "ArkUILoadSystemFont");
 }
 
 void PipelineContext::AddFontNode(const WeakPtr<RenderNode>& node)
@@ -2796,8 +2806,7 @@ void PipelineContext::FlushBuildAndLayoutBeforeSurfaceReady()
             context->SetRootRect(context->width_, context->height_);
             context->FlushLayout();
         },
-        TaskExecutor::TaskType::UI, "ArkUIFlushBuildAndLayout",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIFlushBuildAndLayout");
 }
 
 void PipelineContext::RootLostFocus(BlurReason reason) const
@@ -3102,7 +3111,7 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
         pageOffset_ = GetPageRect().GetOffset();
     }
 
-    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
+    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes);
 
     if (action != DragEventAction::DRAG_EVENT_END) {
         ProcessDragEvent(renderNode, event, globalPoint);
@@ -3191,11 +3200,9 @@ void PipelineContext::MakeThreadStuck(const std::vector<std::string>& params) co
     }
     DumpLog::GetInstance().Print(params[1] + " thread will stuck for " + params[2] + " seconds.");
     if (params[1] == JS_THREAD_NAME) {
-        taskExecutor_->PostTask([time] { ThreadStuckTask(time); }, TaskExecutor::TaskType::JS, "ArkUIThreadStuck",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor_->PostTask([time] { ThreadStuckTask(time); }, TaskExecutor::TaskType::JS, "ArkUIThreadStuck");
     } else {
-        taskExecutor_->PostTask([time] { ThreadStuckTask(time); }, TaskExecutor::TaskType::UI, "ArkUIThreadStuck",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor_->PostTask([time] { ThreadStuckTask(time); }, TaskExecutor::TaskType::UI, "ArkUIThreadStuck");
     }
 }
 
@@ -3369,8 +3376,7 @@ void PipelineContext::AddScreenOnEvent(std::function<void()>&& func)
                 pipeline->screenOnCallback_(std::move(screenOnFunc));
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIScreenOnEvent",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIScreenOnEvent");
 }
 
 void PipelineContext::AddScreenOffEvent(std::function<void()>&& func)
@@ -3382,8 +3388,7 @@ void PipelineContext::AddScreenOffEvent(std::function<void()>&& func)
                 pipeline->screenOffCallback_(std::move(screenOffFunc));
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIScreenOffEvent",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIScreenOffEvent");
 }
 
 bool PipelineContext::IsWindowInScreen()
@@ -3398,8 +3403,7 @@ bool PipelineContext::IsWindowInScreen()
                 }
                 pipeline->queryIfWindowInScreenCallback_();
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIQueryIfWindowInScreen",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::PLATFORM, "ArkUIQueryIfWindowInScreen");
     }
     // Note that the result is not real-time result but the result from previous query
     return isWindowInScreen_;

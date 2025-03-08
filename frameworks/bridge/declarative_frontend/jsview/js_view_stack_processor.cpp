@@ -85,6 +85,10 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
     JSClass<JSViewStackProcessor>::StaticMethod("GetAndPushFrameNode", &JSViewStackProcessor::JsGetAndPushFrameNode);
     JSClass<JSViewStackProcessor>::StaticMethod("moveDeletedElmtIds", &JSViewStackProcessor::JsMoveDeletedElmtIds);
     JSClass<JSViewStackProcessor>::StaticMethod("sendStateInfo", &JSViewStackProcessor::JsSendStateInfo);
+    JSClass<JSViewStackProcessor>::StaticMethod("PushPrebuildCompCmd",
+        &JSViewStackProcessor::JsPushPrebuildCompCmd, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod("CheckIsPrebuildTimeout",
+        &JSViewStackProcessor::JsCheckIsPrebuildTimeout, opt);
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
 }
 
@@ -208,4 +212,13 @@ void JSViewStackProcessor::JsGetAndPushFrameNode(const JSCallbackInfo& info)
     ViewStackModel::GetInstance()->GetAndPushFrameNode(info[0]->ToString(), info[1]->ToNumber<int32_t>());
 }
 
+void JSViewStackProcessor::JsPushPrebuildCompCmd(const JSCallbackInfo& info)
+{
+    ViewStackModel::GetInstance()->PushPrebuildCompCmd();
+}
+
+bool JSViewStackProcessor::JsCheckIsPrebuildTimeout()
+{
+    return ViewStackModel::GetInstance()->CheckIsPrebuildTimeout();
+}
 } // namespace OHOS::Ace::Framework

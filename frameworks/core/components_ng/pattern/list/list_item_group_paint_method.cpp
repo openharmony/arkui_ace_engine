@@ -54,7 +54,7 @@ void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas
 void ListItemGroupPaintMethod::UpdateDividerList(const DividerGroupInfo& info,
     const DividerPainter& dividerPainter, RSCanvas& canvas)
 {
-    int32_t laneIdx = 0;
+    int32_t laneIdx = itemPosition_.begin()->first % info.lanes;
     bool isFirstItem = (itemPosition_.begin()->first == 0);
     std::list<int32_t> lastLineIndex;
     bool nextIsPressed = false;
@@ -72,15 +72,15 @@ void ListItemGroupPaintMethod::UpdateDividerList(const DividerGroupInfo& info,
         isFirstItem = isFirstItem ? laneIdx > 0 : false;
     }
     if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < totalItemCount_ - 1) {
-        int32_t laneIdx = 0;
+        int32_t lastLineLaneIdx = 0;
         for (auto index : lastLineIndex) {
             if (index + info.lanes >= totalItemCount_) {
                 break;
             }
             if (!itemPosition_.at(index).isPressed) {
-                DrawLastLineDivider(index, laneIdx, info, dividerPainter, canvas);
+                DrawLastLineDivider(index, lastLineLaneIdx, info, dividerPainter, canvas);
             }
-            laneIdx++;
+            lastLineLaneIdx++;
         }
     }
 }

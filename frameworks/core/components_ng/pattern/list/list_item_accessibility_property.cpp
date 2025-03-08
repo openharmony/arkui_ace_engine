@@ -33,6 +33,28 @@ bool ListItemAccessibilityProperty::IsSelected() const
 
 void ListItemAccessibilityProperty::SetSpecificSupportAction()
 {
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+
+    auto swiperIndex = listItemPattern->GetSwiperIndex();
+    auto swipeActionState = listItemPattern->GetSwipeActionState();
+
+    if (listItemPattern->HasStartNode()) {
+        if (swipeActionState == SwipeActionState::EXPANDED && swiperIndex == ListItemSwipeIndex::SWIPER_START) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        } else if (swipeActionState == SwipeActionState::COLLAPSED) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+    }
+    if (listItemPattern->HasEndNode()) {
+        if (swipeActionState == SwipeActionState::EXPANDED && swiperIndex == ListItemSwipeIndex::SWIPER_END) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        } else if (swipeActionState == SwipeActionState::COLLAPSED) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+    }
     AddSupportAction(AceAction::ACTION_SELECT);
     AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
 }
@@ -45,6 +67,39 @@ void ListItemAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElem
     auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_VOID(listItemPattern);
     extraElementInfo.SetExtraElementInfo("ListItemIndex", listItemPattern->GetIndexInList());
+    std::string stateStr;
+    switch (listItemPattern->GetSwipeActionState()) {
+        case SwipeActionState::COLLAPSED:
+            stateStr = "collapsed";
+            break;
+        case SwipeActionState::EXPANDED:
+            stateStr = "expanded";
+            break;
+        case SwipeActionState::ACTIONING:
+            break;
+    }
+
+    if (!listItemPattern->HasStartNode() && !listItemPattern->HasEndNode()) {
+        stateStr = "disabled";
+    }
+
+    std::string axisStr;
+    switch (listItemPattern->GetAxis()) {
+        case Axis::VERTICAL:
+            axisStr = "vertical";
+            break;
+        case Axis::HORIZONTAL:
+            axisStr = "horizontal";
+            break;
+        case Axis::FREE:
+            axisStr = "free";
+            break;
+        case Axis::NONE:
+            axisStr = "none";
+            break;
+    }
+    extraElementInfo.SetExtraElementInfo("expandedState", stateStr);
+    extraElementInfo.SetExtraElementInfo("direction", axisStr);
 #endif
 }
 } // namespace OHOS::Ace::NG

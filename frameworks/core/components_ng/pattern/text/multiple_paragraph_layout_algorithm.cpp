@@ -79,9 +79,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto contentModifier = pattern->GetContentModifier();
 
     auto themeScopeId = frameNode->GetThemeScopeId();
-    textStyle = CreateTextStyleUsingTheme(
-        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
-            pipeline->GetTheme<TextTheme>(themeScopeId));
+    textStyle = CreateTextStyleUsingTheme(textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
+        pipeline->GetTheme<TextTheme>(themeScopeId));
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
         !(textLayoutProperty->GetFontFamily().has_value())) {
@@ -98,6 +97,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
+
+    auto symbolType = textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM);
+    textStyle.SetSymbolType(symbolType);
 
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
@@ -337,6 +339,12 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     } else {
         modifier->SetTextColor(textStyle.GetTextColor(), true);
     }
+    auto symbolColors = layoutProperty->GetSymbolColorList();
+    if (symbolColors && symbolColors.has_value()) {
+        modifier->SetSymbolColor(symbolColors.value());
+    } else {
+        modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+    }
     auto textShadow = layoutProperty->GetTextShadow();
     if (textShadow.has_value()) {
         modifier->SetTextShadow(textShadow.value());
@@ -522,7 +530,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                     textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
             }
         }
-        auto&& paragraph = Paragraph::Create(spanParagraphStyle, FontCollection::Current());
+        auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle, aiSpanMap);
         CHECK_NULL_RETURN(paragraph, false);
         auto paraStart = spanTextLength;
         paragraphIndex++;
@@ -588,10 +596,12 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         preParagraphsPlaceholderCount_ += currentParagraphPlaceholderCount_;
         currentParagraphPlaceholderCount_ = 0;
         shadowOffset_ += GetShadowOffset(group);
-        HandleEmptyParagraph(paragraph, group);
-        paragraph->Build();
-        ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
-        UpdateSymbolSpanEffect(frameNode, paragraph, group);
+        if (!useParagraphCache_) {
+            HandleEmptyParagraph(paragraph, group);
+            paragraph->Build();
+            ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
+            UpdateSymbolSpanEffect(frameNode, paragraph, group);
+        }
         if (paraStyle.maxLines != UINT32_MAX) {
             paragraph->Layout(static_cast<float>(maxWidth));
         }
@@ -607,7 +617,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
 
 void MultipleParagraphLayoutAlgorithm::InheritParentTextStyle(const TextStyle& textStyle)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         inheritTextStyle_ = textStyle_.value_or(TextStyle());
     } else {
         inheritTextStyle_ = textStyle;

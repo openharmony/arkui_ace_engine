@@ -26,7 +26,6 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
@@ -36,11 +35,11 @@
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/event/mouse_event.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
-#include "frameworks/core/components/focus_animation/focus_animation_theme.h"
 #include "frameworks/core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class TextLayoutProperty;
 
 const auto TabBarPhysicalCurve = AceType::MakeRefPtr<InterpolatingSpring>(-1.0f, 1.0f, 228.0f, 30.f);
 
@@ -159,8 +158,8 @@ class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
 public:
-    TabBarPattern() = default;
-    ~TabBarPattern() override = default;
+    TabBarPattern();
+    ~TabBarPattern() override;
 
     bool IsAtomicNode() const override
     {
@@ -268,6 +267,8 @@ public:
     }
 
     void TriggerTranslateAnimation(int32_t currentIndex, int32_t targetIndex);
+
+    RectF GetOriginalPaintRect(int32_t currentIndex);
 
     void HandleBottomTabBarChange(int32_t index);
 
@@ -511,12 +512,13 @@ public:
     bool ContentWillChange(int32_t comingIndex);
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
 
-    void AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem);
+    void AddTabBarItemClickAndTouchEvent(const RefPtr<FrameNode>& tabBarItem);
     void AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem);
 
     void RemoveTabBarItemInfo(int32_t tabBarItemId)
     {
         clickEvents_.erase(tabBarItemId);
+        touchEvents_.erase(tabBarItemId);
         labelStyles_.erase(tabBarItemId);
     }
 
@@ -574,7 +576,6 @@ private:
     void InitScrollableEvent(
         const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
-    void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
     bool InsideTabBarRegion(const TouchLocationInfo& locationInfo);
     void InitHoverEvent();
     void InitMouseEvent();
@@ -594,7 +595,7 @@ private:
     void InitLongPressAndDragEvent();
     void HandleClick(SourceType type, int32_t index);
     void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
-    void HandleTouchEvent(const TouchLocationInfo& info);
+    void HandleTouchEvent(TouchType touchType, int32_t index);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
     void HandleBottomTabBarClick(int32_t selectedIndex, int32_t unselectedIndex);
     void ChangeMask(int32_t index, float imageSize, const OffsetF& originalMaskOffset, float opacity,
@@ -697,8 +698,8 @@ private:
     TabBarState tabBarState_ = TabBarState::SHOW;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
+    std::map<int32_t, RefPtr<TouchEventImpl>> touchEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
-    RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -734,7 +735,7 @@ private:
     bool isMaskAnimationExecuted_ = false;
     bool tabContentWillChangeFlag_ = false;
     std::optional<int32_t> imageColorOnIndex_;
-    std::optional<int32_t> touchingIndex_;
+    std::set<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
     std::optional<int32_t> moveIndex_;
     TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;

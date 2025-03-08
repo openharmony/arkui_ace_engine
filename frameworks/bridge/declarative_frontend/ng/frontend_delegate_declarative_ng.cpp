@@ -51,7 +51,7 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
             auto overlayManager = weak.Upgrade();
             task(overlayManager);
         },
-        TaskExecutor::TaskType::UI, name, PriorityType::VIP);
+        TaskExecutor::TaskType::UI, name);
 }
 } // namespace
 
@@ -196,7 +196,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
                 pipeline->SetMinPlatformVersion(manifestParser->GetMinPlatformVersion());
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIRunPageUrl", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIRunPageUrl");
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
@@ -210,7 +210,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
             pageRouterManager->RunPage(content, params);
             auto pipeline = delegate->GetPipelineContext();
         },
-        TaskExecutor::TaskType::JS, "ArkUIRunPageContent", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIRunPageContent");
 }
 
 void FrontendDelegateDeclarativeNG::OnConfigurationUpdated(const std::string& data)
@@ -297,16 +297,14 @@ void FrontendDelegateDeclarativeNG::UpdateApplicationState(const std::string& pa
 {
     taskExecutor_->PostTask([updateApplicationState = updateApplicationState_, packageName,
                                 state] { updateApplicationState(packageName, state); },
-        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState");
 }
 
 void FrontendDelegateDeclarativeNG::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
     taskExecutor_->PostTask([onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow,
                                 data] { onWindowDisplayModeChanged(isShownInMultiWindow, data); },
-        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged");
 }
 
 void FrontendDelegateDeclarativeNG::NotifyAppStorage(
@@ -320,7 +318,7 @@ void FrontendDelegateDeclarativeNG::NotifyAppStorage(
             }
             jsEngine->NotifyAppStorage(key, value);
         },
-        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage");
 }
 
 void FrontendDelegateDeclarativeNG::FireAccessibilityEvent(const AccessibilityEvent& accessibilityEvent)
@@ -549,10 +547,9 @@ void FrontendDelegateDeclarativeNG::NavigatePage(uint8_t type, const PageTarget&
     }
 }
 
-void FrontendDelegateDeclarativeNG::PostJsTask(
-    std::function<void()>&& task, const std::string& name, PriorityType priorityType)
+void FrontendDelegateDeclarativeNG::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name, priorityType);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }
 
 const std::string& FrontendDelegateDeclarativeNG::GetAppID() const
@@ -600,8 +597,7 @@ void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, co
 {
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale");
 }
 
 void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc,
@@ -726,6 +722,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
+        .levelOrder = dialogAttr.levelOrder,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
@@ -744,6 +741,12 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     }
     if (dialogAttr.backgroundBlurStyle.has_value()) {
         dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+    }
+    if (dialogAttr.blurStyleOption.has_value()) {
+        dialogProperties.blurStyleOption = dialogAttr.blurStyleOption.value();
+    }
+    if (dialogAttr.effectOption.has_value()) {
+        dialogProperties.effectOption = dialogAttr.effectOption.value();
     }
     if (dialogAttr.hoverModeArea.has_value()) {
         dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
@@ -766,6 +769,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .isModal = dialogAttr.isModal,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
+        .levelOrder = dialogAttr.levelOrder,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -784,14 +788,21 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
-        .customBuilderWithId = dialogAttr.customBuilderWithId, .borderWidth = dialogAttr.borderWidth,
+        .customBuilderWithId = dialogAttr.customBuilderWithId,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption,
+        .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
-        .width = dialogAttr.width, .height = dialogAttr.height, .maskRect = dialogAttr.maskRect,
+        .width = dialogAttr.width, .height = dialogAttr.height,
+        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
+        .maskRect = dialogAttr.maskRect,
         .transitionEffect = dialogAttr.transitionEffect, .contentNode = dialogAttr.contentNode,
         .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
         .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
         .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
+        .levelOrder = dialogAttr.levelOrder,
+        .focusable = dialogAttr.focusable,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
@@ -887,7 +898,7 @@ void FrontendDelegateDeclarativeNG::CloseCustomDialog(const WeakPtr<NG::UINode>&
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
             overlayManager->CloseCustomDialog(node, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
 }
 
 void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
@@ -917,7 +928,29 @@ void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
             overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
+}
+
+std::optional<double> FrontendDelegateDeclarativeNG::GetTopOrder()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetTopOrder();
+}
+
+std::optional<double> FrontendDelegateDeclarativeNG::GetBottomOrder()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetBottomOrder();
 }
 
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
@@ -977,7 +1010,7 @@ void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate(bool isSynchronous)
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
         },
-        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
+        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
 }
 
 void FrontendDelegateDeclarativeNG::OnLayoutCompleted(const std::string& componentId)
@@ -1133,7 +1166,7 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-            TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel");
     };
     auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
         LOGI("Begin to show dialog ");
@@ -1180,7 +1213,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenuInner(DialogProperties& dialog
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel");
     };
     auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
@@ -1190,7 +1223,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenuInner(DialogProperties& dialog
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenu", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenu");
     return;
 }
 
@@ -1338,6 +1371,17 @@ void FrontendDelegateDeclarativeNG::AddFrameNodeToOverlay(
     MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNode", nullptr);
 }
 
+void FrontendDelegateDeclarativeNG::AddFrameNodeWithOrder(
+    const RefPtr<NG::FrameNode>& node, std::optional<double> levelOrder)
+{
+    CHECK_NULL_VOID(node);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->AddFrameNodeWithOrder(node, levelOrder);
+}
+
 void FrontendDelegateDeclarativeNG::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
     auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
@@ -1390,8 +1434,6 @@ void FrontendDelegateDeclarativeNG::HideAllNodesOnOverlay()
 
 bool FrontendDelegateDeclarativeNG::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     auto overlayManager = context->GetOverlayManager();
@@ -1400,8 +1442,6 @@ bool FrontendDelegateDeclarativeNG::SetOverlayManagerOptions(const NG::OverlayMa
 };
 std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarativeNG::GetOverlayManagerOptions()
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, std::nullopt);
     auto overlayManager = context->GetOverlayManager();

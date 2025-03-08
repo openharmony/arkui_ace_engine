@@ -306,6 +306,8 @@ inline bool IsDarkColor(uint32_t color)
 
 bool RealPath(const std::string& fileName, char* realPath);
 
+double RoundToMaxPrecision(double value);
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UTILS_H

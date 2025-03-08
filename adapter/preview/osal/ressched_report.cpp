@@ -20,4 +20,9 @@ ReportDataFunc LoadReportDataFunc()
 {
     return nullptr;
 }
+
+ReportSyncEventFunc LoadReportSyncEventFunc()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

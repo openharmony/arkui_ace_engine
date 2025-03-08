@@ -59,29 +59,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
         this.setIsV2(true);
-        PUV2ViewBase.arkThemeScopeManager?.onViewPUCreate(this);
+        ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this);
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
-
-    onGlobalThemeChanged(): void {
-        this.onWillApplyThemeInternally();
-        this.forceCompleteRerender(false);
-        this.childrenWeakrefMap_.forEach((weakRefChild) => {
-            const child = weakRefChild.deref();
-            if (child) {
-                child.onGlobalThemeChanged();
-            }
-        });
-    }
-
-    private onWillApplyThemeInternally(): void {
-        const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this);
-        if (theme) {
-            this.onWillApplyTheme(theme);
-        }
-    }
-
-    onWillApplyTheme(theme: Theme): void {}
 
     /**
      * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
@@ -352,7 +332,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
-        PUV2ViewBase.arkThemeScopeManager?.onViewPUDelete(this);
+        ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
     }
 
     public initialRenderView(): void {
@@ -360,7 +340,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         if (this.isReusable_ === true) {
             const isReusableAllowed = this.allowReusableV2Descendant();
             if (!isReusableAllowed) {
-                const error = `using @ReusableV2 component inside Repeat.template is not allowed!`;
+                const error = `Using @ReusableV2 component inside Repeat.template or other invalid parent component is not allowed!`;
                 stateMgmtConsole.applicationError(error);
                 throw new Error(error);
             }
@@ -403,6 +383,14 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      }
 
     public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void {
+        if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+            const prebuildFunc: PrebuildFunc = () => {
+              this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
+            };
+            PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+            ViewStackProcessor.PushPrebuildCompCmd();
+            return;
+        }
         if (this.isDeleting_) {
             stateMgmtConsole.error(`@ComponentV2 ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
             return;
@@ -412,7 +400,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
             this.syncInstanceId();
             stateMgmtConsole.debug(`@ComponentV2 ${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] - start ....`);
-            PUV2ViewBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
+            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
@@ -428,7 +416,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
-            PUV2ViewBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
+            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
             stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
             this.restoreInstanceId();
         };
@@ -460,7 +448,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * @param newValue
      */
     protected initParam<Z>(paramVariableName: string, newValue: Z): void {
-        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV2.initParam<Z>(this, paramVariableName, newValue);
     }
     /**
@@ -473,19 +460,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * @param newValue
      */
     protected updateParam<Z>(paramVariableName: string, newValue: Z): void {
-        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV2.updateParam<Z>(this, paramVariableName, newValue);
     }
 
     protected resetParam<Z>(paramVariableName: string, newValue: Z): void {
-        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV2.resetParam<Z>(this, paramVariableName, newValue);
-    }
-
-    private checkIsV1Proxy<Z>(paramVariableName: string, value: Z): void {
-        if (ObservedObject.IsObservedObject(value)) {
-            throw new Error(`Cannot assign the ComponentV1 value to the ComponentV2 for the property '${paramVariableName}'`);
-        }
     }
 
     /**
@@ -496,6 +475,16 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * FIXME will still use in the future?
      */
     public uiNodeNeedUpdateV2(elmtId: number): void {
+        if (this.isPrebuilding_) {
+            const propertyChangedFunc: PrebuildFunc = () => {
+                this.uiNodeNeedUpdateV2(elmtId);
+            };
+            if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+                PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
+            }
+            PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
+            return;
+        }
         if (this.isFirstRender()) {
             return;
         }
@@ -548,6 +537,11 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             if (this.dirtDescendantElementIds_.size) {
                 stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
             }
+
+            for (const dirtRetakenElementId of this.dirtRetakenElementIds_) {
+                this.dirtDescendantElementIds_.add(dirtRetakenElementId);
+            }
+            this.dirtRetakenElementIds_.clear();
         } while (this.dirtDescendantElementIds_.size);
         stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE`);
         stateMgmtProfiler.end();
@@ -569,7 +563,18 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
         // do not process an Element that has been marked to be deleted
         const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
-        const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+        if (!entry) {
+            stateMgmtProfiler.end();
+            return;
+        }
+        let updateFunc: UpdateFunc;
+        // if the element is pending, its updateFunc will not be executed during this function call, instead mark its UpdateFuncRecord as changed
+        // when the pending element is retaken and its UpdateFuncRecord is marked changed, then it will be inserted into dirtRetakenElementIds_
+        if (entry.isPending()) {
+            entry.setIsChanged(true);
+        } else {
+            updateFunc = entry.getUpdateFunc();
+        }
 
         if (typeof updateFunc !== 'function') {
             stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: update function of elmtId ${elmtId} not found, internal error!`);

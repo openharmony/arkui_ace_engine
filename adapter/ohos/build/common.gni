@@ -197,6 +197,10 @@ if (dynamic_component_support) {
   defines += [ "DYNAMIC_COMPONENT_SUPPORT" ]
 }
 
+if (!build_ohos_sdk) {
+  defines += [ "FORM_BUTTON_COMPONENT_SUPPORT" ]
+}
+
 if (vsync_timeout_check) {
   defines += [ "VSYNC_TIMEOUT_CHECK" ]
 }

@@ -1732,6 +1732,9 @@ HWTEST_F(RichEditorPatternTestSixNg, HandleKbVerticalSelection003, TestSize.Leve
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    TextSpanOptions options;
+    options.value = TEST_INSERT_VALUE;
+    richEditorPattern->AddTextSpan(options);
 
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 0;

@@ -174,6 +174,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         navigationPattern->AddNavDestinationNode(name, navDestination, navRouteMode);
     }
     if (navDestination) {
+        navDestination->SetCanReused(true);
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
     }

@@ -45,12 +45,15 @@ bool SystemProperties::measureDebugTraceEnable_ = false;
 bool SystemProperties::safeAreaDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
+bool SystemProperties::vsyncModeTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
 bool SystemProperties::debugEnabled_ = false;
+DebugFlags SystemProperties::debugFlags_ = 0;
+bool SystemProperties::containerDeleteFlag_ = false;
 bool SystemProperties::layoutDetectEnabled_ = false;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
@@ -67,6 +70,7 @@ bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
+std::atomic<bool> SystemProperties::asyncInitializeEnabled_(true);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
@@ -218,6 +222,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+bool SystemProperties::IsBigFoldProduct()
+{
+    return false;
+}
+
 std::string SystemProperties::GetDebugInspectorId()
 {
     return "N/A";
@@ -238,6 +247,11 @@ double SystemProperties::GetScrollableDistance()
     return 0.0;
 }
 
+bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
+{
+    return true;
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
@@ -256,5 +270,15 @@ bool SystemProperties::GetResourceDecoupling()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return false;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    return false;
 }
 } // namespace OHOS::Ace

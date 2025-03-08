@@ -176,6 +176,20 @@ class CheckBoxGroupOptionsModifier extends ModifierWithKey<CheckboxGroupOptions>
   }
 }
 
+class CheckboxGroupOnChangeModifier extends ModifierWithKey<OnCheckboxGroupChangeCallback> {
+  constructor(value: OnCheckboxGroupChangeCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('checkboxOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().checkboxgroup.resetCheckboxGroupOnChange(node);
+    } else {
+      getUINativeModule().checkboxgroup.setCheckboxGroupOnChange(node, this.value);
+    }
+  }
+}
+
 class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -213,8 +227,9 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
       this._modifiersWithKeys, CheckboxGroupMarkModifier.identity, CheckboxGroupMarkModifier, value);
     return this;
   }
-  onChange(callback: (event: CheckboxGroupResult) => void): CheckboxGroupAttribute {
-    throw new Error('Method not implemented.');
+  onChange(callback: OnCheckboxGroupChangeCallback ): this {
+    modifierWithKey(this._modifiersWithKeys, CheckboxGroupOnChangeModifier.identity, CheckboxGroupOnChangeModifier, callback);
+    return this;
   }
   size(value: SizeOptions): this {
     modifierWithKey(

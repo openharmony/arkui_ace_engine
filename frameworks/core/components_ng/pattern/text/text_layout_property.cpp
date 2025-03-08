@@ -114,7 +114,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         return;
     }
     auto host = GetHost();
-    auto themeScopeId = host ? host->GetThemeScopeId() : 0;
+    CHECK_NULL_VOID(host);
+    auto themeScopeId = host->GetThemeScopeId();
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>(themeScopeId);

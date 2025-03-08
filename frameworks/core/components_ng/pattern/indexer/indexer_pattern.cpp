@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
@@ -143,8 +141,9 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
         itemCount_ = 0;
         arrayValue_.clear();
     }
-    if (propSelect != selected_) {
+    if (propSelect != selected_ || collapsedIndex_ != lastCollapsedIndex_) {
         selected_ = propSelect;
+        lastCollapsedIndex_ = collapsedIndex_;
         selectChanged_ = true;
         ResetStatus();
     } else if (!isNewHeightCalculated_) {
@@ -232,9 +231,12 @@ void IndexerPattern::BuildArrayValueItems()
 void IndexerPattern::BuildFullArrayValue()
 {
     arrayValue_.clear();
+    collapsedItemNums_.clear();
     autoCollapse_ = false;
+    collapsedIndex_ = 0;
     for (auto indexerLetter : fullArrayValue_) {
         arrayValue_.push_back(std::pair(indexerLetter, false));
+        collapsedItemNums_.push_back(1);
     }
 }
 
@@ -292,9 +294,12 @@ void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
     auto gmin = 6 - gmax; // number of groups with minimum items count
 
     arrayValue_.clear();
+    collapsedItemNums_.clear();
     arrayValue_.push_back(std::pair(fullArrayValue_.at(0), false)); // push the first item
+    collapsedItemNums_.push_back(1);
     if (sharpItemCount_ > 0) {
         arrayValue_.push_back(std::pair(fullArrayValue_.at(1), false)); // push the second item if the first is #
+        collapsedItemNums_.push_back(1);
     }
 
     auto lastPushedIndex = sharpItemCount_;
@@ -304,6 +309,8 @@ void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
         int32_t lastIndex = firstIndex + cmin - 1;
         arrayValue_.push_back(std::pair(fullArrayValue_.at(firstIndex), true));
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
+        collapsedItemNums_.push_back(cmin - 1);
+        collapsedItemNums_.push_back(1);
         lastPushedIndex = lastIndex;
     }
 
@@ -312,6 +319,8 @@ void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
         int32_t lastIndex = firstIndex + cmax - 1;
         arrayValue_.push_back(std::pair(fullArrayValue_.at(firstIndex), true));
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
+        collapsedItemNums_.push_back(cmax - 1);
+        collapsedItemNums_.push_back(1);
         lastPushedIndex = lastIndex;
     }
     autoCollapse_ = true;
@@ -328,9 +337,12 @@ void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
     auto gmin = 4 - gmax; // number of groups with minimum items count
 
     arrayValue_.clear();
+    collapsedItemNums_.clear();
     arrayValue_.push_back(std::pair(fullArrayValue_.at(0), false)); // push the first item
+    collapsedItemNums_.push_back(1);
     if (sharpItemCount_ > 0) {
         arrayValue_.push_back(std::pair(fullArrayValue_.at(1), false)); // push the second item if the first is #
+        collapsedItemNums_.push_back(1);
     }
 
     auto lastPushedIndex = sharpItemCount_;
@@ -340,6 +352,8 @@ void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
         int32_t lastIndex = firstIndex + cmin - 1;
         arrayValue_.push_back(std::pair(fullArrayValue_.at(firstIndex), true));
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
+        collapsedItemNums_.push_back(cmin - 1);
+        collapsedItemNums_.push_back(1);
         lastPushedIndex = lastIndex;
     }
 
@@ -348,6 +362,8 @@ void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
         int32_t lastIndex = firstIndex + cmax - 1;
         arrayValue_.push_back(std::pair(fullArrayValue_.at(firstIndex), true));
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
+        collapsedItemNums_.push_back(cmax - 1);
+        collapsedItemNums_.push_back(1);
         lastPushedIndex = lastIndex;
     }
     autoCollapse_ = true;
@@ -372,10 +388,21 @@ int32_t IndexerPattern::GetAutoCollapseIndex(int32_t propSelect)
         index += gmin * 2; // one group includes two index
         propSelect -= gmin * cmin;
         index += propSelect / cmax * 2 + (propSelect % cmax == 0 ? 0 : 1);
+        collapsedIndex_ = propSelect % cmax == 0 ? 0 : (propSelect % cmax - 1);
     } else {
         index += propSelect / cmin * 2 + (propSelect % cmin == 0 ? 0 : 1);
+        collapsedIndex_ = propSelect % cmin == 0 ? 0 : (propSelect % cmin - 1);
     }
     return  index;
+}
+
+int32_t IndexerPattern::GetActualIndex(int32_t index)
+{
+    auto actualIndex = autoCollapse_ && index > 0 && index < itemCount_ ?
+                        static_cast<int32_t>(std::find(fullArrayValue_.begin(), fullArrayValue_.end(),
+                        arrayValue_.at(index).first) - fullArrayValue_.begin()) : index;
+    int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
+    return std::clamp(actualIndex + collapsedIndex_, 0, fullArraySize);
 }
 
 void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -389,7 +416,7 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             if (info.GetInputEventType() == InputEventType::AXIS) {
                 return;
             }
-            pattern->MoveIndexByOffset(info.GetLocalLocation());
+            pattern->MoveIndexByOffset(info.GetLocalLocation(), false);
         }
     };
 
@@ -403,7 +430,7 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
                 pattern->MoveIndexByStep(1);
             }
         } else {
-            pattern->MoveIndexByOffset(info.GetLocalLocation());
+            pattern->MoveIndexByOffset(info.GetLocalLocation(), false);
         }
     };
 
@@ -519,7 +546,7 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
     if (itemCount_ <= 0 || info.GetTouches().empty()) {
         return;
     }
-    MoveIndexByOffset(info.GetTouches().front().GetLocalLocation());
+    MoveIndexByOffset(info.GetTouches().front().GetLocalLocation(), true);
 }
 
 void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
@@ -538,23 +565,21 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     StartDelayTask();
 }
 
-void IndexerPattern::MoveIndexByOffset(const Offset& offset)
+void IndexerPattern::MoveIndexByOffset(const Offset& offset, bool isTouch)
 {
-    if (itemHeight_ <= 0) {
+    if (itemHeight_ <= 0 || itemCount_ <= 0) {
         return;
     }
-    if (itemCount_ <= 0) {
-        return;
-    }
-    auto nextSelectIndex = GetSelectChildIndex(offset);
-    if (nextSelectIndex == childPressIndex_ || nextSelectIndex == -1) {
+    auto nextSelectIndex = GetSelectChildIndex(offset, isTouch);
+    if ((nextSelectIndex == childPressIndex_&& collapsedIndex_ == lastCollapsedIndex_) || nextSelectIndex == -1) {
         return;
     }
     childPressIndex_ = nextSelectIndex;
     selected_ = nextSelectIndex;
-    selectedChangedForHaptic_ = lastSelected_ != selected_;
-    lastSelected_ = nextSelectIndex;
     FireOnSelect(selected_, true);
+    selectedChangedForHaptic_ = lastSelected_ != selected_ || collapsedIndex_ != lastCollapsedIndex_;
+    lastSelected_ = nextSelectIndex;
+    lastCollapsedIndex_ = collapsedIndex_;
     if (isHover_ && childPressIndex_ >= 0) {
         IndexerPressInAnimation();
     }
@@ -563,7 +588,7 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
     ApplyIndexChanged(true, true);
 }
 
-int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
+int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset, bool isTouch)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
@@ -581,6 +606,14 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
         }
         if (GreatOrEqual(offset.GetY(), childOffset.GetY()) &&
             LessNotEqual(offset.GetY(), childOffset.GetY() + itemHeight_)) {
+                if (isTouch) {
+                    collapsedIndex_ = 0;
+                } else {
+                    float yOffset = offset.GetY() - childOffset.GetY();
+                    int32_t itemNum = collapsedItemNums_[index] < 1 ? 1 : collapsedItemNums_[index];
+                    float itemHeight = itemHeight_ / itemNum;
+                    collapsedIndex_ = NearZero(itemHeight) ? 0 : floor(yOffset / itemHeight);
+                }
             break;
         }
         index++;
@@ -606,6 +639,7 @@ bool IndexerPattern::KeyIndexByStep(int32_t step)
     }
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
+    collapsedIndex_ = 0;
     ApplyIndexChanged(true, refreshBubble);
     OnSelect();
     return nextSelected >= 0;
@@ -627,6 +661,7 @@ bool IndexerPattern::MoveIndexByStep(int32_t step)
         return false;
     }
     selected_ = nextSelected;
+    collapsedIndex_ = 0;
     ResetStatus();
     ApplyIndexChanged(true, true);
     OnSelect();
@@ -643,6 +678,7 @@ bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
     childFocusIndex_ = nextSelectIndex;
     childHoverIndex_ = -1;
     childPressIndex_ = -1;
+    collapsedIndex_ = 0;
     ApplyIndexChanged(true, true);
     OnSelect();
     return nextSelectIndex >= 0;
@@ -977,17 +1013,8 @@ void IndexerPattern::UpdateBubbleList(std::vector<std::string>& currentListData)
     CHECK_NULL_VOID(indexerEventHub);
     auto popListData = indexerEventHub->GetOnRequestPopupData();
     CHECK_NULL_VOID(popListData);
-    auto actualIndex =
-        autoCollapse_ && selected_ > 0 && selected_ < itemCount_
-            ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(selected_).first) -
-                  fullArrayValue_.begin()
-            : selected_;
-    auto actualChildIndex =
-        autoCollapse_ && childPressIndex_ > 0 && childPressIndex_ < itemCount_
-            ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(childPressIndex_).first) -
-                  fullArrayValue_.begin()
-            : childPressIndex_;
-    currentListData = popListData(actualChildIndex >= 0 ? actualChildIndex : actualIndex);
+    auto actualIndex = GetActualIndex(selected_);
+    currentListData = popListData(actualIndex);
 }
 
 void IndexerPattern::UpdateBubbleView(std::vector<std::string>& currentListData)
@@ -1030,9 +1057,9 @@ void IndexerPattern::UpdateBubbleView(std::vector<std::string>& currentListData)
 Shadow IndexerPattern::GetPopupShadow()
 {
     Shadow shadow;
-    auto colorMode = SystemProperties::GetColorMode();
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, shadow);
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, shadow);
     shadow = shadowTheme->GetShadow(ShadowStyle::OuterDefaultLG, colorMode);
@@ -1170,7 +1197,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(letterNode);
     auto letterLayoutProperty = letterNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(letterLayoutProperty);
-    letterLayoutProperty->UpdateContent(arrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : selected_].first);
+    letterLayoutProperty->UpdateContent(fullArrayValue_[GetActualIndex(selected_)]);
     auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
     if ((!layoutProperty->GetPopupFont().has_value() ||
             layoutProperty->GetPopupFont().value().GetFontFamilies().empty()) &&
@@ -1655,9 +1682,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected) {
         onPopupSelected(index);
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPopupSelected");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected");
     }
     ChangeListItemsSelectedStyle(index);
 }
@@ -1964,12 +1989,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     CHECK_NULL_VOID(host);
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
-    int32_t actualIndex = autoCollapse_ ?
-            selected_ > 0 && selected_ < itemCount_ ?
-                std::find(fullArrayValue_.begin(), fullArrayValue_.end(),
-                    arrayValue_.at(selected_).first) - fullArrayValue_.begin() :
-                selected_ :
-        selectIndex;
+    int32_t actualIndex = GetActualIndex(selectIndex);
     if (fromPress || lastIndexFromPress_ == fromPress || lastFireSelectIndex_ != selectIndex) {
         auto onChangeEvent = indexerEventHub->GetChangeEvent();
         if (onChangeEvent && (selected_ >= 0) && (selected_ < itemCount_)) {

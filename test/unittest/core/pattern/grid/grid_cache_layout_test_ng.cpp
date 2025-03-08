@@ -17,6 +17,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -543,6 +544,33 @@ HWTEST_F(GridCacheLayoutTestNg, ShowCache005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShowCache006
+ * @tc.desc: Test cached items when last line isn't filled
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, ShowCache006, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, true);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return 50.0f; });
+    CreateDone();
+
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    for (int i = 0; i < 20; ++i) {
+        UpdateCurrentOffset(-300.0f);
+    }
+    EXPECT_TRUE(GetItem(9, true)->IsActive());
+    EXPECT_LT(GetChildY(frameNode_, 9), -50.0f);
+    EXPECT_TRUE(GetItem(8, true)->IsActive());
+    EXPECT_TRUE(GetItem(7, true)->IsActive());
+    EXPECT_TRUE(GetItem(6, true)->IsActive());
+    EXPECT_FALSE(GetItem(5, true)->IsActive());
+    EXPECT_FALSE(GetItem(4, true)->IsActive());
+}
+
+/**
  * @tc.name: LayoutCachedItem001
  * @tc.desc: Test LayoutCachedItem
  * @tc.type: FUNC
@@ -595,5 +623,64 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
     ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
+}
+
+/**
+ * @tc.name: LayoutCachedItem002
+ * @tc.desc: Change dataSource when overScroll at top.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem002, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(1);
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetCachedCount(3, true);
+    CreateFixedItems(40);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(400.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 400);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 400);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 0);
+
+    // remove the last child.
+    frameNode_->RemoveChildAtIndex(39);
+    frameNode_->ChildrenUpdatedFrom(39);
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 463.02078);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 463.020782);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 0);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 2), 100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 4), 200);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
 }
 } // namespace OHOS::Ace::NG

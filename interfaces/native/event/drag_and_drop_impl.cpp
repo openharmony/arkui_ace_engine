@@ -690,6 +690,9 @@ int32_t OH_ArkUI_DragEvent_StartDataLoading(
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    if (!(dragEvent->isSuitGetData)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
     int32_t length = strlen(dragEvent->key);
     for (int32_t i = 0; i < length; i++) {
         key[i] = dragEvent->key[i];
@@ -731,6 +734,53 @@ int32_t OH_ArkUI_DisableDropDataPrefetchOnNode(ArkUI_NodeHandle node, bool disab
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     impl->getNodeModifiers()->getCommonModifier()->setDisableDataPrefetch(node->uiNodeHandle, disable);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DragEvent_RequestDragEndPending(ArkUI_DragEvent* event, int32_t* requestIdentify)
+{
+    if (!event) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!dragEvent || !impl) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto id = impl->getDragAdapterAPI()->requestDragEndPending();
+    if (id == -1) {
+        return ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED;
+    }
+
+    dragEvent->isDragEndPending = true;
+    dragEvent->requestId = id;
+    (*requestIdentify) = id;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NotifyDragResult(int32_t requestIdentify, ArkUI_DragResult result)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto ret = impl->getDragAdapterAPI()->notifyDragResult(requestIdentify, static_cast<ArkUI_Int32>(result));
+    if (ret == -1) {
+        return ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NotifyDragEndPendingDone(int32_t requestIdentify)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto ret = impl->getDragAdapterAPI()->notifyDragEndPendingDone(requestIdentify);
+    if (ret == -1) {
+        return ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED;
+    }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 #ifdef __cplusplus

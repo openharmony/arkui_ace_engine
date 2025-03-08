@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
+#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
@@ -53,7 +54,6 @@
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -73,6 +73,8 @@ using DragEventCallBack = std::function<void(const DragPointerEvent&, const Drag
 using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
 
+class PipelineBase;
+
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
@@ -83,6 +85,14 @@ public:
     virtual void Initialize() = 0;
 
     virtual void Destroy() = 0;
+
+    virtual void SetAppRunningUniqueId(const std::string& uniqueId) {};
+
+    virtual const std::string& GetAppRunningUniqueId() const
+    {
+        static const std::string res;
+        return res;
+    }
 
     virtual bool IsKeyboard()
     {
@@ -181,6 +191,13 @@ public:
         return 0;
     }
 
+    virtual void SetParentId(int32_t parentId) {}
+
+    virtual int32_t GetParentId() const
+    {
+        return 0;
+    }
+
     virtual void ProcessScreenOnEvents() {}
 
     virtual void ProcessScreenOffEvents() {}
@@ -200,10 +217,7 @@ public:
 
     virtual FoldStatus GetCurrentFoldStatus();
 
-    virtual NG::SafeAreaInsets GetKeyboardSafeArea()
-    {
-        return {};
-    }
+    virtual NG::SafeAreaInsets GetKeyboardSafeArea();
 
     virtual std::string GetHapPath() const
     {
@@ -330,6 +344,7 @@ public:
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
+    static ColorMode CurrentColorMode();
 
     void SetUseNewPipeline()
     {
@@ -379,11 +394,7 @@ public:
         return container ? container->IsSubContainer() : false;
     }
 
-    Window* GetWindow() const
-    {
-        auto context = GetPipelineContext();
-        return context ? context->GetWindow() : nullptr;
-    }
+    Window* GetWindow() const;
 
     virtual uint64_t GetDisplayId() const
     {
@@ -491,6 +502,11 @@ public:
         return false;
     }
 
+    virtual bool IsCrossAxisWindow()
+    {
+        return false;
+    }
+
     virtual bool IsUIExtensionWindow()
     {
         return false;
@@ -541,57 +557,28 @@ public:
      *this interface is just use before api12(not include api12),after api12 when you judge version,use
      *LessThanAPITargetVersion(PlatformVersion version)
      */
-    static bool LessThanAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersion(PlatformVersion version);
 
     /*
      *this interface is just use before api12(not include api12),after api12 when you judge version,use
      *GreatOrEqualAPITargetVersion(PlatformVersion version)
      */
-    static bool GreatOrEqualAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
     /*
      *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
      */
-    static bool LessThanAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
-                             static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersionWithCheck(PlatformVersion version);
 
     /*
      *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
      */
-    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
-                             static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        if (!container) {
-            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-            return apiTargetVersion < static_cast<int32_t>(version);
-        }
+        CHECK_NULL_RETURN(container, false);
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion < static_cast<int32_t>(version);
     }
@@ -675,6 +662,16 @@ public:
         return false;
     }
 
+    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    {
+        containerHandler_ = containerHandler;
+    }
+
+    WeakPtr<ContainerHandler> GetContainerHandler()
+    {
+        return containerHandler_;
+    }
+
     void SetCurrentDisplayId(uint64_t displayId)
     {
         currentDisplayId_ = displayId;
@@ -683,6 +680,16 @@ public:
     uint64_t GetCurrentDisplayId() const
     {
         return currentDisplayId_;
+    }
+
+    virtual void SetColorMode(ColorMode mode)
+    {
+        colorMode_ = mode;
+    }
+
+    virtual ColorMode GetColorMode() const
+    {
+        return colorMode_;
     }
 
     virtual ResourceConfiguration GetResourceConfiguration() const = 0;
@@ -695,6 +702,15 @@ public:
     {
         return false;
     }
+
+    virtual std::vector<Rect> GetCurrentFoldCreaseRegion();
+
+    virtual Rect GetDisplayAvailableRect() const
+    {
+        return Rect();
+    }
+
+    static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);
@@ -713,6 +729,9 @@ protected:
     Frontend::State state_ = Frontend::State::UNDEFINE;
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
+    // for common handler
+    WeakPtr<ContainerHandler> containerHandler_;
+    RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:
     std::string bundleName_;
@@ -731,6 +750,7 @@ private:
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     uint64_t currentDisplayId_ = 0;
+    ColorMode colorMode_ = ColorMode::LIGHT;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

@@ -115,6 +115,7 @@ void SelectPatternTestNg::SetUpTestCase()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void SelectPatternTestNg::TearDownTestCase()
@@ -1682,6 +1683,8 @@ HWTEST_F(SelectPatternTestNg, SetItemSelected032, TestSize.Level1)
  */
 HWTEST_F(SelectPatternTestNg, SetControlSize001, TestSize.Level1)
 {
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     SelectModelNG selectModelInstance;
     /**
      * @tc.steps: step1. Get frameNode and pattern.
@@ -1698,6 +1701,7 @@ HWTEST_F(SelectPatternTestNg, SetControlSize001, TestSize.Level1)
     selectPattern->SetControlSize(ControlSize::SMALL);
     auto controlSize = selectPattern->GetControlSize();
     EXPECT_EQ(ControlSize::SMALL, controlSize);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1780,6 +1784,7 @@ HWTEST_F(SelectPatternTestNg, InitFocusEventTest001, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->optionApplyFocusedStyle_ = 1;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step1. Create select.
      */
@@ -1823,6 +1828,7 @@ HWTEST_F(SelectPatternTestNg, InitFocusEventTest002, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->optionApplyFocusedStyle_ = 1;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step1. Create select.
      */
@@ -1870,6 +1876,7 @@ HWTEST_F(SelectPatternTestNg, SelectPatternTest001, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->optionApplyFocusedStyle_ = 1;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step1. Create select model and select event.
      * @tc.expected: Objects are created successfully.

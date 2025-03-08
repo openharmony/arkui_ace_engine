@@ -307,6 +307,28 @@ void FfiOHOSAceFrameworkInteractableViewOnAreaChanged(void (*callback)(CJArea, C
     });
 }
 
+void FfiOHOSAceFrameworkInteractableViewOnSizeChange(void (*callback)(CJSizeOptions, CJSizeOptions))
+{
+    auto onSizeChange = CJLambda::Create(callback);
+    auto onSizeChangeFunc = [onSizeChange](const NG::RectF& oldRect, const NG::RectF& rect) {
+        CJSizeOptions lastCJSizeOptions {};
+        lastCJSizeOptions.width = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
+        lastCJSizeOptions.height = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());
+
+        CJSizeOptions cjSizeOptions {};
+        cjSizeOptions.width = PipelineBase::Px2VpWithCurrentDensity(rect.Width());
+        cjSizeOptions.height = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
+
+        onSizeChange(lastCJSizeOptions, cjSizeOptions);
+    };
+    ViewAbstractModel::GetInstance()->SetOnSizeChanged(std::move(onSizeChangeFunc));
+}
+
+void FfiOHOSAceFrameworkInteractableViewOnDetach(void (*callback)())
+{
+    ViewAbstractModel::GetInstance()->SetOnDetach(CJLambda::Create(callback));
+}
+
 void FfiOHOSAceFrameworkInteractableViewOnVisibleAreaChange(
     VectorFloat64Handle raitosValsHandle, void (*callback)(bool isVisible, double currentRatio))
 {

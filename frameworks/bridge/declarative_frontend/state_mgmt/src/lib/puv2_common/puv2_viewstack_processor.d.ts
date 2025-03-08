@@ -89,4 +89,8 @@ declare class ViewStackProcessor {
 
   // get send state info to profiler
   public static sendStateInfo(stateInfo: string): void;
+
+  public static PushPrebuildCompCmd(): void;
+
+  public static CheckIsPrebuildTimeout(): boolean;
 }

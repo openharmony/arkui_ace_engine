@@ -147,8 +147,8 @@ int32_t TextFieldController::AddText(std::u16string text, int32_t offset)
         return textFieldPattern->GetCaretIndex();
     }
     textFieldPattern->FinishTextPreviewOperation();
-    int32_t length = textFieldPattern->GetTextUtf16Value().length();
-    if (offset == -1) {
+    int32_t length = static_cast<int32_t>(textFieldPattern->GetTextUtf16Value().length());
+    if (offset == -1 || offset > length) {
         offset = length;
     }
     return textFieldPattern->InsertValueByController(text, offset);
@@ -162,7 +162,7 @@ void TextFieldController::DeleteText(int32_t start, int32_t end)
         return;
     }
     textFieldPattern->FinishTextPreviewOperation();
-    int32_t length = textFieldPattern->GetTextUtf16Value().length();
+    int32_t length = static_cast<int32_t>(textFieldPattern->GetTextUtf16Value().length());
     if (start == -1 && end == -1) {
         // delete all
         textFieldPattern->DeleteRange(0, length, false);
@@ -176,6 +176,19 @@ void TextFieldController::DeleteText(int32_t start, int32_t end)
     start = std::clamp(start, 0, length);
     end = std::clamp(end, 0, length);
     textFieldPattern->DeleteRange(start, end, false);
+}
+
+void TextFieldController::ClearPreviewText()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    PreviewRange range = {
+        textFieldPattern->GetPreviewTextStart(),
+        textFieldPattern->GetPreviewTextEnd(),
+    };
+    textFieldPattern->SetPreviewText(u"", range);
+    textFieldPattern->FinishTextPreviewOperation();
+    textFieldPattern->NotifyImfFinishTextPreview();
 }
 
 SelectionInfo TextFieldController::GetSelection()

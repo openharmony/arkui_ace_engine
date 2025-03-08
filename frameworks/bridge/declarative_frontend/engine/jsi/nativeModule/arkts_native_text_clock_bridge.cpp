@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_clock_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "frameworks/base/geometry/calc_dimension.h"
@@ -471,17 +470,12 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockTimeZoneOffset(ArkUIRuntimeC
     Local<JSValueRef> hourWestVal = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
-    auto themeColors = Framework::JSThemeUtils::GetThemeColors();
     float hourWest = NAN;
     if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->Int32Value(vm))) {
         hourWest = GetHoursWest(hourWestVal->ToNumber(vm)->Value());
     }
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (themeColors.has_value()) {
-        nodeModifiers->getTextClockModifier()->setFontColor(
-            nativeNode, themeColors->FontSecondary().GetValue());
-    }
     nodeModifiers->getTextClockModifier()->setTextClockTimeZoneOffset(nativeNode, hourWest);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -494,13 +488,6 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockController(ArkUIRuntimeCallI
     Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
-    auto themeColors = Framework::JSThemeUtils::GetThemeColors();
-    if (themeColors.has_value()) {
-        auto nodeModifiers = GetArkUINodeModifiers();
-        CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-        nodeModifiers->getTextClockModifier()->setFontColor(
-            nativeNode, themeColors->FontSecondary().GetValue());
-    }
 
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
@@ -523,6 +510,45 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockController(ArkUIRuntimeCallI
         }
         TextClockModelNG::SetJSTextClockController(frameNode, nullptr);
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::SetTextClockOnDateChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTextClockModifier()->resetTextClockOnDateChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    std::function<void(const std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                           const std::string& value) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+
+        panda::Local<panda::JSValueRef> params[1] = { panda::StringRef::NewFromUtf8(vm, value.c_str()) };
+        func->Call(vm, func.ToLocal(), params, 1);
+    };
+    GetArkUINodeModifiers()->getTextClockModifier()->setTextClockOnDateChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::ResetTextClockOnDateChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextClockModifier()->resetTextClockOnDateChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

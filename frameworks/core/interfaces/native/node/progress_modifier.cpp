@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
+constexpr double DEFAULT_PROGRESS_TOTAL = 100;
 constexpr int32_t MIN_COLOR_STOPS_VALUE_INDEX = 0;
 constexpr int32_t MIN_COLOR_STOPS_HAS_DIMENSION_INDEX = 1;
 constexpr int32_t MIN_COLOR_STOPS_DIMENSION_INDEX = 2;
@@ -37,6 +38,7 @@ const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
 constexpr float STROKEWIDTH_DEFAULT_VALUE = 4.0f;
+constexpr ArkUI_Uint32 MAX_FONT_FAMILY_LENGTH = Infinity<ArkUI_Uint32>();
 
 /**
  * @param colors color value
@@ -79,6 +81,7 @@ void ResetProgressValue(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::SetValue(frameNode, DEFAULT_PROGRESS_VALUE);
+    ProgressModelNG::SetTotal(frameNode, DEFAULT_PROGRESS_TOTAL);
 }
 
 
@@ -133,6 +136,7 @@ void SetProgressColor(ArkUINodeHandle node, uint32_t color)
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
+    ProgressModelNG::SetModifierInitiatedColor(frameNode, true);
     ProgressModelNG::SetColor(frameNode, Color(color));
 }
 
@@ -154,9 +158,9 @@ void ResetProgressColor(ArkUINodeHandle node)
         endColor = progressTheme->GetRingProgressEndSideColor();
         beginColor = progressTheme->GetRingProgressBeginSideColor();
     } else if (progresstype == ProgressType::CAPSULE) {
-        colorVal = progressTheme->GetCapsuleSelectColor();
+        colorVal = progressTheme->GetCapsuleParseFailedSelectColor();
     } else {
-        colorVal = progressTheme->GetTrackSelectedColor();
+        colorVal = progressTheme->GetTrackParseFailedSelectedColor();
     }
 
     OHOS::Ace::NG::Gradient gradient;
@@ -169,6 +173,7 @@ void ResetProgressColor(ArkUINodeHandle node)
     gradient.AddColor(endSideColor);
     gradient.AddColor(beginSideColor);
     ProgressModelNG::SetGradientColor(frameNode, gradient);
+    ProgressModelNG::SetModifierInitiatedColor(frameNode, false);
     ProgressModelNG::SetColor(frameNode, colorVal);
 }
 
@@ -233,7 +238,7 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     const char** fontFamilies = value->fontInfo.fontFamilies;
     uint32_t familyLength = value->fontInfo.familyLength;
     std::vector<std::string> families;
-    if (fontFamilies && familyLength > 0) {
+    if (fontFamilies && familyLength > 0 && familyLength <= MAX_FONT_FAMILY_LENGTH) {
         families.resize(familyLength);
         for (uint32_t i = 0; i < familyLength; i++) {
             families.at(i) = std::string(*(fontFamilies + i));
@@ -246,14 +251,14 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
         ProgressModelNG::SetBorderWidth(
             node, Dimension(value->borderWidthValue, static_cast<DimensionUnit>(value->borderWidthUnit)));
     }
+    ProgressModelNG::SetBorderColor(node, Color(value->borderColor));
+    ProgressModelNG::SetSweepingEffect(node, value->enableScanEffect);
+    ProgressModelNG::SetShowText(node, value->showDefaultPercentage);
     if (value->content == nullptr) {
         ProgressModelNG::SetText(node, std::nullopt);
     } else {
         ProgressModelNG::SetText(node, std::string(value->content));
     }
-    ProgressModelNG::SetBorderColor(node, Color(value->borderColor));
-    ProgressModelNG::SetSweepingEffect(node, value->enableScanEffect);
-    ProgressModelNG::SetShowText(node, value->showDefaultPercentage);
     ProgressModelNG::SetFontColor(node, Color(value->fontColor));
     ProgressModelNG::SetFontSize(node, Dimension(fontSizeNumber, static_cast<DimensionUnit>(fontSizeUnit)));
     ProgressModelNG::SetFontWeight(node, static_cast<FontWeight>(fontWeight));
@@ -360,6 +365,7 @@ void SetProgressBackgroundColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    ProgressModelNG::SetModifierInitiatedBgColor(frameNode, true);
     ProgressModelNG::SetBackgroundColor(frameNode, Color(color));
 }
 
@@ -377,13 +383,14 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
 
     Color backgroundColor;
     if (progresstype == ProgressType::CAPSULE) {
-        backgroundColor = theme->GetCapsuleBgColor();
+        backgroundColor = theme->GetCapsuleParseFailedBgColor();
     } else if (progresstype == ProgressType::RING) {
-        backgroundColor = theme->GetRingProgressBgColor();
+        backgroundColor = theme->GetRingProgressParseFailedBgColor();
     } else {
-        backgroundColor = theme->GetTrackBgColor();
+        backgroundColor = theme->GetTrackParseFailedBgColor();
     }
 
+    ProgressModelNG::SetModifierInitiatedBgColor(frameNode, false);
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 

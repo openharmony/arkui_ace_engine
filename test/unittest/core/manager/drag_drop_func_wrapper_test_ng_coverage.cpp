@@ -37,6 +37,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -97,15 +98,15 @@ RefPtr<FrameNode> CreateGridNodeWithChild(size_t childCount)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() {return AceType::MakeRefPtr<GridPattern>(); });
-    ViewAbstract::SetWidth(frameNode.GetRawPtr(), CalcLength(GRID_WIDTH));
-    ViewAbstract::SetHeight(frameNode.GetRawPtr(), CalcLength(GRID_HEIGHT));
+    ViewAbstract::SetWidth(Referenced::RawPtr(frameNode), CalcLength(GRID_WIDTH));
+    ViewAbstract::SetHeight(Referenced::RawPtr(frameNode), CalcLength(GRID_HEIGHT));
 
     for (size_t i = 0; i < childCount; ++i) {
         auto chidNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto childNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, chidNodeId,
             []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, GridItemStyle::NONE); });
-        ViewAbstract::SetWidth(childNode.GetRawPtr(), CalcLength(ITEM_WIDTH));
-        ViewAbstract::SetHeight(childNode.GetRawPtr(), CalcLength(ITEM_HEIGHT));
+        ViewAbstract::SetWidth(Referenced::RawPtr(childNode), CalcLength(ITEM_WIDTH));
+        ViewAbstract::SetHeight(Referenced::RawPtr(childNode), CalcLength(ITEM_HEIGHT));
         childNode->MountToParent(frameNode);
     }
     return frameNode;
@@ -643,7 +644,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage027
     DragPreviewOption option;
     DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
 
-    EXPECT_FALSE(option.options.blurbgEffect.backGroundEffect.radius.IsValid());
+    EXPECT_TRUE(option.options.blurbgEffect.backGroundEffect.radius.IsValid());
 }
 
 /**
@@ -851,5 +852,78 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, FindItemParentNode, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     frameNode->MountToParent(gridNode);
     EXPECT_EQ(DragDropFuncWrapper::FindItemParentNode(frameNode), nullptr);
+}
+
+/**
+ * @tc.name: Test RequestDragEndPending
+ * @tc.desc: Test RequestDragEndPending func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, RequestDragEndPending, TestSize.Level1)
+{
+    int32_t requestId = DragDropFuncWrapper::RequestDragEndPending();
+    EXPECT_EQ(requestId, -1);
+
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    requestId = DragDropFuncWrapper::RequestDragEndPending();
+    EXPECT_NE(requestId, -1);
+
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+    requestId = DragDropFuncWrapper::RequestDragEndPending();
+    EXPECT_EQ(requestId, -1);
+}
+
+/**
+ * @tc.name: Test NotifyDragResult
+ * @tc.desc: Test NotifyDragResult func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDragResult, TestSize.Level1)
+{
+    int32_t requestId = 1;
+    DragDropGlobalController::GetInstance().requestId_ = 0;
+    int32_t ret = DragDropFuncWrapper::NotifyDragResult(requestId, static_cast<int32_t>(DragRet::DRAG_SUCCESS));
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    ret = DragDropFuncWrapper::NotifyDragResult(requestId, static_cast<int32_t>(DragRet::DRAG_SUCCESS));
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    DragDropGlobalController::GetInstance().requestId_ = requestId;
+    ret = DragDropFuncWrapper::NotifyDragResult(requestId, static_cast<int32_t>(DragRet::DRAG_SUCCESS));
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
+}
+
+/**
+ * @tc.name: Test NotifyDragEndPendingDone
+ * @tc.desc: Test NotifyDragEndPendingDone func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDragEndPendingDone, TestSize.Level1)
+{
+    int32_t requestId = 1;
+    DragDropGlobalController::GetInstance().requestId_ = 0;
+    DragDropGlobalController::GetInstance().dragResult_ = DragRet::DRAG_SUCCESS;
+    int32_t ret = DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
+
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    ret = DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
+
+    DragDropGlobalController::GetInstance().requestId_ = requestId;
+    ret = DragDropFuncWrapper::NotifyDragEndPendingDone(requestId);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
 }
 } // namespace OHOS::Ace::NG

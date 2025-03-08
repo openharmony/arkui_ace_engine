@@ -58,12 +58,12 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         return;
     }
     // api 16 trigger onActive and onInactive observer
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && (
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && (
         state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
         return;
     }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
-        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, std::to_string(uniqueId));
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
     navigationHandleFunc_(info);
 }
 
@@ -178,7 +178,7 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavDestinationInfo(con
     return std::make_shared<NavDestinationInfo>(
         GetNavigationId(pattern), pattern->GetName(),
         state, host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()),
-        mode, std::to_string(uniqueId));
+        mode, uniqueId);
 }
 
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)

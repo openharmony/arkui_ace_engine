@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
@@ -28,7 +29,7 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             frameNode->GetGeometryNode()->ResetContent();
         } else {
             frameNode->GetGeometryNode()->Reset();

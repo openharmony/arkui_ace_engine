@@ -90,11 +90,18 @@ bool IndicatorPattern::IsLoopFromProperty() const
     return swiperIndicatorLayoutProperty->GetLoop().value_or(true);
 }
 
-void IndicatorPattern::FireChangeEvent(int32_t index) const
+void IndicatorPattern::FireChangeEvent() const
 {
     auto indicatorEventHub = GetEventHub<IndicatorEventHub>();
     CHECK_NULL_VOID(indicatorEventHub);
-    indicatorEventHub->FireChangeEvent(index);
+    indicatorEventHub->FireChangeEvent(GetLoopIndex(GetCurrentIndex()));
+}
+
+void IndicatorPattern::FireIndicatorIndexChangeEvent(int32_t index) const
+{
+    auto indicatorEventHub = GetEventHub<IndicatorEventHub>();
+    CHECK_NULL_VOID(indicatorEventHub);
+    indicatorEventHub->FireChangeEvent(GetLoopIndex(index));
 }
 
 std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
@@ -112,6 +119,7 @@ std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
         swiperParameters_->maskValue = false;
         swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
         swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+        swiperParameters_->dimSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     }
     return swiperParameters_;
 }
@@ -171,13 +179,7 @@ void IndicatorPattern::SaveDigitIndicatorProperty()
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
     layoutProperty->UpdateSelectedFontWeight(swiperDigitalParameters->selectedFontWeight.value_or(
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
-    auto indicatorModifier = GetDotIndicatorModifier();
-    CHECK_NULL_VOID(indicatorModifier);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto rsRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->RemoveContentModifier(indicatorModifier);
+    ResetDotModifier();
 }
 
 void IndicatorPattern::SaveDotIndicatorProperty()
@@ -211,7 +213,9 @@ void IndicatorPattern::SaveDotIndicatorProperty()
         auto dimValue = swiperParameters->dimEnd.value();
         isRtl ? layoutProperty->UpdateLeft(dimValue) : layoutProperty->UpdateRight(dimValue);
     }
-
+    if (swiperParameters->dimSpace.has_value()) {
+        layoutProperty->UpdateSpace(swiperParameters->dimSpace.value());
+    }
     UpdatePaintProperty();
 }
 
@@ -238,6 +242,7 @@ void IndicatorPattern::UpdatePaintProperty()
     paintProperty->UpdateSelectedColor(
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(isCustomSize_);
+    paintProperty->UpdateSpace(swiperParameters->dimSpace.value_or(swiperIndicatorTheme->GetIndicatorDotItemSpace()));
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -252,7 +257,9 @@ void IndicatorPattern::OnModifyDone()
         }
         currentIndexInSingleMode_ = initialIndex;
     }
-
+    if (currentIndexInSingleMode_ > RealTotalCount() - 1) {
+        currentIndexInSingleMode_ = 0;
+    }
     auto indicatorNode = GetHost();
     CHECK_NULL_VOID(indicatorNode);
     if (GetIndicatorType() == SwiperIndicatorType::DOT) {
@@ -324,7 +331,8 @@ bool IndicatorPattern::GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& f
 
 void IndicatorPattern::OnIndexChangeInSingleMode(int32_t index)
 {
-    if (!IsLoop()) {
+    if (!IsLoop() || IsHover() || IsPressed()) {
+        singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
         if (index >= RealTotalCount()) {
             SetCurrentIndexInSingleMode(RealTotalCount() - 1);
             return;
@@ -334,7 +342,7 @@ void IndicatorPattern::OnIndexChangeInSingleMode(int32_t index)
         }
     }
     SetCurrentIndexInSingleMode(GetLoopIndex(index));
-    FireChangeEvent(GetLoopIndex(index));
+    FireChangeEvent();
     SwiperIndicatorPattern::IndicatorOnChange();
 }
 
@@ -345,7 +353,7 @@ void IndicatorPattern::ShowPrevious()
     }
 
     singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
+    if (IsHorizontalAndRightToLeft()) {
         singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
         if (IsLoop() && GetCurrentIndex() == 0) {
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
@@ -367,7 +375,7 @@ void IndicatorPattern::ShowNext()
         return SwiperIndicatorPattern::ShowNext();
     }
     singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-    if (GetNonAutoLayoutDirection() == TextDirection::RTL) {
+    if (IsHorizontalAndRightToLeft()) {
         singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
         if (IsLoop() && GetCurrentIndex() == (RealTotalCount() - 1)) {
             singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
@@ -400,6 +408,10 @@ void IndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
         }
     } else {
         singleGestureState_ = GestureState::GESTURE_STATE_INIT;
+    }
+    auto dotIndicatorModifier = GetDotIndicatorModifier();
+    if (dotIndicatorModifier) {
+        dotIndicatorModifier->StopAnimation();
     }
     OnIndexChangeInSingleMode(index);
 }
@@ -522,5 +534,37 @@ void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
         }
         SetDragStartPoint(dragPoint);
     }
+}
+
+int32_t IndicatorPattern::GetTouchCurrentIndex() const
+{
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::GetTouchCurrentIndex();
+    }
+
+    auto currentIndex = GetCurrentIndex();
+    auto isRtl = IsHorizontalAndRightToLeft();
+    if (isRtl) {
+        currentIndex = RealTotalCount() - 1 - currentIndex;
+    }
+
+    return currentIndex;
+}
+
+std::pair<int32_t, int32_t> IndicatorPattern::CalMouseClickIndexStartAndEnd(
+    int32_t itemCount, int32_t currentIndex)
+{
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::CalMouseClickIndexStartAndEnd(itemCount, currentIndex);
+    }
+
+    int32_t loopCount = SwiperIndicatorUtils::CalcLoopCount(currentIndex, itemCount);
+    int32_t start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount + 1) * itemCount;
+    int32_t end = currentIndex >= 0 ? (loopCount + 1) * itemCount : -loopCount * itemCount;
+    if (IsHorizontalAndRightToLeft()) {
+        end = currentIndex >= 0 ? loopCount * itemCount - 1 : -(loopCount + 1) * itemCount - 1;
+        start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
+    }
+    return { start, end };
 }
 } // namespace OHOS::Ace::NG

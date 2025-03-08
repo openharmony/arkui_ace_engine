@@ -18,6 +18,8 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_stub.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
@@ -69,6 +71,20 @@ constexpr float MAX_HEIGHT = 100.0f;
 const Dimension DEFAULT_GRADIENT_HEIGHT = 20.0_vp;
 const Dimension DEFAULT_PICKER_ITEM_HEIGHT = 12.0_vp;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class TextPickerColumnExtendTestNg : public TestNG {
@@ -103,18 +119,10 @@ void TextPickerColumnExtendTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else if (type == ButtonTheme::TypeId()) {
-            return AceType::MakeRefPtr<ButtonTheme>();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -275,6 +283,217 @@ HWTEST_F(TextPickerColumnExtendTestNg, PlayTossAnimation001, TestSize.Level1)
     toss->timeEnd_ = toss->GetCurrentTime() + dragTimeStep;
     textPickerColumnPattern->HandleDragEnd();
     EXPECT_FALSE(textPickerColumnPattern->GetTossStatus());
+}
+
+/**
+ * @tc.name: SetColumnWidths001
+ * @tc.desc: Test SetColumnWidths when the unit is PERCENT, PX or VP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(50.0f, DimensionUnit::PERCENT));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH / 2.0f);
+
+    width.pop_back();
+    width.emplace_back(Dimension(10.0f, DimensionUnit::PX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 10.0f);
+
+    width.pop_back();
+    width.emplace_back(Dimension(10.0f, DimensionUnit::VP));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::VP).ConvertToPx());
+}
+
+/**
+ * @tc.name: SetColumnWidths002
+ * @tc.desc: Test SetColumnWidths when the unit is LPX, FP or the width is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(10.0f, DimensionUnit::LPX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::LPX).ConvertToPx());
+
+    width.pop_back();
+    width.emplace_back(Dimension(10.0f, DimensionUnit::FP));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::FP).ConvertToPx());
+
+    width.pop_back();
+    width.emplace_back(Dimension(-10.0f, DimensionUnit::PX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+}
+
+/**
+ * @tc.name: SetColumnWidths003
+ * @tc.desc: Test SetColumnWidths when width.size() is less than the number of options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+}
+
+/**
+ * @tc.name: SetColumnWidths004
+ * @tc.desc: Test SetColumnWidths when width.size() is greater than the number of options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths004, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(COMPONENT_WIDTH, DimensionUnit::PX));
+    width.emplace_back(Dimension(30.0f, DimensionUnit::PX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+}
+
+/**
+ * @tc.name: SetColumnWidths005
+ * @tc.desc: Test SetColumnWidths when there are multiple options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->MultiInit(theme);
+    TextPickerModelNG::GetInstance()->SetIsCascade(true);
+    std::vector<NG::TextCascadePickerOptions> options;
+    NG::TextCascadePickerOptions options1;
+    options1.rangeResult = { "11", "12", "13" };
+    options.emplace_back(options1);
+    NG::TextCascadePickerOptions options2;
+    options2.rangeResult = { "21", "22", "23" };
+    options.emplace_back(options2);
+    NG::TextCascadePickerOptions options3;
+    options3.rangeResult = { "31", "32", "33" };
+    options.emplace_back(options3);
+    TextPickerModelNG::GetInstance()->SetColumns(options);
+
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(15.0f, DimensionUnit::PX));
+    width.emplace_back(Dimension(15.0f, DimensionUnit::PX));
+    width.emplace_back(Dimension(15.0f, DimensionUnit::PX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    auto widthSize = textPickerPattern->GetColumnWidths().size();
+    EXPECT_EQ(widthSize, 3);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 15.0f);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(1).Value(), 15.0f);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(2).Value(), 15.0f);
 }
 
 /**
@@ -657,5 +876,407 @@ HWTEST_F(TextPickerColumnExtendTestNg, GetGradientPercent001, TestSize.Level1)
     gradientPercent = textPickerLayoutAlgorithm->GetGradientPercent(
         pickerProperty, textPickerPattern, frameSize, pickerTheme);
     EXPECT_EQ(gradientPercent, 0.5f);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeTest001
+ * @tc.desc: Test OnDetachFromFrameNode haptic->stop && UnregisterWindowStateChangedCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, OnDetachFromFrameNodeTest001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    FrameNode& ref = *columnNode;
+    auto pipeline = columnNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    textPickerColumnPattern->OnDetachFromFrameNode(&ref);
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNodeTest002
+ * @tc.desc: Test OnDetachFromFrameNode  haptic->stop && UnregisterWindowStateChangedCallback. .
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, OnDetachFromFrameNodeTest002, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    FrameNode& ref = *columnNode;
+    textPickerColumnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    auto pipeline = columnNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    textPickerColumnPattern->OnDetachFromFrameNode(&ref);
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
+}
+
+/**
+ * @tc.name: InitHapticControllerTest001
+ * @tc.desc: Test InitHapticController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    textPickerColumnPattern->InitHapticController(columnNode);
+    EXPECT_EQ(textPickerColumnPattern->hapticController_, nullptr);
+}
+
+/**
+ * @tc.name: InitHapticControllerTest002
+ * @tc.desc: Test InitHapticController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest002, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    textPickerColumnPattern->InitHapticController(columnNode);
+    EXPECT_NE(textPickerColumnPattern->hapticController_, nullptr);
+}
+
+/**
+ * @tc.name: InitHapticControllerTest003
+ * @tc.desc: Test InitHapticController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest003, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    textPickerColumnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    textPickerColumnPattern->InitHapticController(columnNode);
+    EXPECT_TRUE(textPickerColumnPattern->isEnableHaptic_);
+}
+
+/**
+ * @tc.name: InitHapticControllerTest004
+ * @tc.desc: Test InitHapticController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest004, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto textPickerPattern = parentNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    textPickerPattern->isEnableHaptic_ = false;
+    textPickerColumnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    textPickerColumnPattern->InitHapticController(columnNode);
+    EXPECT_FALSE(textPickerColumnPattern->isEnableHaptic_);
+}
+
+/**
+ * @tc.name: InitHapticControllerTest005
+ * @tc.desc: Test InitHapticController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest005, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(columnNode->GetParent());
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = AceType::DynamicCast<FrameNode>(blendNode->GetParent());
+    ASSERT_NE(stackNode, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(stackNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    auto textPickerPattern = parentNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    textPickerPattern->isEnableHaptic_ = false;
+    textPickerColumnPattern->hapticController_ = nullptr;
+    textPickerColumnPattern->InitHapticController(columnNode);
+    EXPECT_EQ(textPickerColumnPattern->hapticController_, nullptr);
+}
+
+/**
+ * @tc.name: RegisterWindowStateChangedCallbackTest001
+ * @tc.desc: Test RegisterWindowStateChangedCallback & UnregisterWindowStateChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, RegisterWindowStateChangedCallbackTest001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    auto pipeline = columnNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    pipeline->onWindowStateChangedCallbacks_.clear();
+    textPickerColumnPattern->RegisterWindowStateChangedCallback();
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), 1);
+    textPickerColumnPattern->UnregisterWindowStateChangedCallback(columnNode.rawPtr_);
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), 0);
+}
+
+/**
+ * @tc.name: OnWindowHideTest001
+ * @tc.desc: Test OnWindowHide &  OnWindowShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, OnWindowHideTest001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    textPickerColumnPattern->OnWindowHide();
+    EXPECT_FALSE(textPickerColumnPattern->isShow_);
+    textPickerColumnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    textPickerColumnPattern->OnWindowHide();
+    EXPECT_FALSE(textPickerColumnPattern->isShow_);
+    textPickerColumnPattern->OnWindowShow();
+    EXPECT_TRUE(textPickerColumnPattern->isShow_);
+}
+
+/**
+ * @tc.name: HandleDragEndTest001
+ * @tc.desc: Test HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, HandleDragEndTest001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    textPickerColumnPattern->HandleDragEnd();
+    EXPECT_FALSE(textPickerColumnPattern->pressed_);
+    textPickerColumnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    textPickerColumnPattern->HandleDragEnd();
+    EXPECT_FALSE(textPickerColumnPattern->pressed_);
+}
+
+/**
+ * @tc.name: TossAnimationStopedTest001
+ * @tc.desc: Test TossAnimationStoped
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, TossAnimationStopedTest001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    textPickerColumnPattern->TossAnimationStoped();
+    EXPECT_EQ(textPickerColumnPattern->yLast_, 0.0f);
+    textPickerColumnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    textPickerColumnPattern->TossAnimationStoped();
+    EXPECT_EQ(textPickerColumnPattern->yLast_, 0.0f);
+}
+
+/**
+ * @tc.name: UpdateColumnChildPositionTest001
+ * @tc.desc: Test UpdateColumnChildPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, UpdateColumnChildPositionTest001, TestSize.Level1)
+{
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    double offset = 50.0;
+    textPickerColumnPattern->UpdateColumnChildPosition(offset);
+    EXPECT_EQ(textPickerColumnPattern->yLast_, 50.0f);
+    textPickerColumnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    textPickerColumnPattern->isShow_ = false;
+    auto pickerAudioHapticStub =
+        std::static_pointer_cast<PickerAudioHapticStub>(textPickerColumnPattern->hapticController_);
+    ASSERT_NE(pickerAudioHapticStub, nullptr);
+    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    textPickerColumnPattern->UpdateColumnChildPosition(offset);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    textPickerColumnPattern->isShow_ = true;
+    textPickerColumnPattern->UpdateColumnChildPosition(offset);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::HANDLE_DELTA);
+    textPickerColumnPattern->isEnableHaptic_ = false;
+    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    textPickerColumnPattern->UpdateColumnChildPosition(offset);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetEnableHapticFeedback001
+ * @tc.desc: Test TextPickerModelNG SetEnableHapticFeedback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, TextPickerModelNGSetEnableHapticFeedback001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->MultiInit(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::GetInstance()->SetEnableHapticFeedback(false);
+    EXPECT_FALSE(textPickerPattern->isEnableHaptic_);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewShowTest002
+ * @tc.desc: Test TextPickerDialogView Show for API16.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, TextPickerDialogViewShowTest002, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+
+    auto func = [](const std::string& /* info */) {};
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    dialogEvent["changeId"] = func;
+    dialogEvent["acceptId"] = func;
+    dialogEvent["scrollStopId"] = func;
+
+    int32_t cancelCallbackInfo = 0;
+    auto cancelFunc = [&cancelCallbackInfo](
+                          const GestureEvent& /* info */) { cancelCallbackInfo = ONCANCEL_CALLBACK_INFO; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto settingData = CreateDefaultTextPickerSettingData();
+    ASSERT_NE(settingData, nullptr);
+    settingData->isEnableHapticFeedback = false;
+    DialogProperties dialogProperties;
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode =
+        TextPickerDialogView::Show(dialogProperties, *settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto customNode = dialogPattern->GetCustomNode();
+    ASSERT_NE(customNode, nullptr);
+    RefPtr<FrameNode> textPickerNode = nullptr;
+    auto children = customNode->GetChildren();
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        auto targetNode = AceType::DynamicCast<FrameNode>(*it);
+        if (targetNode && targetNode->GetTag() == V2::TEXT_PICKER_ETS_TAG) {
+            textPickerNode = targetNode;
+            break;
+        }
+    }
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    EXPECT_FALSE(textPickerPattern->isEnableHaptic_);
+}
+
+/**
+ * @tc.name: InnerHandleScrollTest001
+ * @tc.desc: Test TextPickerColumnPattern InnerHandleScroll001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, InnerHandleScrollTest001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(0);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->GetParentLayout()->UpdateCanLoop(true);
+    RangeContent tstContentOne = { "test1", "test1" };
+    columnPattern->options_.push_back(tstContentOne);
+    columnPattern->isEnableHaptic_ = false;
+    columnPattern->hapticController_ = nullptr;
+    bool result = columnPattern->InnerHandleScroll(true);
+    EXPECT_TRUE(result);
+    columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+    auto pickerAudioHapticStub = std::static_pointer_cast<PickerAudioHapticStub>(columnPattern->hapticController_);
+    ASSERT_NE(pickerAudioHapticStub, nullptr);
+    columnPattern->InnerHandleScroll(true);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    columnPattern->isEnableHaptic_ = true;
+    columnPattern->InnerHandleScroll(true);
+    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::PLAY_ONCE);
+}
+
+/**
+ * @tc.name: ColumnPatternInitHapticController001
+ * @tc.desc: Test ColumnPatternInitHapticController
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, ColumnPatternInitHapticController001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_PICKER_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    textPickerPattern->ColumnPatternInitHapticController();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    textPickerPattern->isHapticChanged_ = false;
+    textPickerPattern->ColumnPatternInitHapticController();
+    EXPECT_FALSE(textPickerPattern->isHapticChanged_);
+    textPickerPattern->isHapticChanged_ = true;
+    textPickerPattern->ColumnPatternInitHapticController();
+    EXPECT_FALSE(textPickerPattern->isHapticChanged_);
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonNodeTwo = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNodeTwo, nullptr);
+    auto columnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
+    ASSERT_NE(columnNode, nullptr);
+    auto blendNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(blendNode, nullptr);
+    auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(stackNode, nullptr);
+    auto geometryNode = stackNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    buttonNode->MountToParent(stackNode);
+    buttonNodeTwo->MountToParent(blendNode);
+    columnNode->MountToParent(blendNode);
+    blendNode->MountToParent(stackNode);
+    stackNode->MountToParent(frameNode);
+    textPickerPattern->isHapticChanged_ = true;
+    textPickerPattern->ColumnPatternInitHapticController();
+    EXPECT_FALSE(textPickerPattern->isHapticChanged_);
 }
 } // namespace OHOS::Ace::NG

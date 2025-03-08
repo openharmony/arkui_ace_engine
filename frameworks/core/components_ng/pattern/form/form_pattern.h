@@ -40,6 +40,9 @@ class PointerEvent;
 namespace Ace {
 class SubContainer;
 class FormManagerDelegate;
+class DrawDelegate;
+struct SerializedGesture;
+struct AccessibilityParentRectInfo;
 
 namespace NG {
 enum class FormChildNodeType : int32_t {
@@ -236,7 +239,8 @@ private:
     void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
     void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
-    bool IsFormBundleLocked(const std::string &bundleName, int64_t formId) const;
+    bool IsFormBundleExempt(int64_t formId) const;
+    bool IsFormBundleProtected(const std::string &bundleName, int64_t formId) const;
     void HandleLockEvent(bool isLock);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);

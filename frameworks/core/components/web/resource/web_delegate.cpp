@@ -768,6 +768,18 @@ void WebDelegate::UnRegisterScreenLockFunction()
     }
 }
 
+void WebWindowFocusChangedListener::AfterFocused()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Dragdrop, AfterFocused error delegate is nullptr");
+        return;
+    }
+    delegate->OnDragAttach();
+    delegate->UnRegisterWebWindowFocusChangedListener();
+    TAG_LOGI(AceLogTag::ACE_WEB, "Dragdrop, AfterFocused, end attach ime, remove listener");
+}
+
 void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
     const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
@@ -2771,15 +2783,29 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
         return;
     }
     visibleRatio_ = visibleRatio;
-
     if (fabs(visibleRatio_) > FLT_EPSILON && visibleRatio_ > 0.0) {
         CHECK_NULL_VOID(nweb_);
         nweb_->OnUnoccluded();
-        if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
-            visibleRatio_ < lowerFrameRateVisibleRatio_) {
-            nweb_->SetEnableLowerFrameRate(true);
+        if (isHalfFrame_) {
+            if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
+                visibleRatio_ < lowerFrameRateVisibleRatio_) {
+                nweb_->SetEnableLowerFrameRate(true);
+                nweb_->SetEnableHalfFrameRate(false);
+            } else if (fabs(visibleRatio_ - halfFrameRateVisibleRatio_) <= FLT_EPSILON ||
+                visibleRatio_ < halfFrameRateVisibleRatio_) {
+                nweb_->SetEnableLowerFrameRate(false);
+                nweb_->SetEnableHalfFrameRate(true);
+            } else {
+                nweb_->SetEnableLowerFrameRate(false);
+                nweb_->SetEnableHalfFrameRate(false);
+            }
         } else {
-            nweb_->SetEnableLowerFrameRate(false);
+            if (fabs(visibleRatio_ - lowerFrameRateVisibleRatio_) <= FLT_EPSILON ||
+                visibleRatio_ < lowerFrameRateVisibleRatio_) {
+                nweb_->SetEnableLowerFrameRate(true);
+            } else {
+                nweb_->SetEnableLowerFrameRate(false);
+            }
         }
     } else {
         auto context = context_.Upgrade();
@@ -2794,8 +2820,7 @@ void WebDelegate::SurfaceOcclusionCallback(float visibleRatio)
                     CHECK_NULL_VOID(delegate->nweb_);
                     delegate->nweb_->OnOccluded();
                 }
-            },
-            TaskExecutor::TaskType::UI, delayTime_, "ArkUIWebOccluded");
+            }, TaskExecutor::TaskType::UI, delayTime_, "ArkUIWebOccluded");
     }
 }
 
@@ -2829,6 +2854,55 @@ void WebDelegate::ratioStrToFloat(const std::string& str)
     }
 }
 
+void WebDelegate::ratioStrToFloatV2(const std::string& str)
+{
+    // LowerFrameRateConfig format x.xx, len is 4, [0.00, 1.00]
+    if (str.size() != VISIBLERATIO_LENGTH) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio lenth is over 4.");
+        return;
+    }
+    auto dotCount = std::count(str.begin(), str.end(), '.');
+    if (dotCount != 1) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio does not have dot.");
+        return;
+    }
+    auto pos = str.find('.', 0);
+    if (pos != 1) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio dot position is wrong.");
+        return;
+    }
+    auto notDigitCount = std::count_if(str.begin(), str.end(), [](char c) { return !isdigit(c) && c != '.'; });
+    if (notDigitCount > 0) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "visibleRatio dot count is over 1.");
+        return;
+    }
+    float f = std::stof(str);
+    int i = f * VISIBLERATIO_FLOAT_TO_INT;
+    if (i >= 0 && i <= VISIBLERATIO_FLOAT_TO_INT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "visibleRatio check success.");
+        halfFrameRateVisibleRatio_ = f;
+    }
+}
+
+void WebDelegate::SetPartitionPoints(std::vector<float>& partition)
+{
+    if (isHalfFrame_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to half frame rate:%{public}f", halfFrameRateVisibleRatio_);
+        if ((int)(halfFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partition = { 0 };
+        } else if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partition = { 0, halfFrameRateVisibleRatio_ };
+        } else {
+            partition = { 0, lowerFrameRateVisibleRatio_, halfFrameRateVisibleRatio_ };
+        }
+    } else {
+        if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
+            partition = { 0 };
+        } else {
+            partition = { 0, lowerFrameRateVisibleRatio_ };
+        }
+    }
+}
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
     if (!GetWebOptimizationValue()) {
@@ -2841,14 +2915,14 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     }
     std::string visibleAreaRatio =
         OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig", "visibleAreaRatio");
+    std::string visibleAreaRatioV2 =
+        OHOS::NWeb::NWebAdapterHelper::Instance().ParsePerfConfig("LowerFrameRateConfig", "visibleAreaRatioV2");
     ratioStrToFloat(visibleAreaRatio);
+    ratioStrToFloatV2(visibleAreaRatioV2);
+    isHalfFrame_ = (lowerFrameRateVisibleRatio_ < halfFrameRateVisibleRatio_ ? true : false);
     std::vector<float> partitionPoints;
     TAG_LOGI(AceLogTag::ACE_WEB, "max visible rate to lower frame rate:%{public}f", lowerFrameRateVisibleRatio_);
-    if ((int)(lowerFrameRateVisibleRatio_ * VISIBLERATIO_FLOAT_TO_INT) == 0) {
-        partitionPoints = { 0 };
-    } else {
-        partitionPoints = { 0, lowerFrameRateVisibleRatio_ };
-    }
+    SetPartitionPoints(partitionPoints);
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
         [weak = WeakClaim(this)](float visibleRatio) {
@@ -2900,6 +2974,53 @@ void WebDelegate::RegisterAvoidAreaChangeListener(int32_t instanceId)
         TAG_LOGI(AceLogTag::ACE_WEB, "RegisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
     } else {
         TAG_LOGI(AceLogTag::ACE_WEB, "CANNOT RegisterAvoidAreaChangeListener");
+    }
+}
+
+void WebDelegate::RegisterWebWindowFocusChangedListener()
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_VOID(container);
+    int32_t instanceId = container->GetInstanceId();
+    auto window = Platform::AceContainer::GetUIWindow(instanceId);
+    CHECK_NULL_VOID(window);
+    if (webWindowFocusChangedListener_) {
+        return;
+    }
+    webWindowFocusChangedListener_ = new WebWindowFocusChangedListener(AceType::WeakClaim(this));
+    OHOS::Rosen::WMError result = window->RegisterLifeCycleListener(webWindowFocusChangedListener_);
+    if (OHOS::Rosen::WMError::WM_OK == result) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Dragdrop, RegisterWebWindowFocusChangedListener after drop action success.");
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "Dragdrop, RegisterWebWindowFocusChangedListener after drop action fail. result:%{public}d", (int) result);
+        webWindowFocusChangedListener_ = nullptr;
+    }
+}
+
+void WebDelegate::UnRegisterWebWindowFocusChangedListener()
+{
+    CHECK_NULL_VOID(webWindowFocusChangedListener_);
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_VOID(container);
+    int32_t instanceId = container->GetInstanceId();
+    auto window = Platform::AceContainer::GetUIWindow(instanceId);
+    CHECK_NULL_VOID(window);
+    OHOS::Rosen::WMError result = window->UnregisterLifeCycleListener(webWindowFocusChangedListener_);
+    if (OHOS::Rosen::WMError::WM_OK == result) {
+        webWindowFocusChangedListener_ = nullptr;
+        TAG_LOGE(AceLogTag::ACE_WEB, "Dragdrop, UnRegisterWebWindowFocusChangedListener success.");
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "Dragdrop, UnRegisterWebWindowFocusChangedListener fail. result:%{public}d", (int) result);
+    }
+}
+
+void WebDelegate::OnDragAttach()
+{
+    if (nweb_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Dragdrop, after drop action, OnDragAttach");
+        nweb_->OnDragAttach();
     }
 }
 
@@ -3194,17 +3315,17 @@ void WebDelegate::DragResize(const double& width, const double& height,
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebDragResize");
 }
 
-void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
-{
-    isSmoothDragResizeEnabled_ = isSmoothDragResizeEnabled;
-}
-
 bool WebDelegate::GetIsSmoothDragResizeEnabled()
 {
-    if (OHOS::system::GetDeviceType() != "2in1") {
-        isSmoothDragResizeEnabled_ = false;
+    if (!nweb_) {
+        return false;
     }
-    return isSmoothDragResizeEnabled_;
+    bool isBrowserUsage = nweb_->IsNWebEx();
+    if (OHOS::system::GetDeviceType() != "2in1" || !isBrowserUsage) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "Smooth drag resize only support browser in 2in1");
+        return false;
+    }
+    return true;
 }
 
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart)
@@ -3801,6 +3922,7 @@ void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& 
     CHECK_NULL_VOID(executor);
 
     std::string colorMode = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    std::string weightScale = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
     std::string themeTag = configuration.GetItem(OHOS::AAFwk::GlobalConfigurationKey::THEME);
     uint8_t themeFlags = static_cast<uint8_t>(OHOS::NWeb::SystemThemeFlags::NONE);
     if (!themeTag.empty()) {
@@ -3812,7 +3934,7 @@ void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& 
     }
 
     executor->PostTask(
-        [weak = WeakClaim(this), colorMode, themeFlags, dark_mode = current_dark_mode_]() {
+        [weak = WeakClaim(this), colorMode, themeFlags, dark_mode = current_dark_mode_, weightScale]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto nweb = delegate->GetNweb();
@@ -3833,6 +3955,9 @@ void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& 
             } else if (auto_dark_mode && colorMode == "light") {
                 setting->PutDarkSchemeEnabled(false);
                 setting->PutForceDarkModeEnabled(false);
+            }
+            if (delegate->enableFollowSystemFontWeight_) {
+                setting->SetFontWeightScale(stof(weightScale));
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebConfigurationUpdated");
@@ -4072,6 +4197,32 @@ void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebPutScrollBarColor");
+}
+
+void WebDelegate::UpdateEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::UpdateEnableFollowSystemFontWeight isfollow:%{public}d",
+        enableFollowSystemFontWeight);
+    enableFollowSystemFontWeight_ = enableFollowSystemFontWeight;
+    if (!enableFollowSystemFontWeight_) {
+        return;
+    }
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    float fontWeightScale = SystemProperties::GetFontWeightScale();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), fontWeightScale]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetFontWeightScale(fontWeightScale);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetFontWeightScale");
 }
 
 void WebDelegate::LoadUrl()
@@ -4525,7 +4676,7 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
 
 void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const
 {
-    if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+    if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB)) {
         return;
     }
     auto pattern = webPattern_.Upgrade();
@@ -4535,6 +4686,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
     Recorder::EventParamsBuilder builder;
     builder.SetId(host->GetInspectorIdValue(""))
         .SetType(host->GetHostTag())
+        .SetEventCategory(Recorder::EventCategory::CATEGORY_WEB)
         .SetEventType(eventType)
         .SetText(param)
         .SetHost(host)
@@ -5895,10 +6047,10 @@ void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double
 }
 
 void WebDelegate::WebHandleAxisEvent(const double& x, const double& y,
-    const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes)
+    const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes, const int32_t source)
 {
     if (nweb_) {
-        nweb_->WebSendMouseWheelEvent(x, y, deltaX, deltaY, pressedCodes);
+        nweb_->WebSendMouseWheelEventV2(x, y, deltaX, deltaY, pressedCodes, source);
     }
 }
 
@@ -7422,30 +7574,42 @@ void WebDelegate::OnCursorUpdate(double x, double y, double width, double height
     webPattern->OnCursorUpdate(x, y, width, height);
 }
 
-void WebDelegate::OnSafeInsetsChange()
+NG::SafeAreaInsets WebDelegate::GetCombinedSafeArea()
 {
     NG::SafeAreaInsets resultSafeArea({0, 0}, {0, 0}, {0, 0}, {0, 0});
     resultSafeArea = resultSafeArea.Combine(systemSafeArea_);
     resultSafeArea = resultSafeArea.Combine(cutoutSafeArea_);
     resultSafeArea = resultSafeArea.Combine(navigationIndicatorSafeArea_);
+    return resultSafeArea;
+}
+
+void WebDelegate::OnSafeInsetsChange()
+{
+    NG::SafeAreaInsets resultSafeArea = GetCombinedSafeArea();
+    auto context = context_.Upgrade();
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::OnSafeInsetsChange occur errors, context is nullptr");
+        return;
+    }
+    auto windowRect = context->GetDisplayWindowRectInfo();
 
     int left = 0;
     if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
-        left = static_cast<int>(resultSafeArea.left_.start + resultSafeArea.left_.end);
+        left = static_cast<int>(
+            resultSafeArea.left_.start + resultSafeArea.left_.end - std::max(currentArea_.Left(), windowRect.Left()));
     }
     int top = 0;
     if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
-        top = static_cast<int>(resultSafeArea.top_.end - resultSafeArea.top_.start);
+        top = static_cast<int>(resultSafeArea.top_.end - std::max(windowRect.Top(), currentArea_.Top()));
     }
     int right = 0;
     if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
-        constexpr static int32_t CUTOUT_EDGES_BALANCE_FACTOR = 2;
-        right = static_cast<int>(resultSafeArea.right_.end - resultSafeArea.right_.start +
-                (currentArea_.Right() - resultSafeArea.right_.end) * CUTOUT_EDGES_BALANCE_FACTOR);
+        right = static_cast<int>(std::min(windowRect.Right(), currentArea_.Right()) +
+            windowRect.Right() - resultSafeArea.right_.end - resultSafeArea.right_.start);
     }
     int bottom = 0;
     if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
-        bottom = static_cast<int>(resultSafeArea.bottom_.end - resultSafeArea.bottom_.start);
+        bottom = static_cast<int>(std::min(windowRect.Bottom(), currentArea_.Bottom()) - resultSafeArea.bottom_.start);
     }
 
     if (left < 0 || bottom < 0 || right < 0 || top < 0) {
@@ -7453,7 +7617,6 @@ void WebDelegate::OnSafeInsetsChange()
                 "ltrb:%{public}d,%{public}d,%{public}d,%{public}d", left, top, right, bottom);
         return;
     }
-
     TAG_LOGD(AceLogTag::ACE_WEB,
         "WebDelegate::OnSafeInsetsChange left:%{public}d top:%{public}d right:%{public}d bottom:%{public}d "
         "systemSafeArea:%{public}s cutoutSafeArea:%{public}s navigationIndicatorSafeArea:%{public}s "
@@ -7462,10 +7625,6 @@ void WebDelegate::OnSafeInsetsChange()
         navigationIndicatorSafeArea_.ToString().c_str(), resultSafeArea.ToString().c_str(),
         currentArea_.ToString().c_str());
 
-    auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), left, top, right, bottom]() {
             auto delegate = weak.Upgrade();
@@ -7636,4 +7795,26 @@ void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaAVSessionEnabled");
 }
 
+std::string WebDelegate::GetCurrentLanguage()
+{
+    if (nweb_) {
+        return nweb_->GetCurrentLanguage();
+    }
+    return "";
+}
+
+void WebDelegate::MaximizeResize()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->MaximizeResize();
+    }
+}
+
+void WebDelegate::RestoreRenderFit()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->RestoreRenderFit();
+}
 } // namespace OHOS::Ace

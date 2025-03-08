@@ -22,12 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/event/ace_events.h"
-#include "core/event/touch_event.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -197,11 +192,7 @@ RectF TextFieldSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandle
         if (IsSingleHandle()) {
             return controller->GetCaretInfo().originalRect;
         }
-        auto handleRect = controller->GetSecondHandleRect();
-        auto contentHeight = pattern->GetTextContentRect().Height();
-        auto handleHeight = std::min(handleRect.Height(), contentHeight);
-        handleRect.SetHeight(handleHeight);
-        return handleRect;
+        return controller->GetSecondHandleRect();
     } else { // DragHandleIndex::NONE
         return RectF();
     }
@@ -357,7 +348,7 @@ RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
         }
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
         if (NearZero(res.Width())) {
-            res.SetWidth(TextBase::GetSelectedBlankLineWidth());
+            pattern->AdjustSelectedBlankLineWidth(res);
         }
     }
     auto globalContentRect = GetVisibleContentRect(true);
@@ -564,7 +555,10 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         }
     } else {
         pattern->StopTwinkling();
-        selectController->MoveSecondHandleToContentRect(selectController->GetSecondHandleIndex(), false);
+        // single handle use caret offset.
+        auto caretRect = selectController->GetCaretRect();
+        selectController->UpdateCaretInfoByOffset(
+            Offset(caretRect.Left(), caretRect.Top() + caretRect.Height() / 2.0f));
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->SetHandleCircleIsShow(isFirst, true);
@@ -612,7 +606,7 @@ void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFi
     CHECK_NULL_VOID(pattern);
     auto recognizer = pattern->GetMultipleClickRecognizer();
     CHECK_NULL_VOID(recognizer);
-    if (recognizer->IsRunning() && recognizer->IsValidClick(event)) {
+    if (recognizer->IsValidClick(event)) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield overlayClick multiple click recognizer is running.");
         auto overlayEvent = event;
         overlayEvent.SetLocalLocation(recognizer->GetBeginLocalLocation());

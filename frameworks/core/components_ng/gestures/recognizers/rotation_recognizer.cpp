@@ -311,6 +311,9 @@ void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 
 double RotationRecognizer::ComputeAngle()
 {
+    if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS) {
+        return 0.0;
+    }
     auto sId = activeFingers_.begin();
     auto fId = sId++;
 
@@ -346,6 +349,9 @@ void RotationRecognizer::OnResetStatus()
 
 void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
@@ -366,6 +372,9 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         if (touchPoint.tiltY.has_value()) {
             info.SetTiltY(touchPoint.tiltY.value());
         }
+        if (touchPoint.rollAngle.has_value()) {
+            info.SetRollAngle(touchPoint.rollAngle.value());
+        }
         if (inputEventType_ == InputEventType::AXIS) {
             info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
             info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
@@ -380,6 +389,14 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
+    }
+}
+
+void RotationRecognizer::CheckCallbackState()
+{
+    if ((callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) &&
+        currentFingers_ == 0) {
+        SendCallbackMsg(onActionEnd_);
     }
 }
 
@@ -413,6 +430,9 @@ GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
     }
     if (touchPoint.tiltY.has_value()) {
         info->SetTiltY(touchPoint.tiltY.value());
+    }
+    if (touchPoint.rollAngle.has_value()) {
+        info->SetRollAngle(touchPoint.rollAngle.value());
     }
     info->SetSourceTool(touchPoint.sourceTool);
     if (gestureRecognizerJudgeFunc) {

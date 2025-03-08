@@ -22,7 +22,7 @@
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-class RecycleDummyNode : public UINode {
+class ACE_FORCE_EXPORT RecycleDummyNode : public UINode {
     DECLARE_ACE_TYPE(RecycleDummyNode, UINode);
 
 public:

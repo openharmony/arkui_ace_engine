@@ -16,6 +16,7 @@
 #include "core/components/custom_paint/custom_paint_component.h"
 
 #include "core/components/custom_paint/custom_paint_element.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 
@@ -27,6 +28,14 @@ RefPtr<RenderNode> CustomPaintComponent::CreateRenderNode()
 RefPtr<Element> CustomPaintComponent::CreateElement()
 {
     return AceType::MakeRefPtr<CustomPaintElement>();
+}
+
+void CustomPaintComponent::SetOnReadyEvent(const EventMarker& value, RefPtr<PipelineContext> context)
+{
+    if (pool_) {
+        std::function<void()> onReadyEvent = AceAsyncEvent<void()>::Create(value, context);
+        pool_->SetOnReadyEvent(onReadyEvent);
+    }
 }
 
 void CanvasTaskPool::SetRenderNode(const WeakPtr<RenderCustomPaint>& paint)

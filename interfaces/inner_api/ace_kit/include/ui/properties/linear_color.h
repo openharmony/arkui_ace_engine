@@ -71,6 +71,30 @@ public:
                blue_ == color.GetBlue();
     }
 
+    LinearColor& operator+=(const LinearColor& color) {
+        alpha_ = alpha_ + color.GetAlpha();
+        red_ = red_ + color.GetRed();
+        green_ = green_ + color.GetGreen();
+        blue_ = blue_ + color.GetBlue();
+        return *this;
+    }
+
+    LinearColor& operator*=(float scale) {
+        alpha_ = alpha_ * scale;
+        red_ = red_ * scale;
+        green_ = green_ * scale;
+        blue_ = blue_ * scale;
+        return *this;
+    }
+
+    LinearColor& operator-=(const LinearColor& color) {
+        alpha_ = alpha_ - color.GetAlpha();
+        red_ = red_ - color.GetRed();
+        green_ = green_ - color.GetGreen();
+        blue_ = blue_ - color.GetBlue();
+        return *this;
+    }
+
     int16_t GetRed() const
     {
         return red_;

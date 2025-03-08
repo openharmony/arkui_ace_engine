@@ -327,6 +327,11 @@ std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
         std::vector<TextDirection> tempTextDirections;
         info.paragraph->TxtGetRectsForRange(
             relativeStart, relativeEnd, heightStyle, widthStyle, tempRects, tempTextDirections);
+        if (tempTextDirections.size() < tempRects.size()) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "TxtGetRectsForRange failed, tempTextDirections size=%{public}zu is less "\
+                "than tempRects size=%{public}zu", tempTextDirections.size(), tempRects.size());
+            continue;
+        }
         for (size_t i = 0; i < tempRects.size(); ++i) {
             tempRects[i].SetTop(tempRects[i].Top() + y);
             resultTextBoxes.emplace_back(TextBox(tempRects[i], tempTextDirections[i]));

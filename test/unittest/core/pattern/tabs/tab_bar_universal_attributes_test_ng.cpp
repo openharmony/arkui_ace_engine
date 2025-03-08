@@ -184,11 +184,11 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarClipTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPaddingAndBorderTest
+ * @tc.name: TabBarPaddingAndBorderTest001
  * @tc.desc: test padding and border
  * @tc.type: FUNC
  */
-HWTEST_F(TabBarUniversalAttributeTestNg, TabBarPaddingAndBorderTest, TestSize.Level1)
+HWTEST_F(TabBarUniversalAttributeTestNg, TabBarPaddingAndBorderTest001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetTabBarHeight(50.0_px);
@@ -222,5 +222,87 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarPaddingAndBorderTest, TestSize.Le
     childOffset = childGeometryNode->GetMarginFrameOffset();
     EXPECT_EQ(childOffset.GetX(), 15.0f);
     EXPECT_EQ(childOffset.GetY(), 15.0f);
+}
+
+/**
+ * @tc.name: TabBarPaddingAndBorderTest002
+ * @tc.desc: test padding and border more than the frame size
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarUniversalAttributeTestNg, TabBarPaddingAndBorderTest002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    auto geometryNode = tabBarNode_->GetGeometryNode();
+    EXPECT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize().Width(), 720.0f);
+    EXPECT_EQ(geometryNode->GetFrameSize().Height(), 56.0f);
+    auto childNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    EXPECT_NE(childNode, nullptr);
+    auto childGeometryNode = childNode->GetGeometryNode();
+    EXPECT_NE(childGeometryNode, nullptr);
+
+    ViewAbstract::SetPadding(AceType::RawPtr(tabBarNode_), CalcLength(30));
+    FlushUITasks();
+    EXPECT_EQ(geometryNode->GetFrameSize().Width(), 720.0f);
+    EXPECT_EQ(geometryNode->GetFrameSize().Height(), 60.0f);
+    EXPECT_EQ(tabBarPattern_->GetContentSize().Width(), 660.0f);
+    EXPECT_EQ(tabBarPattern_->GetContentSize().Height(), 0.0f);
+    auto childOffset = childGeometryNode->GetMarginFrameOffset();
+    EXPECT_EQ(childOffset.GetX(), 30.0f);
+    EXPECT_EQ(childOffset.GetY(), 30.0f);
+
+    ViewAbstract::SetPadding(AceType::RawPtr(tabBarNode_), CalcLength(210));
+    FlushUITasks();
+    EXPECT_EQ(geometryNode->GetFrameSize().Width(), 720.0f);
+    EXPECT_EQ(geometryNode->GetFrameSize().Height(), 420.0f);
+    EXPECT_EQ(tabBarPattern_->GetContentSize().Width(), 300.0f);
+    EXPECT_EQ(tabBarPattern_->GetContentSize().Height(), 0.0f);
+    childOffset = childGeometryNode->GetMarginFrameOffset();
+    EXPECT_EQ(childOffset.GetX(), 210.0f);
+    EXPECT_EQ(childOffset.GetY(), 210.0f);
+
+    ViewAbstract::SetBorderWidth(AceType::RawPtr(tabBarNode_), 170.0_px);
+    FlushUITasks();
+    EXPECT_EQ(geometryNode->GetFrameSize().Width(), 760.0f);
+    EXPECT_EQ(geometryNode->GetFrameSize().Height(), 760.0f);
+    EXPECT_EQ(tabBarPattern_->GetContentSize().Width(), 0.0f);
+    EXPECT_EQ(tabBarPattern_->GetContentSize().Height(), 0.0f);
+    childOffset = childGeometryNode->GetMarginFrameOffset();
+    EXPECT_EQ(childOffset.GetX(), 380.0f);
+    EXPECT_EQ(childOffset.GetY(), 380.0f);
+}
+
+/**
+ * @tc.name: TabBarMarginTest001
+ * @tc.desc: test margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarUniversalAttributeTestNg, TabBarMarginTest001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    FlushUITasks();
+    auto geometryNode = tabBarNode_->GetGeometryNode();
+    EXPECT_NE(geometryNode, nullptr);
+    auto frameOffset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(frameOffset.GetX(), 0.0f);
+    EXPECT_EQ(frameOffset.GetY(), 0.0f);
+
+    ViewAbstract::SetMargin(AceType::RawPtr(tabBarNode_), CalcLength(10));
+    FlushUITasks();
+    frameOffset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(frameOffset.GetX(), 10.0f);
+    EXPECT_EQ(frameOffset.GetY(), 10.0f);
+
+    ViewAbstract::SetLayoutDirection(AceType::RawPtr(frameNode_), TextDirection::RTL);
+    FlushUITasks();
+    frameOffset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(frameOffset.GetX(), 10.0f);
+    EXPECT_EQ(frameOffset.GetY(), 10.0f);
 }
 } // namespace OHOS::Ace::NG

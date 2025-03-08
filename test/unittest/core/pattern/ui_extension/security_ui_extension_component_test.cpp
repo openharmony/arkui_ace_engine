@@ -17,17 +17,17 @@
 #include "base/memory/ace_type.h"
 #define private public
 #define protected public
+#include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_ng/pattern/ui_extension/security_session_wrapper_impl.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_proxy.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
-#include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
-#include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -1110,6 +1110,9 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, DumpInfoTest001, TestSize.Level1)
 HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionEventTest, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
+    const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->instanceId_ = IGNORE_POSITION_TRANSITION_SWITCH;
     /**
      * @tc.steps: step1. construct a UIExtensionComponent Node
      */
@@ -1304,6 +1307,45 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, RegisterEventProxyFlagCallback, Tes
     EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 0);
     pattern->RegisterEventProxyFlagCallback();
     EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 1);
+#endif
+}
+
+/**
+* @tc.name: SecurityUIExtensionComponentTestNg
+* @tc.desc: Test the method of pattern GetAccessibilityRectInfo
+* @tc.type: FUNC
+*/
+HWTEST_F(SecurityUIExtensionComponentTestNg, GetAccessibilityRectInfo, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+    * @tc.steps: step1. construct a UIExtensionComponent Node
+    */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+ 
+    /**
+      * @tc.steps: step2. test RegisterEventProxyFlagCallback
+    */
+    auto rectInfo = pattern->GetAccessibilityRectInfo();
+    EXPECT_EQ(rectInfo.left, 0);
+    pattern->TransferAccessibilityRectInfo(true);
+    pattern->TransferAccessibilityRectInfo(false);
+
+    bool isAncestorNodeGeometryChange = false;
+    bool isAncestorNodeTransformChange = false;
+    FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_TRUE(isAncestorNodeGeometryChange);
+    ASSERT_FALSE(isAncestorNodeTransformChange);
 #endif
 }
 } //namespace OHOS::Ace::NG

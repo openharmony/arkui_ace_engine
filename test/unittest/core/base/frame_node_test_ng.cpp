@@ -1483,7 +1483,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback048, TestSize
     callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
     callbackInfo.period = minInterval;
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
-    FRAME_NODE2->ProcessThrottledVisibleCallback();
+    FRAME_NODE2->ProcessThrottledVisibleCallback(false);
     EXPECT_EQ(FRAME_NODE2->throttledCallbackOnTheWay_, false);
 }
 
@@ -2451,4 +2451,27 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg090, TestSize.Level1)
     EXPECT_TRUE(json->Contains(label));
 }
 
+/**
+ * @tc.name: FrameNodeTestNg091
+ * @tc.desc: Test AddFrameNodeChangeInfoFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg091, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddFrameNodeChangeInfoFlag(1 << 5);
+    EXPECT_EQ(frameNode->GetChangeInfoFlag(), 1 << 5);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg092
+ * @tc.desc: Test AddFrameNodeChangeInfoFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg092, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddFrameNodeChangeInfoFlag(0);
+    EXPECT_EQ(frameNode->GetChangeInfoFlag(), 0);
+}
 } // namespace OHOS::Ace::NG

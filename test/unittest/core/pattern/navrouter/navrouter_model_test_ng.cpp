@@ -42,6 +42,17 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
+namespace {
+void CreateAndBindNavigationBarTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+}
+} // namespace
+
 class NavrouterModelTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1192,10 +1203,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0038, TestSize.Level1)
      * @tc.steps: step1. create BarItemNode.
      * @tc.expected: check whether the properties is correct.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    CreateAndBindNavigationBarTheme();
     auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
         V2::BAR_ITEM_ETS_TAG, 1, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     ASSERT_NE(barItemNode, nullptr);
@@ -1277,10 +1285,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0039, TestSize.Level1)
     /**
      * @tc.steps: step2. create mock theme manager.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    CreateAndBindNavigationBarTheme();
     /**
      * @tc.steps: step3. call algorithm->Measure then change isInToolbar_.
      */
@@ -1363,10 +1368,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0040, TestSize.Level1)
     /**
      * @tc.steps: step2. create mock theme manager.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    CreateAndBindNavigationBarTheme();
     /**
      * @tc.steps: step3. call algorithm->Layout then change isInToolbar_.
      */

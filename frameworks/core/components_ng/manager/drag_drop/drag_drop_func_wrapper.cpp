@@ -23,6 +23,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -47,6 +48,7 @@ constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr size_t SHORT_KEY_LENGTH = 8;
 constexpr size_t PLAINTEXT_LENGTH = 4;
+constexpr size_t  CONVERT_TIME_BASE = 1000;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
@@ -68,7 +70,7 @@ void GetShadowInfoArray(
     auto minScaleWidth = NG::DragDropFuncWrapper::GetScaleWidth(dragAction->instanceId);
     for (auto& pixelMap : dragAction->pixelMapList) {
         double scale = 1.0;
-        if (pixelMap.GetRawPtr()) {
+        if (Referenced::RawPtr(pixelMap)) {
             if (pixelMap->GetWidth() > minScaleWidth && dragAction->previewOption.isScaleEnabled) {
                 scale = minScaleWidth / pixelMap->GetWidth();
             }
@@ -103,7 +105,7 @@ void PostStopDrag(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAct
             InteractionInterface::GetInstance()->StopDrag(dropResult);
             InteractionInterface::GetInstance()->SetDragWindowVisible(false);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDragStop", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIDragStop");
 }
 
 bool ConfirmCurPointerEventInfo(
@@ -279,7 +281,8 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     return 0;
 }
 
-void DragDropFuncWrapper::HandleOnDragEvent(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction)
+void DragDropFuncWrapper::HandleOnDragEvent(
+    const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction)
 {
     CHECK_NULL_VOID(dragAction);
     auto pipelineContext = PipelineContext::GetContextByContainerId(dragAction->instanceId);
@@ -305,6 +308,32 @@ void DragDropFuncWrapper::SetDraggingPointerAndPressedState(int32_t currentPoint
     CHECK_NULL_VOID(manager);
     manager->SetDraggingPointer(currentPointerId);
     manager->SetDraggingPressedState(true);
+}
+
+int32_t DragDropFuncWrapper::RequestDragEndPending()
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    static std::atomic<int32_t> gDragDropDelayEndRequestId;
+    int32_t id = gDragDropDelayEndRequestId.fetch_add(1);
+    return id;
+}
+
+int32_t DragDropFuncWrapper::NotifyDragResult(int32_t requestId, int32_t result)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifyDragResult(requestId, result);
+}
+
+int32_t DragDropFuncWrapper::NotifyDragEndPendingDone(int32_t requestId)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(requestId);
 }
 
 void DragDropFuncWrapper::DecideWhetherToStopDragging(
@@ -335,7 +364,7 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     auto opacity = imageContext->GetOpacity();
-    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) >= MIN_OPACITY) {
+    if (opacity.has_value() && (opacity.value()) <= MAX_OPACITY && (opacity.value()) > MIN_OPACITY) {
         option.options.opacity = opacity.value();
     } else {
         option.options.opacity = DEFAULT_OPACITY;
@@ -450,7 +479,7 @@ std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, std::nullopt);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
     shadow.SetIsFilled(true);
     return shadow;
@@ -475,13 +504,13 @@ std::optional<EffectOption> DragDropFuncWrapper::BlurStyleToEffection(
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
-        LOGW("cannot find theme of blurStyle, create blurStyle failed");
+        TAG_LOGW(AceLogTag::ACE_DRAG, "cannot find theme of blurStyle, create blurStyle failed");
         return std::nullopt;
     }
     CHECK_NULL_RETURN(blurStyleOp, std::nullopt);
     ThemeColorMode colorMode = blurStyleOp->colorMode;
     if (blurStyleOp->colorMode == ThemeColorMode::SYSTEM) {
-        colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+        colorMode = pipeline->GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
     }
     auto blurParam = blurStyleTheme->GetBlurParameter(blurStyleOp->blurStyle, colorMode);
     CHECK_NULL_RETURN(blurParam, std::nullopt);
@@ -695,9 +724,9 @@ void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, Drag
     event.deviceId = touchPoint.deviceId;
     event.x = event.windowX;
     event.y = event.windowY;
-    event.pressedKeyCodes_.clear();
+    event.pressedKeyCodes.clear();
     for (const auto& curCode : touchPoint.pressedKeyCodes_) {
-        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+        event.pressedKeyCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
     GetPointerEventAction(touchPoint, event);
 }
@@ -902,6 +931,21 @@ RefPtr<PixelMap> DragDropFuncWrapper::GetGatherNodePreviewPixelMap(const RefPtr<
     return pixelMap;
 }
 
+void DragDropFuncWrapper::TrySetDraggableStateAsync(
+    const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG && !gestureHub->GetIsTextDraggable()) {
+        return;
+    }
+    int64_t downTime = static_cast<int64_t>(touchRestrict.touchEvent.time.time_since_epoch().count());
+    if (DragDropGlobalController::GetInstance().IsAppGlobalDragEnabled()) {
+        InteractionInterface::GetInstance()->SetDraggableStateAsync(true, downTime / CONVERT_TIME_BASE);
+    }
+}
+
 /**
  * check the current node's status to decide if it can initiate one drag operation
  */
@@ -924,6 +968,7 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
     if (gestureHub->GetTextDraggable()) {
         auto pattern = frameNode->GetPattern<TextBase>();
         if (pattern && !pattern->IsSelected()) {
+            TrySetDraggableStateAsync(frameNode, touchRestrict);
             TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, text is not selected.");
             return false;
         }
@@ -943,6 +988,17 @@ void DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(int32_t targetId)
     auto overlayManager = subWindow->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto menuWrapperNode = overlayManager->GetMenuNode(targetId);
+    if (!menuWrapperNode) {
+        auto rootNode = overlayManager->GetRootNode().Upgrade();
+        CHECK_NULL_VOID(rootNode);
+        for (const auto& child : rootNode->GetChildren()) {
+            auto node = AceType::DynamicCast<FrameNode>(child);
+            if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+                menuWrapperNode = node;
+                break;
+            }
+        }
+    }
     CHECK_NULL_VOID(menuWrapperNode);
 
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1261,11 +1317,14 @@ void DragDropFuncWrapper::GetThumbnailPixelMapForCustomNodeSync(
 void DragDropFuncWrapper::GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(gestureHub);
-    auto callback = [id = Container::CurrentId(), gestureHub](const RefPtr<PixelMap>& pixelMap) {
+    auto callback = [id = Container::CurrentId(), weakGestureHub = AceType::WeakClaim(AceType::RawPtr(gestureHub))](
+                        const RefPtr<PixelMap>& pixelMap) {
         ContainerScope scope(id);
         if (pixelMap != nullptr) {
             auto taskScheduler = Container::CurrentTaskExecutor();
             CHECK_NULL_VOID(taskScheduler);
+            auto gestureHub = weakGestureHub.Upgrade();
+            CHECK_NULL_VOID(gestureHub);
             taskScheduler->PostTask(
                 [gestureHub, pixelMap]() {
                     CHECK_NULL_VOID(gestureHub);
@@ -1350,8 +1409,12 @@ void DragDropFuncWrapper::GetThumbnailPixelMap(
         gestureHub->SetPixelMap(dragPreviewInfo.pixelMap);
         gestureHub->SetDragPreviewPixelMap(dragPreviewInfo.pixelMap);
         pixelMapCallback(dragPreviewInfo.pixelMap, false);
-    } else if (dragPreviewInfo.customNode != nullptr) {
+    } else if (dragPreviewInfo.customNode || (dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc)) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail through customNode.");
+        if (!dragPreviewInfo.customNode && dragPreviewInfo.delayCreating && dragPreviewInfo.buildFunc) {
+            dragPreviewInfo.customNode = dragPreviewInfo.buildFunc();
+        }
+        frameNode->SetDragPreview(dragPreviewInfo);
         if (isSync) {
             GetThumbnailPixelMapForCustomNodeSync(gestureHub, pixelMapCallback);
         } else {
@@ -1360,5 +1423,30 @@ void DragDropFuncWrapper::GetThumbnailPixelMap(
     } else {
         GetThumbnailPixelMapAsync(gestureHub);
     }
+}
+
+float DragDropFuncWrapper::GetPixelMapScale(const RefPtr<FrameNode>& frameNode)
+{
+    float scale = 1.0f;
+    CHECK_NULL_RETURN(frameNode, scale);
+    auto pixelMap = frameNode->GetDragPixelMap();
+    CHECK_NULL_RETURN(pixelMap, scale);
+    auto width = pixelMap->GetWidth();
+    auto height = pixelMap->GetHeight();
+    auto gestureEvent = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEvent, scale);
+    if (frameNode->GetDragPreviewOption().isScaleEnabled && width > 0 && height > 0) {
+        auto scaleData = DragDropManager::GetScaleInfo(width, height, gestureEvent->GetTextDraggable());
+        CHECK_NULL_RETURN(scaleData, scale);
+        scale = scaleData->scale;
+    }
+    return scale;
+}
+
+bool DragDropFuncWrapper::IsTextCategoryComponent(const std::string& frameTag)
+{
+    return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
+           frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG ||
+           frameTag == V2::RICH_EDITOR_ETS_TAG;
 }
 } // namespace OHOS::Ace::NG

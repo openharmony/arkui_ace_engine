@@ -23,6 +23,12 @@ interface CrossLanguageOptions {
   attributeSetting?: boolean;
 }
 
+enum ExpandMode {
+  NOT_EXPAND = 0,
+  EXPAND = 1,
+  LAZY_EXPAND = 2,
+}
+
 class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
@@ -282,8 +288,8 @@ class FrameNode {
     __JSScopeUtil__.restoreInstanceId();
     this._childList.clear();
   }
-  getChild(index: number, isExpanded?: boolean): FrameNode | null {
-    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
+  getChild(index: number, expandMode?: ExpandMode): FrameNode | null {
+    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, expandMode);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -293,6 +299,14 @@ class FrameNode {
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getFirstChildIndexWithoutExpand(): number {
+    return getUINativeModule().frameNode.getFirstChildIndexWithoutExpand(this.getNodePtr());
+  }
+
+  getLastChildIndexWithoutExpand(): number {
+    return getUINativeModule().frameNode.getLastChildIndexWithoutExpand(this.getNodePtr());
   }
 
   getFirstChild(isExpanded?: boolean): FrameNode | null {
@@ -377,8 +391,9 @@ class FrameNode {
 
   getChildrenCount(isExpanded?: boolean): number {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
     __JSScopeUtil__.restoreInstanceId();
+    return childrenCount;
   }
 
   moveTo(targetParent: FrameNode, index?: number): void {
@@ -582,9 +597,9 @@ class FrameNode {
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
-      this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     }
     this._commonAttribute.setNodePtr(this.nodePtr_);
+    this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonAttribute;
   }
 
@@ -1011,14 +1026,14 @@ class typeNode {
   }
   
   static getAttribute(node: FrameNode, nodeType: string): ArkComponent {
-    if (node === undefined || node === null || node.getNodeType() != nodeType) {
+    if (node === undefined || node === null || node.getNodeType() !== nodeType) {
       return undefined;
     }
     if (!node.checkIfCanCrossLanguageAttributeSetting()) {
       return undefined;
     }
     let attribute = __attributeMap__.get(nodeType);
-    if (attribute === undefined || attribute == null) {
+    if (attribute === undefined || attribute === null) {
       return undefined;
     }
     return attribute(node);
@@ -1026,7 +1041,7 @@ class typeNode {
 
   static bindController(node: FrameNode, controller: Scroller, nodeType: string): void {
     if (node === undefined || node === null || controller === undefined || controller === null ||
-      node.getNodeType() != nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
+      node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
       throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
     }
     if (!node.checkIfCanCrossLanguageAttributeSetting()) {

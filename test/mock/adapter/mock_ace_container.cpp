@@ -40,6 +40,17 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
     return nullptr;
 }
 
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    return;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    static const std::string res;
+    return res;
+}
+
 uint32_t AceContainer::GetParentWindowType() const
 {
     return DEFAULT_WINDOW_TYPE;
@@ -50,7 +61,7 @@ uint32_t AceContainer::GetWindowType() const
     return DEFAULT_WINDOW_TYPE;
 }
 
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     return {};
 }
@@ -62,6 +73,19 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent) {}
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration) {}
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
+{}
 
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
+}
+
+bool AceContainer::IsCrossAxisWindow()
+{
+    return false;
+}
+
+void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 } // namespace OHOS::Ace::Platform

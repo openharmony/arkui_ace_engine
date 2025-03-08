@@ -376,7 +376,7 @@ public:
 
     bool HasVirtualNodeAccessibilityProperty() override
     {
-        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNodePtr()) {
+        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNode()) {
             return true;
         }
         return false;
@@ -474,6 +474,10 @@ public:
 
     void OnWindowUnfocused() override;
 
+    void OnWindowActivated() override;
+
+    void OnWindowDeactivated() override;
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -496,7 +500,9 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    RectF GetTransformRectRelativeToWindow() const;
+    int32_t GetTransformRotateRelativeToWindow(bool excludeSelf = false);
+
+    RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
@@ -544,6 +550,9 @@ public:
     void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
 
     void OnAccessibilityEvent(
+        AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
+
+    void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
     void OnAccessibilityEvent(
@@ -570,12 +579,7 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
-    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
-    {
-        std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
-        ndkColorModeUpdateCallback_ = callback;
-        colorMode_ = SystemProperties::GetColorMode();
-    }
+    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback);
 
     void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
     {
@@ -831,6 +835,7 @@ public:
     RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override;
 
     FrameNode* GetFrameNodeChildByIndex(uint32_t index, bool isCache = false, bool isExpand = true);
+    FrameNode* GetFrameNodeChildByIndexWithoutBuild(uint32_t index);
     /**
      * @brief Get the index of Child among all FrameNode children of [this].
      * Handles intermediate SyntaxNodes like LazyForEach.
@@ -1123,6 +1128,22 @@ public:
         return changeInfoFlag_;
     }
 
+    void SetDeleteRsNode(bool isDelete) {
+        isDeleteRsNode_ = isDelete;
+    }
+ 
+    bool GetIsDelete() const {
+        return isDeleteRsNode_;
+    }
+
+    void SetPositionZ(bool hasPositionZ) {
+        hasPositionZ_ = hasPositionZ;
+    }
+ 
+    bool HasPositionZ() const {
+        return hasPositionZ_;
+    }
+
     void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
 
     void ClearChangeInfoFlag()
@@ -1208,6 +1229,7 @@ public:
     void OnPropertyChangeMeasure() const;
 
     void SetKitNode(const RefPtr<Kit::FrameNode>& node);
+    const RefPtr<Kit::FrameNode>& GetKitNode() const;
 
     void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
     {
@@ -1244,15 +1266,31 @@ public:
     {
         return lastHostParentOffsetToWindow_;
     }
+    void ResetRenderDirtyMarked(bool isRenderDirtyMarked)
+    {
+        isRenderDirtyMarked_ = isRenderDirtyMarked;
+    }
 
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
     void FireFrameNodeDestructorCallback();
+
+    bool CheckTopWindowBoundary() const
+    {
+        return topWindowBoundary_;
+    }
+
+    void SetTopWindowBoundary(bool topWindowBoundary)
+    {
+        topWindowBoundary_ = topWindowBoundary;
+    }
+    bool CheckVisibleOrActive() override;
 
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
+    void OnCollectRemoved() override;
 
 private:
     void MarkDirtyNode(
@@ -1318,6 +1356,7 @@ private:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void DumpOnSizeChangeInfo();
+    void DumpKeyboardShortcutInfo();
     bool CheckAutoSave() override;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1331,7 +1370,7 @@ private:
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
-    void ProcessThrottledVisibleCallback();
+    void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp);
     bool IsFrameAncestorDisappear(uint64_t timestamp);
@@ -1412,7 +1451,6 @@ private:
     std::shared_ptr<OffsetF> lastHostParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
-    const static std::set<std::string> layoutTags_;
     std::function<void()> removeCustomProperties_;
     std::function<std::string(const std::string& key)> getCustomProperty_;
     std::optional<RectF> viewPort_;
@@ -1485,13 +1523,14 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
+    bool isDeleteRsNode_ = false;
+    bool hasPositionZ_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true,
-        false, true, false, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_;
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
@@ -1520,6 +1559,8 @@ private:
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
+
+    bool topWindowBoundary_ = false;
 
     friend class RosenRenderContext;
     friend class RenderContext;

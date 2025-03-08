@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_TEXT_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_TEXT_THEME_H
 
+#include "ui/base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
@@ -76,7 +78,7 @@ public:
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
             auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
-            if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
                 dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);
             }
             theme->dragBackgroundColor_ = dragBackgroundColor;

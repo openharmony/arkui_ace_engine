@@ -183,6 +183,188 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_Align004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToIndex_Align005
+ * @tc.desc: Test ScrollToIndex with ScrollAlign::START
+ * @tc.desc: Scroll to (first/inView/outOfView/last) item (with/without) animation
+ * @tc.type: FUNC
+ */
+HWTEST_P(ListControllerTestNg, ScrollToIndex_Align005, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    CreateListItems();
+    CreateDone();
+
+    // Scroll to the first item
+    bool smooth = GetParam();
+    ScrollAlign align = ScrollAlign::START;
+    ScrollToIndex(0, smooth, align);
+    EXPECT_TRUE(TickPosition(0));
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    // Scroll to the middle item in view
+    ScrollToIndex(1, smooth, align);
+    EXPECT_TRUE(TickPosition(-100.0f));
+
+    // Scroll to the item out of view
+    ScrollToIndex(5, smooth, align);
+    EXPECT_TRUE(TickPosition(-500.0f));
+
+    // Scroll back
+    ScrollToIndex(1, smooth, align);
+    EXPECT_TRUE(TickPosition(-100.0f));
+
+    // Scroll with invalid index
+    ScrollToIndex(-100, smooth, align);
+    EXPECT_TRUE(TickPosition(-100.0f));
+    ScrollToIndex(100, smooth, align);
+    EXPECT_TRUE(TickPosition(-100.0f));
+
+    // Scroll to the last item
+    ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, align);
+    if (smooth) {
+        EXPECT_TRUE(TickPosition(-100.0f));
+    } else {
+        EXPECT_TRUE(TickPosition(-600.0f));
+    }
+}
+
+/**
+ * @tc.name: ScrollToIndex_Align006
+ * @tc.desc: Test ScrollToIndex with ScrollAlign::CENTER
+ * @tc.desc: Scroll to (first/inView/outOfView/last) item (with/without) animation
+ * @tc.type: FUNC
+ */
+HWTEST_P(ListControllerTestNg, ScrollToIndex_Align006, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    CreateListItems();
+    CreateDone();
+
+    // Scroll to the first item
+    bool smooth = GetParam();
+    ScrollAlign align = ScrollAlign::CENTER;
+    ScrollToIndex(0, smooth, align);
+    if (smooth) {
+        EXPECT_TRUE(TickPosition(150));
+    } else {
+        EXPECT_TRUE(TickPosition(0));
+    }
+    
+
+    // Scroll to the middle item in view
+    ScrollToIndex(1, smooth, align);
+    if (smooth) {
+        EXPECT_TRUE(TickPosition(50));
+    } else {
+        EXPECT_TRUE(TickPosition(0));
+    }
+    // Scroll to the item out of view
+    ScrollToIndex(5, smooth, align);
+    EXPECT_TRUE(TickPosition(-350.0f));
+
+    // Scroll back
+    ScrollToIndex(1, smooth, align);
+    EXPECT_TRUE(TickPosition(0));
+
+    // Scroll to the last item
+    ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, align);
+    if (smooth) {
+        EXPECT_TRUE(TickPosition(0));
+    } else {
+        EXPECT_TRUE(TickPosition(-600.0f));
+    }
+}
+
+/**
+ * @tc.name: ScrollToIndex_Align007
+ * @tc.desc: Test ScrollToIndex with ScrollAlign::END
+ * @tc.desc: Scroll to (first/inView/outOfView/last) item (with/without) animation
+ * @tc.type: FUNC
+ */
+HWTEST_P(ListControllerTestNg, ScrollToIndex_Align007, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    CreateListItems();
+    CreateDone();
+
+    // Scroll to the first item
+    bool smooth = GetParam();
+    ScrollAlign align = ScrollAlign::END;
+    ScrollToIndex(0, smooth, align);
+    if (smooth) {
+        EXPECT_TRUE(TickPosition(300));
+    } else {
+        EXPECT_TRUE(TickPosition(0));
+    }
+
+    // Scroll to the middle item in view
+    ScrollToIndex(1, smooth, align);
+    if (smooth) {
+        EXPECT_TRUE(TickPosition(200));
+    } else {
+        EXPECT_TRUE(TickPosition(0));
+    }
+
+    // Scroll to the item out of view
+    ScrollToIndex(5, smooth, align);
+    EXPECT_TRUE(TickPosition(-200.0f));
+
+    // Scroll back
+    ScrollToIndex(1, smooth, align);
+    EXPECT_TRUE(TickPosition(0));
+
+    // Scroll to the last item
+    ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, align);
+    if (smooth) {
+        EXPECT_TRUE(TickPosition(0));
+    } else {
+        EXPECT_TRUE(TickPosition(-600.0f));
+    }
+}
+
+/**
+ * @tc.name: ScrollToIndex_Align008
+ * @tc.desc: Test ScrollToIndex with ScrollAlign::AUTO
+ * @tc.desc: Scroll to (first/inView/outOfView/last) item (with/without) animation
+ * @tc.type: FUNC
+ */
+HWTEST_P(ListControllerTestNg, ScrollToIndex_Align008, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems();
+    CreateDone();
+
+    // Scroll to the first item
+    bool smooth = GetParam();
+    ScrollAlign align = ScrollAlign::AUTO;
+    ScrollToIndex(0, smooth, align);
+    EXPECT_TRUE(TickPosition(0));
+
+    // Scroll to the middle item in view
+    ScrollToIndex(1, smooth, align);
+    EXPECT_TRUE(TickPosition(0));
+
+    // Scroll to the item out of view
+    ScrollToIndex(5, smooth, align);
+    EXPECT_TRUE(TickPosition(-200.0f));
+
+    // Scroll back
+    ScrollToIndex(1, smooth, align);
+    EXPECT_TRUE(TickPosition(-100.0f));
+
+    // Scroll to the last item
+    ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, smooth, align);
+    if (smooth) {
+        EXPECT_TRUE(TickPosition(-100.0f));
+    } else {
+        EXPECT_TRUE(TickPosition(-600.0f));
+    }
+}
+
+/**
  * @tc.name: ScrollToIndex_Space001
  * @tc.desc: Test ScrollToIndex with space
  * @tc.type: FUNC

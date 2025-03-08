@@ -65,7 +65,7 @@ public:
     void DrawDefaultBlock(DrawingContext& context);
     void DrawHoverOrPress(DrawingContext& context);
     void DrawShadow(DrawingContext& context);
-
+    void AddStepPoint(float startX, float startY, float endX, float endY, RSCanvas& canvas);
     void UpdateThemeColor()
     {
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -296,6 +296,10 @@ public:
     {
         return stepPointVec_;
     }
+    void SetHost(const WeakPtr<FrameNode>& host)
+    {
+        host_ = host;
+    }
 
 private:
     void InitializeShapeProperty();
@@ -317,6 +321,7 @@ private:
 private:
     std::function<void(float)> updateImageCenterX_;
     std::function<void(float)> updateImageCenterY_;
+    WeakPtr<FrameNode> host_;
 
     // animatable property
     RefPtr<AnimatablePropertyOffsetF> selectStart_;

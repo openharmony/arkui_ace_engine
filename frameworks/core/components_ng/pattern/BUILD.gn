@@ -165,10 +165,12 @@ build_component_ng("pattern_ng") {
     "hyperlink/hyperlink_pattern.cpp",
     "image/image_content_modifier.cpp",
     "image/image_layout_algorithm.cpp",
+    "image/image_layout_property.cpp",
     "image/image_model_ng.cpp",
     "image/image_overlay_modifier.cpp",
     "image/image_paint_method.cpp",
     "image/image_pattern.cpp",
+    "image_animator/controlled_animator.cpp",
     "image_animator/image_animator_model_ng.cpp",
     "image_animator/image_animator_pattern.cpp",
     "indexer/arc_indexer_content_modifier.cpp",
@@ -219,6 +221,10 @@ build_component_ng("pattern_ng") {
     "marquee/marquee_model_ng.cpp",
     "marquee/marquee_pattern.cpp",
     "menu/menu_accessibility_property.cpp",
+    "menu/menu_divider/menu_divider_layout_algorithm.cpp",
+    "menu/menu_divider/menu_divider_modifier.cpp",
+    "menu/menu_divider/menu_divider_paint_method.cpp",
+    "menu/menu_divider/menu_divider_pattern.cpp",
     "menu/menu_item/menu_item_accessibility_property.cpp",
     "menu/menu_item/menu_item_layout_algorithm.cpp",
     "menu/menu_item/menu_item_model_ng.cpp",
@@ -330,6 +336,7 @@ build_component_ng("pattern_ng") {
     "radio/radio_layout_algorithm.cpp",
     "radio/radio_model_ng.cpp",
     "radio/radio_paint_method.cpp",
+    "radio/radio_paint_property.cpp",
     "radio/radio_pattern.cpp",
     "rating/rating_accessibility_property.cpp",
     "rating/rating_layout_algorithm.cpp",
@@ -536,8 +543,10 @@ build_component_ng("pattern_ng") {
     "toast/toast_pattern.cpp",
     "toast/toast_view.cpp",
     "toggle/switch_accessibility_property.cpp",
+    "toggle/switch_event_hub.cpp",
     "toggle/switch_layout_algorithm.cpp",
     "toggle/switch_paint_method.cpp",
+    "toggle/switch_paint_property.cpp",
     "toggle/switch_pattern.cpp",
     "toggle/toggle_model_ng.cpp",
     "video/video_accessibility_property.cpp",
@@ -637,6 +646,17 @@ build_component_ng("pattern_ng") {
     ]
     if (!use_mingw_win && !use_mac && !use_linux) {
       external_deps += [ "window_manager:scene_session" ]
+    }
+    if (!build_ohos_sdk) {
+      sources += [
+        "form_button/form_button_model_ng.cpp",
+        "form_button/form_button_pattern.cpp",
+      ]
+
+      external_deps += [
+        "ability_base:want",
+        "form_fwk:fmskit_native",
+      ]
     }
   } else if (is_arkui_x) {
     deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]

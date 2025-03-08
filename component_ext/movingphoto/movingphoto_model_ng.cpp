@@ -16,8 +16,10 @@
 #include "movingphoto_model_ng.h"
 #include "movingphoto_node.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

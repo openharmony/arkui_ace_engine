@@ -20,6 +20,7 @@
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -41,6 +42,7 @@ class TitleBarPatternTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    static void MockPipelineContextGetTheme();
 };
 
 void TitleBarPatternTestNg::SetUpTestSuite()
@@ -53,6 +55,14 @@ void TitleBarPatternTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+void TitleBarPatternTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
 }
 
 /**
@@ -501,7 +511,6 @@ HWTEST_F(TitleBarPatternTestNg, HandleLongPress004, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -518,7 +527,6 @@ HWTEST_F(TitleBarPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Leve
 
     EXPECT_TRUE(LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale()));
     titleBarPattern->OnFontScaleConfigurationUpdate();
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -528,7 +536,6 @@ HWTEST_F(TitleBarPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Leve
  */
 HWTEST_F(TitleBarPatternTestNg, OnFontScaleConfigurationUpdate002, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -545,7 +552,6 @@ HWTEST_F(TitleBarPatternTestNg, OnFontScaleConfigurationUpdate002, TestSize.Leve
 
     EXPECT_FALSE(LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale()));
     titleBarPattern->OnFontScaleConfigurationUpdate();
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -555,7 +561,6 @@ HWTEST_F(TitleBarPatternTestNg, OnFontScaleConfigurationUpdate002, TestSize.Leve
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone001, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -566,7 +571,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone001, TestSize.Level1)
 
     EXPECT_TRUE(GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale()));
     titleBarPattern->OnModifyDone();
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -576,7 +580,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone001, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone002, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -587,7 +590,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone002, TestSize.Level1)
 
     EXPECT_FALSE(GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale()));
     titleBarPattern->OnModifyDone();
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -597,7 +599,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone002, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone003, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -610,7 +611,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone003, TestSize.Level1)
     EXPECT_FALSE(GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale()));
     EXPECT_FALSE(titleBarPattern->options_.enableHoverMode);
     titleBarPattern->OnModifyDone();
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -620,7 +620,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone003, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone004, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -635,7 +634,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone004, TestSize.Level1)
     EXPECT_TRUE(titleBarPattern->options_.enableHoverMode);
     EXPECT_FALSE(titleBarPattern->currentFoldCreaseRegion_.empty());
     titleBarPattern->OnModifyDone();
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -646,7 +644,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone004, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone005, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -670,7 +667,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone005, TestSize.Level1)
     ASSERT_EQ(titleBarPattern->currentFoldCreaseRegion_.size(), 1);
     EXPECT_EQ(titleBarPattern->currentFoldCreaseRegion_[0].width_, 50.0f);
     EXPECT_EQ(titleBarPattern->currentFoldCreaseRegion_[0].height_, 1080.0f);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -681,7 +677,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone005, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone006, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -699,7 +694,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone006, TestSize.Level1)
     EXPECT_TRUE(titleBarPattern->isTitleChanged_);
     EXPECT_EQ(titleBarPattern->GetTempTitleBarHeight(),
         static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -710,7 +704,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone006, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone007, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -728,7 +721,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone007, TestSize.Level1)
     EXPECT_TRUE(titleBarPattern->isTitleChanged_);
     EXPECT_EQ(titleBarPattern->GetTempTitleBarHeight(),
         static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -739,7 +731,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone007, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone008, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -758,7 +749,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone008, TestSize.Level1)
     EXPECT_FALSE(titleBarPattern->isTitleChanged_);
     EXPECT_EQ(titleBarPattern->GetTempTitleBarHeight(),
         static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -769,7 +759,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone008, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone009, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -788,7 +777,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone009, TestSize.Level1)
     EXPECT_FALSE(titleBarPattern->isTitleChanged_);
     EXPECT_EQ(titleBarPattern->GetTempTitleBarHeight(),
         static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -799,7 +787,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone009, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone0010, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -818,7 +805,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone0010, TestSize.Level1)
     EXPECT_FALSE(titleBarPattern->isTitleChanged_);
     EXPECT_EQ(titleBarPattern->GetTempTitleBarHeight(),
         static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -829,7 +815,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone0010, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone0011, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -849,7 +834,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone0011, TestSize.Level1)
     EXPECT_FALSE(titleBarPattern->isTitleChanged_);
     EXPECT_EQ(titleBarPattern->GetTempTitleBarHeight(),
         static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -860,7 +844,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone0011, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, OnModifyDone0012, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -878,7 +861,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone0012, TestSize.Level1)
     titleBarPattern->OnModifyDone();
     EXPECT_FALSE(titleBarPattern->isTitleChanged_);
     EXPECT_EQ(titleBarPattern->GetTempTitleBarHeight(), 0.0f);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -889,7 +871,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone0012, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, ProcessTitleDragUpdate001, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -900,7 +881,6 @@ HWTEST_F(TitleBarPatternTestNg, ProcessTitleDragUpdate001, TestSize.Level1)
 
     titleBarPattern->ProcessTitleDragUpdate(0.0f);
     EXPECT_NE(titleBarPattern->opacity_, titleBarPattern->GetSubtitleOpacity());
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -911,7 +891,6 @@ HWTEST_F(TitleBarPatternTestNg, ProcessTitleDragUpdate001, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, ProcessTitleDragUpdate002, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
@@ -930,7 +909,6 @@ HWTEST_F(TitleBarPatternTestNg, ProcessTitleDragUpdate002, TestSize.Level1)
 
     titleBarPattern->ProcessTitleDragUpdate(0.0f);
     EXPECT_NE(titleBarPattern->opacity_, titleBarPattern->GetSubtitleOpacity());
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -941,7 +919,6 @@ HWTEST_F(TitleBarPatternTestNg, ProcessTitleDragUpdate002, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, ProcessTitleDragUpdate003, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
@@ -960,7 +937,6 @@ HWTEST_F(TitleBarPatternTestNg, ProcessTitleDragUpdate003, TestSize.Level1)
 
     titleBarPattern->ProcessTitleDragUpdate(0.0f);
     EXPECT_EQ(titleBarPattern->opacity_, titleBarPattern->GetSubtitleOpacity());
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -971,7 +947,6 @@ HWTEST_F(TitleBarPatternTestNg, ProcessTitleDragUpdate003, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, SetTempTitleOffsetY001, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -984,7 +959,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempTitleOffsetY001, TestSize.Level1)
 
     titleBarPattern->SetTempTitleOffsetY();
     EXPECT_EQ(titleBarPattern->tempTitleOffsetY_, tempTitleOffsetY);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -994,7 +968,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempTitleOffsetY001, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, SetTempTitleOffsetY002, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1006,7 +979,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempTitleOffsetY002, TestSize.Level1)
 
     titleBarPattern->SetTempTitleOffsetY();
     EXPECT_EQ(titleBarPattern->tempTitleOffsetY_, titleBarPattern->minTitleOffsetY_);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1016,7 +988,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempTitleOffsetY002, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, SetTempTitleOffsetY003, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1028,7 +999,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempTitleOffsetY003, TestSize.Level1)
 
     titleBarPattern->SetTempTitleOffsetY();
     EXPECT_EQ(titleBarPattern->tempTitleOffsetY_, titleBarPattern->maxTitleOffsetY_);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1040,7 +1010,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempTitleOffsetY003, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY001, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1053,7 +1022,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY001, TestSize.Level1)
 
     titleBarPattern->SetTempSubTitleOffsetY();
     EXPECT_EQ(titleBarPattern->tempSubTitleOffsetY_, titleBarPattern->tempTitleOffsetY_ + titleHeight);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1065,7 +1033,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY001, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY002, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1081,7 +1048,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY002, TestSize.Level1)
     auto titleSpaceVertical = static_cast<float>(titleBarPattern->titleSpaceVertical_.ConvertToPx());
     EXPECT_EQ(titleBarPattern->tempSubTitleOffsetY_,
         titleBarPattern->tempTitleOffsetY_ + titleHeight + titleSpaceVertical);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1091,7 +1057,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY002, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY003, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1104,7 +1069,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY003, TestSize.Level1)
 
     titleBarPattern->SetTempSubTitleOffsetY();
     EXPECT_EQ(titleBarPattern->tempSubTitleOffsetY_, titleBarPattern->minTitleOffsetY_);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1114,7 +1078,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY003, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY004, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1127,7 +1090,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY004, TestSize.Level1)
 
     titleBarPattern->SetTempSubTitleOffsetY();
     EXPECT_EQ(titleBarPattern->tempSubTitleOffsetY_, titleBarPattern->maxTitleOffsetY_);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1137,7 +1099,6 @@ HWTEST_F(TitleBarPatternTestNg, SetTempSubTitleOffsetY004, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, UpdateTitleFontSize001, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1152,7 +1113,6 @@ HWTEST_F(TitleBarPatternTestNg, UpdateTitleFontSize001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_TRUE(textLayoutProperty->GetFontSize() == tempTitleFontSize);
     EXPECT_TRUE(textLayoutProperty->GetAdaptMaxFontSize() == tempTitleFontSize);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1162,7 +1122,6 @@ HWTEST_F(TitleBarPatternTestNg, UpdateTitleFontSize001, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, UpdateTitleFontSize002, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1176,7 +1135,6 @@ HWTEST_F(TitleBarPatternTestNg, UpdateTitleFontSize002, TestSize.Level1)
     auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_FALSE(textLayoutProperty->GetFontSize() == tempTitleFontSize);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1187,7 +1145,6 @@ HWTEST_F(TitleBarPatternTestNg, UpdateTitleFontSize002, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent001, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1215,7 +1172,6 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent001, TestSize.Level1)
     GestureEvent info;
     gestureHub->dragEventActuator_->userCallback_->actionUpdate_(info);
     EXPECT_EQ(titleBarPattern->moveIndex_, std::nullopt);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1228,7 +1184,7 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent001, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent002, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
+    TitleBarPatternTestNg::MockPipelineContextGetTheme();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1239,13 +1195,13 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent002, TestSize.Level1)
     ASSERT_NE(gestureHub, nullptr);
     auto menuNode = FrameNode::CreateFrameNode(
         "Menu", 201, AceType::MakeRefPtr<MenuPattern>(1, "Menu", MenuType::MENU));
-    auto textNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXT_ETS_TAG, 301, []() { return AceType::MakeRefPtr<TextPattern>(); });
-    textNode->isActive_ = true;
-    auto textGeometryNode = textNode->GetGeometryNode();
-    textGeometryNode->frame_.rect_.width_ = 50.0f;
-    textGeometryNode->frame_.rect_.height_ = 50.0f;
-    menuNode->children_.push_back(textNode);
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 301, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    buttonNode->isActive_ = true;
+    auto buttonGeometryNode = buttonNode->GetGeometryNode();
+    buttonGeometryNode->frame_.rect_.width_ = 50.0f;
+    buttonGeometryNode->frame_.rect_.height_ = 50.0f;
+    menuNode->children_.push_back(buttonNode);
     auto dialogNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_ETS_TAG, 401, []() { return AceType::MakeRefPtr<TextPattern>(); });
     titleBarPattern->largeFontPopUpDialogNode_ = AceType::WeakClaim(AceType::RawPtr(dialogNode));
@@ -1266,7 +1222,6 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent002, TestSize.Level1)
     EXPECT_EQ(titleBarPattern->moveIndex_, index);
     ASSERT_NE(titleBarPattern->largeFontPopUpDialogNode_.Upgrade(), nullptr);
     EXPECT_EQ(titleBarPattern->largeFontPopUpDialogNode_.Upgrade()->GetId(), dialogNode->GetId());
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 
 /**
@@ -1277,7 +1232,7 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent002, TestSize.Level1)
  */
 HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent003, TestSize.Level1)
 {
-    TitleBarPatternTestNg::SetUpTestSuite();
+    TitleBarPatternTestNg::MockPipelineContextGetTheme();
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "TitleBar", 101, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1288,13 +1243,13 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent003, TestSize.Level1)
     ASSERT_NE(gestureHub, nullptr);
     auto menuNode = FrameNode::CreateFrameNode(
         "Menu", 201, AceType::MakeRefPtr<MenuPattern>(1, "Menu", MenuType::MENU));
-    auto textNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXT_ETS_TAG, 301, []() { return AceType::MakeRefPtr<TextPattern>(); });
-    textNode->isActive_ = true;
-    auto textGeometryNode = textNode->GetGeometryNode();
-    textGeometryNode->frame_.rect_.width_ = 50.0f;
-    textGeometryNode->frame_.rect_.height_ = 50.0f;
-    menuNode->children_.push_back(textNode);
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 301, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    buttonNode->isActive_ = true;
+    auto buttonGeometryNode = buttonNode->GetGeometryNode();
+    buttonGeometryNode->frame_.rect_.width_ = 50.0f;
+    buttonGeometryNode->frame_.rect_.height_ = 50.0f;
+    menuNode->children_.push_back(buttonNode);
     auto dialogNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_ETS_TAG, 401, []() { return AceType::MakeRefPtr<TextPattern>(); });
     titleBarPattern->largeFontPopUpDialogNode_ = AceType::WeakClaim(AceType::RawPtr(dialogNode));
@@ -1314,6 +1269,5 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent003, TestSize.Level1)
     gestureHub->dragEventActuator_->userCallback_->actionUpdate_(info);
     EXPECT_EQ(titleBarPattern->moveIndex_, index);
     ASSERT_EQ(titleBarPattern->largeFontPopUpDialogNode_.Upgrade(), nullptr);
-    TitleBarPatternTestNg::TearDownTestSuite();
 }
 } // namespace OHOS::Ace::NG

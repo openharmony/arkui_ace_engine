@@ -53,6 +53,8 @@ constexpr int32_t COUNT_1 = 1;
 constexpr int32_t COUNT_3 = 3;
 } // namespace
 
+using CacheItem = RepeatVirtualScrollCaches::CacheItem;
+
 class RepeatNodeCacheSyntaxTest : public testing::Test {
 public:
 
@@ -163,7 +165,7 @@ auto g_onSetActiveRange = [](int32_t from, int32_t to) {
  */
 const std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype = {
     {"element1", { true, 1 }},
-    {"element2", { true, 2 } },
+    {"element2", { true, 2 }},
     {"element3", { true, 3 }},
     {"element4", { true, 4 }},
     {"element5", { true, 5 }}
@@ -174,8 +176,8 @@ const std::map<std::string, std::pair<bool, uint32_t>> cacheCountL24ttype = {
  */
 const std::map<std::string, std::pair<bool, uint32_t>> templateCachedCountMap = {
     // { template, { cachedCountSpecified, cacheCount } }
-    {"elmt1", { true, 1} },
-    {"elmt2", { true, 2} }
+    {"elmt1", { true, 1 } },
+    {"elmt2", { true, 2 } }
 };
 
 RefPtr<RepeatVirtualScrollNode> RepeatNodeCacheSyntaxTest::GetOrCreateRepeatNode(bool createItems)
@@ -1940,5 +1942,43 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest060, TestSize.Level1)
     EXPECT_GT(repeatNode->tempChildrenOfRepeat_.size(), 0);
 
     repeatNode->MoveChild(0);
+}
+
+/**
+ * @tc.name: RepeatNodeCacheTest061
+ * @tc.desc: Test for GetFrameChildByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest061, TestSize.Level1)
+{
+    auto onGetTypes4Range = [](uint32_t from, uint32_t to) -> std::list<std::string> {
+        std::list<std::string> types;
+        for (uint32_t i = from; i <= to; ++i) {
+            types.push_back("elmt1");
+        }
+        return types;
+    };
+    // enable reuse
+    RefPtr<RepeatVirtualScrollNode> repeatNode = RepeatVirtualScrollNode::GetOrCreateRepeatNode(
+        NODE_ID, COUNT_3, templateCachedCountMap, onCreateNode, g_onUpdateNode, g_onGetKeys4Range, onGetTypes4Range,
+        g_onSetActiveRange, true);
+    ASSERT_NE(repeatNode, nullptr);
+    repeatNode->GetFrameChildByIndex(0, true, false, true);
+    repeatNode->GetFrameChildByIndex(1, true, false, true);
+    repeatNode->DoSetActiveChildRange(0, 0, 0, 0);
+    auto node = repeatNode->GetFrameChildByIndex(2, true, false, true);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetId(), 1);
+    // diable reuse
+    repeatNode = RepeatVirtualScrollNode::GetOrCreateRepeatNode(
+        NODE_ID + 1, COUNT_3, templateCachedCountMap, onCreateNode, g_onUpdateNode, g_onGetKeys4Range, onGetTypes4Range,
+        g_onSetActiveRange, false);
+    ASSERT_NE(repeatNode, nullptr);
+    repeatNode->GetFrameChildByIndex(0, true, false, true);
+    repeatNode->GetFrameChildByIndex(1, true, false, true);
+    repeatNode->DoSetActiveChildRange(0, 0, 0, 0);
+    node = repeatNode->GetFrameChildByIndex(2, true, false, true);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetId(), 2);
 }
 } // namespace OHOS::Ace::NG

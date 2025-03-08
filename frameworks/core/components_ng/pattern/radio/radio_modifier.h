@@ -208,6 +208,13 @@ public:
         }
     }
 
+    void SetIsUserSetUncheckBorderColor(bool isUserSet)
+    {
+        if (isUserSetUncheckedBorderColor_) {
+            isUserSetUncheckedBorderColor_->Set(isUserSet);
+        }
+    }
+
 private:
     float shadowWidth_ = 1.5f;
     float borderWidth_ = 1.5f;
@@ -248,6 +255,7 @@ private:
     RefPtr<AnimatablePropertyFloat> ringPointScale_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
+    RefPtr<PropertyBool> isUserSetUncheckedBorderColor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RadioModifier);
 };

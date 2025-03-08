@@ -50,6 +50,10 @@ void EventHub::OnDetachContext(PipelineContext *context)
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
+    auto eventManager = context->GetEventManager();
+    if (eventManager) {
+        eventManager->DelKeyboardShortcutNode(host->GetId());
+    }
 }
 
 RefPtr<FrameNode> EventHub::GetFrameNode() const
@@ -71,6 +75,22 @@ void EventHub::SetSupportedStates(UIState state)
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
     stateStyleMgr_->SetSupportedStates(state);
+}
+
+void EventHub::AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner);
+}
+
+void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
+{
+    if (!stateStyleMgr_) {
+        stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
+    }
+    stateStyleMgr_->RemoveSupportedUIState(state, isInner);
 }
 
 void EventHub::SetCurrentUIState(UIState state, bool flag)
@@ -126,7 +146,7 @@ void EventHub::PostEnabledTask()
         enabledFunc_ = callback;
         return;
     }
-    taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState", PriorityType::VIP);
+    taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState");
 }
 
 void EventHub::FireEnabledTask()
@@ -921,6 +941,7 @@ bool EventHub::HasStateStyle(UIState state) const
 void EventHub::SetKeyboardShortcut(
     const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction)
 {
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SetKeyboardShortcut value = %{public}s, keys = %{public}d", value.c_str(), keys);
     KeyboardShortcut keyboardShortcut;
     for (auto&& ch : value) {
         keyboardShortcut.value.push_back(static_cast<char>(std::toupper(ch)));

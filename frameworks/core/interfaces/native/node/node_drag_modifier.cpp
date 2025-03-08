@@ -111,6 +111,8 @@ void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
         info->UseCustomAnimation(event.dragEvent.useCustomDropAnimation);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
+        info->SetIsDragEndPending(event.dragEvent.isDragEndPending);
+        info->SetRequestIdentify(event.dragEvent.requestId);
         info->SetCapi(true);
     };
     ViewAbstract::SetOnDrop(frameNode, onDragDrop);

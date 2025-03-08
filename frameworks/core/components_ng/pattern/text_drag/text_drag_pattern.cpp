@@ -51,6 +51,7 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
 {
     bool hasResult = false;
     RectF result;
+    RectF preBox;
     auto maxBottom = contentRect.GetY() + SystemProperties::GetDevicePhysicalHeight();
     for (const auto& box : boxes) {
         auto caculateBottom = box.Bottom() + textStartY;
@@ -58,7 +59,15 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
         if (isReachingBottom && !hasResult) {
             result = box;
             hasResult = true;
+            auto isBoxExceedContent = GreatOrEqual(result.Top() + textStartY, contentRect.Bottom()) &&
+                LessNotEqual(preBox.Bottom() + textStartY, contentRect.Bottom());
+            isBoxExceedContent = isBoxExceedContent || (GreatOrEqual(result.Top() + textStartY, maxBottom) &&
+                LessNotEqual(preBox.Bottom() + textStartY, maxBottom));
+            CHECK_NULL_RETURN(!isBoxExceedContent, preBox);
             continue;
+        }
+        if (!hasResult) {
+            preBox = box;
         }
         if (hasResult && box.Bottom() == result.Bottom()) {
             result = box;
@@ -121,6 +130,9 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * CONSTANT_HALF;
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
+    while (!boxes.empty() && NearZero(boxes.back().Width())) {
+        boxes.pop_back();
+    }
     auto globalOffset = pattern->GetParentGlobalOffset();
     CalculateFloatTitleOffset(dragNode, globalOffset);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);

@@ -216,10 +216,6 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
   ace_common_defines += [ "USE_ROSEN_DRAWING" ]
 }
 
-if (enable_graphic_text_gine) {
-  ace_common_defines += [ "USE_GRAPHIC_TEXT_GINE" ]
-}
-
 if (!defined(global_parts_info) ||
     defined(global_parts_info.account_os_account)) {
   os_account_exists = true

@@ -14,11 +14,11 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_scroll_theme.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -28,7 +28,6 @@
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_scroll_theme.h"
 
 namespace OHOS::Ace {
 
@@ -270,9 +269,7 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(side);
             func->Call(JSRef<JSObject>(), 1, params.data());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollEdge");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollEdge");
         };
         ScrollModel::GetInstance()->SetOnScrollEdge(std::move(scrollEdge));
     }
@@ -285,9 +282,7 @@ void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
         auto scrollEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Call(JSRef<JSObject>(), 0, nullptr);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollEnd");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollEnd");
         };
         ScrollModel::GetInstance()->SetOnScrollEnd(std::move(scrollEnd));
     }
@@ -312,9 +307,7 @@ void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
         auto scrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Call(JSRef<JSObject>(), 0, nullptr);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollStop");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollStop");
         };
         ScrollModel::GetInstance()->SetOnScrollStop(std::move(scrollStop));
     }

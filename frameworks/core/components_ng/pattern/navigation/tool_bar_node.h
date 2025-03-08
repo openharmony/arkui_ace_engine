@@ -66,10 +66,21 @@ public:
         return hasValidContent_;
     }
 
+    void SetIsHideItemText(bool hideItemText)
+    {
+        isHideItemText_ = hideItemText;
+    }
+
+    bool IsHideItemText() const
+    {
+        return isHideItemText_;
+    }
+
 private:
     RefPtr<UINode> toolbarContainerNode_;
     bool isNewToolbar_ = false;
     bool hasValidContent_ = false;
+    bool isHideItemText_ = false;
 };
 } // namespace OHOS::Ace::NG
 

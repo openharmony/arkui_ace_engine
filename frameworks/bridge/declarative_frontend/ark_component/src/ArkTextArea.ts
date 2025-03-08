@@ -622,8 +622,8 @@ class TextAreaTextIndentModifier extends ModifierWithKey<Dimension> {
   }
 }
 
-class TextAreaOnChangeModifier extends ModifierWithKey<(value: string) => void> {
-  constructor(value: (value: string) => void) {
+class TextAreaOnChangeModifier extends ModifierWithKey<(value: ChangeValueInfo) => void> {
+  constructor(value: (value: ChangeValueInfo) => void) {
     super(value);
   }
   static identity = Symbol('textAreaOnChange');
@@ -1324,7 +1324,7 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     modifierWithKey(this._modifiersWithKeys, TextAreaInputFilterModifier.identity, TextAreaInputFilterModifier, arkValue);
     return this;
   }
-  onChange(callback: (value: string) => void): TextAreaAttribute {
+  onChange(callback: (value: ChangeValueInfo) => void): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaOnChangeModifier.identity,
       TextAreaOnChangeModifier, callback);
     return this;

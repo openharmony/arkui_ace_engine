@@ -650,8 +650,7 @@ void DOMNode::UpdatePseudoStyle(bool isBackendChange)
             }
             node->UpdatePseudoStyleByStatus(status, true);
         },
-        TaskExecutor::TaskType::UI, "ArkUIWebDomUpdatePseudoStyle",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUIWebDomUpdatePseudoStyle");
 }
 
 void DOMNode::CachePseudoClassStyle(const std::pair<std::string, std::string>& pseudoClassStyle)

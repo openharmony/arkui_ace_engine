@@ -178,6 +178,7 @@ struct SheetStyle {
     std::optional<SheetHeight> detentSelection;
     std::optional<Placement> placement;
     std::optional<bool> placementOnTarget;
+    std::optional<bool> showInSubWindow;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -195,7 +196,8 @@ struct SheetStyle {
                 bottomOffset == sheetStyle.bottomOffset && enableHoverMode == sheetStyle.enableHoverMode &&
                 hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius &&
                 detentSelection == sheetStyle.detentSelection && sheetEffectEdge == sheetStyle.sheetEffectEdge &&
-                placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget);
+                placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget &&
+                showInSubWindow == sheetStyle.showInSubWindow);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)

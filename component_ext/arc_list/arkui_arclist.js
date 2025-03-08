@@ -14,6 +14,8 @@
  */
 
 const __ArcList__ = requireInternal('arkui.ArcList');
+const ModifierMap = requireNapi('arkui.modifier').ModifierMap;
+const ModifierUtils = requireNapi('arkui.modifier').ModifierUtils;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 
 class ArcListChildrenMainSizeModifier extends ModifierWithKey {
@@ -179,7 +181,7 @@ class ArcList extends List {
         attributeModifierFunc.call(this, modifier, (nativePtr) => {
             return new ArcListComponent(nativePtr);
         }, (nativePtr, classType, modifierJS) => {
-            return new modifierJS.ArcListModifier(nativePtr, classType);
+            return new ArcListModifier(nativePtr, classType);
         });
     }
 
@@ -250,7 +252,7 @@ class ArcListItem extends ListItem {
         attributeModifierFunc.call(this, modifier, (nativePtr) => {
             return new ArcListItemComponent(nativePtr);
         }, (nativePtr, classType, modifierJS) => {
-            return new modifierJS.ArcListItemModifier(nativePtr, classType);
+            return new ArcListItemModifier(nativePtr, classType);
         });
     }
 

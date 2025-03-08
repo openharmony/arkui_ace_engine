@@ -385,6 +385,9 @@ void SwipeRecognizer::OnResetStatus()
 
 void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
@@ -401,6 +404,9 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         }
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
+        }
+        if (lastTouchEvent_.rollAngle.has_value()) {
+            info.SetRollAngle(lastTouchEvent_.rollAngle.value());
         }
         if (inputEventType_ == InputEventType::AXIS) {
             info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
@@ -452,6 +458,9 @@ GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
     }
     if (lastTouchEvent_.tiltY.has_value()) {
         info->SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    if (lastTouchEvent_.rollAngle.has_value()) {
+        info->SetRollAngle(lastTouchEvent_.rollAngle.value());
     }
     info->SetSourceTool(
         inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.sourceTool : lastTouchEvent_.sourceTool);

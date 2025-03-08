@@ -46,6 +46,7 @@ private:
     static std::string ToHtml(const std::string& key, const std::optional<OHOS::Ace::NG::MarginProperty>& prop);
     static std::string ToHtml(const std::optional<ImageFit>& objectFit);
     static std::string ToHtml(const std::optional<VerticalAlign>& verticalAlign);
+    static std::string ToHtml(const std::string& key, bool syncLoad);
     static std::string ParagraphStyleToHtml(const OHOS::Ace::NG::TextLineStyle& textLineStyle);
     static std::string LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle& style);
     static int WriteLocalFile(RefPtr<PixelMap> pixelMap, std::string& filePath, std::string& fileUri);

@@ -155,10 +155,6 @@ public:
     void StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue> allNavigationInfo);
     const std::vector<NavdestinationRecoveryInfo> GetNavigationRecoveryInfo(std::string navigationId);
 
-    void OnContainerModalButtonsRectChange();
-    void AddButtonsRectChangeListener(int32_t id, std::function<void()>&& listener);
-    void RemoveButtonsRectChangeListener(int32_t id);
-
     void AddNavigation(int32_t pageId, int32_t navigationId);
 
     void RemoveNavigation(int32_t pageId);
@@ -170,6 +166,8 @@ public:
     void FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
     void FireLowerLayerLifecycle(const RefPtr<UINode>& node, int lifecycle, int32_t reason);
+
+    void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
 private:
     struct DumpMapKey {
@@ -186,6 +184,10 @@ private:
         }
     };
 
+    bool IsOverlayValid(const RefPtr<UINode>& frameNode);
+
+    bool IsCustomDialogValid(const RefPtr<UINode>& node);
+
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
     std::unordered_map<std::string, std::vector<NavdestinationRecoveryInfo>> navigationRecoveryInfo_;
     std::unordered_map<int32_t, std::vector<int32_t>> navigationMaps_;
@@ -201,12 +203,10 @@ private:
     bool preNodeAnimationCached_ = false;
     bool isInAnimation_ = false;
     bool isNodeAddAnimation_ = false;
-    bool hasCacheNavigationNodeEnable_ = false;
+    bool hasCacheNavigationNodeEnable_ = true;
     int32_t interactiveAnimationId_ = -1;
 
     WeakPtr<PipelineContext> pipeline_;
-    bool hasRegisterListener_ = false;
-    std::unordered_map<int32_t, std::function<void()>> buttonsRectChangeListeners_;
 };
 } // namespace OHOS::Ace::NG
 

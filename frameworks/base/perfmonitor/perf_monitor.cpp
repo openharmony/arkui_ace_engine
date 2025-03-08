@@ -18,8 +18,12 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
+#ifdef OHOS_STANDARD_SYSTEM
+#include "event_handler.h"
+#endif
 
 namespace OHOS::Ace {
 using namespace std;
@@ -335,6 +339,7 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     SceneRecord* record = GetRecord(sceneId);
     if (IsSceneIdInSceneWhiteList(sceneId)) {
         isExceptAnimator = true;
+        SetVsyncLazyMode();
     }
     ACE_SCOPED_TRACE("Animation start and current sceneId=%s", sceneId.c_str());
     if (record == nullptr) {
@@ -344,6 +349,29 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
         mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
         RecordBaseInfo(record);
         AceAsyncTraceBegin(0, sceneId.c_str());
+    }
+}
+
+void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note)
+{
+    std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, true);
+    }
+
+    int64_t inputTime = GetInputTime(sceneId, type, note);
+    SceneRecord* record = GetRecord(sceneId);
+    if (IsSceneIdInSceneWhiteList(sceneId)) {
+        isExceptAnimator = true;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("Animation start and current sceneId=%s", sceneId.c_str());
+    if (record == nullptr) {
+        currentSceneId = sceneId;
+        record = new SceneRecord();
+        record->InitRecord(sceneId, type, mSourceType, note, inputTime);
+        mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
+        RecordBaseInfo(record);
+        AceAsyncTraceBeginCommercial(0, sceneId.c_str());
     }
 }
 
@@ -360,12 +388,34 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     if (record != nullptr) {
         if (IsSceneIdInSceneWhiteList(sceneId)) {
             isExceptAnimator = false;
+            SetVsyncLazyMode();
         }
         RecordBaseInfo(record);
         record->Report(sceneId, mVsyncTime, isRsRender);
         ReportAnimateEnd(sceneId, record);
         RemoveRecord(sceneId);
         AceAsyncTraceEnd(0, sceneId.c_str());
+    }
+}
+
+void PerfMonitor::EndCommercial(const std::string& sceneId, bool isRsRender)
+{
+    std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, false);
+    }
+
+    SceneRecord* record = GetRecord(sceneId);
+    ACE_SCOPED_TRACE_COMMERCIAL("Animation end and current sceneId=%s", sceneId.c_str());
+    if (record != nullptr) {
+        if (IsSceneIdInSceneWhiteList(sceneId)) {
+            isExceptAnimator = false;
+        }
+        RecordBaseInfo(record);
+        record->Report(sceneId, mVsyncTime, isRsRender);
+        ReportAnimateEnd(sceneId, record);
+        RemoveRecord(sceneId);
+        AceAsyncTraceEndCommercial(0, sceneId.c_str());
     }
 }
 
@@ -387,6 +437,7 @@ void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceTyp
                 ACE_SCOPED_TRACE("RecordInputEvent: last_up=%lld(ns)", static_cast<long long>(time));
                 mInputTime[LAST_UP] = time;
                 isResponseExclusion = true;
+                SetVsyncLazyMode();
                 break;
             }
         case FIRST_MOVE:
@@ -623,10 +674,29 @@ bool PerfMonitor::IsExclusionFrame()
     return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow || isExceptAnimator;
 }
 
+void PerfMonitor::SetVsyncLazyMode()
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    static bool lastExcusion = false;
+    bool needExcusion = isResponseExclusion || isStartAppFrame || isBackgroundApp ||
+                        isExclusionWindow || isExceptAnimator;
+    if (lastExcusion == needExcusion) {
+        return;
+    }
+
+    lastExcusion = needExcusion;
+    ACE_VSYNC_MODE_SCOPED_TRACE("SetVsyncLazyMode: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) "
+        "isExcAni(%d)",
+        isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
+    OHOS::AppExecFwk::EventHandler::SetVsyncLazyMode(needExcusion);
+#endif
+}
+
 void PerfMonitor::SetAppStartStatus()
 {
     ACE_FUNCTION_TRACE();
     isStartAppFrame = true;
+    SetVsyncLazyMode();
     startAppTime = GetCurrentRealTimeNs();
 }
 
@@ -637,6 +707,7 @@ void PerfMonitor::CheckInStartAppStatus()
         if (curTime - startAppTime >= STARTAPP_FRAME_TIMEOUT) {
             isStartAppFrame = false;
             startAppTime = curTime;
+            SetVsyncLazyMode();
         }
     }
 }
@@ -644,6 +715,7 @@ void PerfMonitor::CheckInStartAppStatus()
 void PerfMonitor::SetAppForeground(bool isShow)
 {
     isBackgroundApp = !isShow;
+    SetVsyncLazyMode();
 }
 
 void PerfMonitor::CheckExclusionWindow(const std::string& windowName)
@@ -654,12 +726,14 @@ void PerfMonitor::CheckExclusionWindow(const std::string& windowName)
         windowName == "SCBStatusBar15") {
         isExclusionWindow = true;
     }
+    SetVsyncLazyMode();
 }
 
 void PerfMonitor::CheckResponseStatus()
 {
     if (isResponseExclusion) {
         isResponseExclusion = false;
+        SetVsyncLazyMode();
     }
 }
 
@@ -703,7 +777,8 @@ bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
         sceneId == PerfConstants::LAUNCHER_APP_BACK_TO_HOME ||
         sceneId == PerfConstants::EXIT_RECENT_2_HOME_ANI ||
         sceneId == PerfConstants::APP_SWIPER_FLING ||
-        sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
+        sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH ||
+        sceneId == PerfConstants::SCREENLOCK_SCREEN_OFF_ANIM) {
             return true;
         }
     return false;
@@ -713,6 +788,7 @@ void PerfMonitor::CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId)
 {
     if (IsSceneIdInSceneWhiteList(sceneId)) {
         isExceptAnimator = false;
+        SetVsyncLazyMode();
     }
 }
 

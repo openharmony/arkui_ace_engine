@@ -70,6 +70,8 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
+    void CheckCallbackState() override;
+    void DumpVelocityInfo(int32_t fingerId);
 
     double GetDistance() const
     {
@@ -135,6 +137,7 @@ private:
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    void GetGestureEventHalfInfo(GestureEvent* info);
     GestureEvent GetGestureEventInfo();
 
     void OnResetStatus() override;

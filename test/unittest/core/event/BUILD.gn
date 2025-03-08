@@ -43,6 +43,12 @@ ace_unittest("drag_event_test_ng") {
   ]
 }
 
+ace_unittest("drag_drop_event_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "./drag_event/drag_drop_event_test_ng.cpp" ]
+}
+
 ace_unittest("drag_event_test_ng_base") {
   type = "new"
   module_output = "events"
@@ -157,6 +163,7 @@ group("core_event_unittest") {
   deps = [
     ":axis_event_test_ng",
     ":click_event_test_ng",
+    ":drag_drop_event_test_ng",
     ":drag_event_test_ng",
     ":event_hub_test_ng",
     ":event_manager_test_ng",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,202 +20,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
-class TabBarLayoutTestNg : public TabsTestNg {
-public:
-};
-
-/**
- * @tc.name: TabBarPatternOnDirtyLayoutWrapperSwap001
- * @tc.desc: test OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    model.SetFadingEdge(true);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
-    EXPECT_EQ(tabBarPattern_->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
-    DirtySwapConfig config;
-    tabBarPattern_->OnDirtyLayoutWrapperSwap(frameNode_, config);
-    EXPECT_EQ(tabBarPattern_->indicator_, 0);
-    /**
-     * @tc.steps: step2. creat different conditions and invoke OnDirtyLayoutWrapperSwap.
-     * @tc.expected: step2. expect The function is run ok.
-     */
-    config.skipMeasure = true;
-    EXPECT_FALSE(tabBarPattern_->OnDirtyLayoutWrapperSwap(frameNode_, config));
-
-    config.skipLayout = true;
-    EXPECT_FALSE(tabBarPattern_->OnDirtyLayoutWrapperSwap(frameNode_, config));
-
-    config.skipMeasure = false;
-    EXPECT_FALSE(tabBarPattern_->OnDirtyLayoutWrapperSwap(frameNode_, config));
-
-    tabBarPattern_->isAnimating_ = true;
-    EXPECT_FALSE(tabBarPattern_->OnDirtyLayoutWrapperSwap(frameNode_, config));
-    EXPECT_EQ(tabBarPattern_->isAnimating_, true);
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmLayoutMask001
- * @tc.desc: test LayoutMask
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutMask001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. call UpdateSelectedMask and UpdateUnselectedMask.
-     */
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    TabsItemDivider divider;
-    model.SetDivider(divider);
-    CreateTabsDone(model);
-
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    tabBarLayoutProperty_->UpdateSelectedMask(0);
-    tabBarLayoutProperty_->UpdateUnselectedMask(1);
-    std::map<int32_t, OffsetF> childOffsetDelta;
-    childOffsetDelta[0] = OffsetF();
-    childOffsetDelta[1] = OffsetF();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarLayoutProperty_);
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step2. build selectedMaskNode and unselectedMaskNode.
-     */
-    auto selectedmaskPosition = tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT;
-    auto selectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(selectedmaskPosition));
-    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> selectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
-    layoutWrapper.AppendChild(selectedMaskLayoutWrapper);
-
-    auto unselectedmaskPosition = tabBarNode_->GetChildren().size() - TEST_UNSELECTED_MASK_COUNT;
-    auto unselectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(unselectedmaskPosition));
-    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
-    auto unselectedProperty = unselectedMaskNode->GetLayoutProperty();
-    RefPtr<LayoutWrapperNode> unselectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(unselectedMaskNode, geometryNode2, unselectedProperty);
-    layoutWrapper.AppendChild(unselectedMaskLayoutWrapper);
-
-    /**
-     * @tc.steps: step3. call LayoutMask function.
-     * @tc.expected: step3. expect The function is run ok.
-     */
-    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper, childOffsetDelta);
-    EXPECT_EQ(tabBarLayoutProperty_->GetSelectedMask().value_or(-1), 0);
-    EXPECT_EQ(tabBarLayoutProperty_->GetUnselectedMask().value_or(-1), 1);
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmLayoutMask002
- * @tc.desc: test LayoutMask
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutMask002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    TabsItemDivider divider;
-    model.SetDivider(divider);
-    CreateTabsDone(model);
-
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
-
-    auto selectedmaskPosition = tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT;
-    auto selectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(selectedmaskPosition));
-    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> selectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
-    layoutWrapper.AppendChild(selectedMaskLayoutWrapper);
-
-    auto unselectedmaskPosition = tabBarNode_->GetChildren().size() - TEST_UNSELECTED_MASK_COUNT;
-    auto unselectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(unselectedmaskPosition));
-    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
-    auto unselectedProperty = unselectedMaskNode->GetLayoutProperty();
-    RefPtr<LayoutWrapperNode> unselectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(unselectedMaskNode, geometryNode2, unselectedProperty);
-    layoutWrapper.AppendChild(unselectedMaskLayoutWrapper);
-
-    /**
-     * @tc.steps: step2. call LayoutMask function.
-     * @tc.expected: step2. expect The function is run ok.
-     */
-    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper, {});
-    EXPECT_EQ(tabBarLayoutProperty_->GetSelectedMask().value_or(-1), -1);
-    EXPECT_EQ(tabBarLayoutProperty_->GetUnselectedMask().value_or(-1), -1);
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmLayoutMask004
- * @tc.desc: Test the LayoutMask function in the TabBarLayoutAlgorithm class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutMask004, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    TabsItemDivider divider;
-    model.SetDivider(divider);
-    CreateTabsDone(model);
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    tabBarLayoutProperty_->UpdateSelectedMask(0);
-    tabBarLayoutProperty_->UpdateUnselectedMask(1);
-    std::map<int32_t, OffsetF> childOffsetDelta;
-    childOffsetDelta[0] = OffsetF();
-    childOffsetDelta[1] = OffsetF();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarLayoutProperty_);
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
-
-    /**
-     * @tc.steps: step2. build selectedMaskNode and unselectedMaskNode.
-     */
-    auto selectedmaskPosition = tabBarNode_->GetChildren().size() - TEST_SELECTED_MASK_COUNT;
-    auto selectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(selectedmaskPosition));
-    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> selectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
-    layoutWrapper.AppendChild(selectedMaskLayoutWrapper);
-
-    auto unselectedmaskPosition = tabBarNode_->GetChildren().size() - TEST_UNSELECTED_MASK_COUNT;
-    auto unselectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(unselectedmaskPosition));
-    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
-    auto unselectedProperty = unselectedMaskNode->GetLayoutProperty();
-    RefPtr<LayoutWrapperNode> unselectedMaskLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(unselectedMaskNode, geometryNode2, unselectedProperty);
-    layoutWrapper.AppendChild(unselectedMaskLayoutWrapper);
-
-    /**
-     * @tc.steps: steps3. Create a child named imageLayoutWrapper for currentWrapper.
-     */
-    auto currentWrapper = selectedMaskLayoutWrapper;
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    RefPtr<GeometryNode> geometryNode5 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> imageLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(imageNode, geometryNode5, imageNode->GetLayoutProperty());
-    auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageLayoutWrapper->GetLayoutProperty());
-    selectedMaskLayoutWrapper->AppendChild(imageLayoutWrapper);
-
-    /**
-     * @tc.steps: step4. call LayoutMask function.
-     * @tc.expected: step4. expect The function is run ok.
-     */
-    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper, childOffsetDelta);
-    EXPECT_EQ(tabBarLayoutProperty_->GetSelectedMask().value_or(-1), 0);
-    EXPECT_EQ(tabBarLayoutProperty_->GetUnselectedMask().value_or(-1), 1);
-}
+class TabBarLayoutTestNg : public TabsTestNg {};
 
 /**
  * @tc.name: TabBarLayoutAlgorithmGetGridWidth001
@@ -387,8 +192,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren001, TestSize.Le
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    auto tabbarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
@@ -397,7 +201,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren001, TestSize.Le
         auto columnNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-            RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+        RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
         RefPtr<LayoutWrapperNode> columnLayoutWrapper =
             AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
         columnLayoutWrapper->GetGeometryNode()->SetFrameSize(FIRST_ITEM_SIZE);
@@ -428,8 +232,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren002, TestSize.Le
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    auto tabbarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
@@ -438,7 +241,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren002, TestSize.Le
         auto columnNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-            RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+        RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
         RefPtr<LayoutWrapperNode> columnLayoutWrapper =
             AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
         columnLayoutWrapper->GetGeometryNode()->SetFrameSize(FIRST_ITEM_SIZE);
@@ -470,8 +273,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmGetContentMainSize001, TestSiz
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-    auto tabBarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
@@ -928,10 +730,10 @@ HWTEST_F(TabBarLayoutTestNg, TabBarPatternOnDirtyLayoutWrapperSwap002, TestSize.
 }
 
 /**
-* @tc.name: TabBarPatternBeforeCreateLayoutWrapper003
-* @tc.desc: test Measure
-* @tc.type: FUNC
-*/
+ * @tc.name: TabBarPatternBeforeCreateLayoutWrapper003
+ * @tc.desc: test Measure
+ * @tc.type: FUNC
+ */
 HWTEST_F(TabBarLayoutTestNg, TabBarPatternBeforeCreateLayoutWrapper003, TestSize.Level1)
 {
     /**
@@ -994,8 +796,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode001, Test
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH / TABCONTENT_NUMBER);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER + itemWidth);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos,
-        TABS_WIDTH / TABCONTENT_NUMBER * 3 - itemWidth);
+    EXPECT_EQ(
+        tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, TABS_WIDTH / TABCONTENT_NUMBER * 3 - itemWidth);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH / TABCONTENT_NUMBER * 3);
 
     /**
@@ -1007,13 +809,13 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureScrollableMode001, Test
     tabBarPattern_->visibleItemPosition_.clear();
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    auto startPos = (TABS_WIDTH - BARITEM_SIZE * TABCONTENT_NUMBER) / 2;
+    auto startPos = (TABS_WIDTH - BAR_ITEM_SIZE * TABCONTENT_NUMBER) / 2;
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, startPos);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, startPos + BARITEM_SIZE);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, startPos + BAR_ITEM_SIZE);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, TABCONTENT_NUMBER - 1);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, startPos + BARITEM_SIZE * 3);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, startPos + BARITEM_SIZE * 4);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.startPos, startPos + BAR_ITEM_SIZE * 3);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, startPos + BAR_ITEM_SIZE * 4);
 }
 
 /**
@@ -1252,8 +1054,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset001, TestSize
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, currentDelta1 + currentDelta2);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos,
-        itemWidth * 4 + currentDelta1 + currentDelta2);
+    EXPECT_EQ(
+        tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, itemWidth * 4 + currentDelta1 + currentDelta2);
 
     tabBarPattern_->canOverScroll_ = true;
     auto currentDelta3 = -300.0f;
@@ -1321,8 +1123,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureWithOffset002, TestSize
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
-    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos,
-        TABS_WIDTH - itemWidth * 3 - currentDelta1);
+    EXPECT_EQ(
+        tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH - itemWidth * 3 - currentDelta1);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->first, 3);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.rbegin()->second.endPos, TABS_WIDTH - currentDelta1);
 }

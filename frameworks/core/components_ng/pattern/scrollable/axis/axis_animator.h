@@ -21,6 +21,10 @@
 #include "frameworks/core/components_ng/pattern/scrollable/axis/axis_scroll_motion.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
 
+namespace OHOS::Ace {
+class Animator;
+}
+
 namespace OHOS::Ace::NG {
 
 using AxisAnimationCallback = std::function<void(float)>;
@@ -28,6 +32,8 @@ using AxisAnimationStartCallback = std::function<void(float)>;
 using AxisAnimationFinishCallback = std::function<void()>;
 
 class AxisAnimator : public AceType {
+    DECLARE_ACE_TYPE(AxisAnimator, AceType);
+
 public:
     AxisAnimator() = default;
     AxisAnimator(AxisAnimationCallback&& axisAnimationCallback, AxisAnimationStartCallback&& axisAnimationStartCallback,
@@ -47,22 +53,14 @@ public:
 
     void CreateAnimator();
 
-    bool IsRunning()
-    {
-        return axisScrollAnimator_ && axisScrollAnimator_->IsRunning();
-    }
+    bool IsRunning();
 
     RefPtr<AxisScrollMotion> GeAxisScrollMotion() const
     {
         return axisScrollMotion_;
     }
 
-    void StopAxisAnimation()
-    {
-        if (IsRunning()) {
-            axisScrollAnimator_->Stop();
-        }
-    }
+    void StopAxisAnimation();
 
 private:
     WeakPtr<PipelineBase> context_;
@@ -73,6 +71,8 @@ private:
 
     RefPtr<AxisScrollMotion> axisScrollMotion_;
     RefPtr<Animator> axisScrollAnimator_;
+    
+    ACE_DISALLOW_COPY_AND_MOVE(AxisAnimator);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_AXIS_AXIS_ANIMATOR_H

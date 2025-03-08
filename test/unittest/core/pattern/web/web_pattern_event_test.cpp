@@ -125,6 +125,7 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_002, TestSize.Level1)
     g_webPattern->HandleBlurEvent(blurReason);
     KeyEvent keyEvent;
     g_webPattern->WebOnKeyEvent(keyEvent);
+    EXPECT_FALSE(g_webPattern->isTouchUpEvent_);
 #endif
 }
 

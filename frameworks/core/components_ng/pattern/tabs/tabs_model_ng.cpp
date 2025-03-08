@@ -332,13 +332,10 @@ void TabsModelNG::SetIndex(int32_t index)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
-    auto tabBarLayoutProperty = GetTabBarLayoutProperty();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
     if (index < 0) {
         index = 0;
     }
-    tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->SetClickRepeat(false);
+    tabBarPattern->UpdateIndicator(index);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
     auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
@@ -458,6 +455,14 @@ void TabsModelNG::SetOnSelected(std::function<void(const BaseEventInfo* info)>&&
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetOnSelectedEvent(std::move(onSelected));
+}
+
+void TabsModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnSelectedEvent(std::move(onSelected));
 }
 
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)

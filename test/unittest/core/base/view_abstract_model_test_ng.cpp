@@ -229,7 +229,7 @@ HWTEST_F(ViewAbstractModelTestNg, BindContextMenuTest, TestSize.Level1)
     /**
      * @tc.steps: subwindow is null and does not enter BindContextMenuSingle.
      */
-    SubwindowManager::GetInstance()->RemoveSubwindow(Container::CurrentId());
+    SubwindowManager::GetInstance()->RemoveSubwindow(Container::CurrentId(), SubwindowType::TYPE_MENU);
     viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
     ASSERT_EQ(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
 
@@ -350,9 +350,11 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg004, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     menuParam.isShowInSubWindow = false;
     buildFunc = []() { flag++; };
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::ENABLED;
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     params.push_back(OptionParam());
     menuParam.setShow = true;
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::AUTO;
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     EXPECT_NE(mainNode, nullptr);
 }
@@ -562,8 +564,13 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg009, TestSize.Level1)
     menuParam.previewMode = MenuPreviewMode::IMAGE;
     buildFunc = []() { flag++; };
     menuParam.isShowHoverImage = false;
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::ENABLED;
+    viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::AUTO;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     menuParam.previewMode = MenuPreviewMode::NONE;
+    viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::ENABLED;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     EXPECT_NE(mainNode, nullptr);
 }

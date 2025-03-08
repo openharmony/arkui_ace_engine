@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,8 @@ class LoadingProgressPattern : public Pattern {
 public:
     LoadingProgressPattern() = default;
     ~LoadingProgressPattern() override = default;
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
@@ -92,6 +94,17 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
+    void SetForegroundColorParseFailed(bool isParseFailed)
+    {
+        CHECK_NULL_VOID(loadingProgressModifier_);
+        loadingProgressModifier_->SetForegroundColorParseFailed(isParseFailed);
+    }
+
+    void SetColorLock(bool colorLock)
+    {
+        colorLock_ = colorLock;
+    }
+
 private:
     void RegisterVisibleAreaChange();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -129,6 +142,7 @@ private:
     bool isVisibleArea_ = false;
     bool isVisible_ = true;
     bool isShow_ = true;
+    bool colorLock_ = false;
     RefPtr<LoadingProgressModifier> loadingProgressModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressPattern);
 };

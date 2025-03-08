@@ -138,6 +138,8 @@ class ACE_FORCE_EXPORT PerfMonitor {
 public:
     void Start(const std::string& sceneId, PerfActionType type, const std::string& note);
     void End(const std::string& sceneId, bool isRsRender);
+    void StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note);
+    void EndCommercial(const std::string& sceneId, bool isRsRender);
     void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
     int64_t GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note);
     void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank, const std::string& windowName);
@@ -202,6 +204,7 @@ private:
     bool IsSceneIdInSceneWhiteList(const std::string& sceneId);
     void CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId);
     bool IsExclusionFrame();
+    void SetVsyncLazyMode();
     void CheckInStartAppStatus();
     void CheckExclusionWindow(const std::string& windowName);
     void CheckResponseStatus();

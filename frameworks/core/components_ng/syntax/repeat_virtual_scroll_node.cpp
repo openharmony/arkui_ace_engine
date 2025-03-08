@@ -64,6 +64,10 @@ void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
 {
     TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).UpdateTotalCount TotalCount: %{public}d",
         static_cast<int32_t>(GetId()), totalCount);
+        // set active range when deleting all.
+        if (totalCount == 0 && totalCount != totalCount_) {
+            DoSetActiveChildRange(-1, -1, 0, 0, false);
+        }
     totalCount_ = totalCount;
 }
 

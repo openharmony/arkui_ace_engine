@@ -37,6 +37,13 @@ struct XComponentParams {
     JSXComponentController* controller = nullptr;
 };
 
+struct XComponentOptions {
+    std::optional<std::string> id = std::nullopt;
+    XComponentType xcomponentType = XComponentType::SURFACE;
+    std::optional<std::string> libraryName = std::nullopt;
+    std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
+};
+
 class XComponentClient {
 public:
     using GetJSValCallback = std::function<bool(JSRef<JSVal>& param)>;
@@ -202,6 +209,9 @@ public:
     bool ChangeRenderType(int32_t renderType);
 
 private:
+    static void ExtractInfoToXComponentOptions(
+        XComponentOptions& options, JSRef<JSObject> controllerObj, const JSCallbackInfo& info);
+
     RefPtr<AceType> frameNode_;
 };
 } // namespace OHOS::Ace::Framework

@@ -38,6 +38,7 @@ struct ArkUI_UIInputEvent {
     ArkUI_UIInputEvent_Type inputType;
     ArkUIEventTypeId eventTypeId;
     void* inputEvent;
+    bool isCloned = false;
 };
 
 #ifdef __cplusplus

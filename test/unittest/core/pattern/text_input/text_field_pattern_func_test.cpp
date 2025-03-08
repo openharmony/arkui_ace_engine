@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const int32_t TWO = 2;
 const int32_t FIVE = 5;
+constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1<<8;
 } // namespace
 
 class TextFieldPatternFuncTest : public TextInputBases {
@@ -1337,10 +1338,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc072, TestSize.Level1)
     auto manager = pattern->GetHost()->GetContextRefPtr()->GetTextFieldManager();
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
-    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    RefPtr<UINode> element = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode));
     ASSERT_NE(element, nullptr);
     element->tag_ = V2::SHEET_WRAPPER_TAG;
-    textFieldNode->SetParent(element);
+    textFieldNode->SetParent(element, false);
     auto result = textFieldManager->FindNavNode(textFieldNode);
     auto parent = textFieldNode->GetAncestorNodeOfFrame(false);
     auto sheetNode = parent->GetChildAtIndex(0);
@@ -1391,11 +1392,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc074, TestSize.Level1)
     auto manager = pattern1->GetHost()->GetContextRefPtr()->GetTextFieldManager();
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
-    RefPtr<UINode> element1 = AceType::Claim<UINode>(textFieldNode1.GetRawPtr());
+    RefPtr<UINode> element1 = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode1));
     ASSERT_NE(element1, nullptr);
     element1->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     textFieldNode1->SetParent(element1);
-    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(textFieldNode2.GetRawPtr());
+    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode2));
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVIGATION_VIEW_ETS_TAG;
     element1->SetParent(navigationNode);
@@ -1429,11 +1430,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc075, TestSize.Level1)
     auto manager = pattern1->GetHost()->GetContextRefPtr()->GetTextFieldManager();
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
-    RefPtr<UINode> element1 = AceType::Claim<UINode>(textFieldNode1.GetRawPtr());
+    RefPtr<UINode> element1 = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode1));
     ASSERT_NE(element1, nullptr);
     element1->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     textFieldNode1->SetParent(element1);
-    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(textFieldNode2.GetRawPtr());
+    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode2));
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     element1->SetParent(navigationNode);
@@ -1469,11 +1470,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc076, TestSize.Level1)
     auto manager = pattern1->GetHost()->GetContextRefPtr()->GetTextFieldManager();
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
-    RefPtr<UINode> element1 = AceType::Claim<UINode>(textFieldNode1.GetRawPtr());
+    RefPtr<UINode> element1 = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode1));
     ASSERT_NE(element1, nullptr);
     element1->tag_ = V2::NAVBAR_ETS_TAG;
     textFieldNode1->SetParent(element1);
-    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(textFieldNode2.GetRawPtr());
+    RefPtr<UINode> navigationNode = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode2));
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVBAR_ETS_TAG;
     element1->SetParent(navigationNode);
@@ -1628,10 +1629,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc081, TestSize.Level1)
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
     MockContainer::SetUp();
-    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    RefPtr<UINode> element = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode));
     ASSERT_NE(element, nullptr);
     element->tag_ = "Panel";
-    textFieldNode->SetParent(element);
+    textFieldNode->SetParent(element, false);
     Offset menuOffset(960, 1660);
     textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     textFieldManager->SetClickPosition(menuOffset);
@@ -1656,10 +1657,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc082, TestSize.Level1)
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
     ASSERT_NE(textFieldManager, nullptr);
     MockContainer::SetUp();
-    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    RefPtr<UINode> element = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode));
     ASSERT_NE(element, nullptr);
     element->tag_ = "SheetPage";
-    textFieldNode->SetParent(element);
+    textFieldNode->SetParent(element, false);
     Offset menuOffset(960, 0.0f);
     textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     textFieldManager->SetClickPosition(menuOffset);
@@ -1742,7 +1743,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc086, TestSize.Level1)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    RefPtr<UINode> element = AceType::Claim<UINode>(Referenced::RawPtr(textFieldNode));
     keyboard->children_.emplace_back(element);
     RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
     ASSERT_NE(safeAreaManager, nullptr);
@@ -2017,4 +2018,684 @@ HWTEST_F(TextFieldPatternFuncTest, GetKeyboardAppearance001, TestSize.Level1)
     pattern->SetKeyboardAppearance(KeyboardAppearance::NONE_IMMERSIVE);
     EXPECT_TRUE(pattern->GetKeyboardAppearance() == KeyboardAppearance::NONE_IMMERSIVE);
 }
+
+/**
+ * @tc.name: TextFieldSelectOverlay001
+ * @tc.desc: test OnOverlayClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    /**
+     * @tc.steps: step2. call OnOverlayClick and expect no error.
+     */
+    GestureEvent event;
+    pattern->selectOverlay_->OnOverlayClick(event, true);
+    pattern->selectOverlay_->isSingleHandle_ = true;
+    pattern->selectOverlay_->OnOverlayClick(event, true);
+    pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
+    pattern->selectOverlay_->OnOverlayClick(event, true);
+    pattern->multipleClickRecognizer_->lastClickPosition_ = Offset(0.0f, 0.0f);
+    event.SetGlobalLocation(Offset(100.0f, 100.0f));
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    event.SetTimeStamp(timeStampAce);
+    pattern->multipleClickRecognizer_->lastClickTimeStamp_ = TimeStamp(std::chrono::nanoseconds(0));
+    pattern->selectOverlay_->OnOverlayClick(event, true);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay002
+ * @tc.desc: test OnHandleMoveStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlay002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    /**
+     * @tc.steps: step2. call OnHandleMoveStart and expect no error.
+     */
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->selectOverlay_->isSingleHandle_ = true;
+    GestureEvent event;
+    pattern->selectOverlay_->OnHandleMoveStart(event, true);
+    pattern->contentController_->content_ = u"";
+    pattern->selectOverlay_->OnHandleMoveStart(event, true);
+    EXPECT_FALSE(pattern->contentScroller_.isScrolling);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay003
+ * @tc.desc: test AllowTranslate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlay003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    /**
+     * @tc.steps: step2. call AllowTranslate and expect no error.
+     */
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    auto layoutProperty = textFieldNode->GetLayoutPropertyPtr<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCopyOptions(CopyOptions::None);
+    EXPECT_FALSE(pattern->selectOverlay_->AllowTranslate());
+    layoutProperty->UpdateCopyOptions(CopyOptions::Local);
+    layoutProperty->UpdateTextInputType(TextInputType::NEW_PASSWORD);
+    EXPECT_FALSE(pattern->selectOverlay_->AllowTranslate());
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    EXPECT_TRUE(pattern->selectOverlay_->AllowTranslate());
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay004
+ * @tc.desc: test AllowSearch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlay004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    /**
+     * @tc.steps: step2. call AllowSearch and expect no error.
+     */
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    auto layoutProperty = textFieldNode->GetLayoutPropertyPtr<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCopyOptions(CopyOptions::None);
+    EXPECT_FALSE(pattern->selectOverlay_->AllowSearch());
+    layoutProperty->UpdateCopyOptions(CopyOptions::Local);
+    layoutProperty->UpdateTextInputType(TextInputType::NEW_PASSWORD);
+    EXPECT_FALSE(pattern->selectOverlay_->AllowSearch());
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER);
+    EXPECT_TRUE(pattern->selectOverlay_->AllowSearch());
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay005
+ * @tc.desc: test GetHandleColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlay005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    /**
+     * @tc.steps: step2. call GetHandleColor and expect no error.
+     */
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->ResetCursorColor();
+    EXPECT_EQ(pattern->selectOverlay_->GetHandleColor(), std::nullopt);
+    paintProperty->UpdateCursorColor(Color::GREEN);
+    EXPECT_EQ(pattern->selectOverlay_->GetHandleColor(), Color::GREEN);
+    pattern->selectOverlay_->hostTextBase_.Reset();
+    EXPECT_EQ(pattern->selectOverlay_->GetHandleColor(), std::nullopt);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay006
+ * @tc.desc: test UpdateAllHandlesOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlay006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    /**
+     * @tc.steps: step2. call UpdateAllHandlesOffset and expect no error.
+     */
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    pattern->selectOverlay_->dragHandleIndex_ = DragHandleIndex::NONE;
+    pattern->selectOverlay_->UpdateAllHandlesOffset();
+    pattern->selectOverlay_->dragHandleIndex_ = DragHandleIndex::FIRST;
+    pattern->selectOverlay_->UpdateAllHandlesOffset();
+    pattern->selectOverlay_->dragHandleIndex_ = DragHandleIndex::SECOND;
+    pattern->selectOverlay_->UpdateAllHandlesOffset();
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay000
+ * @tc.desc: test base_text_select_overlay.cpp ToggleMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay000, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call ToggleMenu and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->selectOverlay_->ToggleMenu();
+    EXPECT_NE(pattern->selectOverlay_->GetManager<SelectContentOverlayManager>(), nullptr);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay001
+ * @tc.desc: test base_text_select_overlay.cpp DisableMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call DisableMenu and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->selectOverlay_->DisableMenu();
+    EXPECT_NE(pattern->selectOverlay_->GetManager<SelectContentOverlayManager>(), nullptr);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay002
+ * @tc.desc: test base_text_select_overlay.cpp OnHandleGlobalTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call OnHandleGlobalTouchEvent and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    auto sourceType = SourceType::MOUSE;
+    auto touchType = TouchType::DOWN;
+    pattern->selectOverlay_->OnHandleGlobalTouchEvent(sourceType, touchType);
+    EXPECT_EQ(pattern->selectOverlay_->IsMouseClickDown(sourceType, touchType), true);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay003
+ * @tc.desc: test base_text_select_overlay.cpp CheckTouchInHostNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call CheckTouchInHostNode and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    PointF point;
+    pattern->selectOverlay_->CheckTouchInHostNode(point);
+    EXPECT_NE(pattern->selectOverlay_->GetOwner(), nullptr);
+    EXPECT_NE(pattern->selectOverlay_->GetOwner()->GetGeometryNode(), nullptr);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay004
+ * @tc.desc: test base_text_select_overlay.cpp OnUpdateSelectOverlayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call OnUpdateSelectOverlayInfo and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    SelectOverlayInfo selectInfo;
+    int32_t requestCode = 0;
+    pattern->selectOverlay_->hasTransform_ = true;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(selectInfo, requestCode);
+    pattern->selectOverlay_->hasTransform_ = false;
+    pattern->selectOverlay_->OnUpdateSelectOverlayInfo(selectInfo, requestCode);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay005
+ * @tc.desc: test base_text_select_overlay.cpp RemoveSelectionHoldCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call RemoveSelectionHoldCallback and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->selectOverlay_->RemoveSelectionHoldCallback();
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+}
+ 
+/**
+ * @tc.name: BaseTextSelectOverlay006
+ * @tc.desc: test base_text_select_overlay.cpp GetVisibleContentRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call GetVisibleContentRect and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->selectOverlay_->enableHandleLevel_ = true;
+    pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    pattern->selectOverlay_->GetVisibleContentRect(false);
+    EXPECT_NE(pattern->selectOverlay_->GetPattern<Pattern>(), nullptr);
+    EXPECT_NE(pattern->selectOverlay_->GetPattern<Pattern>()->GetHost(), nullptr);
+    EXPECT_NE(pattern->selectOverlay_->GetPattern<Pattern>()->GetHost()->GetContext(), nullptr);
+    EXPECT_NE(pattern->selectOverlay_->GetPattern<Pattern>()->GetHost()->GetGeometryNode(), nullptr);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay007
+ * @tc.desc: test base_text_select_overlay.cpp MergeSelectedBoxes
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call MergeSelectedBoxes and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    std::vector<RectF> boxes;
+    RectF contentRect(1.0f, 2.0f, 3.0f, 4.0f);
+    RectF textRect(1.0f, 2.0f, 3.0f, 4.0f);
+    OffsetF paintOffset(0.0f, 0.0f);
+    auto rect = pattern->selectOverlay_->MergeSelectedBoxes(boxes, contentRect, textRect, paintOffset);
+    EXPECT_EQ(rect.GetX(), 0);
+    EXPECT_EQ(rect.GetY(), 0);
+}
+ 
+/**
+ * @tc.name: BaseTextSelectOverlay008
+ * @tc.desc: test base_text_select_overlay.cpp GetLocalPointWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call GetLocalPointWithTransform and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    OffsetF localOffset(0.0f, 0.0f);
+    pattern->selectOverlay_->hasTransform_ = false;
+    pattern->selectOverlay_->GetLocalPointWithTransform(localOffset);
+    pattern->selectOverlay_->hasTransform_ = true;
+    pattern->selectOverlay_->GetLocalPointWithTransform(localOffset);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay009
+ * @tc.desc: test base_text_select_overlay.cpp ConvertPaintInfoToRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call ConvertPaintInfoToRect and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    SelectHandlePaintInfo paintInfo;
+    auto rect = pattern->selectOverlay_->ConvertPaintInfoToRect(paintInfo);
+    EXPECT_EQ(rect.GetX(), 0);
+    EXPECT_EQ(rect.GetY(), 0);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay010
+ * @tc.desc: test base_text_select_overlay.cpp GetHandleLocalPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call GetHandleLocalPaintRect and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    DragHandleIndex dragHandleIndex = DragHandleIndex::FIRST;
+    auto rect = pattern->selectOverlay_->GetHandleLocalPaintRect(dragHandleIndex);
+    EXPECT_EQ(rect.GetX(), 0);
+    EXPECT_EQ(rect.GetY(), 0);
+}
+ 
+/**
+ * @tc.name: BaseTextSelectOverlay011
+ * @tc.desc: test base_text_select_overlay.cpp UpdateMenuWhileAncestorNodeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateMenuWhileAncestorNodeChanged and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    bool shouldHideMenu = false;
+    bool shouldShowMenu = false;
+    FrameNodeChangeInfoFlag extraFlag = AVOID_KEYBOARD_END_FALG;
+    pattern->selectOverlay_->UpdateMenuWhileAncestorNodeChanged(shouldHideMenu, shouldShowMenu, extraFlag);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+}
+ 
+/**
+ * @tc.name: BaseTextSelectOverlay012
+ * @tc.desc: test base_text_select_overlay.cpp RegisterScrollingListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call RegisterScrollingListener and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern->selectOverlay_->OnBind(manager);
+    pattern->selectOverlay_->hasRegisterListener_ = true;
+    pattern->selectOverlay_->RegisterScrollingListener(nullptr);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay013
+ * @tc.desc: test base_text_select_overlay.cpp ConvertWindowToScreenDomain with Rect input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call ConvertWindowToScreenDomain and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    RectF inputRectf;
+    auto outputRecf = pattern->selectOverlay_->ConvertWindowToScreenDomain(inputRectf);
+    EXPECT_EQ(outputRecf.GetX(), 0);
+    EXPECT_EQ(outputRecf.GetY(), 0);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay014
+ * @tc.desc: test base_text_select_overlay.cpp ConvertWindowToScreenDomain with Edge input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call ConvertWindowToScreenDomain and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    EdgeF edgeF;
+    auto outputEdgeF = pattern->selectOverlay_->ConvertWindowToScreenDomain(edgeF);
+    EXPECT_EQ(outputEdgeF.x, 0);
+    EXPECT_EQ(outputEdgeF.y, 0);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay015
+ * @tc.desc: test base_text_select_overlay.cpp GetTranslateParamRectStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call GetTranslateParamRectStr and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+
+    RectF rectf1(1.0f, 2.0f, 3.0f, 4.0f);
+    EdgeF edgeF1(0.0f, 0.0f);
+    EdgeF edgeF2(0.0f, 0.0f);
+    pattern->selectOverlay_->GetTranslateParamRectStr(rectf1, edgeF1, edgeF2);
+    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+}
+
+/**
+ * @tc.name: BaseTextSelectOverlay016
+ * @tc.desc: test base_text_select_overlay.cpp IsHandleVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, BaseTextSelectOverlay016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call IsHandleVisible and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto isHandleVisible = pattern->selectOverlay_->IsHandleVisible(false);
+    EXPECT_EQ(isHandleVisible, false);
+}
+
 } // namespace OHOS::Ace

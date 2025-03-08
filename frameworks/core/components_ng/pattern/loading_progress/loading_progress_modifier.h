@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
 
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_base.h"
@@ -97,11 +98,27 @@ public:
         useContentModifier_->Set(useContentModifier);
     }
 
+    void SetForegroundColorParseFailed(bool isForegroundColorParseFailed)
+    {
+        isForegroundColorParseFailed_ = isForegroundColorParseFailed;
+    }
+
+    bool GetForegroundColorParseFailed() const
+    {
+        return isForegroundColorParseFailed_;
+    }
+
 private:
     void AdjustMatrix(RSCamera3D& camera, RSMatrix& matrix);
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
     float GetCurentCometAngle(float baseAngle, uint32_t index, uint32_t totalNumber);
     uint32_t GetCometNumber();
+    inline bool IsDynamicComponent()
+    {
+        auto container = Container::Current();
+        return container && container->IsDynamicRender() &&
+               container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    }
     // no Animatable
     RefPtr<PropertyBool> enableLoading_;
     RefPtr<PropertyOffsetF> offset_;
@@ -119,6 +136,7 @@ private:
     LoadingProgressOwner loadingProgressOwner_;
     bool isLoading_ = false;
     bool isVisible_ = false;
+    bool isForegroundColorParseFailed_ = false;
     float recycleSizeScale_ = 1.0f;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };

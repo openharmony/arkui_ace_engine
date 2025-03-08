@@ -33,6 +33,7 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
     JSClass<JSTextEditableController>::CustomMethod("addText", &JSTextEditableController::AddText);
     JSClass<JSTextEditableController>::CustomMethod("deleteText", &JSTextEditableController::DeleteText);
     JSClass<JSTextEditableController>::CustomMethod("getSelection", &JSTextEditableController::GetSelection);
+    JSClass<JSTextEditableController>::CustomMethod("clearPreviewText", &JSTextEditableController::ClearPreviewText);
     JSClass<JSTextEditableController>::Method("stopEditing", &JSTextEditableController::StopEditing);
     JSClass<JSTextEditableController>::Bind(
         globalObj, JSTextEditableController::Constructor, JSTextEditableController::Destructor);
@@ -205,7 +206,6 @@ void JSTextEditableController::DeleteText(const JSCallbackInfo& info)
         JSRef<JSVal> start = rangeObj->GetProperty("start");
         if (start->IsNumber()) {
             startIndex = start->ToNumber<int32_t>();
-            startIndex = std::max(0, startIndex);
             startIndex = startIndex < 0 ? 0 : startIndex;
         }
         JSRef<JSVal> end = rangeObj->GetProperty("end");
@@ -248,6 +248,16 @@ void JSTextEditableController::GetCaretOffset(const JSCallbackInfo& info)
         info.SetReturnValue(ret);
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "GetCaretOffset: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::ClearPreviewText(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->ClearPreviewText();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "ClearPreviewText: The JSTextEditableController is NULL");
     }
 }
 

@@ -81,8 +81,10 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void BubblePattern::OnModifyDone()
 {
-    if (SystemProperties::GetColorMode() != colorMode_ && !isCustomPopup_) {
-        colorMode_ = SystemProperties::GetColorMode();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (context->GetColorMode() != colorMode_ && !isCustomPopup_) {
+        colorMode_ = context->GetColorMode();
         UpdateBubbleText();
     }
     UpdateAgingTextSize();
@@ -416,6 +418,15 @@ void BubblePattern::Animation(
         option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); });
 }
 
+bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
+}
+
 void BubblePattern::StartEnteringTransitionEffects(
     const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish)
 {
@@ -450,7 +461,7 @@ void BubblePattern::StartEnteringTransitionEffects(
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();
@@ -564,7 +575,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();
@@ -708,7 +719,8 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
             CHECK_NULL_VOID(layoutProp);
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                    pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
                 CHECK_NULL_VOID(subwindow);
                 subwindow->HidePopupNG(targetNodeId_);
             }
@@ -730,7 +742,8 @@ void BubblePattern::OnWindowHide()
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     if (showInSubWindow) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
         CHECK_NULL_VOID(subwindow);
         subwindow->HidePopupNG(targetNodeId_);
     }
@@ -799,7 +812,9 @@ void BubblePattern::OnColorConfigurationUpdate()
     if (isCustomPopup_) {
         return;
     }
-    colorMode_ = SystemProperties::GetColorMode();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    colorMode_ = context->GetColorMode();
     UpdateBubbleText();
 }
 

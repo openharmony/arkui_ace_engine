@@ -23,6 +23,8 @@
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
+#include "core/components_ng/syntax/if_else_model_ng.h"
+#include "core/components_ng/syntax/if_else_node.h"
 #undef protected
 #undef private
 
@@ -981,8 +983,13 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->layoutInfo_->UpdateOffset(100.0f);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), 100.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 100.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->itemStart_, true);
+    // In less-than fillViewport scene, offsetEnd_ has difference.
+    EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_,
+        pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN ? false : true);
 
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(100.0f), { 100.0f, 0 }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { -100.0f, 0 }));
@@ -991,13 +998,128 @@ HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
     // layout in overScroll status at bottom.
     pattern_->layoutInfo_->UpdateOffset(-150.0f);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), -50.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_,
         pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN ? 0 : Infinity<int32_t>());
 
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -50.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->itemStart_, false);
+    EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_, true);
+
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(20.0f), { 0, 20.0f }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { 0, -100.0f }));
     EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(400.0f), { 350.0f, 50.0f }));
+}
+
+/**
+ * @tc.name: Delete006
+ * @tc.desc: Delete all items, test footer position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Delete006, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    ScrollToIndex(10, false, ScrollAlign::START, 10.0f);
+    // delete all items.
+    for (int i = 1; i <= 30; ++i) {
+        frameNode_->RemoveChildAtIndex(1);
+        frameNode_->ChildrenUpdatedFrom(1);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: IfElseNode001
+ * @tc.desc: Test the updateIdx when IfElseNode's branch changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, IfElseNode001, TestSize.Level1)
+{
+    std::list<int32_t> removedElmtIds;
+    std::list<int32_t> reservedElmtIds;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    IfElseModelNG ifElse;
+    ifElse.Create();
+    ifElse.SetBranchId(1, removedElmtIds, reservedElmtIds);
+    EXPECT_EQ(ifElse.GetBranchId(), 1);
+    auto ifElseNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(ifElseNode != nullptr && ifElseNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
+    EXPECT_EQ(ifElseNode->GetBranchId(), 1);
+    /**
+    // corresponding ets code:
+    //     if () {
+    //       Blank()
+    //     }
+    */
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ifElseNode->AddChild(childFrameNode);
+    frameNode_->AddChild(ifElseNode);
+    ifElseNode->FlushUpdateAndMarkDirty();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 22);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 21);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+
+    // make [if] to empty branch.
+    ifElseNode->SetBranchId(0, removedElmtIds, reservedElmtIds);
+    ifElseNode->FlushUpdateAndMarkDirty();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 21);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 21);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+}
+
+/**
+ * @tc.name: Footer001
+ * @tc.desc: Put [if] to footer, test the updateIdx when IfElseNode's branch changes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Footer001, TestSize.Level1)
+{
+    std::list<int32_t> removedElmtIds;
+    std::list<int32_t> reservedElmtIds;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter([]() {
+        IfElseModelNG ifElse;
+        ifElse.Create();
+    });
+    CreateWaterFlowItems(20);
+    CreateDone();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 20);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), -1);
+
+    auto ifElseNode = AceType::DynamicCast<IfElseNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_TRUE(ifElseNode != nullptr && ifElseNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
+    ifElseNode->SetBranchId(1, removedElmtIds, reservedElmtIds);
+    EXPECT_EQ(ifElseNode->GetBranchId(), 1);
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ifElseNode->AddChild(childFrameNode);
+    ifElseNode->FlushUpdateAndMarkDirty();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 21);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+
+    // make [if] to empty branch.
+    ifElseNode->SetBranchId(0, removedElmtIds, reservedElmtIds);
+    ifElseNode->FlushUpdateAndMarkDirty();
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 20);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
 }
 } // namespace OHOS::Ace::NG

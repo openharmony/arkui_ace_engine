@@ -157,6 +157,9 @@ public:
     {
         isRootNode_ = isRoot;
     }
+    Offset CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin, const Rect& baseRect);
+    float GetRegionLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
+    float GetRegionPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     Rect GetSvgContainerRect() const;
@@ -180,11 +183,12 @@ protected:
     void OnTransform(RSCanvas& canvas, const Size& viewPort);
     virtual void OnClipEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
     virtual void OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
-    virtual void OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
+    virtual void OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+        float useOffsetX, float useOffsetY) {}
     void OnClipPath(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     void OnFilter(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     void OnMask(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
-    void OnTransform(RSCanvas& canvas);
+    void OnTransform(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule);
     double ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const;
     double ConvertDimensionToPx(const Dimension& value, double baseValue) const;
 
@@ -203,6 +207,8 @@ protected:
     template<typename T>
     void UpdateAttr(const std::string& name, const T& val);
     void UpdateAttrHelper(const std::string& name, const std::string& val);
+    SvgLengthScaleRule TransformForCurrentOBB(RSCanvas& canvas, const SvgCoordinateSystemContext& context,
+        SvgLengthScaleUnit contentUnits, float offsetX, float offsetY);
 
     // defs gradient animation
     void InitNoneFlag()
@@ -239,6 +245,7 @@ protected:
     bool inheritStyle_ = true;  // inherit style attributes from parent node, TAGS mask/defs/pattern/filter = false
     bool isRootNode_ = false;
     RSCanvas* rsCanvas_ = nullptr;
+    bool isDrawing_ = false; // Indicates if the current node is being drawn in the SVG rendering process.
     SvgLengthScaleRule lengthRule_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgNode);
 };

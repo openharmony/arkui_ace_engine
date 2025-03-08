@@ -43,8 +43,7 @@
             "day":"日"
         },
         "navigation":{
-            "back":"返回",
-            "more":"更多"
+            "back":"返回"
         },
         "patternlock":{
             "accessibilitypasspoint":"已连接圆点"
@@ -102,8 +101,7 @@
             "lunarSwitch":"Show lunar calendar"
         },
         "navigation":{
-            "back":"Back",
-            "more":"More"
+            "back":"Back"
         },
         "sheet":{
             "close":"Close"
@@ -140,7 +138,8 @@
     "tr":{
         "common":{
             "ok":"Tamam",
-            "cancel":"İptal"
+            "cancel":"İptal",
+            "more":"Diğer"
         },
         "textoverlay":{
             "paste":"Yapıştır",
@@ -163,12 +162,22 @@
             "next":"İleri",
             "start":"Başlat",
             "back":"Geri"
+        },
+        "navigation":{
+            "back":"Geri"
+        },
+        "sheet":{
+            "close":"Kapat"
+        },
+        "datepicker":{
+            "lunarSwitch":"Ay takvimini göster"
         }
     },
     "sl":{
         "common":{
             "ok":"V redu",
-            "cancel":"Prekliči"
+            "cancel":"Prekliči",
+            "more":"Več"
         },
         "textoverlay":{
             "paste":"Prilepi",
@@ -183,32 +192,42 @@
             "last_updated":"Zadnja posodobitev: %s"
         },
         "switch":{
-            "on":"Vklopljeno",
-            "off":"Izklopljeno"
+            "on":"Vklop",
+            "off":"Izklop"
         },
         "stepper":{
             "skip":"Preskoči",
             "next":"Naprej",
             "start":"Začni",
             "back":"Nazaj"
+        },
+        "navigation":{
+            "back":"Nazaj"
+        },
+        "sheet":{
+            "close":"Zapri"
+        },
+        "datepicker":{
+            "lunarSwitch":"Prikaži lunin koledar"
         }
     },
     "nb":{
         "common":{
             "ok":"OK",
-            "cancel":"Avbryt"
+            "cancel":"Avbryt",
+            "more":"Mer"
         },
         "textoverlay":{
             "paste":"Lim inn",
-            "select_all":"Velg alt",
+            "select_all":"Velg alle",
             "cut":"Klipp",
-            "copy":"Kopi",
+            "copy":"Kopier",
             "search":"Søk",
             "share":"Del",
             "translate":"Oversett"
         },
         "refresh":{
-            "last_updated":"Siste oppdatering: %s"
+            "last_updated":"Sist oppdatert: %s"
         },
         "switch":{
             "on":"På",
@@ -219,6 +238,15 @@
             "next":"Neste",
             "start":"Start",
             "back":"Tilbake"
+        },
+        "navigation":{
+            "back":"Tilbake"
+        },
+        "sheet":{
+            "close":"Lukk"
+        },
+        "datepicker":{
+            "lunarSwitch":"Vis månekalender"
         }
     },
     "bs":{
@@ -252,7 +280,8 @@
     "en-GB":{
         "common":{
             "ok":"OK",
-            "cancel":"Cancel"
+            "cancel":"Cancel",
+            "more":"More"
         },
         "textoverlay":{
             "paste":"Paste",
@@ -275,6 +304,15 @@
             "next":"Next",
             "start":"Start",
             "back":"Back"
+        },
+        "navigation":{
+            "back":"Back"
+        },
+        "sheet":{
+            "close":"Close"
+        },
+        "datepicker":{
+            "lunarSwitch":"Show lunar calendar"
         }
     },
     "az-AZ":{
@@ -392,11 +430,12 @@
     "bg":{
         "common":{
             "ok":"ОК",
-            "cancel":"Отказ"
+            "cancel":"Отказ",
+            "more":"Още"
         },
         "textoverlay":{
             "paste":"Поставяне",
-            "select_all":"Избор на всички",
+            "select_all":"Избиране на всички",
             "cut":"Изрязване",
             "copy":"Копиране",
             "search":"Търсене",
@@ -415,17 +454,27 @@
             "next":"Напред",
             "start":"Начало",
             "back":"Назад"
+        },
+        "navigation":{
+            "back":"Назад"
+        },
+        "sheet":{
+            "close":"Затваряне"
+        },
+        "datepicker":{
+            "lunarSwitch":"Показване на лунния календар"
         }
     },
     "ro":{
         "common":{
             "ok":"OK",
-            "cancel":"Anulare"
+            "cancel":"Anulare",
+            "more":"Mai multe"
         },
         "textoverlay":{
             "paste":"Lipire",
-            "select_all":"Selectare totală",
-            "cut":"Tăiere",
+            "select_all":"Selectare toate",
+            "cut":"Decupare",
             "copy":"Copiere",
             "search":"Căutare",
             "share":"Partajare",
@@ -441,8 +490,17 @@
         "stepper":{
             "skip":"Omitere",
             "next":"Înainte",
-            "start":"Pornire",
+            "start":"Start",
             "back":"Înapoi"
+        },
+        "navigation":{
+            "back":"Înapoi"
+        },
+        "sheet":{
+            "close":"Închidere"
+        },
+        "datepicker":{
+            "lunarSwitch":"Afișare calendar lunar"
         }
     },
     "ca":{
@@ -560,7 +618,8 @@
     "ar":{
         "common":{
             "ok":"موافق",
-            "cancel":"إلغاء"
+            "cancel":"إلغاء",
+            "more":"المزيد"
         },
         "textoverlay":{
             "paste":"لصق",
@@ -572,23 +631,33 @@
             "translate":"ترجمة"
         },
         "refresh":{
-            "last_updated":"آخر تحديث: %s"
+            "last_updated":"تاريخ آخر تحديث:‏ %s"
         },
         "switch":{
-            "on":"مشغّل",
-            "off":"مغلق"
+            "on":"تشغيل",
+            "off":"إغلاق"
         },
         "stepper":{
             "skip":"تخطي",
             "next":"التالي",
             "start":"بدء",
             "back":"رجوع"
+        },
+        "navigation":{
+            "back":"رجوع"
+        },
+        "sheet":{
+            "close":"إغلاق"
+        },
+        "datepicker":{
+            "lunarSwitch":"إظهار التقويم القمري"
         }
     },
     "es-US":{
         "common":{
             "ok":"Aceptar",
-            "cancel":"Cancelar"
+            "cancel":"Cancelar",
+            "more":"Más"
         },
         "textoverlay":{
             "paste":"Pegar",
@@ -609,8 +678,17 @@
         "stepper":{
             "skip":"Omitir",
             "next":"Siguiente",
-            "start":"Iniciar",
+            "start":"Inicio",
             "back":"Volver"
+        },
+        "navigation":{
+            "back":"Volver"
+        },
+        "sheet":{
+            "close":"Cerrar"
+        },
+        "datepicker":{
+            "lunarSwitch":"Mostrar calendario lunar"
         }
     },
     "my-ZG":{
@@ -735,8 +813,7 @@
             "lunarSwitch":"ལུགས་རྙིང་ལོ་ཐོ་མངོན་སྟོན།"
         },
         "navigation":{
-            "back":"ཕྱིར་ལོག",
-            "more":"དེ་ལས་མང་བ།"
+            "back":"ཕྱིར་ལོག"
         },
         "sheet":{
             "close":"ཁ་རྒྱག"
@@ -773,11 +850,12 @@
     "lt":{
         "common":{
             "ok":"Gerai",
-            "cancel":"Atšaukti"
+            "cancel":"Atšaukti",
+            "more":"Daugiau"
         },
         "textoverlay":{
             "paste":"Įdėti",
-            "select_all":"Pasirinkti viską",
+            "select_all":"Žym. viską",
             "cut":"Iškirpti",
             "copy":"Kopijuoti",
             "search":"Ieškoti",
@@ -785,7 +863,7 @@
             "translate":"Versti"
         },
         "refresh":{
-            "last_updated":"Paskutinis atnaujinimas: %s"
+            "last_updated":"Paskutinį kartą atnaujinta: %s"
         },
         "switch":{
             "on":"Įjungta",
@@ -796,12 +874,22 @@
             "next":"Pirmyn",
             "start":"Pradėti",
             "back":"Atgal"
+        },
+        "navigation":{
+            "back":"Atgal"
+        },
+        "sheet":{
+            "close":"Užverti"
+        },
+        "datepicker":{
+            "lunarSwitch":"Rodyti mėnulio kalendorių"
         }
     },
     "in":{
         "common":{
             "ok":"OK",
-            "cancel":"Batal"
+            "cancel":"Batal",
+            "more":"Lainnya"
         },
         "textoverlay":{
             "paste":"Tempel",
@@ -824,6 +912,15 @@
             "next":"Berikutnya",
             "start":"Mulai",
             "back":"Kembali"
+        },
+        "navigation":{
+            "back":"Kembali"
+        },
+        "sheet":{
+            "close":"Tutup"
+        },
+        "datepicker":{
+            "lunarSwitch":"Tampilkan kalender bulan"
         }
     },
     "mr":{
@@ -913,11 +1010,12 @@
     "sv":{
         "common":{
             "ok":"OK",
-            "cancel":"Avbryt"
+            "cancel":"Avbryt",
+            "more":"Mer"
         },
         "textoverlay":{
             "paste":"Klistra in",
-            "select_all":"Markera alla",
+            "select_all":"Välj alla",
             "cut":"Klipp ut",
             "copy":"Kopiera",
             "search":"Sök",
@@ -935,17 +1033,27 @@
             "skip":"Hoppa över",
             "next":"Nästa",
             "start":"Starta",
-            "back":"Bakåt"
+            "back":"Tillbaka"
+        },
+        "navigation":{
+            "back":"Tillbaka"
+        },
+        "sheet":{
+            "close":"Stäng"
+        },
+        "datepicker":{
+            "lunarSwitch":"Visa månkalender"
         }
     },
     "pt":{
         "common":{
             "ok":"OK",
-            "cancel":"Cancelar"
+            "cancel":"Cancelar",
+            "more":"Mais"
         },
         "textoverlay":{
             "paste":"Colar",
-            "select_all":"Selecionar tudo",
+            "select_all":"Selecionar todos",
             "cut":"Recortar",
             "copy":"Copiar",
             "search":"Pesquisar",
@@ -964,6 +1072,15 @@
             "next":"Avançar",
             "start":"Iniciar",
             "back":"Voltar"
+        },
+        "navigation":{
+            "back":"Voltar"
+        },
+        "sheet":{
+            "close":"Fechar"
+        },
+        "datepicker":{
+            "lunarSwitch":"Mostrar Calendário lunar"
         }
     },
     "mn":{
@@ -1025,7 +1142,8 @@
     "nl":{
         "common":{
             "ok":"OK",
-            "cancel":"Annuleren"
+            "cancel":"Annuleren",
+            "more":"Meer"
         },
         "textoverlay":{
             "paste":"Plakken",
@@ -1037,7 +1155,7 @@
             "translate":"Vertalen"
         },
         "refresh":{
-            "last_updated":"Laatst bijgewerkt op: %s"
+            "last_updated":"Laatst bijgewerkt: %s"
         },
         "switch":{
             "on":"Aan",
@@ -1048,12 +1166,22 @@
             "next":"Volgende",
             "start":"Starten",
             "back":"Terug"
+        },
+        "navigation":{
+            "back":"Terug"
+        },
+        "sheet":{
+            "close":"Sluiten"
+        },
+        "datepicker":{
+            "lunarSwitch":"Maankalender weergeven"
         }
     },
     "pl":{
         "common":{
             "ok":"OK",
-            "cancel":"Anuluj"
+            "cancel":"Anuluj",
+            "more":"Więcej"
         },
         "textoverlay":{
             "paste":"Wklej",
@@ -1068,24 +1196,34 @@
             "last_updated":"Ostatnia aktualizacja: %s"
         },
         "switch":{
-            "on":"Włączono",
-            "off":"Wyłączono"
+            "on":"Wł.",
+            "off":"Wył."
         },
         "stepper":{
             "skip":"Pomiń",
             "next":"Dalej",
-            "start":"Rozpocznij",
+            "start":"Początek",
             "back":"Wstecz"
+        },
+        "navigation":{
+            "back":"Wstecz"
+        },
+        "sheet":{
+            "close":"Zamknij"
+        },
+        "datepicker":{
+            "lunarSwitch":"Pokaż kalendarz księżycowy"
         }
     },
     "tl":{
         "common":{
             "ok":"OK",
-            "cancel":"Kanselahin"
+            "cancel":"Kanselahin",
+            "more":"Higit Pa"
         },
         "textoverlay":{
             "paste":"I-paste",
-            "select_all":"Piliin ang lahat",
+            "select_all":"Piliin lahat",
             "cut":"I-cut",
             "copy":"Kopyahin",
             "search":"Maghanap",
@@ -1096,14 +1234,23 @@
             "last_updated":"Huling na-update: %s"
         },
         "switch":{
-            "on":"I-on",
-            "off":"I-off"
+            "on":"Naka-on",
+            "off":"Naka-off"
         },
         "stepper":{
             "skip":"Laktawan",
             "next":"Susunod",
-            "start":"Simula",
+            "start":"Simulan",
             "back":"Bumalik"
+        },
+        "navigation":{
+            "back":"Bumalik"
+        },
+        "sheet":{
+            "close":"Isara"
+        },
+        "datepicker":{
+            "lunarSwitch":"Ipakita ang lunar calendar"
         }
     },
     "kk-KZ":{
@@ -1137,7 +1284,8 @@
     "th":{
         "common":{
             "ok":"ตกลง",
-            "cancel":"ยกเลิก"
+            "cancel":"ยกเลิก",
+            "more":"เพิ่มเติม"
         },
         "textoverlay":{
             "paste":"วาง",
@@ -1149,7 +1297,7 @@
             "translate":"แปลภาษา"
         },
         "refresh":{
-            "last_updated":"ปรับปรุงล่าสุด: %s"
+            "last_updated":"อัปเดตล่าสุด: %s"
         },
         "switch":{
             "on":"เปิด",
@@ -1158,8 +1306,17 @@
         "stepper":{
             "skip":"ข้าม",
             "next":"ถัดไป",
-            "start":"เริ่มต้น",
+            "start":"เริ่ม",
             "back":"ย้อนกลับ"
+        },
+        "navigation":{
+            "back":"ย้อนกลับ"
+        },
+        "sheet":{
+            "close":"ปิด"
+        },
+        "datepicker":{
+            "lunarSwitch":"แสดงปฏิทินจันทรคติ"
         }
     },
     "si-LK":{
@@ -1221,7 +1378,8 @@
     "cs":{
         "common":{
             "ok":"OK",
-            "cancel":"Zrušit"
+            "cancel":"Zrušit",
+            "more":"Další"
         },
         "textoverlay":{
             "paste":"Vložit",
@@ -1242,18 +1400,28 @@
         "stepper":{
             "skip":"Přeskočit",
             "next":"Další",
-            "start":"Začít",
+            "start":"Začátek",
             "back":"Zpět"
+        },
+        "navigation":{
+            "back":"Zpět"
+        },
+        "sheet":{
+            "close":"Zavřít"
+        },
+        "datepicker":{
+            "lunarSwitch":"Zobrazit lunární kalendář"
         }
     },
     "hu":{
         "common":{
             "ok":"OK",
-            "cancel":"Mégse"
+            "cancel":"Mégse",
+            "more":"Továbbiak"
         },
         "textoverlay":{
             "paste":"Beillesztés",
-            "select_all":"Mind kijelöl",
+            "select_all":"Összes kijelölése",
             "cut":"Kivágás",
             "copy":"Másolás",
             "search":"Keres",
@@ -1268,16 +1436,26 @@
             "off":"Ki"
         },
         "stepper":{
-            "skip":"Kihagy",
+            "skip":"Kihagyás",
             "next":"Tovább",
-            "start":"Indítás",
+            "start":"Kezdés",
             "back":"Vissza"
+        },
+        "navigation":{
+            "back":"Vissza"
+        },
+        "sheet":{
+            "close":"Bezárás"
+        },
+        "datepicker":{
+            "lunarSwitch":"Holdnaptár mutatása"
         }
     },
     "es":{
         "common":{
             "ok":"Aceptar",
-            "cancel":"Cancelar"
+            "cancel":"Cancelar",
+            "more":"Más"
         },
         "textoverlay":{
             "paste":"Pegar",
@@ -1298,19 +1476,29 @@
         "stepper":{
             "skip":"Omitir",
             "next":"Siguiente",
-            "start":"Iniciar",
+            "start":"Inicio",
             "back":"Volver"
+        },
+        "navigation":{
+            "back":"Volver"
+        },
+        "sheet":{
+            "close":"Cerrar"
+        },
+        "datepicker":{
+            "lunarSwitch":"Mostrar calendario lunar"
         }
     },
     "iw":{
         "common":{
             "ok":"אישור",
-            "cancel":"ביטול"
+            "cancel":"ביטול",
+            "more":"עוד"
         },
         "textoverlay":{
             "paste":"הדבק",
             "select_all":"בחר הכל",
-            "cut":"חתוך",
+            "cut":"גזור",
             "copy":"העתק",
             "search":"חיפוש",
             "share":"שיתוף",
@@ -1328,12 +1516,22 @@
             "next":"הבא",
             "start":"התחל",
             "back":"חזרה"
+        },
+        "navigation":{
+            "back":"חזרה"
+        },
+        "sheet":{
+            "close":"סגור"
+        },
+        "datepicker":{
+            "lunarSwitch":"הצג לוח שנה ירחי"
         }
     },
     "ms":{
         "common":{
             "ok":"OK",
-            "cancel":"Batalkan"
+            "cancel":"Batalkan",
+            "more":"Lagi"
         },
         "textoverlay":{
             "paste":"Tampal",
@@ -1348,14 +1546,23 @@
             "last_updated":"Kemas kini terakhir: %s"
         },
         "switch":{
-            "on":"Buka",
-            "off":"Tutup"
+            "on":"Dihidupkan",
+            "off":"Dimatikan"
         },
         "stepper":{
             "skip":"Langkau",
             "next":"Seterusnya",
-            "start":"Mula",
+            "start":"Mulakan",
             "back":"Kembali"
+        },
+        "navigation":{
+            "back":"Kembali"
+        },
+        "sheet":{
+            "close":"Tutup"
+        },
+        "datepicker":{
+            "lunarSwitch":"Tunjukkan kalendar lunar"
         }
     },
     "be":{
@@ -1389,7 +1596,8 @@
     "fi":{
         "common":{
             "ok":"OK",
-            "cancel":"Peruuta"
+            "cancel":"Peruuta",
+            "more":"Lisää"
         },
         "textoverlay":{
             "paste":"Liitä",
@@ -1412,12 +1620,22 @@
             "next":"Seuraava",
             "start":"Aloita",
             "back":"Takaisin"
+        },
+        "navigation":{
+            "back":"Takaisin"
+        },
+        "sheet":{
+            "close":"Sulje"
+        },
+        "datepicker":{
+            "lunarSwitch":"Näytä kuukalenteri"
         }
     },
     "ru":{
         "common":{
             "ok":"OK",
-            "cancel":"Отмена"
+            "cancel":"Отмена",
+            "more":"Еще"
         },
         "textoverlay":{
             "paste":"Вставить",
@@ -1432,20 +1650,30 @@
             "last_updated":"Обновлено: %s"
         },
         "switch":{
-            "on":"Включить",
-            "off":"Выключить"
+            "on":"Включено",
+            "off":"Выключено"
         },
         "stepper":{
             "skip":"Пропустить",
             "next":"Далее",
             "start":"Начать",
             "back":"Назад"
+        },
+        "navigation":{
+            "back":"Назад"
+        },
+        "sheet":{
+            "close":"Закрыть"
+        },
+        "datepicker":{
+            "lunarSwitch":"Лунный календарь"
         }
     },
     "ko":{
         "common":{
             "ok":"확인",
-            "cancel":"취소"
+            "cancel":"취소",
+            "more":"더 보기"
         },
         "textoverlay":{
             "paste":"붙여넣기",
@@ -1460,14 +1688,23 @@
             "last_updated":"마지막 업데이트: %s"
         },
         "switch":{
-            "on":"사용",
-            "off":"사용 안 함"
+            "on":"켜짐",
+            "off":"꺼짐"
         },
         "stepper":{
             "skip":"건너뛰기",
             "next":"다음",
             "start":"시작",
             "back":"뒤로"
+        },
+        "navigation":{
+            "back":"뒤로"
+        },
+        "sheet":{
+            "close":"닫기"
+        },
+        "datepicker":{
+            "lunarSwitch":"음력 캘린더 표시"
         }
     },
     "sw":{
@@ -1501,7 +1738,8 @@
     "de":{
         "common":{
             "ok":"OK",
-            "cancel":"Abbrechen"
+            "cancel":"Abbrechen",
+            "more":"Mehr"
         },
         "textoverlay":{
             "paste":"Einfügen",
@@ -1524,12 +1762,22 @@
             "next":"Weiter",
             "start":"Start",
             "back":"Zurück"
+        },
+        "navigation":{
+            "back":"Zurück"
+        },
+        "sheet":{
+            "close":"Schließen"
+        },
+        "datepicker":{
+            "lunarSwitch":"Mondkalender anzeigen"
         }
     },
     "hi":{
         "common":{
             "ok":"ठीक",
-            "cancel":"रद्द करें"
+            "cancel":"रद्द करें",
+            "more":"अधिक"
         },
         "textoverlay":{
             "paste":"चिपकाएं",
@@ -1541,23 +1789,33 @@
             "translate":"अनुवाद करें"
         },
         "refresh":{
-            "last_updated":"पिछली बार अद्यतन किया गया: %s"
+            "last_updated":"अंतिम अद्यतन: %s"
         },
         "switch":{
             "on":"चालू",
-            "off":"बंद करें"
+            "off":"बंद"
         },
         "stepper":{
-            "skip":"छोड़ें",
+            "skip":"छोड़ें",
             "next":"अगला",
-            "start":"प्रारंभ करें",
+            "start":"शुरू करें",
             "back":"वापस जाएँ"
+        },
+        "navigation":{
+            "back":"वापस जाएँ"
+        },
+        "sheet":{
+            "close":"बंद करें"
+        },
+        "datepicker":{
+            "lunarSwitch":"लूनर कैलेंडर दिखाएँ"
         }
     },
     "my-MM":{
         "common":{
             "ok":"အိုကေ",
-            "cancel":"မလုပ်ပါ"
+            "cancel":"ပယ်ဖျက်မည်",
+            "more":"နောက်ထပ်"
         },
         "textoverlay":{
             "paste":"ကူးထည့်ရန်",
@@ -1569,7 +1827,7 @@
             "translate":"ဘာသာပြန်"
         },
         "refresh":{
-            "last_updated":"နောက်ဆုံး အပ်ဒိတ်လုပ်ခဲ့မှု- %s"
+            "last_updated":"နောက်ဆုံးအပ်ဒိတ်လုပ်ခဲ့ချိန်- %s"
         },
         "switch":{
             "on":"ဖွင့်",
@@ -1578,14 +1836,24 @@
         "stepper":{
             "skip":"ကျော်ရန်",
             "next":"ရှေ့သို့",
-            "start":"စရန်",
+            "start":"စတင်ရန်",
             "back":"နောက်သို့"
+        },
+        "navigation":{
+            "back":"နောက်သို့"
+        },
+        "sheet":{
+            "close":"ပိတ်ရန်"
+        },
+        "datepicker":{
+            "lunarSwitch":"လ ပြက္ခဒိန် ပြရန်"
         }
     },
     "da":{
         "common":{
             "ok":"OK",
-            "cancel":"Annuller"
+            "cancel":"Annuller",
+            "more":"Mere"
         },
         "textoverlay":{
             "paste":"Indsæt",
@@ -1597,7 +1865,7 @@
             "translate":"Oversæt"
         },
         "refresh":{
-            "last_updated":"Sidst opdateret: %s"
+            "last_updated":"Senest opdateret: %s"
         },
         "switch":{
             "on":"Til",
@@ -1608,16 +1876,26 @@
             "next":"Næste",
             "start":"Start",
             "back":"Tilbage"
+        },
+        "navigation":{
+            "back":"Tilbage"
+        },
+        "sheet":{
+            "close":"Luk"
+        },
+        "datepicker":{
+            "lunarSwitch":"Vis månekalender"
         }
     },
     "mk":{
         "common":{
             "ok":"ОК",
-            "cancel":"Откажи"
+            "cancel":"Откажи",
+            "more":"Повеќе"
         },
         "textoverlay":{
             "paste":"Залепи",
-            "select_all":"Изберете ги сите",
+            "select_all":"Избери ги сите",
             "cut":"Отсечи",
             "copy":"Копирај",
             "search":"Пребарај",
@@ -1628,32 +1906,42 @@
             "last_updated":"Последно ажурирање: %s"
         },
         "switch":{
-            "on":"Вклучено",
+            "on":"Вклучи",
             "off":"Исклучено"
         },
         "stepper":{
             "skip":"Прескокни",
             "next":"Следно",
-            "start":"Почеток",
+            "start":"Започни",
             "back":"Назад"
+        },
+        "navigation":{
+            "back":"Назад"
+        },
+        "sheet":{
+            "close":"Затвори"
+        },
+        "datepicker":{
+            "lunarSwitch":"Прикажи лунарен календар"
         }
     },
     "fa":{
         "common":{
-            "ok":"تأييد",
-            "cancel":"لغو"
+            "ok":"تأیید",
+            "cancel":"لغو",
+            "more":"بیشتر"
         },
         "textoverlay":{
             "paste":"چسباندن",
-            "select_all":"انتخاب همه",
-            "cut":"برش",
+            "select_all":"انتخاب همۀ موارد",
+            "cut":"بریدن",
             "copy":"کپی",
             "search":"جستجو",
             "share":"اشتراک‌گذاری",
             "translate":"ترجمه"
         },
         "refresh":{
-            "last_updated":"آخرین به‌روزرسانی: %s"
+            "last_updated":"آخرین به روزرسانی: %s"
         },
         "switch":{
             "on":"روشن",
@@ -1664,12 +1952,22 @@
             "next":"بعدی",
             "start":"شروع",
             "back":"بازگشت"
+        },
+        "navigation":{
+            "back":"بازگشت"
+        },
+        "sheet":{
+            "close":"بستن"
+        },
+        "datepicker":{
+            "lunarSwitch":"نمایش تقویم قمری"
         }
     },
     "ja":{
         "common":{
             "ok":"OK",
-            "cancel":"キャンセル"
+            "cancel":"キャンセル",
+            "more":"その他"
         },
         "textoverlay":{
             "paste":"貼り付け",
@@ -1692,6 +1990,15 @@
             "next":"次へ",
             "start":"開始",
             "back":"戻る"
+        },
+        "navigation":{
+            "back":"戻る"
+        },
+        "sheet":{
+            "close":"閉じる"
+        },
+        "datepicker":{
+            "lunarSwitch":"太陰暦を表示"
         }
     },
     "ka-GE":{
@@ -1753,7 +2060,8 @@
     "pt-PT":{
         "common":{
             "ok":"OK",
-            "cancel":"Cancelar"
+            "cancel":"Cancelar",
+            "more":"Mais"
         },
         "textoverlay":{
             "paste":"Colar",
@@ -1776,12 +2084,22 @@
             "next":"Seguinte",
             "start":"Iniciar",
             "back":"Anterior"
+        },
+        "navigation":{
+            "back":"Anterior"
+        },
+        "sheet":{
+            "close":"Fechar"
+        },
+        "datepicker":{
+            "lunarSwitch":"Mostrar calendário lunar"
         }
     },
     "sk":{
         "common":{
             "ok":"OK",
-            "cancel":"Zrušiť"
+            "cancel":"Zrušiť",
+            "more":"Viac"
         },
         "textoverlay":{
             "paste":"Prilepiť",
@@ -1804,12 +2122,22 @@
             "next":"Ďalej",
             "start":"Spustiť",
             "back":"Späť"
+        },
+        "navigation":{
+            "back":"Späť"
+        },
+        "sheet":{
+            "close":"Zatvoriť"
+        },
+        "datepicker":{
+            "lunarSwitch":"Zobraziť lunárny kalendár"
         }
     },
     "uk":{
         "common":{
             "ok":"OK",
-            "cancel":"Скасувати"
+            "cancel":"Скасувати",
+            "more":"Більше"
         },
         "textoverlay":{
             "paste":"Вставити",
@@ -1824,20 +2152,30 @@
             "last_updated":"Останнє оновлення: %s"
         },
         "switch":{
-            "on":"Увімк.",
-            "off":"Вимк."
+            "on":"Увімкнено",
+            "off":"Вимкнено"
         },
         "stepper":{
             "skip":"Пропустити",
             "next":"Далі",
-            "start":"Почати",
+            "start":"Запустити",
             "back":"Назад"
+        },
+        "navigation":{
+            "back":"Назад"
+        },
+        "sheet":{
+            "close":"Закрити"
+        },
+        "datepicker":{
+            "lunarSwitch":"Показувати місячний календар"
         }
     },
     "vi":{
         "common":{
             "ok":"OK",
-            "cancel":"Hủy"
+            "cancel":"Hủy",
+            "more":"Thêm"
         },
         "textoverlay":{
             "paste":"Dán",
@@ -1849,7 +2187,7 @@
             "translate":"Dịch"
         },
         "refresh":{
-            "last_updated":"Cập nhật mới nhất: %s"
+            "last_updated":"Cập nhật gần nhất: %s"
         },
         "switch":{
             "on":"Bật",
@@ -1859,7 +2197,16 @@
             "skip":"Bỏ qua",
             "next":"Tiếp",
             "start":"Bắt đầu",
-            "back":"Quay lại"
+            "back":"Trở lại"
+        },
+        "navigation":{
+            "back":"Trở lại"
+        },
+        "sheet":{
+            "close":"Đóng"
+        },
+        "datepicker":{
+            "lunarSwitch":"Hiển thị lịch âm"
         }
     },
     "b+jv+Latn":{
@@ -1984,8 +2331,7 @@
             "lunarSwitch":"دېھقانلار كالېندارى كۆرسىتىش"
         },
         "navigation":{
-            "back":"قايتىش",
-            "more":"كۆپرەك"
+            "back":"قايتىش"
         },
         "sheet":{
             "close":"ئېتىش"
@@ -1994,7 +2340,8 @@
     "et":{
         "common":{
             "ok":"OK",
-            "cancel":"Loobu"
+            "cancel":"Tühista",
+            "more":"Rohkem"
         },
         "textoverlay":{
             "paste":"Kleebi",
@@ -2006,7 +2353,7 @@
             "translate":"Tõlgi"
         },
         "refresh":{
-            "last_updated":"Viimane värskendus: %s"
+            "last_updated":"Viimati värskendatud: %s"
         },
         "switch":{
             "on":"Sees",
@@ -2014,9 +2361,18 @@
         },
         "stepper":{
             "skip":"Jäta vahele",
-            "next":"Edasi",
+            "next":"Järgmine",
             "start":"Alusta",
             "back":"Tagasi"
+        },
+        "navigation":{
+            "back":"Tagasi"
+        },
+        "sheet":{
+            "close":"Sulge"
+        },
+        "datepicker":{
+            "lunarSwitch":"Näita kuukalendrit"
         }
     },
     "ta":{
@@ -2050,7 +2406,8 @@
     "it":{
         "common":{
             "ok":"OK",
-            "cancel":"Annulla"
+            "cancel":"Annulla",
+            "more":"Altro"
         },
         "textoverlay":{
             "paste":"Incolla",
@@ -2065,26 +2422,36 @@
             "last_updated":"Ultimo aggiornamento: %s"
         },
         "switch":{
-            "on":"On",
-            "off":"Off"
+            "on":"Attivato",
+            "off":"Disattivato"
         },
         "stepper":{
-            "skip":"Salta",
+            "skip":"Ignora",
             "next":"Avanti",
-            "start":"Inizio",
+            "start":"Inizia",
             "back":"Indietro"
+        },
+        "navigation":{
+            "back":"Indietro"
+        },
+        "sheet":{
+            "close":"Chiudi"
+        },
+        "datepicker":{
+            "lunarSwitch":"Mostra calendario lunare"
         }
     },
     "bn":{
         "common":{
             "ok":"ঠিক আছে",
-            "cancel":"বাতিল"
+            "cancel":"বাতিল করুন",
+            "more":"আরও"
         },
         "textoverlay":{
-            "paste":"প্রতিলেপন করুন",
+            "paste":"পেস্ট করুন",
             "select_all":"সব নির্বাচন করুন",
             "cut":"কাট করুন",
-            "copy":"অনুলিপি",
+            "copy":"কপি করুন",
             "search":"অনুসন্ধান করুন",
             "share":"শেয়ার করুন",
             "translate":"অনুবাদ করুন"
@@ -2097,16 +2464,26 @@
             "off":"বন্ধ"
         },
         "stepper":{
-            "skip":"এড়িয়ে যান",
+            "skip":"স্কিপ করুন",
             "next":"পরবর্তী",
             "start":"শুরু করুন",
-            "back":"পিছনে"
+            "back":"পিছনে যান"
+        },
+        "navigation":{
+            "back":"পিছনে যান"
+        },
+        "sheet":{
+            "close":"বন্ধ করুন"
+        },
+        "datepicker":{
+            "lunarSwitch":"লুনার ক্যালেন্ডার দেখুন"
         }
     },
     "fr":{
         "common":{
             "ok":"OK",
-            "cancel":"Annuler"
+            "cancel":"Annuler",
+            "more":"Plus"
         },
         "textoverlay":{
             "paste":"Coller",
@@ -2127,8 +2504,17 @@
         "stepper":{
             "skip":"Ignorer",
             "next":"Suivant",
-            "start":"Commencer",
-            "back":"Précédent"
+            "start":"Démarrer",
+            "back":"Revenir"
+        },
+        "navigation":{
+            "back":"Revenir"
+        },
+        "sheet":{
+            "close":"Fermer"
+        },
+        "datepicker":{
+            "lunarSwitch":"Afficher le calendrier lunaire"
         }
     },
     "zh-HK":{
@@ -2169,8 +2555,7 @@
             "lunarSwitch":"顯示農曆"
         },
         "navigation":{
-            "back":"返回",
-            "more":"更多"
+            "back":"返回"
         },
         "sheet":{
             "close":"關閉"
@@ -2214,8 +2599,7 @@
             "lunarSwitch":"顯示農曆"
         },
         "navigation":{
-            "back":"返回",
-            "more":"更多"
+            "back":"返回"
         },
         "sheet":{
             "close":"關閉"
@@ -2224,7 +2608,8 @@
     "hr":{
         "common":{
             "ok":"U redu",
-            "cancel":"Odustani"
+            "cancel":"Odustani",
+            "more":"Više"
         },
         "textoverlay":{
             "paste":"Zalijepi",
@@ -2245,14 +2630,24 @@
         "stepper":{
             "skip":"Preskoči",
             "next":"Sljedeće",
-            "start":"Početak",
+            "start":"Pokreni",
             "back":"Natrag"
+        },
+        "navigation":{
+            "back":"Natrag"
+        },
+        "sheet":{
+            "close":"Zatvori"
+        },
+        "datepicker":{
+            "lunarSwitch":"Prikaži lunarni kalendar"
         }
     },
     "lv":{
         "common":{
             "ok":"Labi",
-            "cancel":"Atcelt"
+            "cancel":"Atcelt",
+            "more":"Vairāk"
         },
         "textoverlay":{
             "paste":"Ielīmēt",
@@ -2267,20 +2662,30 @@
             "last_updated":"Pēdējoreiz atjaunināts: %s"
         },
         "switch":{
-            "on":"Iesl.",
-            "off":"Izsl."
+            "on":"Ieslēgts",
+            "off":"Izslēgts"
         },
         "stepper":{
             "skip":"Izlaist",
             "next":"Tālāk",
             "start":"Sākt",
             "back":"Atpakaļ"
+        },
+        "navigation":{
+            "back":"Atpakaļ"
+        },
+        "sheet":{
+            "close":"Aizvērt"
+        },
+        "datepicker":{
+            "lunarSwitch":"Rādīt mēness kalendāru"
         }
     },
     "el":{
         "common":{
             "ok":"OK",
-            "cancel":"Ακύρωση"
+            "cancel":"Ακύρωση",
+            "more":"Περισσότερα"
         },
         "textoverlay":{
             "paste":"Επικόλληση",
@@ -2301,8 +2706,17 @@
         "stepper":{
             "skip":"Παράλειψη",
             "next":"Επόμενο",
-            "start":"Εκκίνηση",
+            "start":"Έναρξη",
             "back":"Πίσω"
+        },
+        "navigation":{
+            "back":"Πίσω"
+        },
+        "sheet":{
+            "close":"Κλείσιμο"
+        },
+        "datepicker":{
+            "lunarSwitch":"Εμφάνιση σεληνιακού ημερολογίου"
         }
     },
     "lo-LA":{
@@ -2364,8 +2778,7 @@
             "back":"[TS_954619]_Back"
         },
         "navigation":{
-            "back":"[TS_954632]_Back",
-            "more":"[TS_954620]_MORE"
+            "back":"[TS_954632]_Back"
         },
         "sheet":{
             "close":"[TS_961627]_Close"
@@ -2376,6 +2789,76 @@
         },
         "datepicker":{
             "lunarSwitch":"[TS_954634]_Show lunar calendar"
+        }
+    },
+    "sr-Latn":{
+        "common":{
+            "cancel":"Otkaži",
+            "ok":"U redu",
+            "more":"Još"
+        },
+        "textoverlay":{
+            "select_all":"Izaberi sve",
+            "copy":"Kopiraj",
+            "cut":"Iseci",
+            "paste":"Nalepi"
+        },
+        "refresh":{
+            "last_updated":"Poslednji put ažurirano: %s"
+        },
+        "stepper":{
+            "skip":"Preskoči",
+            "next":"Sledeće",
+            "start":"Pokreni",
+            "back":"Nazad"
+        },
+        "navigation":{
+            "back":"Nazad"
+        },
+        "sheet":{
+            "close":"Zatvori"
+        },
+        "switch":{
+            "off":"Isključeno",
+            "on":"Uključeno"
+        },
+        "datepicker":{
+            "lunarSwitch":"Prikaži lunarni kalendar"
+        }
+    },
+    "null":{
+        "common":{
+            "cancel":"გაუქმება",
+            "ok":"კარგი",
+            "more":"მეტი"
+        },
+        "textoverlay":{
+            "select_all":"ყველას არჩევა",
+            "copy":"კოპირება",
+            "cut":"ჭრა",
+            "paste":"ჩასმა"
+        },
+        "refresh":{
+            "last_updated":"ბოლო განახლება: %s"
+        },
+        "stepper":{
+            "skip":"გამოტოვება",
+            "next":"შემდეგი",
+            "start":"დაწყება",
+            "back":"უკან"
+        },
+        "navigation":{
+            "back":"უკან"
+        },
+        "sheet":{
+            "close":"დახურვა"
+        },
+        "switch":{
+            "off":"გამორთული",
+            "on":"ჩართული"
+        },
+        "datepicker":{
+            "lunarSwitch":"მთვარის კალენდრის ჩვენება"
         }
     }
 }

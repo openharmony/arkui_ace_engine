@@ -104,8 +104,6 @@ private:
     float FixScrollOffset(float offset, int32_t source);
     void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged) override {}
     float GetScrollUpdateFriction(float overScroll) override;
-    float GetStartOverScrollOffset(float offset, float startMainPos) const override;
-    float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const override;
     ScrollAlign GetScrollToNodeAlign() override
     {
         return ScrollAlign::CENTER;
@@ -119,6 +117,9 @@ private:
     int32_t scrollStartMidIndex_ = -1;
     float startHeaderPos_ = 0.0f;
     float headerOffset_ = -1.0f;
+    float oldHeaderSize_ = 0.0f;
+    float oldFirstItemSize_ = -1.0f;
+    bool headerStayNear_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
 #endif

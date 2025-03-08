@@ -288,6 +288,17 @@ void ReplaceHolder(std::string& originStr, const std::string& param)
 }
 } // namespace
 
+namespace OHOS::Ace::Framework {
+
+RefPtr<PipelineBase> GetPipelineContext()
+{
+    auto currentObj = Container::Current();
+    CHECK_NULL_RETURN(currentObj, nullptr);
+    return currentObj->GetPipelineContext();
+}
+
+} // namespace OHOS::Ace::Framework
+
 extern "C" {
 void FfiOHOSAceFrameworkPopupDismiss()
 {
@@ -386,7 +397,7 @@ void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
             value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
         }
     }
-    
+
 
     int32_t topValue = cjValue.top;
     if (Utils::CheckParamsValid(topValue, PIXEL_ROUND_CALC_POLICIES.size())) {
@@ -1442,7 +1453,7 @@ void FfiOHOSAceFrameworkViewAbstractSetBackgroundBlurStyleOption(
     styleOption.isValidColor = true;
 
     // Set scale
-    styleOption.scale = std::clamp(styleOption.scale, 0.0, 1.0);
+    styleOption.scale = std::clamp(options.scale, 0.0f, 1.0f);
 
     BlurOption blurOption;
     int vectorSize = 2;
@@ -1781,7 +1792,7 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
         std::function<void(const int32_t& info)> onWillDismissFunc =
             [nativeFunc = CJLambda::Create(value.onWillDismiss.value)]
             (const int32_t& info) {nativeFunc(info);};
-        
+
         popupParam->SetOnWillDismiss(onWillDismissFunc);
     }
     if (value.transition.hasValue) {
@@ -1805,6 +1816,16 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
     }
 }
 
+void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
+{
+    menuParam.isShowInSubWindow = false;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    menuParam.isShowInSubWindow = theme->GetExpandDisplay();
+}
+
 void FfiOHOSAceFrameworkViewAbstractBindMenu(
     VectorMenuValuePtr vectorMenuValue, void (*menuActionCallback)(const char*))
 {
@@ -1820,12 +1841,14 @@ void FfiOHOSAceFrameworkViewAbstractBindMenu(
         params[i].action = [menuActionHandle, label]() { menuActionHandle(label); };
     }
     NG::MenuParam options;
+    GetMenuShowInSubwindow(options);
     ViewAbstractModel::GetInstance()->BindMenu(std::move(params), nullptr, options);
 }
 
 void FfiOHOSAceFrameworkViewAbstractBindCustomMenu(void (*builder)())
 {
     NG::MenuParam params;
+    GetMenuShowInSubwindow(params);
     ViewAbstractModel::GetInstance()->BindMenu({}, CJLambda::Create(builder), params);
 }
 
@@ -1840,6 +1863,256 @@ void FfiOHOSAceFrameworkViewAbstractBindContextMenu(void (*builder)(), int32_t r
     auto emptyFunc = std::function([] {});
     ViewAbstractModel::GetInstance()->BindContextMenu(
         static_cast<OHOS::Ace::ResponseType>(responseType), buildFunc, options, emptyFunc);
+}
+
+void ParseContentPreviewAnimationOptionsParam(NativeOptionCallBack preview,
+    NativeOptionCJContextMenuAnimationOptions previewAnimationOptions, NG::MenuParam& menuParam,
+    std::function<void()>& previewBuildFunc)
+{
+    // Parse preview
+    if (preview.hasValue) {
+        menuParam.previewMode = MenuPreviewMode::CUSTOM;
+        previewBuildFunc = CJLambda::Create(preview.value);
+    } else {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        previewBuildFunc = ([]() -> void {});
+    }
+    if (previewAnimationOptions.hasValue) {
+        CJContextMenuAnimationOptions animationOptions = previewAnimationOptions.value;
+        menuParam.previewAnimationOptions.scaleFrom = -1.0f;
+        menuParam.previewAnimationOptions.scaleTo = -1.0f;
+        if (animationOptions.scaleFrom.hasValue) {
+            double scaleFromVal = animationOptions.scaleFrom.value;
+            double scaleToVal = animationOptions.scaleTo.value;
+            menuParam.previewAnimationOptions.scaleFrom = LessOrEqual(scaleFromVal, 0.0) ? -1.0f : scaleFromVal;
+            menuParam.previewAnimationOptions.scaleTo = LessOrEqual(scaleToVal, 0.0) ? -1.0f : scaleToVal;
+        }
+        menuParam.hasPreviewTransitionEffect = false;
+        if (animationOptions.transition.hasValue) {
+            menuParam.hasPreviewTransitionEffect = true;
+            auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(animationOptions.transition.value);
+            if (nativeTransitionEffect) {
+                menuParam.previewTransition = nativeTransitionEffect->effect;
+            }
+        }
+        if (menuParam.previewMode != MenuPreviewMode::CUSTOM || menuParam.hasPreviewTransitionEffect ||
+            menuParam.hasTransitionEffect ||
+            menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
+            return;
+        }
+        menuParam.hoverImageAnimationOptions.scaleFrom = -1.0f;
+        menuParam.hoverImageAnimationOptions.scaleTo = -1.0f;
+        menuParam.isShowHoverImage = false;
+        if (animationOptions.hoverScaleFrom.hasValue) {
+            double hoverScaleFromVal = animationOptions.hoverScaleFrom.value;
+            double hoverScaleToVal = animationOptions.hoverScaleTo.value;
+            menuParam.hoverImageAnimationOptions.scaleFrom =
+                LessOrEqual(hoverScaleFromVal, 0.0) ? -1.0f : hoverScaleFromVal;
+            menuParam.hoverImageAnimationOptions.scaleTo =
+                LessOrEqual(hoverScaleToVal, 0.0) ? -1.0f : hoverScaleToVal;
+            menuParam.isShowHoverImage = true;
+        }
+    }
+}
+
+void ParseMenuCallback(NativeOptionCallBack onAppear, NativeOptionCallBack onDisappear,
+    NativeOptionCallBack aboutToAppear, NativeOptionCallBack aboutToDisappear, NG::MenuParam& menuParam)
+{
+    // Parse onAppear
+    std::function<void()> onAppearCallback;
+    if (onAppear.hasValue) {
+        onAppearCallback = CJLambda::Create(onAppear.value);
+        menuParam.onAppear = std::move(onAppearCallback);
+    }
+    // Parse onDisappear
+    std::function<void()> onDisappearCallback;
+    if (onDisappear.hasValue) {
+        onDisappearCallback = CJLambda::Create(onDisappear.value);
+        menuParam.onDisappear = std::move(onDisappearCallback);
+    }
+    // Parse aboutToAppear
+    std::function<void()> aboutToAppearCallback;
+    if (aboutToAppear.hasValue) {
+        aboutToAppearCallback = CJLambda::Create(aboutToAppear.value);
+        menuParam.aboutToAppear = std::move(aboutToAppearCallback);
+    }
+    // Parse aboutToDisappear
+    std::function<void()> aboutToDisappearCallback;
+    if (aboutToDisappear.hasValue) {
+        aboutToDisappearCallback = CJLambda::Create(aboutToDisappear.value);
+        menuParam.aboutToDisappear = std::move(aboutToDisappearCallback);
+    }
+}
+
+// Parse transition
+void ParseMenuTransition(NativeOptionInt64 transition, NG::MenuParam& menuParam)
+{
+    menuParam.hasTransitionEffect = false;
+    if (transition.hasValue) {
+        auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(transition.value);
+        if (nativeTransitionEffect) {
+            menuParam.hasTransitionEffect = true;
+            menuParam.transition = nativeTransitionEffect->effect;
+        }
+    }
+}
+
+void ParseMenuArrowParam(bool enableArrow, NativeLength arrowOffset, NG::MenuParam& menuParam)
+{
+    // Parse enableArrow
+    menuParam.enableArrow = enableArrow;
+    // Parse arrowOffsetDime
+    menuParam.arrowOffset = Dimension(arrowOffset.value, static_cast<DimensionUnit>(arrowOffset.unitType));
+    // if enableArrow is true and placement not set, set placement default value to top.
+    if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
+        menuParam.placement = Placement::TOP;
+    }
+}
+
+// Parse borderRadius
+void ParseMenuBorderRadius(NativeOptionRadius borderRadius, NG::MenuParam& menuParam)
+{
+    if (borderRadius.hasValue) {
+        NativeBorderRadiuses nativeBorderRadiuses = borderRadius.value;
+        NG::BorderRadiusProperty radius;
+        CalcDimension topLeft(
+            nativeBorderRadiuses.topLeftRadiuses, static_cast<DimensionUnit>(nativeBorderRadiuses.topLeftUnit));
+        CalcDimension topRight(
+            nativeBorderRadiuses.topRightRadiuses, static_cast<DimensionUnit>(nativeBorderRadiuses.topRightUnit));
+        CalcDimension bottomLeft(
+            nativeBorderRadiuses.bottomLeftRadiuses, static_cast<DimensionUnit>(nativeBorderRadiuses.bottomLeftUnit));
+        CalcDimension bottomRight(
+            nativeBorderRadiuses.bottomRightRadiuses,
+            static_cast<DimensionUnit>(nativeBorderRadiuses.bottomRightUnit));
+        radius.radiusTopLeft = topLeft;
+        radius.radiusTopRight = topRight;
+        radius.radiusBottomLeft = bottomLeft;
+        radius.radiusBottomRight = bottomRight;
+        radius.multiValued = true;
+        menuParam.borderRadius = radius;
+    }
+}
+
+// Parse layoutRegionMargin
+void ParseMenuLayoutRegionMarginParam(NativeOptionMargin layoutRegionMargin, NG::MenuParam& menuParam)
+{
+    if (layoutRegionMargin.hasValue) {
+        NativeMargin margin = layoutRegionMargin.value;
+        NG::PaddingProperty margins;
+        Dimension top(margin.top, static_cast<DimensionUnit>(margin.topUnit));
+        Dimension left(margin.left, static_cast<DimensionUnit>(margin.leftUnit));
+        Dimension right(margin.right, static_cast<DimensionUnit>(margin.rightUnit));
+        Dimension bottom(margin.bottom, static_cast<DimensionUnit>(margin.bottomUnit));
+        margins.top = NG::CalcLength(top);
+        margins.left = NG::CalcLength(left);
+        margins.right = NG::CalcLength(right);
+        margins.bottom = NG::CalcLength(bottom);
+        menuParam.layoutRegionMargin = margins;
+    }
+}
+
+void ParseContextMenuParam(CJContextMenuOptions options, NG::MenuParam& menuParam,
+    std::function<void()>& previewBuildFunc)
+{
+    // Parse offset
+    Dimension dx = Dimension(options.offset.x, DimensionUnit::VP);
+    Dimension dy = Dimension(options.offset.y, DimensionUnit::VP);
+    menuParam.positionOffset.SetX(dx.ConvertToPx());
+    menuParam.positionOffset.SetY(dy.ConvertToPx());
+    // Parse placement
+    if (options.placement.hasValue) {
+        menuParam.placement = static_cast<Placement>(options.placement.value);
+    }
+    // Parse backgroundColor
+    menuParam.backgroundColor = Color(options.backgroundColor);
+    // Parse backgroundBlurStyle
+    menuParam.backgroundBlurStyle = options.backgroundBlurStyle;
+    ParseMenuCallback(options.onAppear, options.onDisappear, options.aboutToAppear, options.aboutToDisappear,
+        menuParam);
+    ParseMenuTransition(options.transition, menuParam);
+    ParseMenuArrowParam(options.enableArrow, options.arrowOffset, menuParam);
+    ParseMenuBorderRadius(options.borderRadius, menuParam);
+    ParseMenuLayoutRegionMarginParam(options.layoutRegionMargin, menuParam);
+    ParseContentPreviewAnimationOptionsParam(options.preview, options.previewAnimationOptions, menuParam,
+        previewBuildFunc);
+}
+
+void ParseMenuParam(CJMenuOptions options, NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+{
+    // Parse offset
+    Dimension dx = Dimension(options.offset.x, DimensionUnit::VP);
+    Dimension dy = Dimension(options.offset.y, DimensionUnit::VP);
+    menuParam.positionOffset.SetX(dx.ConvertToPx());
+    menuParam.positionOffset.SetY(dy.ConvertToPx());
+    // Parse placement
+    if (options.placement.hasValue) {
+        menuParam.placement = static_cast<Placement>(options.placement.value);
+    }
+    // Parse backgroundColor
+    menuParam.backgroundColor = Color(options.backgroundColor);
+    // Parse backgroundBlurStyle
+    menuParam.backgroundBlurStyle = options.backgroundBlurStyle;
+    ParseMenuCallback(options.onAppear, options.onDisappear, options.aboutToAppear, options.aboutToDisappear,
+        menuParam);
+    ParseMenuTransition(options.transition, menuParam);
+    GetMenuShowInSubwindow(menuParam);
+    if (menuParam.isShowInSubWindow) {
+        if (options.showInSubWindow.hasValue) {
+            menuParam.isShowInSubWindow = options.showInSubWindow.value;
+        }
+    }
+    ParseMenuArrowParam(options.enableArrow, options.arrowOffset, menuParam);
+    ParseMenuBorderRadius(options.borderRadius, menuParam);
+    ParseMenuLayoutRegionMarginParam(options.layoutRegionMargin, menuParam);
+    ParseContentPreviewAnimationOptionsParam(options.preview, options.previewAnimationOptions, menuParam,
+        previewBuildFunc);
+}
+
+void FfiOHOSAceFrameworkViewAbstractBindMenuElement(CArrNativeMenuElement elements, CJMenuOptions options)
+{
+    std::vector<NG::OptionParam> params(elements.size);
+    for (size_t i = 0; i < static_cast<size_t>(elements.size); ++i) {
+        auto element = elements.head[i];
+        params[i].value = element.value.value;
+        params[i].action = CJLambda::Create(element.action.value);
+        params[i].enabled = element.enabled.value;
+        if (element.icon.hasValue) {
+            params[i].icon = element.icon.value;
+        }
+    }
+    NG::MenuParam menuParam;
+    if (options.title.hasValue) {
+        menuParam.title = std::string(options.title.value);
+    }
+    std::function<void()> previewBuildFunc;
+    ParseMenuParam(options, menuParam, previewBuildFunc);
+    ViewAbstractModel::GetInstance()->BindMenu(std::move(params), nullptr, menuParam);
+}
+
+void FfiOHOSAceFrameworkViewAbstractBindContextMenuOption(
+    void (*builder)(), int32_t responseType, CJContextMenuOptions options)
+{
+    if (!Utils::CheckParamsValid(responseType, RESPONSE_TYPES.size())) {
+        LOGE("bindContextMenu error, invalid value for responseType");
+        return;
+    }
+    NG::MenuParam menuParam { .type = NG::MenuType::CONTEXT_MENU };
+    auto buildFunc = CJLambda::Create(builder);
+    std::function<void()> previewBuildFunc;
+    ParseContextMenuParam(options, menuParam, previewBuildFunc);
+    ResponseType responseTypeValue = static_cast<OHOS::Ace::ResponseType>(responseType);
+    if (responseTypeValue != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.isShowHoverImage = false;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    // arrow is disabled for contextMenu with preview
+    if (menuParam.previewMode != MenuPreviewMode::NONE) {
+        menuParam.enableArrow = false;
+    }
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseTypeValue, buildFunc, menuParam, previewBuildFunc);
+    ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
 }
 
 static void NewGetCjGradientColorStops(NG::Gradient& gradient, CArrCColors cjColors)
@@ -2104,7 +2377,28 @@ void FfiOHOSAceFrameworkViewAbstractSpringBack()
     ViewAbstractModel::GetInstance()->SheetSpringBack();
 }
 
-void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear, std::function<void()>& onDisappear,
+void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear,
+    std::function<void()>& onDisappear, std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear,
+    std::function<void()>& onWillDisappear)
+{
+    if (options.onAppear.hasValue) {
+        onAppear =  CJLambda::Create(options.onAppear.value);
+    }
+    if (options.onDisappear.hasValue) {
+        onDisappear = CJLambda::Create(options.onDisappear.value);
+    }
+    if (options.shouldDismiss.hasValue) {
+        shouldDismiss = CJLambda::Create(options.shouldDismiss.value);
+    }
+    if (options.onWillAppear.hasValue) {
+        onWillAppear = CJLambda::Create(options.onWillAppear.value);
+    }
+    if (options.onWillDisappear.hasValue) {
+        onWillDisappear =  CJLambda::Create(options.onWillDisappear.value);
+    }
+}
+
+void ParseSheetCallbackV2(CJSheetOptionsV2 options, std::function<void()>& onAppear, std::function<void()>& onDisappear,
     std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
     std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& sheetSpringBack,
     std::function<void(const float)>& onHeightDidChange, std::function<void(const float)>& onDetentsDidChange,
@@ -2185,7 +2479,7 @@ bool ParseSheetDetents(const CArrInt32 array, std::vector<NG::SheetHeight>& shee
     return true;
 }
 
-void ParseSheetBorderProps(CJSheetOptions option, NG::SheetStyle& sheetStyle)
+void ParseSheetBorderProps(CJSheetOptionsV2 option, NG::SheetStyle& sheetStyle)
 {
     if (option.borderWidth.hasValue) {
         auto nativeBorderWidth = option.borderWidth.value;
@@ -2308,9 +2602,49 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
         sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
         sheetStyle.sheetHeight.height = sheetDetent.height;
     }
+}
+
+void ParseSheetStyleV2(CJSheetOptionsV2 option, NG::SheetStyle& sheetStyle)
+{
+    std::vector<NG::SheetHeight> detents;
+    if (option.detents.hasValue && ParseSheetDetents(option.detents.value, detents)) {
+        sheetStyle.detents = detents;
+    }
+    if (option.blurStyle.hasValue) {
+        ParseBlurStyle(option.blurStyle.value, sheetStyle);
+    }
+    if (option.showClose.hasValue) {
+        sheetStyle.showCloseIcon = option.showClose.value;
+    }
+    if (option.dragBarl.hasValue) {
+        sheetStyle.showDragBar = option.dragBarl.value;
+    } else {
+        sheetStyle.showDragBar = true;
+    }
+    if (option.enableOutsideInteractive.hasValue) {
+        sheetStyle.interactive = option.enableOutsideInteractive.value;
+    }
+    if (option.enableOutsideInteractive.hasValue) {
+        sheetStyle.interactive = option.enableOutsideInteractive.value;
+    }
+    if (option.preferType.hasValue) {
+        ParsePreferType(option.preferType.value, sheetStyle);
+    }
+    if (option.backgroundColor.hasValue) {
+        sheetStyle.backgroundColor = Color(ColorAlphaAdapt(option.backgroundColor.value));
+    }
+    if (option.maskColor.hasValue) {
+        sheetStyle.maskColor = Color(ColorAlphaAdapt(option.maskColor.value));
+    }
+    NG::SheetHeight sheetDetent;
+    if (option.height.hasValue) {
+        ParseSheetDetentHeight(option.height.value, sheetDetent);
+        sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
+        sheetStyle.sheetHeight.height = sheetDetent.height;
+    }
     if (option.mode.hasValue) {
         auto sheetLevel = option.mode.value;
-        sheetStyle.showInPage = (sheetLevel == static_cast<int>(NG::SheetLevel::EMBEDDED));
+        sheetStyle.showInPage = (sheetLevel == static_cast<uint32_t>(NG::SheetLevel::EMBEDDED));
     }
     if (option.width.hasValue) {
         sheetStyle.width =
@@ -2321,10 +2655,11 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
     ParseSheetBorderProps(option, sheetStyle);
 }
 
-void ParseSheetTitle(CJSheetOptions option, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
+void ParseSheetTitle(
+    NativeOptionCallBack title, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
 {
     sheetStyle.isTitleBuilder = true;
-    titleBuilderFunction = option.title.hasValue ? CJLambda::Create(option.title.value) : ([]() -> void {});
+    titleBuilderFunction = title.hasValue ? CJLambda::Create(title.value) : ([]() -> void {});
 }
 
 void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option)
@@ -2347,11 +2682,44 @@ void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(
     std::function<void(const float)> onTypeDidChangeCallback;
     std::function<void()> titleBuilderFunction;
     std::function<void()> sheetSpringBackFunc;
-    ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc, onWillAppearCallback,
+    ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc,
+        onWillAppearCallback, onWillDisappearCallback);
+    ParseSheetStyle(option, sheetStyle);
+    ParseSheetTitle(option.title, sheetStyle, titleBuilderFunction);
+    ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
+        std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
+        std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
+        std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback),
+        std::move(onDetentsDidChangeCallback), std::move(onWidthDidChangeCallback),
+        std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
+    return;
+}
+
+void FfiOHOSAceFrameworkViewAbstractbindSheetParamV2(bool isShow, void (*builder)(), CJSheetOptionsV2 option)
+{
+    auto buildFunc = CJLambda::Create(builder);
+    NG::SheetStyle sheetStyle;
+    DoubleBindCallback callback = nullptr;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.showDragBar = true;
+    sheetStyle.showInPage = false;
+    std::function<void()> onAppearCallback;
+    std::function<void()> onDisappearCallback;
+    std::function<void()> onWillAppearCallback;
+    std::function<void()> onWillDisappearCallback;
+    std::function<void()> shouldDismissFunc;
+    std::function<void(const int32_t)> onWillDismissCallback;
+    std::function<void(const float)> onHeightDidChangeCallback;
+    std::function<void(const float)> onDetentsDidChangeCallback;
+    std::function<void(const float)> onWidthDidChangeCallback;
+    std::function<void(const float)> onTypeDidChangeCallback;
+    std::function<void()> titleBuilderFunction;
+    std::function<void()> sheetSpringBackFunc;
+    ParseSheetCallbackV2(option, onAppearCallback, onDisappearCallback, shouldDismissFunc, onWillAppearCallback,
         onWillDisappearCallback, onWillDismissCallback, sheetSpringBackFunc, onHeightDidChangeCallback,
         onDetentsDidChangeCallback, onWidthDidChangeCallback, onTypeDidChangeCallback);
-    ParseSheetStyle(option, sheetStyle);
-    ParseSheetTitle(option, sheetStyle, titleBuilderFunction);
+    ParseSheetStyleV2(option, sheetStyle);
+    ParseSheetTitle(option.title, sheetStyle, titleBuilderFunction);
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
         std::move(titleBuilderFunction), sheetStyle, std::move(onAppearCallback), std::move(onDisappearCallback),
         std::move(shouldDismissFunc), std::move(onWillDismissCallback), std::move(onWillAppearCallback),
@@ -2438,28 +2806,30 @@ uint32_t FFIOHOSAceFrameworkBlendColor(uint32_t color, uint32_t overlayColor)
     return Color(color).BlendColor(Color(overlayColor)).GetValue();
 }
 
-void ParseModalTransition(CJContentCoverOptions options, NG::ModalStyle& modalStyle)
+void ParseModalTransition(uint32_t transVal, NativeOptionUInt32 bgColor, NG::ModalStyle& modalStyle)
 {
     modalStyle.modalTransition = NG::ModalTransition::DEFAULT;
-    auto modalTransition = options.modalTransition;
+    auto modalTransition = transVal;
     auto transitionNumber = static_cast<int32_t>(modalTransition);
     modalStyle.modalTransition = static_cast<NG::ModalTransition>(transitionNumber);
-    if (options.backgroundColor.hasValue) {
-        auto backgroundColor = static_cast<uint32_t>(options.backgroundColor.value);
+    if (bgColor.hasValue) {
+        auto backgroundColor = static_cast<uint32_t>(bgColor.value);
         modalStyle.backgroundColor = Color(backgroundColor);
     }
 }
 
-void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJContentCoverOptions options)
+void FFIOHOSAceFrameworkBindContentCoverV2(bool isShow, void (*builder)(), CJContentCoverOptionsV2 options)
 {
     // parse builder
     auto buildFunc = CJLambda::Create(builder);
 
     // parse ModalTransition
     NG::ModalStyle modalStyle;
-    ParseModalTransition(options, modalStyle);
-    std::function<void()> onWillShowCallback;
-    std::function<void()> onWillDismissCallback;
+    ParseModalTransition(options.modalTransition, options.backgroundColor, modalStyle);
+    std::function<void()> onWillShowCallback =
+        options.onWillAppear.hasValue ? CJLambda::Create(options.onWillAppear.value) : ([]() -> void {});
+    std::function<void()> onWillDismissCallback =
+        options.onWillDisappear.hasValue ? CJLambda::Create(options.onWillDisappear.value) : ([]() -> void {});
     NG::ContentCoverParam contentCoverParam;
     std::function<void(const int32_t&)> onWillDismissFunc;
     // parse callback
@@ -2491,6 +2861,31 @@ void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJConte
         };
         contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
     }
+
+    ViewAbstractModel::GetInstance()->BindContentCover(isShow, nullptr, std::move(buildFunc), modalStyle,
+        std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
+        std::move(onWillDismissCallback), contentCoverParam);
+}
+
+void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJContentCoverOptions options)
+{
+    // parse builder
+    auto buildFunc = CJLambda::Create(builder);
+
+    // parse ModalTransition
+    NG::ModalStyle modalStyle;
+    ParseModalTransition(options.modalTransition, options.backgroundColor, modalStyle);
+    std::function<void()> onWillShowCallback =
+        options.onWillAppear.hasValue ? CJLambda::Create(options.onWillAppear.value) : ([]() -> void {});
+    std::function<void()> onWillDismissCallback =
+        options.onWillDisappear.hasValue ? CJLambda::Create(options.onWillDisappear.value) : ([]() -> void {});
+    NG::ContentCoverParam contentCoverParam;
+    std::function<void(const int32_t&)> onWillDismissFunc;
+    // parse callback
+    std::function<void()> onShowCallback =
+        options.onAppear.hasValue ? CJLambda::Create(options.onAppear.value) : ([]() -> void {});
+    std::function<void()> onDismissCallback =
+        options.onDisappear.hasValue ? CJLambda::Create(options.onDisappear.value) : ([]() -> void {});
 
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, nullptr, std::move(buildFunc), modalStyle,
         std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
@@ -2688,6 +3083,16 @@ void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value)
     ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
 }
 
+void FfiOHOSAceFrameworkViewAbstractHitTestBehavior(int32_t hitTestMode)
+{
+    ViewAbstractModel::GetInstance()->SetHitTestMode(static_cast<NG::HitTestMode>(hitTestMode));
+}
+
+void FfiOHOSAceFrameworkViewAbstractHoverEffect(int32_t hoverEffectValue)
+{
+    ViewAbstractModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(hoverEffectValue));
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(
     const char* source, CBorderImageOption option)
 {
@@ -2711,7 +3116,7 @@ void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithLinearGradient(
     NewCjLinearGradient(source, lineGradient);
     ViewAbstractModel::GetInstance()->SetBorderImageGradient(lineGradient);
     imageBorderBitsets |= BorderImage::GRADIENT_BIT;
-    
+
     ParceBorderImageParam(borderImage, imageBorderBitsets, option);
     ViewAbstractModel::GetInstance()->SetBorderImage(borderImage, imageBorderBitsets);
 }
@@ -2832,44 +3237,44 @@ void ParceBorderImageParam(RefPtr<BorderImage>& borderImage, uint8_t& bitset, CB
 {
     borderImage->SetEdgeOutset(
         BorderImageDirection::LEFT,
-        Dimension(option.outset.top, static_cast<DimensionUnit>(option.outset.topUnit)));
+        Dimension(option.outset.left, static_cast<DimensionUnit>(option.outset.leftUnit)));
     borderImage->SetEdgeOutset(
         BorderImageDirection::RIGHT,
         Dimension(option.outset.right, static_cast<DimensionUnit>(option.outset.rightUnit)));
     borderImage->SetEdgeOutset(
         BorderImageDirection::TOP,
-        Dimension(option.outset.bottom, static_cast<DimensionUnit>(option.outset.bottomUnit)));
+        Dimension(option.outset.top, static_cast<DimensionUnit>(option.outset.topUnit)));
     borderImage->SetEdgeOutset(
         BorderImageDirection::BOTTOM,
-        Dimension(option.outset.left, static_cast<DimensionUnit>(option.outset.leftUnit)));
+        Dimension(option.outset.bottom, static_cast<DimensionUnit>(option.outset.bottomUnit)));
     bitset |= BorderImage::OUTSET_BIT;
 
     borderImage->SetEdgeWidth(
         BorderImageDirection::LEFT,
-        Dimension(option.width.top, static_cast<DimensionUnit>(option.width.topUnit)));
+        Dimension(option.width.left, static_cast<DimensionUnit>(option.width.leftUnit)));
     borderImage->SetEdgeWidth(
         BorderImageDirection::RIGHT,
         Dimension(option.width.right, static_cast<DimensionUnit>(option.width.rightUnit)));
     borderImage->SetEdgeWidth(
         BorderImageDirection::TOP,
-        Dimension(option.width.bottom, static_cast<DimensionUnit>(option.width.bottomUnit)));
+        Dimension(option.width.top, static_cast<DimensionUnit>(option.width.topUnit)));
     borderImage->SetEdgeWidth(
         BorderImageDirection::BOTTOM,
-        Dimension(option.width.left, static_cast<DimensionUnit>(option.width.leftUnit)));
+        Dimension(option.width.bottom, static_cast<DimensionUnit>(option.width.bottomUnit)));
     bitset |= BorderImage::WIDTH_BIT;
 
     borderImage->SetEdgeSlice(
         BorderImageDirection::LEFT,
-        Dimension(option.slice.top, static_cast<DimensionUnit>(option.slice.topUnit)));
+        Dimension(option.slice.left, static_cast<DimensionUnit>(option.slice.leftUnit)));
     borderImage->SetEdgeSlice(
         BorderImageDirection::RIGHT,
         Dimension(option.slice.right, static_cast<DimensionUnit>(option.slice.rightUnit)));
     borderImage->SetEdgeSlice(
         BorderImageDirection::TOP,
-        Dimension(option.slice.bottom, static_cast<DimensionUnit>(option.slice.bottomUnit)));
+        Dimension(option.slice.top, static_cast<DimensionUnit>(option.slice.topUnit)));
     borderImage->SetEdgeSlice(
         BorderImageDirection::BOTTOM,
-        Dimension(option.slice.left, static_cast<DimensionUnit>(option.slice.leftUnit)));
+        Dimension(option.slice.bottom, static_cast<DimensionUnit>(option.slice.bottomUnit)));
     bitset |= BorderImage::SLICE_BIT;
 
     borderImage->SetRepeatMode(static_cast<BorderImageRepeat>(option.repeat));

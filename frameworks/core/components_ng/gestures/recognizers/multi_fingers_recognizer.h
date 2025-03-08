@@ -50,6 +50,11 @@ public:
         isLimitFingerCount_ = limitFingerCount;
     }
 
+    bool GetLimitFingerCount() const
+    {
+        return isLimitFingerCount_;
+    }
+
     bool CheckLimitFinger()
     {
         if (isLimitFingerCount_) {

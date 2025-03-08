@@ -199,6 +199,11 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
     return this;
   }
+
+  enableToolBarAdaptation(value: boolean | undefined): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavigationEnableToolBarAdaptationModifier.identity, NavigationEnableToolBarAdaptationModifier, value);
+    return this;
+  }
 }
 
 class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
@@ -506,6 +511,21 @@ class NavigationEnableDragBarModifier extends ModifierWithKey<boolean | undefine
       getUINativeModule().navigation.resetEnableDragBar(node);
     } else {
       getUINativeModule().navigation.setEnableDragBar(node, this.value);
+    }
+  }
+}
+
+class NavigationEnableToolBarAdaptationModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableToolBarAdaptation');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableToolBarAdaptation(node);
+    } else {
+      getUINativeModule().navigation.setEnableToolBarAdaptation(node, this.value);
     }
   }
 }

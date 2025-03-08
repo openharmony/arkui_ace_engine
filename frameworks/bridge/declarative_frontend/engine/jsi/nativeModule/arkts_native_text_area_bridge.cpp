@@ -45,6 +45,7 @@ constexpr int NUM_28 = 28;
 constexpr int SIZE_OF_FOUR = 4;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
+constexpr int PARAM_ARR_LENGTH_3 = 3;
 constexpr uint32_t KEY_BOARD_FOCUS_DEFAULT = 1;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr int32_t DEFAULT_MODE = -1;
@@ -1015,8 +1016,8 @@ ArkUINativeModuleValue TextAreaBridge::SetKeyboardAppearance(ArkUIRuntimeCallInf
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsNumber()) {
         uint32_t keyboardAppearance = secondArg->Uint32Value(vm);
-        if (keyboardAppearance >= static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) &&
-            keyboardAppearance <= static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        if (keyboardAppearance >= static_cast<uint32_t>(KeyboardAppearance::NONE_IMMERSIVE) &&
+            keyboardAppearance <= static_cast<uint32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
             GetArkUINodeModifiers()->getTextAreaModifier()->
                 setTextAreaKeyboardAppearance(nativeNode, keyboardAppearance); // when input is valid
             return panda::JSValueRef::Undefined(vm);
@@ -1300,18 +1301,17 @@ ArkUINativeModuleValue TextAreaBridge::SetOnChange(ArkUIRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::u16string&, PreviewText&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::u16string& changeValue, PreviewText& previewText) {
+    std::function<void(const ChangeValueInfo&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const ChangeValueInfo& changeValueInfo) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const char* keys[] = { "offset", "value" };
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, previewText.offset),
-            panda::StringRef::NewFromUtf16(vm, previewText.value.c_str()) };
-        auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
-            panda::StringRef::NewFromUtf16(vm, changeValue.c_str()), eventObject };
-        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+        auto eventObject = CommonBridge::CreateChangeValueInfoObj(vm, changeValueInfo);
+        auto contentObj = eventObject->Get(vm, "content");
+        auto previewTextObj = eventObject->Get(vm, "previewText");
+        auto optionsObj = eventObject->Get(vm, "options");
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_3] = { contentObj, previewTextObj, optionsObj };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_3);
     };
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaOnChange(
         nativeNode, reinterpret_cast<void*>(&callback));
@@ -1670,10 +1670,10 @@ ArkUINativeModuleValue TextAreaBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeC
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
 
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
 
     CalcDimension topDimen(0, DimensionUnit::VP);
     CalcDimension rightDimen(0, DimensionUnit::VP);
@@ -1842,7 +1842,7 @@ ArkUINativeModuleValue TextAreaBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCa
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorder(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         SetBorderDash(runtimeCallInfo, vm, nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1903,10 +1903,17 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runt
         SetBorderWidthArrayByDimen(bottom, values, units, NUM_2);
         SetBorderWidthArrayByDimen(isRightToLeft ? right : left, values, units, NUM_3);
     } else {
-        ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
-        ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
-        ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);
-        ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_3);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
+            ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
+            ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);
+            ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_3);
+        } else {
+            ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_0);
+            ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
+            ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_2);
+            ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_3);
+        }
     }
 
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderWidth(nativeNode, values, units, size);

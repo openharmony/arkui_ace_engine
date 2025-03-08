@@ -239,6 +239,12 @@ public:
 
     virtual void OnHandleAreaChanged() {}
     virtual void SetIsTextDraggable(bool isTextDraggable = true) {}
+
+    virtual bool IsStopBackPress() const
+    {
+        return true;
+    }
+
     static void SetSelectionNode(const SelectedByMouseInfo& info);
     static int32_t GetGraphemeClusterLength(const std::u16string& text, int32_t extend, bool checkPrev = false);
     static void CalculateSelectedRect(

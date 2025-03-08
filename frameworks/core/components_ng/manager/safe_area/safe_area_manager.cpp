@@ -20,16 +20,13 @@
 namespace OHOS::Ace::NG {
 SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, {});
-    CHECK_NULL_RETURN(pipeline->GetUseCutout(), {});
     // cutout regions adjacent to edges.
     auto cutoutArea = safeArea;
 
     if (cutoutArea.top_.IsValid()) {
         cutoutArea.top_.start = 0;
     }
-    if (safeArea.bottom_.IsValid()) {
+    if (cutoutArea.bottom_.IsValid()) {
         cutoutArea.bottom_.end = rootSize.Height().has_value() ? rootSize.Height().value()
                                                                : PipelineContext::GetCurrentRootHeight();
     }
@@ -75,17 +72,17 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
-bool SafeAreaManager::CheckNavArea(const SafeAreaInsets& safeArea)
+bool SafeAreaManager::CheckNavSafeArea(const SafeAreaInsets& safeArea)
 {
     return navSafeArea_ != safeArea;
 }
 
-bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
+bool SafeAreaManager::UpdateNavSafeArea(const SafeAreaInsets& safeArea)
 {
     if (navSafeArea_ == safeArea) {
         return false;
     }
-    ACE_SCOPED_TRACE("SafeAreaManager::UpdateNavArea %s", safeArea.ToString().c_str());
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateNavSafeArea %s", safeArea.ToString().c_str());
     navSafeArea_ = safeArea;
     return true;
 }
@@ -115,7 +112,7 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     if (!IsSafeAreaValid()) {
         return {};
     }
-    if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
+    if ((opts.type & SAFE_AREA_TYPE_CUTOUT) && useCutout_) {
         res = res.Combine(cutoutSafeArea_);
     }
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
@@ -238,13 +235,27 @@ bool SafeAreaManager::IsAtomicService() const
 
 SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 {
+    if (windowTypeConfig_.isSceneBoardWindow && scbSystemSafeArea_.has_value()) {
+        return scbSystemSafeArea_.value();
+    }
     return systemSafeArea_;
 }
 
 SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
 {
-    if (!IsSafeAreaValid()) {
-        return {};
+    if (IsSafeAreaValid() && useCutout_) {
+        if (windowTypeConfig_.isSceneBoardWindow && scbCutoutSafeArea_.has_value()) {
+            return scbCutoutSafeArea_.value();
+        }
+        return cutoutSafeArea_;
+    }
+    return {};
+}
+
+SafeAreaInsets SafeAreaManager::GetCutoutSafeAreaWithoutProcess() const
+{
+    if (windowTypeConfig_.isSceneBoardWindow && scbCutoutSafeArea_.has_value()) {
+        return scbCutoutSafeArea_.value();
     }
     return cutoutSafeArea_;
 }
@@ -254,7 +265,8 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
     if (!IsSafeAreaValid()) {
         return {};
     }
-    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
 }
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
@@ -267,22 +279,15 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
 
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
-    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
-}
-
-// Effective only in API 16 and later versions
-SafeAreaInsets SafeAreaManager::GetScbSafeArea() const
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, {});
+    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
     if (!windowTypeConfig_.isSceneBoardWindow) {
-        return GetSafeAreaWithoutProcess();
+        return systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
     }
     SafeAreaInsets scbSafeArea;
     if (scbSystemSafeArea_.has_value()) {
         scbSafeArea = scbSafeArea.Combine(scbSystemSafeArea_.value());
     }
-    if (scbCutoutSafeArea_.has_value() && pipeline->GetUseCutout()) {
+    if (scbCutoutSafeArea_.has_value() && useCutout_) {
         scbSafeArea = scbSafeArea.Combine(scbCutoutSafeArea_.value());
     }
     if (scbNavSafeArea_.has_value()) {
@@ -304,7 +309,8 @@ PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)
         }
 #endif
     }
-    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+    auto cutoutSafeArea = useCutout_ ? cutoutSafeArea_ : SafeAreaInsets();
+    auto combinedSafeArea = systemSafeArea_.Combine(cutoutSafeArea).Combine(navSafeArea_);
     PaddingPropertyF result;
     if (combinedSafeArea.left_.IsValid()) {
         result.left = combinedSafeArea.left_.Length();
@@ -384,6 +390,17 @@ std::vector<WeakPtr<FrameNode>> SafeAreaManager::GetExpandNodeSet()
     std::vector<WeakPtr<FrameNode>> result;
     std::copy(needExpandNodes_.begin(), needExpandNodes_.end(), std::back_inserter(result));
     return result;
+}
+
+void SafeAreaManager::SetKeyboardInfo(float height)
+{
+    SetRawKeyboardHeight(height);
+    keyboardOrientation_ = -1;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    keyboardOrientation_ = static_cast<int32_t>(displayInfo->GetRotation());
 }
 
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)

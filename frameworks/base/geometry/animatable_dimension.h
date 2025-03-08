@@ -16,43 +16,44 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_ANIMATABLE_DIMENSION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_ANIMATABLE_DIMENSION_H
 
-#include "base/geometry/dimension.h"
 #include "base/geometry/calc_dimension.h"
-#include "core/animation/animator.h"
-#include "core/animation/curve_animation.h"
+#include "base/geometry/dimension.h"
+#include "base/memory/referenced.h"
+#include "core/animation/evaluator.h"
 #include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
 
 using RenderNodeAnimationCallback = std::function<void()>;
 
+class Animator;
+
+enum class AnimatorStatus {
+    IDLE,    // when animation not start or been cancel.
+    RUNNING, // play in reverse / forward direction.
+    PAUSED,  // paused by call Pause API.
+    STOPPED, // stopped by call Finish/Stop API or has played to the end.
+};
+
 /*
  * AnimatableDimension is a Dimension with AnimationOption and Animator.
  */
 class ACE_FORCE_EXPORT AnimatableDimension : public CalcDimension {
 public:
-    AnimatableDimension() = default;
-    ~AnimatableDimension() = default;
+    AnimatableDimension();
+    ~AnimatableDimension();
 
     explicit AnimatableDimension(
-        double value, DimensionUnit unit = DimensionUnit::PX, const AnimationOption& option = AnimationOption())
-        : CalcDimension(value, unit), animationOption_(option)
-    {}
+        double value, DimensionUnit unit = DimensionUnit::PX, const AnimationOption& option = AnimationOption());
 
-    explicit AnimatableDimension(
-        const std::string& value, DimensionUnit unit = DimensionUnit::CALC,
-        const AnimationOption& option = AnimationOption())
-        : CalcDimension(value, unit), animationOption_(option)
-    {}
+    explicit AnimatableDimension(const std::string& value, DimensionUnit unit = DimensionUnit::CALC,
+        const AnimationOption& option = AnimationOption());
 
-    explicit AnimatableDimension(const Dimension& dimension, const AnimationOption& option = AnimationOption())
-        : CalcDimension(dimension), animationOption_(option)
-    {}
+    explicit AnimatableDimension(const Dimension& dimension, const AnimationOption& option = AnimationOption());
 
-    explicit AnimatableDimension(const CalcDimension& dimension, const AnimationOption& option = AnimationOption())
-        : CalcDimension(dimension), animationOption_(option)
-    {}
+    explicit AnimatableDimension(const CalcDimension& dimension, const AnimationOption& option = AnimationOption());
 
+    AnimatableDimension(const AnimatableDimension& other);
     void SetContextAndCallback(const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
     {
         context_ = context;
@@ -82,13 +83,7 @@ public:
         stopCallback_ = callback;
     }
 
-    Animator::Status GetAnimationStatus() const
-    {
-        if (!animationController_) {
-            return Animator::Status::IDLE;
-        }
-        return animationController_->GetStatus();
-    }
+    AnimatorStatus GetAnimationStatus() const;
 
     void SetEvaluator(const RefPtr<Evaluator<double>>& evaluator)
     {

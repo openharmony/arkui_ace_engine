@@ -704,6 +704,15 @@ class ArkScrollableBarModeOptions {
   }
 }
 
+class ArkTabsCachedMaxCount {
+  count: number;
+  mode: TabsCacheMode;
+
+  isEqual(another: ArkTabsCachedMaxCount): boolean {
+    return (this.count === another.count && this.mode === another.mode);
+  }
+}
+
 class ArkAlignRules {
   left: string | undefined;
   middle: string | undefined;
@@ -1077,7 +1086,7 @@ class ArkDotIndicator extends DotIndicator {
   leftValue: Length | undefined;
   topValue: Length | undefined;
   rightValue: Length | undefined;
-  bottomValue: Length | undefined;
+  bottomValue: Length | LengthMetrics | undefined;
   itemWidthValue: Length | undefined;
   itemHeightValue: Length | undefined;
   selectedItemWidthValue: Length | undefined;
@@ -1086,6 +1095,9 @@ class ArkDotIndicator extends DotIndicator {
   colorValue: ResourceColor | undefined;
   selectedColorValue: ResourceColor | undefined;
   maxDisplayCountValue: ResourceColor | undefined;
+  spaceValue: LengthMetrics | undefined;
+  ignoreSizeValue: boolean | undefined;
+  setIgnoreSizeValue : boolean;
 
   constructor() {
     super();
@@ -1102,6 +1114,9 @@ class ArkDotIndicator extends DotIndicator {
     this.colorValue = undefined;
     this.selectedColorValue = undefined;
     this.maxDisplayCountValue = undefined;
+    this.spaceValue = undefined;
+    this.ignoreSizeValue = undefined;
+    this.setIgnoreSizeValue = undefined;
   }
 
   isEqual(another: ArkDotIndicator): boolean {
@@ -1118,7 +1133,10 @@ class ArkDotIndicator extends DotIndicator {
       this.maskValue === another.maskValue &&
       this.colorValue === another.colorValue &&
       this.selectedColorValue === another.selectedColorValue &&
-      this.maxDisplayCountValue === another.maxDisplayCountValue
+      this.maxDisplayCountValue === another.maxDisplayCountValue &&
+      this.spaceValue === another.spaceValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue &&
+      this.setIgnoreSizeValue === another.setIgnoreSizeValue
     );
   }
 }
@@ -1128,11 +1146,13 @@ class ArkDigitIndicator extends DigitIndicator {
   leftValue: Length | undefined;
   topValue: Length | undefined;
   rightValue: Length | undefined;
-  bottomValue: Length | undefined;
+  bottomValue: Length | LengthMetrics | undefined;
   fontColorValue: ResourceColor | undefined;
   selectedFontColorValue: ResourceColor | undefined;
   digitFontValue: ArkDigitFont | undefined;
   selectedDigitFontValue: ArkDigitFont | undefined;
+  ignoreSizeValue: boolean | undefined;
+  setIgnoreSizeValue : boolean;
 
   constructor() {
     super();
@@ -1145,6 +1165,8 @@ class ArkDigitIndicator extends DigitIndicator {
     this.selectedFontColorValue = undefined;
     this.digitFontValue = undefined;
     this.selectedDigitFontValue = undefined;
+    this.ignoreSizeValue = undefined;
+    this.setIgnoreSizeValue = undefined;
   }
 
   isEqual(another: ArkDigitIndicator): boolean {
@@ -1155,7 +1177,9 @@ class ArkDigitIndicator extends DigitIndicator {
       this.rightValue === another.rightValue &&
       this.bottomValue === another.bottomValue &&
       this.digitFontValue === another.digitFontValue &&
-      this.selectedDigitFontValue === another.selectedDigitFontValue
+      this.selectedDigitFontValue === another.selectedDigitFontValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue &&
+      this.setIgnoreSizeValue === another.setIgnoreSizeValue
     );
   }
 }
@@ -1331,6 +1355,20 @@ class ArkSymbolEffect {
   }
 }
 
+class ArkBindMenu{
+  content: Array<MenuElement> | CustomBuilder | undefined;
+  options: MenuOptions | undefined;
+
+  constructor() {
+    this.content = undefined;
+    this.options = undefined;
+  }
+
+  isEqual(another: ArkBindMenu): boolean {
+    return (this.content === another.content && this.options === another.options);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;
@@ -1426,41 +1464,58 @@ class TextDataDetectorConfig {
 
 class ArkDragPreviewOptions {
   mode: DragPreviewMode | Array<DragPreviewMode> | undefined;
+  sizeChangeEffect: DraggingSizeChangeEffect | undefined;
   numberBadge: boolean | number | undefined;
   isMultiSelectionEnabled: boolean | undefined;
   defaultAnimationBeforeLifting: boolean | undefined;
   enableEdgeAutoScroll: boolean | undefined;
   enableHapticFeedback: boolean | undefined;
+  isLiftingDisabled: boolean | undefined;
 
   constructor() {
     this.mode = undefined;
     this.numberBadge = undefined;
+    this.sizeChangeEffect = undefined;
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
     this.enableHapticFeedback = undefined;
+    this.isLiftingDisabled = undefined;
   }
 
   isEqual(another: ArkDragPreviewOptions): boolean {
     return (
       this.mode === another.mode &&
       this.numberBadge === another.numberBadge &&
+      this.sizeChangeEffect === another.sizeChangeEffect &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting && 
       this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&
-      this.enableHapticFeedback === another.enableHapticFeedback
+      this.enableHapticFeedback === another.enableHapticFeedback &&
+      this.isLiftingDisabled === another.isLiftingDisabled
     );
   }
 }
 
 class ArkDragPreview {
   inspetorId: string;
+  onlyForLifting: boolean | undefined;
+  pixelMap: PixelMap | undefined;
+  extraInfo: string;
   constructor() {
     this.inspetorId = undefined;
+    this.onlyForLifting = undefined;
+    this.pixelMap = undefined;
+    this.extraInfo = undefined;
   }
 
   isEqual(another: ArkDragPreview): boolean {
-    return this.inspetorId === another.inspetorId;
+    return (
+      this.inspetorId === another.inspetorId &&
+      this.onlyForLifting === another.onlyForLifting && 
+      this.pixelMap === another.pixelMap &&
+      this.extraInfo === another.extraInfo
+    );
   }
 }
 

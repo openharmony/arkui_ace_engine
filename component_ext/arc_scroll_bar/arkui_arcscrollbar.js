@@ -14,6 +14,8 @@
  */
 
 const __ArcScrollBar__ = requireInternal("arkui.ArcScrollBar");
+const ModifierMap = requireNapi('arkui.modifier').ModifierMap;
+const ModifierUtils = requireNapi('arkui.modifier').ModifierUtils;
 
 class ArcScrollBarComponent extends ArkScrollBarComponent {
     constructor(nativePtr, classType) {
@@ -37,7 +39,7 @@ class ArcScrollBar extends ScrollBar {
         attributeModifierFunc.call(this, modifier, (nativePtr) => {
             return new ArcScrollBarComponent(nativePtr);
         }, (nativePtr, classType, modifierJS) => {
-            return new modifierJS.ArcScrollBarModifier(nativePtr, classType);
+            return new ArcScrollBarModifier(nativePtr, classType);
         });
     }
 

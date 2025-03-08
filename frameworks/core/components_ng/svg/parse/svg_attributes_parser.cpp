@@ -23,13 +23,40 @@ const char LINEJOIN_BEVEL[] = "bevel";
 const char LINEJOIN_ROUND[] = "round";
 const std::regex COLOR_WITH_ALPHA(
     R"(rgba?\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\,(\d+\.?\d*)\))", std::regex::icase);
-const std::regex COLOR_WITH_RGBA_MAGIC("#[0-9A-Fa-f]{8}");
+const std::regex COLOR_WITH_RGBA_MAGIC("#[0-9A-Fa-f]{7,8}");
+const std::regex COLOR_FORMAT_FOUR_HEX("#[0-9A-Fa-f]{4}");
 constexpr int32_t RADIX_HEX = 16;
-constexpr int32_t BASIC_COLOR_SPAN = 6;
+constexpr int32_t THREE_BYTE_BITS = 24;
 constexpr int32_t TWO_BYTE_BITS = 16;
+constexpr int32_t TWELVE_BITS = 12;
 constexpr int32_t ONE_BYTE_BITS = 8;
+constexpr int32_t FOUR_BITS = 4;
 constexpr uint32_t RGBA_SUB_MATCH_SIZE = 5;
+constexpr int32_t HEX_COLOR_LEN_SEVEN = 7;
 constexpr double MAX_ALPHA = 1.0;
+constexpr Dimension TRANSFORM_ORIGIN_DEFAULT = 0.5_pct;
+constexpr size_t TRANSFORM_ORIGIN_PARA_AMOUNT1 = 1;
+constexpr size_t TRANSFORM_ORIGIN_PARA_AMOUNT2 = 2;
+constexpr size_t TRANSFORM_ORIGIN_PARA_AMOUNT3 = 3;
+const char TRANSFORM_MATRIX[] = "matrix";
+const char TRANSFORM_ROTATE[] = "rotate";
+const char TRANSFORM_SCALE[] = "scale";
+const char TRANSFORM_SKEWX[] = "skewX";
+const char TRANSFORM_SKEWY[] = "skewY";
+const char TRANSFORM_TRANSLATE[] = "translate";
+const char SVG_ALIGN_XMIN_YMIN[] = "xMinYMin";
+const char SVG_ALIGN_XMIN_YMID[] = "xMinYMid";
+const char SVG_ALIGN_XMIN_YMAX[] = "xMinYMax";
+const char SVG_ALIGN_XMID_YMIN[] = "xMidYMin";
+const char SVG_ALIGN_XMID_YMID[] = "xMidYMid";
+const char SVG_ALIGN_XMID_YMAX[] = "xMidYMax";
+const char SVG_ALIGN_XMAX_YMIN[] = "xMaxYMin";
+const char SVG_ALIGN_XMAX_YMID[] = "xMaxYMid";
+const char SVG_ALIGN_XMAX_YMAX[] = "xMaxYMax";
+const char SVG_ALIGN_NONE[] = "none";
+const char SVG_ALIGN_MEET[] = "meet";
+const char SVG_ALIGN_SLICE[] = "slice";
+constexpr float PERCENT_RANGE_MAX = 100.0;
 }
 
 LineCapStyle SvgAttributesParser::GetLineCapStyle(const std::string& val)
@@ -216,17 +243,24 @@ std::optional<Color> SvgAttributesParser::GetSpecialColor(const std::string& val
 bool SvgAttributesParser::ParseRGBAMagicColor(const std::string& value, Color& color)
 {
     std::smatch matches;
+    // #RGBA--->RRGGBBAA
+    if (std::regex_match(value, matches, COLOR_FORMAT_FOUR_HEX)) {
+        auto colorStr = value.substr(1);
+        color = GetColorFrom4HexString(colorStr);
+        return true;
+    }
+
     if (!std::regex_match(value, matches, COLOR_WITH_RGBA_MAGIC)) {
         return false;
     }
-    std::string baseColorStr = value.substr(1, BASIC_COLOR_SPAN);
-    auto baseColorValue = std::strtoul(baseColorStr.c_str(), nullptr, RADIX_HEX);
-    std::string baseAlphaStr = value.substr(BASIC_COLOR_SPAN + 1);
-    auto alpha = std::strtoul(baseAlphaStr.c_str(), nullptr, RADIX_HEX);
-    auto red = (baseColorValue >> TWO_BYTE_BITS) & 0xff;
-    auto green = (baseColorValue >> ONE_BYTE_BITS) & 0xff;
-    auto blue = baseColorValue & 0xff;
-    color = Color::FromARGB(alpha, red, green, blue);
+    std::string colorStr = value.substr(1);
+    // #00ffaad--->default black
+    if (colorStr.length() == HEX_COLOR_LEN_SEVEN) {
+        color = Color::BLACK;
+        return true;
+    }
+    // #00ffaadd
+    color = GetColorFromHexString(colorStr);
     return true;
 }
 
@@ -238,7 +272,7 @@ bool SvgAttributesParser::ParseColor(std::string value, Color& color)
         return true;
     }
     value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)
         && ParseRGBAMagicColor(value, color)) {
         return true;
     }
@@ -263,6 +297,42 @@ Dimension SvgAttributesParser::ParseDimension(const std::string& value, bool use
     return StringUtils::StringToDimension(value, useVp);
 }
 
+void SvgAttributesParser::StringToDimensionWithUnitSvg(const std::string& value, Dimension& dimension)
+{
+    errno = 0;
+    if (std::strcmp(value.c_str(), "auto") == 0) {
+        return;
+    }
+    char* pEnd = nullptr;
+    double result = std::strtod(value.c_str(), &pEnd);
+    if ((pEnd == nullptr) || (pEnd == value.c_str()) || (errno == ERANGE)) {
+        return;
+    }
+    if (std::strcmp(pEnd, "%") == 0) {
+        // Parse percent, transfer from [0, 100] to [0, 1]
+        dimension = Dimension(result / PERCENT_RANGE_MAX, DimensionUnit::PERCENT);
+    } else if (std::strcmp(pEnd, "px") == 0) {
+        dimension = Dimension(result, DimensionUnit::PX);
+    } else if (std::strcmp(pEnd, "vp") == 0) {
+        dimension = Dimension(result, DimensionUnit::VP);
+    } else if (std::strcmp(pEnd, "fp") == 0) {
+        dimension = Dimension(result, DimensionUnit::FP);
+    } else if (std::strcmp(pEnd, "lpx") == 0) {
+        dimension = Dimension(result, DimensionUnit::LPX);
+    } else if (std::strcmp(pEnd, "\0") == 0) {
+        dimension = Dimension(result, DimensionUnit::PX);
+    }
+}
+
+void SvgAttributesParser::ParseDimension(const std::string& value, Dimension& dimension, bool useVp)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        dimension = StringUtils::StringToDimension(value, useVp);
+        return;
+    }
+    StringToDimensionWithUnitSvg(value, dimension);
+}
+
 double SvgAttributesParser::ParseDouble(const std::string& value)
 {
     return StringUtils::StringToDouble(value);
@@ -283,5 +353,249 @@ bool SvgAttributesParser::CheckColorAlpha(const std::string& colorStr, Color& re
         }
     }
     return false;
+}
+
+std::pair<Dimension, Dimension> SvgAttributesParser::GetTransformOrigin(const std::string& transformOrigin)
+{
+    if (transformOrigin.empty()) {
+        return std::pair<Dimension, Dimension>(0, 0);
+    }
+    std::vector<std::string> valueVector;
+    Dimension pivotX = Dimension(0.0);
+    Dimension pivotY = Dimension(0.0);
+    Dimension tempPivotX = Dimension(0.0);
+    Dimension tempPivotY = Dimension(0.0);
+    StringUtils::StringSplitter(transformOrigin, ' ', valueVector);
+    if (valueVector.size() == TRANSFORM_ORIGIN_PARA_AMOUNT1) {
+        if (StringUtils::StringToDimensionWithUnitNG(valueVector[0], tempPivotX)) {
+            pivotX = tempPivotX;
+            pivotY = TRANSFORM_ORIGIN_DEFAULT;
+            TAG_LOGI(AceLogTag::ACE_IMAGE, "GetTransformOrigin value:%{public}s|%{public}s",
+                pivotX.ToString().c_str(), pivotY.ToString().c_str());
+        }
+    } else if ((valueVector.size() == TRANSFORM_ORIGIN_PARA_AMOUNT2) ||
+               (valueVector.size() == TRANSFORM_ORIGIN_PARA_AMOUNT3)) {
+        if (StringUtils::StringToDimensionWithUnitNG(valueVector[0], tempPivotX) &&
+            StringUtils::StringToDimensionWithUnitNG(valueVector[1], tempPivotY)) {
+            pivotX = tempPivotX;
+            pivotY = tempPivotY;
+            TAG_LOGI(AceLogTag::ACE_IMAGE, "GetTransformOrigin value:%{public}s|%{public}s",
+                pivotX.ToString().c_str(), pivotY.ToString().c_str());
+        }
+    }
+    return std::pair<Dimension, Dimension>(pivotX, pivotY);
+}
+
+bool IsBalanced(const std::string& str)
+{
+    std::stack<char> bracketStack;
+    for (char ch : str) {
+        if (ch == '(') {
+            bracketStack.push(ch);
+        } else if (ch == ')') {
+            if (bracketStack.empty()) {
+                return false;
+            } else if (bracketStack.top() != '(') {
+                return false;
+            } else {
+                bracketStack.pop();
+            }
+        }
+    }
+    return bracketStack.empty();
+}
+
+bool IsLegalParam(const std::vector<std::string>& paramVec)
+{
+    double result = 0.0;
+    for (auto param : paramVec) {
+        if (param.empty() || (param.back() == '%')) {
+            return false;
+        }
+        if (!StringUtils::StringToDouble(param, result)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool IsValidFuncType(const std::string& funcType)
+{
+    if ((funcType == TRANSFORM_MATRIX) || (funcType == TRANSFORM_ROTATE) || (funcType == TRANSFORM_SCALE) ||
+        (funcType == TRANSFORM_SKEWX) || (funcType == TRANSFORM_SKEWY) || (funcType == TRANSFORM_TRANSLATE)) {
+        return true;
+    }
+    return false;
+}
+
+std::vector<NG::TransformInfo> SvgAttributesParser::GetTransformInfo(const std::string& transform)
+{
+    std::vector<NG::TransformInfo> transformVec;
+    if (transform.empty() || !IsBalanced(transform)) {
+        return std::vector<NG::TransformInfo>();
+    }
+    std::string transformStr = StringUtils::TrimStr(transform);
+    if (transformStr.empty()) {
+        return std::vector<NG::TransformInfo>();
+    }
+    std::vector<std::string> attrs;
+    StringUtils::SplitStr(transformStr, ")", attrs);
+    for (auto& attr : attrs) {
+        attr = StringUtils::TrimStr(attr);
+        if (attr.empty()) {
+            continue;
+        }
+
+        std::string funcType = attr.substr(0, attr.find_first_of("("));
+        if (funcType.empty()) {
+            return std::vector<NG::TransformInfo>();
+        }
+        funcType = StringUtils::TrimStr(funcType);
+        if (!IsValidFuncType(funcType)) {
+            return std::vector<NG::TransformInfo>();
+        }
+
+        std::string parameters = attr.substr(attr.find_first_of("(") + 1);
+        if (parameters.empty()) {
+            return std::vector<NG::TransformInfo>();
+        }
+        parameters = StringUtils::TrimStr(parameters);
+
+        std::vector<std::string> paramVec;
+        std::string tag = (parameters.find(",") != std::string::npos) ? "," : " ";
+        StringUtils::SplitStr(parameters, tag, paramVec);
+        if (paramVec.empty() || !IsLegalParam(paramVec)) {
+            return std::vector<NG::TransformInfo>();
+        }
+        NG::TransformInfo transformInfo {funcType, paramVec};
+        transformVec.push_back(transformInfo);
+    }
+    return transformVec;
+}
+
+SvgAlign SvgAttributesParser::ParseSvgAlign(const std::string& value)
+{
+    static const LinearMapNode<SvgAlign> SVG_ALIGN_ARRAY[] = {
+        { SVG_ALIGN_NONE, SvgAlign::ALIGN_NONE },
+        { SVG_ALIGN_XMAX_YMAX, SvgAlign::ALIGN_XMAX_YMAX },
+        { SVG_ALIGN_XMAX_YMID, SvgAlign::ALIGN_XMAX_YMID },
+        { SVG_ALIGN_XMAX_YMIN, SvgAlign::ALIGN_XMAX_YMIN },
+        { SVG_ALIGN_XMID_YMAX, SvgAlign::ALIGN_XMID_YMAX },
+        { SVG_ALIGN_XMID_YMID, SvgAlign::ALIGN_XMID_YMID },
+        { SVG_ALIGN_XMID_YMIN, SvgAlign::ALIGN_XMID_YMIN },
+        { SVG_ALIGN_XMIN_YMAX, SvgAlign::ALIGN_XMIN_YMAX },
+        { SVG_ALIGN_XMIN_YMID, SvgAlign::ALIGN_XMIN_YMID },
+        { SVG_ALIGN_XMIN_YMIN, SvgAlign::ALIGN_XMIN_YMIN },
+    };
+    auto attrIter = BinarySearchFindIndex(SVG_ALIGN_ARRAY, ArraySize(SVG_ALIGN_ARRAY), value.c_str());
+    if (attrIter != -1) {
+        return SVG_ALIGN_ARRAY[attrIter].value;
+    }
+    return SvgAlign::ALIGN_XMID_YMID;
+}
+
+SvgMeetOrSlice SvgAttributesParser::ParseSvgMeetOrSlice(const std::string& value)
+{
+    static const LinearMapNode<SvgMeetOrSlice> SVG_MEETORSLICE_ARRAY[] = {
+        { SVG_ALIGN_MEET, SvgMeetOrSlice::MEET },
+        { SVG_ALIGN_SLICE, SvgMeetOrSlice::SLICE },
+    };
+    auto attrIter = BinarySearchFindIndex(SVG_MEETORSLICE_ARRAY, ArraySize(SVG_MEETORSLICE_ARRAY), value.c_str());
+    if (attrIter != -1) {
+        return SVG_MEETORSLICE_ARRAY[attrIter].value;
+    }
+    return SvgMeetOrSlice::MEET;
+}
+
+void SvgAttributesParser::ComputeTranslate(const Size& viewBox, const Size& viewPort, const float scaleX,
+    const float scaleY, const SvgAlign& svgAlign, float& translateX, float& translateY)
+{
+    translateX = 0.0f;
+    translateY = 0.0f;
+    switch (svgAlign) {
+        /*translate x y eq 0.0f*/
+        case SvgAlign::ALIGN_XMIN_YMIN:
+            break;
+        /*translate x eq 0.0f*/
+        case SvgAlign::ALIGN_XMIN_YMID:
+            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
+            break;
+        /*translate x eq 0.0f*/
+        case SvgAlign::ALIGN_XMIN_YMAX:
+            translateY = viewPort.Height() - viewBox.Height() * scaleY;
+            break;
+        /*translate y eq 0.0f*/
+        case SvgAlign::ALIGN_XMID_YMIN:
+            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
+            break;
+        case SvgAlign::ALIGN_XMID_YMAX:
+            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
+            translateY = viewPort.Height() - viewBox.Height() * scaleY;
+            break;
+        /*translate y eq 0.0f*/
+        case SvgAlign::ALIGN_XMAX_YMIN:
+            translateX = viewPort.Width() - viewBox.Width() * scaleX;
+            break;
+        case SvgAlign::ALIGN_XMAX_YMID:
+            translateX = viewPort.Width() - viewBox.Width() * scaleX;
+            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
+            break;
+        case SvgAlign::ALIGN_XMAX_YMAX:
+            translateX = viewPort.Width() - viewBox.Width() * scaleX;
+            translateY = viewPort.Height() - viewBox.Height() * scaleY;
+            break;
+        case SvgAlign::ALIGN_XMID_YMID:
+        default:
+            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
+            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
+            break;
+    }
+}
+
+void SvgAttributesParser::ComputeScale(const Size& viewBox, const Size& viewPort,
+    const SvgPreserveAspectRatio& preserveAspectRatio, float& scaleX, float& scaleY)
+{
+    float ratioX = viewPort.Width() / viewBox.Width();
+    float ratioY = viewPort.Height() / viewBox.Height();
+    if (preserveAspectRatio.svgAlign == SvgAlign::ALIGN_NONE) {
+        scaleX = ratioX;
+        scaleY = ratioY;
+        return;
+    }
+    switch (preserveAspectRatio.meetOrSlice) {
+        case SvgMeetOrSlice::SLICE:
+            scaleX = std::max(ratioX, ratioY);
+            break;
+        case SvgMeetOrSlice::MEET:
+        default:
+            scaleX = std::min(ratioX, ratioY);
+            break;
+    }
+    scaleY = scaleX;
+}
+
+Color SvgAttributesParser::GetColorFromHexString(const std::string& value)
+{
+    auto colorInt32 = std::strtoul(value.c_str(), nullptr, RADIX_HEX);
+    auto red = (colorInt32 >> THREE_BYTE_BITS) & 0xff;
+    auto green = (colorInt32 >> TWO_BYTE_BITS) & 0xff;
+    auto blue = (colorInt32 >> ONE_BYTE_BITS) & 0xff;
+    auto alpha = colorInt32 & 0xff;
+    return Color::FromARGB(alpha, red, green, blue);
+}
+
+Color SvgAttributesParser::GetColorFrom4HexString(const std::string& value)
+{
+    // value is rgba, convert to rrggbbaa color
+    auto colorInt32 = std::strtoul(value.c_str(), nullptr, RADIX_HEX);
+    auto red = (colorInt32 >> TWELVE_BITS) & 0xf;
+    red += red << FOUR_BITS;
+    auto green = (colorInt32 >> ONE_BYTE_BITS) & 0xf;
+    green += green << FOUR_BITS;
+    auto blue = (colorInt32 >> FOUR_BITS) & 0xf;
+    blue += blue << FOUR_BITS;
+    auto alpha = colorInt32 & 0xf;
+    alpha += alpha << FOUR_BITS;
+    return Color::FromARGB(alpha, red, green, blue);
 }
 } // namespace OHOS::Ace::NG

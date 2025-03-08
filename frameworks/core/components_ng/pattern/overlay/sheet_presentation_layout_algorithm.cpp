@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -76,6 +77,34 @@ void SheetPresentationLayoutAlgorithm::CalculateSheetOffsetInOtherScenes(LayoutW
     }
 }
 
+void SheetPresentationLayoutAlgorithm::ComputeWidthAndHeight(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+    LayoutConstraintF layoutConstraint = parentConstraint.value();
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    auto maxSize = layoutConstraint.maxSize;
+    sheetMaxHeight_ = maxSize.Height();
+    sheetMaxWidth_ = maxSize.Width();
+    auto showInSubWindow = sheetStyle_.showInSubWindow.value_or(false);
+    auto parentHeightConstraint = sheetMaxHeight_;
+    auto parentWidthConstraint = sheetMaxWidth_;
+    if (showInSubWindow) {
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_VOID(sheetWrapper);
+        auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
+        CHECK_NULL_VOID(sheetWrapperPattern);
+        auto mainWindowRect = sheetWrapperPattern->GetMainWindowRect();
+        parentHeightConstraint = mainWindowRect.Height();
+        parentWidthConstraint = mainWindowRect.Width();
+    }
+    sheetWidth_ = GetWidthByScreenSizeType(parentWidthConstraint, layoutWrapper);
+    sheetHeight_ = GetHeightByScreenSizeType(parentHeightConstraint, parentWidthConstraint, layoutWrapper);
+}
+
 void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -88,28 +117,8 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     InitParameter();
-    auto maxSize = layoutConstraint->maxSize;
     if (layoutWrapper->GetGeometryNode() && layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
-        auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
-        layoutConstraint = parentConstraint.value();
-        layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
-        maxSize = layoutConstraint->maxSize;
-        sheetMaxHeight_ = maxSize.Height();
-        sheetMaxWidth_ = maxSize.Width();
-        sheetWidth_ = GetWidthByScreenSizeType(maxSize, layoutWrapper);
-        sheetHeight_ = GetHeightByScreenSizeType(maxSize, layoutWrapper);
-        if (sheetStyle_.width.has_value()) {
-            float width = 0.0f;
-            if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
-                width = sheetStyle_.width->ConvertToPxWithSize(maxSize.Width());
-            } else {
-                width = sheetStyle_.width->ConvertToPx();
-            }
-            if (width > maxSize.Width() || width < 0.0f) {
-                width = sheetWidth_;
-            }
-            sheetWidth_ = width;
-        }
+        ComputeWidthAndHeight(layoutWrapper);
         CalculateSheetHeightInOtherScenes(layoutWrapper);
         AddArrowHeightToSheetSize();
         SizeF idealSize(sheetWidth_, sheetHeight_);
@@ -120,7 +129,11 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);
         }
-        auto scrollNode = layoutWrapper->GetChildByIndex(1);
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        auto scrollNode = sheetPattern->GetSheetScrollNode();
         CHECK_NULL_VOID(scrollNode);
         childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
@@ -128,8 +141,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET))
             && (sheetStyle_.sheetHeight.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
             auto&& children = layoutWrapper->GetAllChildrenWithBuild();
-            auto secondIter = std::next(children.begin(), 1);
-            auto secondChild = *secondIter;
+            auto secondChild = AceType::DynamicCast<LayoutWrapper>(scrollNode);
             CHECK_NULL_VOID(secondChild);
             auto&& scrollChild = secondChild->GetAllChildrenWithBuild();
             auto builder = scrollChild.front();
@@ -167,6 +179,163 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
+void SheetPresentationLayoutAlgorithm::ComputeCenterStyleOffset(LayoutWrapper* layoutWrapper)
+{
+    auto showInSubWindow = sheetStyle_.showInSubWindow.value_or(false);
+    if (!showInSubWindow) {
+        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / DOUBLE_SIZE;
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(sheetWrapper);
+    auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto mainWindowRect = sheetWrapperPattern->GetMainWindowRect();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto sheetFrameSize = geometryNode->GetFrameSize();
+
+    // compute sheet offset when show in subwindow
+    RectF containerModal;
+    RectF buttonsRect;
+    auto hostWindowId = SubwindowManager::GetInstance()->GetParentContainerId(sheetWrapperPattern->GetSubWindowId());
+    ContainerScope scope(hostWindowId);
+    auto container = AceEngine::Get().GetContainer(hostWindowId);
+    CHECK_NULL_VOID(container);
+    auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    sheetOffsetY_ = mainWindowRect.GetY() + mainWindowRect.Height() / DOUBLE_SIZE
+        - sheetFrameSize.Height() / DOUBLE_SIZE;
+    if (mainWindowContext && mainWindowContext->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
+        sheetOffsetY_ += buttonsRect.Height() / DOUBLE_SIZE;
+        if (LessOrEqual(sheetOffsetY_, mainWindowRect.GetY() + buttonsRect.Height())) {
+            sheetOffsetY_ = mainWindowRect.GetY() + buttonsRect.Height();
+        }
+    }
+    sheetOffsetX_ = mainWindowRect.GetX() + (mainWindowRect.Width()  - sheetFrameSize.Width()) / DOUBLE_SIZE;
+    std::vector<Rect> rects;
+    auto rect = Rect(sheetOffsetX_, sheetOffsetY_,
+        sheetFrameSize.Width(), sheetFrameSize.Height());
+    rects.emplace_back(rect);
+    SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_SHEET,
+        host->GetId(), sheetWrapperPattern->GetSubWindowId());
+}
+
+void SheetPresentationLayoutAlgorithm::ComputePopupStyleOffset(LayoutWrapper* layoutWrapper)
+{
+    sheetOffsetX_ = sheetPopupInfo_.sheetOffsetX;
+    sheetOffsetY_ = sheetPopupInfo_.sheetOffsetY;
+    auto showInSubWindow = sheetStyle_.showInSubWindow.value_or(false);
+    if (showInSubWindow) {
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_VOID(sheetWrapper);
+        auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
+        CHECK_NULL_VOID(sheetWrapperPattern);
+        if (sheetWrapperPattern->ShowInUEC()) {
+            auto UECId = SubwindowManager::GetInstance()->GetParentContainerId(sheetWrapperPattern->GetSubWindowId());
+            auto container = AceEngine::Get().GetContainer(UECId);
+            CHECK_NULL_VOID(container);
+            auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            auto UECWindowGlobalRect = mainWindowContext->GetDisplayWindowRectInfo();
+            sheetOffsetX_ += UECWindowGlobalRect.Left();
+            sheetOffsetY_ += UECWindowGlobalRect.Top();
+        } else {
+            auto mainWindowRect = sheetWrapperPattern->GetMainWindowRect();
+            sheetOffsetX_ += mainWindowRect.GetX();
+            sheetOffsetY_ += mainWindowRect.GetY();
+        }
+        std::vector<Rect> rects;
+        auto rect = Rect(sheetOffsetX_, sheetOffsetY_,
+            host->GetGeometryNode()->GetFrameSize().Width(), host->GetGeometryNode()->GetFrameSize().Height());
+        rects.emplace_back(rect);
+        auto subWindowMgr = SubwindowManager::GetInstance();
+        subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_SHEET, host->GetId(),
+            sheetWrapperPattern->GetSubWindowId());
+    }
+}
+
+void SheetPresentationLayoutAlgorithm::LayoutTitleBuilder(const NG::OffsetF& translate,
+    LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto titleBuilderNode = sheetPattern->GetTitleBuilderNode();
+    CHECK_NULL_VOID(titleBuilderNode);
+    auto index = host->GetChildIndexById(titleBuilderNode->GetId());
+    auto titleBuilderWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(titleBuilderWrapper);
+    auto geometryNode = titleBuilderWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetMarginFrameOffset(translate);
+    titleBuilderWrapper->Layout();
+}
+
+void SheetPresentationLayoutAlgorithm::LayoutCloseIcon(const NG::OffsetF& translate,
+    LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetCloseNode = sheetPattern->GetSheetCloseIcon();
+    CHECK_NULL_VOID(sheetCloseNode);
+    auto index = host->GetChildIndexById(sheetCloseNode->GetId());
+    auto closeIconWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(closeIconWrapper);
+    auto geometryNode = closeIconWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto sheetGeometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(sheetGeometryNode);
+    auto closeIconX = sheetGeometryNode->GetFrameSize().Width() -
+                      static_cast<float>(SHEET_CLOSE_ICON_WIDTH.ConvertToPx()) -
+                      static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
+    if (AceApplicationInfo::GetInstance().IsRightToLeft() &&
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        closeIconX = static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
+    }
+    auto closeIconY = static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
+    OffsetF positionOffset;
+    positionOffset.SetX(closeIconX + translate.GetX());
+    positionOffset.SetY(closeIconY + translate.GetY());
+    geometryNode->SetMarginFrameOffset(positionOffset);
+    closeIconWrapper->Layout();
+}
+
+void SheetPresentationLayoutAlgorithm::LayoutScrollNode(const NG::OffsetF& translate,
+    LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto index = host->GetChildIndexById(scrollNode->GetId());
+    auto scrollWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(scrollWrapper);
+
+    auto offset = translate;
+    auto titleBuilder = sheetPattern->GetTitleBuilderNode();
+    if (titleBuilder) {
+        auto titleBuilderNode = titleBuilder->GetGeometryNode();
+        CHECK_NULL_VOID(titleBuilderNode);
+        offset += OffsetF(0, titleBuilderNode->GetFrameSize().Height());
+    }
+    auto geometryNode = scrollWrapper->GetGeometryNode();
+    geometryNode->SetMarginFrameOffset(offset);
+    scrollWrapper->Layout();
+}
+
 void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -176,10 +345,9 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE) {
         sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / DOUBLE_SIZE;
     } else if (sheetType_ == SheetType::SHEET_CENTER) {
-        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / DOUBLE_SIZE;
+        ComputeCenterStyleOffset(layoutWrapper);
     } else if (sheetType_ == SheetType::SHEET_POPUP) {
-        sheetOffsetX_ = sheetPopupInfo_.sheetOffsetX;
-        sheetOffsetY_ = sheetPopupInfo_.sheetOffsetY;
+        ComputePopupStyleOffset(layoutWrapper);
     } else if (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET) {
         sheetOffsetY_ = (sheetMaxHeight_ - sheetHeight_ + sheetStyle_.bottomOffset->GetY());
         sheetOffsetX_ = sheetOffsetX_ + sheetStyle_.bottomOffset->GetX();
@@ -198,16 +366,14 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (sheetType_ == SheetType::SHEET_POPUP) {
         UpdateTranslateOffsetWithPlacement(translate);
     }
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->GetGeometryNode()->SetMarginFrameOffset(translate);
-        child->Layout();
-        translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
-    }
+    LayoutCloseIcon(translate, layoutWrapper);
+    LayoutTitleBuilder(translate, layoutWrapper);
+    LayoutScrollNode(translate, layoutWrapper);
 }
 
 void SheetPresentationLayoutAlgorithm::UpdateTranslateOffsetWithPlacement(OffsetF& translate)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         translate += OffsetF(0, SHEET_ARROW_HEIGHT.ConvertToPx());
         return;
     }
@@ -238,24 +404,25 @@ void SheetPresentationLayoutAlgorithm::UpdateTranslateOffsetWithPlacement(Offset
     }
 }
 
-float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& maxSize,
-    LayoutWrapper* layoutWrapper) const
+float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const float parentConstraintHeight,
+    const float parentConstraintWidth, LayoutWrapper* layoutWrapper) const
 {
-    float height = maxSize.Height();
+    float height = parentConstraintHeight;
     switch (sheetType_) {
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
         case SheetType::SHEET_BOTTOMLANDSPACE:
-            height = maxSize.Height();
+            height = parentConstraintHeight;
             break;
         case SheetType::SHEET_BOTTOM_OFFSET:
         case SheetType::SHEET_CENTER:
-            height = GetHeightBySheetStyle(layoutWrapper);
+            height = GetHeightBySheetStyle(parentConstraintHeight, parentConstraintWidth, layoutWrapper);
             break;
         case SheetType::SHEET_POPUP:
-            height = GetHeightBySheetStyle(layoutWrapper) + SHEET_ARROW_HEIGHT.ConvertToPx();
+            height = GetHeightBySheetStyle(parentConstraintHeight, parentConstraintWidth, layoutWrapper) +
+                SHEET_ARROW_HEIGHT.ConvertToPx();
             // The sheet height can only be confirmed after the placement is confirmed.
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 height -= SHEET_ARROW_HEIGHT.ConvertToPx();
             }
             break;
@@ -266,39 +433,89 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& m
     return height;
 }
 
-float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& maxSize,
+float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const float parentConstraintWidth,
     LayoutWrapper* layoutWrapper) const
 {
-    float width = maxSize.Width();
+    float sheetWidth = parentConstraintWidth;
     auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, width);
+    CHECK_NULL_RETURN(host, sheetWidth);
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_RETURN(sheetPattern, width);
+    CHECK_NULL_RETURN(sheetPattern, sheetWidth);
     switch (sheetType_) {
         case SheetType::SHEET_BOTTOM:
             if (sheetPattern->IsPhoneInLandScape()) {
-                width = std::min(static_cast<float>(SHEET_LANDSCAPE_WIDTH.ConvertToPx()), maxSize.Width());
+                sheetWidth = std::min(static_cast<float>(SHEET_LANDSCAPE_WIDTH.ConvertToPx()), parentConstraintWidth);
                 break;
             }
             [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
-            width = maxSize.Width();
+            sheetWidth = parentConstraintWidth;
             break;
         case SheetType::SHEET_BOTTOMLANDSPACE:
             [[fallthrough]];
         case SheetType::SHEET_CENTER:
-            width = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
+            sheetWidth = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
             break;
         case SheetType::SHEET_POPUP:
-            width = SHEET_POPUP_WIDTH.ConvertToPx();
+            sheetWidth = SHEET_POPUP_WIDTH.ConvertToPx();
             break;
         default:
             break;
     }
+
+    if (!sheetStyle_.width.has_value()) {
+        return sheetWidth;
+    }
+    auto width = 0.0f;
+    if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
+        width = sheetStyle_.width->ConvertToPxWithSize(parentConstraintWidth);
+    } else {
+        width = sheetStyle_.width->ConvertToPx();
+    }
+    if (LessNotEqual(width, 0.0f) || width > parentConstraintWidth) {
+        width = sheetWidth;
+    }
     return width;
 }
 
-float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle(LayoutWrapper* layoutWrapper) const
+float SheetPresentationLayoutAlgorithm::ComputeMaxHeight(const float parentConstraintHeight,
+    const float parentConstraintWidth, LayoutWrapper* layoutWrapper) const
+{
+    float sheetMaxHeight = parentConstraintHeight;
+    if (SheetInSplitWindow()) {
+        sheetMaxHeight = parentConstraintHeight - SHEET_SPLIT_STATUS_BAR.ConvertToPx() -
+            SHEET_SPLIT_AI_BAR.ConvertToPx();
+    }
+    NG::RectF floatButtons;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, 0.0f);
+    auto maxHeight = (std::min(sheetMaxHeight, parentConstraintWidth)) * POPUP_LARGE_SIZE;
+    if (sheetPattern->GetWindowButtonRect(floatButtons)) {
+        maxHeight = sheetMaxHeight - DOUBLE_SIZE *
+            (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
+    } else if (sheetStyle_.showInSubWindow.value_or(false)) {
+        auto sheetWrapper = AceType::DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_RETURN(sheetWrapper, 0.0f);
+        auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
+        CHECK_NULL_RETURN(sheetWrapperPattern, 0.0f);
+        RectF containerModal;
+        RectF buttonsRect;
+        auto subwindowId = sheetWrapperPattern->GetSubWindowId();
+        auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(subwindowId);
+        ContainerScope scope(currentId);
+        auto mainWindowContext = PipelineContext::GetContextByContainerId(currentId);
+        if (mainWindowContext && mainWindowContext->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
+            maxHeight = (std::min(parentConstraintHeight - buttonsRect.Height(),
+                parentConstraintWidth)) * POPUP_LARGE_SIZE;
+        }
+    }
+    return maxHeight;
+}
+
+float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle(const float parentConstraintHeight,
+    const float parentConstraintWidth, LayoutWrapper* layoutWrapper) const
 {
     float height = 0.0f;
     bool isMediumOrLargeMode = false;
@@ -307,21 +524,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle(LayoutWrapper* lay
         isMediumOrLargeMode =  true;
     }
     if (sheetStyle_.sheetHeight.height.has_value() || isMediumOrLargeMode) {
-        float sheetMaxHeight = sheetMaxHeight_;
-        if (SheetInSplitWindow()) {
-            sheetMaxHeight = sheetMaxHeight_ - SHEET_SPLIT_STATUS_BAR.ConvertToPx()-
-                SHEET_SPLIT_AI_BAR.ConvertToPx();
-        }
-        NG::RectF floatButtons;
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_RETURN(host, 0.0f);
-        auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
-        CHECK_NULL_RETURN(sheetPattern, 0.0f);
-        auto maxHeight = (std::min(sheetMaxHeight, sheetMaxWidth_)) * POPUP_LARGE_SIZE;
-        if (sheetPattern->GetWindowButtonRect(floatButtons)) {
-            maxHeight = sheetMaxHeight - DOUBLE_SIZE *
-                (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
-        }
+        auto maxHeight = ComputeMaxHeight(parentConstraintHeight, parentConstraintWidth, layoutWrapper);
         if (sheetStyle_.sheetHeight.height->Unit() == DimensionUnit::PERCENT) {
             height = sheetStyle_.sheetHeight.height->ConvertToPxWithSize(maxHeight);
         } else if (isMediumOrLargeMode) {
@@ -359,7 +562,9 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
         ((sheetType_ == SheetType::SHEET_CENTER) || (sheetType_ == SheetType::SHEET_POPUP))) {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_RETURN(host, childConstraint);
-        auto operationNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_RETURN(sheetPattern, childConstraint);
+        auto operationNode = sheetPattern->GetTitleBuilderNode();
         CHECK_NULL_RETURN(operationNode, childConstraint);
         auto titleGeometryNode = operationNode->GetGeometryNode();
         CHECK_NULL_RETURN(titleGeometryNode, childConstraint);
@@ -381,7 +586,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
 
 void SheetPresentationLayoutAlgorithm::UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         maxHeight -= SHEET_ARROW_HEIGHT.ConvertToPx();
         return;
     }
@@ -449,7 +654,7 @@ void SheetPresentationLayoutAlgorithm::UpdatePopupInfoAndRemeasure(LayoutWrapper
     sheetPopupInfo_ = sheetPopupInfo;
     sheetOffsetX_ = sheetPopupInfo.sheetOffsetX;
     sheetOffsetY_ = sheetPopupInfo.sheetOffsetY;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     sheetWidth_ = sheetWidth;
@@ -461,7 +666,7 @@ void SheetPresentationLayoutAlgorithm::UpdatePopupInfoAndRemeasure(LayoutWrapper
 
 void SheetPresentationLayoutAlgorithm::AddArrowHeightToSheetSize()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ||
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ||
         sheetType_ != SheetType::SHEET_POPUP) {
         return;
     }
@@ -522,12 +727,16 @@ void SheetPresentationLayoutAlgorithm::RemeasureForPopup(const RefPtr<LayoutWrap
         SizeF idealSize(sheetWidth_, sheetHeight_);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
-        auto childConstraint = CreateSheetChildConstraint(layoutProperty, layoutWrapper.GetRawPtr());
+        auto childConstraint = CreateSheetChildConstraint(layoutProperty, Referenced::RawPtr(layoutWrapper));
         layoutConstraint.percentReference = SizeF(sheetWidth_, sheetHeight_);
         for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->Measure(childConstraint);
         }
-        auto scrollNode = layoutWrapper->GetChildByIndex(1);
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        auto scrollNode = sheetPattern->GetSheetScrollNode();
         CHECK_NULL_VOID(scrollNode);
         childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);

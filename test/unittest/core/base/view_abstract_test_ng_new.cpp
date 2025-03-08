@@ -849,6 +849,49 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ViewAbstractDisableAxis
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableAxisTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnAxisEventFunc onAxisEventFunc;
+    ViewAbstract::SetOnAxisEvent(std::move(onAxisEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetOrCreateInputEventHub();
+    auto& callback = eventHub->axisEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnAxisEvent();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnAxisEventFunc onAxisEventFunc2;
+    ViewAbstract::SetOnAxisEvent(std::move(onAxisEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
  * @tc.name: ViewAbstractDisableHoverTest
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
@@ -1395,6 +1438,40 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseByFrameNodeTest, TestSize.L
      * @tc.expected: callback is null.
      */
     ViewAbstract::DisableOnMouse(AceType::RawPtr(node));
+    EXPECT_EQ(callback, nullptr);
+}
+
+/**
+ * @tc.name: ViewAbstractDisableAxisByFrameNodeTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableAxisByFrameNodeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    OnAxisEventFunc onAxisEventFunc;
+    ViewAbstract::SetOnAxisEvent(AceType::RawPtr(node), std::move(onAxisEventFunc));
+    auto eventHub = node->GetOrCreateInputEventHub();
+    auto& callback = eventHub->axisEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnAxisEvent(AceType::RawPtr(node));
     EXPECT_EQ(callback, nullptr);
 }
 

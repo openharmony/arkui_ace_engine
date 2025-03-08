@@ -35,10 +35,12 @@
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 #include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
+#include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
 struct DragNotifyMsg;
+struct KeyEvent;
 class UnifiedData;
 class Subwindow;
 }
@@ -89,6 +91,22 @@ struct PreparedInfoForDrag {
     OffsetF dragMovePosition = { 0.0f, 0.0f };
     RefPtr<PixelMap> pixelMap;
     RefPtr<FrameNode> imageNode;
+    RefPtr<FrameNode> relativeContainerNode { nullptr };
+    RefPtr<FrameNode> menuPreviewNode { nullptr };
+    RefPtr<FrameNode> textNode { nullptr };
+    RefPtr<FrameNode> gatherNode { nullptr };
+    RectF menuPreviewRect;
+    RectF dragPreviewRect;
+    BorderRadiusProperty borderRadius = BorderRadiusProperty(0.0_vp);
+};
+
+struct PreparedAsyncCtxForAnimate {
+    int32_t containerId = -1;
+    bool hasTouchPoint = false;
+    DragPointerEvent dragPointerEvent;
+    DragPreviewOption dragPreviewOption;
+    DimensionOffset touchPoint = DimensionOffset(0.0_vp, 0.0_vp);
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
 };
 
 struct DragframeNodeInfo {
@@ -107,6 +125,9 @@ struct DragDropInfo {
     // The inspectorId acts as a preview surrogate identifier which is used
     // to retrieve a preview image for the item being dragged.
     std::string inspectorId;
+    std::function<RefPtr<UINode>()> buildFunc;
+    bool onlyForLifting = false;
+    bool delayCreating = false;
 };
 
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
@@ -120,6 +141,7 @@ constexpr float DEFALUT_DRAG_PPIXELMAP_SCALE = 1.05f;
 constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
 
 class EventHub;
+class PipelineContext;
 
 // The gesture event hub is mainly used to handle common gesture events.
 class ACE_FORCE_EXPORT GestureEventHub : public Referenced {
@@ -256,7 +278,8 @@ public:
     int32_t GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData);
     bool TryDoDragStartAnimation(const RefPtr<PipelineBase>& context, const RefPtr<Subwindow>& subwindow,
         const GestureEvent& info, PreparedInfoForDrag& data);
-    float GetDefaultPixelMapScale(const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap);
+    float GetDefaultPixelMapScale(
+        const RefPtr<FrameNode>& frameNode, const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap);
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
@@ -335,6 +358,10 @@ public:
     bool IsPanEventEmpty() const;
 
     void SetExcludedAxisForPanEvent(bool isExcludedAxis);
+
+    void DumpVelocityInfoFroPanEvent(int32_t fingerId);
+
+    bool IsDragNewFwk() const;
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -352,6 +379,8 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void PrepareDragStartInfo(
+        const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data);
     void StartVibratorByDrag(const RefPtr<FrameNode>& frameNode);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale,
         const PreparedInfoForDrag& dragInfoData);
@@ -373,6 +402,9 @@ private:
         const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority,
         RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
         int32_t& exclusiveIndex);
+
+    void UpdateNodePositionBeforeStartAnimation(const RefPtr<FrameNode>& frameNode,
+        PreparedInfoForDrag& data, const OffsetF& subWindowOffset);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -441,6 +473,7 @@ private:
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;
     float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
+    bool isDragNewFwk_ = false;
 };
 
 } // namespace OHOS::Ace::NG

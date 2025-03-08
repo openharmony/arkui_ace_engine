@@ -107,6 +107,7 @@ struct ArkUI_SwiperIndicator {
     ArkUI_OptionalFloat dimTop;
     ArkUI_OptionalFloat dimRight;
     ArkUI_OptionalFloat dimBottom;
+    ArkUI_OptionalFloat dimSpace;
     ArkUI_OptionalFloat itemWidth;
     ArkUI_OptionalFloat itemHeight;
     ArkUI_OptionalFloat selectedItemWidth;
@@ -115,6 +116,31 @@ struct ArkUI_SwiperIndicator {
     ArkUI_OptionalUint colorValue;
     ArkUI_OptionalUint selectedColorValue;
     ArkUI_OptionalInt maxDisplayCount;
+    ArkUI_OptionalInt ignoreSizeValue;
+};
+
+struct ArkUI_SwiperDigitIndicator {
+    ArkUI_SwiperIndicatorType type;
+    ArkUI_OptionalFloat dimLeft;
+    ArkUI_OptionalFloat dimTop;
+    ArkUI_OptionalFloat dimRight;
+    ArkUI_OptionalFloat dimBottom;
+    ArkUI_OptionalUint fontColor;
+    ArkUI_OptionalUint selectedFontColor;
+    ArkUI_OptionalFloat fontSize;
+    ArkUI_OptionalFloat selectedFontSize;
+    ArkUI_OptionalUint fontWeight;
+    ArkUI_OptionalUint selectedFontWeight;
+    ArkUI_OptionalInt ignoreSizeValue;
+};
+
+struct ArkUI_SwiperArrowStyle {
+    ArkUI_OptionalInt showBackground;
+    ArkUI_OptionalInt showSidebarMiddle;
+    ArkUI_OptionalFloat backgroundSize;
+    ArkUI_OptionalUint backgroundColor;
+    ArkUI_OptionalFloat arrowSize;
+    ArkUI_OptionalUint arrowColor;
 };
 
 struct ArkUI_DrawableDescriptor {
@@ -174,6 +200,11 @@ struct ArkUI_ActiveChildrenInfo {
 
 struct ArkUI_CrossLanguageOption {
     bool attributeSetting;
+};
+
+struct ArkUI_VisibleAreaEventOptions {
+    std::vector<float> ratios;
+    int32_t expectedUpdateInterval;
 };
 
 #ifdef __cplusplus

@@ -38,10 +38,10 @@ void JSTextMenu::SetMenuOptions(const JSCallbackInfo& info)
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto showModeJsVal = paramObject->GetProperty("showMode");
     if (showModeJsVal->IsNull() || showModeJsVal->IsUndefined() || !showModeJsVal->IsNumber()) {
-        info.SetReturnValue(info.This());
-        return;
+        textMenuOptions.showMode = NG::TextMenuShowMode::DEFAULT;
+    } else {
+        textMenuOptions.showMode = NG::CastToTextMenuShowMode(showModeJsVal->ToNumber<int32_t>());
     }
-    textMenuOptions.showMode = NG::CastToTextMenuShowMode(showModeJsVal->ToNumber<int32_t>());
     auto container = Container::CurrentSafely();
     if (!container) {
         info.SetReturnValue(info.This());

@@ -149,6 +149,13 @@ MenuParam PlaceholderOneStepDragParam::GetMenuParam(const RefPtr<FrameNode>& fra
         const auto& spanItem = placeholderNode->GetSpanItem();
         onAppear(spanItem->rangeStart, spanItem->position);
     };
+    res.onDisappear = [weak = AceType::WeakClaim(AceType::RawPtr(placeholderNode)), onDisappear = this->onDisappear]() {
+        CHECK_NULL_VOID(onDisappear);
+        auto placeholderNode = weak.Upgrade();
+        CHECK_NULL_VOID(placeholderNode);
+        const auto& spanItem = placeholderNode->GetSpanItem();
+        onDisappear(spanItem->rangeStart, spanItem->position);
+    };
     return res;
 }
 

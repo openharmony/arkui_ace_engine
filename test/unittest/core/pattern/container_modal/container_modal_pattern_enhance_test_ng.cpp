@@ -202,20 +202,6 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest005
     EXPECT_FALSE(result);
 }
 /**
- * @tc.name: ContainerModalPatternEnhanceTest006
- * @tc.desc: Test OnWindowForceUnfocused
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest006, TestSize.Level1)
-{
-    auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
-    containerModalPatternEnhance->OnWindowFocused();
-    containerModalPatternEnhance->OnWindowForceUnfocused();
-    auto result = containerModalPatternEnhance->GetIsFocus();
-    EXPECT_TRUE(result);
-}
-/**
  * @tc.name: ContainerModalPatternEnhanceTest007
  * @tc.desc: Test ChangeFloatingTitle
  * @tc.type: FUNC

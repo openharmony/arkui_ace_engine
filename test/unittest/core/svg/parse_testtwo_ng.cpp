@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -826,8 +826,9 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest001, TestSize.Level1)
     svgNode->SetAttr("strokeDashoffset", "2.0");
     EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetLineDash().dashOffset, 2.0);
 
-    svgNode->SetAttr("transform-origin", "test_transform-origin");
-    EXPECT_EQ(svgNode->GetBaseAttributes().transformOrigin, "test_transform-origin");
+    svgNode->SetAttr("transform-origin", "10 10");
+    EXPECT_EQ(Dimension(10), svgNode->GetBaseAttributes().transformOrigin.first);
+    EXPECT_EQ(Dimension(10), svgNode->GetBaseAttributes().transformOrigin.second);
 
     svgNode->SetAttr("xlink:href", "test_xlink:href");
     EXPECT_NE(svgNode->GetBaseAttributes().href, "test_xlink:href");
@@ -932,7 +933,7 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest005, TestSize.Level1)
      * @tc.steps: step4. set fill
      * @tc.expected: The property is set successfully
      */
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 
@@ -1059,7 +1060,7 @@ HWTEST_F(ParseTestTwoNg, ParseAnimation003, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, ParseStopTest001, TestSize.Level1)
 {
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 
@@ -1779,5 +1780,25 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest007, TestSize.Level1)
     svgDom->root_->InitStyle(SvgBaseAttribute());
     EXPECT_EQ(svgDom->root_->GetBaseAttributes().strokeState.GetHref(), "grad1");
     EXPECT_EQ(svgDom->root_->GetBaseAttributes().fillState.GetHref(), "grad1");
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseStyleTest001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call ParseCssStyle
+     * @tc.expected: Execute function return value false
+     */
+    std::string str;
+    PushAttr callback = [&str](const std::string& key, const std::pair<std::string, std::string>& value) { str = key; };
+    SvgStyle::ParseCssStyle("", callback);
+    EXPECT_TRUE(str.empty());
+
+    SvgStyle::ParseCssStyle("body {font-style: oblique;}.normal {font-style: normal;}", callback);
+    EXPECT_FALSE(str.empty());
 }
 } // namespace OHOS::Ace::NG

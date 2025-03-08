@@ -172,14 +172,24 @@ void FfiOHOSAceFrameworkShapeSetAntiAlias(bool antiAlias)
     ShapeModel::GetInstance()->SetAntiAlias(antiAlias);
 }
 
-void FfiOHOSAceFrameworkShapeSetMesh(VectorFloat64Ptr vecValue, uint32_t column, uint32_t row)
+void FfiOHOSAceFrameworkShapeSetMesh(VectorFloat64Handle vecValue, uint32_t column, uint32_t row)
 {
     if (vecValue == nullptr) {
         LOGE("mesh array is empty");
         return;
     }
-    auto meshValue = *reinterpret_cast<std::vector<float>*>(vecValue);
-    ShapeModel::GetInstance()->SetBitmapMesh(meshValue, static_cast<int32_t>(column), static_cast<int32_t>(row));
+    auto meshValue = reinterpret_cast<std::vector<double>*>(vecValue);
+    LOGI("FfiOHOSAceFrameworkShapeSetMesh mesh meshValue szie: %{public}d", meshValue->size());
+    auto tempMeshSize = static_cast<uint64_t>(column + 1) * (row + 1) * 2;
+    if (tempMeshSize != meshValue->size()) {
+        ShapeModel::GetInstance()->SetBitmapMesh(std::vector<float>(), 0, 0);
+        return;
+    }
+    std::vector<float> mesh;
+    for (size_t i = 0; i < meshValue->size(); ++i) {
+        mesh.emplace_back(static_cast<float>((*meshValue)[i]));
+    }
+    ShapeModel::GetInstance()->SetBitmapMesh(mesh, static_cast<int32_t>(column), static_cast<int32_t>(row));
 }
 
 void FfiOHOSAceFrameworkShapeSetWidth(double width, int32_t unit)

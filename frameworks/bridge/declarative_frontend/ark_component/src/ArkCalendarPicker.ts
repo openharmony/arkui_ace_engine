@@ -255,6 +255,20 @@ class CalendarPickerMarkTodayModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class CalendarPickerOnChangeModifier extends ModifierWithKey<Callback<Date>>{
+  constructor(value: Callback<Date>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('calendarPickerOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().calendarPicker.resetCalendarPickerOnChange(node);
+    } else {
+      getUINativeModule().calendarPicker.setCalendarPickerOnChange(node, this.value);
+    }
+  }
+}
+
 class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -270,8 +284,9 @@ class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerA
     modifierWithKey(this._modifiersWithKeys, TextStyleModifier.identity, TextStyleModifier, value);
     return this;
   }
-  onChange(callback: (value: Date) => void): this {
-    throw new Error('Method not implemented.');
+  onChange(callback: Callback<Date>): this {
+    modifierWithKey(this._modifiersWithKeys,CalendarPickerOnChangeModifier.identity,CalendarPickerOnChangeModifier,callback);
+    return this;
   }
   padding(value: Padding | Length): this {
     let arkValue = new ArkPadding();

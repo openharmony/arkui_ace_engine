@@ -889,7 +889,7 @@ void NativeCanvasRenderer::PutImageData(const sptr<NativeImageData> imageData, c
     imageData_.dirtyHeight = imageData_.dirtyY < 0 ? std::min(imageData_.dirtyY + imageData_.dirtyHeight, imgHeight)
                                                    : std::min(imgHeight - imageData_.dirtyY, imageData_.dirtyHeight);
     auto buffer = imageData->data;
-    int32_t bufferLength = buffer.size();
+    int32_t bufferLength = static_cast<int32_t>(buffer.size());
     imageData_.data = std::vector<uint32_t>();
     for (int32_t i = std::max(imageData_.dirtyY, 0); i < imageData_.dirtyY + imageData_.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData_.dirtyX, 0); j < imageData_.dirtyX + imageData_.dirtyWidth; ++j) {

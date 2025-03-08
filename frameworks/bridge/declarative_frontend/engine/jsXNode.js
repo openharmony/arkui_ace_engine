@@ -12,15 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/// <reference path="../../state_mgmt/distRelease/stateMgmt.d.ts" />
 var NodeRenderType;
 (function (NodeRenderType) {
     NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
     NodeRenderType[NodeRenderType["RENDER_TYPE_TEXTURE"] = 1] = "RENDER_TYPE_TEXTURE";
 })(NodeRenderType || (NodeRenderType = {}));
-
-class BaseNode extends __JSBaseNode__ {
+class BaseNode extends ViewBuildNodeBase {
     constructor(uiContext, options) {
-        super(options);
+        super(false);
+        let baseNode = new __JSBaseNode__(options);
+        this.builderBaseNode_ = baseNode;
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -36,6 +38,30 @@ class BaseNode extends __JSBaseNode__ {
     }
     updateInstance(uiContext) {
         this.instanceId_ = uiContext.instanceId_;
+    }
+    create(builder, params, update, updateConfiguration, supportLazyBuild) {
+        return this.builderBaseNode_.create(builder.bind(this), params, update, updateConfiguration, supportLazyBuild);
+    }
+    finishUpdateFunc() {
+        return this.builderBaseNode_.finishUpdateFunc();
+    }
+    postTouchEvent(touchEvent) {
+        return this.builderBaseNode_.postTouchEvent(touchEvent);
+    }
+    disposeNode() {
+        return this.builderBaseNode_.disposeNode();
+    }
+    updateStart() {
+        return this.builderBaseNode_.updateStart();
+    }
+    updateEnd() {
+        return this.builderBaseNode_.updateEnd();
+    }
+    onRecycleWithBindObject() {
+        return this.builderBaseNode_.onRecycleWithBindObject();
+    }
+    onReuseWithBindObject(object) {
+        return this.builderBaseNode_.onReuseWithBindObject(object);
     }
 }
 /*
@@ -106,9 +132,8 @@ class BuilderNode {
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
         super(uiContext, options);
-        this.childrenWeakrefMap_ = new Map();
         this.uiContext_ = uiContext;
-        this.updateFuncByElmtId = new Map();
+        this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this._supportNestingBuilder = false;
     }
     reuse(param) {
@@ -153,44 +178,6 @@ class JSBuilderNode extends BaseNode {
     }
     getCardId() {
         return -1;
-    }
-    addChild(child) {
-        if (this.childrenWeakrefMap_.has(child.id__())) {
-            return false;
-        }
-        this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
-        return true;
-    }
-    getChildById(id) {
-        const childWeakRef = this.childrenWeakrefMap_.get(id);
-        return childWeakRef ? childWeakRef.deref() : undefined;
-    }
-    updateStateVarsOfChildByElmtId(elmtId, params) {
-        if (elmtId < 0) {
-            return;
-        }
-        let child = this.getChildById(elmtId);
-        if (!child) {
-            return;
-        }
-        child.updateStateVars(params);
-        child.updateDirtyElements();
-    }
-    createOrGetNode(elmtId, builder) {
-        const entry = this.updateFuncByElmtId.get(elmtId);
-        if (entry === undefined) {
-            throw new Error(`fail to create node, elmtId is illegal`);
-        }
-        let updateFuncRecord = (typeof entry === 'object') ? entry : undefined;
-        if (updateFuncRecord === undefined) {
-            throw new Error(`fail to create node, the api level of app does not supported`);
-        }
-        let nodeInfo = updateFuncRecord.node;
-        if (nodeInfo === undefined) {
-            nodeInfo = builder();
-            updateFuncRecord.node = nodeInfo;
-        }
-        return nodeInfo;
     }
     isObject(param) {
         const typeName = Object.prototype.toString.call(param);
@@ -269,15 +256,11 @@ class JSBuilderNode extends BaseNode {
     UpdateElement(elmtId) {
         // do not process an Element that has been marked to be deleted
         const obj = this.updateFuncByElmtId.get(elmtId);
-        const updateFunc = (typeof obj === 'object') ? obj.updateFunc : null;
+        const updateFunc = (typeof obj === 'object') ? obj.getUpdateFunc() : null;
         if (typeof updateFunc === 'function') {
             updateFunc(elmtId, /* isFirstRender */ false);
             this.finishUpdateFunc();
         }
-    }
-    purgeDeletedElmtIds() {
-        UINodeRegisterProxy.obtainDeletedElmtIds();
-        UINodeRegisterProxy.unregisterElmtIdsFromIViews();
     }
     purgeDeleteElmtId(rmElmtId) {
         const result = this.updateFuncByElmtId.delete(rmElmtId);
@@ -314,6 +297,9 @@ class JSBuilderNode extends BaseNode {
         const _popFunc = classObject && 'pop' in classObject ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
+            if (Utils.isApiVersionEQAbove(16)) {
+                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
+            }
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
             // enable V2 object deep observation
@@ -336,15 +322,15 @@ class JSBuilderNode extends BaseNode {
                 ObserveV2.getObserve().stopRecordDependencies();
             }
             ViewStackProcessor.StopGetAccessRecording();
+            if (Utils.isApiVersionEQAbove(16)) {
+                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
+            }
             __JSScopeUtil__.restoreInstanceId();
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         // needs to move set before updateFunc.
         // make sure the key and object value exist since it will add node in attributeModifier during updateFunc.
-        this.updateFuncByElmtId.set(elmtId, {
-            updateFunc: updateFunc,
-            componentName: _componentName,
-        });
+        this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, classObject: classObject });
         UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
         try {
             updateFunc(elmtId, /* is first render */ true);
@@ -425,21 +411,6 @@ class JSBuilderNode extends BaseNode {
         // purging these elmtIds from state mgmt will make sure no more update function on any deleted child will be executed
         this.purgeDeletedElmtIds();
     }
-    ifElseBranchUpdateFunction(branchId, branchfunc) {
-        const oldBranchid = If.getBranchId();
-        if (branchId === oldBranchid) {
-            return;
-        }
-        // branchId identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
-        // ifElseNode stores the most recent branch, so we can compare
-        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
-        let removedChildElmtIds = new Array();
-        If.branchId(branchId, removedChildElmtIds);
-        //un-registers the removed child elementIDs using proxy
-        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
-        this.purgeDeletedElmtIds();
-        branchfunc();
-    }
     getNodePtr() {
         return this.nodePtr_;
     }
@@ -480,6 +451,9 @@ class JSBuilderNode extends BaseNode {
     observeRecycleComponentCreation(name, recycleUpdateFunc) {
         throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
     }
+    ifElseBranchUpdateFunctionDirtyRetaken() { }
+    forceCompleteRerender(deep) { }
+    forceRerenderNode(elmtId) { }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -701,7 +675,7 @@ globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeController
     let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
     if (nodeController) {
         nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
-        nodeController._value = -1;
+        nodeController._nodeContainerId._value = -1;
         NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
     }
 };
@@ -763,6 +737,12 @@ class NodeController {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var ExpandMode;
+(function (ExpandMode) {
+    ExpandMode[ExpandMode["NOT_EXPAND"] = 0] = "NOT_EXPAND";
+    ExpandMode[ExpandMode["EXPAND"] = 1] = "EXPAND";
+    ExpandMode[ExpandMode["LAZY_EXPAND"] = 2] = "LAZY_EXPAND";
+})(ExpandMode || (ExpandMode = {}));
 class FrameNode {
     constructor(uiContext, type, options) {
         if (uiContext === undefined) {
@@ -1017,8 +997,8 @@ class FrameNode {
         }
         targetParent._childList.set(this._nodeId, this);
     }
-    getChild(index, isExpanded) {
-        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
+    getChild(index, expandMode) {
+        const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, expandMode);
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
@@ -1028,6 +1008,12 @@ class FrameNode {
             return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
+    }
+    getFirstChildIndexWithoutExpand() {
+        return getUINativeModule().frameNode.getFirstChildIndexWithoutExpand(this.getNodePtr());
+    }
+    getLastChildIndexWithoutExpand() {
+        return getUINativeModule().frameNode.getLastChildIndexWithoutExpand(this.getNodePtr());
     }
     getFirstChild(isExpanded) {
         const result = getUINativeModule().frameNode.getFirst(this.getNodePtr(), isExpanded);
@@ -1105,8 +1091,9 @@ class FrameNode {
     }
     getChildrenCount(isExpanded) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+        const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
         __JSScopeUtil__.restoreInstanceId();
+        return childrenCount;
     }
     getPositionToParent() {
         const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
@@ -1660,21 +1647,21 @@ class typeNode {
         return creator(context, options);
     }
     static getAttribute(node, nodeType) {
-        if (node === undefined || node === null || node.getNodeType() != nodeType) {
+        if (node === undefined || node === null || node.getNodeType() !== nodeType) {
             return undefined;
         }
         if (!node.checkIfCanCrossLanguageAttributeSetting()) {
             return undefined;
         }
         let attribute = __attributeMap__.get(nodeType);
-        if (attribute === undefined || attribute == null) {
+        if (attribute === undefined || attribute === null) {
             return undefined;
         }
         return attribute(node);
     }
     static bindController(node, controller, nodeType) {
         if (node === undefined || node === null || controller === undefined || controller === null ||
-            node.getNodeType() != nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
+            node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
             throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
         }
         if (!node.checkIfCanCrossLanguageAttributeSetting()) {
@@ -1903,10 +1890,10 @@ class ColorMetrics {
         return this.alpha_;
     }
     setResourceId(resourceId) {
-      this.resourceId_ = resourceId;
+        this.resourceId_ = resourceId;
     }
     getResourceId() {
-      return this.resourceId_;
+        return this.resourceId_;
     }
 }
 class BaseShape {
@@ -2321,7 +2308,7 @@ class RenderNode {
         this.nodePtr = this._nativeRef?.getNativeHandle();
     }
     setBaseNode(baseNode) {
-        this.baseNode_ = baseNode;
+        this.baseNode_ = baseNode.builderBaseNode_;
     }
     resetNodePtr() {
         this.nodePtr = null;
@@ -2652,5 +2639,5 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter
+    typeNode, NodeAdapter, ExpandMode
 };

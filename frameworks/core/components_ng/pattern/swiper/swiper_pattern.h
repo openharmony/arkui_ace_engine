@@ -47,10 +47,22 @@
 #include "core/event/crown_event.h"
 #endif
 namespace OHOS::Ace::NG {
+enum class GestureStatus {
+    INIT = 0,
+    START,
+    END,
+};
+
 enum class PageFlipMode {
     CONTINUOUS = 0,
     SINGLE,
 };
+
+using SwiperHoverFlag = uint32_t;
+constexpr SwiperHoverFlag HOVER_NONE = 0;
+constexpr SwiperHoverFlag HOVER_SWIPER = 1;
+constexpr SwiperHoverFlag HOVER_INDICATOR = 1 << 1;
+constexpr SwiperHoverFlag HOVER_ARROW = 1 << 2;
 
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
@@ -137,10 +149,7 @@ public:
         return currentFirstIndex_;
     }
 
-    int32_t GetCurrentIndex()
-    {
-        return GetLoopIndex(currentIndex_);
-    }
+    int32_t GetCurrentIndex(bool original = false);
 
     float GetTurnPageRate() const
     {
@@ -317,6 +326,15 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
+    
+    void ResetIndicatorParameters()
+    {
+        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+            swiperParameters_ = nullptr;
+        } else {
+            swiperDigitalParameters_ = nullptr;
+        }
+    }
 
     virtual void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) {}
 
@@ -480,7 +498,11 @@ public:
     virtual std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const { return nullptr; }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
-    void ArrowHover(bool hoverFlag);
+    void ArrowHover(bool isHover, SwiperHoverFlag flag);
+    bool IsHoverNone()
+    {
+        return hoverFlag_ == HOVER_NONE;
+    }
     virtual bool IsLoop() const;
     bool IsEnabled() const;
     void OnWindowShow() override;
@@ -570,6 +592,7 @@ public:
     }
 
     RefPtr<Curve> GetCurveIncludeMotion();
+    RefPtr<Curve> GetIndicatorHeadCurve() const;
     float GetMotionVelocity()
     {
         return motionVelocity_;
@@ -597,6 +620,7 @@ public:
     void CheckMarkForIndicatorBoundary();
     bool IsHorizontalAndRightToLeft() const;
     TextDirection GetNonAutoLayoutDirection() const;
+    void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
@@ -698,7 +722,7 @@ public:
 
     bool IsTouchDownOnOverlong() const
     {
-        return isTouchDownOnOverlong_;
+        return isTouchDownOnOverlong_ || isDragging_;
     }
 
     bool IsAutoPlay() const;
@@ -726,8 +750,9 @@ public:
     }
 
     bool NeedFastAnimation() const;
+    bool IsInFastAnimation() const;
 
-    float CalcCurrentTurnPageRate() const;
+    float CalcCurrentTurnPageRate(bool isTouchBottom = false) const;
     int32_t GetFirstIndexInVisibleArea() const;
     float CalculateGroupTurnPageRate(float additionalOffset);
 
@@ -753,6 +778,12 @@ public:
     }
 
     bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
+    virtual RefPtr<Curve> GetCurve() const;
+
+    void SetGestureStatus(GestureStatus gestureStatus)
+    {
+        gestureStatus_ = gestureStatus;
+    }
 
 protected:
     void MarkDirtyNodeSelf();
@@ -781,6 +812,7 @@ protected:
 
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     int32_t currentIndex_ = 0;
+    std::optional<int32_t> fastCurrentIndex_;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
     std::optional<int32_t> targetIndex_;
@@ -876,7 +908,7 @@ private:
     // ArcSwiper will implement this interface in order to reset the background color of parent node.
     virtual void ResetParentNodeColor() {};
     // ArcSwiper will implement this interface in order to achieve the function of the manual effect.
-    virtual void PlayScrollAnimation(float offset) {};
+    virtual void PlayScrollAnimation(float currentDelta, float currentIndexOffset) {};
     virtual void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
@@ -901,9 +933,8 @@ private:
     void FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex);
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
-    void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
     void HandleSwiperCustomAnimation(float offset);
-    void CalculateAndUpdateItemInfo(float offset);
+    void CalculateAndUpdateItemInfo(float offset = 0.0f);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
     void UpdateTabBarAnimationDuration(int32_t index);
 
@@ -923,7 +954,6 @@ private:
     int32_t CalculateCount(
         float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
     int32_t GetInterval() const;
-    virtual RefPtr<Curve> GetCurve() const;
     EdgeEffect GetEdgeEffect() const;
     bool IsDisableSwipe() const;
     bool IsShowIndicator() const;
@@ -1066,7 +1096,7 @@ private:
     void CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
-    std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
+    std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset, bool isTouchBottom = false) const;
 
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
@@ -1183,6 +1213,13 @@ private:
         return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
     }
 
+    void CheckAndReportEvent();
+
+    void UpdateItemsLatestSwitched();
+    void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
+    void PostIdleTaskToCleanTabContent();
+    std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1218,6 +1255,8 @@ private:
     int32_t endIndex_ = 0;
     int32_t oldIndex_ = 0;
     int32_t nextIndex_ = 0;
+    int32_t prevStartIndex_ = 0;
+    int32_t prevEndIndex_ = 0;
 
     PanDirection panDirection_;
 
@@ -1358,6 +1397,12 @@ private:
     bool stopWhenTouched_ = true;
     WeakPtr<NG::UINode> indicatorNode_;
     bool isBindIndicator_ = false;
+
+    SwiperHoverFlag hoverFlag_ = HOVER_NONE;
+    GestureStatus gestureStatus_ = GestureStatus::INIT;
+
+    std::list<int32_t> itemsLatestSwitched_;
+    std::set<int32_t> itemsNeedClean_;
 };
 } // namespace OHOS::Ace::NG
 

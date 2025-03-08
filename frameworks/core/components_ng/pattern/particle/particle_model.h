@@ -54,7 +54,7 @@ struct EmitterProperty {
     std::optional<uint32_t> emitRate;
 };
 
-class ACE_EXPORT ParticleModel {
+class ACE_FORCE_EXPORT ParticleModel {
 public:
     static ParticleModel* GetInstance();
     virtual ~ParticleModel() = default;

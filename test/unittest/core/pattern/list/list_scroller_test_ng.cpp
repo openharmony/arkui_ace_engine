@@ -417,6 +417,64 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToIndex009
+ * @tc.desc: Test the onReachStart event after executing ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToIndex009, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Create the List
+     * @tc.expected: Create the List successfully
+     */
+    SizeT<Dimension> itemSize = SizeT<Dimension>(FILL_LENGTH, Dimension(1000.0f));
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::VERTICAL);
+    CreateListItems(12);
+    CreateDone();
+
+    /**
+     * @tc.cases: Scroll to the 7 index
+     * @tc.expected: the startIndex of List is 7 and startIndexChanged_ is true
+     */
+    ScrollToIndex(7, false, ScrollAlign::START);
+    EXPECT_EQ(pattern_->GetStartIndex(), 7);
+    EXPECT_EQ(pattern_->prevStartOffset_, 0.f);
+    EXPECT_EQ(pattern_->contentStartOffset_, 0.f);
+    EXPECT_TRUE(pattern_->startIndexChanged_);
+
+    /**
+     * @tc.cases: Scroll to the 0 index
+     * @tc.expected: the startIndex of List is 0, startIndexChanged_ and scrollDownToStart are true
+     */
+    ScrollToIndex(0, false, ScrollAlign::START);
+    EXPECT_EQ(pattern_->GetStartIndex(), 0);
+    EXPECT_EQ(pattern_->prevStartOffset_, 0.f);
+    EXPECT_EQ(pattern_->contentStartOffset_, 0.f);
+    EXPECT_TRUE(pattern_->startIndexChanged_);
+    auto scrollDownToStart =
+        (pattern_->startIndexChanged_ || LessNotEqual(pattern_->prevStartOffset_, pattern_->contentStartOffset_) ||
+            !pattern_->isInitialized_) &&
+        GreatOrEqual(pattern_->startMainPos_, pattern_->contentStartOffset_);
+    EXPECT_TRUE(scrollDownToStart);
+
+    /**
+     * @tc.cases: Scroll to the 0 index again
+     * @tc.expected: the startIndex of List is 0, startIndexChanged_ and scrollDownToStart are false
+     */
+    ScrollToIndex(0, false, ScrollAlign::START);
+    EXPECT_EQ(pattern_->GetStartIndex(), 0);
+    EXPECT_EQ(pattern_->prevStartOffset_, 0.f);
+    EXPECT_EQ(pattern_->contentStartOffset_, 0.f);
+    EXPECT_FALSE(pattern_->startIndexChanged_);
+    scrollDownToStart =
+        (pattern_->startIndexChanged_ || LessNotEqual(pattern_->prevStartOffset_, pattern_->contentStartOffset_) ||
+            !pattern_->isInitialized_) &&
+        GreatOrEqual(pattern_->startMainPos_, pattern_->contentStartOffset_);
+    EXPECT_FALSE(scrollDownToStart);
+}
+
+/**
  * @tc.name: JumpToItemInGroup001
  * @tc.desc: Test JumpToItemInGroup
  * @tc.type: FUNC
@@ -1785,5 +1843,22 @@ HWTEST_F(ListScrollerTestNg, SetScrollBy002, TestSize.Level1)
     model.SetScrollBy(AceType::RawPtr(frameNode_), 0, y);
     CreateDone();
     EXPECT_EQ(pattern_->GetTotalOffset(), y);
+}
+
+/**
+ * @tc.name: SetAutoScale001
+ * @tc.desc: Test List item model ng SetAutoScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, SetAutoScale001, TestSize.Level1)
+{
+    ListItemModelNG itemModel;
+    itemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD, true);
+    itemModel.SetAutoScale(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    itemModel.SetAutoScale(Referenced::RawPtr(frameNode), false);
+    itemModel.CreateFrameNode(0, true);
+    EXPECT_EQ(pattern->GetListItemStyle(), V2::ListItemStyle::CARD);
 }
 } // namespace OHOS::Ace::NG

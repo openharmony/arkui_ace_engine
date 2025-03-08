@@ -36,7 +36,7 @@ void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
     UINode::Build(extraInfos);
 }
 
-void CustomNode::Render()
+bool CustomNode::Render(int64_t deadline)
 {
     // NOTE: this function will be re-enter, we need backup needMarkParent_ first and restore it later.
     bool needMarkParentBak = needMarkParent_;
@@ -44,9 +44,13 @@ void CustomNode::Render()
     if (renderFunction_) {
         RenderFunction renderFunction = nullptr;
         std::swap(renderFunction, renderFunction_);
-        {
-            ACE_SCOPED_TRACE("CustomNode:OnAppear");
+        if (!CheckFireOnAppear()) {
+            ACE_LAYOUT_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
+            if (deadline > 0 && GetSysTimestamp() > deadline) {
+                std::swap(renderFunction, renderFunction_);
+                return false;
+            }
         }
         {
             int32_t id = -1;
@@ -54,20 +58,27 @@ void CustomNode::Render()
                 id = Container::CurrentId();
             }
             COMPONENT_CREATION_DURATION(id);
-            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d]", GetJSViewName().c_str(), GetId(),
-                GetParent() ? GetParent()->GetId() : 0);
+            ACE_LAYOUT_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d][frameRound:%d]",
+                GetJSViewName().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0, prebuildFrameRounds_);
             // first create child node and wrapper.
-            ScopedViewStackProcessor scopedViewStackProcessor;
+            ScopedViewStackProcessor scopedViewStackProcessor(prebuildViewStackProcessor_);
             auto parent = GetParent();
             bool parentNeedExportTexture = parent ? parent->IsNeedExportTexture() : false;
             ViewStackProcessor::GetInstance()->SetIsExportTexture(parentNeedExportTexture || IsNeedExportTexture());
-            auto child = renderFunction();
+            bool isTimeout = false;
+            auto child = renderFunction(deadline, isTimeout);
+            if (isTimeout) {
+                prebuildFrameRounds_++;
+                std::swap(renderFunction, renderFunction_);
+                scopedViewStackProcessor.SwapViewStackProcessor(prebuildViewStackProcessor_);
+                return false;
+            }
             if (child) {
                 child->MountToParent(Claim(this));
             }
         }
         {
-            ACE_SCOPED_TRACE("CustomNode::DidBuild");
+            ACE_LAYOUT_SCOPED_TRACE("CustomNode::DidBuild");
             FireDidBuild();
         }
     }
@@ -75,6 +86,7 @@ void CustomNode::Render()
         FireRecycleRenderFunc();
     }
     needMarkParent_ = needMarkParentBak;
+    return true;
 }
 
 void CustomNode::FireCustomDisappear()
@@ -94,6 +106,7 @@ void CustomNode::FlushReload()
     CHECK_NULL_VOID(completeReloadFunc_);
     Clean();
     renderFunction_ = completeReloadFunc_;
+    executeFireOnAppear_ = false;
     Build(nullptr);
 }
 
@@ -102,7 +115,9 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
     if (GetSysTimestamp() > deadline) {
         return false;
     }
-    Render();
+    if (!Render(deadline)) {
+        return false;
+    }
     return UINode::RenderCustomChild(deadline);
 }
 
@@ -257,6 +272,15 @@ void CustomNode::DumpInfo()
         if (decoratorInfo != nullptr) {
             DumpDecoratorInfo(decoratorInfo);
         }
+    }
+}
+
+void CustomNode::OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
+{
+    if (isDestroying && cleanStatus) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddPendingDeleteCustomNode(Claim(this));
     }
 }
 } // namespace OHOS::Ace::NG

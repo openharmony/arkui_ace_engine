@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 void CheckLayoutConstraint(LayoutConstraintF& constraint, const RefPtr<FrameNode>& menuWrapper)
@@ -27,10 +28,9 @@ void CheckLayoutConstraint(LayoutConstraintF& constraint, const RefPtr<FrameNode
     menuWrapperPattern->SetChildLayoutConstraint(constraint);
 
     CHECK_NULL_VOID(menuWrapperPattern->GetIsFirstShow());
-    auto currentId = Container::CurrentId();
-    auto parentContainerId =
-        currentId >= MIN_SUBCONTAINER_ID ? SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
-    auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
+    auto pipeline = menuWrapper->GetContextRefPtr();
+    auto currentId = pipeline ? pipeline->GetInstanceId() : Container::CurrentId();
+    auto subWindow = SubwindowManager::GetInstance()->GetSubwindowByType(currentId, SubwindowType::TYPE_MENU);
     CHECK_NULL_VOID(subWindow);
     auto subwindowRect = subWindow->GetRect();
     // after the size of subwindow is changed, flush layout before updating windowSize to root node will result in an

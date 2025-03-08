@@ -17,6 +17,7 @@
 
 #include "base/log/jank_frame_report.h"
 #include "core/common/container.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -93,6 +94,16 @@ void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
 
 bool Animator::AttachSchedulerOnContainer()
 {
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    if (!Container::CheckRunOnThreadByThreadId(currentId, false)) {
+        auto localContainerId = ContainerScope::CurrentLocalId();
+        if (localContainerId > 0 && Container::CheckRunOnThreadByThreadId(localContainerId, false)) {
+            currentId = localContainerId;
+        } else {
+            return false;
+        }
+    }
+    ContainerScope scope(currentId);
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "animator binds to context %{public}d, id:%{public}d", pipeline->GetInstanceId(),

@@ -14,7 +14,9 @@
  */
 #include "core/interfaces/native/node/select_modifier.h"
 
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -112,6 +114,26 @@ void SetMenuAlign(
         menuAlignObj.offset = DimensionOffset(dx, dy);
     }
     SelectModelNG::SetMenuAlign(frameNode, menuAlignObj);
+}
+
+void SetAvoidance(ArkUINodeHandle node, ArkUI_Int32 modeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::Avoidance avoidance;
+    switch (modeValue) {
+        case static_cast<ArkUI_Int32>(OHOS::Ace::AvoidanceMode::COVER_TARGET):
+            avoidance.mode = OHOS::Ace::AvoidanceMode::COVER_TARGET;
+            break;
+        case static_cast<ArkUI_Int32>(OHOS::Ace::AvoidanceMode::AVOID_AROUND_TARGET):
+            avoidance.mode = OHOS::Ace::AvoidanceMode::AVOID_AROUND_TARGET;
+            break;
+        default:
+            avoidance.mode = OHOS::Ace::AvoidanceMode::COVER_TARGET;
+            break;
+    }
+
+    SelectModelNG::SetAvoidance(frameNode, avoidance);
 }
 
 void SetFont(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
@@ -311,6 +333,15 @@ void ResetMenuAlign(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     MenuAlign menuAlignObj;
     SelectModelNG::SetMenuAlign(frameNode, menuAlignObj);
+}
+
+void ResetAvoidance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::Avoidance avoidance;
+    avoidance.mode = OHOS::Ace::AvoidanceMode::COVER_TARGET;
+    SelectModelNG::SetAvoidance(frameNode, avoidance);
 }
 
 void ResetFont(ArkUINodeHandle node)
@@ -617,6 +648,30 @@ void ResetSelectDirection(ArkUINodeHandle node)
     SelectModelNG::SetLayoutDirection(frameNode, DEFAULT_SELECT_DIRECTION);
 }
 
+void SetSelectDividerStyle(ArkUINodeHandle node, ArkUIMenuDividerOptions* dividerInfo)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    NG::SelectDivider divider;
+    divider.isDividerStyle = true;
+    divider.strokeWidth = Dimension(dividerInfo->strokeWidth.value,
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->strokeWidth.units));
+    divider.color = Color(dividerInfo->color);
+    divider.startMargin = Dimension(dividerInfo->startMargin.value,
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->startMargin.units));
+    divider.endMargin = Dimension(dividerInfo->endMargin.value,
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->endMargin.units));
+    DividerMode mode = dividerInfo->mode == 1 ? DividerMode::EMBEDDED_IN_MENU: DividerMode::FLOATING_ABOVE_MENU;
+    SelectModelNG::SetDividerStyle(frameNode, divider, mode);
+}
+
+void ResetSelectDividerStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    SelectModelNG::ResetDividerStyle(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -632,6 +687,7 @@ const ArkUISelectModifier* GetSelectModifier()
         .setSelectedOptionFontColor = SetSelectedOptionFontColor,
         .setArrowPosition = SetArrowPosition,
         .setMenuAlign = SetMenuAlign,
+        .setAvoidance = SetAvoidance,
         .setFont = SetFont,
         .setOptionFont = SetOptionFont,
         .setSelectedOptionFont = SetSelectedOptionFont,
@@ -645,6 +701,7 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetSelectedOptionFontColor = ResetSelectedOptionFontColor,
         .resetArrowPosition = ResetArrowPosition,
         .resetMenuAlign = ResetMenuAlign,
+        .resetAvoidance = ResetAvoidance,
         .resetFont = ResetFont,
         .resetOptionFont = ResetOptionFont,
         .resetSelectedOptionFont = ResetSelectedOptionFont,
@@ -672,6 +729,8 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetSelectDividerNull = ResetSelectDividerNull,
         .setSelectDirection = SetSelectDirection,
         .resetSelectDirection = ResetSelectDirection,
+        .setSelectDividerStyle = SetSelectDividerStyle,
+        .resetSelectDividerStyle = ResetSelectDividerStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -692,6 +751,7 @@ const CJUISelectModifier* GetCJUISelectModifier()
         .setSelectedOptionFontColor = SetSelectedOptionFontColor,
         .setArrowPosition = SetArrowPosition,
         .setMenuAlign = SetMenuAlign,
+        .setAvoidance = SetAvoidance,
         .setFont = SetFont,
         .setOptionFont = SetOptionFont,
         .setSelectedOptionFont = SetSelectedOptionFont,
@@ -705,6 +765,7 @@ const CJUISelectModifier* GetCJUISelectModifier()
         .resetSelectedOptionFontColor = ResetSelectedOptionFontColor,
         .resetArrowPosition = ResetArrowPosition,
         .resetMenuAlign = ResetMenuAlign,
+        .resetAvoidance = ResetAvoidance,
         .resetFont = ResetFont,
         .resetOptionFont = ResetOptionFont,
         .resetSelectedOptionFont = ResetSelectedOptionFont,

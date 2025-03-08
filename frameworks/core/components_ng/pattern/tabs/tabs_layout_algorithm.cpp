@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/measure_utils.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SWIPER_INDEX = 0;
@@ -125,7 +128,7 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(dividerOffset);
         dividerWrapper->Layout();
 
-        auto tabBarWidth = tabBarWrapper->GetGeometryNode()->GetFrameSize().Width();
+        auto tabBarWidth = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
         OffsetF tabBarOffset =
             OffsetF((tabsWidth - offsetList[TAB_BAR_INDEX].GetX() - tabBarWidth), offsetList[TAB_BAR_INDEX].GetY());
         tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(tabBarOffset);

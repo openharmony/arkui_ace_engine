@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,11 +48,7 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        if (SwiperIndicatorUtils::GetSwiperIndicatorType() == SwiperIndicatorType::ARC_DOT) {
-            return MakeRefPtr<CircleDotIndicatorPaintProperty>();
-        }
-
-        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        if (swiperIndicatorType_ == SwiperIndicatorType::DOT) {
             return MakeRefPtr<DotIndicatorPaintProperty>();
         } else {
             return MakeRefPtr<PaintProperty>();
@@ -75,7 +71,7 @@ public:
             indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
             indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
 
-            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
                 swiperPattern->DisplayIndicatorTotalCount() : swiperPattern->TotalCount();
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
@@ -123,9 +119,9 @@ public:
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
-        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
             swiperLayoutProperty->GetSwipeByGroup().value_or(false) ?
-            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate();
+            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate(true);
         paintMethod->SetTouchBottomPageRate(currentTurnPageRate);
         paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
         mouseClickIndex_ = std::nullopt;
@@ -239,6 +235,11 @@ public:
     {
         return 0.0;
     }
+    virtual float GetEndAngle(const PointF& conter, const PointF& point, float startAngle)
+    {
+        return 0.0;
+    }
+    virtual void UpadateStartAngle() {};
     virtual void InitAccessibilityFocusEvent(){};
     virtual Axis GetDirection() const;
     virtual bool GetDotCurrentOffset(OffsetF& offset, float indicatorWidth, float indicatorHeight);
@@ -300,7 +301,6 @@ private:
     void UpdateFocusable() const;
     void CheckDragAndUpdate(
         const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
-    std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex);
 
     double GetIndicatorDragAngleThreshold(bool isMaxAngle);
     RefPtr<ClickEvent> clickEvent_;
@@ -334,7 +334,8 @@ private:
 protected:
     OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
     OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
-    virtual void FireChangeEvent(int32_t index) const {}
+    virtual void FireChangeEvent() const {}
+    virtual void FireIndicatorIndexChangeEvent(int32_t index) const {}
     virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
     virtual void ShowPrevious();
     virtual void ShowNext();
@@ -345,6 +346,8 @@ protected:
     virtual int32_t GetCurrentShownIndex() const;
     virtual int32_t DisplayIndicatorTotalCount() const;
     virtual bool IsLoop() const;
+    virtual int32_t GetTouchCurrentIndex() const;
+    virtual std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex);
     virtual void HandleLongDragUpdate(const TouchLocationInfo& info);
 
     RefPtr<SwiperPattern> GetSwiperPattern() const
@@ -431,8 +434,6 @@ protected:
     RectF CalcBoundsRect() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();
-
-    int32_t lastNotifyIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

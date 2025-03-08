@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/sliding_panel_model_impl.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
@@ -446,6 +447,9 @@ void JSSlidingPanel::SetFullHeight(const JSCallbackInfo& info)
 
 void JSSlidingPanel::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSSlidingPanel][pop]", &JSSlidingPanel::Pop);
+    }
     SlidingPanelModel::GetInstance()->Pop();
 }
 

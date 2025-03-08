@@ -84,6 +84,7 @@ public:
     void MarkIsSelected(bool isSelected);
     void SetButtonPress(bool value);
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -151,7 +152,6 @@ private:
     bool isPress_ = false;
     bool isSetClickedColor_ = false;
     bool IsNeedToHandleHoverOpacity();
-    bool isTouchPreventDefault_ = false;
     bool isTextFadeOut_ = false;
     bool isHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);

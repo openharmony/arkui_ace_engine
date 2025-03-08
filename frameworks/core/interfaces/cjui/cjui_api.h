@@ -456,6 +456,8 @@ struct CJUICommonModifier {
     ArkUI_CharPtr (*getAccessibilityRole)(ArkUINodeHandle node);
     void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut);
     void (*resetFocusScopeId)(ArkUINodeHandle node);
+    void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
+    void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
     void (*setFocusScopePriority)(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority);
     void (*resetFocusScopePriority)(ArkUINodeHandle node);
     void (*setPixelRound)(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length);
@@ -1025,6 +1027,15 @@ struct CJUISwiperModifier {
     void (*resetSwiperOnGestureSwipe)(ArkUINodeHandle node);
     void (*setSwiperOnSelected)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnSelected)(ArkUINodeHandle node);
+    void (*setSwiperMinSize)(ArkUINodeHandle node, ArkUI_Float32 minSizeValue, ArkUI_Int32 minSizeUnit);
+    void (*resetSwiperMinSize)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getSwiperMinSize)(ArkUINodeHandle node);
+    void (*setSwiperDigitIndicatorStyle)(ArkUINodeHandle node, ArkUISwiperDigitIndicator* swiperIndicator);
+    void (*getSwiperDigitIndicator)(ArkUINodeHandle node, ArkUISwiperDigitIndicator* swiperIndicator);
+    ArkUISwiperIndicatorType (*getIndicatorType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperSwipeByGroup)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getSwiperDisplayMode)(ArkUINodeHandle node);
+    ArkUISwiperArrowStyle (*getSwiperArrowStyle)(ArkUINodeHandle node);
 };
 
 struct CJUISwiperControllerModifier {
@@ -1322,6 +1333,8 @@ struct CJUITabsModifier {
     void (*resetAnimateMode)(ArkUINodeHandle node);
     void (*setBarBackgroundEffect)(ArkUINodeHandle node, ArkUITabBarBackgroundEffect* effectOption);
     void (*resetBarBackgroundEffect)(ArkUINodeHandle node);
+    void (*setTabsOnSelected)(ArkUINodeHandle node, void* callback);
+    void (*resetTabsOnSelected)(ArkUINodeHandle node);
 };
 
 struct CJUIStepperItemModifier {
@@ -1859,7 +1872,24 @@ struct CJUIWebModifier {
     void (*setWebOptions)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setWebSrcResources)(ArkUINodeHandle node, ArkUI_Int32 id, ArkUI_Int32 type, ArkUI_CharPtr name,
         ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
-    void (*setWebMixedMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setJavaScriptAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetJavaScriptAccess)(ArkUINodeHandle node);
+    void (*setFileAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetFileAccessEnabled)(ArkUINodeHandle node);
+    void (*setDomStorageAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetDomStorageAccessEnabled)(ArkUINodeHandle node);
+    void (*setMixedMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetMixedMode)(ArkUINodeHandle node);
+    void (*setZoomAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetZoomAccessEnabled)(ArkUINodeHandle node);
+    void (*setCacheMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetCacheMode)(ArkUINodeHandle node);
+    void (*setDarkMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDarkMode)(ArkUINodeHandle node);
+    void (*setMultiWindowAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetMultiWindowAccessEnabled)(ArkUINodeHandle node);
+    void (*setAllowWindowOpenMethod)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAllowWindowOpenMethod)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
@@ -2132,6 +2162,8 @@ struct CJUINavigationModifier {
     void (*resetNavBarWidth)(ArkUINodeHandle node);
     void (*setNavIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetNavIgnoreLayoutSafeArea)(ArkUINodeHandle node);
+    void (*setEnableToolBarAdaptation)(ArkUINodeHandle node, ArkUI_Bool enbale);
+    void (*resetEnableToolBarAdaptation)(ArkUINodeHandle node);
 };
 
 struct CJUINavRouterModifier {
@@ -2562,6 +2594,11 @@ struct CJUISymbolGlyphModifier {
     void (*resetEffectStrategy)(ArkUINodeHandle node);
     void (*setSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 copyOption);
     void (*resetSymbolGlyphInitialize)(ArkUINodeHandle node);
+    void (*setMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 minFontScale);
+    void (*resetMinFontScale)(ArkUINodeHandle node);
+    void (*setMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale);
+    void (*resetMaxFontScale)(ArkUINodeHandle node);
+    void (*setCustomSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 copyOption, ArkUI_CharPtr fontFamily);
 };
 
 struct CJUISymbolSpanModifier {
@@ -2577,6 +2614,7 @@ struct CJUISymbolSpanModifier {
     void (*setSymbolSpanEffectStrategy)(ArkUINodeHandle node, ArkUI_Uint32 effectStrategy);
     void (*resetSymbolSpanEffectStrategy)(ArkUINodeHandle node);
     void (*setSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId);
+    void (*setCustomSymbolSpanId)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
 };
 
 struct CJUIComponent3DModifier {
@@ -2746,6 +2784,8 @@ struct CJUISelectModifier {
     void (*resetSelectDividerNull)(ArkUINodeHandle node);
     void (*setSelectDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetSelectDirection)(ArkUINodeHandle node);
+    void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 mode);
+    void (*resetAvoidance)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/
@@ -3073,7 +3113,7 @@ struct CJUIFrameNodeModifier {
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*clearChildren)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getChildrenCount)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
-    ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Bool isExpanded);
+    ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 expandMode);
     ArkUINodeHandle (*getFirst)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getNextSibling)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getPreviousSibling)(ArkUINodeHandle node, ArkUI_Bool isExpanded);

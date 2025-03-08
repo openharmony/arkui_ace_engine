@@ -47,7 +47,14 @@ JSRef<JSObject> GenConstraintNG(const NG::LayoutConstraintF& parentConstraint)
     auto minSize = parentConstraint.minSize;
     auto maxSize = parentConstraint.maxSize;
     JSRef<JSObject> constraint = JSRef<JSObject>::New();
+    constraint->SetProperty<double>("minWidth", 0.0f);
+    constraint->SetProperty<double>("minHeight", 0.0f);
+    constraint->SetProperty<double>("maxWidth", 0.0f);
+    constraint->SetProperty<double>("maxHeight", 0.0f);
     auto pipeline = PipelineBase::GetCurrentContext();
+    if (!pipeline) {
+        return constraint;
+    }
     constraint->SetProperty<double>("minWidth", minSize.Width() / pipeline->GetDipScale());
     constraint->SetProperty<double>("minHeight", minSize.Height() / pipeline->GetDipScale());
     constraint->SetProperty<double>("maxWidth", maxSize.Width() / pipeline->GetDipScale());
@@ -59,8 +66,7 @@ JSRef<JSObject> GenPlaceChildrenConstraintNG(const NG::SizeF& size, RefPtr<NG::L
 {
     JSRef<JSObject> constraint = JSRef<JSObject>::New();
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, JSRef<JSObject>::New());
-    if (!layoutProperty) {
+    if (!layoutProperty || !pipeline) {
         constraint->SetProperty<double>("minWidth", 0.0f);
         constraint->SetProperty<double>("minHeight", 0.0f);
         constraint->SetProperty<double>("maxWidth", 0.0f);
@@ -196,7 +202,8 @@ JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
     const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
     const std::unique_ptr<NG::PaddingProperty> defaultMargin = std::make_unique<NG::MarginProperty>();
     const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
-    if (!layoutProperty) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (!layoutProperty || !pipeline) {
         selfLayoutInfo->SetPropertyObject("borderWidth", GenEdgeWidths(defaultEdgeWidth));
         selfLayoutInfo->SetPropertyObject("margin", GenMargin(defaultPadding));
         selfLayoutInfo->SetPropertyObject("padding", GenPadding(defaultPadding));
@@ -205,7 +212,6 @@ JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
         return selfLayoutInfo;
     }
     auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
-    auto pipeline = PipelineBase::GetCurrentContext();
     if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         layoutProperty = parentNode->GetLayoutProperty();
     }

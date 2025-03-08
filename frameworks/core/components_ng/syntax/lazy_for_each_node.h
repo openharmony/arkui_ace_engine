@@ -132,6 +132,12 @@ public:
             isActive_ = active;
         }
     }
+    void SetDestroying(bool isDestroying = true, bool cleanStatus = true) override
+    {
+        if (builder_) {
+            builder_->SetDestroying(isDestroying, cleanStatus);
+        }
+    }
     void PaintDebugBoundaryTreeAll(bool flag) override
     {
         if (builder_) {
@@ -159,6 +165,8 @@ public:
         }
     }
 
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
     void FireOnMove(int32_t from, int32_t to) override;

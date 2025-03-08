@@ -16,7 +16,9 @@
 #include "gtest/gtest.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#define private public
 #include "core/components_ng/pattern/web/touch_event_listener.h"
+#undef private
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -64,6 +66,7 @@ HWTEST_F(TouchEventListenerTest, OnTouchEvent_001, TestSize.Level1)
     WeakPtr<NG::Pattern> patternSet;
     touchEventListener.SetPatternToListener(patternSet);
     touchEventListener.OnTouchEvent();
+    EXPECT_EQ(touchEventListener.pattern_.Upgrade(), nullptr);
 }
 
 /**

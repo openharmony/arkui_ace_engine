@@ -25,6 +25,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,7 +33,8 @@ enum class Direction {
     PRE = 0,
     NEXT,
 };
-using ChangeIndicatorEvent = std::function<void(int32_t index)>;
+using ChangeIndicatorEvent = std::function<void()>;
+using IndicatorIndexChangeEvent = std::function<void(int32_t index)>;
 using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeEventWithPreIndex = std::function<void(int32_t preIndex, int32_t currentIndex)>;
@@ -60,6 +62,11 @@ public:
     void SetIndicatorOnChange(ChangeIndicatorEvent&& changeEvent)
     {
         changeIndicatorEvent_ = std::move(changeEvent);
+    }
+
+    void SetIndicatorIndexChangeEvent(IndicatorIndexChangeEvent&& indicatorIndexChangeEvent)
+    {
+        indicatorIndexChangeEvent_ = std::move(indicatorIndexChangeEvent);
     }
 
     void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
@@ -170,7 +177,14 @@ public:
     void FireIndicatorChangeEvent(int32_t index) const
     {
         if (changeIndicatorEvent_) {
-            changeIndicatorEvent_(index);
+            changeIndicatorEvent_();
+        }
+    }
+
+    void FireIndicatorIndexChangeEvent(int32_t index) const
+    {
+        if (indicatorIndexChangeEvent_) {
+            indicatorIndexChangeEvent_(index);
         }
     }
 
@@ -303,6 +317,7 @@ private:
     std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
+    IndicatorIndexChangeEvent indicatorIndexChangeEvent_;
     std::list<AnimationStartEventPtr> animationStartEvents_;
     std::list<AnimationEndEventPtr> animationEndEvents_;
     GestureSwipeEvent gestureSwipeEvent_;

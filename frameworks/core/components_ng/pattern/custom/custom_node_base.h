@@ -113,6 +113,7 @@ protected:
     std::string jsViewName_;
     ExtraInfo extraInfo_;
     bool isV2_ = false;
+    bool executeFireOnAppear_ = false;
 
 private:
     std::function<void()> updateFunc_;
@@ -133,7 +134,6 @@ private:
     std::function<void()> onRecycleFunc_;
     std::function<void(void*)> onReuseFunc_;
     bool needRebuild_ = false;
-    bool executeFireOnAppear_ = false;
     RecycleNodeInfo recycleInfo_;
 };
 } // namespace OHOS::Ace::NG

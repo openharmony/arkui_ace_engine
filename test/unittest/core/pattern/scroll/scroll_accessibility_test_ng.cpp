@@ -39,9 +39,8 @@ HWTEST_F(ScrollAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
      */
     EXPECT_TRUE(pattern_->IsAtTop());
     accessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_FORWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step2. scroll to middle
@@ -50,10 +49,8 @@ HWTEST_F(ScrollAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_FORWARD, AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step3. scroll to bottom
@@ -61,9 +58,8 @@ HWTEST_F(ScrollAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -141,7 +137,8 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.steps: step2. Test SetSpecificSupportAction
      */
     accessibilityProperty_->ResetSupportAction();
-    EXPECT_EQ(GetActions(accessibilityProperty_), 0);
+    std::unordered_set<AceAction> expectedActions = {};
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step3. Test ActActionScrollBackward/ActActionScrollForward

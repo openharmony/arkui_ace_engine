@@ -904,7 +904,7 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleBlurEvent001, TestSize.Level1)
     richEditorPattern->isCustomKeyboardAttached_ = true;
     focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
     richEditorPattern->HandleBlurEvent();
-    EXPECT_EQ(richEditorPattern->isMoveCaretAnywhere_, false);
+    EXPECT_EQ(richEditorPattern->isEditing_, false);
 }
 
 /**
@@ -1266,6 +1266,7 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowAIWrite005, TestSize.Level1)
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     theme->aiWriteBundleName_ = "bundleName";
     theme->aiWriteAbilityName_ = "abilityName";
     auto result = richEditorPattern->IsShowAIWrite();
@@ -1297,6 +1298,7 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowAIWrite006, TestSize.Level1)
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     theme->aiWriteBundleName_ = "bundleName";
     theme->aiWriteAbilityName_ = "abilityName";
     theme->aiWriteIsSupport_ = "true";
@@ -1321,6 +1323,7 @@ HWTEST_F(RichEditorPatternTestOneNg, IsMenuItemShow001, TestSize.Level1)
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     theme->searchIsSupport_ = true;
     theme->translateIsSupport_ = true;
 
@@ -1351,6 +1354,7 @@ HWTEST_F(RichEditorPatternTestOneNg, IsMenuItemShow002, TestSize.Level1)
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     theme->searchIsSupport_ = true;
     auto showSearch = richEditorPattern->IsShowSearch();
     EXPECT_TRUE(showSearch);

@@ -1046,7 +1046,7 @@ class ArkThemeScopeManager {
     static getInstance() {
         if (!ArkThemeScopeManager.instance) {
             ArkThemeScopeManager.instance = new ArkThemeScopeManager();
-            PUV2ViewBase.setArkThemeScopeManager(ArkThemeScopeManager.instance);
+            ViewBuildNodeBase.setArkThemeScopeManager(ArkThemeScopeManager.instance);
         }
         return ArkThemeScopeManager.instance;
     }
@@ -1077,25 +1077,11 @@ ArkThemeWhiteList.whiteList = [
     'AlphabetIndexer',
     'Badge',
     'Button',
-    'Checkbox',
-    'CheckboxGroup',
-    'Counter',
     'DataPanel',
-    'DatePicker',
-    'LoadingProgress',
-    'Menu',
-    'MenuItem',
     'PatternLock',
-    'Progress',
     'QRCode',
     'Radio',
     'Scroll',
-    'Select',
-    'Slider',
     'Swiper',
     'Text',
-    'TextClock',
-    'TextPicker',
-    'TimePicker',
-    'Toggle',
 ];

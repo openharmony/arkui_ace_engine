@@ -2091,4 +2091,80 @@ HWTEST_F(WaterFlowSWTest, Illegal005, TestSize.Level1)
         info_->lanes_[1][0].ToString(), "{StartPos: 0.000000 EndPos: 800.000000 Items [18 19 20 21 22 23 24 25 ] }");
     EXPECT_EQ(info_->idxToLane_.size(), 8);
 }
+
+/**
+ * @tc.name: EdgeEffect001
+ * @tc.desc: only have footer, test Spring EdgeEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, EdgeEffect001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 50.0f);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    GestureEvent gesture;
+    gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    gesture.SetMainVelocity(1000.0f);
+    gesture.SetMainDelta(100.0f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(gesture);
+    scrollable->HandleDragUpdate(gesture);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 22.279572);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(gesture);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 45.735794);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 22.867897);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+}
+
+/**
+ * @tc.name: UpdateAndJump001
+ * @tc.desc: call ScrollToIndex after updating sections.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, UpdateAndJump001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(1000.f));
+    CreateWaterFlowItems(32);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_15);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 7);
+
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 8, .crossCount = 2, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC } };
+    secObj->ChangeData(1, 1, newSection);
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.0f), CalcLength(Dimension(1000.0f))));
+    pattern_->ScrollToIndex(8, false, ScrollAlign::START);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+
+    EXPECT_EQ(info_->startIndex_, 7);
+    EXPECT_EQ(info_->endIndex_, 16);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -200.000000 EndPos: -200.000000 empty}");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -400.000000 EndPos: -400.000000 empty}");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 0.000000 EndPos: 500.000000 Items [7 10 11 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 0.000000 EndPos: 300.000000 Items [8 9 ] }");
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 500.000000 EndPos: 900.000000 Items [12 14 15 ] }");
+    EXPECT_EQ(info_->lanes_[2][1].ToString(), "{StartPos: 500.000000 EndPos: 700.000000 Items [13 ] }");
+}
 } // namespace OHOS::Ace::NG

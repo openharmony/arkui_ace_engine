@@ -39,8 +39,8 @@ public:
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
     virtual void SetExpandingMode(const NG::SubMenuExpandingMode& expandingMode) {};
-    virtual void SetItemDivider(const V2::ItemDivider& divider) = 0;
-    virtual void SetItemGroupDivider(const V2::ItemDivider& divider) = 0;
+    virtual void SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode) = 0;
+    virtual void SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode) = 0;
 private:
     static std::unique_ptr<MenuModel> instance_;
     static std::mutex mutex_;

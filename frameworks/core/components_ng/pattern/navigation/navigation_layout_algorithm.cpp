@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -107,11 +108,6 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     OffsetF& returnNavBarOffset)
 {
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
-    bool isZeroNavbarWidth = false;
-    if (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
-        navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
-        isZeroNavbarWidth = true;
-    }
     auto contentNode = hostNode->GetContentNode();
     CHECK_NULL_RETURN(contentNode, 0.0f);
     auto navBarNode = hostNode->GetNavBarNode();
@@ -124,7 +120,10 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
     bool isNavBarInRight = (position == NavBarPosition::END && !AceApplicationInfo::GetInstance().IsRightToLeft()) ||
         (position == NavBarPosition::START && AceApplicationInfo::GetInstance().IsRightToLeft());
-    if (isNavBarInRight) {
+    bool isHideNavBar = navigationLayoutProperty->GetHideNavBar().value_or(false);
+    NavigationMode navigationMode = navigationPattern->GetNavigationMode();
+    if (isNavBarInRight && !isHideNavBar && navigationMode == NavigationMode::SPLIT) {
+        // only in SPLIT mode can navBar show on the left or right side of navigation, otherwise it is centered.
         navBarOffset.SetX(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width());
     }
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
@@ -133,7 +132,7 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     geometryNode->SetMarginFrameOffset(navBarOffset);
     navBarWrapper->Layout();
     returnNavBarOffset = navBarOffset;
-    return isZeroNavbarWidth ? 0.0f : geometryNode->GetFrameSize().Width();
+    return isHideNavBar && navigationMode == NavigationMode::SPLIT ? 0.0f : geometryNode->GetFrameSize().Width();
 }
 
 float LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,

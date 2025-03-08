@@ -62,6 +62,9 @@ void HandleGestureEvent(ArkUINodeEvent* event);
 int32_t SetGestureInterrupterToNode(
     ArkUI_NodeHandle node,  ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
 
+int32_t SetGestureInterrupterToNodeWithUserData(ArkUI_NodeHandle node, void* userData,
+    ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
+
 int32_t SetInnerGestureParallelTo(ArkUI_NodeHandle node, void* userData,
     ArkUI_GestureRecognizer* (*parallelInnerGesture)(ArkUI_ParallelInnerGestureEvent* event));
 

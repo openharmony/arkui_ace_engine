@@ -165,7 +165,7 @@ void JSUIExtensionProxy::AddCallbackToList(napi_env env, napi_value cb,
     napi_close_handle_scope(env, scope);
 }
 
-void JSUIExtensionProxy::DeleteCallbackFromList(int argc, napi_env env, napi_value cb, RegisterType type)
+void JSUIExtensionProxy::DeleteCallbackFromList(uint32_t argc, napi_env env, napi_value cb, RegisterType type)
 {
     if (argc == 1) {
         if (type == RegisterType::SYNC) {

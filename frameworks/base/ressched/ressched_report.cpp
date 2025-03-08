@@ -27,6 +27,8 @@ constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
 constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
+constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
+constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
@@ -71,6 +73,9 @@ constexpr char KEY_CODE[] = "key_code";
 constexpr char AXIS_OFF[] = "axis_off";
 constexpr char AXIS_NORMAL_UP_SPEED[] = "0.0";
 constexpr char AXIS_EVENT_TYPE[] = "axis_event_type";
+constexpr char FROM_PAGE_INFO[] = "from_page";
+constexpr char TO_PAGE_INFO[] = "to_page";
+constexpr char TRANSITION_MODE[] = "transition_mode";
 #ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
@@ -92,6 +97,12 @@ ResSchedReport& ResSchedReport::GetInstance()
 {
     static ResSchedReport instance;
     return instance;
+}
+
+ResSchedReport::ResSchedReport()
+{
+    reportDataFunc_ = LoadReportDataFunc();
+    reportSyncEventFunc_ = LoadReportSyncEventFunc();
 }
 
 void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param)
@@ -172,12 +183,28 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
 void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     const std::unordered_map<std::string, std::string>& payload)
 {
-    if (reportDataFunc_ == nullptr) {
-        reportDataFunc_ = LoadReportDataFunc();
+    if (!reportDataFunc_) {
+        LOGD("reportDataFunc_ is null!");
+        return;
     }
-    if (reportDataFunc_ != nullptr) {
-        reportDataFunc_(resType, value, payload);
+    reportDataFunc_(resType, value, payload);
+}
+
+void ResSchedReport::ResScheSyncEventReport(const uint32_t resType, const int64_t value,
+    const std::unordered_map<std::string, std::string>& payload, std::unordered_map<std::string, std::string>& reply)
+{
+    if (!reportSyncEventFunc_) {
+        LOGD("reportSyncEventFunc_ is null!");
+        return;
     }
+    reportSyncEventFunc_(resType, value, payload, reply);
+}
+
+bool ResSchedReport::AppWhiteListCheck(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 0, payload, reply);
+    return reply["result"] == "\"true\"" ? true : false;
 }
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)
@@ -265,11 +292,15 @@ void ResSchedReport::OnKeyEvent(const KeyEvent& event)
 void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce)
 {
     if (enforce) {
-        lastTouchEvent_ = touchEvent;
-        curTouchEvent_ = touchEvent;
-    } else if (curTouchEvent_.GetOffset() != touchEvent.GetOffset()) {
-        lastTouchEvent_ = curTouchEvent_;
-        curTouchEvent_ = touchEvent;
+        lastTouchEvent_.timeStamp = touchEvent.GetTimeStamp();
+        lastTouchEvent_.offset = touchEvent.GetOffset();
+        curTouchEvent_.timeStamp = touchEvent.GetTimeStamp();
+        curTouchEvent_.offset = touchEvent.GetOffset();
+    } else if (curTouchEvent_.offset != touchEvent.GetOffset()) {
+        lastTouchEvent_.timeStamp = curTouchEvent_.timeStamp;
+        lastTouchEvent_.offset = curTouchEvent_.offset;
+        curTouchEvent_.timeStamp = touchEvent.GetTimeStamp();
+        curTouchEvent_.offset = touchEvent.GetOffset();
     }
 }
 
@@ -313,7 +344,7 @@ void ResSchedReport::HandleKeyUp(const KeyEvent& event)
 void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent);
-    averageDistance_ += curTouchEvent_.GetOffset() - lastTouchEvent_.GetOffset();
+    averageDistance_ += curTouchEvent_.offset - lastTouchEvent_.offset;
     if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE &&
         !isInSlide_ && isInTouch_) {
         std::unordered_map<std::string, std::string> payload;
@@ -356,12 +387,12 @@ void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
     RecordTouchEvent(touchEvent);
 }
 
-double ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
-    const TouchEvent& upEventInfo)
+double ResSchedReport::GetUpVelocity(const ResEventInfo& lastMoveInfo,
+    const ResEventInfo& upEventInfo)
 {
-    double distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
-    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(upEventInfo.GetTimeStamp() -
-        lastMoveInfo.GetTimeStamp()).count();
+    double distance = (upEventInfo.offset - lastMoveInfo.offset).GetDistance();
+    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(upEventInfo.timeStamp -
+        lastMoveInfo.timeStamp).count();
     if (time <= 0) {
         return 0.0f;
     }
@@ -409,20 +440,27 @@ void ResSchedReport::HandleAxisEnd(const AxisEvent& axisEvent)
 void ResSchedReport::RecordAxisEvent(const AxisEvent& axisEvent, bool enforce)
 {
     if (enforce) {
-        lastAxisEvent_ = axisEvent;
-        curAxisEvent_ = axisEvent;
+        lastAxisEvent_.timeStamp = axisEvent.time;
+        lastAxisEvent_.offset = axisEvent.ConvertToOffset();
+        lastAxisEvent_.sourceTool = axisEvent.sourceTool;
+        curAxisEvent_.timeStamp = axisEvent.time;
+        curAxisEvent_.offset = axisEvent.ConvertToOffset();
+        curAxisEvent_.sourceTool = axisEvent.sourceTool;
     } else if (axisEvent.ConvertToOffset().GetX() != 0 || axisEvent.ConvertToOffset().GetY() != 0) {
-        lastAxisEvent_ = curAxisEvent_;
-        curAxisEvent_ = axisEvent;
+        lastAxisEvent_.timeStamp = curAxisEvent_.timeStamp;
+        lastAxisEvent_.offset = curAxisEvent_.offset;
+        lastAxisEvent_.sourceTool = curAxisEvent_.sourceTool;
+        curAxisEvent_.timeStamp = axisEvent.time;
+        curAxisEvent_.offset = axisEvent.ConvertToOffset();
+        curAxisEvent_.sourceTool = axisEvent.sourceTool;
     }
 }
 
-double ResSchedReport::GetAxisUpVelocity(const AxisEvent& lastAxisEvent, const AxisEvent& curAxisEvent)
+double ResSchedReport::GetAxisUpVelocity(const ResEventInfo& lastAxisEvent, const ResEventInfo& curAxisEvent)
 {
-    double distance = sqrt(pow(curAxisEvent.ConvertToOffset().GetX(), SQUARE) +
-        pow(curAxisEvent.ConvertToOffset().GetY(), SQUARE));
-    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(curAxisEvent.time -
-        lastAxisEvent.time).count();
+    double distance = curAxisEvent.offset.GetDistance();
+    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(curAxisEvent.timeStamp -
+        lastAxisEvent.timeStamp).count();
     if (time <= 0) {
         return 0.0;
     }
@@ -458,6 +496,22 @@ void ResSchedReport::OnAxisEvent(const AxisEvent& axisEvent)
         default:
             break;
     }
+}
+
+void ResSchedReport::HandlePageTransition(const std::string& fromPage,
+    const std::string& toPage, const std::string& mode)
+{
+    if (fromPage.empty() || toPage.empty()) {
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "rss report page transition empty info:%{public}s, %{public}s",
+            fromPage.c_str(), toPage.c_str());
+        return;
+    }
+    std::unordered_map<std::string, std::string> payload;
+    payload[FROM_PAGE_INFO] = fromPage;
+    payload[TO_PAGE_INFO] = toPage;
+    payload[TRANSITION_MODE] = mode;
+    LoadAceApplicationContext(payload);
+    ResSchedDataReport(RES_TYPE_PAGE_TRANSITION, 0, payload);
 }
 
 ResSchedReportScope::ResSchedReportScope(const std::string& name,

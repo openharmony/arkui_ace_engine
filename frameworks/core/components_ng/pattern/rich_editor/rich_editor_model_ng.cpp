@@ -608,7 +608,11 @@ void RichEditorModelNG::SetMaxLength(FrameNode* frameNode, std::optional<int32_t
 void RichEditorModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxLinesHeight(FLT_MAX);
+    pattern->SetMaxLines(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value);
 }
 
 void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)

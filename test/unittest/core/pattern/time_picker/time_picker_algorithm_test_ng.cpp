@@ -73,6 +73,21 @@ const std::string AM = "上午";
 const std::string PM = "下午";
 constexpr double SECLECTED_TEXTNODE_HEIGHT = 84.0;
 constexpr double OTHER_TEXTNODE_HEIGHT = 54.0;
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 class TimePickerAlgorithmTest : public testing::Test {
 public:
@@ -120,20 +135,11 @@ void TimePickerAlgorithmTest::TearDownTestSuite()
 void TimePickerAlgorithmTest::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            if (type == IconTheme::TypeId()) {
-                return AceType::MakeRefPtr<IconTheme>();
-            } else if (type == DialogTheme::TypeId()) {
-                return AceType::MakeRefPtr<DialogTheme>();
-            } else if (type == PickerTheme::TypeId()) {
-                return MockThemeDefault::GetPickerTheme();
-            } else if (type == ButtonTheme::TypeId()) {
-                return AceType::MakeRefPtr<ButtonTheme>();
-            } else {
-                return nullptr;
-            }
-        });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 

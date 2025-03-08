@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -471,6 +472,44 @@ void ResetBarBackgroundEffect(ArkUINodeHandle node)
     TabsModelNG::SetBarBackgroundEffect(frameNode, effectOption);
 }
 
+void SetTabsOnSelected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnSelected(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnSelected(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnSelected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnSelected(frameNode, nullptr);
+}
+
+void SetCachedMaxCount(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+        mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+        cacheMode = static_cast<TabsCacheMode>(mode);
+    }
+    TabsModelNG::SetCachedMaxCount(frameNode, count, cacheMode);
+}
+
+void ResetCachedMaxCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetCachedMaxCount(frameNode, std::nullopt, TabsCacheMode::CACHE_BOTH_SIDE);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -525,6 +564,10 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
+        .setCachedMaxCount = SetCachedMaxCount,
+        .resetCachedMaxCount = ResetCachedMaxCount,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -580,6 +623,8 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

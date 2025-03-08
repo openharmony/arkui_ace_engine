@@ -18,6 +18,7 @@
 
 #include <atomic>
 #include <string>
+#include <cstdint>
 
 namespace OHOS::Ace {
 
@@ -100,6 +101,7 @@ enum class AnimationInterface : int32_t {
     ANIMATE_TO_IMMEDIATELY,
     KEYFRAME_ANIMATE_TO,
 };
-} // OHOS::Ace
+
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_ANIMATION_ANIMATION_CONSTANTS_H

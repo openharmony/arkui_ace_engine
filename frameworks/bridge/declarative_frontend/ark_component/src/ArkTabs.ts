@@ -73,7 +73,8 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     throw new Error('Method not implemented.');
   }
   onSelected(event: (index: number) => void): TabsAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabsOnSelectedModifier.identity, TabsOnSelectedModifier, event);
+    return this;
   }
   onTabBarClick(event: (index: number) => void): TabsAttribute {
     throw new Error('Method not implemented.');
@@ -153,6 +154,13 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
   }
   height(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, TabHeightModifier.identity, TabHeightModifier, value);
+    return this;
+  }
+  cachedMaxCount(count: number, mode: TabsCacheMode): this {
+    let arkTabsCachedMaxCount = new ArkTabsCachedMaxCount();
+    arkTabsCachedMaxCount.count = count;
+    arkTabsCachedMaxCount.mode = mode;
+    modifierWithKey(this._modifiersWithKeys, CachedMaxCountModifier.identity, CachedMaxCountModifier, arkTabsCachedMaxCount);
     return this;
   }
 }
@@ -512,6 +520,9 @@ class TabClipModifier extends ModifierWithKey<boolean | object> {
 }
 
 class TabEdgeEffectModifier extends ModifierWithKey<EdgeEffect> {
+  constructor(value: EdgeEffect) {
+    super(value);
+  }
   static identity: Symbol = Symbol('tabedgeEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -569,6 +580,38 @@ class TabHeightModifier extends ModifierWithKey<Length> {
     } else {
       getUINativeModule().tabs.setTabHeight(node, this.value);
     }
+  }
+}
+
+class TabsOnSelectedModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsOnSelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnSelected(node);
+    } else {
+      getUINativeModule().tabs.setTabsOnSelected(node, this.value);
+    }
+  }
+}
+
+class CachedMaxCountModifier extends ModifierWithKey<ArkTabsCachedMaxCount> {
+  constructor(value: ArkTabsCachedMaxCount) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('cachedMaxCount');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetCachedMaxCount(node);
+    } else {
+      getUINativeModule().tabs.setCachedMaxCount(node, this.value.count, this.value.mode);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.count === this.stageValue.count && this.value.mode === this.stageValue.mode);
   }
 }
 

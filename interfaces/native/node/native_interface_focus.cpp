@@ -60,6 +60,15 @@ void OH_ArkUI_FocusSetAutoTransfer(ArkUI_ContextHandle uiContext, bool autoTrans
     impl->getNodeModifiers()->getFrameNodeModifier()->setAutoFocusTransfer(context->id, autoTransfer);
 }
 
+void OH_ArkUI_FocusSetKeyProcessingMode(ArkUI_ContextHandle uiContext, ArkUI_KeyProcessingMode mode)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !uiContext) {
+        return;
+    }
+    auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
+    impl->getNodeModifiers()->getFrameNodeModifier()->setKeyProcessingMode(context->id, static_cast<ArkUI_Int32>(mode));
+}
 #ifdef __cplusplus
 };
 #endif

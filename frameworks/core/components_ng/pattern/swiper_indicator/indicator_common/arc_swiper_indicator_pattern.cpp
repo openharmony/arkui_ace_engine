@@ -22,6 +22,7 @@ constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double THREE_QUARTER_CIRCLE_ANGLE = 270.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr float ITEM_PADDING = 5.0f;
+constexpr int32_t OFFSET_ANGLE = 5;
 constexpr float ACTIVE_ITEM_ANGLE = 4.0f;
 constexpr float ADD_HOT_REG_ANGLE = 8.0f;
 constexpr Dimension CIRCLE_DIAMETER_OFFSET = 16.0_vp;
@@ -189,5 +190,93 @@ float ArcSwiperIndicatorPattern::ConvertAngleWithArcDirection(SwiperArcDirection
     }
 
     return result;
+}
+
+void ArcSwiperIndicatorPattern::CalculateCycle(float angle, float startAngle, const PointF& conter, const PointF& point)
+{
+    if (direction_ == SwiperDirection::LEFT) {
+        if (angle < startAngle && !isUpdateCycle_ && CheckPointLocation(conter, point)) {
+            dragCycle_ += static_cast<int32_t>(FULL_CIRCLE_ANGLE);
+            isUpdateCycle_ = true;
+        } else if (angle > startAngle) {
+            isUpdateCycle_ = false;
+        }
+    }
+    if (direction_ == SwiperDirection::RIGHT) {
+        if (angle > startAngle && !isUpdateCycle_ && CheckPointLocation(conter, point)) {
+            dragCycle_ -= static_cast<int32_t>(FULL_CIRCLE_ANGLE);
+            isUpdateCycle_ = true;
+        } else if (angle < startAngle) {
+            isUpdateCycle_ = false;
+        }
+    }
+}
+
+float ArcSwiperIndicatorPattern::GetEndAngle(const PointF& conter, const PointF& point, float startAngle)
+{
+    float angle = GetAngleWithPoint(conter, point);
+    if (isUpageStartAngle_) {
+        if (angle > startAngle + OFFSET_ANGLE) {
+            direction_ = SwiperDirection::LEFT;
+        } else if (angle < startAngle - OFFSET_ANGLE) {
+            direction_ = SwiperDirection::RIGHT;
+        }
+    }
+    CalculateCycle(angle, startAngle, conter, point);
+    angle += dragCycle_;
+    if (isUpageStartAngle_ && direction_!= SwiperDirection::UNKNOWN) {
+        oldEndAngle_ = angle;
+        isUpageStartAngle_ = false;
+    }
+    if (((direction_ == SwiperDirection::LEFT) && angle < oldEndAngle_ - OFFSET_ANGLE) ||
+        ((direction_ == SwiperDirection::RIGHT) && angle > oldEndAngle_ + OFFSET_ANGLE)) {
+        float angle = GetAngleWithPoint(conter, point);
+        if ((direction_ == SwiperDirection::LEFT) && angle < startAngle) {
+            UpadateStartAngle();
+        }
+        if ((direction_ == SwiperDirection::RIGHT) && angle > startAngle) {
+            UpadateStartAngle();
+        }
+    }
+    if ((direction_ == SwiperDirection::LEFT) && (angle > oldEndAngle_)) {
+        oldEndAngle_ = angle;
+    }
+    if ((direction_ == SwiperDirection::RIGHT) && (angle < oldEndAngle_)) {
+        oldEndAngle_ = angle;
+    }
+    if (direction_ == SwiperDirection::UNKNOWN) {
+        angle = startAngle;
+    }
+    return angle;
+}
+
+void ArcSwiperIndicatorPattern::UpadateStartAngle()
+{
+    dragCycle_ = 0;
+    direction_ = SwiperDirection::UNKNOWN;
+    isUpageStartAngle_ = true;
+    isUpdateCycle_ = false;
+    oldEndAngle_ = 0;
+}
+
+bool ArcSwiperIndicatorPattern::CheckPointLocation(const PointF& conter, const PointF& point)
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, false);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, false);
+
+    float centerX = swiperPattern->GetDirection() == Axis::HORIZONTAL ? conter.GetX() : conter.GetY();
+    float centerY = swiperPattern->GetDirection() == Axis::HORIZONTAL ? conter.GetY() : conter.GetX();
+    float pointX = swiperPattern->GetDirection() == Axis::HORIZONTAL ? point.GetX() : point.GetY();
+    float pointY = swiperPattern->GetDirection() == Axis::HORIZONTAL ? point.GetY() : point.GetX();
+    if ((direction_ == SwiperDirection::LEFT) && pointX > centerX && pointY < centerY) {
+        return true;
+    }
+    if ((direction_ == SwiperDirection::RIGHT) && pointX < centerX && pointY < centerY) {
+        return true;
+    }
+
+    return false;
 }
 } // namespace OHOS::Ace::NG

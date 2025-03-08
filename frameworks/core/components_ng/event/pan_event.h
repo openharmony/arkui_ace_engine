@@ -124,6 +124,8 @@ public:
         isExcludedAxis_ = isExcludedAxis;
     }
 
+    void DumpVelocityInfo(int32_t fingerId);
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<PanEvent>> panEvents_;

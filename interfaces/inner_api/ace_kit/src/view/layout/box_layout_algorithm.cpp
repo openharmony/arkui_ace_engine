@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Kit {
 
-void BoxLayoutAlgorithm::Measure()
+void BoxLayoutAlgorithm::Measure(const Kit::LayoutConstraintInfo& contentConstraint)
 {
     auto frameNode = host_.Upgrade();
     if (frameNode) {

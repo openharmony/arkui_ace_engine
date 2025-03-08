@@ -35,6 +35,7 @@ struct NodeConfig {
     std::string inspectorKey;
     float scaleX = 1.0f;
     float scaleY = 1.0f;
+    bool ignoreHostOffset = false;
 };
 
 class JsThirdProviderInteractionOperation : public Accessibility::AccessibilityElementOperator,
@@ -80,7 +81,7 @@ public:
         Accessibility::EventType eventType);
     bool FindAccessibilityNodeInfosByIdFromProvider(
         const int64_t splitElementId, const int32_t mode, const int32_t requestId,
-        std::list<Accessibility::AccessibilityElementInfo>& infos);
+        std::list<Accessibility::AccessibilityElementInfo>& infos, bool ignoreHostOffset = false);
     const WeakPtr<JsAccessibilityManager>& GetHandler() const
     {
         return jsAccessibilityManager_;
@@ -97,6 +98,7 @@ public:
     }
 
 private:
+    void GetHostRectTranslateInfo(NodeConfig& config);
     void GetNodeConfig(NodeConfig& nodeConfig);
     void SetSearchElementInfoByAccessibilityIdResult(
         AccessibilityElementOperatorCallback& callback,
@@ -124,9 +126,11 @@ private:
         int64_t elementId, const AccessibilityElementInfo& nodeInfo, const int32_t action);
     void GetAccessibilityEventInfoFromNativeEvent(
         const ArkUI_AccessibilityEventInfo& nativeEventInfo,
-        OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
+        OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo,
+        bool ignoreHostOffset);
     void GetAccessibilityEventInfoFromNativeEvent(
-        OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
+        OHOS::Accessibility::AccessibilityEventInfo& accessibilityEventInfo,
+        bool ignoreHostOffset);
     bool SendAccessibilitySyncEventToService(
         const OHOS::Accessibility::AccessibilityEventInfo& eventInfo,
         void (*callback)(int32_t errorCode));
@@ -148,6 +152,7 @@ private:
     bool HandleEventByFramework(
         const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
         Accessibility::AccessibilityEventInfo& accessibilityEventInfo);
+    void HandleActionWhenFindNodeFail(const int32_t action);
 
     WeakPtr<AccessibilityProvider> accessibilityProvider_;
     WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;

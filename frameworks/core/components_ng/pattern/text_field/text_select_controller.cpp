@@ -20,7 +20,6 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
-#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 
@@ -110,7 +109,11 @@ void TextSelectController::FitCaretMetricsToTouchPoint(CaretMetricsF& caretMetri
 
 void TextSelectController::FitCaretMetricsToContentRect(CaretMetricsF& caretMetrics)
 {
-    if (GreatNotEqual(caretMetrics.height, contentRect_.Height())) {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    if (GreatNotEqual(caretMetrics.height, contentRect_.Height()) && !textField->IsTextArea()) {
         caretMetrics.offset.SetY(caretMetrics.offset.GetY() + caretMetrics.height - contentRect_.Height());
         caretMetrics.height = contentRect_.Height();
     }
@@ -304,9 +307,8 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
     CHECK_NULL_RETURN(pattern, err);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textField, err);
-    bool smartSelect = false;
     if (!textField->IsUsingMouse()) {
-        smartSelect = AdjustWordSelection(pos, start, end, localOffset);
+        AdjustWordSelection(pos, start, end, localOffset);
     }
 
     GetSubParagraphByOffset(pos, start, end);
@@ -431,6 +433,12 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
             auto dy = handleRect.GetY() + handleRect.Height() - contentBottomBoundary;
             textRect.SetTop(textRect.GetY() - dy);
             handleRect.SetTop(handleRect.GetY() - dy);
+        } else if (LessNotEqual(handleRect.GetY() + handleRect.Height(),
+            contentRect_.GetY() + contentRect_.Height()) &&
+            GreatNotEqual(handleRect.Height(), contentRect_.Height())) {
+            auto dy = contentRect_.GetY() - handleRect.GetY();
+            textRect.SetTop(textRect.GetY() + dy);
+            handleRect.SetTop(handleRect.GetY() + dy);
         }
     }
 
@@ -598,6 +606,7 @@ void TextSelectController::UpdateFirstHandleOffset()
         GetFirstHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::UPSTREAM : TextAffinity::DOWNSTREAM);
     firstHandleInfo_.rect.SetOffset(caretMetrics.offset);
     firstHandleInfo_.rect.SetHeight(caretMetrics.height);
+    firstHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     AdjustHandleOffset(firstHandleInfo_.rect);
     AdjustHandleOffsetWithBoundary(firstHandleInfo_.rect);
 }
@@ -609,6 +618,7 @@ void TextSelectController::UpdateSecondHandleOffset()
         GetSecondHandleIndex(), caretMetrics, HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
     secondHandleInfo_.rect.SetOffset(caretMetrics.offset);
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
+    secondHandleInfo_.rect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     AdjustHandleOffset(secondHandleInfo_.rect);
     AdjustHandleOffsetWithBoundary(secondHandleInfo_.rect);
 }

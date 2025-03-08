@@ -132,6 +132,26 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
 }
 
+void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
+    func = nullptr;
+}
+
+void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
+}
+
 namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
@@ -139,6 +159,8 @@ const ArkUIStateModifier* GetUIStateModifier()
     static const ArkUIStateModifier modifier = {
         .getUIState = GetUIState,
         .setSupportedUIState = SetSupportedUIState,
+        .addSupportedUIState = AddSupportedUIState,
+        .removeSupportedUIState = RemoveSupportedUIState
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -388,6 +410,11 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnKeyPreIme,
     NodeModifier::SetOnFocusAxisEvent,
     NodeModifier::SetOnKeyEventDispatch,
+    nullptr,
+    NodeModifier::SetOnAxisEvent,
+    NodeModifier::SetOnClick,
+    NodeModifier::SetOnHover,
+    NodeModifier::SetOnHoverMove,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -476,9 +503,11 @@ const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnScrollStop,
 };
 
+#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCalendarPickerOnChange,
 };
+#endif
 
 const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
@@ -604,6 +633,12 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnPreDrag,
     NodeModifier::ResetOnKeyPreIme,
     NodeModifier::ResetOnFocusAxisEvent,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnAxisEvent,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnHoverMove,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1934,32 +1969,161 @@ ArkUI_Int32 SetDialogImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
     return CustomDialog::SetImmersiveMode(handle, mode);
 }
 
+ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
+{
+    return CustomDialog::SetLevelOrder(handle, levelOrder);
+}
+
+ArkUI_Int32 RegisterOnWillAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnWillDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillDisappearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidDisappearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle handle, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom,
+    ArkUI_Float32 left, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetDialogBorderWidth(handle, top, right, bottom, left, unit);
+}
+
+ArkUI_Int32 SetDialogBorderColor(ArkUIDialogHandle handle, uint32_t top, uint32_t right, uint32_t bottom, uint32_t left)
+{
+    return CustomDialog::SetDialogBorderColor(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogBorderStyle(ArkUIDialogHandle handle, int32_t top, int32_t right, int32_t bottom, int32_t left)
+{
+    return CustomDialog::SetDialogBorderStyle(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogWidth(ArkUIDialogHandle handle, float width, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetWidth(handle, width, unit);
+}
+
+ArkUI_Int32 SetDialogHeight(ArkUIDialogHandle handle, float height, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetHeight(handle, height, unit);
+}
+
+ArkUI_Int32 SetDialogShadow(ArkUIDialogHandle handle, ArkUI_Int32 shadow)
+{
+    return CustomDialog::SetShadow(handle, shadow);
+}
+
+ArkUI_Int32 SetDialogCustomShadow(ArkUIDialogHandle handle, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
+{
+    return CustomDialog::SetDialogCustomShadow(handle, shadows, length);
+}
+
+ArkUI_Int32 SetDialogBackgroundBlurStyle(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle)
+{
+    return CustomDialog::SetBackgroundBlurStyle(handle, blurStyle);
+}
+
+ArkUI_Int32 SetDialogKeyboardAvoidMode(ArkUIDialogHandle handle, ArkUI_Int32 keyboardAvoidMode)
+{
+    return CustomDialog::SetKeyboardAvoidMode(handle, keyboardAvoidMode);
+}
+
+ArkUI_Int32 EnableDialogHoverMode(ArkUIDialogHandle handle, ArkUI_Bool enableHoverMode)
+{
+    return CustomDialog::EnableHoverMode(handle, enableHoverMode);
+}
+
+ArkUI_Int32 SetDialogHoverModeArea(ArkUIDialogHandle handle, ArkUI_Int32 hoverModeAreaType)
+{
+    return CustomDialog::SetHoverModeArea(handle, hoverModeAreaType);
+}
+
+ArkUI_Int32 SetDialogFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
+{
+    return CustomDialog::SetFocusable(handle, focusable);
+}
+
+ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
+{
+    return CustomDialog::OpenCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void(*callback)(int32_t dialogId))
+{
+    return CustomDialog::UpdateCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
+{
+    return CustomDialog::CloseCustomDialog(dialogId);
+}
+
+ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
+{
+    return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIDialogAPI dialogImpl = {
-        CreateDialog,
-        DisposeDialog,
-        SetDialogContent,
-        RemoveDialogContent,
-        SetDialogContentAlignment,
-        ResetDialogContentAlignment,
-        SetDialogModalMode,
-        SetDialogAutoCancel,
-        SetDialogMask,
-        SetDialogBackgroundColor,
-        SetDialogCornerRadius,
-        SetDialogGridColumnCount,
-        EnableDialogCustomStyle,
-        EnableDialogCustomAnimation,
-        ShowDialog,
-        CloseDialog,
-        RegisterOnWillDialogDismiss,
-        RegisterOnWillDismissWithUserData,
-        SetKeyboardAvoidDistance,
-        SetDialogLevelMode,
-        SetDialogLevelUniqueId,
-        SetDialogImmersiveMode,
+        .create = CreateDialog,
+        .dispose = DisposeDialog,
+        .setContent = SetDialogContent,
+        .removeContent = RemoveDialogContent,
+        .setContentAlignment = SetDialogContentAlignment,
+        .resetContentAlignment = ResetDialogContentAlignment,
+        .setModalMode = SetDialogModalMode,
+        .setAutoCancel = SetDialogAutoCancel,
+        .setMask = SetDialogMask,
+        .setBackgroundColor = SetDialogBackgroundColor,
+        .setCornerRadius = SetDialogCornerRadius,
+        .setGridColumnCount = SetDialogGridColumnCount,
+        .enableCustomStyle = EnableDialogCustomStyle,
+        .enableCustomAnimation = EnableDialogCustomAnimation,
+        .show = ShowDialog,
+        .close = CloseDialog,
+        .registerOnWillDismiss = RegisterOnWillDialogDismiss,
+        .registerOnWillDismissWithUserData = RegisterOnWillDismissWithUserData,
+        .setKeyboardAvoidDistance = SetKeyboardAvoidDistance,
+        .setLevelMode = SetDialogLevelMode,
+        .setLevelUniqueId = SetDialogLevelUniqueId,
+        .setImmersiveMode = SetDialogImmersiveMode,
+        .setLevelOrder = SetLevelOrder,
+        .registerOnWillAppear = RegisterOnWillAppear,
+        .registerOnDidAppear = RegisterOnDidAppear,
+        .registerOnWillDisappear = RegisterOnWillDisappear,
+        .registerOnDidDisappear = RegisterOnDidDisappear,
+        .setBorderWidth = SetDialogBorderWidth,
+        .setBorderColor = SetDialogBorderColor,
+        .setBorderStyle = SetDialogBorderStyle,
+        .setWidth = SetDialogWidth,
+        .setHeight = SetDialogHeight,
+        .setShadow = SetDialogShadow,
+        .setCustomShadow = SetDialogCustomShadow,
+        .setBackgroundBlurStyle = SetDialogBackgroundBlurStyle,
+        .setKeyboardAvoidMode = SetDialogKeyboardAvoidMode,
+        .enableHoverMode = EnableDialogHoverMode,
+        .setHoverModeArea = SetDialogHoverModeArea,
+        .setFocusable = SetDialogFocusable,
+        .openCustomDialog = OpenCustomDialog,
+        .updateCustomDialog = UpdateCustomDialog,
+        .closeCustomDialog = CloseCustomDialog,
+        .setSubwindowMode = SetDialogSubwindowMode
     };
+    CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;
 }
 
@@ -2286,7 +2450,8 @@ ArkUI_Int32 UnmarshallStyledStringDescriptor(
     CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
     std::vector<uint8_t> vec(buffer, buffer + bufferSize);
     SpanString* spanString = new SpanString(u"");
-    spanString->DecodeTlvExt(vec, spanString);
+    std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
+    spanString->DecodeTlvExt(vec, spanString, std::move(unmarshallCallback));
     descriptor->spanString = reinterpret_cast<void*>(spanString);
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -2376,8 +2541,14 @@ ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshot
 
 const ArkUISnapshotAPI* GetComponentSnapshotAPI()
 {
-    static const ArkUISnapshotAPI impl { CreateSnapshotOptions, DestroySnapshotOptions, SnapshotOptionsSetScale,
-        GetNodeSnapshot };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUISnapshotAPI impl {
+        .createSnapshotOptions = CreateSnapshotOptions,
+        .destroySnapshotOptions = DestroySnapshotOptions,
+        .snapshotOptionsSetScale = SnapshotOptionsSetScale,
+        .getSyncSnapshot = GetNodeSnapshot
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
 }
 

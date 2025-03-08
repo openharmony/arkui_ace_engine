@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_STATE_H
 
 #include <string>
+#include <map>
+#include <variant>
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
@@ -36,8 +38,12 @@ class FocusState : public virtual AceType {
 
 public:
     FocusState() = default;
-    explicit FocusState(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE);
-    explicit FocusState(const WeakPtr<FrameNode>& frameNode, FocusType type = FocusType::DISABLE);
+    explicit FocusState(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE)
+        : eventHub_(eventHub), focusType_(type)
+    {}
+    explicit FocusState(const WeakPtr<FrameNode>& frameNode, FocusType type = FocusType::DISABLE)
+        : frameNode_(frameNode), focusType_(type)
+    {}
     virtual ~FocusState() = default;
 
     void SetLastWeakFocusNode(const WeakPtr<FocusHub>& focusHub)
@@ -64,6 +70,23 @@ public:
     {
         return tabStop_;
     }
+    void ResetNextFocus()
+    {
+        nextStep_.clear();
+    }
+    std::variant<WeakPtr<AceType>, std::string> GetNextFocus(int32_t key) const
+    {
+        auto it = nextStep_.find(key);
+        if (it != nextStep_.end()) {
+            return it->second;
+        } else {
+            return std::string("");
+        }
+    }
+    void SetNextFocus(int32_t key, const std::variant<WeakPtr<AceType>, std::string>& nextFocus)
+    {
+        nextStep_[key] = nextFocus;
+    }
     RefPtr<FrameNode> GetFrameNode() const;
     std::string GetFrameName() const;
     int32_t GetFrameId() const;
@@ -75,6 +98,7 @@ public:
     FocusType focusType_ = FocusType::DISABLE;
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
     bool tabStop_ { false };
+    std::map<int32_t, std::variant<WeakPtr<AceType>, std::string>> nextStep_;
 };
 } // namespace OHOS::Ace::NG
 

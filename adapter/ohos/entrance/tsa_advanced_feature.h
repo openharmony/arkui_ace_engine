@@ -24,10 +24,6 @@ typedef enum {
     FEATURE_NONE               = 0,        //      0x00000000
     OPERATING_HAND_LEFT        = (1 << 0), //   0: 0x00000001
     OPERATING_HAND_RIGHT       = (1 << 1), //   1: 0x00000002
-    FINGER_PART_PAD            = (1 << 2), //   2: 0x00000004
-    FINGER_PART_TIP            = (1 << 3), //   3: 0x00000008
-    FINGER_PART_NAIL           = (1 << 4), //   4: 0x00000010
-    FINGER_PART_KNUCKLE        = (1 << 5), //   5: 0x00000020
 } TSA_ADVANCED_FEATURE_ENUM;
 
 #ifdef __cplusplus

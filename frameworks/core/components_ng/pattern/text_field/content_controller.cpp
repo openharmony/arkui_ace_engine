@@ -30,7 +30,7 @@ namespace {
 const std::u16string DIGIT_WHITE_LIST = u"[0-9]";
 const std::u16string DIGIT_DECIMAL_WHITE_LIST = u"[0-9.]";
 const std::u16string PHONE_WHITE_LIST = uR"([0-9 \+\-\*\#\(\)])";
-const std::u16string EMAIL_WHITE_LIST = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@-])";
+const std::u16string EMAIL_WHITE_LIST = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@"-])";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
@@ -327,7 +327,7 @@ bool ContentController::FilterWithAscii(std::u16string& result)
     if (errorText.empty()) {
         textChange = false;
     } else {
-        LOGI("FilterWithAscii Error text %{private}s", UtfUtils::Str16DebugToStr8(errorText).c_str());
+        LOGI("FilterWithAscii Error text size %{publc}zu", UtfUtils::Str16DebugToStr8(errorText).size());
     }
     return textChange;
 }
@@ -423,6 +423,7 @@ std::u16string ContentController::GetValueBeforeIndex(int32_t index)
 
 std::u16string ContentController::GetValueAfterIndex(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(content_.length()));
     return content_.substr(index, content_.length() - index);
 }
 

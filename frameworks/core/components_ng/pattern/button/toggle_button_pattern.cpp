@@ -61,7 +61,6 @@ void ToggleButtonPattern::OnModifyDone()
     CheckLocalizedBorderRadiuses();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetPositionProperty()) {
@@ -70,7 +69,6 @@ void ToggleButtonPattern::OnModifyDone()
     } else {
         layoutProperty->UpdateAlignment(Alignment::CENTER);
     }
-
     auto buttonPaintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
     CHECK_NULL_VOID(buttonPaintProperty);
     if (!isOn_.has_value()) {
@@ -82,20 +80,22 @@ void ToggleButtonPattern::OnModifyDone()
         changed = isOn ^ isOn_.value();
         isOn_ = isOn;
     }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(toggleTheme);
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-
     if (!UseContentModifier()) {
-        if (isOn_.value()) {
-            auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(checkedColor_);
+        if (isOn_.value_or(false)) {
+            auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(toggleTheme->GetCheckedColor());
             renderContext->UpdateBackgroundColor(selectedColor);
         } else {
-            auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(unCheckedColor_);
+            auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(toggleTheme->GetBackgroundColor());
             renderContext->UpdateBackgroundColor(bgColor);
         }
         HandleOnOffStyle(!isOn_.value(), isFocus_);
     }
-
     if (changed) {
         auto toggleButtonEventHub = GetEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(toggleButtonEventHub);
@@ -103,14 +103,14 @@ void ToggleButtonPattern::OnModifyDone()
     }
     GetIsTextFade();
     FireBuilder();
-    InitButtonAndText();
-    HandleEnabled();
     InitEvent();
     SetAccessibilityAction();
 }
 
 void ToggleButtonPattern::InitEvent()
 {
+    InitButtonAndText();
+    HandleEnabled();
     InitClickEvent();
     HandleOverlayStyle();
     InitTouchEvent();
@@ -494,9 +494,6 @@ void ToggleButtonPattern::InitTouchEvent()
         if (info.GetTouches().empty()) {
             return;
         }
-        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
-            buttonPattern->isTouchPreventDefault_ = info.IsPreventDefault();
-        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
             buttonPattern->OnTouchDown();
@@ -508,7 +505,7 @@ void ToggleButtonPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchAfterEvent(touchListener_);
+    gesture->AddTouchEvent(touchListener_);
 }
 
 void ToggleButtonPattern::OnTouchDown()
@@ -577,16 +574,10 @@ void ToggleButtonPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH &&
-            (info.IsPreventDefault() || buttonPattern->isTouchPreventDefault_)) {
-            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "toggle button preventDefault successfully");
-            buttonPattern->isTouchPreventDefault_ = false;
-            return;
-        }
         buttonPattern->OnClick();
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickAfterEvent(clickListener_);
+    gesture->AddClickEvent(clickListener_);
 }
 
 void ToggleButtonPattern::OnClick()
@@ -645,7 +636,7 @@ void ToggleButtonPattern::InitButtonAndText()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         layoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         layoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -735,11 +726,39 @@ void ToggleButtonPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(toggleTheme);
     checkedColor_ = toggleTheme->GetCheckedColor();
     unCheckedColor_ = toggleTheme->GetBackgroundColor();
     OnModifyDone();
+}
+
+bool ToggleButtonPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>(themeScopeId);
+    CHECK_NULL_RETURN(toggleTheme, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+
+    auto paintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+
+    if (isOn_.value_or(false) && !paintProperty->HasSelectedColor()) {
+        renderContext->UpdateBackgroundColor(toggleTheme->GetCheckedColor());
+        result = true;
+    }
+    if (!isOn_.value_or(false) && !paintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(toggleTheme->GetBackgroundColor());
+        result = true;
+    }
+    host->MarkDirtyNode();
+    return result;
 }
 
 void ToggleButtonPattern::SetButtonPress(bool isSelected)

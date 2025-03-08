@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -303,7 +304,7 @@ bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
 void ScrollPattern::AdjustOffset(float& delta, int32_t source)
 {
     if (NearZero(delta) || NearZero(viewPortLength_) || source == SCROLL_FROM_ANIMATION ||
-        source == SCROLL_FROM_ANIMATION_SPRING) {
+        source == SCROLL_FROM_ANIMATION_SPRING || source == SCROLL_FROM_FOCUS_JUMP) {
         return;
     }
     // the distance above the top, if lower than top, it is zero

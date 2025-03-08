@@ -2264,4 +2264,337 @@ HWTEST_F(BubbleTestOneNg, CheckArrowPositionTest, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->showArrow_, false);
 }
 
+/**
+ * @tc.name: UpdateBubbleText
+ * @tc.desc: Test UpdateBubbleText function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, UpdateBubbleText, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set value to popupParam.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    ButtonProperties buttonProperties { true, "Button" };
+    buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    popupParam->SetPrimaryButtonProperties(buttonProperties);
+    popupParam->SetSecondaryButtonProperties(buttonProperties);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    /**
+     * @tc.steps: step2. create bubble and get popupNode.
+     * @tc.expected: Check the popupNode were created successfully.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto pattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. test UpdateBubbleText.
+     */
+    pattern->UpdateBubbleText();
+    auto columnNode = popupNode->GetFirstChild();
+    ASSERT_NE(columnNode, nullptr);
+    auto combinedChild = columnNode->GetFirstChild();
+    ASSERT_NE(combinedChild, nullptr);
+    auto scrollNode = combinedChild->GetFirstChild();
+    ASSERT_NE(scrollNode, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(scrollNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto popupTheme = pattern->GetPopupTheme();
+    auto color = popupTheme->GetFontPrimaryColor();
+    EXPECT_EQ(layoutProperty->GetTextColor().value(), color);
+}
+
+/**
+ * @tc.name: HandleUIExtensionKeyboard
+ * @tc.desc: Test HandleUIExtensionKeyboard function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, HandleUIExtensionKeyboard, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test HandleUIExtensionKeyboard.
+     */
+    layoutAlgorithm->showArrow_ = false;
+    bool showInSubwindow = true;
+    layoutAlgorithm->avoidKeyboard_ = true;
+    layoutAlgorithm->HandleUIExtensionKeyboard(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    showInSubwindow = true;
+    layoutAlgorithm->avoidKeyboard_ = false;
+    layoutAlgorithm->HandleUIExtensionKeyboard(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    showInSubwindow = false;
+    layoutAlgorithm->avoidKeyboard_ = true;
+    layoutAlgorithm->HandleUIExtensionKeyboard(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    showInSubwindow = false;
+    layoutAlgorithm->avoidKeyboard_ = false;
+    layoutAlgorithm->HandleUIExtensionKeyboard(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    EXPECT_EQ(layoutAlgorithm->showArrow_, false);
+}
+
+/**
+ * @tc.name: CheckIfNeedRemoveArrow
+ * @tc.desc: Test CheckIfNeedRemoveArrow function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, CheckIfNeedRemoveArrow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test CheckIfNeedRemoveArrow.
+     */
+    float xMin = 0.0;
+    float xMax = 100.0;
+    float yMin = 0.0;
+    float yMax = 100.0;
+    Dimension BUBBLE_ARROW_HEIGHT = 8.0_vp;
+    layoutAlgorithm->arrowHeight_ = BUBBLE_ARROW_HEIGHT.ConvertToPx();
+
+    layoutAlgorithm->showArrow_ = true;
+    layoutAlgorithm->avoidKeyboard_ = true;
+    layoutAlgorithm->placement_ = Placement::TOP;
+    yMin = yMax + layoutAlgorithm->arrowHeight_ - 1.0;
+    auto result = layoutAlgorithm->CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax);
+    EXPECT_EQ(result, true);
+
+    layoutAlgorithm->showArrow_ = true;
+    yMin = yMax + layoutAlgorithm->arrowHeight_ + 1.0;
+    result = layoutAlgorithm->CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax);
+    EXPECT_EQ(result, false);
+
+    layoutAlgorithm->placement_ = Placement::LEFT;
+    yMin = 0;
+    layoutAlgorithm->showArrow_ = true;
+    xMin = xMax + layoutAlgorithm->arrowHeight_ - 1.0;
+    result = layoutAlgorithm->CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax);
+    EXPECT_EQ(result, true);
+
+    layoutAlgorithm->showArrow_ = true;
+    xMin = xMax + layoutAlgorithm->arrowHeight_ + 1.0;
+    result = layoutAlgorithm->CheckIfNeedRemoveArrow(xMin, xMax, yMin, yMax);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: UpdateScrollHeight
+ * @tc.desc: Test UpdateScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, UpdateScrollHeight, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    ButtonProperties buttonProperties { true, "Button" };
+    buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    popupParam->SetPrimaryButtonProperties(buttonProperties);
+    popupParam->SetSecondaryButtonProperties(buttonProperties);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    /**
+     * @tc.steps: step2. create bubble and get popupNode.
+     * @tc.expected: Check the popupNode were created successfully.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(popupNode, geometryNode, popupNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test UpdateScrollHeight.
+     */
+    bubblePattern->enableHoverMode_ = true;
+    bool showInSubwindow = true;
+    layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    showInSubwindow = false;
+    layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    EXPECT_EQ(bubblePattern->enableHoverMode_, true);
+}
+
+/**
+ * @tc.name: CheckArrowPosition1
+ * @tc.desc: Test CheckArrowPosition1 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, CheckArrowPosition1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test CheckArrowPosition1.
+     */
+    
+    std::vector<Placement> curPlaceStates = { Placement::LEFT, Placement::RIGHT, Placement::TOP,
+        Placement::BOTTOM, Placement::NONE };
+
+    for (auto &placement : curPlaceStates) {
+        OffsetF position = {0.0f, 0.0f};
+        layoutAlgorithm->showArrow_ = true;
+        layoutAlgorithm->avoidKeyboard_ = true;
+        layoutAlgorithm->placement_ = placement;
+        layoutAlgorithm->CheckArrowPosition(position, 10.0f, 10.0f);
+    }
+    EXPECT_EQ(layoutAlgorithm->avoidKeyboard_, true);
+}
+
+/**
+ * @tc.name: IsUIExtensionWindow
+ * @tc.desc: Test IsUIExtensionWindow function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, IsUIExtensionWindow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test IsUIExtensionWindow.
+     */
+
+    EXPECT_EQ(layoutAlgorithm->IsUIExtensionWindow(), false);
+}
+
+/**
+ * @tc.name: InitWrapperRect
+ * @tc.desc: Test InitWrapperRect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, InitWrapperRect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    ButtonProperties buttonProperties { true, "Button" };
+    buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    popupParam->SetPrimaryButtonProperties(buttonProperties);
+    popupParam->SetSecondaryButtonProperties(buttonProperties);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    /**
+     * @tc.steps: step2. create bubble and get popupNode.
+     * @tc.expected: Check the popupNode were created successfully.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(popupNode, geometryNode, popupNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. test InitWrapperRect.
+     */
+    bubblePattern->enableHoverMode_ = true;
+    layoutAlgorithm->isHalfFoldHover_ = true;
+    layoutAlgorithm->InitWrapperRect(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(bubblePattern->enableHoverMode_, true);
+}
+
 } // namespace OHOS::Ace::NG

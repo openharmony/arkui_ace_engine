@@ -44,6 +44,10 @@ public:
     bool GetSurfaceRotation();
     void GetSurfaceOffset(float& offsetX, float& offsetY);
     void SetController(const std::shared_ptr<InnerXComponentController>& controller);
+    void SetXComponentControllerOnCreated(const WeakPtr<NG::FrameNode>& targetNode, int64_t controllerId);
+    void SetXComponentControllerOnChanged(const WeakPtr<NG::FrameNode>& targetNode, int64_t controllerId);
+    void SetXComponentControllerOnDestroyed(const WeakPtr<NG::FrameNode>& targetNode, int64_t controllerId);
+    void SetXComponentControllerCallback(int64_t controllerId);
     std::shared_ptr<InnerXComponentController> GetInnerController();
 
 private:

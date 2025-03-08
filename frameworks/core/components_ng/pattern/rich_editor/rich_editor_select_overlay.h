@@ -59,11 +59,17 @@ public:
     bool IsHandleShow();
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void UpdateHandleOffset();
+    void UpdateFirstHandleOffset() override;
+    void UpdateSecondHandleOffset() override;
     void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
     bool GetIsHandleMoving()
     {
         return isHandleMoving_;
+    }
+    bool GetIsHandleHidden()
+    {
+        return handleIsHidden_;
     }
     bool IsSingleHandleMoving()
     {
@@ -92,7 +98,7 @@ private:
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
     void SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info);
     void SetMagnifierOffset(const OffsetF& localOffset, const RectF& handleRect);
-    void OnUpdateSelectOverlayInfo(SelectOverlayInfo& selectInfo);
+    void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo);
     void ResumeTwinkling();
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;

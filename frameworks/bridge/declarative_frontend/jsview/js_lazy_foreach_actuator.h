@@ -24,6 +24,7 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_data_change_listener.h"
+#include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 
@@ -126,7 +127,7 @@ public:
         CHECK_NULL_VOID(aceType);
         std::string typeName = AceType::TypeName(aceType);
         if (typeName != "JSBaseNode") {
-            parentView_ = parentViewObj->Unwrap<JSView>();
+            parentView_ = JSView::GetNativeView(parentViewObj);
         }
     }
 

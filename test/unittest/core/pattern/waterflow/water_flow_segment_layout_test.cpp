@@ -1596,6 +1596,50 @@ HWTEST_F(WaterFlowSegmentTest, Jump003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Jump004
+ * @tc.desc: Test jump function without user defined height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Jump004, TestSize.Level1)
+{
+    WaterFlowModelNG model;
+    model.Create();
+    GetWaterFlow();
+    CreateWaterFlowItems(37);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_14);
+    CreateDone();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 15);
+    EXPECT_EQ(info->currentOffset_, 0);
+    for (int i = 0; i <= 36; ++i) {
+        auto seg = info->GetSegment(i);
+        EXPECT_FALSE(secObj->GetSectionInfo()[seg].onGetItemMainSizeByIndex);
+    }
+
+    ScrollToIndex(19, false, ScrollAlign::START);
+    EXPECT_EQ(info->currentOffset_, -1800.0f);
+    EXPECT_EQ(info->startIndex_, 19);
+    EXPECT_EQ(info->endIndex_, 27);
+
+    ScrollToIndex(0, false, ScrollAlign::START);
+
+    auto item = GetItem(19, false);
+    ASSERT_TRUE(item);
+    EXPECT_EQ(item->GetGeometryNode()->GetFrameRect().ToString(), "RectT (0.00, 0.00) - [720.00 x 200.00]");
+    item->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.0f), CalcLength(Dimension(100.0f))));
+    FlushUITasks();
+
+    ScrollToIndex(21, false, ScrollAlign::CENTER);
+    EXPECT_EQ(info->currentOffset_, -1560.0f);
+    EXPECT_EQ(info->startIndex_, 17);
+    EXPECT_EQ(info->endIndex_, 25);
+    EXPECT_EQ(item->GetGeometryNode()->GetFrameRect().ToString(), "RectT (0.00, 240.00) - [300.00 x 100.00]");
+}
+
+/**
  * @tc.name: EstimateTotalHeight001
  * @tc.desc: Test EstimateTotalHeight.
  * @tc.type: FUNC

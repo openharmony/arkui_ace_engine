@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "core/components/marquee/marquee_component.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

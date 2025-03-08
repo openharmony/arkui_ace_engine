@@ -147,6 +147,23 @@ static napi_value JSActivate(napi_env env, napi_callback_info info)
     return obj;
 }
 
+static napi_value JsSetKeyProcessingMode(napi_env env, napi_callback_info info)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        return nullptr;
+    }
+    napi_value argv[1] = { 0 };
+    napi_valuetype valueType = napi_undefined;
+    if (!GetSingleParam(env, info, argv, valueType) || (valueType != napi_number)) {
+        return nullptr;
+    }
+    int32_t keyProcessingMode = 0;
+    napi_get_value_int32(env, argv[0], &keyProcessingMode);
+    delegate->SetKeyProcessingMode(keyProcessingMode);
+    return nullptr;
+}
+
 static napi_value registerFunc(napi_env env, napi_value exports)
 {
     napi_property_descriptor animatorDesc[] = {
@@ -155,6 +172,7 @@ static napi_value registerFunc(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("activate", JSActivate),
         DECLARE_NAPI_FUNCTION("setAutoFocusTransfer", JsSetAutoFocusTransfer),
         DECLARE_NAPI_FUNCTION("configWindowMask", JsConfigWindowMask),
+        DECLARE_NAPI_FUNCTION("setKeyProcessingMode", JsSetKeyProcessingMode),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(animatorDesc) / sizeof(animatorDesc[0]), animatorDesc));
     return exports;

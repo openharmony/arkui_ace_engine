@@ -58,6 +58,7 @@ public:
 
             theme->minWidth_ = toastPattern->GetAttr<Dimension>("toast_content_min_width", 0.0_vp);
             theme->minHeight_ = toastPattern->GetAttr<Dimension>("toast_content_min_height", 0.0_vp);
+            theme->top_ = toastPattern->GetAttr<Dimension>("toast_top", 0.0_vp);
             theme->bottom_ = toastPattern->GetAttr<Dimension>("toast_bottom", 0.0_vp);
             theme->minFontSize_ = toastPattern->GetAttr<Dimension>("toast_text_min_font_size", 0.0_vp);
             auto textMaxLines = static_cast<int32_t>(toastPattern->GetAttr<double>("toast_text_max_lines", 0.0));
@@ -116,6 +117,7 @@ public:
                 "toast_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
             theme->toastBackgroundBlurStyle_ = toastPattern->GetAttr<int>(
                 "toast_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            theme->defaultBGColor_ = toastPattern->GetAttr<Color>("toast_default_bg_color", Color::TRANSPARENT);
         }
     };
 
@@ -154,6 +156,11 @@ public:
     const Radius& GetRadius() const
     {
         return radius_;
+    }
+
+    const Dimension& GetTop() const
+    {
+        return top_;
     }
 
     const Dimension& GetBottom() const
@@ -236,6 +243,11 @@ public:
         return toastLimitHeightRatio_;
     }
 
+    Color GetDefaultBGColor() const
+    {
+        return defaultBGColor_;
+    }
+
 protected:
     ToastTheme() = default;
 
@@ -247,6 +259,7 @@ private:
     Color backgroundColor_;
     TextStyle textStyle_;
     Radius radius_;
+    Dimension top_;
     Dimension bottom_;
     Dimension minFontSize_;
     uint32_t textMaxLines_ = 1;
@@ -263,6 +276,7 @@ private:
     int32_t toastAlign_ = 0;
     double toastLimitHeightRatio_ = 0.65;
     int toastBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    Color defaultBGColor_ = Color::TRANSPARENT;
 };
 
 } // namespace OHOS::Ace

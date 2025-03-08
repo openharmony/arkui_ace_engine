@@ -1703,6 +1703,46 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest028, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusHubTestNgtest029
+ * @tc.desc: Test the function SetNextFocus and RequestUserNextFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNgtest029, TestSize.Level1)
+{
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->SetNextFocus(FocusIntension::RIGHT, "Node");
+    KeyEvent keyEvent;
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
+    FocusEvent event(keyEvent);
+    event.intension = FocusIntension::RIGHT;
+    EXPECT_FALSE(focusHub->RequestUserNextFocus(event));
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 104, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode2, nullptr);
+    focusHub->SetNextFocus(FocusIntension::LEFT, frameNode2);
+    event.intension = FocusIntension::LEFT;
+    EXPECT_TRUE(focusHub->RequestUserNextFocus(event));
+    event.intension = FocusIntension::UP;
+    EXPECT_FALSE(focusHub->RequestUserNextFocus(event));
+    auto frameNode3 = FrameNodeOnTree::CreateFrameNode("frameNode", 106, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode3, nullptr);
+    frameNode3->GetOrCreateFocusHub();
+    auto focusHub2 = frameNode3->GetFocusHub();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->SetIsFocusingByTab(true);
+    focusHub2->SetFocusType(FocusType::DISABLE);
+    focusHub2->currentFocus_ = false;
+    focusHub->SetNextFocus(FocusIntension::DOWN, frameNode3);
+    event.intension = FocusIntension::DOWN;
+    EXPECT_FALSE(focusHub->RequestUserNextFocus(event));
+}
+
+/**
  * @tc.name: GetUnicodeTest001
  * @tc.desc: Test GetUnicode.
  * @tc.type: FUNC

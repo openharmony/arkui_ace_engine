@@ -24,7 +24,6 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
-
 class NativeCurveHelper;
 
 constexpr double SQUARE = 2.0;
@@ -323,17 +322,27 @@ public:
     {
         return blendDuration_;
     }
+    float GetMinimumAmplitudeRatio() const
+    {
+        return minimumAmplitudeRatio_;
+    }
+    void UpdateMinimumAmplitudeRatio(float minimumAmplitudeRatio)
+    {
+        minimumAmplitudeRatio_ = minimumAmplitudeRatio;
+    }
     static constexpr float DEFAULT_SPRING_MOTION_RESPONSE = 0.55f;
     static constexpr float DEFAULT_SPRING_MOTION_DAMPING_RATIO = 0.825f;
     static constexpr float DEFAULT_SPRING_MOTION_BLEND_DURATION = 0.0f;
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE = 0.15f;
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO = 0.86f;
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION = 0.25f;
+    static constexpr float DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 
 private:
     float response_;
     float dampingRatio_;
     float blendDuration_;
+    float minimumAmplitudeRatio_ = DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO;
 };
 
 class InterpolatingSpring final : public Curve {
@@ -415,6 +424,6 @@ private:
     float damping_ = 0.0f;
     float minimumAmplitudeRatio_ = DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO;
 };
-} // OHOS::Ace
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_ANIMATION_CURVE_H

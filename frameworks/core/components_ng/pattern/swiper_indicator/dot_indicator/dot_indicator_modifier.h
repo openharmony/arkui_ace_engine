@@ -316,6 +316,20 @@ public:
         motionVelocity_ = motionVelocity;
     }
 
+    void SetUserSetSwiperCurve(RefPtr<Curve> userSetSwiperCurve)
+    {
+        userSetSwiperCurve_ = userSetSwiperCurve;
+    }
+
+    void SetIndicatorDotItemSpace(const Dimension& indicatorDotItemSpace)
+    {
+        indicatorDotItemSpace_ = indicatorDotItemSpace;
+    }
+
+    const Dimension& GetIndicatorDotItemSpace() const
+    {
+        return indicatorDotItemSpace_;
+    }
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -339,6 +353,8 @@ protected:
     float CalculateMinimumAmplitudeRatio(
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState) const;
     RefPtr<InterpolatingSpring> GetTailCurve();
+    AnimationOption CreateTailOption(
+        const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState, bool isNormal);
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -355,6 +371,7 @@ protected:
     RefPtr<PropertyBool> isFocused_;
 
     RefPtr<Curve> headCurve_;
+    RefPtr<Curve> userSetSwiperCurve_;
     float motionVelocity_ = 0;
 
     float centerY_ = 0;
@@ -387,6 +404,7 @@ protected:
     Color originalUnselectColor_;
     Color originalSelectColor_;
     Dimension paddingSide_;
+    Dimension indicatorDotItemSpace_ = 8.0_vp;
     float scaleIndicator_ = 1.33f;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
