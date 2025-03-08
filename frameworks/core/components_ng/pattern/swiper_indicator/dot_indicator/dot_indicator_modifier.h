@@ -330,6 +330,17 @@ public:
     {
         return indicatorDotItemSpace_;
     }
+
+    std::pair<float, float> GetTargetCenter() const
+    {
+        return bottomCenterX_;
+    }
+
+    bool GetIsBottomAnimationFinished() const
+    {
+        return isBottomAnimationFinished_;
+    }
+    void FinishAnimationToTargetImmediately(std::pair<float, float> centerX);
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -382,6 +393,8 @@ protected:
     RefPtr<AnimatablePropertyColor> touchBottomPointColor_;
     bool isTouchBottomLoop_ = false;
     bool ifNeedFinishCallback_ = false;
+    bool isBottomAnimationFinished_ = true;
+    std::pair<float, float> bottomCenterX_;
     TouchBottomAnimationStage animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     std::optional<int32_t> normalToHoverIndex_ = std::nullopt;
     std::optional<int32_t> hoverToNormalIndex_ = std::nullopt;
