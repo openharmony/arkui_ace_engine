@@ -1982,4 +1982,70 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg048, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
 }
 
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg049
+ * @tc.desc: Verify SelectLayoutAvoidAlgorithm.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
+{
+    std::vector<SelectParam> selectParams;
+    selectParams.push_back({ "MenuItem1", "Icon1" });
+    selectParams.push_back({ "MenuItem2", "Icon2" });
+    // create select menu
+    auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1, EMPTY_TEXT);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    property->UpdateLayoutConstraint(parentLayoutConstraint);
+
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, "menu");
+    ASSERT_NE(menuLayoutAlgorithm, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->isSelectMenu_ = true;
+    SizeF size(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT);
+
+    /**
+     * @tc.cases: case1. parameter property is nullptr, return OffsetF(0.0, 0.0).
+     */
+    auto resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(nullptr, menuPattern, size);
+    EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
+
+    /**
+     * @tc.cases: case2. parameter menuPattern is nullptr, return OffsetF(0.0, 0.0).
+     */
+    resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(property, nullptr, size);
+    EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
+
+    /**
+     * @tc.cases: case3. targetSize_ has width or height greater than 0.
+     */
+    menuLayoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    menuLayoutAlgorithm->targetOffset_ = OffsetF(POSITION_OFFSET, POSITION_OFFSET);
+    menuLayoutAlgorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    menuLayoutAlgorithm->wrapperRect_ = Rect(0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(property, menuPattern, size);
+
+    float expectOffsetX = POSITION_OFFSET;
+    float expectOffsetY = POSITION_OFFSET + TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx();
+    EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
+
+    /**
+     * @tc.cases: case4. targetSize_ is (0.0, 0.0).
+     */
+    menuLayoutAlgorithm->targetSize_ = SizeF(0.0f, 0.0f);
+    resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(property, menuPattern, size);
+
+    EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
+}
 } // namespace OHOS::Ace::NG
