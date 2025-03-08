@@ -90,6 +90,7 @@ public:
         const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<DecorationSpan> ToDecorationSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     RefPtr<FontSpan> ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<UrlSpan> ToUrlSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     std::string ToString();
 protected:
     RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
