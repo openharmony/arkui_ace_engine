@@ -187,6 +187,30 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LongPressRecognizerIssue004
+ * @tc.desc: Test set and get rollAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue004, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, 1, false);
+    GestureEvent eventInfo;
+    auto onActionStart = [&eventInfo](GestureEvent& info) { eventInfo = info; };
+    longPressRecognizer->SetOnAction(onActionStart);
+    TouchEvent moveEvent;
+    moveEvent.SetId(0)
+        .SetType(TouchType::MOVE)
+        .SetTiltX(10.0f)
+        .SetTiltY(10.0f)
+        .SetRollAngle(10.0f)
+        .SetTargetDisplayId(2);
+    longPressRecognizer->HandleEvent(moveEvent);
+    longPressRecognizer->OnAccepted();
+    EXPECT_EQ(eventInfo.GetRollAngle(), 10.0f);
+}
+
+/**
  * @tc.name: PanRecognizerIssue001
  * @tc.desc: Test PanRecognizer: Test the finger information of the current recognizer in the case of setting a single
  *           finger by pressing multiple fingers and lifting them.
