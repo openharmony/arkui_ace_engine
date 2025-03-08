@@ -590,23 +590,11 @@ void FocusHub::CloseChildFocusView()
 
 bool FocusHub::IsFocusable()
 {
-    auto node = GetFrameNode();
-    CHECK_NULL_RETURN(node, false);
-    auto context = node->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, false);
-    auto vsyncTime = context->GetVsyncTime();
-    if (vsyncTime == updateVsyncTime_) {
-        return isCurrentVsyncFocusable_;
-    }
     if (focusType_ == FocusType::NODE) {
-        updateVsyncTime_ = vsyncTime;
-        isCurrentVsyncFocusable_ = IsFocusableNode();
-        return isCurrentVsyncFocusable_;
+        return IsFocusableNode();
     }
     if (focusType_ == FocusType::SCOPE) {
-        updateVsyncTime_ = vsyncTime;
-        isCurrentVsyncFocusable_ = IsFocusableScope();
-        return isCurrentVsyncFocusable_;
+        return IsFocusableScope();
     }
     return false;
 }
