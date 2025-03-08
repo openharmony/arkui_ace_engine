@@ -712,6 +712,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
     COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
     COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
+    COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
     if (textStyle_.has_value()) {
         sameSpan->textStyle_ = textStyle_;
     }
@@ -768,6 +769,8 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
         TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_GROUPID);
         TLVUtil::WriteInt32(buff, backgroundStyle->groupId);
     }
+    WRITE_TLV_INHERIT(textLineStyle, ParagraphSpacing, TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING, Dimension,
+        ParagraphSpacing);
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
     return true;
 };
@@ -878,11 +881,15 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
                 sameSpan->backgroundStyle->groupId = TLVUtil::ReadInt32(buff, cursor);
                 break;
             }
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateParagraphSpacing,
+                TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING, Dimension);
             default:
                 break;
         }
     }
-
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        sameSpan->textLineStyle->ResetParagraphSpacing();
+    }
     return sameSpan;
 }
 

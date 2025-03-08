@@ -1042,6 +1042,7 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId
         }
         subwindow->SetToastWindowType(windowType);
         subwindow->SetMainWindowId(mainWindowId);
+        subwindow->InitContainer();
         AddToastSubwindow(containerId, subwindow);
     }
     return subwindow;

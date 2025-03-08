@@ -99,6 +99,8 @@ public:
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
     bool tabStop_ { false };
     std::map<int32_t, std::variant<WeakPtr<AceType>, std::string>> nextStep_;
+    uint64_t updateVsyncTime_ = 0;
+    bool isCurrentVsyncFocusable_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -30,19 +30,23 @@ public:
 
     void Stop();
 
+    void StopInner();
+
     void Init();
+
+    void Clear();
 
     std::function<bool()> GetFrameDumpFunc() const
     {
         return frameDumpFunc_;
     }
 
-    bool IsRecoding() const
+    bool IsRecording() const
     {
         return frameDumpFunc_ != nullptr;
     }
 
-    void Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json, WeakPtr<TaskExecutor> taskExecutor);
+    void Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json);
 
     void Diff(int64_t timestamp);
 

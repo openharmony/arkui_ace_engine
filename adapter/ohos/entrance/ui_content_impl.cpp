@@ -1703,15 +1703,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 
         auto task = [] {
-            bool dynamicVsync = false;
             std::unordered_map<std::string, std::string> payload;
             std::unordered_map<std::string, std::string> reply;
             payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
             payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
-            dynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
-            g_isDynamicVsync = dynamicVsync;
-            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", dynamicVsync);
-            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(dynamicVsync);
+            g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", g_isDynamicVsync.load());
+            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(g_isDynamicVsync);
         };
         BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
@@ -4753,6 +4751,17 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
     UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
+    RegisterGetCurrentPageName(pipeline);
+}
+
+void UIContentImpl::RegisterGetCurrentPageName(RefPtr<PipelineBase> pipeline)
+{
+    auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_RETURN(pipeline, "");
+        return pipeline->GetCurrentPageNameCallback();
+    };
+    UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
 }
 
 bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)

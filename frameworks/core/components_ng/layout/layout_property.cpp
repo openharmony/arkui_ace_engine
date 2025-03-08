@@ -18,7 +18,6 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/property/grid_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {

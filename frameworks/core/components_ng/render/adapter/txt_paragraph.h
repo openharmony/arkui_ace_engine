@@ -118,7 +118,7 @@ public:
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
     std::u16string GetParagraphText() override;
     const ParagraphStyle& GetParagraphStyle() const override;
-    bool empty() const
+    bool empty() const override
     {
         return GetParagraphLength() == 0;
     }
@@ -138,6 +138,10 @@ public:
     void TxtGetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
+    virtual bool IsEndAddParagraphSpacing()
+    {
+        return false;
+    }
 
 protected:
     ParagraphStyle paraStyle_;

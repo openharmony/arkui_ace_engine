@@ -216,14 +216,6 @@ public:
         measureTextState_.SetTextAlign(align);
     }
 
-    void SetDefaultTextAlign()
-    {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            // The default value of TextAlign is TextAlign::START.
-            SetTextAlign(TextAlign::START);
-        }
-    }
-
     void SetTextBaseline(TextBaseline baseline)
     {
         state_.fillState.SetTextBaseline(baseline);

@@ -1116,6 +1116,7 @@ RefPtr<ParagraphStyleSpan> SpanString::ToParagraphStyleSpan(
     paragraphStyle.leadingMargin = spanItem->textLineStyle->GetLeadingMargin();
     paragraphStyle.wordBreak = spanItem->textLineStyle->GetWordBreak();
     paragraphStyle.textIndent = spanItem->textLineStyle->GetTextIndent();
+    paragraphStyle.paragraphSpacing = spanItem->textLineStyle->GetParagraphSpacing();
     return AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle, start, end);
 }
 

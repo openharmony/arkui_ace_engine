@@ -113,6 +113,7 @@ public:
     void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void UpdateWindowBlur();
+    void RegisterGetCurrentPageName(RefPtr<PipelineBase> pipeline);
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
