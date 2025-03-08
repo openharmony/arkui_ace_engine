@@ -1248,27 +1248,15 @@ void MenuPattern::ShowPreviewPositionAnimation(AnimationOption& option, int32_t 
     previewRenderContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
 
-    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(
-        -1.0, [menuWrapperPattern, previewOriginPosition, previewPosition](float rate) {
-            CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
-            auto previewOffset = (previewPosition - previewOriginPosition) * rate + previewOriginPosition;
-            menuWrapperPattern->SetAnimationPreviewOffset(previewOffset);
-        });
-    CHECK_NULL_VOID(animateProperty);
-    previewRenderContext->AttachNodeAnimatableProperty(animateProperty);
-    animateProperty->Set(0.0);
-
     if (isHoverImageTarget) {
         option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
         option.SetDelay(delay);
     }
 
-    AnimationUtils::Animate(option, [previewRenderContext, previewPosition, animateProperty]() {
+    AnimationUtils::Animate(option, [previewRenderContext, previewPosition]() {
         CHECK_NULL_VOID(previewRenderContext);
         previewRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-        CHECK_NULL_VOID(animateProperty);
-        animateProperty->Set(1.0);
     });
 }
 
@@ -1292,29 +1280,16 @@ void MenuPattern::ShowPreviewMenuScaleAnimation(
     renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
     renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(originOffset_.GetX()), Dimension(originOffset_.GetY())));
 
-    auto callback = [menuWrapperPattern, originOffset = originOffset_, menuPosition, scaleFrom = menuAnimationScale](
-                        float rate) {
-        CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
-        menuWrapperPattern->SetAnimationMenuOffset((menuPosition - originOffset) * rate + originOffset);
-        menuWrapperPattern->SetAnimationMenuScale((1.0 - scaleFrom) * rate + scaleFrom);
-    };
-    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
-    CHECK_NULL_VOID(animateProperty);
-    renderContext->AttachNodeAnimatableProperty(animateProperty);
-    animateProperty->Set(0.0);
-
     if (isShowHoverImage_) {
         option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
         option.SetDelay(delay);
     }
 
-    AnimationUtils::Animate(option, [renderContext, menuPosition, animateProperty]() {
+    AnimationUtils::Animate(option, [renderContext, menuPosition]() {
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
         renderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        CHECK_NULL_VOID(animateProperty);
-        animateProperty->Set(1.0);
     });
 }
 
