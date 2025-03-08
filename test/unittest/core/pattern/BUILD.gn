@@ -30,6 +30,7 @@ group("core_pattern_unittest") {
     "checkbox:checkbox_test_ng",
     "checkboxgroup:checkboxgroup_test_ng",
     "common_view:common_view_test_ng",
+    "container_modal:container_modal_pattern_enhance_test_ng",
     "container_modal:container_modal_test_ng",
     "counter:counter_test_ng",
     "custom:custom_test_ng",
