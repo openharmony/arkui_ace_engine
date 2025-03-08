@@ -68,6 +68,14 @@ private:
     void XComponentSizeChange(const RectF& surfaceRect);
     void OnSurfaceChanged(const RectF& surfaceRect);
 
+    void UpdateUsesSuperMethod()
+    {
+        if (usesSuperMethod_) {
+            return;
+        }
+        usesSuperMethod_ = (isCNode_ && !isLifecycleInterfaceCalled_ && !surfaceHolder_);
+    }
+
     bool autoInitialize_ = true;
     bool isInitialized_ = false;
     bool isLifecycleInterfaceCalled_ = false;
