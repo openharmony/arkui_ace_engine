@@ -1590,9 +1590,9 @@ void JSRichEditorBaseController::ParseTextUrlStyle(const JSRef<JSObject>& jsObje
     CHECK_NULL_VOID(!urlStyleObj->IsUndefined());
  
     JSRef<JSVal> urlObj = urlStyleObj->GetProperty("url");
-    CHECK_NULL_VOID(!urlObj->IsEmpty() && urlObj->IsString());
- 
-    urlAddressOpt = urlObj->ToU16String();
+    std::u16string urlAddress;
+    CHECK_NULL_VOID(JSContainerBase::ParseJsString(urlObj, urlAddress));
+    urlAddressOpt = urlAddress;
 }
 
 void JSRichEditorController::ParseUserGesture(
