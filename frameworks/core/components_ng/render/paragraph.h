@@ -144,8 +144,8 @@ struct ParagraphStyle {
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;
     Dimension lineHeight;
-    bool halfLeading = false;
     Dimension indent;
+    bool halfLeading = false;
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
     Dimension paragraphSpacing;
 
