@@ -1056,10 +1056,11 @@ bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
     }
 
     auto startRow = gridMatrix_.lower_bound(startMainLineIndex_);
-    if (startRow == gridMatrix_.end() || startRow == gridMatrix_.begin()) {
+    if (startRow == gridMatrix_.end()) {
         return true;
     }
-    while ((--startRow) != gridMatrix_.begin()) {
+    while (startRow != gridMatrix_.begin()) {
+        --startRow;
         if (startRow->first < startMainLineIndex_ - cachedCount) {
             break;
         }
