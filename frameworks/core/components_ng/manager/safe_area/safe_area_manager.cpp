@@ -96,8 +96,10 @@ bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
 bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight)
 {
     uint32_t bottom;
-    if (systemSafeArea_.bottom_.IsValid()) {
+    auto container = Container::Current();
+    if (container && systemSafeArea_.bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
         bottom = systemSafeArea_.bottom_.start;
+        ACE_SCOPED_TRACE("calc keyboardRect use systemSafeArea_.bottom_");
     } else {
         bottom = rootHeight.has_value() ? rootHeight.value() : PipelineContext::GetCurrentRootHeight();
     }
@@ -106,6 +108,7 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight, std::optional
         return false;
     }
     keyboardInset_ = inset;
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateKeyboardSafeArea %s", inset.ToString().c_str());
     return true;
 }
 
