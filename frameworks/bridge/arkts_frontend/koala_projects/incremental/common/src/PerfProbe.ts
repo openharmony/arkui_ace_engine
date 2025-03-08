@@ -58,7 +58,7 @@ export interface PerfProbe {
     /**
      * Cancels measuring the probe and its children probes.
      */
-    cancel(): void
+    cancel(cancelChildren: boolean): void
 
     /**
      * User-defined data associated with the probe.
@@ -154,7 +154,7 @@ class DummyPerfProbe implements MainPerfProbe {
     get name(): string { return "dummy" }
     get dummy(): boolean { return true }
     exit(log: boolean|undefined): void {}
-    cancel () {}
+    cancel (cancelChildren: boolean) {}
     get canceled(): boolean { return false }
     enterProbe(name: string): PerfProbe { return PerfProbeImpl.DUMMY }
     exitProbe (name: string): PerfProbe { return PerfProbeImpl.DUMMY }
@@ -237,7 +237,7 @@ class PerfProbeImpl implements PerfProbe {
         if (log) this.log()
     }
 
-    cancel(cancelChildren: boolean = true) {
+    cancel(cancelChildren: boolean) {
         this._canceled = true
         if (cancelChildren) this.maybeCancelChildren()
     }
@@ -286,7 +286,7 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
     ) {
         super(name)
         const prev = MainPerfProbeImpl.mainProbes.get(name)
-        if (prev) prev.cancel()
+        if (prev) prev.cancel(true)
         MainPerfProbeImpl.mainProbes.set(name, this)
         this.currentProbe = this.enterProbe(name)
     }
@@ -365,10 +365,10 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
     exit(log?: boolean) {
         super.exit()
         if (log) this.log()
-        this.cancel()
+        this.cancel(true)
     }
 
-    cancel() {
+    cancel(cancelChildren: boolean) {
         MainPerfProbeImpl.mainProbes.delete(this.name)
     }
 
