@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
 #include "base/perfmonitor/perf_monitor.h"
@@ -760,7 +761,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
+        HandlePanGestureAccept(info, PanGestureState::BEFORE, callback);
         callbackFunction(info);
+        HandlePanGestureAccept(info, PanGestureState::AFTER, callback);
     }
 }
 
@@ -1059,6 +1062,22 @@ void PanRecognizer::DumpVelocityInfo(int32_t fingerId)
         velocityTrackerIter->second.DumpVelocityPoints();
     } else {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Dump velocity fail with fingerId:%{public}d", fingerId);
+    }
+}
+
+void PanRecognizer::HandlePanGestureAccept(
+    const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback)
+{
+    if (callback == onActionStart_) {
+        currentCallbackState_ = CurrentCallbackState::START;
+        auto node = GetAttachedNode().Upgrade();
+        UIObserverHandler::GetInstance().NotifyPanGestureStateChange(
+            info, Claim(this), node, { panGestureState, currentCallbackState_ });
+    } else if (callback == onActionEnd_) {
+        currentCallbackState_ = CurrentCallbackState::END;
+        auto node = GetAttachedNode().Upgrade();
+        UIObserverHandler::GetInstance().NotifyPanGestureStateChange(
+            info, Claim(this), node, { panGestureState, currentCallbackState_ });
     }
 }
 } // namespace OHOS::Ace::NG

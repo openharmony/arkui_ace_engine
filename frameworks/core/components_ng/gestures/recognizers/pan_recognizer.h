@@ -23,6 +23,7 @@
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
+enum class PanGestureState : int32_t;
 
 class PanRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PanRecognizer, MultiFingersRecognizer);
@@ -81,6 +82,9 @@ public:
     {
         return direction_;
     }
+
+    void HandlePanGestureAccept(
+        const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback);
 
 private:
     class PanVelocity {
