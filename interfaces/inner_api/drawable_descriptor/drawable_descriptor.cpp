@@ -330,6 +330,9 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         }
         Media::DecodeOptions decodeOpts;
         decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
+        auto decoderWidth = decodeSize_.has_value() ? decodeSize_->first : 0;
+        auto decoderHeight = decodeSize_.has_value() ? decodeSize_->second : 0;
+        decodeOpts.desiredSize = { std::max(0, decoderWidth), std::max(0, decoderHeight) };
         if (imageSource) {
             auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
             if (errorCode != 0) {
