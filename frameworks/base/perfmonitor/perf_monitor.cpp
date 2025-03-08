@@ -18,6 +18,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_interfaces.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
@@ -330,6 +331,9 @@ void PerfMonitor::InitInstance()
 void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (IsScrollJank(sceneId)) {
+        PerfInterfaces::SetScrollState(true);
+    }
     NotifySdbJankStatsEnd(sceneId);
     if (apsMonitor_ != nullptr) {
         apsMonitor_->SetApsScene(sceneId, true);
@@ -355,6 +359,9 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (IsScrollJank(sceneId)) {
+        PerfInterfaces::SetScrollState(true);
+    }
     if (apsMonitor_ != nullptr) {
         apsMonitor_->SetApsScene(sceneId, true);
     }
@@ -378,6 +385,9 @@ void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType typ
 void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (IsScrollJank(sceneId)) {
+        PerfInterfaces::SetScrollState(false);
+    }
     NotifySbdJankStatsBegin(sceneId);
     if (apsMonitor_ != nullptr) {
         apsMonitor_->SetApsScene(sceneId, false);
@@ -401,6 +411,9 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 void PerfMonitor::EndCommercial(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (IsScrollJank(sceneId)) {
+        PerfInterfaces::SetScrollState(false);
+    }
     if (apsMonitor_ != nullptr) {
         apsMonitor_->SetApsScene(sceneId, false);
     }
@@ -781,6 +794,16 @@ bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
         sceneId == PerfConstants::SCREENLOCK_SCREEN_OFF_ANIM) {
             return true;
         }
+    return false;
+}
+
+bool PerfMonitor::IsScrollJank(const std::string& sceneId)
+{
+    if (sceneId == PerfConstants::APP_LIST_FLING ||
+        sceneId == PerfConstants::APP_SWIPER_SCROLL ||
+        sceneId == PerfConstants::APP_SWIPER_FLING) {
+        return true;
+    }
     return false;
 }
 
