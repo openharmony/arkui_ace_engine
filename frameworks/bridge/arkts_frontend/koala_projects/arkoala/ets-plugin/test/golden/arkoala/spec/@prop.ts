@@ -1,5 +1,6 @@
 import { ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkStructBase, LocalStorage, MutableState, SyncedProperty, observableProxy, propState, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkCustomXComponent extends ArkStructBase<ArkCustomXComponent, CustomXOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -26,6 +27,7 @@ class ArkCustomXComponent extends ArkStructBase<ArkCustomXComponent, CustomXOpti
     content?: () => void, initializers?: CustomXOptions) {
     }
 }
+/** @memo:stable */
 class ArkCustomYComponent extends ArkStructBase<ArkCustomYComponent, CustomYOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

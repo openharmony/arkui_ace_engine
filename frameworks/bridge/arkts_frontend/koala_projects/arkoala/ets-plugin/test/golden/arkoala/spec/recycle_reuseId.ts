@@ -1,6 +1,7 @@
 import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, Color, LocalStorage, MutableState, SyncedProperty, observableProxy, propState, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 let a: string = "aaaaaaaaaa";
+/** @memo:stable */
 class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent, HomeComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -52,6 +53,7 @@ class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent,
         });
     }
 }
+/** @memo:stable */
 class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

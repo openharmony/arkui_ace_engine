@@ -7,6 +7,7 @@ function animatablePoints__Polyline<T extends ArkPolylineComponent>(PolylineInst
 function attributeExtend__Text<T extends ArkTextComponent>(TextInstance: T): T {
     return TextInstance.fontSize(50);
 }
+/** @memo:stable */
 class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent, HomeComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

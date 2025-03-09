@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -47,15 +47,22 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { LinearGradient } from "./../ArkLinearGradientMaterialized"
 import { LinearStyleOptions, RingStyleOptions, CapsuleStyleOptions, ProgressStyleOptions, ProgressConfiguration, ProgressOptions, ProgressAttribute } from "./../ArkProgressInterfaces"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -92,7 +99,7 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
             if (TypeChecker.isColor(value_0)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_0_0  = value_0 as Color
-                thisSerializer.writeInt32((value_0_0.valueOf() as int32))
+                thisSerializer.writeInt32(((value_0_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_0_type) {
                 thisSerializer.writeInt8(1 as int32)
@@ -110,7 +117,7 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeResource(value_0_3)
             }
         }
-        else if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isLinearGradient(value))) {
+        else if (TypeChecker.isLinearGradient(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as LinearGradient
             thisSerializer.writeLinearGradient(value_1)

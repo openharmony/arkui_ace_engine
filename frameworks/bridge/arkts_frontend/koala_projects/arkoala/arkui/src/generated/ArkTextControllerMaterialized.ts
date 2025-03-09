@@ -29,10 +29,11 @@ import { ImageSpanAlignment, ImageFit } from "./ArkEnumsInterfaces"
 import { DrawContext } from "./ArkCommonInterfaces"
 import { LengthMetrics, LengthMetricsInternal } from "./ArkLengthMetricsMaterialized"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -44,7 +45,7 @@ export class TextControllerInternal {
     }
 }
 export class TextController implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -75,13 +76,11 @@ export class TextController implements MaterializedBase {
         ArkUIGeneratedNativeModule._TextController_closeSelectionMenu(this.peer!.ptr)
     }
     private setStyledString_serialize(value: StyledString): void {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(value)
-        ArkUIGeneratedNativeModule._TextController_setStyledString(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._TextController_setStyledString(this.peer!.ptr, toPeerPtr(value))
     }
     private getLayoutManager_serialize(): LayoutManager {
         const retval = ArkUIGeneratedNativeModule._TextController_getLayoutManager(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj: LayoutManager = LayoutManagerInternal.fromPtr(retval)
+        return obj
     }
 }

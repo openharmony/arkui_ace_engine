@@ -36,7 +36,7 @@ export class ComponentTransformer extends AbstractVisitor {
     createImportDeclaration() {
         return arkts.factory.createImportDeclaration(
             // TODO: es2panda has already resolved the "paths" section
-            arkts.factory.create1StringLiteral(this.options?.arkui ?? '@ohos.arkui.runtime'),
+            arkts.factory.create1StringLiteral(this.options?.arkui ?? '@ohos.arkui'),
             [
                 arkts.factory.createImportSpecifier(
                     arkts.factory.createIdentifier('StructBase'),
@@ -69,33 +69,58 @@ export class ComponentTransformer extends AbstractVisitor {
         )
     }
 
-    processComponent(node: arkts.ClassDeclaration | arkts.StructDeclaration): arkts.ClassDeclaration {
-        const className = node.definition.name.name
+    processComponent(node: arkts.ClassDeclaration | arkts.StructDeclaration): arkts.ClassDeclaration | arkts.StructDeclaration {
+        const className = node.definition?.ident?.name
+        if (!className) {
+            throw "Non Empty className expected for Component"
+        }
         arkts.GlobalInfo.getInfoInstance().add(className);
         this.context.componentNames.push(className)
 
+        if (!node.definition) {
+            return node
+        }
         const newDefinition = arkts.factory.updateClassDefinition(
             node.definition,
-            node.definition.name,
-            node.definition.members,
-            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_FINAL,
-            arkts.Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
-            node.definition.typeParamsDecl,
+            node.definition?.ident,
+            undefined,
+            undefined, // superTypeParams doen't work
+            // arkts.factory.createTSTypeParameterInstantiation(
+            //     [
+            //         arkts.factory.createTypeReference(
+            //             arkts.factory.createTypeReferencePart(
+            //                 arkts.factory.createIdentifier("H")
+            //             )
+            //         ),
+            //         arkts.factory.createTypeReferenceFromId(
+            //             arkts.factory.createIdentifier(`__Options_${className}`)
+            //         ),
+            //     ]
+            // ),
+            node.definition?.implements,
+            undefined,
             arkts.factory.createTypeReference(
                 arkts.factory.createTypeReferencePart(
                     arkts.factory.createIdentifier('StructBase'),
                     arkts.factory.createTSTypeParameterInstantiation(
                         [
-                            arkts.factory.createTypeReferenceFromId(
-                                arkts.factory.createIdentifier(className)
+                            arkts.factory.createTypeReference(
+                                arkts.factory.createTypeReferencePart(
+                                    arkts.factory.createIdentifier(className)
+                                )
                             ),
-                            arkts.factory.createTypeReferenceFromId(
-                                arkts.factory.createIdentifier(`__Options_${className}`)
+                            arkts.factory.createTypeReference(
+                                arkts.factory.createTypeReferencePart(
+                                    arkts.factory.createIdentifier(`__Options_${className}`)
+                                )
                             ),
                         ]
                     )
                 )
-            )
+            ),
+            node.definition?.body,
+            node.definition?.modifiers,
+            arkts.classDefinitionFlags(node.definition) | arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_FINAL
         )
 
         if (arkts.isStructDeclaration(node)) {

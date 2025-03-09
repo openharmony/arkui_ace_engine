@@ -69,11 +69,26 @@ export class ClassDefinition extends TypedAstNode {
     get ident(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._ClassDefinitionIdentConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setIdent(ident: Identifier): this {
+        global.generatedEs2panda._ClassDefinitionSetIdent(global.context, this.peer, passNode(ident))
+        return this
+    }
     get internalName(): string {
         return unpackString(global.generatedEs2panda._ClassDefinitionInternalNameConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setInternalName(internalName: string): this {
+        global.generatedEs2panda._ClassDefinitionSetInternalName(global.context, this.peer, internalName)
+        return this
+    }
     get super(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ClassDefinitionSuperConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setSuper(superClass: Expression): this {
+        global.generatedEs2panda._ClassDefinitionSetSuper(global.context, this.peer, passNode(superClass))
+        return this
     }
     get isGlobal(): boolean {
         return global.generatedEs2panda._ClassDefinitionIsGlobalConst(global.context, this.peer)
@@ -105,17 +120,62 @@ export class ClassDefinition extends TypedAstNode {
     get isModule(): boolean {
         return global.generatedEs2panda._ClassDefinitionIsModuleConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setGlobalInitialized(): this {
+        global.generatedEs2panda._ClassDefinitionSetGlobalInitialized(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setInnerModifier(): this {
+        global.generatedEs2panda._ClassDefinitionSetInnerModifier(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setClassDefinitionChecked(): this {
+        global.generatedEs2panda._ClassDefinitionSetClassDefinitionChecked(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setAnonymousModifier(): this {
+        global.generatedEs2panda._ClassDefinitionSetAnonymousModifier(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setNamespaceTransformed(): this {
+        global.generatedEs2panda._ClassDefinitionSetNamespaceTransformed(global.context, this.peer)
+        return this
+    }
     get modifiers(): Es2pandaClassDefinitionModifiers {
         return global.generatedEs2panda._ClassDefinitionModifiersConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setModifiers(modifiers: Es2pandaClassDefinitionModifiers): this {
+        global.generatedEs2panda._ClassDefinitionSetModifiers(global.context, this.peer, modifiers)
+        return this
+    }
+    /** @deprecated */
+    addProperties(body: readonly AstNode[]): this {
+        global.generatedEs2panda._ClassDefinitionAddProperties(global.context, this.peer, passNodeArray(body), body.length)
+        return this
+    }
     get body(): readonly AstNode[] {
         return unpackNodeArray(global.generatedEs2panda._ClassDefinitionBodyConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setCtor(ctor: MethodDefinition): this {
+        global.generatedEs2panda._ClassDefinitionSetCtor(global.context, this.peer, passNode(ctor))
+        return this
     }
     get implements(): readonly TSClassImplements[] {
         return unpackNodeArray(global.generatedEs2panda._ClassDefinitionImplementsConst(global.context, this.peer))
     }
     get typeParams(): TSTypeParameterDeclaration | undefined {
         return unpackNode(global.generatedEs2panda._ClassDefinitionTypeParamsConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setTypeParams(typeParams: TSTypeParameterDeclaration): this {
+        global.generatedEs2panda._ClassDefinitionSetTypeParams(global.context, this.peer, passNode(typeParams))
+        return this
     }
     get superTypeParams(): TSTypeParameterInstantiation | undefined {
         return unpackNode(global.generatedEs2panda._ClassDefinitionSuperTypeParamsConst(global.context, this.peer))
@@ -129,14 +189,29 @@ export class ClassDefinition extends TypedAstNode {
     get localPrefix(): string {
         return unpackString(global.generatedEs2panda._ClassDefinitionLocalPrefixConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setOrigEnumDecl(enumDecl: TSEnumDeclaration): this {
+        global.generatedEs2panda._ClassDefinitionSetOrigEnumDecl(global.context, this.peer, passNode(enumDecl))
+        return this
+    }
     get origEnumDecl(): TSEnumDeclaration | undefined {
         return unpackNode(global.generatedEs2panda._ClassDefinitionOrigEnumDeclConst(global.context, this.peer))
     }
     get getAnonClass(): ClassDeclaration | undefined {
         return unpackNode(global.generatedEs2panda._ClassDefinitionGetAnonClass(global.context, this.peer))
     }
+    /** @deprecated */
+    setAnonClass(anonClass: ClassDeclaration): this {
+        global.generatedEs2panda._ClassDefinitionSetAnonClass(global.context, this.peer, passNode(anonClass))
+        return this
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ClassDefinitionAnnotationsConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ClassDefinitionSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
     }
 }
 export function isClassDefinition(node: AstNode): node is ClassDefinition {

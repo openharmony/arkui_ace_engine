@@ -4,6 +4,7 @@ import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
 import * as AllComponent from './test/pages/NamespaceComponent';
 import TsModule from './test/pages/TsModule';
+/** @memo:stable */
 class ArkImportTestComponent extends ArkStructBase<ArkImportTestComponent, ImportTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

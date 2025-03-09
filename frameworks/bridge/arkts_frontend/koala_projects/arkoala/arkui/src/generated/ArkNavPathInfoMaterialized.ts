@@ -17,10 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { PopInfo } from "./ArkNavigationInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -32,7 +33,7 @@ export class NavPathInfoInternal {
     }
 }
 export class NavPathInfo implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -85,9 +86,9 @@ export class NavPathInfo implements MaterializedBase {
         return retval
     }
      constructor(name?: string, param?: unknown, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean) {
-        if (((name) !== (undefined)) && ((param) !== (undefined)) && ((onPop) !== (undefined)) && ((isEntry) !== (undefined)))
+        if (((name) !== (undefined)) || ((param) !== (undefined)) || ((onPop) !== (undefined)) || ((isEntry) !== (undefined)))
         {
-            const ctorPtr: KPointer = NavPathInfo.ctor_navpathinfo(name, param, onPop, isEntry)
+            const ctorPtr: KPointer = NavPathInfo.ctor_navpathinfo((name)!, (param)!, (onPop)!, (isEntry)!)
             this.peer = new Finalizable(ctorPtr, NavPathInfo.getFinalizer())
         }
     }

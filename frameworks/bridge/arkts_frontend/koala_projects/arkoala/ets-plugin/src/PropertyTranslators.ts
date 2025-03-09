@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,6 @@ import {
     isStatic,
     makePrivate,
     parameter,
-    undefinedValue,
 } from "./ApiUtils"
 import { Importer } from "./Importer"
 import {
@@ -116,20 +115,6 @@ export abstract class PropertyTranslator {
 
     createStateOf(type: ts.TypeNode | undefined, ...initializer: ts.Expression[]): ts.Expression {
         return createStateOf(this.context.importer, type, ...initializer)
-    }
-
-    typeOrErrorType(node: ts.Node, type: ts.TypeNode|undefined): ts.TypeNode {
-        if (!type) {
-            reportError(
-                MessageCode.EXPECTED_STRUCT_FIELD__TO_BE_EXPLICITLY_TYPED,
-                `Expected struct field to be explicitly typed in arkts 2.0 app: ${node.getText(this.context.sourceFile)}`,
-                node,
-                this.context.sourceFile,
-                this.context.extras
-            )
-        }
-        return type ??
-            ts.factory.createTypeReferenceNode("<Error type>")
     }
 
     translateStateMember(
@@ -308,13 +293,7 @@ export abstract class PropertyTranslator {
                                 createThisFieldAccess(newName)
                             )
                         ),
-                        ts.factory.createCallExpression(
-                            id(this.context.importer.withCommonImport("observableProxy")),
-                            undefined,
-                            [
-                                id("value"),
-                            ]
-                        )
+                        createObservableProxy(this.context.importer, undefined, id("value"))
                     ),
                     postStatements
                 ),
@@ -429,16 +408,7 @@ export abstract class PropertyTranslator {
 
     protected stateImplField(impl: StateImplementation): OptionDescriptor[] {
         const originalName = asIdentifier(this.property.name)
-        if (!this.property.type) {
-            reportError(
-                MessageCode.EXPECTED_STRUCT_FIELD__TO_BE_EXPLICITLY_TYPED,
-                `Expected struct field to be explicitly typed in arkts 2.0 app: ${this.property.getText()}`,
-                this.property,
-                this.context.sourceFile,
-                this.context.extras
-            )
-        }
-        const originalType = this.typeOrErrorType(this.property, this.property.type)
+        const originalType = getPropertyType(this.property, this.context)
         const backingName = backingFieldName(asIdentifier(this.property.name))
         const backingType = ts.factory.createTypeReferenceNode(
             (impl === StateImplementation.SyncedProperty) ?
@@ -455,14 +425,20 @@ export abstract class PropertyTranslator {
 
     protected plainImplField(needsMemo: boolean): OptionDescriptor[] {
         const name = asIdentifier(this.property.name)
-        const type = this.typeOrErrorType(this.property, this.property.type)
+        const type = getPropertyType(this.property, this.context)
 
-        return [new OptionDescriptor( name, type, needsMemo)]
+        return [new OptionDescriptor(name, type, needsMemo)]
     }
 }
 
+export function createObservableProxy(importer: Importer, type: ts.TypeNode | undefined, ...initializer: ts.Expression[]): ts.Expression {
+    return ts.factory.createCallExpression(
+        id(importer.withCommonImport("observableProxy")),
+        type ? [type] : undefined,
+        initializer
+    )
+}
 
-// TODO : move func
 export function createStateOf(importer: Importer, type: ts.TypeNode | undefined, ...initializer: ts.Expression[]): ts.Expression {
     return ts.factory.createCallExpression(
         id(importer.withAdaptorImport("stateOf")),
@@ -471,8 +447,21 @@ export function createStateOf(importer: Importer, type: ts.TypeNode | undefined,
     )
 }
 
+export function getPropertyType(property: ts.PropertyDeclaration, context: PropertyTranslatorContext): ts.TypeNode {
+    const type = property.type
+    if (type) return type
+    reportError(
+        MessageCode.EXPECTED_STRUCT_FIELD__TO_BE_EXPLICITLY_TYPED,
+        `Expected field to be explicitly typed in ArkTS 1.2 app: ${property.getText(context.sourceFile)}`,
+        property,
+        context.sourceFile,
+        context.extras
+    )
+    return ts.factory.createTypeReferenceNode("<Error type>")
+}
+
 class State extends PropertyTranslator {
-    override implField(): { name: ts.Identifier; type: ts.TypeNode, isBuilderParam: boolean }[] {
+    override implField(): OptionDescriptor[] {
         return this.stateImplField(StateImplementation.MutableState)
     }
     override toInitialization(initializers: ts.Identifier) {
@@ -496,25 +485,6 @@ class State extends PropertyTranslator {
                 ts.factory.createThis()
             )
         )
-    }
-}
-
-export class ClassState extends PropertyTranslator {
-    override implField(): OptionDescriptor[] {
-        return this.stateImplField(StateImplementation.MutableState)
-    }
-
-    override toInitialization(initializers: ts.Identifier) {
-        return this.initializeBacking(initializers)
-    }
-
-    translateMember(): ts.ClassElement[] {
-        // special case: @State in any class other than struct
-        return this.translateStateWithInitializer(this.property, StateDecorator, this.createStateOf(
-            this.property.type,
-            this.property.initializer!,
-            undefinedValue(),
-            undefinedValue()))
     }
 }
 
@@ -630,14 +600,14 @@ class StorageLink extends PropertyTranslator {
         const name = backingFieldName(asIdentifier(this.property.name))
         const type = ts.factory.createTypeReferenceNode(
             this.context.importer.withRuntimeImport("MutableState"),
-            [this.typeOrErrorType(this.property, this.property.type)]
+            [getPropertyType(this.property, this.context)]
         )
 
         const name1 = asIdentifier(this.property.name)
-        const type1 = this.typeOrErrorType(this.property, this.property.type)
+        const type1 = getPropertyType(this.property, this.context)
         return [
             new OptionDescriptor(name, type),
-            new OptionDescriptor(name1,type1)
+            new OptionDescriptor(name1, type1)
         ]
     }
 

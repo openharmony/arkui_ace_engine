@@ -1,15 +1,27 @@
-import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkStructBase, ArkText, ForEach, LocalStorage, MutableState, Observed, SyncedProperty, objectLinkState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
+import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkStructBase, ArkText, ForEach, LocalStorage, MutableState, SyncedProperty, objectLinkState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 var nextID: number = 0;
-@Observed
 class Model {
-    text: string = '';
-    color: string = '#00ff00';
+    private __backing_text: MutableState<string> = stateOf<string>('');
+    get text(): string {
+        return this.__backing_text.value;
+    }
+    set text(value: string) {
+        this.__backing_text.value = observableProxy(value);
+    }
+    private __backing_color: MutableState<string> = stateOf<string>('#00ff00');
+    get color(): string {
+        return this.__backing_color.value;
+    }
+    set color(value: string) {
+        this.__backing_color.value = observableProxy(value);
+    }
     constructor(t: string, c: string) {
         this.text = t;
         this.color = c;
     }
 }
+/** @memo:stable */
 class ArkCustomTextComponent extends ArkStructBase<ArkCustomTextComponent, CustomTextOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -39,6 +51,7 @@ class ArkCustomTextComponent extends ArkStructBase<ArkCustomTextComponent, Custo
         });
     }
 }
+/** @memo:stable */
 class ArkParentComponent extends ArkStructBase<ArkParentComponent, ParentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

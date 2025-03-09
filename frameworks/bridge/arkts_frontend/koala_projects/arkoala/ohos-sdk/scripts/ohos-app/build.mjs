@@ -42,8 +42,6 @@ export async function build(options) {
             [`"${path.join(LZ_TOOLS(), "ohpm/bin/ohpm")}"`,
             "install",
             "--all",
-            "--registry",
-            "https://cmc.centralrepo.rnd.huawei.com/artifactory/api/npm/product_npm",
             "--strict_ssl",
             "false",
             ...extraOptions],

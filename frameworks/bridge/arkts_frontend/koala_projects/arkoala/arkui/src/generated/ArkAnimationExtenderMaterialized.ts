@@ -20,39 +20,15 @@ import { AnimateParam, TranslateOptions, FinishCallbackType, ExpectedFrameRateRa
 import { DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish } from "./ArkAnimationExtenderInterfaces"
 import { Curve, PlayMode } from "./ArkEnumsInterfaces"
 import { ICurve, ICurveInternal } from "./ArkICurveMaterialized"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
-export class AnimationExtenderInternal {
-    public static fromPtr(ptr: KPointer): AnimationExtender {
-        const obj: AnimationExtender = new AnimationExtender()
-        obj.peer = new Finalizable(ptr, AnimationExtender.getFinalizer())
-        return obj
-    }
-}
-export class AnimationExtender implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_animationextender(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._AnimationExtender_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = AnimationExtender.ctor_animationextender()
-        this.peer = new Finalizable(ctorPtr, AnimationExtender.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._AnimationExtender_getFinalizer()
-    }
+export class AnimationExtender {
     public static SetClipRect(node: KPointer, x: float32, y: float32, width: float32, height: float32): void {
         const node_casted = node as (KPointer)
         const x_casted = x as (float32)

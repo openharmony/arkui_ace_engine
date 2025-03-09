@@ -26,7 +26,7 @@ suite(util.basename(__filename), () => {
                             arkts.factory.createIdentifier(
                                 'console'
                             ),
-                            arkts.Identifier.create(
+                            arkts.Identifier.create2Identifier(
                                 'log'
                             ),
                             arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_PROPERTY_ACCESS,

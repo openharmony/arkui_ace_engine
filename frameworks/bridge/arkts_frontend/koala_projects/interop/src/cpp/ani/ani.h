@@ -36,7 +36,7 @@ typedef size_t ani_size;
 
 // Primitive types:
 typedef uint8_t ani_boolean;
-typedef uint32_t ani_char;
+typedef uint16_t ani_char;
 typedef int8_t ani_byte;
 typedef int16_t ani_short;
 typedef int32_t ani_int;
@@ -51,53 +51,49 @@ class __ani_module : public __ani_ref {};
 class __ani_namespace : public __ani_ref {};
 class __ani_object : public __ani_ref {};
 class __ani_fn_object : public __ani_object {};
-class __ani_enum_value : public __ani_object {};
+class __ani_enum_item : public __ani_object {};
 class __ani_error : public __ani_object {};
-class __ani_promise : public __ani_object {};
 class __ani_tuple_value : public __ani_object {};
 class __ani_type : public __ani_object {};
 class __ani_arraybuffer : public __ani_object {};
 class __ani_string : public __ani_object {};
-class __ani_stringliteral : public __ani_string {};
 class __ani_class : public __ani_type {};
 class __ani_enum : public __ani_type {};
-class __ani_tuple : public __ani_type {};
-class __ani_fixedarray : public __ani_object {};
-class __ani_fixedarray_boolean : public __ani_fixedarray {};
-class __ani_fixedarray_char : public __ani_fixedarray {};
-class __ani_fixedarray_byte : public __ani_fixedarray {};
-class __ani_fixedarray_short : public __ani_fixedarray {};
-class __ani_fixedarray_int : public __ani_fixedarray {};
-class __ani_fixedarray_long : public __ani_fixedarray {};
-class __ani_fixedarray_float : public __ani_fixedarray {};
-class __ani_fixedarray_double : public __ani_fixedarray {};
-class __ani_fixedarray_ref : public __ani_fixedarray {};
+class __ani_union : public __ani_type {};
+class __ani_array : public __ani_object {};
+class __ani_array_boolean : public __ani_array {};
+class __ani_array_char : public __ani_array {};
+class __ani_array_byte : public __ani_array {};
+class __ani_array_short : public __ani_array {};
+class __ani_array_int : public __ani_array {};
+class __ani_array_long : public __ani_array {};
+class __ani_array_float : public __ani_array {};
+class __ani_array_double : public __ani_array {};
+class __ani_array_ref : public __ani_array {};
 typedef __ani_ref *ani_ref;
 typedef __ani_module *ani_module;
 typedef __ani_namespace *ani_namespace;
 typedef __ani_object *ani_object;
 typedef __ani_fn_object *ani_fn_object;
-typedef __ani_enum_value *ani_enum_value;
+typedef __ani_enum_item *ani_enum_item;
 typedef __ani_error *ani_error;
-typedef __ani_promise *ani_promise;
 typedef __ani_tuple_value *ani_tuple_value;
 typedef __ani_type *ani_type;
 typedef __ani_arraybuffer *ani_arraybuffer;
 typedef __ani_string *ani_string;
-typedef __ani_stringliteral *ani_stringliteral;
 typedef __ani_class *ani_class;
 typedef __ani_enum *ani_enum;
-typedef __ani_tuple *ani_tuple;
-typedef __ani_fixedarray *ani_fixedarray;
-typedef __ani_fixedarray_boolean *ani_fixedarray_boolean;
-typedef __ani_fixedarray_char *ani_fixedarray_char;
-typedef __ani_fixedarray_byte *ani_fixedarray_byte;
-typedef __ani_fixedarray_short *ani_fixedarray_short;
-typedef __ani_fixedarray_int *ani_fixedarray_int;
-typedef __ani_fixedarray_long *ani_fixedarray_long;
-typedef __ani_fixedarray_float *ani_fixedarray_float;
-typedef __ani_fixedarray_double *ani_fixedarray_double;
-typedef __ani_fixedarray_ref *ani_fixedarray_ref;
+typedef __ani_union *ani_union;
+typedef __ani_array *ani_array;
+typedef __ani_array_boolean *ani_array_boolean;
+typedef __ani_array_char *ani_array_char;
+typedef __ani_array_byte *ani_array_byte;
+typedef __ani_array_short *ani_array_short;
+typedef __ani_array_int *ani_array_int;
+typedef __ani_array_long *ani_array_long;
+typedef __ani_array_float *ani_array_float;
+typedef __ani_array_double *ani_array_double;
+typedef __ani_array_ref *ani_array_ref;
 #else   // __cplusplus
 struct __ani_ref;
 typedef struct __ani_ref *ani_ref;
@@ -105,31 +101,26 @@ typedef ani_ref ani_module;
 typedef ani_ref ani_namespace;
 typedef ani_ref ani_object;
 typedef ani_object ani_fn_object;
-typedef ani_object ani_enum_value;
+typedef ani_object ani_enum_item;
 typedef ani_object ani_error;
-typedef ani_object ani_promise;
 typedef ani_object ani_tuple_value;
 typedef ani_object ani_type;
 typedef ani_object ani_arraybuffer;
 typedef ani_object ani_string;
-typedef ani_string ani_stringliteral;
 typedef ani_type ani_class;
 typedef ani_type ani_enum;
-typedef ani_type ani_tuple;
-typedef ani_object ani_fixedarray;
-typedef ani_fixedarray ani_fixedarray_boolean;
-typedef ani_fixedarray ani_fixedarray_char;
-typedef ani_fixedarray ani_fixedarray_byte;
-typedef ani_fixedarray ani_fixedarray_short;
-typedef ani_fixedarray ani_fixedarray_int;
-typedef ani_fixedarray ani_fixedarray_long;
-typedef ani_fixedarray ani_fixedarray_float;
-typedef ani_fixedarray ani_fixedarray_double;
-typedef ani_fixedarray ani_fixedarray_ref;
+typedef ani_type ani_union;
+typedef ani_object ani_array;
+typedef ani_array ani_array_boolean;
+typedef ani_array ani_array_char;
+typedef ani_array ani_array_byte;
+typedef ani_array ani_array_short;
+typedef ani_array ani_array_int;
+typedef ani_array ani_array_long;
+typedef ani_array ani_array_float;
+typedef ani_array ani_array_double;
+typedef ani_array ani_array_ref;
 #endif  // __cplusplus
-
-struct __ani_gref;
-typedef struct __ani_gref *ani_gref;
 
 struct __ani_wref;
 typedef struct __ani_wref *ani_wref;
@@ -146,31 +137,16 @@ typedef struct __ani_field *ani_field;
 struct __ani_static_field;
 typedef struct __ani_satic_field *ani_static_field;
 
-struct __ani_property;
-typedef struct __ani_property *ani_property;
-
 struct __ani_method;
 typedef struct __ani_method *ani_method;
 
 struct __ani_static_method;
 typedef struct __ani_static_method *ani_static_method;
 
-struct __ani_cls_slot;
-typedef struct __ani_cls_slot *ani_cls_slot;
+struct __ani_resolver;
+typedef struct __ani_resolver *ani_resolver;
 
 typedef void (*ani_finalizer)(void *data, void *hint);
-
-typedef enum {
-    ANI_KIND_BOOLEAN,
-    ANI_KIND_CHAR,
-    ANI_KIND_BYTE,
-    ANI_KIND_SHORT,
-    ANI_KIND_INT,
-    ANI_KIND_LONG,
-    ANI_KIND_FLOAT,
-    ANI_KIND_DOUBLE,
-    ANI_KIND_REF,
-} ani_kind;
 
 typedef union {
     ani_boolean z;
@@ -204,6 +180,7 @@ typedef enum {
     ANI_INVALID_ARGS,
     ANI_INVALID_TYPE,
     ANI_INVALID_DESCRIPTOR,
+    ANI_INCORRECT_REF,
     ANI_PENDING_ERROR,
     ANI_NOT_FOUND,
     ANI_ALREADY_BINDED,
@@ -211,8 +188,19 @@ typedef enum {
     ANI_OUT_OF_MEMORY,
     ANI_OUT_OF_RANGE,
     ANI_BUFFER_TO_SMALL,
+    ANI_INVALID_VERSION,
     // NOTE: Add necessary status codes
 } ani_status;
+
+typedef struct {
+    const char *option;
+    void *extra;
+} ani_option;
+
+typedef struct {
+    size_t nr_options;
+    const ani_option *options;
+} ani_options;
 
 struct __ani_vm_api {
     void *reserved0;
@@ -222,14 +210,9 @@ struct __ani_vm_api {
 
     ani_status (*DestroyVM)(ani_vm *vm);
     ani_status (*GetEnv)(ani_vm *vm, uint32_t version, ani_env **result);
-    ani_status (*AttachThread)(ani_vm *vm, void *params, ani_env **result);
-    ani_status (*DetachThread)(ani_vm *vm);
+    ani_status (*AttachCurrentThread)(ani_vm *vm, const ani_options *options, uint32_t version, ani_env **result);
+    ani_status (*DetachCurrentThread)(ani_vm *vm);
 };
-
-typedef struct {
-    const char *option;
-    void *option_data;
-} ani_vm_option;
 
 #define ANI_EXPORT __attribute__((visibility("default")))
 
@@ -237,7 +220,7 @@ typedef struct {
 extern "C" {
 #endif
 
-ANI_EXPORT ani_status ANI_CreateVM(uint32_t version, size_t nr_options, const ani_vm_option *options, ani_vm **result);
+ANI_EXPORT ani_status ANI_CreateVM(const ani_options *options, uint32_t version, ani_vm **result);
 ANI_EXPORT ani_status ANI_GetCreatedVMs(ani_vm **vms_buffer, ani_size vms_buffer_length, ani_size *result);
 
 // Prototypes of exported functions for a shared library.
@@ -275,210 +258,6 @@ struct __ani_interaction_api {
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*GetVM)(ani_env *env, ani_vm **result);
-
-    /**
-     * @brief Checks if a reference is an object.
-     *
-     * This function determines whether the specified reference represents an object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the boolean result (true if the reference is an object, false otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsObject)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a functional object.
-     *
-     * This function determines whether the specified reference represents a functional object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the boolean result (true if the reference is a functional object, false
-     * otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFunctionalObject)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is an enum.
-     *
-     * This function determines whether the specified reference represents an enum.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the boolean result (true if the reference is an enum, false otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsEnum)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a tuple.
-     *
-     * This function determines whether the specified reference represents a tuple.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the boolean result (true if the reference is a tuple, false otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsTuple)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a string.
-     *
-     * This function determines whether the specified reference represents a string.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the boolean result (true if the reference is a string, false otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsString)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a string literal.
-     *
-     * This function determines whether the specified reference represents a string literal.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the boolean result (true if the reference is a string literal, false
-     * otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsStringLiteral)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array.
-     *
-     * This function determines whether the specified reference represents a fixed array.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the boolean result (true if the reference is a fixed array, false
-     * otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array of booleans.
-     *
-     * This function determines whether the specified reference represents a fixed array of booleans.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the boolean result (true if the reference is a fixed array of booleans,
-     * false otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray_Boolean)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array of chars.
-     *
-     * This function determines whether the specified reference represents a fixed array of chars.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the char result (true if the reference is a fixed array of chars, false
-     * otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray_Char)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array of bytes.
-     *
-     * This function determines whether the specified reference represents a fixed array of bytes.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the byte result (true if the reference is a fixed array of bytes, false
-     * otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray_Byte)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array of shorts.
-     *
-     * This function determines whether the specified reference represents a fixed array of shorts.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the short result (true if the reference is a fixed array of shorts, false
-     * otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray_Short)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array of integers.
-     *
-     * This function determines whether the specified reference represents a fixed array of integers.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the integer result (true if the reference is a fixed array of integers,
-     * false otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray_Int)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array of longs.
-     *
-     * This function determines whether the specified reference represents a fixed array of longs.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the long result (true if the reference is a fixed array of longs, false
-     * otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray_Long)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array of floats.
-     *
-     * This function determines whether the specified reference represents a fixed array of floats.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the float result (true if the reference is a fixed array of floats, false
-     * otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray_Float)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array of doubles.
-     *
-     * This function determines whether the specified reference represents a fixed array of doubles.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the double result (true if the reference is a fixed array of doubles, false
-     * otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray_Double)(ani_env *env, ani_ref ref, ani_boolean *result);
-
-    /**
-     * @brief Checks if a reference is a fixed array of references.
-     *
-     * This function determines whether the specified reference represents a fixed array of references.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] ref The reference to check.
-     * @param[out] result A pointer to store the boolean result (true if the reference is a fixed array of references,
-     * false otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reference_IsFixedArray_Ref)(ani_env *env, ani_ref ref, ani_boolean *result);
 
     /**
      * @brief Creates a new object of a specified class using a constructor method.
@@ -551,19 +330,6 @@ struct __ani_interaction_api {
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Object_InstanceOf)(ani_env *env, ani_object object, ani_type type, ani_boolean *result);
-
-    /**
-     * @brief Checks if two objects are the same.
-     *
-     * This function compares two objects to determine if they refer to the same instance.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object1 The first object to compare.
-     * @param[in] object2 The second object to compare.
-     * @param[out] result A pointer to store the boolean result (true if the objects are the same, false otherwise).
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_IsSame)(ani_env *env, ani_object object1, ani_object object2, ani_boolean *result);
 
     /**
      * @brief Retrieves the superclass of a specified type.
@@ -639,42 +405,6 @@ struct __ani_interaction_api {
     ani_status (*FindEnum)(ani_env *env, const char *enum_descriptor, ani_enum *result);
 
     /**
-     * @brief Finds a tuple by its descriptor.
-     *
-     * This function locates a tuple based on its descriptor and stores it in the result parameter.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] tuple_descriptor The descriptor of the tuple to find.
-     * @param[out] result A pointer to the tuple to be populated.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FindTuple)(ani_env *env, const char *tuple_descriptor, ani_tuple *result);
-
-    /**
-     * @brief Finds a function by its descriptor.
-     *
-     * This function locates a function based on its descriptor and stores it in the result parameter.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] function_descriptor The descriptor of the function to find.
-     * @param[out] result A pointer to the function to be populated.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FindFunction)(ani_env *env, const char *function_descriptor, ani_function *result);
-
-    /**
-     * @brief Finds a variable by its descriptor.
-     *
-     * This function locates a variable based on its descriptor and stores it in the result parameter.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] variable_descriptor The descriptor of the variable to find.
-     * @param[out] result A pointer to the variable to be populated.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FindVariable)(ani_env *env, const char *variable_descriptor, ani_variable *result);
-
-    /**
      * @brief Finds a namespace within a module by its descriptor.
      *
      * This function locates a namespace within the specified module based on its descriptor.
@@ -721,8 +451,8 @@ struct __ani_interaction_api {
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] module The module to search within.
-     * @param[in] name The name of the function to retrieve.
-     * @param[in] signature The signature of the function to retrieve.
+     * @param[in] name The name of the function to find.
+     * @param[in] signature The signature of the function to find.
      * @param[out] result A pointer to the function object.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
@@ -730,18 +460,17 @@ struct __ani_interaction_api {
                                       ani_function *result);
 
     /**
-     * @brief Finds a variable within a module by its descriptor.
+     * @brief Finds a variable within a module by its name.
      *
-     * This function locates a variable within the specified module based on its descriptor.
+     * This function locates a variable within the specified module based on its name.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] module The module to search within.
-     * @param[in] variable_descriptor The descriptor of the variable to find.
+     * @param[in] name The name of the variable to find.
      * @param[out] result A pointer to the variable object.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Module_FindVariable)(ani_env *env, ani_module module, const char *variable_descriptor,
-                                      ani_variable *result);
+    ani_status (*Module_FindVariable)(ani_env *env, ani_module module, const char *name, ani_variable *result);
 
     /**
      * @brief Finds a namespace within another namespace by its descriptor.
@@ -790,8 +519,8 @@ struct __ani_interaction_api {
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] ns The namespace to search within.
-     * @param[in] name The name of the function to retrieve.
-     * @param[in] signature The signature of the function to retrieve.
+     * @param[in] name The name of the function to find.
+     * @param[in] signature The signature of the function to find.
      * @param[out] result A pointer to the function object.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
@@ -799,18 +528,17 @@ struct __ani_interaction_api {
                                          ani_function *result);
 
     /**
-     * @brief Finds a variable within a namespace by its descriptor.
+     * @brief Finds a variable within a namespace by its name.
      *
-     * This function locates a variable within the specified namespace based on its descriptor.
+     * This function locates a variable within the specified namespace based on its name.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] ns The namespace to search within.
-     * @param[in] variable_descriptor The descriptor of the variable to find.
+     * @param[in] name The name of the variable to find.
      * @param[out] result A pointer to the variable object.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Namespace_FindVariable)(ani_env *env, ani_namespace ns, const char *variable_descriptor,
-                                         ani_variable *result);
+    ani_status (*Namespace_FindVariable)(ani_env *env, ani_namespace ns, const char *name, ani_variable *result);
 
     /**
      * @brief Binds native functions to a module.
@@ -1185,663 +913,479 @@ struct __ani_interaction_api {
                                           char *utf8_buffer, ani_size utf8_buffer_size, ani_size *result);
 
     /**
-     * @brief Retrieves critical information about a string.
+     * @brief Retrieves the length of an array.
      *
-     * This function retrieves the type and data of a string for critical operations.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] string The string to analyze.
-     * @param[out] result_string_type A pointer to store the type of the string (e.g., UTF-16 or UTF-8).
-     * @param[out] result_data A pointer to the raw string data.
-     * @param[out] result_size A pointer to the size of the string data.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*String_GetCritical)(ani_env *env, ani_string string, uint32_t *result_string_type,
-                                     const void **result_data,
-                                     ani_size *result_size);  // result_string_type - string type utf16/utf8, etc?
-
-    /**
-     * @brief Releases critical string data.
-     *
-     * This function releases the raw string data retrieved using `String_GetCritical`.
+     * This function retrieves the length of the specified array.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] string The string whose data was retrieved.
-     * @param[in] data A pointer to the raw data to release.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*String_ReleaseCritical)(ani_env *env, ani_string string, const void *data);
-
-    /**
-     * @brief Creates a new UTF-16 string literal.
-     *
-     * This function creates a new string literal from the provided UTF-16 encoded data.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] utf16_string A pointer to the UTF-16 encoded string data.
-     * @param[in] utf16_size The size of the UTF-16 string in code units.
-     * @param[out] result A pointer to store the created string literal.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_NewUTF16)(ani_env *env, const uint16_t *utf16_string, ani_size utf16_size,
-                                         ani_stringliteral *result);
-
-    /**
-     * @brief Retrieves the size of a UTF-16 string literal.
-     *
-     * This function retrieves the size (in code units) of the specified UTF-16 string literal.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] string The UTF-16 string literal to measure.
-     * @param[out] result A pointer to store the size of the string literal.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_GetUTF16Size)(ani_env *env, ani_stringliteral string, ani_size *result);
-
-    /**
-     * @brief Retrieves the UTF-16 encoded data of a string literal.
-     *
-     * This function copies the UTF-16 encoded data of the string literal into the provided buffer.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] string The string literal to retrieve data from.
-     * @param[out] utf16_buffer A buffer to store the UTF-16 encoded data.
-     * @param[in] utf16_buffer_size The size of the buffer in code units.
-     * @param[out] result A pointer to store the number of code units written.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_GetUTF16)(ani_env *env, ani_stringliteral string, uint16_t *utf16_buffer,
-                                         ani_size utf16_buffer_size, ani_size *result);
-
-    /**
-     * @brief Retrieves a substring of a UTF-16 string literal.
-     *
-     * This function copies a portion of the UTF-16 string literal into the provided buffer.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] string The string literal to retrieve data from.
-     * @param[in] substr_offset The starting offset of the substring.
-     * @param[in] substr_size The size of the substring in code units.
-     * @param[out] utf16_buffer A buffer to store the substring.
-     * @param[in] utf16_buffer_size The size of the buffer in code units.
-     * @param[out] result A pointer to store the number of code units written.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_GetUTF16SubString)(ani_env *env, ani_stringliteral string, ani_size substr_offset,
-                                                  ani_size substr_size, uint16_t *utf16_buffer,
-                                                  ani_size utf16_buffer_size, ani_size *result);
-
-    /**
-     * @brief Creates a new UTF-8 string literal.
-     *
-     * This function creates a new string literal from the provided UTF-8 encoded data.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] utf8_string A pointer to the UTF-8 encoded string data.
-     * @param[in] size The size of the UTF-8 string in bytes.
-     * @param[out] result A pointer to store the created string literal.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_NewUTF8)(ani_env *env, const char *utf8_string, ani_size size,
-                                        ani_stringliteral *result);
-
-    /**
-     * @brief Retrieves the size of a UTF-8 string literal.
-     *
-     * This function retrieves the size (in bytes) of the specified UTF-8 string literal.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] string The UTF-8 string literal to measure.
-     * @param[out] result A pointer to store the size of the string literal.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_GetUTF8Size)(ani_env *env, ani_stringliteral string, ani_size *result);
-
-    /**
-     * @brief Retrieves the UTF-8 encoded data of a string literal.
-     *
-     * This function copies the UTF-8 encoded data of the string literal into the provided buffer.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] string The string literal to retrieve data from.
-     * @param[out] utf8_buffer A buffer to store the UTF-8 encoded data.
-     * @param[in] utf8_buffer_size The size of the buffer in bytes.
-     * @param[out] result A pointer to store the number of bytes written.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_GetUTF8)(ani_env *env, ani_stringliteral string, char *utf8_buffer,
-                                        ani_size utf8_buffer_size, ani_size *result);
-
-    /**
-     * @brief Retrieves a substring of a UTF-8 string literal.
-     *
-     * This function copies a portion of the UTF-8 string literal into the provided buffer.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] string The string literal to retrieve data from.
-     * @param[in] substr_offset The starting offset of the substring.
-     * @param[in] substr_size The size of the substring in bytes.
-     * @param[out] utf8_buffer A buffer to store the substring.
-     * @param[in] utf8_buffer_size The size of the buffer in bytes.
-     * @param[out] result A pointer to store the number of bytes written.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_GetUTF8SubString)(ani_env *env, ani_stringliteral string, ani_size substr_offset,
-                                                 ani_size substr_size, char *utf8_buffer, ani_size utf8_buffer_size,
-                                                 ani_size *result);
-
-    /**
-     * @brief Retrieves critical information about a string literal.
-     *
-     * This function retrieves the type and data of a string literal for critical operations.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] string The string literal to analyze.
-     * @param[out] result_string_type A pointer to store the type of the string literal (e.g., UTF-16 or UTF-8).
-     * @param[out] result_data A pointer to the raw string literal data.
-     * @param[out] result_size A pointer to the size of the string literal data.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_GetCritical)(
-        ani_env *env, ani_stringliteral string, uint32_t *result_string_type, const void **result_data,
-        ani_size *result_size);  // result_string_type - string type utf16/utf8, etc?
-
-    /**
-     * @brief Releases critical string literal data.
-     *
-     * This function releases the raw string literal data retrieved using `StringLiteral_GetCritical`.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] string The string literal whose data was retrieved.
-     * @param[in] data A pointer to the raw data to release.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*StringLiteral_ReleaseCritical)(ani_env *env, ani_stringliteral string, const void *data);
-
-    /**
-     * @brief Retrieves the length of a fixed array.
-     *
-     * This function retrieves the length of the specified fixed array.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array whose length is to be retrieved.
+     * @param[in] array The array whose length is to be retrieved.
      * @param[out] result A pointer to store the length of the array.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_GetLength)(ani_env *env, ani_fixedarray array, ani_size *result);
+    ani_status (*Array_GetLength)(ani_env *env, ani_array array, ani_size *result);
 
     /**
-     * @brief Creates a new fixed array of booleans.
+     * @brief Creates a new array of booleans.
      *
-     * This function creates a new fixed array of the specified length for boolean values.
+     * This function creates a new array of the specified length for boolean values.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] length The length of the array to be created.
-     * @param[out] result A pointer to store the created fixed array.
+     * @param[out] result A pointer to store the created array.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_New_Boolean)(ani_env *env, ani_size length, ani_fixedarray_boolean *result);
+    ani_status (*Array_New_Boolean)(ani_env *env, ani_size length, ani_array_boolean *result);
 
     /**
-     * @brief Creates a new fixed array of characters.
+     * @brief Creates a new array of characters.
      *
-     * This function creates a new fixed array of the specified length for character values.
+     * This function creates a new array of the specified length for character values.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] length The length of the array to be created.
-     * @param[out] result A pointer to store the created fixed array.
+     * @param[out] result A pointer to store the created array.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_New_Char)(ani_env *env, ani_size length, ani_fixedarray_char *result);
+    ani_status (*Array_New_Char)(ani_env *env, ani_size length, ani_array_char *result);
 
     /**
-     * @brief Creates a new fixed array of bytes.
+     * @brief Creates a new array of bytes.
      *
-     * This function creates a new fixed array of the specified length for byte values.
+     * This function creates a new array of the specified length for byte values.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] length The length of the array to be created.
-     * @param[out] result A pointer to store the created fixed array.
+     * @param[out] result A pointer to store the created array.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_New_Byte)(ani_env *env, ani_size length, ani_fixedarray_byte *result);
+    ani_status (*Array_New_Byte)(ani_env *env, ani_size length, ani_array_byte *result);
 
     /**
-     * @brief Creates a new fixed array of shorts.
+     * @brief Creates a new array of shorts.
      *
-     * This function creates a new fixed array of the specified length for short integer values.
+     * This function creates a new array of the specified length for short integer values.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] length The length of the array to be created.
-     * @param[out] result A pointer to store the created fixed array.
+     * @param[out] result A pointer to store the created array.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_New_Short)(ani_env *env, ani_size length, ani_fixedarray_short *result);
+    ani_status (*Array_New_Short)(ani_env *env, ani_size length, ani_array_short *result);
 
     /**
-     * @brief Creates a new fixed array of integers.
+     * @brief Creates a new array of integers.
      *
-     * This function creates a new fixed array of the specified length for integer values.
+     * This function creates a new array of the specified length for integer values.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] length The length of the array to be created.
-     * @param[out] result A pointer to store the created fixed array.
+     * @param[out] result A pointer to store the created array.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_New_Int)(ani_env *env, ani_size length, ani_fixedarray_int *result);
+    ani_status (*Array_New_Int)(ani_env *env, ani_size length, ani_array_int *result);
 
     /**
-     * @brief Creates a new fixed array of long integers.
+     * @brief Creates a new array of long integers.
      *
-     * This function creates a new fixed array of the specified length for long integer values.
+     * This function creates a new array of the specified length for long integer values.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] length The length of the array to be created.
-     * @param[out] result A pointer to store the created fixed array.
+     * @param[out] result A pointer to store the created array.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_New_Long)(ani_env *env, ani_size length, ani_fixedarray_long *result);
+    ani_status (*Array_New_Long)(ani_env *env, ani_size length, ani_array_long *result);
 
     /**
-     * @brief Creates a new fixed array of floats.
+     * @brief Creates a new array of floats.
      *
-     * This function creates a new fixed array of the specified length for float values.
+     * This function creates a new array of the specified length for float values.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] length The length of the array to be created.
-     * @param[out] result A pointer to store the created fixed array.
+     * @param[out] result A pointer to store the created array.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_New_Float)(ani_env *env, ani_size length, ani_fixedarray_float *result);
+    ani_status (*Array_New_Float)(ani_env *env, ani_size length, ani_array_float *result);
 
     /**
-     * @brief Creates a new fixed array of doubles.
+     * @brief Creates a new array of doubles.
      *
-     * This function creates a new fixed array of the specified length for double values.
+     * This function creates a new array of the specified length for double values.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] length The length of the array to be created.
-     * @param[out] result A pointer to store the created fixed array.
+     * @param[out] result A pointer to store the created array.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_New_Double)(ani_env *env, ani_size length, ani_fixedarray_double *result);
+    ani_status (*Array_New_Double)(ani_env *env, ani_size length, ani_array_double *result);
 
     /**
-     * @brief Retrieves a region of boolean values from a fixed array.
+     * @brief Retrieves a region of boolean values from an array.
      *
-     * This function retrieves a portion of the specified boolean fixed array into a native buffer.
+     * This function retrieves a portion of the specified boolean array into a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to retrieve values from.
+     * @param[in] array The array to retrieve values from.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to retrieve.
      * @param[out] native_buffer A buffer to store the retrieved boolean values.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_GetRegion_Boolean)(ani_env *env, ani_fixedarray_boolean array, ani_size offset,
-                                               ani_size length, ani_boolean *native_buffer);
+    ani_status (*Array_GetRegion_Boolean)(ani_env *env, ani_array_boolean array, ani_size offset, ani_size length,
+                                          ani_boolean *native_buffer);
 
     /**
-     * @brief Retrieves a region of character values from a fixed array.
+     * @brief Retrieves a region of character values from an array.
      *
-     * This function retrieves a portion of the specified character fixed array into a native buffer.
+     * This function retrieves a portion of the specified character array into a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to retrieve values from.
+     * @param[in] array The array to retrieve values from.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to retrieve.
      * @param[out] native_buffer A buffer to store the retrieved character values.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_GetRegion_Char)(ani_env *env, ani_fixedarray_char array, ani_size offset, ani_size length,
-                                            ani_char *native_buffer);
+    ani_status (*Array_GetRegion_Char)(ani_env *env, ani_array_char array, ani_size offset, ani_size length,
+                                       ani_char *native_buffer);
 
     /**
-     * @brief Retrieves a region of byte values from a fixed array.
+     * @brief Retrieves a region of byte values from an array.
      *
-     * This function retrieves a portion of the specified byte fixed array into a native buffer.
+     * This function retrieves a portion of the specified byte array into a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to retrieve values from.
+     * @param[in] array The array to retrieve values from.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to retrieve.
      * @param[out] native_buffer A buffer to store the retrieved byte values.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_GetRegion_Byte)(ani_env *env, ani_fixedarray_byte array, ani_size offset, ani_size length,
-                                            ani_byte *native_buffer);
+    ani_status (*Array_GetRegion_Byte)(ani_env *env, ani_array_byte array, ani_size offset, ani_size length,
+                                       ani_byte *native_buffer);
 
     /**
-     * @brief Retrieves a region of short values from a fixed array.
+     * @brief Retrieves a region of short values from an array.
      *
-     * This function retrieves a portion of the specified short fixed array into a native buffer.
+     * This function retrieves a portion of the specified short array into a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to retrieve values from.
+     * @param[in] array The array to retrieve values from.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to retrieve.
      * @param[out] native_buffer A buffer to store the retrieved short values.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_GetRegion_Short)(ani_env *env, ani_fixedarray_short array, ani_size offset, ani_size length,
-                                             ani_short *native_buffer);
+    ani_status (*Array_GetRegion_Short)(ani_env *env, ani_array_short array, ani_size offset, ani_size length,
+                                        ani_short *native_buffer);
 
     /**
-     * @brief Retrieves a region of integer values from a fixed array.
+     * @brief Retrieves a region of integer values from an array.
      *
-     * This function retrieves a portion of the specified integer fixed array into a native buffer.
+     * This function retrieves a portion of the specified integer array into a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to retrieve values from.
+     * @param[in] array The array to retrieve values from.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to retrieve.
      * @param[out] native_buffer A buffer to store the retrieved integer values.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_GetRegion_Int)(ani_env *env, ani_fixedarray_int array, ani_size offset, ani_size length,
-                                           ani_int *native_buffer);
+    ani_status (*Array_GetRegion_Int)(ani_env *env, ani_array_int array, ani_size offset, ani_size length,
+                                      ani_int *native_buffer);
 
     /**
-     * @brief Retrieves a region of long integer values from a fixed array.
+     * @brief Retrieves a region of long integer values from an array.
      *
-     * This function retrieves a portion of the specified long integer fixed array into a native buffer.
+     * This function retrieves a portion of the specified long integer array into a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to retrieve values from.
+     * @param[in] array The array to retrieve values from.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to retrieve.
      * @param[out] native_buffer A buffer to store the retrieved long integer values.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_GetRegion_Long)(ani_env *env, ani_fixedarray_long array, ani_size offset, ani_size length,
-                                            ani_long *native_buffer);
+    ani_status (*Array_GetRegion_Long)(ani_env *env, ani_array_long array, ani_size offset, ani_size length,
+                                       ani_long *native_buffer);
 
     /**
-     * @brief Retrieves a region of float values from a fixed array.
+     * @brief Retrieves a region of float values from an array.
      *
-     * This function retrieves a portion of the specified float fixed array into a native buffer.
+     * This function retrieves a portion of the specified float array into a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to retrieve values from.
+     * @param[in] array The array to retrieve values from.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to retrieve.
      * @param[out] native_buffer A buffer to store the retrieved float values.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_GetRegion_Float)(ani_env *env, ani_fixedarray_float array, ani_size offset, ani_size length,
-                                             ani_float *native_buffer);
+    ani_status (*Array_GetRegion_Float)(ani_env *env, ani_array_float array, ani_size offset, ani_size length,
+                                        ani_float *native_buffer);
 
     /**
-     * @brief Retrieves a region of double values from a fixed array.
+     * @brief Retrieves a region of double values from an array.
      *
-     * This function retrieves a portion of the specified double fixed array into a native buffer.
+     * This function retrieves a portion of the specified double array into a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to retrieve values from.
+     * @param[in] array The array to retrieve values from.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to retrieve.
      * @param[out] native_buffer A buffer to store the retrieved double values.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_GetRegion_Double)(ani_env *env, ani_fixedarray_double array, ani_size offset,
-                                              ani_size length, ani_double *native_buffer);
+    ani_status (*Array_GetRegion_Double)(ani_env *env, ani_array_double array, ani_size offset, ani_size length,
+                                         ani_double *native_buffer);
 
     /**
-     * @brief Sets a region of boolean values in a fixed array.
+     * @brief Sets a region of boolean values in an array.
      *
-     * This function sets a portion of the specified boolean fixed array using a native buffer.
+     * This function sets a portion of the specified boolean array using a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to set values in.
+     * @param[in] array The array to set values in.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to set.
      * @param[in] native_buffer A buffer containing the boolean values to set.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_SetRegion_Boolean)(ani_env *env, ani_fixedarray_boolean array, ani_size offset,
-                                               ani_size length, const ani_boolean *native_buffer);
+    ani_status (*Array_SetRegion_Boolean)(ani_env *env, ani_array_boolean array, ani_size offset, ani_size length,
+                                          const ani_boolean *native_buffer);
 
     /**
-     * @brief Sets a region of character values in a fixed array.
+     * @brief Sets a region of character values in an array.
      *
-     * This function sets a portion of the specified character fixed array using a native buffer.
+     * This function sets a portion of the specified character array using a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to set values in.
+     * @param[in] array The array to set values in.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to set.
      * @param[in] native_buffer A buffer containing the character values to set.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_SetRegion_Char)(ani_env *env, ani_fixedarray_char array, ani_size offset, ani_size length,
-                                            const ani_char *native_buffer);
+    ani_status (*Array_SetRegion_Char)(ani_env *env, ani_array_char array, ani_size offset, ani_size length,
+                                       const ani_char *native_buffer);
 
     /**
-     * @brief Sets a region of byte values in a fixed array.
+     * @brief Sets a region of byte values in an array.
      *
-     * This function sets a portion of the specified byte fixed array using a native buffer.
+     * This function sets a portion of the specified byte array using a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to set values in.
+     * @param[in] array The array to set values in.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to set.
      * @param[in] native_buffer A buffer containing the byte values to set.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_SetRegion_Byte)(ani_env *env, ani_fixedarray_byte array, ani_size offset, ani_size length,
-                                            const ani_byte *native_buffer);
+    ani_status (*Array_SetRegion_Byte)(ani_env *env, ani_array_byte array, ani_size offset, ani_size length,
+                                       const ani_byte *native_buffer);
 
     /**
-     * @brief Sets a region of short values in a fixed array.
+     * @brief Sets a region of short values in an array.
      *
-     * This function sets a portion of the specified short fixed array using a native buffer.
+     * This function sets a portion of the specified short array using a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to set values in.
+     * @param[in] array The array to set values in.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to set.
      * @param[in] native_buffer A buffer containing the short values to set.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_SetRegion_Short)(ani_env *env, ani_fixedarray_short array, ani_size offset, ani_size length,
-                                             const ani_short *native_buffer);
+    ani_status (*Array_SetRegion_Short)(ani_env *env, ani_array_short array, ani_size offset, ani_size length,
+                                        const ani_short *native_buffer);
 
     /**
-     * @brief Sets a region of integer values in a fixed array.
+     * @brief Sets a region of integer values in an array.
      *
-     * This function sets a portion of the specified integer fixed array using a native buffer.
+     * This function sets a portion of the specified integer array using a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to set values in.
+     * @param[in] array The array to set values in.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to set.
      * @param[in] native_buffer A buffer containing the integer values to set.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_SetRegion_Int)(ani_env *env, ani_fixedarray_int array, ani_size offset, ani_size length,
-                                           const ani_int *native_buffer);
+    ani_status (*Array_SetRegion_Int)(ani_env *env, ani_array_int array, ani_size offset, ani_size length,
+                                      const ani_int *native_buffer);
 
     /**
-     * @brief Sets a region of long integer values in a fixed array.
+     * @brief Sets a region of long integer values in an array.
      *
-     * This function sets a portion of the specified long integer fixed array using a native buffer.
+     * This function sets a portion of the specified long integer array using a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to set values in.
+     * @param[in] array The array to set values in.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to set.
      * @param[in] native_buffer A buffer containing the long integer values to set.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_SetRegion_Long)(ani_env *env, ani_fixedarray_long array, ani_size offset, ani_size length,
-                                            const ani_long *native_buffer);
+    ani_status (*Array_SetRegion_Long)(ani_env *env, ani_array_long array, ani_size offset, ani_size length,
+                                       const ani_long *native_buffer);
 
     /**
-     * @brief Sets a region of float values in a fixed array.
+     * @brief Sets a region of float values in an array.
      *
-     * This function sets a portion of the specified float fixed array using a native buffer.
+     * This function sets a portion of the specified float array using a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to set values in.
+     * @param[in] array The array to set values in.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to set.
      * @param[in] native_buffer A buffer containing the float values to set.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_SetRegion_Float)(ani_env *env, ani_fixedarray_float array, ani_size offset, ani_size length,
-                                             const ani_float *native_buffer);
+    ani_status (*Array_SetRegion_Float)(ani_env *env, ani_array_float array, ani_size offset, ani_size length,
+                                        const ani_float *native_buffer);
 
     /**
-     * @brief Sets a region of double values in a fixed array.
+     * @brief Sets a region of double values in an array.
      *
-     * This function sets a portion of the specified double fixed array using a native buffer.
+     * This function sets a portion of the specified double array using a native buffer.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array to set values in.
+     * @param[in] array The array to set values in.
      * @param[in] offset The starting offset of the region.
      * @param[in] length The number of elements to set.
      * @param[in] native_buffer A buffer containing the double values to set.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_SetRegion_Double)(ani_env *env, ani_fixedarray_double array, ani_size offset,
-                                              ani_size length, const ani_double *native_buffer);
+    ani_status (*Array_SetRegion_Double)(ani_env *env, ani_array_double array, ani_size offset, ani_size length,
+                                         const ani_double *native_buffer);
 
     /**
-     * @brief Pins a fixed array in memory.
+     * @brief Creates a new array of references.
      *
-     * This function pins a fixed array of primitive types in memory to ensure it is not moved by the garbage collector.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] primitive_array The fixed array to pin.
-     * @param[out] result A pointer to store the memory address of the pinned array.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_Pin)(ani_env *env, ani_fixedarray primitive_array, void **result);
-
-    /**
-     * @brief Unpins a fixed array in memory.
-     *
-     * This function unpins a previously pinned fixed array, allowing it to be moved by the garbage collector.
+     * This function creates a new array of references, optionally initializing it with an array of references.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] primitive_array The fixed array to unpin.
-     * @param[in] data A pointer to the pinned memory that was previously retrieved.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*FixedArray_Unpin)(ani_env *env, ani_fixedarray primitive_array, void *data);
-
-    /**
-     * @brief Creates a new fixed array of references.
-     *
-     * This function creates a new fixed array of references, optionally initializing it with an array of references.
-     *
-     * @param[in] env A pointer to the environment structure.
+     * @param[in] type The type of the elements of the array.
      * @param[in] length The length of the array to be created.
-     * @param[in] initial_array An optional array of references to initialize the fixed array. Can be null.
-     * @param[out] result A pointer to store the created fixed array of references.
+     * @param[in] initial_element An optional reference to initialize the array. Can be null.
+     * @param[out] result A pointer to store the created array of references.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_New_Ref)(ani_env *env, ani_size length, ani_ref *initial_array, ani_fixedarray_ref *result);
+    ani_status (*Array_New_Ref)(ani_env *env, ani_type type, ani_size length, ani_ref initial_element,
+                                ani_array_ref *result);
 
     /**
-     * @brief Sets a reference at a specific index in a fixed array.
+     * @brief Sets a reference at a specific index in an array.
      *
-     * This function sets the value of a reference at the specified index in the fixed array.
+     * This function sets the value of a reference at the specified index in the array.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array of references to modify.
+     * @param[in] array The array of references to modify.
      * @param[in] index The index at which to set the reference.
      * @param[in] ref The reference to set at the specified index.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_Set_Ref)(ani_env *env, ani_fixedarray_ref array, ani_size index, ani_ref ref);
+    ani_status (*Array_Set_Ref)(ani_env *env, ani_array_ref array, ani_size index, ani_ref ref);
 
     /**
-     * @brief Retrieves a reference from a specific index in a fixed array.
+     * @brief Retrieves a reference from a specific index in an array.
      *
-     * This function retrieves the value of a reference at the specified index in the fixed array.
+     * This function retrieves the value of a reference at the specified index in the array.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] array The fixed array of references to query.
+     * @param[in] array The array of references to query.
      * @param[in] index The index from which to retrieve the reference.
      * @param[out] result A pointer to store the retrieved reference.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*FixedArray_Get_Ref)(ani_env *env, ani_fixedarray_ref array, ani_size index, ani_ref *result);
+    ani_status (*Array_Get_Ref)(ani_env *env, ani_array_ref array, ani_size index, ani_ref *result);
 
     /**
-     * @brief Retrieves an enum value by its name.
+     * @brief Retrieves an enum item by its name.
      *
-     * This function retrieves an enum value associated with the specified name.
+     * This function retrieves an enum item associated with the specified name.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] enm The enum to search within.
-     * @param[in] name The name of the enum value to retrieve.
-     * @param[out] result A pointer to store the retrieved enum value.
+     * @param[in] name The name of the enum item to retrieve.
+     * @param[out] result A pointer to store the retrieved enum item.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Enum_GetEnumValueByName)(ani_env *env, ani_enum enm, const char *name, ani_enum_value *result);
+    ani_status (*Enum_GetEnumItemByName)(ani_env *env, ani_enum enm, const char *name, ani_enum_item *result);
 
     /**
-     * @brief Retrieves an enum value by its index.
+     * @brief Retrieves an enum item by its index.
      *
-     * This function retrieves an enum value located at the specified index.
+     * This function retrieves an enum item located at the specified index.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] enm The enum to search within.
-     * @param[in] index The index of the enum value to retrieve.
-     * @param[out] result A pointer to store the retrieved enum value.
+     * @param[in] index The index of the enum item to retrieve.
+     * @param[out] result A pointer to store the retrieved enum item.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Enum_GetEnumValueByIndex)(ani_env *env, ani_enum enm, ani_size index, ani_enum_value *result);
+    ani_status (*Enum_GetEnumItemByIndex)(ani_env *env, ani_enum enm, ani_size index, ani_enum_item *result);
 
     /**
-     * @brief Retrieves the enum associated with an enum value.
+     * @brief Retrieves the enum associated with an enum item.
      *
-     * This function retrieves the enum to which the specified enum value belongs.
+     * This function retrieves the enum to which the specified enum item belongs.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] enum_value The enum value whose associated enum is to be retrieved.
+     * @param[in] enum_item The enum item whose associated enum is to be retrieved.
      * @param[out] result A pointer to store the retrieved enum.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*EnumValue_GetEnum)(ani_env *env, ani_enum_value enum_value, ani_enum *result);
+    ani_status (*EnumItem_GetEnum)(ani_env *env, ani_enum_item enum_item, ani_enum *result);
 
     /**
-     * @brief Retrieves the underlying value of an enum value.
+     * @brief Retrieves the integer value of an enum item.
      *
-     * This function retrieves the object representing the value of the specified enum value.
+     * This function retrieves the integer representing the value of the specified enum item.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] enum_value The enum value whose underlying value is to be retrieved.
-     * @param[out] result A pointer to store the retrieved object.
+     * @param[in] enum_item The enum item whose underlying value is to be retrieved.
+     * @param[out] result A pointer to store the retrieved integer.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*EnumValue_GetValue)(ani_env *env, ani_enum_value enum_value, ani_object *result);
+    ani_status (*EnumItem_GetValue_Int)(ani_env *env, ani_enum_item enum_item, ani_int *result);
 
     /**
-     * @brief Retrieves the name of an enum value.
+     * @brief Retrieves the string value of an enum item.
      *
-     * This function retrieves the name associated with the specified enum value.
+     * This function retrieves the string representing the value of the specified enum item.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] enum_value The enum value whose name is to be retrieved.
+     * @param[in] enum_item The enum item whose underlying value is to be retrieved.
+     * @param[out] result A pointer to store the retrieved string.
+     * @return Returns a status code of type `ani_status` indicating success or failure.
+     */
+    ani_status (*EnumItem_GetValue_String)(ani_env *env, ani_enum_item enum_item, ani_string *result);
+
+    /**
+     * @brief Retrieves the name of an enum item.
+     *
+     * This function retrieves the name associated with the specified enum item.
+     *
+     * @param[in] env A pointer to the environment structure.
+     * @param[in] enum_item The enum item whose name is to be retrieved.
      * @param[out] result A pointer to store the retrieved name.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*EnumValue_GetName)(ani_env *env, ani_enum_value enum_value, ani_string *result);
+    ani_status (*EnumItem_GetName)(ani_env *env, ani_enum_item enum_item, ani_string *result);
 
     /**
-     * @brief Retrieves the index of an enum value.
+     * @brief Retrieves the index of an enum item.
      *
-     * This function retrieves the index of the specified enum value within its enum.
+     * This function retrieves the index of the specified enum item within its enum.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] enum_value The enum value whose index is to be retrieved.
+     * @param[in] enum_item The enum item whose index is to be retrieved.
      * @param[out] result A pointer to store the retrieved index.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*EnumValue_GetIndex)(ani_env *env, ani_enum_value enum_value, ani_size *result);
+    ani_status (*EnumItem_GetIndex)(ani_env *env, ani_enum_item enum_item, ani_size *result);
 
     /**
      * @brief Invokes a functional object.
@@ -2465,161 +2009,124 @@ struct __ani_interaction_api {
     ani_status (*Function_Call_Void_V)(ani_env *env, ani_function fn, va_list args);
 
     /**
-     * @brief Retrieves the partial class representation.
+     * @brief Finds a field from by its name.
      *
-     * This function retrieves the partial class representation of the specified class.
+     * This function locates a field based on its name and stores it in the result parameter.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class to query.
-     * @param[out] result A pointer to store the partial class representation.
+     * @param[in] name The name of the field to find.
+     * @param[out] result A pointer to the field to be populated.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_GetPartial)(ani_env *env, ani_class cls, ani_class *result);
+    ani_status (*Class_FindField)(ani_env *env, ani_class cls, const char *name, ani_field *result);
 
     /**
-     * @brief Retrieves the required class representation.
+     * @brief Finds a static field by its name.
      *
-     * This function retrieves the required class representation of the specified class.
+     * This function locates a static field based on its name and stores it in the result parameter.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class to query.
-     * @param[out] result A pointer to store the required class representation.
+     * @param[in] name The name of the static field to find.
+     * @param[out] result A pointer to the static field to be populated.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_GetRequired)(ani_env *env, ani_class cls, ani_class *result);
+    ani_status (*Class_FindStaticField)(ani_env *env, ani_class cls, const char *name, ani_static_field *result);
 
     /**
-     * @brief Retrieves a field from the class.
+     * @brief Finds a method from by its name and signature.
      *
-     * This function retrieves the specified field by name from the given class.
+     * This function locates a method based on its name and signature and stores it in the result parameter.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class to query.
-     * @param[in] name The name of the field to retrieve.
-     * @param[out] result A pointer to store the retrieved field.
+     * @param[in] name The name of the method to find.
+     * @param[in] signature The signature of the method to find.
+     * @param[out] result A pointer to the method to be populated.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_GetField)(ani_env *env, ani_class cls, const char *name, ani_field *result);
+    ani_status (*Class_FindMethod)(ani_env *env, ani_class cls, const char *name, const char *signature,
+                                   ani_method *result);
 
     /**
-     * @brief Retrieves a static field from the class.
+     * @brief Finds a static method from by its name and signature.
      *
-     * This function retrieves the specified static field by name from the given class.
+     * This function locates a static method based on its name and signature and stores it in the result parameter.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class to query.
-     * @param[in] name The name of the static field to retrieve.
-     * @param[out] result A pointer to store the retrieved static field.
+     * @param[in] name The name of the static method to find.
+     * @param[in] signature The signature of the static method to find.
+     * @param[out] result A pointer to the static method to be populated.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_GetStaticField)(ani_env *env, ani_class cls, const char *name, ani_static_field *result);
+    ani_status (*Class_FindStaticMethod)(ani_env *env, ani_class cls, const char *name, const char *signature,
+                                         ani_static_method *result);
 
     /**
-     * @brief Retrieves a method from the class.
+     * @brief Finds a setter method from by its name.
      *
-     * This function retrieves the specified method by name and signature from the given class.
+     * This function locates a setter method based on its name and stores it in the result parameter.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class to query.
-     * @param[in] name The name of the method to retrieve.
-     * @param[in] signature The signature of the method to retrieve.
-     * @param[out] result A pointer to store the retrieved method.
+     * @param[in] name The name of the property whose setter is to be found.
+     * @param[out] result A pointer to the method to be populated.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_GetMethod)(ani_env *env, ani_class cls, const char *name, const char *signature,
-                                  ani_method *result);
+    ani_status (*Class_FindSetter)(ani_env *env, ani_class cls, const char *name, ani_method *result);
 
     /**
-     * @brief Retrieves a static method from the class.
+     * @brief Finds a getter method from by its name.
      *
-     * This function retrieves the specified static method by name and signature from the given class.
+     * This function locates a getter method based on its name and stores it in the result parameter.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class to query.
-     * @param[in] name The name of the static method to retrieve.
-     * @param[in] signature The signature of the static method to retrieve.
-     * @param[out] result A pointer to store the retrieved static method.
+     * @param[in] name The name of the property whose getter is to be found.
+     * @param[out] result A pointer to the method to be populated.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_GetStaticMethod)(ani_env *env, ani_class cls, const char *name, const char *signature,
-                                        ani_static_method *result);
+    ani_status (*Class_FindGetter)(ani_env *env, ani_class cls, const char *name, ani_method *result);
 
     /**
-     * @brief Retrieves a property from the class.
+     * @brief Finds an indexable getter method from by its signature.
      *
-     * This function retrieves the specified property by name from the given class.
+     * This function locates an indexable getter method based on its signature and stores it in the result parameter.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class to query.
-     * @param[in] name The name of the property to retrieve.
-     * @param[out] result A pointer to store the retrieved property.
+     * @param[in] signature The signature of the indexable getter to find.
+     * @param[out] result A pointer to the method to be populated.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_GetProperty)(ani_env *env, ani_class cls, const char *name, ani_property *result);
+    ani_status (*Class_FindIndexableGetter)(ani_env *env, ani_class cls, const char *signature, ani_method *result);
 
     /**
-     * @brief Retrieves the setter method of a property from the class.
+     * @brief Finds an indexable setter method from by its signature.
      *
-     * This function retrieves the setter method for the specified property by name from the given class.
+     * This function locates an indexable setter method based on its signature and stores it in the result parameter.
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class to query.
-     * @param[in] name The name of the property whose setter is to be retrieved.
-     * @param[out] result A pointer to store the retrieved setter method.
+     * @param[in] signature The signature of the indexable setter to find.
+     * @param[out] result A pointer to the method to be populated.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_GetSetter)(ani_env *env, ani_class cls, const char *name, ani_method *result);
+    ani_status (*Class_FindIndexableSetter)(ani_env *env, ani_class cls, const char *signature, ani_method *result);
 
     /**
-     * @brief Retrieves the getter method of a property from the class.
+     * @brief Finds an iterator method.
      *
-     * This function retrieves the getter method for the specified property by name from the given class.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class to query.
-     * @param[in] name The name of the property whose getter is to be retrieved.
-     * @param[out] result A pointer to store the retrieved getter method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Class_GetGetter)(ani_env *env, ani_class cls, const char *name, ani_method *result);
-
-    /**
-     * @brief Retrieves the indexable getter method from the class.
-     *
-     * This function retrieves the indexable getter method for the specified signature from the given class.
+     * This function locates an iterator method
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class to query.
-     * @param[in] signature The signature of the indexable getter to retrieve.
-     * @param[out] result A pointer to store the retrieved indexable getter method.
+     * @param[out] result A pointer to the method to be populated.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_GetIndexableGetter)(ani_env *env, ani_class cls, const char *signature, ani_method *result);
-
-    /**
-     * @brief Retrieves the indexable setter method from the class.
-     *
-     * This function retrieves the indexable setter method for the specified signature from the given class.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class to query.
-     * @param[in] signature The signature of the indexable setter to retrieve.
-     * @param[out] result A pointer to store the retrieved indexable setter method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Class_GetIndexableSetter)(ani_env *env, ani_class cls, const char *signature, ani_method *result);
-
-    /**
-     * @brief Retrieves the iterator method from the class.
-     *
-     * This function retrieves the iterator method from the specified class.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class to query.
-     * @param[out] result A pointer to store the retrieved iterator method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Class_GetIterator)(ani_env *env, ani_class cls, ani_method *result);
+    ani_status (*Class_FindIterator)(ani_env *env, ani_class cls, ani_method *result);
 
     /**
      * @brief Retrieves a boolean value from a static field of a class.
@@ -3561,12 +3068,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the boolean result.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Class_CallStaticMethodByName_Boolean)(ani_env *env, ani_class cls, const char *name,
-                                                       ani_boolean *result, ...);
+                                                       const char *signature, ani_boolean *result, ...);
 
     /**
      * @brief Calls a static method by name with a boolean return type (array-based).
@@ -3577,12 +3085,14 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the boolean result.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Class_CallStaticMethodByName_Boolean_A)(ani_env *env, ani_class cls, const char *name,
-                                                         ani_boolean *result, const ani_value *args);
+                                                         const char *signature, ani_boolean *result,
+                                                         const ani_value *args);
 
     /**
      * @brief Calls a static method by name with a boolean return type (variadic arguments).
@@ -3593,12 +3103,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the boolean result.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Class_CallStaticMethodByName_Boolean_V)(ani_env *env, ani_class cls, const char *name,
-                                                         ani_boolean *result, va_list args);
+                                                         const char *signature, ani_boolean *result, va_list args);
 
     /**
      * @brief Calls a static method by name with a char return type.
@@ -3609,12 +3120,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the char result.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Char)(ani_env *env, ani_class cls, const char *name, ani_char *result,
-                                                    ...);
+    ani_status (*Class_CallStaticMethodByName_Char)(ani_env *env, ani_class cls, const char *name,
+                                                    const char *signature, ani_char *result, ...);
 
     /**
      * @brief Calls a static method by name with a char return type (array-based).
@@ -3625,12 +3137,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the char result.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Char_A)(ani_env *env, ani_class cls, const char *name, ani_char *result,
-                                                      const ani_value *args);
+    ani_status (*Class_CallStaticMethodByName_Char_A)(ani_env *env, ani_class cls, const char *name,
+                                                      const char *signature, ani_char *result, const ani_value *args);
 
     /**
      * @brief Calls a static method by name with a char return type (variadic arguments).
@@ -3641,12 +3154,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the char result.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Char_V)(ani_env *env, ani_class cls, const char *name, ani_char *result,
-                                                      va_list args);
+    ani_status (*Class_CallStaticMethodByName_Char_V)(ani_env *env, ani_class cls, const char *name,
+                                                      const char *signature, ani_char *result, va_list args);
 
     /**
      * @brief Calls a static method by name with a byte return type.
@@ -3657,12 +3171,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the byte result.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Byte)(ani_env *env, ani_class cls, const char *name, ani_byte *result,
-                                                    ...);
+    ani_status (*Class_CallStaticMethodByName_Byte)(ani_env *env, ani_class cls, const char *name,
+                                                    const char *signature, ani_byte *result, ...);
 
     /**
      * @brief Calls a static method by name with a byte return type (array-based).
@@ -3673,12 +3188,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the byte result.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Byte_A)(ani_env *env, ani_class cls, const char *name, ani_byte *result,
-                                                      const ani_value *args);
+    ani_status (*Class_CallStaticMethodByName_Byte_A)(ani_env *env, ani_class cls, const char *name,
+                                                      const char *signature, ani_byte *result, const ani_value *args);
 
     /**
      * @brief Calls a static method by name with a byte return type (variadic arguments).
@@ -3689,12 +3205,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the byte result.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Byte_V)(ani_env *env, ani_class cls, const char *name, ani_byte *result,
-                                                      va_list args);
+    ani_status (*Class_CallStaticMethodByName_Byte_V)(ani_env *env, ani_class cls, const char *name,
+                                                      const char *signature, ani_byte *result, va_list args);
 
     /**
      * @brief Calls a static method by name with a short return type.
@@ -3705,12 +3222,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the short result.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Short)(ani_env *env, ani_class cls, const char *name, ani_short *result,
-                                                     ...);
+    ani_status (*Class_CallStaticMethodByName_Short)(ani_env *env, ani_class cls, const char *name,
+                                                     const char *signature, ani_short *result, ...);
 
     /**
      * @brief Calls a static method by name with a short return type (array-based).
@@ -3721,12 +3239,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the short result.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Short_A)(ani_env *env, ani_class cls, const char *name, ani_short *result,
-                                                       const ani_value *args);
+    ani_status (*Class_CallStaticMethodByName_Short_A)(ani_env *env, ani_class cls, const char *name,
+                                                       const char *signature, ani_short *result, const ani_value *args);
 
     /**
      * @brief Calls a static method by name with a short return type (variadic arguments).
@@ -3737,12 +3256,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the short result.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Short_V)(ani_env *env, ani_class cls, const char *name, ani_short *result,
-                                                       va_list args);
+    ani_status (*Class_CallStaticMethodByName_Short_V)(ani_env *env, ani_class cls, const char *name,
+                                                       const char *signature, ani_short *result, va_list args);
 
     /**
      * @brief Calls a static method by name with a integer return type.
@@ -3753,11 +3273,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the integer result.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Int)(ani_env *env, ani_class cls, const char *name, ani_int *result, ...);
+    ani_status (*Class_CallStaticMethodByName_Int)(ani_env *env, ani_class cls, const char *name, const char *signature,
+                                                   ani_int *result, ...);
 
     /**
      * @brief Calls a static method by name with a integer return type (array-based).
@@ -3768,12 +3290,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the integer result.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Int_A)(ani_env *env, ani_class cls, const char *name, ani_int *result,
-                                                     const ani_value *args);
+    ani_status (*Class_CallStaticMethodByName_Int_A)(ani_env *env, ani_class cls, const char *name,
+                                                     const char *signature, ani_int *result, const ani_value *args);
 
     /**
      * @brief Calls a static method by name with a integer return type (variadic arguments).
@@ -3784,12 +3307,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the integer result.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Int_V)(ani_env *env, ani_class cls, const char *name, ani_int *result,
-                                                     va_list args);
+    ani_status (*Class_CallStaticMethodByName_Int_V)(ani_env *env, ani_class cls, const char *name,
+                                                     const char *signature, ani_int *result, va_list args);
 
     /**
      * @brief Calls a static method by name with a long return type.
@@ -3800,12 +3324,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the long result.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Long)(ani_env *env, ani_class cls, const char *name, ani_long *result,
-                                                    ...);
+    ani_status (*Class_CallStaticMethodByName_Long)(ani_env *env, ani_class cls, const char *name,
+                                                    const char *signature, ani_long *result, ...);
 
     /**
      * @brief Calls a static method by name with a long return type (array-based).
@@ -3816,12 +3341,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the long result.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Long_A)(ani_env *env, ani_class cls, const char *name, ani_long *result,
-                                                      const ani_value *args);
+    ani_status (*Class_CallStaticMethodByName_Long_A)(ani_env *env, ani_class cls, const char *name,
+                                                      const char *signature, ani_long *result, const ani_value *args);
 
     /**
      * @brief Calls a static method by name with a long return type (variadic arguments).
@@ -3832,12 +3358,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the long result.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Long_V)(ani_env *env, ani_class cls, const char *name, ani_long *result,
-                                                      va_list args);
+    ani_status (*Class_CallStaticMethodByName_Long_V)(ani_env *env, ani_class cls, const char *name,
+                                                      const char *signature, ani_long *result, va_list args);
 
     /**
      * @brief Calls a static method by name with a float return type.
@@ -3848,12 +3375,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the float result.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Float)(ani_env *env, ani_class cls, const char *name, ani_float *result,
-                                                     ...);
+    ani_status (*Class_CallStaticMethodByName_Float)(ani_env *env, ani_class cls, const char *name,
+                                                     const char *signature, ani_float *result, ...);
 
     /**
      * @brief Calls a static method by name with a float return type (array-based).
@@ -3864,12 +3392,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the float result.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Float_A)(ani_env *env, ani_class cls, const char *name, ani_float *result,
-                                                       const ani_value *args);
+    ani_status (*Class_CallStaticMethodByName_Float_A)(ani_env *env, ani_class cls, const char *name,
+                                                       const char *signature, ani_float *result, const ani_value *args);
 
     /**
      * @brief Calls a static method by name with a float return type (variadic arguments).
@@ -3880,12 +3409,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the float result.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Float_V)(ani_env *env, ani_class cls, const char *name, ani_float *result,
-                                                       va_list args);
+    ani_status (*Class_CallStaticMethodByName_Float_V)(ani_env *env, ani_class cls, const char *name,
+                                                       const char *signature, ani_float *result, va_list args);
 
     /**
      * @brief Calls a static method by name with a double return type.
@@ -3896,12 +3426,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the double result.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Double)(ani_env *env, ani_class cls, const char *name, ani_double *result,
-                                                      ...);
+    ani_status (*Class_CallStaticMethodByName_Double)(ani_env *env, ani_class cls, const char *name,
+                                                      const char *signature, ani_double *result, ...);
 
     /**
      * @brief Calls a static method by name with a double return type (array-based).
@@ -3912,12 +3443,14 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the double result.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Class_CallStaticMethodByName_Double_A)(ani_env *env, ani_class cls, const char *name,
-                                                        ani_double *result, const ani_value *args);
+                                                        const char *signature, ani_double *result,
+                                                        const ani_value *args);
 
     /**
      * @brief Calls a static method by name with a double return type (variadic arguments).
@@ -3928,12 +3461,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the double result.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Class_CallStaticMethodByName_Double_V)(ani_env *env, ani_class cls, const char *name,
-                                                        ani_double *result, va_list args);
+                                                        const char *signature, ani_double *result, va_list args);
 
     /**
      * @brief Calls a static method by name with a reference return type.
@@ -3944,11 +3478,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the reference result.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Ref)(ani_env *env, ani_class cls, const char *name, ani_ref *result, ...);
+    ani_status (*Class_CallStaticMethodByName_Ref)(ani_env *env, ani_class cls, const char *name, const char *signature,
+                                                   ani_ref *result, ...);
 
     /**
      * @brief Calls a static method by name with a reference return type (array-based).
@@ -3959,12 +3495,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the reference result.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Ref_A)(ani_env *env, ani_class cls, const char *name, ani_ref *result,
-                                                     const ani_value *args);
+    ani_status (*Class_CallStaticMethodByName_Ref_A)(ani_env *env, ani_class cls, const char *name,
+                                                     const char *signature, ani_ref *result, const ani_value *args);
 
     /**
      * @brief Calls a static method by name with a reference return type (variadic arguments).
@@ -3975,12 +3512,13 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[out] result A pointer to store the reference result.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Ref_V)(ani_env *env, ani_class cls, const char *name, ani_ref *result,
-                                                     va_list args);
+    ani_status (*Class_CallStaticMethodByName_Ref_V)(ani_env *env, ani_class cls, const char *name,
+                                                     const char *signature, ani_ref *result, va_list args);
 
     /**
      * @brief Calls a static method by name with no return value.
@@ -3991,10 +3529,12 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[in] ... Variadic arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Void)(ani_env *env, ani_class cls, const char *name, ...);
+    ani_status (*Class_CallStaticMethodByName_Void)(ani_env *env, ani_class cls, const char *name,
+                                                    const char *signature, ...);
 
     /**
      * @brief Calls a static method by name with no return value (array-based).
@@ -4005,11 +3545,12 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[in] args An array of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Class_CallStaticMethodByName_Void_A)(ani_env *env, ani_class cls, const char *name,
-                                                      const ani_value *args);
+                                                      const char *signature, const ani_value *args);
 
     /**
      * @brief Calls a static method by name with no return value (variadic arguments).
@@ -4020,10 +3561,12 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] cls The class containing the static method.
      * @param[in] name The name of the static method to call.
+     * @param[in] signature The signature of the static method to call.
      * @param[in] args A `va_list` of arguments to pass to the method.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Class_CallStaticMethodByName_Void_V)(ani_env *env, ani_class cls, const char *name, va_list args);
+    ani_status (*Class_CallStaticMethodByName_Void_V)(ani_env *env, ani_class cls, const char *name,
+                                                      const char *signature, va_list args);
 
     /**
      * @brief Retrieves a boolean value from a field of an object.
@@ -4492,241 +4035,6 @@ struct __ani_interaction_api {
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
     ani_status (*Object_SetFieldByName_Ref)(ani_env *env, ani_object object, const char *name, ani_ref value);
-
-    /**
-     * @brief Retrieves a boolean value from a property of an object.
-     *
-     * This function retrieves the boolean value of the specified property from the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to retrieve the boolean value from.
-     * @param[out] result A pointer to store the retrieved boolean value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_GetProperty_Boolean)(ani_env *env, ani_object object, ani_property property,
-                                             ani_boolean *result);
-
-    /**
-     * @brief Retrieves a char value from a property of an object.
-     *
-     * This function retrieves the char value of the specified property from the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to retrieve the char value from.
-     * @param[out] result A pointer to store the retrieved char value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_GetProperty_Char)(ani_env *env, ani_object object, ani_property property, ani_char *result);
-
-    /**
-     * @brief Retrieves a byte value from a property of an object.
-     *
-     * This function retrieves the byte value of the specified property from the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to retrieve the byte value from.
-     * @param[out] result A pointer to store the retrieved byte value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_GetProperty_Byte)(ani_env *env, ani_object object, ani_property property, ani_byte *result);
-
-    /**
-     * @brief Retrieves a short value from a property of an object.
-     *
-     * This function retrieves the short value of the specified property from the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to retrieve the short value from.
-     * @param[out] result A pointer to store the retrieved short value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_GetProperty_Short)(ani_env *env, ani_object object, ani_property property, ani_short *result);
-
-    /**
-     * @brief Retrieves a integer value from a property of an object.
-     *
-     * This function retrieves the integer value of the specified property from the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to retrieve the integer value from.
-     * @param[out] result A pointer to store the retrieved integer value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_GetProperty_Int)(ani_env *env, ani_object object, ani_property property, ani_int *result);
-
-    /**
-     * @brief Retrieves a long value from a property of an object.
-     *
-     * This function retrieves the long value of the specified property from the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to retrieve the long value from.
-     * @param[out] result A pointer to store the retrieved long value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_GetProperty_Long)(ani_env *env, ani_object object, ani_property property, ani_long *result);
-
-    /**
-     * @brief Retrieves a float value from a property of an object.
-     *
-     * This function retrieves the float value of the specified property from the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to retrieve the float value from.
-     * @param[out] result A pointer to store the retrieved float value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_GetProperty_Float)(ani_env *env, ani_object object, ani_property property, ani_float *result);
-
-    /**
-     * @brief Retrieves a double value from a property of an object.
-     *
-     * This function retrieves the double value of the specified property from the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to retrieve the double value from.
-     * @param[out] result A pointer to store the retrieved double value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_GetProperty_Double)(ani_env *env, ani_object object, ani_property property, ani_double *result);
-
-    /**
-     * @brief Retrieves a reference value from a property of an object.
-     *
-     * This function retrieves the reference value of the specified property from the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to retrieve the reference value from.
-     * @param[out] result A pointer to store the retrieved reference value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_GetProperty_Ref)(ani_env *env, ani_object object, ani_property property, ani_ref *result);
-
-    /**
-     * @brief Sets a boolean value to a property of an object.
-     *
-     * This function assigns a boolean value to the specified property of the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to set the boolean value to.
-     * @param[in] value The boolean value to assign to the property.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_SetProperty_Boolean)(ani_env *env, ani_object object, ani_property property, ani_boolean value);
-
-    /**
-     * @brief Sets a char value to a property of an object.
-     *
-     * This function assigns a char value to the specified property of the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to set the char value to.
-     * @param[in] value The char value to assign to the property.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_SetProperty_Char)(ani_env *env, ani_object object, ani_property property, ani_char value);
-
-    /**
-     * @brief Sets a byte value to a property of an object.
-     *
-     * This function assigns a byte value to the specified property of the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to set the byte value to.
-     * @param[in] value The byte value to assign to the property.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_SetProperty_Byte)(ani_env *env, ani_object object, ani_property property, ani_byte value);
-
-    /**
-     * @brief Sets a short value to a property of an object.
-     *
-     * This function assigns a short value to the specified property of the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to set the short value to.
-     * @param[in] value The short value to assign to the property.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_SetProperty_Short)(ani_env *env, ani_object object, ani_property property, ani_short value);
-
-    /**
-     * @brief Sets a integer value to a property of an object.
-     *
-     * This function assigns a integer value to the specified property of the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to set the integer value to.
-     * @param[in] value The integer value to assign to the property.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_SetProperty_Int)(ani_env *env, ani_object object, ani_property property, ani_int value);
-
-    /**
-     * @brief Sets a long value to a property of an object.
-     *
-     * This function assigns a long value to the specified property of the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to set the long value to.
-     * @param[in] value The long value to assign to the property.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_SetProperty_Long)(ani_env *env, ani_object object, ani_property property, ani_long value);
-
-    /**
-     * @brief Sets a float value to a property of an object.
-     *
-     * This function assigns a float value to the specified property of the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to set the float value to.
-     * @param[in] value The float value to assign to the property.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_SetProperty_Float)(ani_env *env, ani_object object, ani_property property, ani_float value);
-
-    /**
-     * @brief Sets a double value to a property of an object.
-     *
-     * This function assigns a double value to the specified property of the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to set the double value to.
-     * @param[in] value The double value to assign to the property.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_SetProperty_Double)(ani_env *env, ani_object object, ani_property property, ani_double value);
-
-    /**
-     * @brief Sets a reference value to a property of an object.
-     *
-     * This function assigns a reference value to the specified property of the given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] object The object containing the property.
-     * @param[in] property The property to set the reference value to.
-     * @param[in] value The reference value to assign to the property.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Object_SetProperty_Ref)(ani_env *env, ani_object object, ani_property property, ani_ref value);
 
     /**
      * @brief Retrieves a boolean value from a property of an object by its name.
@@ -5920,93 +5228,16 @@ struct __ani_interaction_api {
                                                  const char *signature, va_list args);
 
     /**
-     * @brief Creates a new tuple value.
+     * @brief Retrieves the number of items in a tuple value.
      *
-     * This function creates a new value for the specified tuple using variadic arguments.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] tuple The tuple for which to create a new value.
-     * @param[out] result A pointer to store the new tuple value.
-     * @param[in] ... Variadic arguments to initialize the tuple value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Tuple_NewTupleValue)(ani_env *env, ani_tuple tuple, ani_tuple_value *result, ...);
-
-    /**
-     * @brief Creates a new tuple value (array-based).
-     *
-     * This function creates a new value for the specified tuple using arguments provided in an array.
+     * This function retrieves the total number of items in the specified tuple value.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] tuple The tuple for which to create a new value.
-     * @param[out] result A pointer to store the new tuple value.
-     * @param[in] args An array of arguments to initialize the tuple value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Tuple_NewTupleValue_A)(ani_env *env, ani_tuple tuple, ani_tuple_value *result, const ani_value *args);
-
-    /**
-     * @brief Creates a new tuple value (variadic arguments).
-     *
-     * This function creates a new value for the specified tuple using a `va_list`.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] tuple The tuple for which to create a new value.
-     * @param[out] result A pointer to store the new tuple value.
-     * @param[in] args A `va_list` of arguments to initialize the tuple value.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Tuple_NewTupleValue_V)(ani_env *env, ani_tuple tuple, ani_tuple_value *result, va_list args);
-
-    /**
-     * @brief Retrieves the number of items in a tuple.
-     *
-     * This function retrieves the total number of items in the specified tuple.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] tuple The tuple whose number of items is to be retrieved.
+     * @param[in] tuple_value The tuple value whose number of items is to be retrieved.
      * @param[out] result A pointer to store the number of items.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Tuple_GetNumberOfItems)(ani_env *env, ani_tuple tuple, ani_size *result);
-
-    /**
-     * @brief Retrieves the kind of an item in a tuple.
-     *
-     * This function retrieves the kind of the item at the specified index in the tuple.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] tuple The tuple containing the item.
-     * @param[in] index The index of the item.
-     * @param[out] result A pointer to store the kind of the item.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Tuple_GetItemKind)(ani_env *env, ani_tuple tuple, ani_size index, ani_kind *result);
-
-    /**
-     * @brief Retrieves the type of an item in a tuple.
-     *
-     * This function retrieves the type of the item at the specified index in the tuple.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] tuple The tuple containing the item.
-     * @param[in] index The index of the item.
-     * @param[out] result A pointer to store the type of the item.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Tuple_GetItemType)(ani_env *env, ani_tuple tuple, ani_size index, ani_type *result);
-
-    /**
-     * @brief Retrieves the tuple associated with a tuple value.
-     *
-     * This function retrieves the tuple that corresponds to the specified tuple value.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] value The tuple value to query.
-     * @param[out] result A pointer to store the associated tuple.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*TupleValue_GetTuple)(ani_env *env, ani_tuple_value value, ani_tuple *result);
+    ani_status (*TupleValue_GetNumberOfItems)(ani_env *env, ani_tuple_value tuple_value, ani_size *result);
 
     /**
      * @brief Retrieves a boolean item from a tuple value.
@@ -6258,7 +5489,7 @@ struct __ani_interaction_api {
      * @param[out] result A pointer to store the created global reference.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GlobalReference_Create)(ani_env *env, ani_ref ref, ani_gref *result);
+    ani_status (*GlobalReference_Create)(ani_env *env, ani_ref ref, ani_ref *result);
 
     /**
      * @brief Deletes a global reference.
@@ -6269,7 +5500,7 @@ struct __ani_interaction_api {
      * @param[in] gref The global reference to delete.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*GlobalReference_Delete)(ani_env *env, ani_gref gref);
+    ani_status (*GlobalReference_Delete)(ani_env *env, ani_ref gref);
 
     /**
      * @brief Creates a weak reference.
@@ -6301,10 +5532,12 @@ struct __ani_interaction_api {
      *
      * @param[in] env A pointer to the environment structure.
      * @param[in] wref The weak reference to query.
-     * @param[out] result A pointer to store the retrieved local reference.
+     * @param[out] was_released_result A pointer to boolean flag which indicates that wref is GC collected.
+     * @param[out] ref_result A pointer to store the retrieved local reference.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*WeakReference_GetReference)(ani_env *env, ani_wref wref, ani_ref *result);
+    ani_status (*WeakReference_GetReference)(ani_env *env, ani_wref wref, ani_boolean *was_released_result,
+                                             ani_ref *ref_result);
 
     /**
      * @brief Creates a new array buffer.
@@ -6329,8 +5562,8 @@ struct __ani_interaction_api {
      * @param[in] env A pointer to the environment structure.
      * @param[in] external_data A pointer to the external data to be used by the array buffer.
      * @param[in] length The length of the external data in bytes.
-     * @param[in] finalizer A callback function to be called when the array buffer is finalized.
-     * @param[in] hint A user-defined hint to be passed to the finalizer.
+     * @param[in] finalizer A callback function to be called when the array buffer is finalized. Can be nullptr.
+     * @param[in] hint A user-defined hint to be passed to the finalizer. Can be nullptr.
      * @param[out] result A pointer to store the created array buffer object.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
@@ -6352,462 +5585,44 @@ struct __ani_interaction_api {
                                       size_t *length_result);
 
     /**
-     * @brief Converts an object to a method.
+     * @brief Creates a new Promise.
      *
-     * This function extracts the method information from a given object.
+     * This function creates a new promise and a resolver to manage it.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] method The object representing the method.
-     * @param[out] result A pointer to store the extracted method.
+     * @param[out] result_resolver A pointer to store the created resolver.
+     * @param[out] result_promise A pointer to store the created promise.
      * @return Returns a status code of type `ani_status` indicating success or failure.
      */
-    ani_status (*Reflection_FromMethod)(ani_env *env, ani_object method, ani_method *result);
+    ani_status (*Promise_New)(ani_env *env, ani_resolver *result_resolver, ani_object *result_promise);
 
     /**
-     * @brief Converts a method to an object.
+     * @brief Resolves a promise.
      *
-     * This function creates an object representing the specified method.
+     * This function resolves a promise by way of the resolver with which it is associated
+     * and queues promise `then` callbacks.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class containing the method.
-     * @param[in] method The method to convert.
-     * @param[out] result A pointer to store the created object.
+     * @param[in] resolver A resolver whose associated promise to resolve.
+     * @param[in] resolution A reference with which to resolve the promise.
      * @return Returns a status code of type `ani_status` indicating success or failure.
+     * The `resolver` is freed upon successful completion.
      */
-    ani_status (*Reflection_ToMethod)(ani_env *env, ani_class cls, ani_method method, ani_object *result);
+    ani_status (*PromiseResolver_Resolve)(ani_env *env, ani_resolver resolver, ani_ref resolution);
 
     /**
-     * @brief Converts an object to a field.
+     * @brief Rejects a promise.
      *
-     * This function extracts the field information from a given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] field The object representing the field.
-     * @param[out] result A pointer to store the extracted field.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reflection_FromField)(ani_env *env, ani_object field, ani_field *result);
-
-    /**
-     * @brief Converts a field to an object.
-     *
-     * This function creates an object representing the specified field.
+     * This function rejects a promise by way of the resolver with which it is associated
+     * and queues promise `catch` callbacks.
      *
      * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class containing the field.
-     * @param[in] field The field to convert.
-     * @param[out] result A pointer to store the created object.
+     * @param[in] resolver A resolver whose associated promise to resolve.
+     * @param[in] rejection An error with which to reject the promise.
      * @return Returns a status code of type `ani_status` indicating success or failure.
+     * The `resolver` is freed upon successful completion.
      */
-    ani_status (*Reflection_ToField)(ani_env *env, ani_class cls, ani_field field, ani_object *result);
-
-    /**
-     * @brief Converts an object to a static method.
-     *
-     * This function extracts the static method information from a given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] method The object representing the static method.
-     * @param[out] result A pointer to store the extracted static method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reflection_FromStaticMethod)(ani_env *env, ani_object method, ani_static_method *result);
-
-    /**
-     * @brief Converts a static method to an object.
-     *
-     * This function creates an object representing the specified static method.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class containing the static method.
-     * @param[in] method The static method to convert.
-     * @param[out] result A pointer to store the created object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reflection_ToStaticMethod)(ani_env *env, ani_class cls, ani_static_method method, ani_object *result);
-
-    /**
-     * @brief Converts an object to a static field.
-     *
-     * This function extracts the static field information from a given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] field The object representing the static field.
-     * @param[out] result A pointer to store the extracted static field.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reflection_FromStaticField)(ani_env *env, ani_object field, ani_static_field *result);
-
-    /**
-     * @brief Converts a static field to an object.
-     *
-     * This function creates an object representing the specified static field.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class containing the static field.
-     * @param[in] field The static field to convert.
-     * @param[out] result A pointer to store the created object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reflection_ToStaticField)(ani_env *env, ani_class cls, ani_static_field field, ani_object *result);
-
-    /**
-     * @brief Converts an object to a function.
-     *
-     * This function extracts the function information from a given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] function The object representing the function.
-     * @param[out] result A pointer to store the extracted function.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reflection_FromFunction)(ani_env *env, ani_object function, ani_function *result);
-
-    /**
-     * @brief Converts a function to an object.
-     *
-     * This function creates an object representing the specified function.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] function The function to convert.
-     * @param[out] result A pointer to store the created object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reflection_ToFunction)(ani_env *env, ani_function function, ani_object *result);
-
-    /**
-     * @brief Converts an object to a variable.
-     *
-     * This function extracts the variable information from a given object.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] variable The object representing the variable.
-     * @param[out] result A pointer to store the extracted variable.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reflection_FromVariable)(ani_env *env, ani_object variable, ani_variable *result);
-
-    /**
-     * @brief Converts a variable to an object.
-     *
-     * This function creates an object representing the specified variable.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] variable The variable to convert.
-     * @param[out] result A pointer to store the created object.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Reflection_ToVariable)(ani_env *env, ani_variable variable, ani_object *result);
-
-    /**
-     * @brief Registers a new coroutine-local storage slot.
-     *
-     * This function registers a new coroutine-local storage (CLS) slot with an optional initial data, finalizer, and
-     * hint.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] initial_data A pointer to the initial data to associate with the slot. Can be null.
-     * @param[in] finalizer A callback function to finalize and clean up the data when it is no longer needed.
-     * @param[in] hint A user-defined pointer that is passed to the finalizer. Can be null.
-     * @param[out] result A pointer to store the created CLS slot.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*CLS_Register)(ani_env *env, void *initial_data, ani_finalizer finalizer, void *hint,
-                               ani_cls_slot *result);
-
-    /**
-     * @brief Unregisters a coroutine-local storage slot.
-     *
-     * This function unregisters a previously registered CLS slot, releasing its resources.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] slot The CLS slot to unregister.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*CLS_Unregister)(ani_env *env, ani_cls_slot slot);
-
-    /**
-     * @brief Sets data for a CLS slot.
-     *
-     * This function associates the specified data with the given CLS slot.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] slot The CLS slot to set data for.
-     * @param[in] data A pointer to the data to associate with the slot. Can be null.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*CLS_SetData)(ani_env *env, ani_cls_slot slot, void *data);
-
-    /**
-     * @brief Retrieves data from a CLS slot.
-     *
-     * This function retrieves the data associated with the given CLS slot.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] slot The CLS slot to retrieve data from.
-     * @param[out] result A pointer to store the retrieved data. Can be null if no data is associated.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*CLS_GetData)(ani_env *env, ani_cls_slot slot, void **result);
-
-    /**
-     * @brief Launches a coroutine using a functional object.
-     *
-     * This function starts a coroutine that executes the specified functional object with the given arguments.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] fn The functional object to execute.
-     * @param[in] argc The number of arguments to pass to the functional object.
-     * @param[in] argv An array of arguments to pass to the functional object.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchFunctionalObject)(ani_env *env, ani_fn_object fn, ani_size argc, ani_ref *argv,
-                                                   ani_promise *result);
-
-    /**
-     * @brief Launches a coroutine using a function with variadic arguments.
-     *
-     * This function starts a coroutine that executes the specified function with the given arguments.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] function The function to execute.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @param[in] ... Variadic arguments to pass to the function.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchFunction)(ani_env *env, ani_function function, ani_promise *result, ...);
-
-    /**
-     * @brief Launches a coroutine using a function with array-based arguments.
-     *
-     * This function starts a coroutine that executes the specified function using arguments provided in an array.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] function The function to execute.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @param[in] args An array of arguments to pass to the function.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchFunction_A)(ani_env *env, ani_function function, ani_promise *result,
-                                             const ani_value *args);
-
-    /**
-     * @brief Launches a coroutine using a function with variadic arguments in a `va_list`.
-     *
-     * This function starts a coroutine that executes the specified function using arguments provided in a `va_list`.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] function The function to execute.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @param[in] args A `va_list` of arguments to pass to the function.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchFunction_V)(ani_env *env, ani_function function, ani_promise *result, va_list args);
-
-    /**
-     * @brief Launches a coroutine using an object method with variadic arguments.
-     *
-     * This function starts a coroutine that executes the specified method on the given object with the provided
-     * arguments.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] self The object on which the method is to be executed.
-     * @param[in] function The method to execute.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @param[in] ... Variadic arguments to pass to the method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchMethod)(ani_env *env, ani_object self, ani_function function, ani_promise *result,
-                                         ...);
-
-    /**
-     * @brief Launches a coroutine using an object method with array-based arguments.
-     *
-     * This function starts a coroutine that executes the specified method on the given object using arguments provided
-     * in an array.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] self The object on which the method is to be executed.
-     * @param[in] function The method to execute.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @param[in] args An array of arguments to pass to the method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchMethod_A)(ani_env *env, ani_object self, ani_function function, ani_promise *result,
-                                           const ani_value *args);
-
-    /**
-     * @brief Launches a coroutine using an object method with variadic arguments in a `va_list`.
-     *
-     * This function starts a coroutine that executes the specified method on the given object using arguments provided
-     * in a `va_list`.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] self The object on which the method is to be executed.
-     * @param[in] function The method to execute.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @param[in] args A `va_list` of arguments to pass to the method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchMethod_V)(ani_env *env, ani_object self, ani_function function, ani_promise *result,
-                                           va_list args);
-
-    /**
-     * @brief Launches a coroutine using a static method with variadic arguments.
-     *
-     * This function starts a coroutine that executes the specified static method on the given class with the provided
-     * arguments.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class on which the static method is to be executed.
-     * @param[in] function The static method to execute.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @param[in] ... Variadic arguments to pass to the static method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchStaticMethod)(ani_env *env, ani_class cls, ani_function function, ani_promise *result,
-                                               ...);
-
-    /**
-     * @brief Launches a coroutine using a static method with array-based arguments.
-     *
-     * This function starts a coroutine that executes the specified static method on the given class using arguments
-     * provided in an array.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class on which the static method is to be executed.
-     * @param[in] function The static method to execute.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @param[in] args An array of arguments to pass to the static method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchStaticMethod_A)(ani_env *env, ani_class cls, ani_function function,
-                                                 ani_promise *result, const ani_value *args);
-
-    /**
-     * @brief Launches a coroutine using a static method with variadic arguments in a `va_list`.
-     *
-     * This function starts a coroutine that executes the specified static method on the given class using arguments
-     * provided in a `va_list`.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] cls The class on which the static method is to be executed.
-     * @param[in] function The static method to execute.
-     * @param[out] result A pointer to store the promise representing the coroutine's result.
-     * @param[in] args A `va_list` of arguments to pass to the static method.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_LaunchStaticMethod_V)(ani_env *env, ani_class cls, ani_function function,
-                                                 ani_promise *result, va_list args);
-
-    /**
-     * @brief Awaits the completion of a promise and retrieves a boolean result.
-     *
-     * This function waits for the specified promise to complete and retrieves its result as a boolean value.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] promise The promise to await.
-     * @param[out] value A pointer to store the boolean result of the promise.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_Await_Boolean)(ani_env *env, ani_promise promise, ani_boolean value);
-
-    /**
-     * @brief Awaits the completion of a promise and retrieves a char result.
-     *
-     * This function waits for the specified promise to complete and retrieves its result as a char value.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] promise The promise to await.
-     * @param[out] value A pointer to store the char result of the promise.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_Await_Char)(ani_env *env, ani_promise promise, ani_char value);
-
-    /**
-     * @brief Awaits the completion of a promise and retrieves a byte result.
-     *
-     * This function waits for the specified promise to complete and retrieves its result as a byte value.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] promise The promise to await.
-     * @param[out] value A pointer to store the byte result of the promise.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_Await_Byte)(ani_env *env, ani_promise promise, ani_byte value);
-
-    /**
-     * @brief Awaits the completion of a promise and retrieves a short result.
-     *
-     * This function waits for the specified promise to complete and retrieves its result as a short value.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] promise The promise to await.
-     * @param[out] value A pointer to store the short result of the promise.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_Await_Short)(ani_env *env, ani_promise promise, ani_short value);
-
-    /**
-     * @brief Awaits the completion of a promise and retrieves a integer result.
-     *
-     * This function waits for the specified promise to complete and retrieves its result as a integer value.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] promise The promise to await.
-     * @param[out] value A pointer to store the integer result of the promise.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_Await_Int)(ani_env *env, ani_promise promise, ani_int value);
-
-    /**
-     * @brief Awaits the completion of a promise and retrieves a long result.
-     *
-     * This function waits for the specified promise to complete and retrieves its result as a long value.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] promise The promise to await.
-     * @param[out] value A pointer to store the long result of the promise.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_Await_Long)(ani_env *env, ani_promise promise, ani_long value);
-
-    /**
-     * @brief Awaits the completion of a promise and retrieves a float result.
-     *
-     * This function waits for the specified promise to complete and retrieves its result as a float value.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] promise The promise to await.
-     * @param[out] value A pointer to store the float result of the promise.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_Await_Float)(ani_env *env, ani_promise promise, ani_float value);
-
-    /**
-     * @brief Awaits the completion of a promise and retrieves a double result.
-     *
-     * This function waits for the specified promise to complete and retrieves its result as a double value.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] promise The promise to await.
-     * @param[out] value A pointer to store the double result of the promise.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_Await_Double)(ani_env *env, ani_promise promise, ani_double value);
-
-    /**
-     * @brief Awaits the completion of a promise and retrieves a reference result.
-     *
-     * This function waits for the specified promise to complete and retrieves its result as a reference.
-     *
-     * @param[in] env A pointer to the environment structure.
-     * @param[in] promise The promise to await.
-     * @param[out] value A pointer to store the reference result of the promise.
-     * @return Returns a status code of type `ani_status` indicating success or failure.
-     */
-    ani_status (*Coroutine_Await_Ref)(ani_env *env, ani_promise promise, ani_ref value);
+    ani_status (*PromiseResolver_Reject)(ani_env *env, ani_resolver resolver, ani_error rejection);
 };
 
 // C++ API
@@ -6823,13 +5638,13 @@ struct __ani_vm {
     {
         return c_api->GetEnv(this, version, result);
     }
-    ani_status AttachThread(void *params, ani_env **result)
+    ani_status AttachCurrentThread(const ani_options *options, uint32_t version, ani_env **result)
     {
-        return c_api->AttachThread(this, params, result);
+        return c_api->AttachCurrentThread(this, options, version, result);
     }
-    ani_status DetachThread()
+    ani_status DetachCurrentThread()
     {
-        return c_api->DetachThread(this);
+        return c_api->DetachCurrentThread(this);
     }
 #endif  // __cplusplus
 };
@@ -6845,70 +5660,6 @@ struct __ani_env {
     ani_status GetVM(ani_vm **result)
     {
         return c_api->GetVM(this, result);
-    }
-    ani_status Reference_IsObject(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsObject(this, ref, result);
-    }
-    ani_status Reference_IsFunctionalObject(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFunctionalObject(this, ref, result);
-    }
-    ani_status Reference_IsEnum(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsEnum(this, ref, result);
-    }
-    ani_status Reference_IsTuple(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsTuple(this, ref, result);
-    }
-    ani_status Reference_IsString(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsString(this, ref, result);
-    }
-    ani_status Reference_IsStringLiteral(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsStringLiteral(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray_Boolean(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray_Boolean(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray_Char(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray_Char(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray_Byte(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray_Byte(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray_Short(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray_Short(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray_Int(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray_Int(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray_Long(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray_Long(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray_Float(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray_Float(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray_Double(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray_Double(this, ref, result);
-    }
-    ani_status Reference_IsFixedArray_Ref(ani_ref ref, ani_boolean *result)
-    {
-        return c_api->Reference_IsFixedArray_Ref(this, ref, result);
     }
     ani_status Object_New(ani_class cls, ani_method method, ani_object *result, ...)
     {
@@ -6934,10 +5685,6 @@ struct __ani_env {
     {
         return c_api->Object_InstanceOf(this, object, type, result);
     }
-    ani_status Object_IsSame(ani_object object1, ani_object object2, ani_boolean *result)
-    {
-        return c_api->Object_IsSame(this, object1, object2, result);
-    }
     ani_status Type_GetSuperClass(ani_type type, ani_class *result)
     {
         return c_api->Type_GetSuperClass(this, type, result);
@@ -6962,18 +5709,6 @@ struct __ani_env {
     {
         return c_api->FindEnum(this, enum_descriptor, result);
     }
-    ani_status FindTuple(const char *tuple_descriptor, ani_tuple *result)
-    {
-        return c_api->FindTuple(this, tuple_descriptor, result);
-    }
-    ani_status FindFunction(const char *function_descriptor, ani_function *result)
-    {
-        return c_api->FindFunction(this, function_descriptor, result);
-    }
-    ani_status FindVariable(const char *variable_descriptor, ani_variable *result)
-    {
-        return c_api->FindVariable(this, variable_descriptor, result);
-    }
     ani_status Module_FindNamespace(ani_module module, const char *namespace_descriptor, ani_namespace *result)
     {
         return c_api->Module_FindNamespace(this, module, namespace_descriptor, result);
@@ -6990,9 +5725,9 @@ struct __ani_env {
     {
         return c_api->Module_FindFunction(this, module, name, signature, result);
     }
-    ani_status Module_FindVariable(ani_module module, const char *variable_descriptor, ani_variable *result)
+    ani_status Module_FindVariable(ani_module module, const char *name, ani_variable *result)
     {
-        return c_api->Module_FindVariable(this, module, variable_descriptor, result);
+        return c_api->Module_FindVariable(this, module, name, result);
     }
     ani_status Namespace_FindNamespace(ani_namespace ns, const char *namespace_descriptor, ani_namespace *result)
     {
@@ -7010,9 +5745,9 @@ struct __ani_env {
     {
         return c_api->Namespace_FindFunction(this, ns, name, signature, result);
     }
-    ani_status Namespace_FindVariable(ani_namespace ns, const char *variable_descriptor, ani_variable *result)
+    ani_status Namespace_FindVariable(ani_namespace ns, const char *name, ani_variable *result)
     {
-        return c_api->Namespace_FindVariable(this, ns, variable_descriptor, result);
+        return c_api->Namespace_FindVariable(this, ns, name, result);
     }
     ani_status Module_BindNativeFunctions(ani_module module, const ani_native_function *functions,
                                           ani_size nr_functions)
@@ -7140,222 +5875,154 @@ struct __ani_env {
         return c_api->String_GetUTF8SubString(this, string, substr_offset, substr_size, utf8_buffer, utf8_buffer_size,
                                               result);
     }
-    ani_status String_GetCritical(ani_string string, uint32_t *result_string_type, const void **result_data,
-                                  ani_size *result_size)  // result_string_type - string type utf16/utf8, etc
+    ani_status Array_GetLength(ani_array array, ani_size *result)
     {
-        return c_api->String_GetCritical(this, string, result_string_type, result_data, result_size);
+        return c_api->Array_GetLength(this, array, result);
     }
-    ani_status String_ReleaseCritical(ani_string string, const void *data)
+    ani_status Array_New_Boolean(ani_size length, ani_array_boolean *result)
     {
-        return c_api->String_ReleaseCritical(this, string, data);
+        return c_api->Array_New_Boolean(this, length, result);
     }
-    ani_status StringLiteral_NewUTF16(const uint16_t *utf16_string, ani_size utf16_size, ani_stringliteral *result)
+    ani_status Array_New_Char(ani_size length, ani_array_char *result)
     {
-        return c_api->StringLiteral_NewUTF16(this, utf16_string, utf16_size, result);
+        return c_api->Array_New_Char(this, length, result);
     }
-    ani_status StringLiteral_GetUTF16Size(ani_stringliteral string, ani_size *result)
+    ani_status Array_New_Byte(ani_size length, ani_array_byte *result)
     {
-        return c_api->StringLiteral_GetUTF16Size(this, string, result);
+        return c_api->Array_New_Byte(this, length, result);
     }
-    ani_status StringLiteral_GetUTF16(ani_stringliteral string, uint16_t *utf16_buffer, ani_size utf16_buffer_size,
-                                      ani_size *result)
+    ani_status Array_New_Short(ani_size length, ani_array_short *result)
     {
-        return c_api->StringLiteral_GetUTF16(this, string, utf16_buffer, utf16_buffer_size, result);
+        return c_api->Array_New_Short(this, length, result);
     }
-    ani_status StringLiteral_GetUTF16SubString(ani_stringliteral string, ani_size substr_offset, ani_size substr_size,
-                                               uint16_t *utf16_buffer, ani_size utf16_buffer_size, ani_size *result)
+    ani_status Array_New_Int(ani_size length, ani_array_int *result)
     {
-        return c_api->StringLiteral_GetUTF16SubString(this, string, substr_offset, substr_size, utf16_buffer,
-                                                      utf16_buffer_size, result);
+        return c_api->Array_New_Int(this, length, result);
     }
-    ani_status StringLiteral_NewUTF8(const char *utf8_string, ani_size utf8_size, ani_stringliteral *result)
+    ani_status Array_New_Long(ani_size length, ani_array_long *result)
     {
-        return c_api->StringLiteral_NewUTF8(this, utf8_string, utf8_size, result);
+        return c_api->Array_New_Long(this, length, result);
     }
-    ani_status StringLiteral_GetUTF8Size(ani_stringliteral string, ani_size *result)
+    ani_status Array_New_Float(ani_size length, ani_array_float *result)
     {
-        return c_api->StringLiteral_GetUTF8Size(this, string, result);
+        return c_api->Array_New_Float(this, length, result);
     }
-    ani_status StringLiteral_GetUTF8(ani_stringliteral string, char *utf8_buffer, ani_size utf8_buffer_size,
-                                     ani_size *result)
+    ani_status Array_New_Double(ani_size length, ani_array_double *result)
     {
-        return c_api->StringLiteral_GetUTF8(this, string, utf8_buffer, utf8_buffer_size, result);
+        return c_api->Array_New_Double(this, length, result);
     }
-    ani_status StringLiteral_GetUTF8SubString(ani_stringliteral string, ani_size substr_offset, ani_size substr_size,
-                                              char *utf8_buffer, ani_size utf8_buffer_size, ani_size *result)
+    ani_status Array_GetRegion_Boolean(ani_array_boolean array, ani_size offset, ani_size length,
+                                       ani_boolean *native_buffer)
     {
-        return c_api->StringLiteral_GetUTF8SubString(this, string, substr_offset, substr_size, utf8_buffer,
-                                                     utf8_buffer_size, result);
+        return c_api->Array_GetRegion_Boolean(this, array, offset, length, native_buffer);
     }
-    ani_status StringLiteral_GetCritical(ani_stringliteral string, uint32_t *result_string_type,
-                                         const void **result_data,
-                                         ani_size *result_size)  // result_string_type - string type utf16/utf8, etc
+    ani_status Array_GetRegion_Char(ani_array_char array, ani_size offset, ani_size length, ani_char *native_buffer)
     {
-        return c_api->StringLiteral_GetCritical(this, string, result_string_type, result_data, result_size);
+        return c_api->Array_GetRegion_Char(this, array, offset, length, native_buffer);
     }
-    ani_status StringLiteral_ReleaseCritical(ani_stringliteral string, const void *data)
+    ani_status Array_GetRegion_Byte(ani_array_byte array, ani_size offset, ani_size length, ani_byte *native_buffer)
     {
-        return c_api->StringLiteral_ReleaseCritical(this, string, data);
+        return c_api->Array_GetRegion_Byte(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_GetLength(ani_fixedarray array, ani_size *result)
+    ani_status Array_GetRegion_Short(ani_array_short array, ani_size offset, ani_size length, ani_short *native_buffer)
     {
-        return c_api->FixedArray_GetLength(this, array, result);
+        return c_api->Array_GetRegion_Short(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_New_Boolean(ani_size length, ani_fixedarray_boolean *result)
+    ani_status Array_GetRegion_Int(ani_array_int array, ani_size offset, ani_size length, ani_int *native_buffer)
     {
-        return c_api->FixedArray_New_Boolean(this, length, result);
+        return c_api->Array_GetRegion_Int(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_New_Char(ani_size length, ani_fixedarray_char *result)
+    ani_status Array_GetRegion_Long(ani_array_long array, ani_size offset, ani_size length, ani_long *native_buffer)
     {
-        return c_api->FixedArray_New_Char(this, length, result);
+        return c_api->Array_GetRegion_Long(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_New_Byte(ani_size length, ani_fixedarray_byte *result)
+    ani_status Array_GetRegion_Float(ani_array_float array, ani_size offset, ani_size length, ani_float *native_buffer)
     {
-        return c_api->FixedArray_New_Byte(this, length, result);
+        return c_api->Array_GetRegion_Float(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_New_Short(ani_size length, ani_fixedarray_short *result)
+    ani_status Array_GetRegion_Double(ani_array_double array, ani_size offset, ani_size length,
+                                      ani_double *native_buffer)
     {
-        return c_api->FixedArray_New_Short(this, length, result);
+        return c_api->Array_GetRegion_Double(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_New_Int(ani_size length, ani_fixedarray_int *result)
+    ani_status Array_SetRegion_Boolean(ani_array_boolean array, ani_size offset, ani_size length,
+                                       const ani_boolean *native_buffer)
     {
-        return c_api->FixedArray_New_Int(this, length, result);
+        return c_api->Array_SetRegion_Boolean(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_New_Long(ani_size length, ani_fixedarray_long *result)
+    ani_status Array_SetRegion_Char(ani_array_char array, ani_size offset, ani_size length,
+                                    const ani_char *native_buffer)
     {
-        return c_api->FixedArray_New_Long(this, length, result);
+        return c_api->Array_SetRegion_Char(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_New_Float(ani_size length, ani_fixedarray_float *result)
+    ani_status Array_SetRegion_Byte(ani_array_byte array, ani_size offset, ani_size length,
+                                    const ani_byte *native_buffer)
     {
-        return c_api->FixedArray_New_Float(this, length, result);
+        return c_api->Array_SetRegion_Byte(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_New_Double(ani_size length, ani_fixedarray_double *result)
+    ani_status Array_SetRegion_Short(ani_array_short array, ani_size offset, ani_size length,
+                                     const ani_short *native_buffer)
     {
-        return c_api->FixedArray_New_Double(this, length, result);
+        return c_api->Array_SetRegion_Short(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_GetRegion_Boolean(ani_fixedarray_boolean array, ani_size offset, ani_size length,
-                                            ani_boolean *native_buffer)
+    ani_status Array_SetRegion_Int(ani_array_int array, ani_size offset, ani_size length, const ani_int *native_buffer)
     {
-        return c_api->FixedArray_GetRegion_Boolean(this, array, offset, length, native_buffer);
+        return c_api->Array_SetRegion_Int(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_GetRegion_Char(ani_fixedarray_char array, ani_size offset, ani_size length,
-                                         ani_char *native_buffer)
+    ani_status Array_SetRegion_Long(ani_array_long array, ani_size offset, ani_size length,
+                                    const ani_long *native_buffer)
     {
-        return c_api->FixedArray_GetRegion_Char(this, array, offset, length, native_buffer);
+        return c_api->Array_SetRegion_Long(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_GetRegion_Byte(ani_fixedarray_byte array, ani_size offset, ani_size length,
-                                         ani_byte *native_buffer)
+    ani_status Array_SetRegion_Float(ani_array_float array, ani_size offset, ani_size length,
+                                     const ani_float *native_buffer)
     {
-        return c_api->FixedArray_GetRegion_Byte(this, array, offset, length, native_buffer);
+        return c_api->Array_SetRegion_Float(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_GetRegion_Short(ani_fixedarray_short array, ani_size offset, ani_size length,
-                                          ani_short *native_buffer)
+    ani_status Array_SetRegion_Double(ani_array_double array, ani_size offset, ani_size length,
+                                      const ani_double *native_buffer)
     {
-        return c_api->FixedArray_GetRegion_Short(this, array, offset, length, native_buffer);
+        return c_api->Array_SetRegion_Double(this, array, offset, length, native_buffer);
     }
-    ani_status FixedArray_GetRegion_Int(ani_fixedarray_int array, ani_size offset, ani_size length,
-                                        ani_int *native_buffer)
+    ani_status Array_New_Ref(ani_type type, ani_size length, ani_ref initial_element, ani_array_ref *result)
     {
-        return c_api->FixedArray_GetRegion_Int(this, array, offset, length, native_buffer);
+        return c_api->Array_New_Ref(this, type, length, initial_element, result);
     }
-    ani_status FixedArray_GetRegion_Long(ani_fixedarray_long array, ani_size offset, ani_size length,
-                                         ani_long *native_buffer)
+    ani_status Array_Set_Ref(ani_array_ref array, ani_size index, ani_ref ref)
     {
-        return c_api->FixedArray_GetRegion_Long(this, array, offset, length, native_buffer);
+        return c_api->Array_Set_Ref(this, array, index, ref);
     }
-    ani_status FixedArray_GetRegion_Float(ani_fixedarray_float array, ani_size offset, ani_size length,
-                                          ani_float *native_buffer)
+    ani_status Array_Get_Ref(ani_array_ref array, ani_size index, ani_ref *result)
     {
-        return c_api->FixedArray_GetRegion_Float(this, array, offset, length, native_buffer);
+        return c_api->Array_Get_Ref(this, array, index, result);
     }
-    ani_status FixedArray_GetRegion_Double(ani_fixedarray_double array, ani_size offset, ani_size length,
-                                           ani_double *native_buffer)
+    ani_status Enum_GetEnumItemByName(ani_enum enm, const char *name, ani_enum_item *result)
     {
-        return c_api->FixedArray_GetRegion_Double(this, array, offset, length, native_buffer);
+        return c_api->Enum_GetEnumItemByName(this, enm, name, result);
     }
-    ani_status FixedArray_SetRegion_Boolean(ani_fixedarray_boolean array, ani_size offset, ani_size length,
-                                            const ani_boolean *native_buffer)
+    ani_status Enum_GetEnumItemByIndex(ani_enum enm, ani_size index, ani_enum_item *result)
     {
-        return c_api->FixedArray_SetRegion_Boolean(this, array, offset, length, native_buffer);
+        return c_api->Enum_GetEnumItemByIndex(this, enm, index, result);
     }
-    ani_status FixedArray_SetRegion_Char(ani_fixedarray_char array, ani_size offset, ani_size length,
-                                         const ani_char *native_buffer)
+    ani_status EnumItem_GetEnum(ani_enum_item enum_item, ani_enum *result)
     {
-        return c_api->FixedArray_SetRegion_Char(this, array, offset, length, native_buffer);
+        return c_api->EnumItem_GetEnum(this, enum_item, result);
     }
-    ani_status FixedArray_SetRegion_Byte(ani_fixedarray_byte array, ani_size offset, ani_size length,
-                                         const ani_byte *native_buffer)
+    ani_status EnumItem_GetValue_Int(ani_enum_item enum_item, ani_int *result)
     {
-        return c_api->FixedArray_SetRegion_Byte(this, array, offset, length, native_buffer);
+        return c_api->EnumItem_GetValue_Int(this, enum_item, result);
     }
-    ani_status FixedArray_SetRegion_Short(ani_fixedarray_short array, ani_size offset, ani_size length,
-                                          const ani_short *native_buffer)
+    ani_status EnumItem_GetValue_String(ani_enum_item enum_item, ani_string *result)
     {
-        return c_api->FixedArray_SetRegion_Short(this, array, offset, length, native_buffer);
+        return c_api->EnumItem_GetValue_String(this, enum_item, result);
     }
-    ani_status FixedArray_SetRegion_Int(ani_fixedarray_int array, ani_size offset, ani_size length,
-                                        const ani_int *native_buffer)
+    ani_status EnumItem_GetName(ani_enum_item enum_item, ani_string *result)
     {
-        return c_api->FixedArray_SetRegion_Int(this, array, offset, length, native_buffer);
+        return c_api->EnumItem_GetName(this, enum_item, result);
     }
-    ani_status FixedArray_SetRegion_Long(ani_fixedarray_long array, ani_size offset, ani_size length,
-                                         const ani_long *native_buffer)
+    ani_status EnumItem_GetIndex(ani_enum_item enum_item, ani_size *result)
     {
-        return c_api->FixedArray_SetRegion_Long(this, array, offset, length, native_buffer);
-    }
-    ani_status FixedArray_SetRegion_Float(ani_fixedarray_float array, ani_size offset, ani_size length,
-                                          const ani_float *native_buffer)
-    {
-        return c_api->FixedArray_SetRegion_Float(this, array, offset, length, native_buffer);
-    }
-    ani_status FixedArray_SetRegion_Double(ani_fixedarray_double array, ani_size offset, ani_size length,
-                                           const ani_double *native_buffer)
-    {
-        return c_api->FixedArray_SetRegion_Double(this, array, offset, length, native_buffer);
-    }
-    ani_status FixedArray_Pin(ani_fixedarray primitive_array, void **result)
-    {
-        return c_api->FixedArray_Pin(this, primitive_array, result);
-    }
-    ani_status FixedArray_Unpin(ani_fixedarray primitive_array, void *data)
-    {
-        return c_api->FixedArray_Unpin(this, primitive_array, data);
-    }
-    ani_status FixedArray_New_Ref(ani_size length, ani_ref *initial_array, ani_fixedarray_ref *result)
-    {
-        return c_api->FixedArray_New_Ref(this, length, initial_array, result);
-    }
-    ani_status FixedArray_Set_Ref(ani_fixedarray_ref array, ani_size index, ani_ref ref)
-    {
-        return c_api->FixedArray_Set_Ref(this, array, index, ref);
-    }
-    ani_status FixedArray_Get_Ref(ani_fixedarray_ref array, ani_size index, ani_ref *result)
-    {
-        return c_api->FixedArray_Get_Ref(this, array, index, result);
-    }
-    ani_status Enum_GetEnumValueByName(ani_enum enm, const char *name, ani_enum_value *result)
-    {
-        return c_api->Enum_GetEnumValueByName(this, enm, name, result);
-    }
-    ani_status Enum_GetEnumValueByIndex(ani_enum enm, ani_size index, ani_enum_value *result)
-    {
-        return c_api->Enum_GetEnumValueByIndex(this, enm, index, result);
-    }
-    ani_status EnumValue_GetEnum(ani_enum_value enum_value, ani_enum *result)
-    {
-        return c_api->EnumValue_GetEnum(this, enum_value, result);
-    }
-    ani_status EnumValue_GetValue(ani_enum_value enum_value, ani_object *result)
-    {
-        return c_api->EnumValue_GetValue(this, enum_value, result);
-    }
-    ani_status EnumValue_GetName(ani_enum_value enum_value, ani_string *result)
-    {
-        return c_api->EnumValue_GetName(this, enum_value, result);
-    }
-    ani_status EnumValue_GetIndex(ani_enum_value enum_value, ani_size *result)
-    {
-        return c_api->EnumValue_GetIndex(this, enum_value, result);
+        return c_api->EnumItem_GetIndex(this, enum_item, result);
     }
     ani_status FunctionalObject_Call(ani_fn_object fn, ani_size argc, ani_ref *argv, ani_ref *result)
     {
@@ -7593,53 +6260,41 @@ struct __ani_env {
     {
         return c_api->Function_Call_Void_V(this, fn, args);
     }
-    ani_status Class_GetPartial(ani_class cls, ani_class *result)
+    ani_status Class_FindField(ani_class cls, const char *name, ani_field *result)
     {
-        return c_api->Class_GetPartial(this, cls, result);
+        return c_api->Class_FindField(this, cls, name, result);
     }
-    ani_status Class_GetRequired(ani_class cls, ani_class *result)
+    ani_status Class_FindStaticField(ani_class cls, const char *name, ani_static_field *result)
     {
-        return c_api->Class_GetRequired(this, cls, result);
+        return c_api->Class_FindStaticField(this, cls, name, result);
     }
-    ani_status Class_GetField(ani_class cls, const char *name, ani_field *result)
+    ani_status Class_FindMethod(ani_class cls, const char *name, const char *signature, ani_method *result)
     {
-        return c_api->Class_GetField(this, cls, name, result);
+        return c_api->Class_FindMethod(this, cls, name, signature, result);
     }
-    ani_status Class_GetStaticField(ani_class cls, const char *name, ani_static_field *result)
+    ani_status Class_FindStaticMethod(ani_class cls, const char *name, const char *signature, ani_static_method *result)
     {
-        return c_api->Class_GetStaticField(this, cls, name, result);
+        return c_api->Class_FindStaticMethod(this, cls, name, signature, result);
     }
-    ani_status Class_GetMethod(ani_class cls, const char *name, const char *signature, ani_method *result)
+    ani_status Class_FindSetter(ani_class cls, const char *name, ani_method *result)
     {
-        return c_api->Class_GetMethod(this, cls, name, signature, result);
+        return c_api->Class_FindSetter(this, cls, name, result);
     }
-    ani_status Class_GetStaticMethod(ani_class cls, const char *name, const char *signature, ani_static_method *result)
+    ani_status Class_FindGetter(ani_class cls, const char *name, ani_method *result)
     {
-        return c_api->Class_GetStaticMethod(this, cls, name, signature, result);
+        return c_api->Class_FindGetter(this, cls, name, result);
     }
-    ani_status Class_GetProperty(ani_class cls, const char *name, ani_property *result)
+    ani_status Class_FindIndexableGetter(ani_class cls, const char *signature, ani_method *result)
     {
-        return c_api->Class_GetProperty(this, cls, name, result);
+        return c_api->Class_FindIndexableGetter(this, cls, signature, result);
     }
-    ani_status Class_GetSetter(ani_class cls, const char *name, ani_method *result)
+    ani_status Class_FindIndexableSetter(ani_class cls, const char *signature, ani_method *result)
     {
-        return c_api->Class_GetSetter(this, cls, name, result);
+        return c_api->Class_FindIndexableSetter(this, cls, signature, result);
     }
-    ani_status Class_GetGetter(ani_class cls, const char *name, ani_method *result)
+    ani_status Class_FindIterator(ani_class cls, ani_method *result)
     {
-        return c_api->Class_GetGetter(this, cls, name, result);
-    }
-    ani_status Class_GetIndexableGetter(ani_class cls, const char *signature, ani_method *result)
-    {
-        return c_api->Class_GetIndexableGetter(this, cls, signature, result);
-    }
-    ani_status Class_GetIndexableSetter(ani_class cls, const char *signature, ani_method *result)
-    {
-        return c_api->Class_GetIndexableSetter(this, cls, signature, result);
-    }
-    ani_status Class_GetIterator(ani_class cls, ani_method *result)
-    {
-        return c_api->Class_GetIterator(this, cls, result);
+        return c_api->Class_FindIterator(this, cls, result);
     }
     ani_status Class_GetStaticField_Boolean(ani_class cls, ani_static_field field, ani_boolean *result)
     {
@@ -7956,175 +6611,193 @@ struct __ani_env {
     {
         return c_api->Class_CallStaticMethod_Void_V(this, cls, method, args);
     }
-    ani_status Class_CallStaticMethodByName_Boolean(ani_class cls, const char *name, ani_boolean *result, ...)
+    ani_status Class_CallStaticMethodByName_Boolean(ani_class cls, const char *name, const char *signature,
+                                                    ani_boolean *result, ...)
     {
         va_list args;
         va_start(args, result);
-        ani_status status = c_api->Class_CallStaticMethodByName_Boolean_V(this, cls, name, result, args);
+        ani_status status = c_api->Class_CallStaticMethodByName_Boolean_V(this, cls, name, signature, result, args);
         va_end(args);
         return status;
     }
-    ani_status Class_CallStaticMethodByName_Boolean_A(ani_class cls, const char *name, ani_boolean *result,
-                                                      const ani_value *args)
+    ani_status Class_CallStaticMethodByName_Boolean_A(ani_class cls, const char *name, const char *signature,
+                                                      ani_boolean *result, const ani_value *args)
     {
-        return c_api->Class_CallStaticMethodByName_Boolean_A(this, cls, name, result, args);
+        return c_api->Class_CallStaticMethodByName_Boolean_A(this, cls, name, signature, result, args);
     }
-    ani_status Class_CallStaticMethodByName_Boolean_V(ani_class cls, const char *name, ani_boolean *result,
-                                                      va_list args)
+    ani_status Class_CallStaticMethodByName_Boolean_V(ani_class cls, const char *name, const char *signature,
+                                                      ani_boolean *result, va_list args)
     {
-        return c_api->Class_CallStaticMethodByName_Boolean_V(this, cls, name, result, args);
+        return c_api->Class_CallStaticMethodByName_Boolean_V(this, cls, name, signature, result, args);
     }
-    ani_status Class_CallStaticMethodByName_Char(ani_class cls, const char *name, ani_char *result, ...)
+    ani_status Class_CallStaticMethodByName_Char(ani_class cls, const char *name, const char *signature,
+                                                 ani_char *result, ...)
     {
         va_list args;
         va_start(args, result);
-        ani_status status = c_api->Class_CallStaticMethodByName_Char_V(this, cls, name, result, args);
+        ani_status status = c_api->Class_CallStaticMethodByName_Char_V(this, cls, name, signature, result, args);
         va_end(args);
         return status;
     }
-    ani_status Class_CallStaticMethodByName_Char_A(ani_class cls, const char *name, ani_char *result,
+    ani_status Class_CallStaticMethodByName_Char_A(ani_class cls, const char *name, const char *signature,
+                                                   ani_char *result, const ani_value *args)
+    {
+        return c_api->Class_CallStaticMethodByName_Char_A(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Char_V(ani_class cls, const char *name, const char *signature,
+                                                   ani_char *result, va_list args)
+    {
+        return c_api->Class_CallStaticMethodByName_Char_V(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Byte(ani_class cls, const char *name, const char *signature,
+                                                 ani_byte *result, ...)
+    {
+        va_list args;
+        va_start(args, result);
+        ani_status status = c_api->Class_CallStaticMethodByName_Byte_V(this, cls, name, signature, result, args);
+        va_end(args);
+        return status;
+    }
+    ani_status Class_CallStaticMethodByName_Byte_A(ani_class cls, const char *name, const char *signature,
+                                                   ani_byte *result, const ani_value *args)
+    {
+        return c_api->Class_CallStaticMethodByName_Byte_A(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Byte_V(ani_class cls, const char *name, const char *signature,
+                                                   ani_byte *result, va_list args)
+    {
+        return c_api->Class_CallStaticMethodByName_Byte_V(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Short(ani_class cls, const char *name, const char *signature,
+                                                  ani_short *result, ...)
+    {
+        va_list args;
+        va_start(args, result);
+        ani_status status = c_api->Class_CallStaticMethodByName_Short_V(this, cls, name, signature, result, args);
+        va_end(args);
+        return status;
+    }
+    ani_status Class_CallStaticMethodByName_Short_A(ani_class cls, const char *name, const char *signature,
+                                                    ani_short *result, const ani_value *args)
+    {
+        return c_api->Class_CallStaticMethodByName_Short_A(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Short_V(ani_class cls, const char *name, const char *signature,
+                                                    ani_short *result, va_list args)
+    {
+        return c_api->Class_CallStaticMethodByName_Short_V(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Int(ani_class cls, const char *name, const char *signature, ani_int *result,
+                                                ...)
+    {
+        va_list args;
+        va_start(args, result);
+        ani_status status = c_api->Class_CallStaticMethodByName_Int_V(this, cls, name, signature, result, args);
+        va_end(args);
+        return status;
+    }
+    ani_status Class_CallStaticMethodByName_Int_A(ani_class cls, const char *name, const char *signature,
+                                                  ani_int *result, const ani_value *args)
+    {
+        return c_api->Class_CallStaticMethodByName_Int_A(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Int_V(ani_class cls, const char *name, const char *signature,
+                                                  ani_int *result, va_list args)
+    {
+        return c_api->Class_CallStaticMethodByName_Int_V(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Long(ani_class cls, const char *name, const char *signature,
+                                                 ani_long *result, ...)
+    {
+        va_list args;
+        va_start(args, result);
+        ani_status status = c_api->Class_CallStaticMethodByName_Long_V(this, cls, name, signature, result, args);
+        va_end(args);
+        return status;
+    }
+    ani_status Class_CallStaticMethodByName_Long_A(ani_class cls, const char *name, const char *signature,
+                                                   ani_long *result, const ani_value *args)
+    {
+        return c_api->Class_CallStaticMethodByName_Long_A(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Long_V(ani_class cls, const char *name, const char *signature,
+                                                   ani_long *result, va_list args)
+    {
+        return c_api->Class_CallStaticMethodByName_Long_V(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Float(ani_class cls, const char *name, const char *signature,
+                                                  ani_float *result, ...)
+    {
+        va_list args;
+        va_start(args, result);
+        ani_status status = c_api->Class_CallStaticMethodByName_Float_V(this, cls, name, signature, result, args);
+        va_end(args);
+        return status;
+    }
+    ani_status Class_CallStaticMethodByName_Float_A(ani_class cls, const char *name, const char *signature,
+                                                    ani_float *result, const ani_value *args)
+    {
+        return c_api->Class_CallStaticMethodByName_Float_A(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Float_V(ani_class cls, const char *name, const char *signature,
+                                                    ani_float *result, va_list args)
+    {
+        return c_api->Class_CallStaticMethodByName_Float_V(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Double(ani_class cls, const char *name, const char *signature,
+                                                   ani_double *result, ...)
+    {
+        va_list args;
+        va_start(args, result);
+        ani_status status = c_api->Class_CallStaticMethodByName_Double_V(this, cls, name, signature, result, args);
+        va_end(args);
+        return status;
+    }
+    ani_status Class_CallStaticMethodByName_Double_A(ani_class cls, const char *name, const char *signature,
+                                                     ani_double *result, const ani_value *args)
+    {
+        return c_api->Class_CallStaticMethodByName_Double_A(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Double_V(ani_class cls, const char *name, const char *signature,
+                                                     ani_double *result, va_list args)
+    {
+        return c_api->Class_CallStaticMethodByName_Double_V(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Ref(ani_class cls, const char *name, const char *signature, ani_ref *result,
+                                                ...)
+    {
+        va_list args;
+        va_start(args, result);
+        ani_status status = c_api->Class_CallStaticMethodByName_Ref_V(this, cls, name, signature, result, args);
+        va_end(args);
+        return status;
+    }
+    ani_status Class_CallStaticMethodByName_Ref_A(ani_class cls, const char *name, const char *signature,
+                                                  ani_ref *result, const ani_value *args)
+    {
+        return c_api->Class_CallStaticMethodByName_Ref_A(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Ref_V(ani_class cls, const char *name, const char *signature,
+                                                  ani_ref *result, va_list args)
+    {
+        return c_api->Class_CallStaticMethodByName_Ref_V(this, cls, name, signature, result, args);
+    }
+    ani_status Class_CallStaticMethodByName_Void(ani_class cls, const char *name, const char *signature, ...)
+    {
+        va_list args;
+        va_start(args, signature);
+        ani_status status = c_api->Class_CallStaticMethodByName_Void_V(this, cls, name, signature, args);
+        va_end(args);
+        return status;
+    }
+    ani_status Class_CallStaticMethodByName_Void_A(ani_class cls, const char *name, const char *signature,
                                                    const ani_value *args)
     {
-        return c_api->Class_CallStaticMethodByName_Char_A(this, cls, name, result, args);
+        return c_api->Class_CallStaticMethodByName_Void_A(this, cls, name, signature, args);
     }
-    ani_status Class_CallStaticMethodByName_Char_V(ani_class cls, const char *name, ani_char *result, va_list args)
+    ani_status Class_CallStaticMethodByName_Void_V(ani_class cls, const char *name, const char *signature, va_list args)
     {
-        return c_api->Class_CallStaticMethodByName_Char_V(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Byte(ani_class cls, const char *name, ani_byte *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Class_CallStaticMethodByName_Byte_V(this, cls, name, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Class_CallStaticMethodByName_Byte_A(ani_class cls, const char *name, ani_byte *result,
-                                                   const ani_value *args)
-    {
-        return c_api->Class_CallStaticMethodByName_Byte_A(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Byte_V(ani_class cls, const char *name, ani_byte *result, va_list args)
-    {
-        return c_api->Class_CallStaticMethodByName_Byte_V(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Short(ani_class cls, const char *name, ani_short *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Class_CallStaticMethodByName_Short_V(this, cls, name, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Class_CallStaticMethodByName_Short_A(ani_class cls, const char *name, ani_short *result,
-                                                    const ani_value *args)
-    {
-        return c_api->Class_CallStaticMethodByName_Short_A(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Short_V(ani_class cls, const char *name, ani_short *result, va_list args)
-    {
-        return c_api->Class_CallStaticMethodByName_Short_V(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Int(ani_class cls, const char *name, ani_int *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Class_CallStaticMethodByName_Int_V(this, cls, name, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Class_CallStaticMethodByName_Int_A(ani_class cls, const char *name, ani_int *result,
-                                                  const ani_value *args)
-    {
-        return c_api->Class_CallStaticMethodByName_Int_A(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Int_V(ani_class cls, const char *name, ani_int *result, va_list args)
-    {
-        return c_api->Class_CallStaticMethodByName_Int_V(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Long(ani_class cls, const char *name, ani_long *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Class_CallStaticMethodByName_Long_V(this, cls, name, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Class_CallStaticMethodByName_Long_A(ani_class cls, const char *name, ani_long *result,
-                                                   const ani_value *args)
-    {
-        return c_api->Class_CallStaticMethodByName_Long_A(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Long_V(ani_class cls, const char *name, ani_long *result, va_list args)
-    {
-        return c_api->Class_CallStaticMethodByName_Long_V(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Float(ani_class cls, const char *name, ani_float *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Class_CallStaticMethodByName_Float_V(this, cls, name, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Class_CallStaticMethodByName_Float_A(ani_class cls, const char *name, ani_float *result,
-                                                    const ani_value *args)
-    {
-        return c_api->Class_CallStaticMethodByName_Float_A(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Float_V(ani_class cls, const char *name, ani_float *result, va_list args)
-    {
-        return c_api->Class_CallStaticMethodByName_Float_V(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Double(ani_class cls, const char *name, ani_double *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Class_CallStaticMethodByName_Double_V(this, cls, name, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Class_CallStaticMethodByName_Double_A(ani_class cls, const char *name, ani_double *result,
-                                                     const ani_value *args)
-    {
-        return c_api->Class_CallStaticMethodByName_Double_A(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Double_V(ani_class cls, const char *name, ani_double *result, va_list args)
-    {
-        return c_api->Class_CallStaticMethodByName_Double_V(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Ref(ani_class cls, const char *name, ani_ref *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Class_CallStaticMethodByName_Ref_V(this, cls, name, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Class_CallStaticMethodByName_Ref_A(ani_class cls, const char *name, ani_ref *result,
-                                                  const ani_value *args)
-    {
-        return c_api->Class_CallStaticMethodByName_Ref_A(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Ref_V(ani_class cls, const char *name, ani_ref *result, va_list args)
-    {
-        return c_api->Class_CallStaticMethodByName_Ref_V(this, cls, name, result, args);
-    }
-    ani_status Class_CallStaticMethodByName_Void(ani_class cls, const char *name, ...)
-    {
-        va_list args;
-        va_start(args, name);
-        ani_status status = c_api->Class_CallStaticMethodByName_Void_V(this, cls, name, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Class_CallStaticMethodByName_Void_A(ani_class cls, const char *name, const ani_value *args)
-    {
-        return c_api->Class_CallStaticMethodByName_Void_A(this, cls, name, args);
-    }
-    ani_status Class_CallStaticMethodByName_Void_V(ani_class cls, const char *name, va_list args)
-    {
-        return c_api->Class_CallStaticMethodByName_Void_V(this, cls, name, args);
+        return c_api->Class_CallStaticMethodByName_Void_V(this, cls, name, signature, args);
     }
     ani_status Object_GetField_Boolean(ani_object object, ani_field field, ani_boolean *result)
     {
@@ -8269,78 +6942,6 @@ struct __ani_env {
     ani_status Object_SetFieldByName_Ref(ani_object object, const char *name, ani_ref value)
     {
         return c_api->Object_SetFieldByName_Ref(this, object, name, value);
-    }
-    ani_status Object_GetProperty_Boolean(ani_object object, ani_property property, ani_boolean *result)
-    {
-        return c_api->Object_GetProperty_Boolean(this, object, property, result);
-    }
-    ani_status Object_GetProperty_Char(ani_object object, ani_property property, ani_char *result)
-    {
-        return c_api->Object_GetProperty_Char(this, object, property, result);
-    }
-    ani_status Object_GetProperty_Byte(ani_object object, ani_property property, ani_byte *result)
-    {
-        return c_api->Object_GetProperty_Byte(this, object, property, result);
-    }
-    ani_status Object_GetProperty_Short(ani_object object, ani_property property, ani_short *result)
-    {
-        return c_api->Object_GetProperty_Short(this, object, property, result);
-    }
-    ani_status Object_GetProperty_Int(ani_object object, ani_property property, ani_int *result)
-    {
-        return c_api->Object_GetProperty_Int(this, object, property, result);
-    }
-    ani_status Object_GetProperty_Long(ani_object object, ani_property property, ani_long *result)
-    {
-        return c_api->Object_GetProperty_Long(this, object, property, result);
-    }
-    ani_status Object_GetProperty_Float(ani_object object, ani_property property, ani_float *result)
-    {
-        return c_api->Object_GetProperty_Float(this, object, property, result);
-    }
-    ani_status Object_GetProperty_Double(ani_object object, ani_property property, ani_double *result)
-    {
-        return c_api->Object_GetProperty_Double(this, object, property, result);
-    }
-    ani_status Object_GetProperty_Ref(ani_object object, ani_property property, ani_ref *result)
-    {
-        return c_api->Object_GetProperty_Ref(this, object, property, result);
-    }
-    ani_status Object_SetProperty_Boolean(ani_object object, ani_property property, ani_boolean value)
-    {
-        return c_api->Object_SetProperty_Boolean(this, object, property, value);
-    }
-    ani_status Object_SetProperty_Char(ani_object object, ani_property property, ani_char value)
-    {
-        return c_api->Object_SetProperty_Char(this, object, property, value);
-    }
-    ani_status Object_SetProperty_Byte(ani_object object, ani_property property, ani_byte value)
-    {
-        return c_api->Object_SetProperty_Byte(this, object, property, value);
-    }
-    ani_status Object_SetProperty_Short(ani_object object, ani_property property, ani_short value)
-    {
-        return c_api->Object_SetProperty_Byte(this, object, property, value);
-    }
-    ani_status Object_SetProperty_Int(ani_object object, ani_property property, ani_int value)
-    {
-        return c_api->Object_SetProperty_Int(this, object, property, value);
-    }
-    ani_status Object_SetProperty_Long(ani_object object, ani_property property, ani_long value)
-    {
-        return c_api->Object_SetProperty_Long(this, object, property, value);
-    }
-    ani_status Object_SetProperty_Float(ani_object object, ani_property property, ani_float value)
-    {
-        return c_api->Object_SetProperty_Float(this, object, property, value);
-    }
-    ani_status Object_SetProperty_Double(ani_object object, ani_property property, ani_double value)
-    {
-        return c_api->Object_SetProperty_Double(this, object, property, value);
-    }
-    ani_status Object_SetProperty_Ref(ani_object object, ani_property property, ani_ref value)
-    {
-        return c_api->Object_SetProperty_Ref(this, object, property, value);
     }
     ani_status Object_GetPropertyByName_Boolean(ani_object object, const char *name, ani_boolean *result)
     {
@@ -8764,37 +7365,9 @@ struct __ani_env {
     {
         return c_api->Object_CallMethodByName_Void_V(this, object, name, signature, args);
     }
-    ani_status Tuple_NewTupleValue(ani_tuple tuple, ani_tuple_value *result, ...)
+    ani_status TupleValue_GetNumberOfItems(ani_tuple_value tuple_value, ani_size *result)
     {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Tuple_NewTupleValue_V(this, tuple, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Tuple_NewTupleValue_A(ani_tuple tuple, ani_tuple_value *result, const ani_value *args)
-    {
-        return c_api->Tuple_NewTupleValue_A(this, tuple, result, args);
-    }
-    ani_status Tuple_NewTupleValue_V(ani_tuple tuple, ani_tuple_value *result, va_list args)
-    {
-        return c_api->Tuple_NewTupleValue_V(this, tuple, result, args);
-    }
-    ani_status Tuple_GetNumberOfItems(ani_tuple tuple, ani_size *result)
-    {
-        return c_api->Tuple_GetNumberOfItems(this, tuple, result);
-    }
-    ani_status Tuple_GetItemKind(ani_tuple tuple, ani_size index, ani_kind *result)
-    {
-        return c_api->Tuple_GetItemKind(this, tuple, index, result);
-    }
-    ani_status Tuple_GetItemType(ani_tuple tuple, ani_size index, ani_type *result)
-    {
-        return c_api->Tuple_GetItemType(this, tuple, index, result);
-    }
-    ani_status TupleValue_GetTuple(ani_tuple_value value, ani_tuple *result)
-    {
-        return c_api->TupleValue_GetTuple(this, value, result);
+        return c_api->TupleValue_GetNumberOfItems(this, tuple_value, result);
     }
     ani_status TupleValue_GetItem_Boolean(ani_tuple_value tuple_value, ani_size index, ani_boolean *result)
     {
@@ -8868,11 +7441,11 @@ struct __ani_env {
     {
         return c_api->TupleValue_SetItem_Ref(this, tuple_value, index, value);
     }
-    ani_status GlobalReference_Create(ani_ref ref, ani_gref *result)
+    ani_status GlobalReference_Create(ani_ref ref, ani_ref *result)
     {
         return c_api->GlobalReference_Create(this, ref, result);
     }
-    ani_status GlobalReference_Delete(ani_gref ref)
+    ani_status GlobalReference_Delete(ani_ref ref)
     {
         return c_api->GlobalReference_Delete(this, ref);
     }
@@ -8884,9 +7457,9 @@ struct __ani_env {
     {
         return c_api->WeakReference_Delete(this, wref);
     }
-    ani_status WeakReference_GetReference(ani_wref wref, ani_ref *result)
+    ani_status WeakReference_GetReference(ani_wref wref, ani_boolean *was_released_result, ani_ref *ref_result)
     {
-        return c_api->WeakReference_GetReference(this, wref, result);
+        return c_api->WeakReference_GetReference(this, wref, was_released_result, ref_result);
     }
     ani_status CreateArrayBuffer(size_t length, void **data_result, ani_arraybuffer *arraybuffer_result)
     {
@@ -8901,159 +7474,17 @@ struct __ani_env {
     {
         return c_api->ArrayBuffer_GetInfo(this, arraybuffer, data_result, length_result);
     }
-    ani_status Reflection_FromMethod(ani_object method, ani_method *result)
+    ani_status Promise_New(ani_resolver *result_resolver, ani_object *result_promise)
     {
-        return c_api->Reflection_FromMethod(this, method, result);
+        return c_api->Promise_New(this, result_resolver, result_promise);
     }
-    ani_status Reflection_ToMethod(ani_class cls, ani_method method, ani_object *result)
+    ani_status PromiseResolver_Resolve(ani_resolver resolver, ani_ref resolution)
     {
-        return c_api->Reflection_ToMethod(this, cls, method, result);
+        return c_api->PromiseResolver_Resolve(this, resolver, resolution);
     }
-    ani_status Reflection_FromField(ani_object field, ani_field *result)
+    ani_status PromiseResolver_Reject(ani_resolver resolver, ani_error rejection)
     {
-        return c_api->Reflection_FromField(this, field, result);
-    }
-    ani_status Reflection_ToField(ani_class cls, ani_field field, ani_object *result)
-    {
-        return c_api->Reflection_ToField(this, cls, field, result);
-    }
-    ani_status Reflection_FromStaticMethod(ani_object method, ani_static_method *result)
-    {
-        return c_api->Reflection_FromStaticMethod(this, method, result);
-    }
-    ani_status Reflection_ToStaticMethod(ani_class cls, ani_static_method method, ani_object *result)
-    {
-        return c_api->Reflection_ToStaticMethod(this, cls, method, result);
-    }
-    ani_status Reflection_FromStaticField(ani_object field, ani_static_field *result)
-    {
-        return c_api->Reflection_FromStaticField(this, field, result);
-    }
-    ani_status Reflection_ToStaticField(ani_class cls, ani_static_field field, ani_object *result)
-    {
-        return c_api->Reflection_ToStaticField(this, cls, field, result);
-    }
-    ani_status Reflection_FromFunction(ani_object function, ani_function *result)
-    {
-        return c_api->Reflection_FromFunction(this, function, result);
-    }
-    ani_status Reflection_ToFunction(ani_function function, ani_object *result)
-    {
-        return c_api->Reflection_ToFunction(this, function, result);
-    }
-    ani_status Reflection_FromVariable(ani_object variable, ani_variable *result)
-    {
-        return c_api->Reflection_FromVariable(this, variable, result);
-    }
-    ani_status Reflection_ToVariable(ani_variable variable, ani_object *result)
-    {
-        return c_api->Reflection_ToVariable(this, variable, result);
-    }
-    ani_status CLS_Register(void *initial_data, ani_finalizer finalizer, void *hint, ani_cls_slot *result)
-    {
-        return c_api->CLS_Register(this, initial_data, finalizer, hint, result);
-    }
-    ani_status CLS_Unregister(ani_cls_slot slot)
-    {
-        return c_api->CLS_Unregister(this, slot);
-    }
-    ani_status CLS_SetData(ani_cls_slot slot, void *data)
-    {
-        return c_api->CLS_SetData(this, slot, data);
-    }
-    ani_status CLS_GetData(ani_cls_slot slot, void **result)
-    {
-        return c_api->CLS_GetData(this, slot, result);
-    }
-    ani_status Coroutine_LaunchFunctionalObject(ani_fn_object fn, ani_size argc, ani_ref *argv, ani_promise *result)
-    {
-        return c_api->Coroutine_LaunchFunctionalObject(this, fn, argc, argv, result);
-    }
-    ani_status Coroutine_LaunchFunction(ani_function function, ani_promise *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Coroutine_LaunchFunction_V(this, function, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Coroutine_LaunchFunction_A(ani_function function, ani_promise *result, const ani_value *args)
-    {
-        return c_api->Coroutine_LaunchFunction_A(this, function, result, args);
-    }
-    ani_status Coroutine_LaunchFunction_V(ani_function function, ani_promise *result, va_list args)
-    {
-        return c_api->Coroutine_LaunchFunction_V(this, function, result, args);
-    }
-    ani_status Coroutine_LaunchMethod(ani_object self, ani_function function, ani_promise *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Coroutine_LaunchMethod_V(this, self, function, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Coroutine_LaunchMethod_A(ani_object self, ani_function function, ani_promise *result,
-                                        const ani_value *args)
-    {
-        return c_api->Coroutine_LaunchMethod_A(this, self, function, result, args);
-    }
-    ani_status Coroutine_LaunchMethod_V(ani_object self, ani_function function, ani_promise *result, va_list args)
-    {
-        return c_api->Coroutine_LaunchMethod_V(this, self, function, result, args);
-    }
-    ani_status Coroutine_LaunchStaticMethod(ani_class cls, ani_function function, ani_promise *result, ...)
-    {
-        va_list args;
-        va_start(args, result);
-        ani_status status = c_api->Coroutine_LaunchStaticMethod_V(this, cls, function, result, args);
-        va_end(args);
-        return status;
-    }
-    ani_status Coroutine_LaunchStaticMethod_A(ani_class cls, ani_function function, ani_promise *result,
-                                              const ani_value *args)
-    {
-        return c_api->Coroutine_LaunchStaticMethod_A(this, cls, function, result, args);
-    }
-    ani_status Coroutine_LaunchStaticMethod_V(ani_class cls, ani_function function, ani_promise *result, va_list args)
-    {
-        return c_api->Coroutine_LaunchStaticMethod_V(this, cls, function, result, args);
-    }
-    ani_status Coroutine_Await_Boolean(ani_promise promise, ani_boolean value)
-    {
-        return c_api->Coroutine_Await_Boolean(this, promise, value);
-    }
-    ani_status Coroutine_Await_Char(ani_promise promise, ani_char value)
-    {
-        return c_api->Coroutine_Await_Char(this, promise, value);
-    }
-    ani_status Coroutine_Await_Byte(ani_promise promise, ani_byte value)
-    {
-        return c_api->Coroutine_Await_Byte(this, promise, value);
-    }
-    ani_status Coroutine_Await_Short(ani_promise promise, ani_short value)
-    {
-        return c_api->Coroutine_Await_Short(this, promise, value);
-    }
-    ani_status Coroutine_Await_Int(ani_promise promise, ani_int value)
-    {
-        return c_api->Coroutine_Await_Int(this, promise, value);
-    }
-    ani_status Coroutine_Await_Long(ani_promise promise, ani_long value)
-    {
-        return c_api->Coroutine_Await_Long(this, promise, value);
-    }
-    ani_status Coroutine_Await_Float(ani_promise promise, ani_float value)
-    {
-        return c_api->Coroutine_Await_Float(this, promise, value);
-    }
-    ani_status Coroutine_Await_Double(ani_promise promise, ani_double value)
-    {
-        return c_api->Coroutine_Await_Double(this, promise, value);
-    }
-    ani_status Coroutine_Await_Ref(ani_promise promise, ani_ref value)
-    {
-        return c_api->Coroutine_Await_Ref(this, promise, value);
+        return c_api->PromiseResolver_Reject(this, resolver, rejection);
     }
 #endif  // __cplusplus
 };

@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/interop",
-    "version": "1.5.7+devel",
+    "version": "1.5.8+devel",
     "description": "",
     "workspaces": [
         "../incremental/build-common",

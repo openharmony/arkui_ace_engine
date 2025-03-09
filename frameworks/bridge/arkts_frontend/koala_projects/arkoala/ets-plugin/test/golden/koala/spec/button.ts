@@ -1,5 +1,6 @@
 import { $r, $rawfile, AppStorage, ArkButton, ArkButtonComponent, ArkCommonMethodComponent, ArkFlex, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkRowComponent, ArkStructBase, ArkText, ArkTextComponent, ButtonType, CanvasRenderingContext2D, CustomDialogController, DataChangeListener, Environment, FlexAlign, FlexDirection, ForEach, GestureGroup, IDataSource, ItemAlign, LocalStorage, LongPressGesture, PanGesture, PanGestureOptions, PersistentStorage, PinchGesture, RenderingContextSettings, RotationGesture, Scroller, SubscribedAbstractProperty, SwipeGesture, SwiperController, TabsController, TapGesture, TextAreaController, VerticalAlign, VideoController, animateTo, fp2px, getContext, getInspectorByKey, lpx2px, px2fp, px2lpx, px2vp, vp2px } from "@koalaui/arkui";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
+/** @memo:stable */
 class ArkButtonExampleComponent extends ArkStructBase<ArkButtonExampleComponent, ButtonExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

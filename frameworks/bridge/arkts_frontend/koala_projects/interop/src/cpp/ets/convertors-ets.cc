@@ -56,10 +56,10 @@ bool registerAllModules(ets_env *env) {
     auto moduleNames = EtsExports::getInstance()->getModules();
 
     for (auto it = moduleNames.begin(); it != moduleNames.end(); ++it) {
-        std::string classpath = EtsExports::getInstance()->getClasspath(*it);
-        ets_class nativeModule = env->FindClass(classpath.c_str());
+        std::string className = EtsExports::getInstance()->getClasspath(*it);
+        ets_class nativeModule = env->FindClass(className.c_str());
         if (nativeModule == nullptr) {
-            LOGE("Cannot find managed class %s", classpath.c_str());
+            LOGE("Cannot find managed class %s", className.c_str());
             continue;
         }
         if (!registerNatives(env, nativeModule, EtsExports::getInstance()->getMethods(*it))) {

@@ -27,10 +27,21 @@ export enum DataOperationType {
     CHANGE = "change",
     RELOAD = "reload",
 }
+export interface DataAddOperation {
+    type: DataOperationType;
+    index: number;
+    count?: number;
+    key?: string | Array<string>;
+}
 export interface DataDeleteOperation {
     type: DataOperationType;
     index: number;
     count?: number;
+}
+export interface DataChangeOperation {
+    type: DataOperationType;
+    index: number;
+    key?: string;
 }
 export interface MoveIndex {
     from: number;
@@ -54,6 +65,7 @@ export interface DataExchangeOperation {
     index: ExchangeIndex;
     key?: ExchangeKey;
 }
-export interface DataOperation {
-    stub: string;
+export interface DataReloadOperation {
+    type: DataOperationType;
 }
+export type DataOperation = DataAddOperation | DataDeleteOperation | DataChangeOperation | DataMoveOperation | DataExchangeOperation | DataReloadOperation;

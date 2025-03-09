@@ -16,3 +16,11 @@
 export function unsafeCast<T>(value: Object): T {
     return value as T
 }
+
+export function scheduleCoroutine(): void {
+    Coroutine.Schedule()
+}
+
+export function memoryStats(): string {
+    return `used ${GC.getUsedHeapSize()} free ${GC.getFreeHeapSize()}`
+}

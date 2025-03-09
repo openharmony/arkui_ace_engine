@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <link.h>
+#include <string.h>
 
 #include <map>
 #include "convertors-ani.h"
@@ -21,8 +23,6 @@
 
 static const char* callCallbackFromNative = "callCallbackFromNative";
 static const char* callCallbackFromNativeSig = "I[BI:I";
-
-static const char* FAST_NATIVE_PREFIX = "#F$";
 
 const bool registerByOne = true;
 
@@ -34,13 +34,13 @@ static bool registerNatives(ani_env *env, const ani_class clazz, const std::vect
         ani_native_function method;
         method.name = name.c_str();
         method.pointer = func;
-        method.signature = (flag & ANI_SLOW_NATIVE_FLAG) == 0 ? FAST_NATIVE_PREFIX : nullptr;
+        method.signature = nullptr;
         if (registerByOne) {
             result &= env->Class_BindNativeMethods(clazz, &method, 1) == ANI_OK;
             ani_boolean isError = false;
             env->ExistUnhandledError(&isError);
             if (isError) {
-                //env->ErrorDescribe();
+                env->DescribeError();
                 env->ResetError();
             }
         }
@@ -54,44 +54,55 @@ static bool registerNatives(ani_env *env, const ani_class clazz, const std::vect
     return registerByOne ? true : result;
 }
 
-bool registerAllModules(ani_env *env) {
+bool registerAllModules(ani_env *aniEnv) {
     auto moduleNames = AniExports::getInstance()->getModules();
-
     for (auto it = moduleNames.begin(); it != moduleNames.end(); ++it) {
         std::string classpath = AniExports::getInstance()->getClasspath(*it);
         ani_class nativeModule = nullptr;
-        env->FindClass(classpath.c_str(), &nativeModule);
+        aniEnv->FindClass(classpath.c_str(), &nativeModule);
         if (nativeModule == nullptr) {
             LOGE("Cannot find managed class %s", classpath.c_str());
             continue;
         }
-        if (!registerNatives(env, nativeModule, AniExports::getInstance()->getMethods(*it))) {
+        if (!registerNatives(aniEnv, nativeModule, AniExports::getInstance()->getMethods(*it))) {
             return false;
         }
     }
-
     return true;
 }
 
-#if 0
-extern "C" ETS_EXPORT ets_int ETS_CALL EtsNapiOnLoad(ets_env *env) {
-    if (!registerAllModules(env)) {
-        LOGE("Failed to register ets modules");
-        return ETS_ERR;
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {
+    ani_env* aniEnv = nullptr;
+    *result = 1;
+    vm->GetEnv(/* version */ 1, (ani_env**)&aniEnv);
+    if (!registerAllModules(aniEnv)) {
+        LOGE("Failed to register ANI modules");
+        return ANI_ERROR;
     }
-    auto interopClasspath = AniExports::getInstance()->getClasspath("InteropNativeModule");
-    auto interopClass = env->FindClass(interopClasspath.c_str());
+    ani_boolean hasError = false;
+    aniEnv->ExistUnhandledError(&hasError);
+    if (hasError) {
+        aniEnv->DescribeError();
+        aniEnv->ResetError();
+    }
+    auto interopClassName = AniExports::getInstance()->getClasspath("InteropNativeModule");
+    ani_class interopClass = nullptr;
+    aniEnv->FindClass(interopClassName.c_str(), &interopClass);
     if (interopClass == nullptr) {
-        LOGE("Can not find InteropNativeModule classpath to set callback dispatcher");
-        return ETS_ERR;
+        LOGE("Can not find InteropNativeModule class to set callback dispatcher");
+        aniEnv->ExistUnhandledError(&hasError);
+        if (hasError) {
+            aniEnv->DescribeError();
+            aniEnv->ResetError();
+        }
+        return ANI_OK;
     }
-    if (!setKoalaEtsNapiCallbackDispatcher(env, interopClass, callCallbackFromNative, callCallbackFromNativeSig)) {
-        LOGE("Failed to set koala ets callback dispatcher");
-        return ETS_ERR;
+    if (!setKoalaANICallbackDispatcher(aniEnv, interopClass, callCallbackFromNative, callCallbackFromNativeSig)) {
+        LOGE("Failed to set ANI callback dispatcher");
+        return ANI_ERROR;
     }
-    return ETS_NAPI_VERSION_1_0;
+    return ANI_OK;
 }
-#endif
 
 AniExports* AniExports::getInstance() {
     static AniExports *instance = nullptr;
@@ -135,12 +146,13 @@ void AniExports::setClasspath(const char* module, const char *classpath) {
 }
 
 static std::map<std::string, std::string> g_defaultClasspaths = {
-    {"InteropNativeModule", "@koalaui/interop/InteropNativeModule/InteropNativeModule"},
+    {"InteropNativeModule", "L@koalaui/interop/InteropNativeModule/InteropNativeModule;"},
     // todo leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
-    {"TestNativeModule", "@koalaui/arkts-arkui/generated/arkts/TestNativeModule/TestNativeModule"},
-    {"ArkUINativeModule", "@koalaui/arkts-arkui/generated/arkts/ArkUINativeModule/ArkUINativeModule"},
-    {"ArkUIGeneratedNativeModule", "@koalaui/arkts-arkui/generated/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule"},
+    {"TestNativeModule", "L@koalaui/arkts-arkui/generated/arkts/TestNativeModule/TestNativeModule;"},
+    {"ArkUINativeModule", "L@koalaui/arkts-arkui/generated/arkts/ArkUINativeModule/ArkUINativeModule;"},
+    {"ArkUIGeneratedNativeModule", "L@koalaui/arkts-arkui/generated/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule;"},
 };
+
 const std::string& AniExports::getClasspath(const std::string& module) {
     auto it = classpaths.find(module);
     if (it != classpaths.end()) {
@@ -151,4 +163,31 @@ const std::string& AniExports::getClasspath(const std::string& module) {
         return defaultClasspath->second;
     }
     INTEROP_FATAL("Classpath for module %s was not registered", module.c_str());
+}
+
+static struct {
+    ani_class clazz = nullptr;
+    ani_static_method method = nullptr;
+} g_koalaANICallbackDispatcher;
+
+bool setKoalaANICallbackDispatcher(
+    ani_env* aniEnv,
+    ani_class clazz,
+    const char* dispatcherMethodName,
+    const char* dispatcherMethodSig
+) {
+    g_koalaANICallbackDispatcher.clazz = clazz;
+    aniEnv->Class_FindStaticMethod(
+        clazz, dispatcherMethodName, dispatcherMethodSig,
+        &g_koalaANICallbackDispatcher.method
+    );
+    if (g_koalaANICallbackDispatcher.method == nullptr) {
+        return false;
+    }
+    return true;
+}
+
+void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) {
+    *clazz = g_koalaANICallbackDispatcher.clazz;
+    *method = g_koalaANICallbackDispatcher.method;
 }

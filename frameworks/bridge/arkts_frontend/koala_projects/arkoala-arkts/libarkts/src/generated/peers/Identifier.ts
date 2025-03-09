@@ -60,6 +60,11 @@ export class Identifier extends AnnotatedExpression {
     get name(): string {
         return unpackString(global.generatedEs2panda._IdentifierNameConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setName(newName: string): this {
+        global.generatedEs2panda._IdentifierSetName(global.context, this.peer, newName)
+        return this
+    }
     get decorators(): readonly Decorator[] {
         return unpackNodeArray(global.generatedEs2panda._IdentifierDecoratorsConst(global.context, this.peer))
     }
@@ -69,14 +74,34 @@ export class Identifier extends AnnotatedExpression {
     get isOptional(): boolean {
         return global.generatedEs2panda._IdentifierIsOptionalConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setOptional(optional_arg: boolean): this {
+        global.generatedEs2panda._IdentifierSetOptional(global.context, this.peer, optional_arg)
+        return this
+    }
     get isReference(): boolean {
         return global.generatedEs2panda._IdentifierIsReferenceConst(global.context, this.peer)
     }
     get isTdz(): boolean {
         return global.generatedEs2panda._IdentifierIsTdzConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setTdz(): this {
+        global.generatedEs2panda._IdentifierSetTdz(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setAccessor(): this {
+        global.generatedEs2panda._IdentifierSetAccessor(global.context, this.peer)
+        return this
+    }
     get isAccessor(): boolean {
         return global.generatedEs2panda._IdentifierIsAccessorConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    setMutator(): this {
+        global.generatedEs2panda._IdentifierSetMutator(global.context, this.peer)
+        return this
     }
     get isMutator(): boolean {
         return global.generatedEs2panda._IdentifierIsMutatorConst(global.context, this.peer)
@@ -87,17 +112,42 @@ export class Identifier extends AnnotatedExpression {
     get isPrivateIdent(): boolean {
         return global.generatedEs2panda._IdentifierIsPrivateIdentConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setPrivate(isPrivate: boolean): this {
+        global.generatedEs2panda._IdentifierSetPrivate(global.context, this.peer, isPrivate)
+        return this
+    }
     get isIgnoreBox(): boolean {
         return global.generatedEs2panda._IdentifierIsIgnoreBoxConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    setIgnoreBox(): this {
+        global.generatedEs2panda._IdentifierSetIgnoreBox(global.context, this.peer)
+        return this
     }
     get isAnnotationDecl(): boolean {
         return global.generatedEs2panda._IdentifierIsAnnotationDeclConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setAnnotationDecl(): this {
+        global.generatedEs2panda._IdentifierSetAnnotationDecl(global.context, this.peer)
+        return this
+    }
     get isAnnotationUsage(): boolean {
         return global.generatedEs2panda._IdentifierIsAnnotationUsageConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setAnnotationUsage(): this {
+        global.generatedEs2panda._IdentifierSetAnnotationUsage(global.context, this.peer)
+        return this
+    }
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._IdentifierTypeAnnotationConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setTsTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._IdentifierSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
     }
 }
 export function isIdentifier(node: AstNode): node is Identifier {

@@ -11,7 +11,10 @@
                 "only_unmemoize": true,
                 "unmemoizeDir": "build/unmemoized",
             }
-        ]
+        ],
+        "paths": {
+            "@stub/*": ["./stub/ts/*"]
+        }
     },
-    "include": ["./demo.ts", "./stub.ts"]
+    "include": ["./demo/demo.ts", "./stub/ts/stub.ts"]
 }

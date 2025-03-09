@@ -25,7 +25,7 @@ import {
     isUndefined,
     undefinedValue
 } from './ApiUtils'
-import { CallTable, extendsLikeFunctionName, isBuilderLambdaCall, isBuiltinComponentName, isStructCall, RewriteNames, styleInstanceId } from './utils'
+import { CallTable, extendsLikeFunctionName, isBuilderLambdaCall, isBuiltinComponentName, isStructCall, RewriteNames, styledInstance } from './utils'
 
 enum ExtensionStyleRewrite {
     Regular,
@@ -114,7 +114,7 @@ export class StyleTransformer extends AbstractVisitor {
 
         const newDot = ts.factory.updatePropertyAccessExpression(
             dot,
-            firstEtsArgOrUndefined ?? styleInstanceId(),
+            firstEtsArgOrUndefined ?? id(styledInstance),
             styleApplicatorOrOriginalPropertyName
         )
 

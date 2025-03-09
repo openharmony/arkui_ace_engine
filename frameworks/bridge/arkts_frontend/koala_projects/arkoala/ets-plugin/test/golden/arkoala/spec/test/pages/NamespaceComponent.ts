@@ -1,4 +1,5 @@
 import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, LocalStorage, MutableState, observableProxy } from "@koalaui/arkoala-arkui";
+/** @memo:stable */
 class ArkNamespaceComponent1Component extends ArkStructBase<ArkNamespaceComponent1Component, NamespaceComponent1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -86,6 +87,7 @@ class ArkNamespaceComponent1Component extends ArkStructBase<ArkNamespaceComponen
         });
     }
 }
+/** @memo:stable */
 class ArkNamespaceComponent2Component extends ArkStructBase<ArkNamespaceComponent2Component, NamespaceComponent2Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -173,6 +175,7 @@ class ArkNamespaceComponent2Component extends ArkStructBase<ArkNamespaceComponen
         });
     }
 }
+/** @memo:stable */
 class ArkNamespaceComponent3Component extends ArkStructBase<ArkNamespaceComponent3Component, NamespaceComponent3Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

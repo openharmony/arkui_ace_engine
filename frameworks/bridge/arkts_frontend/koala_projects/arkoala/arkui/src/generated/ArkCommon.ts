@@ -17,12 +17,12 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkCommonMethodPeer, ArkCommonShapeMethodPeer, ArkCommonPeer, ArkScrollableCommonMethodPeer } from "./peers/ArkCommonPeer"
-import { UseEventsProperties } from "./use_properties"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, ColorMetrics, Area, Bias, Font } from "./ArkUnitsInterfaces"
+import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Area, Bias, Font } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { Rectangle, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, CustomBuilder, DragItemInfo, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DrawContext, TouchTestInfo, TouchResult, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, LinearGradient_common, FinishCallbackType, ExpectedFrameRateRange, TransitionEffects, TransitionEdge, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, ShadowType, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, ImageModifier, OverlayOffset, TransitionHierarchyStrategy, PopupMessageOptions, SymbolGlyphModifier, MenuPreviewMode, ContextMenuAnimationOptions, BindOptions, SheetSize, SheetType, SheetTitleOptions, SheetMode, ScrollSizeMode, UIContext, SheetKeyboardAvoidMode, SourceTool, RectResult, TouchTestStrategy, EventTarget, SourceType, TouchObject, HistoricalPoint, IntentionCode, DragBehavior, Summary, DragResult, DismissPopupAction, DismissContentCoverAction, SheetDismiss, DismissSheetAction, SpringBackAction, DismissReason, CommonMethod, CommonAttribute, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions } from "./ArkCommonInterfaces"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, Curve, PlayMode, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, FontWeight, FontStyle, LineCapStyle, LineJoinStyle, BarState, EdgeEffect, NestedScrollMode } from "./ArkEnumsInterfaces"
@@ -39,13 +39,21 @@ import { ProgressMask } from "./ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../handwritten"
 import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { GestureType, GestureMask, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { TapGestureInterface } from "./ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./ArkGestureGroupInterfaceMaterialized"
 import { LengthUnit, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions } from "./ArkArkuiExternalInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { HoverEvent } from "./ArkHoverEventMaterialized"
 import { MouseEvent } from "./ArkMouseEventMaterialized"
 import { TouchEvent } from "./ArkTouchEventMaterialized"
 import { KeyEvent } from "./ArkKeyEventMaterialized"
+import { ColorMetrics } from "./ArkColorMetricsMaterialized"
 import { ICurve } from "./ArkICurveMaterialized"
 import { DragEvent } from "./ArkDragEventMaterialized"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
@@ -57,7 +65,7 @@ import { GestureEvent } from "./ArkGestureEventMaterialized"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./ArkScrollInterfaces"
 /** @memo:stable */
 export class ArkCommonMethodComponent extends ComponentBase {
-    getPeer(): ArkCommonMethodPeer {
+    protected getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
     }
     /** @memo */
@@ -145,7 +153,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult)): this {
         if (this.checkPriority("onChildTouchTest")) {
             const value_casted = value as (((value: Array<TouchTestInfo>) => TouchResult))
-            UseEventsProperties({CommonMethod_onChildTouchTest: value_casted})
             this.getPeer()?.onChildTouchTestAttribute(value_casted)
             return this
         }
@@ -419,14 +426,12 @@ export class ArkCommonMethodComponent extends ComponentBase {
             const distanceThreshold_type = runtimeType(distanceThreshold)
             if (RuntimeType.UNDEFINED == distanceThreshold_type) {
                 const value_casted = event as (((event: ClickEvent) => void))
-                UseEventsProperties({CommonMethod_onClick0: value_casted})
                 this.getPeer()?.onClick0Attribute(value_casted)
                 return this
             }
             if (RuntimeType.NUMBER == distanceThreshold_type) {
                 const event_casted = event as (((event: ClickEvent) => void))
                 const distanceThreshold_casted = distanceThreshold as (number)
-                UseEventsProperties({CommonMethod_onClick1: event_casted})
                 this.getPeer()?.onClick1Attribute(event_casted, distanceThreshold_casted)
                 return this
             }
@@ -438,7 +443,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onHover(value: ((isHover: boolean, event: HoverEvent) => void)): this {
         if (this.checkPriority("onHover")) {
             const value_casted = value as (((isHover: boolean, event: HoverEvent) => void))
-            UseEventsProperties({CommonMethod_onHover: value_casted})
             this.getPeer()?.onHoverAttribute(value_casted)
             return this
         }
@@ -448,7 +452,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onAccessibilityHover(value: AccessibilityCallback): this {
         if (this.checkPriority("onAccessibilityHover")) {
             const value_casted = value as (AccessibilityCallback)
-            UseEventsProperties({CommonMethod_onAccessibilityHover: value_casted})
             this.getPeer()?.onAccessibilityHoverAttribute(value_casted)
             return this
         }
@@ -467,7 +470,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onMouse(value: ((event: MouseEvent) => void)): this {
         if (this.checkPriority("onMouse")) {
             const value_casted = value as (((event: MouseEvent) => void))
-            UseEventsProperties({CommonMethod_onMouse: value_casted})
             this.getPeer()?.onMouseAttribute(value_casted)
             return this
         }
@@ -477,7 +479,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onTouch(value: ((event: TouchEvent) => void)): this {
         if (this.checkPriority("onTouch")) {
             const value_casted = value as (((event: TouchEvent) => void))
-            UseEventsProperties({CommonMethod_onTouch: value_casted})
             this.getPeer()?.onTouchAttribute(value_casted)
             return this
         }
@@ -487,7 +488,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onKeyEvent(value: ((event: KeyEvent) => void)): this {
         if (this.checkPriority("onKeyEvent")) {
             const value_casted = value as (((event: KeyEvent) => void))
-            UseEventsProperties({CommonMethod_onKeyEvent: value_casted})
             this.getPeer()?.onKeyEventAttribute(value_casted)
             return this
         }
@@ -497,7 +497,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onKeyPreIme(value: ((parameter: KeyEvent) => boolean)): this {
         if (this.checkPriority("onKeyPreIme")) {
             const value_casted = value as (((parameter: KeyEvent) => boolean))
-            UseEventsProperties({CommonMethod_onKeyPreIme: value_casted})
             this.getPeer()?.onKeyPreImeAttribute(value_casted)
             return this
         }
@@ -516,7 +515,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onFocus(value: (() => void)): this {
         if (this.checkPriority("onFocus")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({CommonMethod_onFocus: value_casted})
             this.getPeer()?.onFocusAttribute(value_casted)
             return this
         }
@@ -526,7 +524,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onBlur(value: (() => void)): this {
         if (this.checkPriority("onBlur")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({CommonMethod_onBlur: value_casted})
             this.getPeer()?.onBlurAttribute(value_casted)
             return this
         }
@@ -792,7 +789,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onAppear(value: (() => void)): this {
         if (this.checkPriority("onAppear")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({CommonMethod_onAppear: value_casted})
             this.getPeer()?.onAppearAttribute(value_casted)
             return this
         }
@@ -802,7 +798,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onDisAppear(value: (() => void)): this {
         if (this.checkPriority("onDisAppear")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({CommonMethod_onDisAppear: value_casted})
             this.getPeer()?.onDisAppearAttribute(value_casted)
             return this
         }
@@ -812,7 +807,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onAttach(value: (() => void)): this {
         if (this.checkPriority("onAttach")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({CommonMethod_onAttach: value_casted})
             this.getPeer()?.onAttachAttribute(value_casted)
             return this
         }
@@ -822,7 +816,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onDetach(value: (() => void)): this {
         if (this.checkPriority("onDetach")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({CommonMethod_onDetach: value_casted})
             this.getPeer()?.onDetachAttribute(value_casted)
             return this
         }
@@ -832,7 +825,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onAreaChange(value: ((oldValue: Area, newValue: Area) => void)): this {
         if (this.checkPriority("onAreaChange")) {
             const value_casted = value as (((oldValue: Area, newValue: Area) => void))
-            UseEventsProperties({CommonMethod_onAreaChange: value_casted})
             this.getPeer()?.onAreaChangeAttribute(value_casted)
             return this
         }
@@ -1004,7 +996,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onDragStart(value: ((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo)): this {
         if (this.checkPriority("onDragStart")) {
             const value_casted = value as (((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo))
-            UseEventsProperties({CommonMethod_onDragStart: value_casted})
             this.getPeer()?.onDragStartAttribute(value_casted)
             return this
         }
@@ -1014,7 +1005,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onDragEnter(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDragEnter")) {
             const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
-            UseEventsProperties({CommonMethod_onDragEnter: value_casted})
             this.getPeer()?.onDragEnterAttribute(value_casted)
             return this
         }
@@ -1024,7 +1014,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onDragMove(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDragMove")) {
             const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
-            UseEventsProperties({CommonMethod_onDragMove: value_casted})
             this.getPeer()?.onDragMoveAttribute(value_casted)
             return this
         }
@@ -1034,7 +1023,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onDragLeave(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDragLeave")) {
             const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
-            UseEventsProperties({CommonMethod_onDragLeave: value_casted})
             this.getPeer()?.onDragLeaveAttribute(value_casted)
             return this
         }
@@ -1044,7 +1032,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onDrop(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDrop")) {
             const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
-            UseEventsProperties({CommonMethod_onDrop: value_casted})
             this.getPeer()?.onDropAttribute(value_casted)
             return this
         }
@@ -1054,7 +1041,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void)): this {
         if (this.checkPriority("onDragEnd")) {
             const value_casted = value as (((event: DragEvent, extraParams?: string) => void))
-            UseEventsProperties({CommonMethod_onDragEnd: value_casted})
             this.getPeer()?.onDragEndAttribute(value_casted)
             return this
         }
@@ -1091,7 +1077,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onPreDrag(value: ((parameter: PreDragStatus) => void)): this {
         if (this.checkPriority("onPreDrag")) {
             const value_casted = value as (((parameter: PreDragStatus) => void))
-            UseEventsProperties({CommonMethod_onPreDrag: value_casted})
             this.getPeer()?.onPreDragAttribute(value_casted)
             return this
         }
@@ -1357,7 +1342,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public accessibilityVirtualNode(value: CustomBuilder): this {
         if (this.checkPriority("accessibilityVirtualNode")) {
             const value_casted = value as (CustomBuilder)
-            UseEventsProperties({CommonMethod_accessibilityVirtualNode: value_casted})
             this.getPeer()?.accessibilityVirtualNodeAttribute(value_casted)
             return this
         }
@@ -1430,7 +1414,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onGestureJudgeBegin(value: ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult)): this {
         if (this.checkPriority("onGestureJudgeBegin")) {
             const value_casted = value as (((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult))
-            UseEventsProperties({CommonMethod_onGestureJudgeBegin: value_casted})
             this.getPeer()?.onGestureJudgeBeginAttribute(value_casted)
             return this
         }
@@ -1443,14 +1426,12 @@ export class ArkCommonMethodComponent extends ComponentBase {
             const exposeInnerGesture_type = runtimeType(exposeInnerGesture)
             if (RuntimeType.UNDEFINED == exposeInnerGesture_type) {
                 const value_casted = callback_ as (GestureRecognizerJudgeBeginCallback)
-                UseEventsProperties({CommonMethod_onGestureRecognizerJudgeBegin0: value_casted})
                 this.getPeer()?.onGestureRecognizerJudgeBegin0Attribute(value_casted)
                 return this
             }
             if (RuntimeType.BOOLEAN == exposeInnerGesture_type) {
                 const callback__casted = callback_ as (GestureRecognizerJudgeBeginCallback)
                 const exposeInnerGesture_casted = exposeInnerGesture as (boolean)
-                UseEventsProperties({CommonMethod_onGestureRecognizerJudgeBegin1: callback__casted})
                 this.getPeer()?.onGestureRecognizerJudgeBegin1Attribute(callback__casted, exposeInnerGesture_casted)
                 return this
             }
@@ -1462,7 +1443,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback): this {
         if (this.checkPriority("shouldBuiltInRecognizerParallelWith")) {
             const value_casted = value as (ShouldBuiltInRecognizerParallelWithCallback)
-            UseEventsProperties({CommonMethod_shouldBuiltInRecognizerParallelWith: value_casted})
             this.getPeer()?.shouldBuiltInRecognizerParallelWithAttribute(value_casted)
             return this
         }
@@ -1481,7 +1461,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode)): this {
         if (this.checkPriority("onTouchIntercept")) {
             const value_casted = value as (((parameter: TouchEvent) => HitTestMode))
-            UseEventsProperties({CommonMethod_onTouchIntercept: value_casted})
             this.getPeer()?.onTouchInterceptAttribute(value_casted)
             return this
         }
@@ -1491,7 +1470,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
     public onSizeChange(value: SizeChangeCallback): this {
         if (this.checkPriority("onSizeChange")) {
             const value_casted = value as (SizeChangeCallback)
-            UseEventsProperties({CommonMethod_onSizeChange: value_casted})
             this.getPeer()?.onSizeChangeAttribute(value_casted)
             return this
         }
@@ -1522,7 +1500,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
         if (this.checkPriority("background")) {
             const builder_casted = builder as (CustomBuilder)
             const options_casted = options as ({ align?: Alignment } | undefined)
-            UseEventsProperties({CommonMethod_background: builder_casted})
             this.getPeer()?.backgroundAttribute(builder_casted, options_casted)
             return this
         }
@@ -1762,7 +1739,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
                 const content_casted = content as (CustomBuilder)
                 const responseType_casted = responseType as (ResponseType)
                 const options_casted = options as (ContextMenuOptions | undefined)
-                UseEventsProperties({CommonMethod_bindContextMenu0: content_casted})
                 this.getPeer()?.bindContextMenu0Attribute(content_casted, responseType_casted, options_casted)
                 return this
             }
@@ -1770,7 +1746,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
                 const isShown_casted = content as (boolean)
                 const content_casted = responseType as (CustomBuilder)
                 const options_casted = options as (ContextMenuOptions | undefined)
-                UseEventsProperties({CommonMethod_bindContextMenu1: content_casted})
                 this.getPeer()?.bindContextMenu1Attribute(isShown_casted, content_casted, options_casted)
                 return this
             }
@@ -1788,7 +1763,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
                 const isShow_casted = isShow as (boolean | undefined)
                 const builder_casted = builder as (CustomBuilder)
                 const type_casted = type as (ModalTransition | undefined)
-                UseEventsProperties({CommonMethod_bindContentCover0: builder_casted})
                 this.getPeer()?.bindContentCover0Attribute(isShow_casted, builder_casted, type_casted)
                 return this
             }
@@ -1796,7 +1770,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
                 const isShow_casted = isShow as (boolean | undefined)
                 const builder_casted = builder as (CustomBuilder)
                 const options_casted = type as (ContentCoverOptions | undefined)
-                UseEventsProperties({CommonMethod_bindContentCover1: builder_casted})
                 this.getPeer()?.bindContentCover1Attribute(isShow_casted, builder_casted, options_casted)
                 return this
             }
@@ -1810,7 +1783,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
             const isShow_casted = isShow as (boolean | undefined)
             const builder_casted = builder as (CustomBuilder)
             const options_casted = options as (SheetOptions | undefined)
-            UseEventsProperties({CommonMethod_bindSheet: builder_casted})
             this.getPeer()?.bindSheetAttribute(isShow_casted, builder_casted, options_casted)
             return this
         }
@@ -1821,7 +1793,6 @@ export class ArkCommonMethodComponent extends ComponentBase {
         if (this.checkPriority("onVisibleAreaChange")) {
             const ratios_casted = ratios as (Array<number>)
             const event_casted = event as (VisibleAreaChangeCallback)
-            UseEventsProperties({CommonMethod_onVisibleAreaChange: event_casted})
             this.getPeer()?.onVisibleAreaChangeAttribute(ratios_casted, event_casted)
             return this
         }
@@ -1846,7 +1817,7 @@ export class ArkCommonMethodComponent extends ComponentBase {
 }
 /** @memo:stable */
 export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent {
-    getPeer(): ArkCommonShapeMethodPeer {
+    protected getPeer(): ArkCommonShapeMethodPeer {
         return (this.peer as ArkCommonShapeMethodPeer)
     }
     /** @memo */
@@ -1955,7 +1926,7 @@ export class ArkCommonShapeMethodComponent extends ArkCommonMethodComponent {
 }
 /** @memo:stable */
 export class ArkCommonComponent extends ArkCommonMethodComponent {
-    getPeer(): ArkCommonPeer {
+    protected getPeer(): ArkCommonPeer {
         return (this.peer as ArkCommonPeer)
     }
     /** @memo */
@@ -1992,7 +1963,7 @@ export function ArkCommon(
 }
 /** @memo:stable */
 export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent {
-    getPeer(): ArkScrollableCommonMethodPeer {
+    protected getPeer(): ArkScrollableCommonMethodPeer {
         return (this.peer as ArkScrollableCommonMethodPeer)
     }
     /** @memo */
@@ -2053,7 +2024,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public onScroll(value: ((first: number, last: number) => void)): this {
         if (this.checkPriority("onScroll")) {
             const value_casted = value as (((first: number, last: number) => void))
-            UseEventsProperties({ScrollableCommonMethod_onScroll: value_casted})
             this.getPeer()?.onScrollAttribute(value_casted)
             return this
         }
@@ -2072,7 +2042,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public onDidScroll(value: ScrollOnScrollCallback): this {
         if (this.checkPriority("onDidScroll")) {
             const value_casted = value as (ScrollOnScrollCallback)
-            UseEventsProperties({ScrollableCommonMethod_onDidScroll: value_casted})
             this.getPeer()?.onDidScrollAttribute(value_casted)
             return this
         }
@@ -2082,7 +2051,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public onReachStart(value: (() => void)): this {
         if (this.checkPriority("onReachStart")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({ScrollableCommonMethod_onReachStart: value_casted})
             this.getPeer()?.onReachStartAttribute(value_casted)
             return this
         }
@@ -2092,7 +2060,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public onReachEnd(value: (() => void)): this {
         if (this.checkPriority("onReachEnd")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({ScrollableCommonMethod_onReachEnd: value_casted})
             this.getPeer()?.onReachEndAttribute(value_casted)
             return this
         }
@@ -2102,7 +2069,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public onScrollStart(value: (() => void)): this {
         if (this.checkPriority("onScrollStart")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({ScrollableCommonMethod_onScrollStart: value_casted})
             this.getPeer()?.onScrollStartAttribute(value_casted)
             return this
         }
@@ -2112,7 +2078,6 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
     public onScrollStop(value: (() => void)): this {
         if (this.checkPriority("onScrollStop")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({ScrollableCommonMethod_onScrollStop: value_casted})
             this.getPeer()?.onScrollStopAttribute(value_casted)
             return this
         }

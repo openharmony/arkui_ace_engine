@@ -17,14 +17,14 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkScrollableCommonMethodComponent } from "./ArkCommon"
 import { ArkWaterFlowPeer } from "./peers/ArkWaterFlowPeer"
-import { UseEventsProperties } from "./use_properties"
 import { ScrollableCommonMethod, CommonMethod, Rectangle, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, CustomBuilder, DragItemInfo, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DrawContext, TouchTestInfo, TouchResult, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, LinearGradient_common, FinishCallbackType, ExpectedFrameRateRange, TransitionEffects, TransitionEdge, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, ShadowType, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, ImageModifier, OverlayOffset, TransitionHierarchyStrategy, PopupMessageOptions, SymbolGlyphModifier, MenuPreviewMode, ContextMenuAnimationOptions, BindOptions, SheetSize, SheetType, SheetTitleOptions, SheetMode, ScrollSizeMode, UIContext, SheetKeyboardAvoidMode, SourceTool, RectResult, TouchTestStrategy, EventTarget, SourceType, TouchObject, HistoricalPoint, IntentionCode, DragBehavior, Summary, DragResult, DismissPopupAction, DismissContentCoverAction, SheetDismiss, DismissSheetAction, SpringBackAction, DismissReason, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions } from "./ArkCommonInterfaces"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, ColorMetrics, Area, Bias, Font } from "./ArkUnitsInterfaces"
+import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Area, Bias, Font } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, Curve, PlayMode, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, FontWeight, FontStyle, BarState, EdgeEffect, NestedScrollMode, FlexDirection, Edge } from "./ArkEnumsInterfaces"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
@@ -40,13 +40,21 @@ import { ProgressMask } from "./ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../handwritten"
 import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { GestureType, GestureMask, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { TapGestureInterface } from "./ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./ArkGestureGroupInterfaceMaterialized"
 import { LengthUnit, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions } from "./ArkArkuiExternalInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { HoverEvent } from "./ArkHoverEventMaterialized"
 import { MouseEvent } from "./ArkMouseEventMaterialized"
 import { TouchEvent } from "./ArkTouchEventMaterialized"
 import { KeyEvent } from "./ArkKeyEventMaterialized"
+import { ColorMetrics } from "./ArkColorMetricsMaterialized"
 import { ICurve } from "./ArkICurveMaterialized"
 import { DragEvent } from "./ArkDragEventMaterialized"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
@@ -62,7 +70,7 @@ import { Scroller } from "./ArkScrollerMaterialized"
 import { WaterFlowSections } from "./ArkWaterFlowSectionsMaterialized"
 /** @memo:stable */
 export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent {
-    getPeer(): ArkWaterFlowPeer {
+    protected getPeer(): ArkWaterFlowPeer {
         return (this.peer as ArkWaterFlowPeer)
     }
     /** @memo */
@@ -179,7 +187,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent {
     public onReachStart(value: (() => void)): this {
         if (this.checkPriority("onReachStart")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({WaterFlow_onReachStart: value_casted})
             this.getPeer()?.onReachStartAttribute(value_casted)
             return this
         }
@@ -189,7 +196,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent {
     public onReachEnd(value: (() => void)): this {
         if (this.checkPriority("onReachEnd")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({WaterFlow_onReachEnd: value_casted})
             this.getPeer()?.onReachEndAttribute(value_casted)
             return this
         }
@@ -199,7 +205,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent {
     public onScrollFrameBegin(value: ((offset: number, state: ScrollState) => { offsetRemain: number })): this {
         if (this.checkPriority("onScrollFrameBegin")) {
             const value_casted = value as (((offset: number, state: ScrollState) => { offsetRemain: number }))
-            UseEventsProperties({WaterFlow_onScrollFrameBegin: value_casted})
             this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
             return this
         }
@@ -209,7 +214,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent {
     public onScrollIndex(value: ((first: number, last: number) => void)): this {
         if (this.checkPriority("onScrollIndex")) {
             const value_casted = value as (((first: number, last: number) => void))
-            UseEventsProperties({WaterFlow_onScrollIndex: value_casted})
             this.getPeer()?.onScrollIndexAttribute(value_casted)
             return this
         }

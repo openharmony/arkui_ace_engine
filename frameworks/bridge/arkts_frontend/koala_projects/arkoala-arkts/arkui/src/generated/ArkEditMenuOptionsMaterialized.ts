@@ -18,18 +18,18 @@
 
 import { TextMenuItem, TextRange } from "./ArkTextCommonInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface EditMenuOptions {
-    onCreateMenu(menuItems: Array<TextMenuItem>): Array<TextMenuItem> 
-    onMenuItemClick(menuItem: TextMenuItem, range: TextRange): boolean 
+    onCreateMenu(menuItems: Array<TextMenuItem>): Array<TextMenuItem>
+    onMenuItemClick(menuItem: TextMenuItem, range: TextRange): boolean
 }
 export class EditMenuOptionsInternal implements MaterializedBase,EditMenuOptions {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -62,7 +62,14 @@ export class EditMenuOptionsInternal implements MaterializedBase,EditMenuOptions
         }
         const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_onCreateMenu(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<TextMenuItem> = new Array<TextMenuItem>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readTextMenuItem()
+        }
+        const returnResult : Array<TextMenuItem> = buffer
+        return returnResult
     }
     private onMenuItemClick_serialize(menuItem: TextMenuItem, range: TextRange): boolean {
         const thisSerializer : Serializer = Serializer.hold()

@@ -1,4 +1,4 @@
-import { ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, Observed } from "@koalaui/arkoala-arkui";
+import { ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, MutableState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +14,37 @@ import { ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, Observ
  * limitations under the License.
  */
 var nextID: number = 0;
-@Observed
 export class ClassB {
-    public name: string;
-    public c: number;
-    public id: number;
+    private __backing_name?: MutableState<string>;
+    public get name(): string {
+        return this.__backing_name!.value;
+    }
+    public set name(value: string) {
+        if (this.__backing_name)
+            this.__backing_name!.value = observableProxy(value);
+        else
+            this.__backing_name = stateOf<string>(value);
+    }
+    private __backing_c?: MutableState<number>;
+    public get c(): number {
+        return this.__backing_c!.value;
+    }
+    public set c(value: number) {
+        if (this.__backing_c)
+            this.__backing_c!.value = observableProxy(value);
+        else
+            this.__backing_c = stateOf<number>(value);
+    }
+    private __backing_id?: MutableState<number>;
+    public get id(): number {
+        return this.__backing_id!.value;
+    }
+    public set id(value: number) {
+        if (this.__backing_id)
+            this.__backing_id!.value = observableProxy(value);
+        else
+            this.__backing_id = stateOf<number>(value);
+    }
     constructor(c: number, name: string = 'OK') {
         this.name = name;
         this.c = c;

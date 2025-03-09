@@ -68,7 +68,7 @@ const all_packages = [
     new Package(path.join(EXTERNAL_HOME, "incremental/harness")),
     new Package(path.join(EXTERNAL_HOME, "incremental/runtime")),
     new Package(path.join(EXTERNAL_HOME, "incremental/compiler-plugin")),
-    new Package(path.join(EXTERNAL_HOME, "arkoala-arkts/ets-harness")),
+    // new Package(path.join(EXTERNAL_HOME, "arkoala-arkts/ets-harness")),
     new Package(path.join(EXTERNAL_HOME, "arkoala/ets-plugin")),
     new Package(path.join(EXTERNAL_HOME, "arkoala/arkui-common")),
     new Package(path.join(EXTERNAL_HOME, "arkoala/arkui")),

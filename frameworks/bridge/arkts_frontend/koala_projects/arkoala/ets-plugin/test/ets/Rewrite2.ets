@@ -15,7 +15,7 @@
 
 export const storage = new LocalStorage()
 
-@Entry(storage)
+@Entry({storage: "storage"})
 @Component
 struct LocalStorageLinkExample {
     @LocalStorageLink("storage") link: string = "Start"

@@ -1,6 +1,7 @@
 import { ArkButton, ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, LocalStorage, MutableState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 import { tExtend, tStyles, DivideTest, Base, DivideTestOptions } from './test/pages/ImportNestAll';
+/** @memo:stable */
 class ArkImportTestComponent extends ArkStructBase<ArkImportTestComponent, ImportTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

@@ -20,7 +20,7 @@ import { BaseEvent, BaseEventInternal } from "./ArkBaseEventMaterialized"
 import { EventTarget, SourceType, SourceTool } from "./ArkCommonInterfaces"
 import { Callback_Void } from "./SyntheticDeclarations"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -38,10 +38,6 @@ export interface ClickEvent {
     preventDefault: (() => void)
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     get displayX(): number {
         return this.getDisplayX()
     }

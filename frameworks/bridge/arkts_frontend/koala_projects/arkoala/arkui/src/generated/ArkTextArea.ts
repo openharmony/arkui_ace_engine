@@ -17,14 +17,14 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkCommonMethodComponent } from "./ArkCommon"
 import { ArkTextAreaPeer } from "./peers/ArkTextAreaPeer"
-import { UseEventsProperties } from "./use_properties"
 import { CommonMethod, Rectangle, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, CustomBuilder, DragItemInfo, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DrawContext, TouchTestInfo, TouchResult, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, LinearGradient_common, FinishCallbackType, ExpectedFrameRateRange, TransitionEffects, TransitionEdge, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, ShadowType, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, ImageModifier, OverlayOffset, TransitionHierarchyStrategy, PopupMessageOptions, SymbolGlyphModifier, MenuPreviewMode, ContextMenuAnimationOptions, BindOptions, SheetSize, SheetType, SheetTitleOptions, SheetMode, ScrollSizeMode, UIContext, SheetKeyboardAvoidMode, SourceTool, RectResult, TouchTestStrategy, EventTarget, SourceType, TouchObject, HistoricalPoint, IntentionCode, DragBehavior, Summary, DragResult, DismissPopupAction, DismissContentCoverAction, SheetDismiss, DismissSheetAction, SpringBackAction, DismissReason, TextDecorationOptions, InputCounterOptions, CaretOffset, SelectionOptions, MenuPolicy } from "./ArkCommonInterfaces"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, ColorMetrics, Area, Bias, Font } from "./ArkUnitsInterfaces"
+import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Area, Bias, Font } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, Curve, PlayMode, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, FontWeight, FontStyle, TextAlign, TextOverflow, CopyOptions, TextContentStyle, BarState, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, TextDecorationType, TextDecorationStyle } from "./ArkEnumsInterfaces"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
@@ -40,13 +40,21 @@ import { ProgressMask } from "./ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../handwritten"
 import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { GestureType, GestureMask, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { TapGestureInterface } from "./ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./ArkGestureGroupInterfaceMaterialized"
 import { LengthUnit, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions } from "./ArkArkuiExternalInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { HoverEvent } from "./ArkHoverEventMaterialized"
 import { MouseEvent } from "./ArkMouseEventMaterialized"
 import { TouchEvent } from "./ArkTouchEventMaterialized"
 import { KeyEvent } from "./ArkKeyEventMaterialized"
+import { ColorMetrics } from "./ArkColorMetricsMaterialized"
 import { ICurve } from "./ArkICurveMaterialized"
 import { DragEvent } from "./ArkDragEventMaterialized"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
@@ -65,7 +73,7 @@ import { TextAreaController } from "./ArkTextAreaControllerMaterialized"
 import { TextContentControllerBase } from "./ArkTextContentControllerBaseMaterialized"
 /** @memo:stable */
 export class ArkTextAreaComponent extends ArkCommonMethodComponent {
-    getPeer(): ArkTextAreaPeer {
+    protected getPeer(): ArkTextAreaPeer {
         return (this.peer as ArkTextAreaPeer)
     }
     /** @memo */
@@ -209,13 +217,11 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
             const value_type = runtimeType(value)
             if (RuntimeType.FUNCTION == value_type) {
                 const value_casted = value as (((enterKey: EnterKeyType) => void))
-                UseEventsProperties({TextArea_onSubmit0: value_casted})
                 this.getPeer()?.onSubmit0Attribute(value_casted)
                 return this
             }
             if (RuntimeType.FUNCTION == value_type) {
                 const value_casted = value as (TextAreaSubmitCallback)
-                UseEventsProperties({TextArea_onSubmit1: value_casted})
                 this.getPeer()?.onSubmit1Attribute(value_casted)
                 return this
             }
@@ -227,7 +233,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onChange(value: EditableTextOnChangeCallback): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (EditableTextOnChangeCallback)
-            UseEventsProperties({TextArea_onChange: value_casted})
             this.getPeer()?.onChangeAttribute(value_casted)
             return this
         }
@@ -237,7 +242,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onTextSelectionChange(value: ((first: number, last: number) => void)): this {
         if (this.checkPriority("onTextSelectionChange")) {
             const value_casted = value as (((first: number, last: number) => void))
-            UseEventsProperties({TextArea_onTextSelectionChange: value_casted})
             this.getPeer()?.onTextSelectionChangeAttribute(value_casted)
             return this
         }
@@ -247,7 +251,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onContentScroll(value: ((first: number, last: number) => void)): this {
         if (this.checkPriority("onContentScroll")) {
             const value_casted = value as (((first: number, last: number) => void))
-            UseEventsProperties({TextArea_onContentScroll: value_casted})
             this.getPeer()?.onContentScrollAttribute(value_casted)
             return this
         }
@@ -257,7 +260,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onEditChange(value: ((parameter: boolean) => void)): this {
         if (this.checkPriority("onEditChange")) {
             const value_casted = value as (((parameter: boolean) => void))
-            UseEventsProperties({TextArea_onEditChange: value_casted})
             this.getPeer()?.onEditChangeAttribute(value_casted)
             return this
         }
@@ -267,7 +269,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onCopy(value: ((breakpoints: string) => void)): this {
         if (this.checkPriority("onCopy")) {
             const value_casted = value as (((breakpoints: string) => void))
-            UseEventsProperties({TextArea_onCopy: value_casted})
             this.getPeer()?.onCopyAttribute(value_casted)
             return this
         }
@@ -277,7 +278,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onCut(value: ((breakpoints: string) => void)): this {
         if (this.checkPriority("onCut")) {
             const value_casted = value as (((breakpoints: string) => void))
-            UseEventsProperties({TextArea_onCut: value_casted})
             this.getPeer()?.onCutAttribute(value_casted)
             return this
         }
@@ -287,7 +287,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onPaste(value: ((value: string, event: PasteEvent) => void)): this {
         if (this.checkPriority("onPaste")) {
             const value_casted = value as (((value: string, event: PasteEvent) => void))
-            UseEventsProperties({TextArea_onPaste: value_casted})
             this.getPeer()?.onPasteAttribute(value_casted)
             return this
         }
@@ -477,7 +476,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onWillInsert(value: ((parameter: InsertValue) => boolean)): this {
         if (this.checkPriority("onWillInsert")) {
             const value_casted = value as (((parameter: InsertValue) => boolean))
-            UseEventsProperties({TextArea_onWillInsert: value_casted})
             this.getPeer()?.onWillInsertAttribute(value_casted)
             return this
         }
@@ -487,7 +485,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onDidInsert(value: ((parameter: InsertValue) => void)): this {
         if (this.checkPriority("onDidInsert")) {
             const value_casted = value as (((parameter: InsertValue) => void))
-            UseEventsProperties({TextArea_onDidInsert: value_casted})
             this.getPeer()?.onDidInsertAttribute(value_casted)
             return this
         }
@@ -497,7 +494,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onWillDelete(value: ((parameter: DeleteValue) => boolean)): this {
         if (this.checkPriority("onWillDelete")) {
             const value_casted = value as (((parameter: DeleteValue) => boolean))
-            UseEventsProperties({TextArea_onWillDelete: value_casted})
             this.getPeer()?.onWillDeleteAttribute(value_casted)
             return this
         }
@@ -507,7 +503,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public onDidDelete(value: ((parameter: DeleteValue) => void)): this {
         if (this.checkPriority("onDidDelete")) {
             const value_casted = value as (((parameter: DeleteValue) => void))
-            UseEventsProperties({TextArea_onDidDelete: value_casted})
             this.getPeer()?.onDidDeleteAttribute(value_casted)
             return this
         }
@@ -565,7 +560,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
         if (this.checkPriority("customKeyboard")) {
             const value_casted = value as (CustomBuilder)
             const options_casted = options as (KeyboardOptions | undefined)
-            UseEventsProperties({TextArea_customKeyboard: value_casted})
             this.getPeer()?.customKeyboardAttribute(value_casted, options_casted)
             return this
         }
@@ -575,7 +569,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent {
     public _onChangeEvent_text(callback: ((value: ResourceStr) => void)): void {
         if (this.checkPriority("_onChangeEvent_text")) {
             const callback_casted = callback as (((value: ResourceStr) => void))
-            UseEventsProperties({TextArea__onChangeEvent_text: callback_casted})
             this.getPeer()?._onChangeEvent_textAttribute(callback_casted)
             return
         }

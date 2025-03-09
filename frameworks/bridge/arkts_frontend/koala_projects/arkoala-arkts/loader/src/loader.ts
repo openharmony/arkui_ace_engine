@@ -139,6 +139,10 @@ export function checkLoader(variant: string, app: string, params: string, loopIt
             vmKind = 2
             break
         }
+        case 'panda-ani': {
+            vmKind = 4
+            break
+        }
         default:
             throw new Error(`${variant} is not known`)
     }
@@ -165,7 +169,7 @@ if (process && process.argv.length > 2) {
 
 checkLoader(
     vm, app, params,
-    (process && process.argv.length > 4) ? parseInt(process.argv[4]) : undefined)
+    (process && process.argv.length > 3) ? parseInt(process.argv[3]) : undefined)
     .then(control => {
         console.log(`Started ${app}...`)
         switch (app) {
@@ -178,8 +182,11 @@ checkLoader(
                 break;
             }
             default: {
-                console.log("Checker is unassigned! app: " + app);
-                control.emitEvent(2, 1001, 100, 100)
+                console.log("Checker is unassigned! app: " + app)
+                setTimeout(() => {
+                    // Request app to exit in 10 secs.
+                    control.emitEvent(2, 1001, 100, 100)
+                }, 10000)
                 break;
             }
         }
@@ -187,7 +194,6 @@ checkLoader(
 
 function navigationChecker(control: AppControl) {
     const stepStack = [
-        "Exit",
         "Wait",
         "GoBack",
         "Wait",

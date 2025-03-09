@@ -20,8 +20,10 @@ public type KPointer = UInt64
 public type KFloat = Float32
 public type pointer = KPointer
 public type KInt = Int32
+public type KLong = Int64
 public type KStringPtr = String
 public type ArrayBuffer = ArrayList<UInt8>
+public const nullptr: UInt64 = 0
 @C
 public struct KInteropReturnBuffer {
   public var length: Int32

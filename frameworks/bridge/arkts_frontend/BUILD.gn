@@ -53,7 +53,6 @@ ohos_shared_library("ArkoalaNative_ark") {
 
   sources = [
     "koala_projects/arkoala/framework/native/src/events.cc",
-    "koala_projects/arkoala/framework/native/src/generated/all_events.cc",
     "koala_projects/arkoala/framework/native/src/generated/bridge_custom.cc",
     "koala_projects/arkoala/framework/native/src/generated/bridge_generated.cc",
     "koala_projects/arkoala/framework/native/src/generated/callback_deserialize_call.cc",

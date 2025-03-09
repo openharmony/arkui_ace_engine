@@ -258,7 +258,7 @@ export type Callback_ComputedBarAttribute_Void = (value: ComputedBarAttribute) =
 export type Callback_Number_Number_ComputedBarAttribute = (index: number, offset: number) => ComputedBarAttribute;
 export type Callback_Number_Number_Void = (first: number, last: number) => void;
 export type Callback_CustomBuilder_Void = (value: CustomBuilder) => void;
-export type Callback_ItemDragInfo_Number_CustomBuilder = (event: ItemDragInfo, itemIndex: number) => CustomBuilder;
+export type onItemDragStart_event_type = (event: ItemDragInfo, itemIndex: number) => CustomBuilder;
 export type Callback_ItemDragInfo_Void = (event: ItemDragInfo) => void;
 export type Callback_ItemDragInfo_Number_Number_Void = (event: ItemDragInfo, itemIndex: number, insertIndex: number) => void;
 export type Callback_ItemDragInfo_Number_Void = (event: ItemDragInfo, itemIndex: number) => void;

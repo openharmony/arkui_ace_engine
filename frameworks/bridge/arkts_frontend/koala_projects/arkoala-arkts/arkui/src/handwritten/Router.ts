@@ -14,20 +14,42 @@
  */
 
 
-import { int32, observableProxyArray } from "@koalaui/common"
+import { int32 } from "@koalaui/common"
 import {
     MutableState,
     contextLocal,
     contextLocalScope,
-    mutableState
+    mutableState,
+    remember,
+    RepeatByArray,
+    arrayState,
+    RunEffect,
 } from "@koalaui/runtime"
-import { RouteType} from "../generated"
+import { ArkUINativeModule } from "#components"
+import OhosRouter from "../ohos.router"
+import { UserView } from "../UserView"
+//import { RouteType} from "../generated/ArkPageTransitionInterfaces"
+
+// ----------------------------------------------------------
+// TODO: Remove these constants when enums are fixed in Panda
+export const VisibilityHidden = 0
+export const VisibilityVisible = 1
+export const VisibilityShowing = 2
+export const VisibilityHiding = 3
+
+const RouteType_NONE = 0
+const RouteType_None = 0
+const RouteType_PUSH = 1
+const RouteType_Push = 1
+const RouteType_POP = 2
+const RouteType_Pop = 2
+// ----------------------------------------------------------
 
 export enum RouterTransitionVisibility {
-    Hidden,
-    Visible,
-    Showing,
-    Hiding,
+    Hidden = VisibilityHidden,
+    Visible = VisibilityVisible,
+    Showing = VisibilityShowing,
+    Hiding = VisibilityHiding
 }
 
 export type MemoFunction =
@@ -36,8 +58,8 @@ export type MemoFunction =
 
 export interface RouterTransitionState {
     pageId: int32
-    visibility: RouterTransitionVisibility
-    route?: RouteType
+    visibility: int32 // TODO: Use RouterTransitionVisibility enum when enums are fixed in Panda
+    route?: int32 // TODO: Use RouteType enum when enums are fixed in Panda
 }
 
 class VisiblePage {
@@ -49,16 +71,16 @@ class VisiblePage {
     constructor(
         page: MemoFunction,
         version: int32,
-        visibility: RouterTransitionVisibility,
-        route?: RouteType
+        visibility: int32, // TODO: Use RouterTransitionVisibility enum when enums are fixed in Panda
+        route?: int32 // TODO: Use RouteType enum when enums are fixed in Panda
     ) {
         this.page = page
         this.version = version
         this.transitionState = mutableState<RouterTransitionState>({ pageId: version, visibility, route } as RouterTransitionState)
     }
 
-    setTransitionState(visibility: RouterTransitionVisibility, route?: RouteType) {
-        this.transitionState.value = { pageId: this.version, visibility, route }
+    setTransitionState(visibility: int32, route?: int32) {
+        this.transitionState.value = { pageId: this.version, visibility, route } as RouterTransitionState
     }
 
     get transition(): RouterTransitionState {
@@ -67,7 +89,7 @@ class VisiblePage {
 }
 
 class RouterState {
-    readonly visiblePages = observableProxyArray<VisiblePage>()
+    readonly visiblePages = arrayState<VisiblePage>()
     currentActivePage = mutableState(0)
     constructor(
         page: MemoFunction,
@@ -79,7 +101,7 @@ class RouterState {
         this.url = url
         this.params = params
         this.resolve = resolve
-        this.visiblePages.push(new VisiblePage(page, this.version.value, RouterTransitionVisibility.Visible))
+        this.visiblePages.push(new VisiblePage(page, this.version.value, VisibilityVisible))
     }
     /** @memo */
     page: MemoFunction
@@ -132,7 +154,7 @@ export interface Router {
         url: string, page: MemoFunction
     ): void
 
-    provideResolver(resolver: (route: string) => Promise<MemoFunction>): void
+    provideResolver(resolver: PageRouteResolver): void
 
     push(url: string, params?: Map<string, Object>): Promise<void>
 
@@ -158,7 +180,7 @@ class RouterImpl implements Router {
     stack = new Array<RouterStackEntry>()
     registry = new Map<string, RouterRegistryEntry>()
     currentLocals?: Map<string, Object>
-    resolver?: (route: string) => Promise<MemoFunction>
+    resolver?: PageRouteResolver
     private readonly state: RouterState
 
     constructor(state: RouterState) {
@@ -169,7 +191,7 @@ class RouterImpl implements Router {
         this.registry.set(url, new RouterRegistryEntry(url, page))
     }
 
-    provideResolver(resolver: (route: string) => Promise<MemoFunction>): void {
+    provideResolver(resolver: PageRouteResolver): void {
         this.resolver = resolver
     }
 
@@ -196,7 +218,7 @@ class RouterImpl implements Router {
 
     pushOrReplace(url: string, push: boolean, params?: Map<string, Object>): Promise<void> {
         return new Promise<void>((
-            resolve: () => void,
+            resolve: (value: undefined) => void,
             reject: (reason: string | undefined) => void
         ): Promise<void> | undefined => {
             let entry = this.registry.get(url)
@@ -205,16 +227,18 @@ class RouterImpl implements Router {
                 if (push) {
                     this.stack.push(new RouterStackEntry(this.state.url, this.state.page, this.state.params))
                 }
-                this.activate(entry, push ? RouteType.Push : RouteType.None, params, resolve)
+                // TODO: Use RouteType enum values when enums are fixed in Panda
+                this.activate(entry, push ? RouteType_Push : RouteType_None, params, () => resolve(undefined))
             } else {
-                const resolver = this.resolver
-                if (resolver !== undefined) {
-                    return resolver(url)
-                        .then<void>((page: MemoFunction) => {
+                const memoPromise = this.resolver?.resolve(url)
+                if (memoPromise !== undefined) {
+                    return memoPromise
+                        .then<void>((view: UserView) => {
+                            let page: MemoFunction = view.getBuilder()
                             if (push) {
                                 this.stack.push(new RouterStackEntry(this.state.url, this.state.page, this.state.params))
                             }
-                            this.activate(new RouterRegistryEntry(url, page), push ? RouteType.Push : RouteType.None, params, resolve)
+                            this.activate(new RouterRegistryEntry(url, page), push ? RouteType_Push : RouteType_None, params, () => resolve(undefined))
                         })
                         .catch<void>((error: string | undefined): void => reject(error))
                 }
@@ -228,58 +252,56 @@ class RouterImpl implements Router {
     showingPage: number = -1
     hidingPage: number = -1
 
-    private activate(entry: RouterRegistryEntry, route: RouteType, params: Map<string, Object> | undefined, resolve: () => void) {
+    // TODO: Use RouteType enum as route parameter when enums are fixed in Panda
+    private activate(entry: RouterRegistryEntry, route: int32, params: Map<string, Object> | undefined, resolve: () => void) {
         const state = this.state
         state.version.value++
         // console.log("activating", RouteType[route], entry.url, "version", state.version.value)
         let previousVisiblePageIndex = this.findIndexByVersion(state.currentActivePage.value)
-        let previousVisiblePage = state.visiblePages[previousVisiblePageIndex]
-        if (previousVisiblePage) previousVisiblePage.setTransitionState(RouterTransitionVisibility.Hiding, route)
+        let previousVisiblePage = state.visiblePages.value[previousVisiblePageIndex]
+        if (previousVisiblePage) previousVisiblePage.setTransitionState(VisibilityHiding, route)
         state.page = entry.page
         state.url = entry.url
         state.params = params
         state.resolve = resolve
         let newVisiblePage: VisiblePage
-        /*
-             TODO SHOPPING: transform switch to ifs
-         */
-        console.log(`TODO SHOPPING: activate`)
-        // switch (route) {
-        //     case RouteType.Push: {
-        //         newVisiblePage = new VisiblePage(entry.page, state.version.value, RouterTransitionVisibility.Showing, route)
-        //         state.visiblePages.splice(previousVisiblePageIndex + 1, 0, newVisiblePage)
-        //         break
-        //     }
-        //     case RouteType.Pop: {
-        //         const index = this.stack.length // TODO: store uid in registry to find a page
-        //         newVisiblePage = state.visiblePages[index]
-        //         newVisiblePage.setTransitionState(RouterTransitionVisibility.Showing, route)
-        //         // remove all hidden pages removed from the stack
-        //         for (let i = state.visiblePages.length - 1; i > index; i--) {
-        //             const visibility = state.visiblePages[i].transition.visibility
-        //             if (visibility == RouterTransitionVisibility.Hidden) state.visiblePages.splice(i)
-        //         }
-        //         break
-        //     }
-        //     case RouteType.None: {
-        //         // TODO: can/shall we animate replace?
-        //         newVisiblePage = new VisiblePage(entry.page, state.version.value, RouterTransitionVisibility.Showing, route)
-        //         state.visiblePages[previousVisiblePageIndex] = newVisiblePage
-        //         break
-        //     }
-        //     default:
-        //         throw new Error("Illegal RouteType: " + route)
-        // }
-        // this.hidingPage = previousVisiblePage?.version ?? -1
-        // this.showingPage = newVisiblePage.version
-        // state.currentActivePage.value = newVisiblePage.version
+
+        switch (route) {
+            case RouteType_Push: {
+                newVisiblePage = new VisiblePage(entry.page, state.version.value, VisibilityShowing, route)
+                state.visiblePages.splice(previousVisiblePageIndex + 1, 0, newVisiblePage)
+                break
+            }
+            case RouteType_Pop: {
+                const index = this.stack.length // TODO: store uid in registry to find a page
+                newVisiblePage = state.visiblePages.value[index]
+                newVisiblePage.setTransitionState(VisibilityShowing, route)
+                // remove all hidden pages removed from the stack
+                for (let i = state.visiblePages.length - 1; i > index; i--) {
+                    const visibility = state.visiblePages.value[i].transition.visibility
+                    if (visibility == VisibilityHidden) state.visiblePages.splice(i, undefined)
+                }
+                break
+            }
+            case RouteType_None: {
+                // TODO: can/shall we animate replace?
+                newVisiblePage = new VisiblePage(entry.page, state.version.value, VisibilityShowing, route)
+                state.visiblePages.set(previousVisiblePageIndex, newVisiblePage)
+                break
+            }
+            default:
+                throw new Error("Illegal RouteType: " + route)
+        }
+        this.hidingPage = previousVisiblePage?.version ?? -1
+        this.showingPage = newVisiblePage.version
+        state.currentActivePage.value = newVisiblePage.version
     }
 
     findIndexByVersion(version: int32): int32 {
         const array = this.state.visiblePages
         const length = array.length
         for (let i = 0; i < length; i++) {
-            if (array[i].version == version) return i
+            if (array.value[i].version == version) return i
         }
         return -1
     }
@@ -287,26 +309,26 @@ class RouterImpl implements Router {
     onPageTransitionEnd(pageId: int32): void {
         const index = this.findIndexByVersion(pageId)
         if (index < 0) return
-        const page = this.state.visiblePages[index]
-        if (page.transition.visibility == RouterTransitionVisibility.Showing) {
+        const page = this.state.visiblePages.value[index]
+        if (page.transition.visibility == VisibilityShowing) {
             if (pageId == this.state.currentActivePage.value) {
                 console.log("PAGE VISIBLE:", page.transition.pageId)
-                page.setTransitionState(RouterTransitionVisibility.Visible)
+                page.setTransitionState(VisibilityVisible)
             } else {
-                // console.log("ERROR: showing page cannot be shown:", page.transition.route ? RouteType[page.transition.route] : "unknown")
-                page.setTransitionState(RouterTransitionVisibility.Hidden)
+                page.setTransitionState(VisibilityHidden)
             }
-        } else if (page.transition.visibility == RouterTransitionVisibility.Hiding) {
+        } else if (page.transition.visibility == VisibilityHiding) {
             if (index < this.stack.length) {
                 console.log("PAGE HIDDEN:", page.transition.pageId)
-                page.setTransitionState(RouterTransitionVisibility.Hidden)
+                page.setTransitionState(VisibilityHidden)
             } else {
                 console.log("PAGE REMOVED:", page.transition.pageId)
                 this.state.visiblePages.splice(index, 1)
             }
-        } else {
-            // console.log("ERROR: no page transition:", RouterTransitionVisibility[page.transition.visibility], page.transition.route ? RouteType[page.transition.route] : "unknown")
         }
+        // else {
+        //     // console.log("ERROR: no page transition:", RouterTransitionVisibility[page.transition.visibility], page.transition.route ? RouteType[page.transition.route] : "unknown")
+        // }
     }
 
     push(url: string, params?: Map<string, Object>): Promise<void> {
@@ -338,7 +360,7 @@ class RouterImpl implements Router {
             if (entry) {
                 this.activate(
                     new RouterRegistryEntry(entry.url, entry.page),
-                    RouteType.Pop,
+                    RouteType_Pop,
                     params ?? entry.params,
                     resolve
                 )
@@ -357,37 +379,64 @@ class RouterImpl implements Router {
     }
 }
 
+export interface PageRouteResolver {
+    resolve(route: string): Promise<UserView>
+}
+
+class TrivialResolver implements PageRouteResolver {
+    private map: Map<string, string>
+    constructor(map: Map<string, string>) {
+        this.map = map
+    }
+    resolve(route: string): Promise<UserView> {
+        return new Promise<UserView>(
+            (resolvePromise: (value: UserView) => void, rejectPromise: (e: Error) => void) => {
+            let className = this.map.get(route)
+            if (!className) {
+                rejectPromise(new Error(`Unknown URL ${route}`))
+                return
+            }
+            // TODO: parameters.
+            let view = ArkUINativeModule._LoadUserView(className, "")
+            if (!view) {
+                rejectPromise(new Error(`Cannot load class ${className}`))
+                return
+            }
+            resolvePromise(view as UserView)
+        })
+    }
+}
+
 /** @memo */
-// export function Routed(
-//     /** @memo */
-//     initial: () => void,
-//     /** @memo */
-//     contentOwner: (
-//         /** @memo */
-//         content: () => void
-//     ) => void,
-//     initialUrl?: string,
-// ) {
-//     const routerState = remember<RouterState>(() => new RouterState(initial, initialUrl ?? "_initial_"))
-//     const router = remember<RouterImpl>(() => new RouterImpl(routerState))
-//     RunEffect<() => void>(routerState.resolve!, (resolve?: () => void): void => { resolve?.() })
-//     contextLocalScope(CURRENT_ROUTER, router, (): void => {
-//         contentOwner(
-//             /** @memo */
-//             (): void => {
-//                 RepeatByArray(
-//                     routerState.visiblePages,
-//                     (page: VisiblePage): int32 => { return page.version },
-//                     (page: VisiblePage): void => {
-//                         WithRouterTransitionState(page.transition, () => {
-//                             page.page()
-//                         })
-//                     }
-//                 )
-//             }
-//         )
-//     })
-// }
+export function Routed(
+    /** @memo */
+    initial: () => void,
+    initialUrl?: string,
+): void {
+    const routerState = remember<RouterState>(() => new RouterState(initial, initialUrl ?? "_initial_"))
+    const router = remember<RouterImpl>(() => {
+        let router = new RouterImpl(routerState)
+        // Install default global router.
+        OhosRouter.setRouter(router)
+        router.provideResolver(new TrivialResolver(new Map<string, string>([
+            ["page1", "ComExampleTrivialApplication"],
+            ["page2", "ComExampleTrivialApplicationPage2"]
+        ])))
+        return router
+    })
+    RunEffect<(() => void) | undefined>(routerState.resolve, (resolve?: () => void): void => { resolve?.() })
+    contextLocalScope(CURRENT_ROUTER, router, () => {
+        RepeatByArray(
+            routerState.visiblePages.value,
+            (page: VisiblePage, index: int32): int32 => { return page.version },
+            (page: VisiblePage, index: int32): void => {
+                WithRouterTransitionState(page.transition, () => {
+                    page.page()
+                })
+            }
+        )
+    })
+}
 
 /** @memo */
 export function CurrentRouter(): Router | undefined {
@@ -396,7 +445,7 @@ export function CurrentRouter(): Router | undefined {
 
 /** @memo */
 export function CurrentRouterTransitionState(): RouterTransitionState | undefined {
-    return contextLocal<RouterTransitionState>(CURRENT_ROUTER_TRANSITION)?.value
+    return contextLocal<RouterTransitionState | undefined>(CURRENT_ROUTER_TRANSITION)?.value
 }
 
 /** @memo */

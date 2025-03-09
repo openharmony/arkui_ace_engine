@@ -19,10 +19,11 @@
 import { ShadowOptions, ShadowType } from "./ArkCommonInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { Color, ColoringStrategy } from "./ArkEnumsInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -34,7 +35,7 @@ export class TextShadowStyleInternal {
     }
 }
 export class TextShadowStyle implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -66,7 +67,7 @@ export class TextShadowStyle implements MaterializedBase {
      constructor(value?: ShadowOptions | Array<ShadowOptions>) {
         if ((value) !== (undefined))
         {
-            const ctorPtr: KPointer = TextShadowStyle.ctor_textshadowstyle(value)
+            const ctorPtr: KPointer = TextShadowStyle.ctor_textshadowstyle((value)!)
             this.peer = new Finalizable(ctorPtr, TextShadowStyle.getFinalizer())
         }
     }
@@ -78,6 +79,13 @@ export class TextShadowStyle implements MaterializedBase {
     }
     private getTextShadow_serialize(): Array<ShadowOptions> {
         const retval = ArkUIGeneratedNativeModule._TextShadowStyle_getTextShadow(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<ShadowOptions> = new Array<ShadowOptions>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readShadowOptions()
+        }
+        const returnResult: Array<ShadowOptions> = buffer
+        return returnResult
     }
 }

@@ -39,6 +39,11 @@ export class TypeNode extends Expression {
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._TypeNodeAnnotationsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._TypeNodeSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
+    }
 }
 export function isTypeNode(node: AstNode): node is TypeNode {
     return node instanceof TypeNode

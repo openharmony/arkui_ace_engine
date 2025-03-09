@@ -41,28 +41,27 @@ import {
     filterDefined,
     filterModifiers,
     filterProvides,
+    getSingleStatement,
     hasLocalDeclaration,
     initializers,
     isBuilderLambdaCall,
     isBuiltinComponentName,
     isDefined,
     isGlobalBuilder,
-    isState,
     isStructCall,
     LocalStoragePropertyName,
-    mangle,
     mangleIfBuild,
     NameTable,
     prependDoubleLineMemoComment,
     prependMemoComment,
+    prependMemoStable,
     provideVariableName,
     RewriteNames,
-    styleInstanceId,
-    throwError,
+    styledInstance,
     voidLambdaType,
     WatchDecorator
 } from './utils'
-import { BuilderParam, classifyProperty, ClassState, PropertyTranslator, PropertyTranslatorContext } from './PropertyTranslators'
+import { BuilderParam, classifyProperty, PropertyTranslator, PropertyTranslatorContext } from './PropertyTranslators'
 import {
     asIdentifier,
     assignment,
@@ -70,6 +69,7 @@ import {
     Export,
     findDecoratorArguments,
     findDecoratorLiterals,
+    findObjectPropertyValue,
     getDeclarationsByNode,
     hasDecorator,
     id,
@@ -87,6 +87,7 @@ import {
     Void
 } from './ApiUtils'
 import { StructOptions } from "./StructOptions"
+import { translateClass } from './ClassMemberTranslators'
 
 export class StructTransformer extends AbstractVisitor {
     private structOptions: StructOptions
@@ -319,12 +320,7 @@ export class StructTransformer extends AbstractVisitor {
 
     propagateStructBuilder(node: ts.Block | undefined): ts.Block | undefined {
         if (!node) return undefined
-        if (!node.statements || node.statements.length == 0) return node
-        if (node.statements.length > 1) {
-            // TODO: May be issue a diagnostings?
-            return node
-        }
-        const singleStatement = node.statements[0]
+        const singleStatement = getSingleStatement(node)
         if (!singleStatement || !ts.isExpressionStatement(singleStatement)) return node
         if (!ts.isCallExpression(singleStatement.expression)) return node
 
@@ -342,7 +338,7 @@ export class StructTransformer extends AbstractVisitor {
             newFirstArgument = ts.factory.createArrowFunction(
                 undefined,
                 undefined,
-                [ts.factory.createParameterDeclaration(undefined, undefined, styleInstanceId(), undefined, undefined, undefined)],
+                [ts.factory.createParameterDeclaration(undefined, undefined, styledInstance, undefined, undefined, undefined)],
                 undefined,
                 ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
                 ts.factory.createBlock(
@@ -353,7 +349,7 @@ export class StructTransformer extends AbstractVisitor {
                                 id(buildBuilderArgument()),
                                 ts.factory.createToken(ts.SyntaxKind.QuestionDotToken),
                                 undefined,
-                                [styleInstanceId()]
+                                [id(styledInstance)]
                             )
                         )
                     ],
@@ -398,7 +394,7 @@ export class StructTransformer extends AbstractVisitor {
                             undefined,
                             [
                                 parameter(
-                                    styleInstanceId(),
+                                    styledInstance,
                                     commonMethodComponentType(this.importer),
                                 )
                             ],
@@ -467,9 +463,7 @@ export class StructTransformer extends AbstractVisitor {
 
         // The rest of the struct members are translated here directly.
         const restMembers = structNode.members.map(member => {
-            if (isStatic(member)) {
-                return member
-            } else if (isKnownIdentifier(member.name, "build")) {
+            if (isKnownIdentifier(member.name, "build")) {
                 return this.translateBuilder(structNode, propertyTranslators, member, true)
             } else if (hasDecorator(member, "Builder")) {
                 return this.translateBuilder(structNode, propertyTranslators, member, false)
@@ -477,8 +471,11 @@ export class StructTransformer extends AbstractVisitor {
                 return prependMemoComment(member)
             } else if (ts.isMethodDeclaration(member)) {
                 return this.translateMemberFunction(member)
+            } else if (isStatic(member)) {
+                return member
+            } else {
+                return []
             }
-            return []
         }).flat()
         return collect(
             ...propertyMembers,
@@ -612,7 +609,7 @@ export class StructTransformer extends AbstractVisitor {
                             [ts.factory.createParameterDeclaration(
                                 undefined,
                                 undefined,
-                                styleInstanceId(),
+                                styledInstance,
                                 undefined,
                                 commonMethodComponentType(this.importer),
                                 undefined
@@ -781,6 +778,25 @@ export class StructTransformer extends AbstractVisitor {
         )
     }
 
+    entryStorageValue(node: ts.Expression): ts.Expression | undefined {
+        if (ts.isObjectLiteralExpression(node)) {
+            const storage = findObjectPropertyValue(node, "storage")
+            return storage
+        }
+        return node
+    }
+
+    entryStorage(node: ts.Expression): ts.Expression | undefined {
+        const value = this.entryStorageValue(node)
+        if (value === undefined) return undefined
+
+        if (!ts.isStringLiteral(value)) {
+            console.log(`Warning: expected the storage value to be a string literal, got ${ts.SyntaxKind[value.kind]}`)
+            return undefined
+        }
+        return id(value.text)
+    }
+
     translateStructToClass(node: ts.StructDeclaration): ts.ClassDeclaration {
         const className = this.translateComponentName(adaptorClassName(node.name)) // TODO make me string for proper reuse
         const baseClassName = this.importer.withAdaptorImport("ArkStructBase")
@@ -811,7 +827,7 @@ export class StructTransformer extends AbstractVisitor {
                 case 0:
                     break
                 case 1:
-                    entryLocalStorage = args[0]
+                    entryLocalStorage = this.entryStorage(args[0])
                     break
                 default:
                     throw new Error("Entry must have only one name, but got " + args?.length)
@@ -864,7 +880,7 @@ export class StructTransformer extends AbstractVisitor {
             ]
         )
 
-        return createdClass
+        return prependMemoStable(createdClass)
     }
 
     findEtsAdaptorName(name: ts.LeftHandSideExpression): ts.LeftHandSideExpression {
@@ -937,10 +953,8 @@ export class StructTransformer extends AbstractVisitor {
             return instanceArgument
         }
 
-        const parameterName = styleInstanceId()
-
         const lambdaParameter = parameter(
-            parameterName,
+            styledInstance,
             parameterTypeName ? ts.factory.createTypeReferenceNode(parameterTypeName) : undefined
         )
 
@@ -1002,7 +1016,7 @@ export class StructTransformer extends AbstractVisitor {
         )
     }
 
-    addCastToInitializer(node: ts.CallExpression, originalInitializer: ts.Expression): ts.Expression|undefined {
+    addCastToInitializer(node: ts.CallExpression, originalInitializer: ts.Expression): ts.Expression | undefined {
         if (!originalInitializer) return undefined
         if (isUndefined(originalInitializer)) return originalInitializer
 
@@ -1132,25 +1146,6 @@ export class StructTransformer extends AbstractVisitor {
         return node
     }
 
-    translateClass(node: ts.ClassDeclaration): ts.ClassDeclaration {
-        const newMembers = node.members.flatMap(it => {
-            if (!ts.isPropertyDeclaration(it) || !isState(it)) {
-                return it
-            }
-            return new ClassState(it, this.propertyTranslatorContext).translateMember()
-        })
-
-        const createdClass = ts.factory.updateClassDeclaration(
-            node,
-            node.modifiers,
-            node.name,
-            node.typeParameters,
-            node.heritageClauses,
-            newMembers
-        )
-        return createdClass
-    }
-
     isUserEts(node: ts.EtsComponentExpression): boolean {
         const nameId = node.expression as ts.Identifier
         const name = ts.idText(nameId)
@@ -1170,7 +1165,7 @@ export class StructTransformer extends AbstractVisitor {
         if (ts.isStructDeclaration(node)) {
             return this.translateStructToClass(node)
         } else if (ts.isClassDeclaration(node)) {
-            return this.translateClass(node)
+            return translateClass(node, this.propertyTranslatorContext)
         } else if (isGlobalBuilder(node)) {
             return this.translateGlobalBuilder(node as ts.FunctionDeclaration)
         } else if (ts.isEtsComponentExpression(node)) {

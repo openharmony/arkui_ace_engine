@@ -2,7 +2,7 @@
 
 import { int8 } from "@koalaui/common"
 
-export class KBuffer {
+export final class KBuffer {
     private readonly _buffer: byte[]
     public get buffer(): byte[] {
         return this._buffer

@@ -2,6 +2,7 @@ import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, A
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 import * as AllComponent from './test/pages/NamespaceComponent';
 import TsModule from './test/pages/TsModule';
+/** @memo:stable */
 class ArkImportTestComponent extends ArkStructBase<ArkImportTestComponent, ImportTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

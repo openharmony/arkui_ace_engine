@@ -14,10 +14,10 @@
         "baseUrl": ".",
         "paths": {
             "@ohos.*": [
-                "../../arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/api/@ohos.*"
+                "../../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/api/@ohos.*"
             ],
             "@system.*": [
-                "../../arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/api/@system.*"
+                "../../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/api/@system.*"
             ]
         },
 

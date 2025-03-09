@@ -1,7 +1,8 @@
-import { $$, $r, $rawfile, AppStorage, ArkAlphabetIndexer, ArkButton, ArkButtonComponent, ArkCheckbox, ArkCheckboxComponent, ArkCheckboxGroup, ArkCheckboxGroupComponent, ArkColumn, ArkCommonMethodComponent, ArkDatePicker, ArkDatePickerComponent, ArkGrid, ArkGridItem, ArkGridItemComponent, ArkList, ArkListItem, ArkListItemComponent, ArkListItemGroup, ArkMenuItem, ArkMenuItemComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkPanel, ArkPanelComponent, ArkRadio, ArkRadioComponent, ArkRefresh, ArkSearch, ArkSearchComponent, ArkSelect, ArkSelectComponent, ArkSideBarContainer, ArkSideBarContainerComponent, ArkSlider, ArkStepper, ArkStructBase, ArkSwiper, ArkSwiperComponent, ArkTabs, ArkText, ArkTextArea, ArkTextInput, ArkTextPicker, ArkTimePicker, ArkTimePickerComponent, ArkToggle, ArkToggleComponent, CanvasRenderingContext2D, CustomDialogController, DataChangeListener, Environment, ForEach, GestureGroup, IDataSource, ListItemStyle, LocalStorage, LongPressGesture, PanGesture, PanGestureOptions, PanelMode, PersistentStorage, PinchGesture, RenderingContextSettings, RotationGesture, Scroller, SideBarContainerType, SubscribedAbstractProperty, SwipeGesture, SwiperController, TabsController, TapGesture, TextAreaController, ToggleType, VideoController, _$, animateTo, contextLocalStateOf, fp2px, getContext, getInspectorByKey, lpx2px, px2fp, px2lpx, px2vp, stateOf, vp2px } from "@koalaui/arkui";
+import { $$, $r, $rawfile, AppStorage, ArkAlphabetIndexer, ArkButton, ArkButtonComponent, ArkCheckbox, ArkCheckboxComponent, ArkCheckboxGroup, ArkCheckboxGroupComponent, ArkColumn, ArkCommonMethodComponent, ArkDatePicker, ArkDatePickerComponent, ArkGrid, ArkGridItem, ArkGridItemComponent, ArkList, ArkListItem, ArkListItemComponent, ArkListItemGroup, ArkMenuItem, ArkMenuItemComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkPanel, ArkPanelComponent, ArkRadio, ArkRadioComponent, ArkRefresh, ArkSearch, ArkSearchComponent, ArkSelect, ArkSelectComponent, ArkSideBarContainer, ArkSideBarContainerComponent, ArkSlider, ArkStepper, ArkStructBase, ArkSwiper, ArkSwiperComponent, ArkTabs, ArkText, ArkTextArea, ArkTextInput, ArkTextPicker, ArkTimePicker, ArkTimePickerComponent, ArkToggle, ArkToggleComponent, CanvasRenderingContext2D, CustomDialogController, DataChangeListener, Environment, ForEach, GestureGroup, IDataSource, ListItemStyle, LocalStorage, LongPressGesture, PanGesture, PanGestureOptions, PanelMode, PersistentStorage, PinchGesture, RenderingContextSettings, RotationGesture, Scroller, SideBarContainerType, SubscribedAbstractProperty, SwipeGesture, SwiperController, TabsController, TapGesture, TextAreaController, ToggleType, VideoController, animateTo, contextLocalStateOf, fp2px, getContext, getInspectorByKey, lpx2px, px2fp, px2lpx, px2vp, stateOf, vp2px } from "@koalaui/arkui";
 import { MutableState } from "@koalaui/runtime";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkDollarDollarComponent extends ArkStructBase<ArkDollarDollarComponent, DollarDollarOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -65,68 +66,68 @@ class ArkDollarDollarComponent extends ArkStructBase<ArkDollarDollarComponent, D
         ArkColumn(__builder, () => {
             ArkSlider(undefined, undefined, { value: this.n });
             ArkToggle((__instance: ArkToggleComponent) => {
-                __instance.__OnChanged_isOn((isOn: boolean): void => { this.b = isOn; });
-            }, undefined, { type: ToggleType.Switch, isOn: _$("", "entry", this.b) });
+                __instance._onChangeEvent_isOn((isOn: boolean): void => { this.b = isOn; });
+            }, undefined, { type: ToggleType.Switch, isOn: this.b });
             ArkStepper(undefined, undefined, { index: this.n });
             ArkCheckbox((__instance: ArkCheckboxComponent) => {
-                __instance.select(_$("", "entry", this.b));
+                __instance.select(this.b);
             }, undefined);
             ArkCheckboxGroup((__instance: ArkCheckboxGroupComponent) => {
-                __instance.selectAll(_$("", "entry", this.b));
+                __instance.selectAll(this.b);
             }, undefined);
             ArkDatePicker((__instance: ArkDatePickerComponent) => {
-                __instance.__OnChanged_selected((selected: Date): void => { this.d = selected; });
-            }, undefined, { selected: _$("", "entry", this.d) });
+                __instance._onChangeEvent_selected((selected: Date): void => { this.d = selected; });
+            }, undefined, { selected: this.d });
             ArkTimePicker((__instance: ArkTimePickerComponent) => {
-                __instance.__OnChanged_selected((selected: Date): void => { this.d = selected; });
-            }, undefined, { selected: _$("", "entry", this.d) });
+                __instance._onChangeEvent_selected((selected: Date): void => { this.d = selected; });
+            }, undefined, { selected: this.d });
             ArkMenuItem((__instance: ArkMenuItemComponent) => {
-                __instance.selected(_$("", "entry", this.b));
+                __instance.selected(this.b);
             }, undefined);
             ArkPanel((__instance: ArkPanelComponent) => {
-                __instance.mode(_$("", "entry", this.m));
+                __instance.mode(this.m);
             }, undefined, false);
             ArkRadio((__instance: ArkRadioComponent) => {
-                __instance.checked(_$("", "entry", this.b));
+                __instance.checked(this.b);
             }, undefined, { group: "", value: "" });
             ArkSearch((__instance: ArkSearchComponent) => {
-                __instance.__OnChanged_value((value: string): void => { this.s = value; });
-            }, undefined, { value: _$("", "entry", this.s) });
+                __instance._onChangeEvent_value((value: string): void => { this.s = value; });
+            }, undefined, { value: this.s });
             ArkSideBarContainer((__instance: ArkSideBarContainerComponent) => {
-                __instance.showSideBar(_$("", "entry", this.b));
+                __instance.showSideBar(this.b);
             }, undefined, SideBarContainerType.Embed);
             ArkSwiper((__instance: ArkSwiperComponent) => {
-                __instance.index(_$("", "entry", this.n));
+                __instance.index(this.n);
             }, undefined);
-            ArkTabs(undefined, undefined, { index: _$("", "entry", this.n) });
-            ArkTextInput(undefined, undefined, { text: _$("", "entry", this.s) });
-            ArkTextArea(undefined, undefined, { text: _$("", "entry", this.s) });
-            ArkTextInput(undefined, undefined, { text: _$("", "entry", this.s) });
+            ArkTabs(undefined, undefined, { index: this.n });
+            ArkTextInput(undefined, undefined, { text: this.s });
+            ArkTextArea(undefined, undefined, { text: this.s });
+            ArkTextInput(undefined, undefined, { text: this.s });
             ArkToggle((__instance: ArkToggleComponent) => {
-                __instance.__OnChanged_isOn((isOn: boolean): void => { this.b = isOn; });
-            }, undefined, { type: ToggleType.Checkbox, isOn: _$("", "entry", this.b) });
-            ArkAlphabetIndexer(undefined, undefined, { arrayValue: [], selected: _$("", "entry", this.n) });
-            ArkRefresh(undefined, undefined, { refreshing: _$("", "entry", this.b) });
-            ArkTextPicker(undefined, undefined, { range: [], value: _$("", "entry", this.s), selected: _$("", "entry", this.n) });
+                __instance._onChangeEvent_isOn((isOn: boolean): void => { this.b = isOn; });
+            }, undefined, { type: ToggleType.Checkbox, isOn: this.b });
+            ArkAlphabetIndexer(undefined, undefined, { arrayValue: [], selected: this.n });
+            ArkRefresh(undefined, undefined, { refreshing: this.b });
+            ArkTextPicker(undefined, undefined, { range: [], value: this.s, selected: this.n });
             ArkSelect((__instance: ArkSelectComponent) => {
-                __instance.value(_$("", "entry", this.s))
-                    .selected(_$("", "entry", this.n));
+                __instance.value(this.s)
+                    .selected(this.n);
             }, undefined, []);
             ArkList(undefined, () => {
                 ArkListItemGroup(undefined, () => {
                     ArkListItem((__instance: ArkListItemComponent) => {
-                        __instance.selected(_$("", "entry", this.b));
+                        __instance.selected(this.b);
                     }, undefined, { style: this.l });
                 });
             });
             ArkGrid(undefined, () => {
                 ArkGridItem((__instance: ArkGridItemComponent) => {
-                    __instance.selected(_$("", "entry", this.b));
+                    __instance.selected(this.b);
                 }, undefined, {});
             });
             ArkButton((__instance: ArkButtonComponent) => {
-                __instance.bindSheet(_$("", "entry", this.b), builder)
-                    .bindContentCover(_$("", "entry", this.b), builder);
+                __instance.bindSheet(this.b, builder)
+                    .bindContentCover(this.b, builder);
             }, undefined);
         });
     }

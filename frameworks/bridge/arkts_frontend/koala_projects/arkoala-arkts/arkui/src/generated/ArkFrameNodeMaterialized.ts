@@ -19,7 +19,7 @@
 import { UIContext } from "./ArkCommonInterfaces"
 import { Position } from "./ArkUnitsInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,7 +33,7 @@ export class FrameNodeInternal {
     }
 }
 export class FrameNode implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -47,7 +47,7 @@ export class FrameNode implements MaterializedBase {
      constructor(uiContext?: UIContext) {
         if ((uiContext) !== (undefined))
         {
-            const ctorPtr : KPointer = FrameNode.ctor_framenode(uiContext)
+            const ctorPtr : KPointer = FrameNode.ctor_framenode((uiContext)!)
             this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
         }
     }
@@ -106,28 +106,22 @@ export class FrameNode implements MaterializedBase {
     public getPositionToWindowWithTransform(): Position {
         return this.getPositionToWindowWithTransform_serialize()
     }
+    public static getFrameNodeByKey(name: string): FrameNode {
+        const name_casted = name as (string)
+        return FrameNode.getFrameNodeByKey_serialize(name_casted)
+    }
     private isModifiable_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_isModifiable(this.peer!.ptr)
         return retval
     }
     private appendChild_serialize(node: FrameNode): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeFrameNode(node)
-        ArkUIGeneratedNativeModule._FrameNode_appendChild(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._FrameNode_appendChild(this.peer!.ptr, toPeerPtr(node))
     }
     private insertChildAfter_serialize(child: FrameNode, sibling: FrameNode): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeFrameNode(child)
-        thisSerializer.writeFrameNode(sibling)
-        ArkUIGeneratedNativeModule._FrameNode_insertChildAfter(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._FrameNode_insertChildAfter(this.peer!.ptr, toPeerPtr(child), toPeerPtr(sibling))
     }
     private removeChild_serialize(node: FrameNode): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeFrameNode(node)
-        ArkUIGeneratedNativeModule._FrameNode_removeChild(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._FrameNode_removeChild(this.peer!.ptr, toPeerPtr(node))
     }
     private clearChildren_serialize(): void {
         ArkUIGeneratedNativeModule._FrameNode_clearChildren(this.peer!.ptr)
@@ -170,6 +164,13 @@ export class FrameNode implements MaterializedBase {
     }
     private getPositionToWindowWithTransform_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readPosition()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : Position = retvalDeserializer.readPosition()
+        return returnResult
+    }
+    private static getFrameNodeByKey_serialize(name: string): FrameNode {
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(name)
+        const obj : FrameNode = FrameNodeInternal.fromPtr(retval)
+        return obj
     }
 }

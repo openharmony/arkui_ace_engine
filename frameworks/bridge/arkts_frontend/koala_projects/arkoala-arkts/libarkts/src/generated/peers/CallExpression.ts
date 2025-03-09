@@ -51,6 +51,11 @@ export class CallExpression extends MaybeOptionalExpression {
     get callee(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._CallExpressionCalleeConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setCallee(callee: Expression): this {
+        global.generatedEs2panda._CallExpressionSetCallee(global.context, this.peer, passNode(callee))
+        return this
+    }
     get typeParams(): TSTypeParameterInstantiation | undefined {
         return unpackNode(global.generatedEs2panda._CallExpressionTypeParamsConst(global.context, this.peer))
     }
@@ -60,8 +65,23 @@ export class CallExpression extends MaybeOptionalExpression {
     get hasTrailingComma(): boolean {
         return global.generatedEs2panda._CallExpressionHasTrailingCommaConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setTypeParams(typeParams: TSTypeParameterInstantiation): this {
+        global.generatedEs2panda._CallExpressionSetTypeParams(global.context, this.peer, passNode(typeParams))
+        return this
+    }
+    /** @deprecated */
+    setTrailingBlock(block: BlockStatement): this {
+        global.generatedEs2panda._CallExpressionSetTrailingBlock(global.context, this.peer, passNode(block))
+        return this
+    }
     get trailingBlock(): BlockStatement | undefined {
         return unpackNode(global.generatedEs2panda._CallExpressionTrailingBlockConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setIsTrailingBlockInNewLine(isNewLine: boolean): this {
+        global.generatedEs2panda._CallExpressionSetIsTrailingBlockInNewLine(global.context, this.peer, isNewLine)
+        return this
     }
     get isTrailingBlockInNewLine(): boolean {
         return global.generatedEs2panda._CallExpressionIsTrailingBlockInNewLineConst(global.context, this.peer)

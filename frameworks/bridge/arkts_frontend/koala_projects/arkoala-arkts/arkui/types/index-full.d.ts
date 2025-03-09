@@ -20,13 +20,15 @@ declare const Component: ClassDecorator & ((options: ComponentOptions) => ClassD
 
 declare const ComponentV2: ClassDecorator & ((options: ComponentOptions) => ClassDecorator);
 
+declare type LocalStorageReference = string
+
 declare interface EntryOptions {
-  routeName? : string,
-  storage? : LocalStorage,
-  useSharedStorage? : boolean,
+    routeName? : string,
+    storage? : LocalStorageReference,
+    useSharedStorage? : boolean,
 }
 
-declare const Entry: ClassDecorator & ((options?: LocalStorage | EntryOptions) => ClassDecorator);
+declare const Entry: ClassDecorator & ((options?: LocalStorageReference | EntryOptions) => ClassDecorator);
 
 declare const Observed: ClassDecorator;
 
@@ -171,13 +173,11 @@ declare const Navigation: NavigationInterface
 type buffer = ArrayBuffer
 
 
-declare interface RuntimeType {
-}
-declare interface Materialized {
-}
-declare interface CallbackResource {
-}
-declare interface VMContext {
+declare interface BusinessError {
+    name: string;
+    message: string;
+    stack?: string;
+    code: number;
 }
 declare type Callback_Extender_OnProgress = ((value: number) => void);
 declare type Callback_Extender_OnFinish = (() => void);
@@ -292,6 +292,14 @@ declare class LengthMetrics {
     unit: LengthUnit;
     value: number;
 }
+declare class ColorMetrics {
+    get color(): string;
+    get red(): number;
+    get green(): number;
+    get blue(): number;
+    get alpha(): number;
+    blendColor(overlayColor: ColorMetrics): ColorMetrics;
+}
 declare interface WebHeader {
     headerKey: string;
     headerValue: string;
@@ -319,12 +327,6 @@ declare enum PerfMonitorSourceType {
     PERF_KEY_EVENT = 4,
 }
 declare class GlobalScope_ohos_arkui_performanceMonitor {
-}
-declare interface BusinessError {
-    name: string;
-    message: string;
-    stack?: string;
-    code: number;
 }
 declare type ErrorCallback = ((err: BusinessError) => void);
 declare class CommonShape {
@@ -1060,7 +1062,7 @@ declare class CanvasRenderingContext2D extends CanvasRenderer {
     readonly height: number;
     readonly width: number;
     readonly canvas: FrameNode;
-    toDataURL(type?: string, quality?: number): string;
+    toDataURL(type?: string | undefined, quality?: number | undefined): string;
     startImageAnalyzer(config: ImageAnalyzerConfig): Promise<void>;
     stopImageAnalyzer(): void;
     on(type: 'onAttach', callback_: (() => void)): void;
@@ -1071,7 +1073,7 @@ declare class CanvasRenderingContext2D extends CanvasRenderer {
 declare class OffscreenCanvasRenderingContext2D extends CanvasRenderer {
     constructor(width: number, height: number, settings?: RenderingContextSettings);
     constructor(width: number, height: number, settings?: RenderingContextSettings, unit?: LengthMetricsUnit);
-    toDataURL(type?: string, quality?: number): string;
+    toDataURL(type?: string | undefined, quality?: number | undefined): string;
     transferToImageBitmap(): ImageBitmap;
 }
 declare class OffscreenCanvas {
@@ -1198,11 +1200,6 @@ declare interface TextDecorationOptions {
     color?: ResourceColor;
     style?: TextDecorationStyle;
 }
-declare interface EntryOptions {
-    routeName?: string;
-    storage?: LocalStorage;
-    useSharedStorage?: boolean;
-}
 declare interface ProvideOptions {
     allowOverride?: string;
 }
@@ -1212,9 +1209,11 @@ declare interface AnimatableArithmetic<T> {
     multiply(scale: number): AnimatableArithmetic<T>;
     equals(rhs: AnimatableArithmetic<T>): boolean;
 }
+declare function getContext(component?: Object): Context;
 declare interface Context {
     _ContextStub: string;
 }
+declare function postCardAction(component: Object, action: Object): void;
 declare interface Configuration {
     readonly colorMode: string;
     readonly fontScale: number;
@@ -1230,6 +1229,8 @@ declare interface ExpectedFrameRateRange {
     max: number;
     expected: number;
 }
+declare function $r(value: string, ...params: any[]): Resource;
+declare function $rawfile(value: string): Resource;
 declare enum FinishCallbackType {
     REMOVED = 0,
     LOGICALLY = 1,
@@ -1389,11 +1390,21 @@ declare interface DragItemInfo {
     builder?: CustomBuilder;
     extraInfo?: string;
 }
+declare function animateTo(value: AnimateParam, event: (() => void)): void;
+declare function animateToImmediately(value: AnimateParam, event: (() => void)): void;
+declare function vp2px(value: number): number;
+declare function px2vp(value: number): number;
+declare function fp2px(value: number): number;
+declare function px2fp(value: number): number;
+declare function lpx2px(value: number): number;
+declare function px2lpx(value: number): number;
 declare namespace focusControl {
     function requestFocus(value: string): boolean;
 }
 declare namespace cursorControl {
     function setCursor(value: PointerStyle): void;
+}
+declare namespace cursorControl {
     function restoreDefault(): void;
 }
 declare interface EventTarget {
@@ -2514,18 +2525,6 @@ declare enum HoverModeAreaType {
     TOP_SCREEN = 0,
     BOTTOM_SCREEN = 1,
 }
-declare function getContext(component?: Object): Context;
-declare function postCardAction(component: Object, action: Object): void;
-declare function $r(value: string, ...params: any[]): Resource;
-declare function $rawfile(value: string): Resource;
-declare function animateTo(value: AnimateParam, event: (() => void)): void;
-declare function animateToImmediately(value: AnimateParam, event: (() => void)): void;
-declare function vp2px(value: number): number;
-declare function px2vp(value: number): number;
-declare function fp2px(value: number): number;
-declare function px2fp(value: number): number;
-declare function lpx2px(value: number): number;
-declare function px2lpx(value: number): number;
 declare class AppStorage {
 }
 declare interface AbstractProperty<T> {
@@ -2535,7 +2534,7 @@ declare interface AbstractProperty<T> {
 }
 declare class SubscribedAbstractProperty<T> {
     constructor(subscribeMe?: IPropertySubscriber, info?: string);
-    protected subscribers_: Set<number>;
+    protected subscribers_: number[];
     id(): number;
     info(): string;
     get(): T;
@@ -2596,7 +2595,7 @@ declare class LocalStorage {
     ref<T>(propName: string): AbstractProperty<T> | undefined;
     setAndRef<T>(propName: string, defaultValue: T): AbstractProperty<T>;
     has(propName: string): boolean;
-    keys(): IterableIterator<String>;
+    keys(): string[];
     size(): number;
     get<T>(propName: string): T | undefined;
     set<T>(propName: string, newValue: T): boolean;
@@ -3990,7 +3989,7 @@ declare interface ComputedBarAttribute {
 }
 declare type Callback_Number_Number_ComputedBarAttribute = ((index: number, offset: number) => ComputedBarAttribute);
 declare type Callback_Number_Number_Void = ((first: number, last: number) => void);
-declare type Callback_ItemDragInfo_Number_CustomBuilder = ((event: ItemDragInfo, itemIndex: number) => CustomBuilder);
+declare type onItemDragStart_event_type = ((event: ItemDragInfo, itemIndex: number) => CustomBuilder);
 declare type Callback_ItemDragInfo_Void = ((event: ItemDragInfo) => void);
 declare type Callback_ItemDragInfo_Number_Number_Void = ((event: ItemDragInfo, itemIndex: number, insertIndex: number) => void);
 declare type Callback_ItemDragInfo_Number_Void = ((event: ItemDragInfo, itemIndex: number) => void);
@@ -7436,9 +7435,6 @@ declare type VoidCallback = (() => void);
 declare interface LengthMetricsUnit {
     _LengthMetricsUnitStub: string;
 }
-declare interface ColorMetrics {
-    _ColorMetricsStub: string;
-}
 declare interface Font {
     size?: Length;
     weight?: (FontWeight|number|string);
@@ -8728,9 +8724,7 @@ declare class UrlStyle {
     constructor(url: string);
     readonly url: string;
 }
-declare interface StyledStringValue {
-    stub: string;
-}
+declare type StyledStringValue = (TextStyle_styled_string|DecorationStyle|BaselineOffsetStyle|LetterSpacingStyle|TextShadowStyle|GestureStyle|ImageAttachment|ParagraphStyle|LineHeightStyle|UrlStyle|CustomSpan|UserDataSpan|BackgroundColorStyle);
 declare class MutableStyledString extends StyledString {
     replaceString(start: number, length: number, other: string): void;
     insertString(start: number, other: string): void;
@@ -8826,15 +8820,17 @@ declare class LinearIndicatorAttribute extends CommonMethod<LinearIndicatorAttri
     onChange(value: OnLinearIndicatorChangeCallback | undefined): LinearIndicatorAttribute;
 }
 declare type OnLinearIndicatorChangeCallback = ((index: number, progress: number) => void);
+declare function getInspectorNodes(): Object;
+declare function getInspectorNodeById(id: number): Object;
 declare namespace Profiler {
     type Callback_String_Void = ((info: string) => void);
 }
 declare namespace Profiler {
     function registerVsyncCallback(callback_: ((info: string) => void)): void;
+}
+declare namespace Profiler {
     function unregisterVsyncCallback(): void;
 }
-declare function getInspectorNodes(): Object;
-declare function getInspectorNodeById(id: number): Object;
 declare function setAppBgColor(value: string): void;
 declare interface RawFileDescriptor {
     fd: number;

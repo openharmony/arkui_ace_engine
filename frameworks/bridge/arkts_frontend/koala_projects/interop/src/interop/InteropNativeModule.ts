@@ -38,6 +38,7 @@ export class InteropNativeModule {
     public static _StartApplication(appUrl: string, appParams: string): KPointer { throw "method not loaded" }
     public static _EmitEvent(eventType: int32, target: int32, arg0: int32, arg1: int32): void { throw "method not loaded" }
     public static _CallForeignVM(foreignContext: KPointer, kind: int32, args: Uint8Array, argsSize: int32): int32 { throw "method not loaded" }
+    public static _SetForeignVMContext(context: KPointer): void { throw "method not loaded" }
 }
 
 export function loadInteropNativeModule() {

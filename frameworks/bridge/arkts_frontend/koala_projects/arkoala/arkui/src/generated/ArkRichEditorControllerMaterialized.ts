@@ -39,10 +39,11 @@ import { FingerInfo } from "./ArkGestureInterfaces"
 import { ImageAttachment, ImageAttachmentInternal } from "./ArkImageAttachmentMaterialized"
 import { CustomSpan, CustomSpanInternal } from "./ArkCustomSpanMaterialized"
 import { LengthMetrics, LengthMetricsInternal } from "./ArkLengthMetricsMaterialized"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -54,10 +55,6 @@ export class RichEditorControllerInternal {
     }
 }
 export class RichEditorController extends RichEditorBaseController implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_richeditorcontroller(): KPointer {
         const retval = ArkUIGeneratedNativeModule._RichEditorController_ctor()
         return retval
@@ -252,7 +249,25 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval = ArkUIGeneratedNativeModule._RichEditorController_getSpans(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<RichEditorImageSpanResult | RichEditorTextSpanResult> = new Array<RichEditorImageSpanResult | RichEditorTextSpanResult>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            const buffer_buf_selector: number = retvalDeserializer.readInt8()
+            let buffer_buf: RichEditorImageSpanResult | RichEditorTextSpanResult | undefined|undefined 
+            if (buffer_buf_selector == 0) {
+                buffer_buf = retvalDeserializer.readRichEditorImageSpanResult()
+            }
+            else if (buffer_buf_selector == 1) {
+                buffer_buf = retvalDeserializer.readRichEditorTextSpanResult()
+            }
+            else {
+                throw new Error("One of the branches for buffer_buf has to be chosen through deserialisation.")
+            }
+            buffer[buffer_i] = (buffer_buf as RichEditorImageSpanResult | RichEditorTextSpanResult)
+        }
+        const returnResult: Array<RichEditorImageSpanResult | RichEditorTextSpanResult> = buffer
+        return returnResult
     }
     private getParagraphs_serialize(value?: RichEditorRange): Array<RichEditorParagraphResult> {
         const thisSerializer: Serializer = Serializer.hold()
@@ -265,24 +280,49 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         }
         const retval = ArkUIGeneratedNativeModule._RichEditorController_getParagraphs(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<RichEditorParagraphResult> = new Array<RichEditorParagraphResult>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readRichEditorParagraphResult()
+        }
+        const returnResult: Array<RichEditorParagraphResult> = buffer
+        return returnResult
     }
     private getSelection_serialize(): RichEditorSelection {
         const retval = ArkUIGeneratedNativeModule._RichEditorController_getSelection(this.peer!.ptr)
-        return new Deserializer(retval.buffer, retval.byteLength).readRichEditorSelection()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: RichEditorSelection = retvalDeserializer.readRichEditorSelection()
+        return returnResult
     }
     private fromStyledString_serialize(value: StyledString): Array<RichEditorSpan> {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(value)
-        const retval = ArkUIGeneratedNativeModule._RichEditorController_fromStyledString(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        const retval = ArkUIGeneratedNativeModule._RichEditorController_fromStyledString(this.peer!.ptr, toPeerPtr(value))
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<RichEditorSpan> = new Array<RichEditorSpan>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            const buffer_buf_selector: number = retvalDeserializer.readInt8()
+            let buffer_buf: RichEditorImageSpanResult | RichEditorTextSpanResult | undefined|undefined 
+            if (buffer_buf_selector == 0) {
+                buffer_buf = retvalDeserializer.readRichEditorImageSpanResult()
+            }
+            else if (buffer_buf_selector == 1) {
+                buffer_buf = retvalDeserializer.readRichEditorTextSpanResult()
+            }
+            else {
+                throw new Error("One of the branches for buffer_buf has to be chosen through deserialisation.")
+            }
+            buffer[buffer_i] = (buffer_buf as RichEditorImageSpanResult | RichEditorTextSpanResult)
+        }
+        const returnResult: Array<RichEditorSpan> = buffer
+        return returnResult
     }
     private toStyledString_serialize(value: RichEditorRange): StyledString {
         const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.writeRichEditorRange(value)
         const retval = ArkUIGeneratedNativeModule._RichEditorController_toStyledString(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        const obj: StyledString = StyledStringInternal.fromPtr(retval)
+        return obj
     }
 }

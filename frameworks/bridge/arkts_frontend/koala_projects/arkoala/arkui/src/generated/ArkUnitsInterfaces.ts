@@ -121,9 +121,6 @@ export type VoidCallback = () => void;
 export interface LengthMetricsUnit {
     _LengthMetricsUnitStub: string;
 }
-export interface ColorMetrics {
-    _ColorMetricsStub: string;
-}
 export interface Font {
     size?: Length;
     weight?: FontWeight | number | string;

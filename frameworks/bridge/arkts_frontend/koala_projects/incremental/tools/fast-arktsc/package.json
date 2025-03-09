@@ -1,6 +1,6 @@
 {
   "name": "@koalaui/fast-arktsc",
-  "version": "1.5.0-dev.3431",
+  "version": "1.5.0+devel",
   "description": "",
   "main": "lib/index.js",
   "bin": "lib/index.js",

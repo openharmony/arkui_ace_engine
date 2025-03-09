@@ -32,9 +32,32 @@ export struct MainPage {
   @Prop ratio: number
   @Consume('pathInfos') pathInfos: NavPathStack
 
-  isPerf: boolean = false
+  isPerf: boolean = true
+
+  onPageShow() {
+    console.log('shopping onPageShow()')
+  }
+
+  onPageHide() {
+    console.log('shopping onPageHide()')
+  }
+
+  @Builder
+  build2() {
+    const count = 1500
+    let perfData = new Array<number>(count)
+    for (let i = 0; i < count; i++) perfData[i] = i
+    let now = Date.now()
+    console.log(`Measuring...`)
+    ForEach(perfData, (item: number, index: number) => {
+        Stack().width(100).height(100).backgroundColor(Color.Red).margin(5)
+    }, (item: number, index: number) => String(item))
+    let passed = Date.now() - now
+    console.log(`Passed ${passed}ms, ${passed / count}ms per iteration`)
+  }
 
   build() {
+    console.log('build')
     if (this.isPerf) {
       const count = 100
       let perfData = new Array<number>(count)

@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -47,14 +47,21 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { SubMenuExpandingMode, MenuAttribute } from "./../ArkMenuInterfaces"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -89,7 +96,7 @@ export class ArkMenuPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -113,7 +120,7 @@ export class ArkMenuPeer extends ArkCommonMethodPeer {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
-        if (((RuntimeType.NUMBER) == (value_type)) || ((RuntimeType.STRING) == (value_type)) || (((RuntimeType.OBJECT) == (value_type)) && (isResource(value)))) {
+        if (((RuntimeType.NUMBER) == (value_type)) || ((RuntimeType.STRING) == (value_type)) || (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isResource(value, false, false, false, false, false)))) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Dimension
             thisSerializer.writeLength(value_0)
@@ -182,7 +189,7 @@ export class ArkMenuPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     subMenuExpandingModeAttribute(value: SubMenuExpandingMode): void {
-        ArkUIGeneratedNativeModule._MenuAttribute_subMenuExpandingMode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._MenuAttribute_subMenuExpandingMode(this.peer.ptr, ((value as SubMenuExpandingMode) as int32))
     }
 }
 export interface ArkMenuAttributes extends ArkCommonMethodAttributes {

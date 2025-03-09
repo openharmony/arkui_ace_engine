@@ -1,5 +1,6 @@
 import { $r, $rawfile, AppStorage, ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, CanvasRenderingContext2D, CustomDialogController, DataChangeListener, Environment, ForEach, GestureGroup, IDataSource, LocalStorage, LongPressGesture, PanGesture, PanGestureOptions, PersistentStorage, PinchGesture, RenderingContextSettings, RotationGesture, Scroller, SubscribedAbstractProperty, SwipeGesture, SwiperController, TabsController, TapGesture, TextAreaController, VideoController, animateTo, fp2px, getContext, getInspectorByKey, lpx2px, px2fp, px2lpx, px2vp, vp2px } from "@koalaui/arkui";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
+/** @memo:stable */
 class ArkHomePreviewComponentComponent extends ArkStructBase<ArkHomePreviewComponentComponent, HomePreviewComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -28,6 +29,7 @@ class ArkHomePreviewComponentComponent extends ArkStructBase<ArkHomePreviewCompo
         }, undefined, this.value);
     }
 }
+/** @memo:stable */
 class ArkHomePreviewComponent_PreviewComponent extends ArkStructBase<ArkHomePreviewComponent_PreviewComponent, HomePreviewComponent_PreviewOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

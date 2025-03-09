@@ -23,6 +23,24 @@
 
 #include "interop-types.h"
 
+#ifdef _MSC_VER
+#define KOALA_EXECUTE(name, code) \
+    static void __init_##name() {                               \
+        code; \
+    }                                                           \
+    namespace {                                                 \
+      struct __Init_##name {                                    \
+        __Init_##name() {  __init_##name(); }                   \
+      } __Init_##name##_v;                                      \
+    }
+#else
+#define KOALA_EXECUTE(name, code) \
+    __attribute__((constructor)) \
+    static void __init_jni_##name() { \
+        code; \
+    }
+#endif
+
 struct KStringPtrImpl {
     KStringPtrImpl(const char* str) : _value(nullptr), _owned(true) {
         int len = str ? strlen(str) : 0;
@@ -247,8 +265,7 @@ inline void parseKLength(const KStringPtrImpl &string, KLength *result)
   }
 }
 
-struct _KVMContext;
-typedef _KVMContext *KVMContext;
+typedef _InteropVMContext *KVMContext;
 
 // BEWARE: this MUST never be used in user code, only in very rare service code.
 struct _KVMObject;

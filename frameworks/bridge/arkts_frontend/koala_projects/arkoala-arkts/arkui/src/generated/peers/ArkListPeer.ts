@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -28,7 +28,7 @@ import { ScrollableCommonMethod, CommonMethod, Rectangle, TouchTestInfo, TouchRe
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, LengthConstrain, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
 import { DrawModifier } from "./../ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect } from "./../ArkEnumsInterfaces"
-import { Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, Callback_ItemDragInfo_Number_CustomBuilder, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain } from "./../SyntheticDeclarations"
+import { Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, onItemDragStart_event_type, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain } from "./../SyntheticDeclarations"
 import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
 import { ResizableOptions } from "./../ArkImageInterfaces"
 import { Resource } from "./../ArkResourceInterfaces"
@@ -47,16 +47,23 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./../ArkScrollInterfaces"
 import { ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, OnScrollVisibleContentChangeCallback, ScrollState, ListAttribute, ListOptions } from "./../ArkListInterfaces"
 import { ChildrenMainSize } from "./../ArkChildrenMainSizeMaterialized"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -85,13 +92,13 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     alignListItemAttribute(value: ListItemAlign): void {
-        ArkUIGeneratedNativeModule._ListAttribute_alignListItem(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ListAttribute_alignListItem(this.peer.ptr, ((value as ListItemAlign) as int32))
     }
     listDirectionAttribute(value: Axis): void {
-        ArkUIGeneratedNativeModule._ListAttribute_listDirection(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ListAttribute_listDirection(this.peer.ptr, ((value as Axis) as int32))
     }
     scrollBarAttribute(value: BarState): void {
-        ArkUIGeneratedNativeModule._ListAttribute_scrollBar(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ListAttribute_scrollBar(this.peer.ptr, ((value as BarState) as int32))
     }
     contentStartOffsetAttribute(value: number): void {
         ArkUIGeneratedNativeModule._ListAttribute_contentStartOffset(this.peer.ptr, value)
@@ -133,10 +140,10 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     stickyAttribute(value: StickyStyle): void {
-        ArkUIGeneratedNativeModule._ListAttribute_sticky(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ListAttribute_sticky(this.peer.ptr, ((value as StickyStyle) as int32))
     }
     scrollSnapAlignAttribute(value: ScrollSnapAlign): void {
-        ArkUIGeneratedNativeModule._ListAttribute_scrollSnapAlign(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ListAttribute_scrollSnapAlign(this.peer.ptr, ((value as ScrollSnapAlign) as int32))
     }
     nestedScrollAttribute(value: NestedScrollOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -165,10 +172,7 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     childrenMainSizeAttribute(value: ChildrenMainSize): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeChildrenMainSize(value)
-        ArkUIGeneratedNativeModule._ListAttribute_childrenMainSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._ListAttribute_childrenMainSize(this.peer.ptr, toPeerPtr(value))
     }
     maintainVisibleContentPositionAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._ListAttribute_maintainVisibleContentPosition(this.peer.ptr, value ? 1 : 0)
@@ -299,7 +303,7 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeEdgeEffectOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._ListAttribute_edgeEffect(this.peer.ptr, (value.valueOf() as int32), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ListAttribute_edgeEffect(this.peer.ptr, ((value as EdgeEffect) as int32), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
 }

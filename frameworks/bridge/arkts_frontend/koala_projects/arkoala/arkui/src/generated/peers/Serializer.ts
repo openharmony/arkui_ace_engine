@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-import { SerializerBase, Tags, RuntimeType, runtimeType, isResource, isInstanceOf, MaterializedBase, InteropNativeModule, ResourceHolder, nullptr, KPointer } from "@koalaui/interop"
+import { SerializerBase, Tags, RuntimeType, runtimeType, toPeerPtr, MaterializedBase, InteropNativeModule, ResourceHolder, nullptr, KPointer, isInstanceOf } from "@koalaui/interop"
 import { int32, float32, unsafeCast } from "@koalaui/common"
+import { isResource, isPadding } from "./../../utils"
 import { CallbackKind } from "./CallbackKind"
 import { Finalizable } from "@koalaui/interop"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, CustomBuilder, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, SymbolGlyphModifier, ShadowOptions, ShadowType, ComponentContent, EventTarget, SourceType, SourceTool, SheetTitleOptions, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, FinishCallbackType, ExpectedFrameRateRange, DismissPopupAction, DismissReason, Rectangle, PickerTextStyle, PickerDialogButtonStyle, BlurOptions, DrawContext, UIContext, SheetType, SpringBackAction, DismissSheetAction, SheetDismiss, DismissContentCoverAction, ContextMenuAnimationOptions, PopupMessageOptions, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, ScrollableCommonMethod, CommonMethod, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, TransitionOptions, MotionBlurOptions, InvertOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, DragItemInfo, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, TouchTestInfo, TouchResult, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, TransitionHierarchyStrategy, MenuPreviewMode, BindOptions, SheetSize, SheetMode, ScrollSizeMode, SheetKeyboardAvoidMode, RectResult, TouchTestStrategy, TouchObject, HistoricalPoint, IntentionCode, DragBehavior, Summary, DragResult, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, HoverModeAreaType, TextDecorationOptions, InputCounterOptions, CaretOffset, SelectionOptions, MenuPolicy, ContentModifier, CommonConfiguration, LayoutSafeAreaType, LayoutSafeAreaEdge, ItemDragInfo, Context, VisibleAreaEventOptions, MeasureResult, SizeResult, LightSource, MultiShadowOptions, KeyboardAvoidMode, PointLightStyle } from "./../ArkCommonInterfaces"
+import { AccessibilityCallback, CustomBuilder, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, SymbolGlyphModifier, ShadowOptions, ShadowType, DrawContext, EventTarget, SourceType, SourceTool, ComponentContent, SheetTitleOptions, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, FinishCallbackType, ExpectedFrameRateRange, DismissPopupAction, DismissReason, Rectangle, PickerTextStyle, PickerDialogButtonStyle, BlurOptions, UIContext, SheetType, SpringBackAction, DismissSheetAction, SheetDismiss, DismissContentCoverAction, ContextMenuAnimationOptions, PopupMessageOptions, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, ScrollableCommonMethod, CommonMethod, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, TransitionOptions, MotionBlurOptions, InvertOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, DragItemInfo, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, TouchTestInfo, TouchResult, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, TransitionHierarchyStrategy, MenuPreviewMode, BindOptions, SheetSize, SheetMode, ScrollSizeMode, SheetKeyboardAvoidMode, RectResult, TouchTestStrategy, TouchObject, HistoricalPoint, IntentionCode, DragBehavior, Summary, DragResult, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, HoverModeAreaType, TextDecorationOptions, InputCounterOptions, CaretOffset, SelectionOptions, MenuPolicy, ContentModifier, CommonConfiguration, LayoutSafeAreaType, LayoutSafeAreaEdge, ItemDragInfo, VisibleAreaEventOptions, MeasureResult, SizeResult, Context, LightSource, MultiShadowOptions, KeyboardAvoidMode, PointLightStyle } from "./../ArkCommonInterfaces"
 import { ButtonTriggerClickCallback, ButtonType, ButtonStyleMode, ButtonRole, LabelStyle, ControlSize, ButtonOptions } from "./../ArkButtonInterfaces"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../ArkAnimationExtenderInterfaces"
 import { Callback_RangeUpdate } from "./../ArkArkuiCustomInterfaces"
 import { ContentDidScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, IndicatorStyle, SwiperAttribute, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ArrowStyle, SwiperAutoFill, SwiperAnimationEvent } from "./../ArkSwiperInterfaces"
 import { CustomNodeBuilder } from "./../ArkCustomBuilderInterfaces"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, DecorationStyleResult, Affinity, TextRange, StyledStringChangeValue, TextMenuItem, MenuType, CaretStyle, InsertValue, DeleteValue, TextDeleteDirection, LineMetrics, PositionWithAffinity, PreviewText, TextBox, TextDataDetectorConfig, FontSettingOptions, TextDataDetectorType, StyledStringChangedListener } from "./../ArkTextCommonInterfaces"
-import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions, RectWidthStyle, RectHeightStyle, SymbolEffect, FontOptions, SnapshotOptions, EffectScope, EffectDirection, NodeController, BusinessError, PerfMonitorActionType, PerfMonitorSourceType } from "./../ArkArkuiExternalInterfaces"
+import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions, RectWidthStyle, RectHeightStyle, SymbolEffect, FontOptions, SnapshotOptions, EffectScope, EffectDirection, NodeController } from "./../ArkArkuiExternalInterfaces"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, SectionOptions, WaterFlowOptions, WaterFlowLayoutMode } from "./../ArkWaterFlowInterfaces"
 import { ImageCompleteCallback, ImageLoadResult } from "./../ArkImageSpanInterfaces"
 import { ImageErrorCallback, ResizableOptions, DrawingLattice, DrawableDescriptor, DrawingColorFilter, ResolutionQuality, ImageError, ImageSourceSize } from "./../ArkImageInterfaces"
@@ -49,20 +50,33 @@ import { PluginErrorCallback, PluginComponentTemplate, PluginErrorData, PluginCo
 import { SearchSubmitCallback, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, CancelButtonStyle, SearchAttribute, SearchType, SearchButtonOptions, SearchOptions } from "./../ArkSearchInterfaces"
 import { SliderTriggerChangeCallback, SliderAttribute, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderChangeMode, SliderBlockType, SliderOptions, SliderStyle } from "./../ArkSliderInterfaces"
 import { TextAreaSubmitCallback, ContentType, TextAreaAttribute, TextAreaType, TextAreaOptions } from "./../ArkTextAreaInterfaces"
-import { VoidCallback, Position, Length, Dimension, PX, VP, FP, LPX, Percentage, Area, Font, LocalizedPadding, Margin, BorderRadiuses, Padding, ResourceColor, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, LengthMetricsUnit, ColorMetrics, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Bias, Offset, DividerStyleOptions, LengthConstrain, DirectionalEdgesT, MarkStyle } from "./../ArkUnitsInterfaces"
+import { VoidCallback, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, BorderRadiuses, Length, Margin, Padding, SizeOptions, Position, Area, ResourceStr, Font, LocalizedPadding, LocalizedEdgeColors, LocalizedEdgeWidths, LocalizedBorderRadiuses, LengthMetricsUnit, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Bias, Offset, DividerStyleOptions, LengthConstrain, DirectionalEdgesT, MarkStyle } from "./../ArkUnitsInterfaces"
 import { WithThemeInterface, CustomTheme, WithThemeOptions, WithThemeAttribute } from "./../ArkWithThemeInterfaces"
 import { Resource } from "./../ArkResourceInterfaces"
-import { ICurve, ICurveInternal } from "./../ArkICurveMaterialized"
 import { PixelMap, PixelMapInternal } from "./../ArkPixelMapMaterialized"
 import { LengthMetrics, LengthMetricsInternal } from "./../ArkLengthMetricsMaterialized"
-import { Color, ColoringStrategy, FontWeight, FontStyle, Curve, TextDecorationType, TextDecorationStyle, PlayMode, TextOverflow, TextHeightAdaptivePolicy, ImageSpanAlignment, ImageFit, TextAlign, WordBreak, LineBreakStrategy, GradientDirection, DialogButtonStyle, HitTestMode, ImageSize, Alignment, BorderStyle, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, BarState, EdgeEffect, NestedScrollMode, FlexDirection, Edge, CopyOptions, TextContentStyle, TextCase, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, TitleHeight, XComponentType, FoldStatus, AppRotation, FlexWrap, FlexAlign, AccessibilityHoverType, IlluminatedType } from "./../ArkEnumsInterfaces"
+import { ICurve, ICurveInternal } from "./../ArkICurveMaterialized"
+import { TextBackgroundStyle } from "./../ArkSpanInterfaces"
+import { Color, ColoringStrategy, TextAlign, TextOverflow, WordBreak, ImageSpanAlignment, ImageFit, TextDecorationType, TextDecorationStyle, FontStyle, FontWeight, Curve, PlayMode, TextHeightAdaptivePolicy, LineBreakStrategy, GradientDirection, DialogButtonStyle, HitTestMode, ImageSize, Alignment, BorderStyle, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, BarState, EdgeEffect, NestedScrollMode, FlexDirection, Edge, CopyOptions, TextContentStyle, TextCase, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, TitleHeight, XComponentType, FoldStatus, AppRotation, FlexWrap, FlexAlign, AccessibilityHoverType, IlluminatedType } from "./../ArkEnumsInterfaces"
+import { ImageAttachmentLayoutStyle, UserDataSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, ParagraphStyleInterface, ImageAttachmentInterface, GestureStyleInterface, DecorationStyleInterface, TextStyleInterface, StyleOptions, StyledStringKey, SpanStyle, StyledStringValue } from "./../ArkStyledStringInterfaces"
 import { GridRowSizeOption, GridRowColumnOption, GutterOption, BreakPoints, BreakpointsReference, GridRowOptions, GridRowDirection } from "./../ArkGridRowInterfaces"
-import { TabBarSymbol, TabBarIconStyle, BoardStyle, LayoutMode, SelectedMode, TabBarOptions } from "./../ArkTabContentInterfaces"
-import { DecorationStyleInterface, StyledStringValue, ImageAttachmentLayoutStyle, StyleOptions, StyledStringKey, SpanStyle, ImageAttachmentInterface, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, ParagraphStyleInterface, GestureStyleInterface, TextStyleInterface } from "./../ArkStyledStringInterfaces"
-import { GestureEvent, GestureEventInternal } from "./../ArkGestureEventMaterialized"
-import { BaseEvent, BaseEventInternal } from "./../ArkBaseEventMaterialized"
-import { FingerInfo, GestureGroupInterface, GestureMode, GestureType, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMask, GestureInfo, GestureJudgeResult, GestureHandler, GesturePriority, GestureRecognizerState } from "./../ArkGestureInterfaces"
+import { BackgroundColorStyle, BackgroundColorStyleInternal } from "./../ArkBackgroundColorStyleMaterialized"
+import { CustomSpan, CustomSpanInternal } from "./../ArkCustomSpanMaterialized"
+import { UrlStyle, UrlStyleInternal } from "./../ArkUrlStyleMaterialized"
+import { LineHeightStyle, LineHeightStyleInternal } from "./../ArkLineHeightStyleMaterialized"
+import { ParagraphStyle, ParagraphStyleInternal } from "./../ArkParagraphStyleMaterialized"
+import { ImageAttachment, ImageAttachmentInternal } from "./../ArkImageAttachmentMaterialized"
+import { GestureStyle, GestureStyleInternal } from "./../ArkGestureStyleMaterialized"
 import { ClickEvent, ClickEventInternal } from "./../ArkClickEventMaterialized"
+import { BaseEvent, BaseEventInternal } from "./../ArkBaseEventMaterialized"
+import { GestureEvent, GestureEventInternal } from "./../ArkGestureEventMaterialized"
+import { FingerInfo, GestureMode, GestureType, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMask, GestureInfo, GestureJudgeResult, GestureHandler, GesturePriority, GestureRecognizerState } from "./../ArkGestureInterfaces"
+import { TextShadowStyle, TextShadowStyleInternal } from "./../ArkTextShadowStyleMaterialized"
+import { LetterSpacingStyle, LetterSpacingStyleInternal } from "./../ArkLetterSpacingStyleMaterialized"
+import { BaselineOffsetStyle, BaselineOffsetStyleInternal } from "./../ArkBaselineOffsetStyleMaterialized"
+import { DecorationStyle, DecorationStyleInternal } from "./../ArkDecorationStyleMaterialized"
+import { TextStyle_styled_string, TextStyle_styled_stringInternal } from "./../ArkTextStyleStyledStringMaterialized"
+import { TabBarSymbol, TabBarIconStyle, BoardStyle, LayoutMode, SelectedMode, TabBarOptions } from "./../ArkTabContentInterfaces"
 import { NavPathInfo, NavPathInfoInternal } from "./../ArkNavPathInfoMaterialized"
 import { SwipeActionState, SwipeActionItem, SwipeActionOptions, SwipeEdgeEffect, ListItemOptions, ListItemStyle } from "./../ArkListItemInterfaces"
 import { TransitionEffect, TransitionEffectInternal } from "./../ArkTransitionEffectMaterialized"
@@ -71,6 +85,7 @@ import { Matrix2D, Matrix2DInternal } from "./../ArkMatrix2DMaterialized"
 import { CanvasGradient, CanvasGradientInternal } from "./../ArkCanvasGradientMaterialized"
 import { NavigationTransitionProxy, NavigationTransitionProxyInternal } from "./../ArkNavigationTransitionProxyMaterialized"
 import { NavDestinationMode, RouteMapConfig, NavDestinationAttribute, NavigationSystemTransitionType, NavDestinationCommonTitle, NavDestinationCustomTitle } from "./../ArkNavDestinationInterfaces"
+import { ColorMetrics, ColorMetricsInternal } from "./../ArkColorMetricsMaterialized"
 import { ImageAnalyzerController, ImageAnalyzerControllerInternal } from "./../ArkImageAnalyzerControllerMaterialized"
 import { ImageAnalyzerType, ImageAIOptions, ImageAnalyzerConfig } from "./../ArkImageCommonInterfaces"
 import { WebResourceRequest, WebResourceRequestInternal } from "./../ArkWebResourceRequestMaterialized"
@@ -83,8 +98,6 @@ import { TextMenuItemId, TextMenuItemIdInternal } from "./../ArkTextMenuItemIdMa
 import { TabContentTransitionProxy, TabContentTransitionProxyInternal } from "./../ArkTabContentTransitionProxyMaterialized"
 import { SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphAttribute, EffectFillStyle } from "./../ArkSymbolglyphInterfaces"
 import { StyledString, StyledStringInternal } from "./../ArkStyledStringMaterialized"
-import { ImageAttachment, ImageAttachmentInternal } from "./../ArkImageAttachmentMaterialized"
-import { CustomSpan, CustomSpanInternal } from "./../ArkCustomSpanMaterialized"
 import { NavPathStack, NavPathStackInternal } from "./../ArkNavPathStackMaterialized"
 import { NavDestinationContext, NavDestinationContextInternal } from "./../ArkNavDestinationContextMaterialized"
 import { GridColColumnOption, GridColOptions } from "./../ArkGridColInterfaces"
@@ -92,13 +105,19 @@ import { LinearGradient, LinearGradientInternal } from "./../ArkLinearGradientMa
 import { ColorStop, DataPanelShadowOptions, DataPanelOptions, DataPanelType } from "./../ArkDataPanelInterfaces"
 import { DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, DatePickerOptions } from "./../ArkDatePickerInterfaces"
 import { Scene, Component3DAttribute, SceneOptions, ModelType } from "./../ArkComponent3dInterfaces"
+import { GestureGroupInterface, GestureGroupInterfaceInternal } from "./../ArkGestureGroupInterfaceMaterialized"
+import { TapGestureInterface, TapGestureInterfaceInternal } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface, LongPressGestureInterfaceInternal } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface, PanGestureInterfaceInternal } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface, PinchGestureInterfaceInternal } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface, SwipeGestureInterfaceInternal } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface, RotationGestureInterfaceInternal } from "./../ArkRotationGestureInterfaceMaterialized"
 import { PanGestureOptions, PanGestureOptionsInternal } from "./../ArkPanGestureOptionsMaterialized"
 import { DrawingCanvas, DrawingCanvasInternal } from "./../ArkDrawingCanvasMaterialized"
 import { Size, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, TextMetrics } from "./../ArkCanvasInterfaces"
 import { FrameNode, FrameNodeInternal } from "./../ArkFrameNodeMaterialized"
 import { TextStyle_alert_dialog, AlertDialogButtonBaseOptions, DialogAlignment, AlertDialogParamWithOptions, AlertDialogParam, AlertDialogButtonOptions, DialogButtonDirection, AlertDialogParamWithButtons, AlertDialogParamWithConfirm } from "./../ArkAlertDialogInterfaces"
 import { DismissDialogAction, ActionSheetOffset, ActionSheetButtonOptions, ActionSheetOptions, SheetInfo } from "./../ArkActionSheetInterfaces"
-import { TextBackgroundStyle } from "./../ArkSpanInterfaces"
 import { UIExtensionProxy, UIExtensionProxyInternal } from "./../ArkUIExtensionProxyMaterialized"
 import { DrawModifier, DrawModifierInternal } from "./../ArkDrawModifierMaterialized"
 import { FocusBoxStyle, FocusPriority } from "./../ArkFocusInterfaces"
@@ -201,21 +220,9 @@ import { BadgeStyle, BadgeParamWithString, BadgeParam, BadgePosition, BadgeParam
 import { BaseShape, BaseShapeInternal } from "./../ArkBaseShapeMaterialized"
 import { CommonShape, CommonShapeInternal } from "./../ArkCommonShapeMaterialized"
 import { LinearIndicatorController, LinearIndicatorControllerInternal } from "./../ArkLinearIndicatorControllerMaterialized"
-import { UrlStyle, UrlStyleInternal } from "./../ArkUrlStyleMaterialized"
-import { LineHeightStyle, LineHeightStyleInternal } from "./../ArkLineHeightStyleMaterialized"
-import { ParagraphStyle, ParagraphStyleInternal } from "./../ArkParagraphStyleMaterialized"
-import { GestureStyle, GestureStyleInternal } from "./../ArkGestureStyleMaterialized"
-import { BackgroundColorStyle, BackgroundColorStyleInternal } from "./../ArkBackgroundColorStyleMaterialized"
-import { TextShadowStyle, TextShadowStyleInternal } from "./../ArkTextShadowStyleMaterialized"
-import { LetterSpacingStyle, LetterSpacingStyleInternal } from "./../ArkLetterSpacingStyleMaterialized"
-import { BaselineOffsetStyle, BaselineOffsetStyleInternal } from "./../ArkBaselineOffsetStyleMaterialized"
-import { DecorationStyle, DecorationStyleInternal } from "./../ArkDecorationStyleMaterialized"
-import { TextStyle_styled_string, TextStyle_styled_stringInternal } from "./../ArkTextStyleStyledStringMaterialized"
 import { ReceiveCallback, UIExtensionOptions, DpiFollowStrategy } from "./../ArkUiExtensionComponentInterfaces"
 import { SwitchStyle, ToggleOptions, ToggleType } from "./../ArkToggleInterfaces"
-import { TimePickerDialog, TimePickerDialogInternal } from "./../ArkTimePickerDialogMaterialized"
 import { TextTimerOptions } from "./../ArkTextTimerInterfaces"
-import { TextPickerDialog, TextPickerDialogInternal } from "./../ArkTextPickerDialogMaterialized"
 import { SubmitEvent, SubmitEventInternal } from "./../ArkSubmitEventMaterialized"
 import { TextClockOptions } from "./../ArkTextClockInterfaces"
 import { BounceSymbolEffect, BounceSymbolEffectInternal } from "./../ArkBounceSymbolEffectMaterialized"
@@ -258,12 +265,11 @@ import { TapGestureEvent, TapGestureEventInternal } from "./../ArkTapGestureEven
 import { GaugeIndicatorOptions, GaugeShadowOptions, GaugeOptions } from "./../ArkGaugeInterfaces"
 import { FormLinkOptions } from "./../ArkFormLinkInterfaces"
 import { FormCallbackInfo, FormInfo, FormDimension, FormRenderingMode, FormShape } from "./../ArkFormComponentInterfaces"
+import { BusinessError } from "./../ArkBaseInterfaces"
 import { TerminationInfo } from "./../ArkEmbeddedComponentInterfaces"
 import { EllipseOptions } from "./../ArkEllipseInterfaces"
-import { DatePickerDialog, DatePickerDialogInternal } from "./../ArkDatePickerDialogMaterialized"
 import { CustomDialogControllerOptions } from "./../ArkCustomDialogControllerInterfaces"
 import { CustomDialogController, CustomDialogControllerInternal } from "./../ArkCustomDialogControllerMaterialized"
-import { ContextMenu, ContextMenuInternal } from "./../ArkContextMenuMaterialized"
 import { UICommonEvent, UICommonEventInternal } from "./../ArkUICommonEventMaterialized"
 import { View, ViewInternal } from "./../ArkViewMaterialized"
 import { Measurable, MeasurableInternal } from "./../ArkMeasurableMaterialized"
@@ -272,23 +278,12 @@ import { PixelMapMock, PixelMapMockInternal } from "./../ArkPixelMapMockMaterial
 import { ColumnOptions } from "./../ArkColumnInterfaces"
 import { CircleOptions } from "./../ArkCircleInterfaces"
 import { OffscreenCanvas, OffscreenCanvasInternal } from "./../ArkOffscreenCanvasMaterialized"
-import { CalendarPickerDialog, CalendarPickerDialogInternal } from "./../ArkCalendarPickerDialogMaterialized"
 import { ScrollMotion, ScrollMotionInternal } from "./../ArkScrollMotionMaterialized"
 import { SpringProp, SpringPropInternal } from "./../ArkSpringPropMaterialized"
 import { FrictionMotion, FrictionMotionInternal } from "./../ArkFrictionMotionMaterialized"
 import { SpringMotion, SpringMotionInternal } from "./../ArkSpringMotionMaterialized"
-import { AlertDialog, AlertDialogInternal } from "./../ArkAlertDialogMaterialized"
-import { ActionSheet, ActionSheetInternal } from "./../ArkActionSheetMaterialized"
-import { EventEmulator, EventEmulatorInternal } from "./../ArkEventEmulatorMaterialized"
-import { NavExtender, NavExtenderInternal } from "./../ArkNavExtenderMaterialized"
 import { ReplaceSymbolEffect, ReplaceSymbolEffectInternal } from "./../ArkReplaceSymbolEffectMaterialized"
 import { ScaleSymbolEffect, ScaleSymbolEffectInternal } from "./../ArkScaleSymbolEffectMaterialized"
-import { GlobalScope_ohos_font, GlobalScope_ohos_fontInternal } from "./../ArkGlobalScopeOhosFontMaterialized"
-import { GlobalScope_ohos_arkui_performanceMonitor, GlobalScope_ohos_arkui_performanceMonitorInternal } from "./../ArkGlobalScopeOhosArkuiPerformanceMonitorMaterialized"
-import { GlobalScope_ohos_arkui_componentSnapshot, GlobalScope_ohos_arkui_componentSnapshotInternal } from "./../ArkGlobalScopeOhosArkuiComponentSnapshotMaterialized"
-import { SystemOps, SystemOpsInternal } from "./../ArkSystemOpsMaterialized"
-import { LazyForEachOps, LazyForEachOpsInternal } from "./../ArkLazyForEachOpsMaterialized"
-import { AnimationExtender, AnimationExtenderInternal } from "./../ArkAnimationExtenderMaterialized"
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
     private static poolTop: int32 = -1
@@ -356,55 +351,280 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeNumber(value_type_value)
         }
     }
-    writeICurve(value: ICurve): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writePixelMap(value: PixelMap): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLengthMetrics(value: LengthMetrics): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeLeadingMarginPlaceholder(value: LeadingMarginPlaceholder): void {
+        let valueSerializer: Serializer = this
+        const value_pixelMap = value.pixelMap
+        valueSerializer.writePixelMap(value_pixelMap)
+        const value_size = value.size
+        const value_size_0 = value_size[0]
+        valueSerializer.writeLength(value_size_0)
+        const value_size_1 = value_size[1]
+        valueSerializer.writeLength(value_size_1)
+    }
+    writeICurve(value: ICurve): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeTextBackgroundStyle(value: TextBackgroundStyle): void {
+        let valueSerializer: Serializer = this
+        const value_color = value.color
+        let value_color_type: int32 = RuntimeType.UNDEFINED
+        value_color_type = runtimeType(value_color)
+        valueSerializer.writeInt8(value_color_type)
+        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+            const value_color_value = value_color!
+            let value_color_value_type: int32 = RuntimeType.UNDEFINED
+            value_color_value_type = runtimeType(value_color_value)
+            if (((RuntimeType.NUMBER) == (value_color_value_type)) && ((unsafeCast<int32>(value_color_value)) >= (0)) && ((unsafeCast<int32>(value_color_value)) <= (11))) {
+                valueSerializer.writeInt8(0)
+                const value_color_value_0 = unsafeCast<Color>(value_color_value)
+                valueSerializer.writeInt32(value_color_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_color_value_type) {
+                valueSerializer.writeInt8(1)
+                const value_color_value_1 = unsafeCast<number>(value_color_value)
+                valueSerializer.writeNumber(value_color_value_1)
+            }
+            else if (RuntimeType.STRING == value_color_value_type) {
+                valueSerializer.writeInt8(2)
+                const value_color_value_2 = unsafeCast<string>(value_color_value)
+                valueSerializer.writeString(value_color_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_color_value_type) {
+                valueSerializer.writeInt8(3)
+                const value_color_value_3 = unsafeCast<Resource>(value_color_value)
+                valueSerializer.writeResource(value_color_value_3)
+            }
         }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
+        const value_radius = value.radius
+        let value_radius_type: int32 = RuntimeType.UNDEFINED
+        value_radius_type = runtimeType(value_radius)
+        valueSerializer.writeInt8(value_radius_type)
+        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
+            const value_radius_value = value_radius!
+            let value_radius_value_type: int32 = RuntimeType.UNDEFINED
+            value_radius_value_type = runtimeType(value_radius_value)
+            if (((RuntimeType.NUMBER) == (value_radius_value_type)) || ((RuntimeType.STRING) == (value_radius_value_type)) || (((RuntimeType.OBJECT) == (value_radius_value_type)) && (isResource(value_radius_value)))) {
+                valueSerializer.writeInt8(0)
+                const value_radius_value_0 = unsafeCast<Dimension>(value_radius_value)
+                valueSerializer.writeLength(value_radius_value_0)
+            }
+            else if (((RuntimeType.OBJECT) == (value_radius_value_type)) && (((value_radius_value!.hasOwnProperty("topLeft")) || (value_radius_value!.hasOwnProperty("topRight")) || (value_radius_value!.hasOwnProperty("bottomLeft")) || (value_radius_value!.hasOwnProperty("bottomRight"))))) {
+                valueSerializer.writeInt8(1)
+                const value_radius_value_1 = unsafeCast<BorderRadiuses>(value_radius_value)
+                const value_radius_value_1_topLeft = value_radius_value_1.topLeft
+                let value_radius_value_1_topLeft_type: int32 = RuntimeType.UNDEFINED
+                value_radius_value_1_topLeft_type = runtimeType(value_radius_value_1_topLeft)
+                valueSerializer.writeInt8(value_radius_value_1_topLeft_type)
+                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_topLeft_type)) {
+                    const value_radius_value_1_topLeft_value = value_radius_value_1_topLeft!
+                    valueSerializer.writeLength(value_radius_value_1_topLeft_value)
+                }
+                const value_radius_value_1_topRight = value_radius_value_1.topRight
+                let value_radius_value_1_topRight_type: int32 = RuntimeType.UNDEFINED
+                value_radius_value_1_topRight_type = runtimeType(value_radius_value_1_topRight)
+                valueSerializer.writeInt8(value_radius_value_1_topRight_type)
+                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_topRight_type)) {
+                    const value_radius_value_1_topRight_value = value_radius_value_1_topRight!
+                    valueSerializer.writeLength(value_radius_value_1_topRight_value)
+                }
+                const value_radius_value_1_bottomLeft = value_radius_value_1.bottomLeft
+                let value_radius_value_1_bottomLeft_type: int32 = RuntimeType.UNDEFINED
+                value_radius_value_1_bottomLeft_type = runtimeType(value_radius_value_1_bottomLeft)
+                valueSerializer.writeInt8(value_radius_value_1_bottomLeft_type)
+                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_bottomLeft_type)) {
+                    const value_radius_value_1_bottomLeft_value = value_radius_value_1_bottomLeft!
+                    valueSerializer.writeLength(value_radius_value_1_bottomLeft_value)
+                }
+                const value_radius_value_1_bottomRight = value_radius_value_1.bottomRight
+                let value_radius_value_1_bottomRight_type: int32 = RuntimeType.UNDEFINED
+                value_radius_value_1_bottomRight_type = runtimeType(value_radius_value_1_bottomRight)
+                valueSerializer.writeInt8(value_radius_value_1_bottomRight_type)
+                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_bottomRight_type)) {
+                    const value_radius_value_1_bottomRight_value = value_radius_value_1_bottomRight!
+                    valueSerializer.writeLength(value_radius_value_1_bottomRight_value)
+                }
+            }
+        }
+    }
+    writeImageAttachmentLayoutStyle(value: ImageAttachmentLayoutStyle): void {
+        let valueSerializer: Serializer = this
+        const value_margin = value.margin
+        let value_margin_type: int32 = RuntimeType.UNDEFINED
+        value_margin_type = runtimeType(value_margin)
+        valueSerializer.writeInt8(value_margin_type)
+        if ((RuntimeType.UNDEFINED) != (value_margin_type)) {
+            const value_margin_value = value_margin!
+            let value_margin_value_type: int32 = RuntimeType.UNDEFINED
+            value_margin_value_type = runtimeType(value_margin_value)
+            if (((RuntimeType.OBJECT) == (value_margin_value_type)) && (value_margin_value instanceof LengthMetrics)) {
+                valueSerializer.writeInt8(0)
+                const value_margin_value_0 = unsafeCast<LengthMetrics>(value_margin_value)
+                valueSerializer.writeLengthMetrics(value_margin_value_0)
+            }
+            else if (isPadding(value_margin_value)) {
+                valueSerializer.writeInt8(1)
+                const value_margin_value_1 = unsafeCast<Margin>(value_margin_value)
+                const value_margin_value_1_top = value_margin_value_1.top
+                let value_margin_value_1_top_type: int32 = RuntimeType.UNDEFINED
+                value_margin_value_1_top_type = runtimeType(value_margin_value_1_top)
+                valueSerializer.writeInt8(value_margin_value_1_top_type)
+                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_top_type)) {
+                    const value_margin_value_1_top_value = value_margin_value_1_top!
+                    valueSerializer.writeLength(value_margin_value_1_top_value)
+                }
+                const value_margin_value_1_right = value_margin_value_1.right
+                let value_margin_value_1_right_type: int32 = RuntimeType.UNDEFINED
+                value_margin_value_1_right_type = runtimeType(value_margin_value_1_right)
+                valueSerializer.writeInt8(value_margin_value_1_right_type)
+                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_right_type)) {
+                    const value_margin_value_1_right_value = value_margin_value_1_right!
+                    valueSerializer.writeLength(value_margin_value_1_right_value)
+                }
+                const value_margin_value_1_bottom = value_margin_value_1.bottom
+                let value_margin_value_1_bottom_type: int32 = RuntimeType.UNDEFINED
+                value_margin_value_1_bottom_type = runtimeType(value_margin_value_1_bottom)
+                valueSerializer.writeInt8(value_margin_value_1_bottom_type)
+                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_bottom_type)) {
+                    const value_margin_value_1_bottom_value = value_margin_value_1_bottom!
+                    valueSerializer.writeLength(value_margin_value_1_bottom_value)
+                }
+                const value_margin_value_1_left = value_margin_value_1.left
+                let value_margin_value_1_left_type: int32 = RuntimeType.UNDEFINED
+                value_margin_value_1_left_type = runtimeType(value_margin_value_1_left)
+                valueSerializer.writeInt8(value_margin_value_1_left_type)
+                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_left_type)) {
+                    const value_margin_value_1_left_value = value_margin_value_1_left!
+                    valueSerializer.writeLength(value_margin_value_1_left_value)
+                }
+            }
+        }
+        const value_padding = value.padding
+        let value_padding_type: int32 = RuntimeType.UNDEFINED
+        value_padding_type = runtimeType(value_padding)
+        valueSerializer.writeInt8(value_padding_type)
+        if ((RuntimeType.UNDEFINED) != (value_padding_type)) {
+            const value_padding_value = value_padding!
+            let value_padding_value_type: int32 = RuntimeType.UNDEFINED
+            value_padding_value_type = runtimeType(value_padding_value)
+            if (((RuntimeType.OBJECT) == (value_padding_value_type)) && (value_padding_value instanceof LengthMetrics)) {
+                valueSerializer.writeInt8(0)
+                const value_padding_value_0 = unsafeCast<LengthMetrics>(value_padding_value)
+                valueSerializer.writeLengthMetrics(value_padding_value_0)
+            }
+            else if (isPadding(value_padding_value)) {
+                valueSerializer.writeInt8(1)
+                const value_padding_value_1 = unsafeCast<Padding>(value_padding_value)
+                const value_padding_value_1_top = value_padding_value_1.top
+                let value_padding_value_1_top_type: int32 = RuntimeType.UNDEFINED
+                value_padding_value_1_top_type = runtimeType(value_padding_value_1_top)
+                valueSerializer.writeInt8(value_padding_value_1_top_type)
+                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_top_type)) {
+                    const value_padding_value_1_top_value = value_padding_value_1_top!
+                    valueSerializer.writeLength(value_padding_value_1_top_value)
+                }
+                const value_padding_value_1_right = value_padding_value_1.right
+                let value_padding_value_1_right_type: int32 = RuntimeType.UNDEFINED
+                value_padding_value_1_right_type = runtimeType(value_padding_value_1_right)
+                valueSerializer.writeInt8(value_padding_value_1_right_type)
+                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_right_type)) {
+                    const value_padding_value_1_right_value = value_padding_value_1_right!
+                    valueSerializer.writeLength(value_padding_value_1_right_value)
+                }
+                const value_padding_value_1_bottom = value_padding_value_1.bottom
+                let value_padding_value_1_bottom_type: int32 = RuntimeType.UNDEFINED
+                value_padding_value_1_bottom_type = runtimeType(value_padding_value_1_bottom)
+                valueSerializer.writeInt8(value_padding_value_1_bottom_type)
+                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_bottom_type)) {
+                    const value_padding_value_1_bottom_value = value_padding_value_1_bottom!
+                    valueSerializer.writeLength(value_padding_value_1_bottom_value)
+                }
+                const value_padding_value_1_left = value_padding_value_1.left
+                let value_padding_value_1_left_type: int32 = RuntimeType.UNDEFINED
+                value_padding_value_1_left_type = runtimeType(value_padding_value_1_left)
+                valueSerializer.writeInt8(value_padding_value_1_left_type)
+                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_left_type)) {
+                    const value_padding_value_1_left_value = value_padding_value_1_left!
+                    valueSerializer.writeLength(value_padding_value_1_left_value)
+                }
+            }
+        }
+        const value_borderRadius = value.borderRadius
+        let value_borderRadius_type: int32 = RuntimeType.UNDEFINED
+        value_borderRadius_type = runtimeType(value_borderRadius)
+        valueSerializer.writeInt8(value_borderRadius_type)
+        if ((RuntimeType.UNDEFINED) != (value_borderRadius_type)) {
+            const value_borderRadius_value = value_borderRadius!
+            let value_borderRadius_value_type: int32 = RuntimeType.UNDEFINED
+            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
+            if (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (value_borderRadius_value instanceof LengthMetrics)) {
+                valueSerializer.writeInt8(0)
+                const value_borderRadius_value_0 = unsafeCast<LengthMetrics>(value_borderRadius_value)
+                valueSerializer.writeLengthMetrics(value_borderRadius_value_0)
+            }
+            else if (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (((value_borderRadius_value!.hasOwnProperty("topLeft")) || (value_borderRadius_value!.hasOwnProperty("topRight")) || (value_borderRadius_value!.hasOwnProperty("bottomLeft")) || (value_borderRadius_value!.hasOwnProperty("bottomRight"))))) {
+                valueSerializer.writeInt8(1)
+                const value_borderRadius_value_1 = unsafeCast<BorderRadiuses>(value_borderRadius_value)
+                const value_borderRadius_value_1_topLeft = value_borderRadius_value_1.topLeft
+                let value_borderRadius_value_1_topLeft_type: int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_1_topLeft_type = runtimeType(value_borderRadius_value_1_topLeft)
+                valueSerializer.writeInt8(value_borderRadius_value_1_topLeft_type)
+                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_topLeft_type)) {
+                    const value_borderRadius_value_1_topLeft_value = value_borderRadius_value_1_topLeft!
+                    valueSerializer.writeLength(value_borderRadius_value_1_topLeft_value)
+                }
+                const value_borderRadius_value_1_topRight = value_borderRadius_value_1.topRight
+                let value_borderRadius_value_1_topRight_type: int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_1_topRight_type = runtimeType(value_borderRadius_value_1_topRight)
+                valueSerializer.writeInt8(value_borderRadius_value_1_topRight_type)
+                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_topRight_type)) {
+                    const value_borderRadius_value_1_topRight_value = value_borderRadius_value_1_topRight!
+                    valueSerializer.writeLength(value_borderRadius_value_1_topRight_value)
+                }
+                const value_borderRadius_value_1_bottomLeft = value_borderRadius_value_1.bottomLeft
+                let value_borderRadius_value_1_bottomLeft_type: int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_1_bottomLeft_type = runtimeType(value_borderRadius_value_1_bottomLeft)
+                valueSerializer.writeInt8(value_borderRadius_value_1_bottomLeft_type)
+                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_bottomLeft_type)) {
+                    const value_borderRadius_value_1_bottomLeft_value = value_borderRadius_value_1_bottomLeft!
+                    valueSerializer.writeLength(value_borderRadius_value_1_bottomLeft_value)
+                }
+                const value_borderRadius_value_1_bottomRight = value_borderRadius_value_1.bottomRight
+                let value_borderRadius_value_1_bottomRight_type: int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_1_bottomRight_type = runtimeType(value_borderRadius_value_1_bottomRight)
+                valueSerializer.writeInt8(value_borderRadius_value_1_bottomRight_type)
+                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_bottomRight_type)) {
+                    const value_borderRadius_value_1_bottomRight_value = value_borderRadius_value_1_bottomRight!
+                    valueSerializer.writeLength(value_borderRadius_value_1_bottomRight_value)
+                }
+            }
+        }
+    }
+    writeSizeOptions(value: SizeOptions): void {
+        let valueSerializer: Serializer = this
+        const value_width = value.width
+        let value_width_type: int32 = RuntimeType.UNDEFINED
+        value_width_type = runtimeType(value_width)
+        valueSerializer.writeInt8(value_width_type)
+        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+            const value_width_value = value_width!
+            valueSerializer.writeLength(value_width_value)
+        }
+        const value_height = value.height
+        let value_height_type: int32 = RuntimeType.UNDEFINED
+        value_height_type = runtimeType(value_height)
+        valueSerializer.writeInt8(value_height_type)
+        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
+            const value_height_value = value_height!
+            valueSerializer.writeLength(value_height_value)
         }
     }
     writePosition(value: Position): void {
@@ -430,16 +650,6 @@ export class Serializer extends SerializerBase {
         let valueSerializer: Serializer = this
         const value__SymbolGlyphModifierStub = value._SymbolGlyphModifierStub
         valueSerializer.writeString(value__SymbolGlyphModifierStub)
-    }
-    writeLeadingMarginPlaceholder(value: LeadingMarginPlaceholder): void {
-        let valueSerializer: Serializer = this
-        const value_pixelMap = value.pixelMap
-        valueSerializer.writePixelMap(value_pixelMap)
-        const value_size = value.size
-        const value_size_0 = value_size[0]
-        valueSerializer.writeLength(value_size_0)
-        const value_size_1 = value_size[1]
-        valueSerializer.writeLength(value_size_1)
     }
     writeShadowOptions(value: ShadowOptions): void {
         let valueSerializer: Serializer = this
@@ -590,6 +800,56 @@ export class Serializer extends SerializerBase {
             const value_xxl_value = value_xxl!
             valueSerializer.writeLength(value_xxl_value)
         }
+    }
+    writeBackgroundColorStyle(value: BackgroundColorStyle): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeUserDataSpan(value: UserDataSpan): void {
+    }
+    writeCustomSpan(value: CustomSpan): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeUrlStyle(value: UrlStyle): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeLineHeightStyle(value: LineHeightStyle): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeParagraphStyle(value: ParagraphStyle): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeImageAttachment(value: ImageAttachment): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeGestureStyle(value: GestureStyle): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeTextShadowStyle(value: TextShadowStyle): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeLetterSpacingStyle(value: LetterSpacingStyle): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeBaselineOffsetStyle(value: BaselineOffsetStyle): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeDecorationStyle(value: DecorationStyle): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeTextStyle_styled_string(value: TextStyle_styled_string): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeArea(value: Area): void {
         let valueSerializer: Serializer = this
@@ -770,7 +1030,7 @@ export class Serializer extends SerializerBase {
                 const value_margin_value_0 = unsafeCast<Dimension>(value_margin_value)
                 valueSerializer.writeLength(value_margin_value_0)
             }
-            else if (((RuntimeType.OBJECT) == (value_margin_value_type)) && (((value_margin_value!.hasOwnProperty("top")) || (value_margin_value!.hasOwnProperty("right")) || (value_margin_value!.hasOwnProperty("bottom")) || (value_margin_value!.hasOwnProperty("left"))))) {
+            else if (isPadding(value_margin_value)) {
                 valueSerializer.writeInt8(1)
                 const value_margin_value_1 = unsafeCast<Margin>(value_margin_value)
                 const value_margin_value_1_top = value_margin_value_1.top
@@ -1127,20 +1387,7 @@ export class Serializer extends SerializerBase {
     }
     writeTransitionEffect(value: TransitionEffect): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLocalizedBorderRadiuses(value: LocalizedBorderRadiuses): void {
         let valueSerializer: Serializer = this
@@ -1179,236 +1426,19 @@ export class Serializer extends SerializerBase {
     }
     writeCanvasPattern(value: CanvasPattern): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCanvasGradient(value: CanvasGradient): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeColorMetrics(value: ColorMetrics): void {
         let valueSerializer: Serializer = this
-        const value__ColorMetricsStub = value._ColorMetricsStub
-        valueSerializer.writeString(value__ColorMetricsStub)
-    }
-    writeStyledStringValue(value: StyledStringValue): void {
-        let valueSerializer: Serializer = this
-        const value_stub = value.stub
-        valueSerializer.writeString(value_stub)
-    }
-    writeImageAttachmentLayoutStyle(value: ImageAttachmentLayoutStyle): void {
-        let valueSerializer: Serializer = this
-        const value_margin = value.margin
-        let value_margin_type: int32 = RuntimeType.UNDEFINED
-        value_margin_type = runtimeType(value_margin)
-        valueSerializer.writeInt8(value_margin_type)
-        if ((RuntimeType.UNDEFINED) != (value_margin_type)) {
-            const value_margin_value = value_margin!
-            let value_margin_value_type: int32 = RuntimeType.UNDEFINED
-            value_margin_value_type = runtimeType(value_margin_value)
-            if (((RuntimeType.OBJECT) == (value_margin_value_type)) && (value_margin_value instanceof LengthMetrics)) {
-                valueSerializer.writeInt8(0)
-                const value_margin_value_0 = unsafeCast<LengthMetrics>(value_margin_value)
-                valueSerializer.writeLengthMetrics(value_margin_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_margin_value_type)) && (((value_margin_value!.hasOwnProperty("top")) || (value_margin_value!.hasOwnProperty("right")) || (value_margin_value!.hasOwnProperty("bottom")) || (value_margin_value!.hasOwnProperty("left"))))) {
-                valueSerializer.writeInt8(1)
-                const value_margin_value_1 = unsafeCast<Margin>(value_margin_value)
-                const value_margin_value_1_top = value_margin_value_1.top
-                let value_margin_value_1_top_type: int32 = RuntimeType.UNDEFINED
-                value_margin_value_1_top_type = runtimeType(value_margin_value_1_top)
-                valueSerializer.writeInt8(value_margin_value_1_top_type)
-                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_top_type)) {
-                    const value_margin_value_1_top_value = value_margin_value_1_top!
-                    valueSerializer.writeLength(value_margin_value_1_top_value)
-                }
-                const value_margin_value_1_right = value_margin_value_1.right
-                let value_margin_value_1_right_type: int32 = RuntimeType.UNDEFINED
-                value_margin_value_1_right_type = runtimeType(value_margin_value_1_right)
-                valueSerializer.writeInt8(value_margin_value_1_right_type)
-                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_right_type)) {
-                    const value_margin_value_1_right_value = value_margin_value_1_right!
-                    valueSerializer.writeLength(value_margin_value_1_right_value)
-                }
-                const value_margin_value_1_bottom = value_margin_value_1.bottom
-                let value_margin_value_1_bottom_type: int32 = RuntimeType.UNDEFINED
-                value_margin_value_1_bottom_type = runtimeType(value_margin_value_1_bottom)
-                valueSerializer.writeInt8(value_margin_value_1_bottom_type)
-                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_bottom_type)) {
-                    const value_margin_value_1_bottom_value = value_margin_value_1_bottom!
-                    valueSerializer.writeLength(value_margin_value_1_bottom_value)
-                }
-                const value_margin_value_1_left = value_margin_value_1.left
-                let value_margin_value_1_left_type: int32 = RuntimeType.UNDEFINED
-                value_margin_value_1_left_type = runtimeType(value_margin_value_1_left)
-                valueSerializer.writeInt8(value_margin_value_1_left_type)
-                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_left_type)) {
-                    const value_margin_value_1_left_value = value_margin_value_1_left!
-                    valueSerializer.writeLength(value_margin_value_1_left_value)
-                }
-            }
-        }
-        const value_padding = value.padding
-        let value_padding_type: int32 = RuntimeType.UNDEFINED
-        value_padding_type = runtimeType(value_padding)
-        valueSerializer.writeInt8(value_padding_type)
-        if ((RuntimeType.UNDEFINED) != (value_padding_type)) {
-            const value_padding_value = value_padding!
-            let value_padding_value_type: int32 = RuntimeType.UNDEFINED
-            value_padding_value_type = runtimeType(value_padding_value)
-            if (((RuntimeType.OBJECT) == (value_padding_value_type)) && (value_padding_value instanceof LengthMetrics)) {
-                valueSerializer.writeInt8(0)
-                const value_padding_value_0 = unsafeCast<LengthMetrics>(value_padding_value)
-                valueSerializer.writeLengthMetrics(value_padding_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_padding_value_type)) && (((value_padding_value!.hasOwnProperty("top")) || (value_padding_value!.hasOwnProperty("right")) || (value_padding_value!.hasOwnProperty("bottom")) || (value_padding_value!.hasOwnProperty("left"))))) {
-                valueSerializer.writeInt8(1)
-                const value_padding_value_1 = unsafeCast<Padding>(value_padding_value)
-                const value_padding_value_1_top = value_padding_value_1.top
-                let value_padding_value_1_top_type: int32 = RuntimeType.UNDEFINED
-                value_padding_value_1_top_type = runtimeType(value_padding_value_1_top)
-                valueSerializer.writeInt8(value_padding_value_1_top_type)
-                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_top_type)) {
-                    const value_padding_value_1_top_value = value_padding_value_1_top!
-                    valueSerializer.writeLength(value_padding_value_1_top_value)
-                }
-                const value_padding_value_1_right = value_padding_value_1.right
-                let value_padding_value_1_right_type: int32 = RuntimeType.UNDEFINED
-                value_padding_value_1_right_type = runtimeType(value_padding_value_1_right)
-                valueSerializer.writeInt8(value_padding_value_1_right_type)
-                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_right_type)) {
-                    const value_padding_value_1_right_value = value_padding_value_1_right!
-                    valueSerializer.writeLength(value_padding_value_1_right_value)
-                }
-                const value_padding_value_1_bottom = value_padding_value_1.bottom
-                let value_padding_value_1_bottom_type: int32 = RuntimeType.UNDEFINED
-                value_padding_value_1_bottom_type = runtimeType(value_padding_value_1_bottom)
-                valueSerializer.writeInt8(value_padding_value_1_bottom_type)
-                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_bottom_type)) {
-                    const value_padding_value_1_bottom_value = value_padding_value_1_bottom!
-                    valueSerializer.writeLength(value_padding_value_1_bottom_value)
-                }
-                const value_padding_value_1_left = value_padding_value_1.left
-                let value_padding_value_1_left_type: int32 = RuntimeType.UNDEFINED
-                value_padding_value_1_left_type = runtimeType(value_padding_value_1_left)
-                valueSerializer.writeInt8(value_padding_value_1_left_type)
-                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_left_type)) {
-                    const value_padding_value_1_left_value = value_padding_value_1_left!
-                    valueSerializer.writeLength(value_padding_value_1_left_value)
-                }
-            }
-        }
-        const value_borderRadius = value.borderRadius
-        let value_borderRadius_type: int32 = RuntimeType.UNDEFINED
-        value_borderRadius_type = runtimeType(value_borderRadius)
-        valueSerializer.writeInt8(value_borderRadius_type)
-        if ((RuntimeType.UNDEFINED) != (value_borderRadius_type)) {
-            const value_borderRadius_value = value_borderRadius!
-            let value_borderRadius_value_type: int32 = RuntimeType.UNDEFINED
-            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (value_borderRadius_value instanceof LengthMetrics)) {
-                valueSerializer.writeInt8(0)
-                const value_borderRadius_value_0 = unsafeCast<LengthMetrics>(value_borderRadius_value)
-                valueSerializer.writeLengthMetrics(value_borderRadius_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (((value_borderRadius_value!.hasOwnProperty("topLeft")) || (value_borderRadius_value!.hasOwnProperty("topRight")) || (value_borderRadius_value!.hasOwnProperty("bottomLeft")) || (value_borderRadius_value!.hasOwnProperty("bottomRight"))))) {
-                valueSerializer.writeInt8(1)
-                const value_borderRadius_value_1 = unsafeCast<BorderRadiuses>(value_borderRadius_value)
-                const value_borderRadius_value_1_topLeft = value_borderRadius_value_1.topLeft
-                let value_borderRadius_value_1_topLeft_type: int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_1_topLeft_type = runtimeType(value_borderRadius_value_1_topLeft)
-                valueSerializer.writeInt8(value_borderRadius_value_1_topLeft_type)
-                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_topLeft_type)) {
-                    const value_borderRadius_value_1_topLeft_value = value_borderRadius_value_1_topLeft!
-                    valueSerializer.writeLength(value_borderRadius_value_1_topLeft_value)
-                }
-                const value_borderRadius_value_1_topRight = value_borderRadius_value_1.topRight
-                let value_borderRadius_value_1_topRight_type: int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_1_topRight_type = runtimeType(value_borderRadius_value_1_topRight)
-                valueSerializer.writeInt8(value_borderRadius_value_1_topRight_type)
-                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_topRight_type)) {
-                    const value_borderRadius_value_1_topRight_value = value_borderRadius_value_1_topRight!
-                    valueSerializer.writeLength(value_borderRadius_value_1_topRight_value)
-                }
-                const value_borderRadius_value_1_bottomLeft = value_borderRadius_value_1.bottomLeft
-                let value_borderRadius_value_1_bottomLeft_type: int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_1_bottomLeft_type = runtimeType(value_borderRadius_value_1_bottomLeft)
-                valueSerializer.writeInt8(value_borderRadius_value_1_bottomLeft_type)
-                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_bottomLeft_type)) {
-                    const value_borderRadius_value_1_bottomLeft_value = value_borderRadius_value_1_bottomLeft!
-                    valueSerializer.writeLength(value_borderRadius_value_1_bottomLeft_value)
-                }
-                const value_borderRadius_value_1_bottomRight = value_borderRadius_value_1.bottomRight
-                let value_borderRadius_value_1_bottomRight_type: int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_1_bottomRight_type = runtimeType(value_borderRadius_value_1_bottomRight)
-                valueSerializer.writeInt8(value_borderRadius_value_1_bottomRight_type)
-                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_bottomRight_type)) {
-                    const value_borderRadius_value_1_bottomRight_value = value_borderRadius_value_1_bottomRight!
-                    valueSerializer.writeLength(value_borderRadius_value_1_bottomRight_value)
-                }
-            }
-        }
-    }
-    writeSizeOptions(value: SizeOptions): void {
-        let valueSerializer: Serializer = this
-        const value_width = value.width
-        let value_width_type: int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8(value_width_type)
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
-            const value_width_value = value_width!
-            valueSerializer.writeLength(value_width_value)
-        }
-        const value_height = value.height
-        let value_height_type: int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8(value_height_type)
-        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
-            const value_height_value = value_height!
-            valueSerializer.writeLength(value_height_value)
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeImageAnalyzerController(value: ImageAnalyzerController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeEventTarget(value: EventTarget): void {
         let valueSerializer: Serializer = this
@@ -1417,54 +1447,15 @@ export class Serializer extends SerializerBase {
     }
     writeWebResourceRequest(value: WebResourceRequest): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebviewController(value: WebviewController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebController(value: WebController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDateTimeOptions(value: DateTimeOptions): void {
         let valueSerializer: Serializer = this
@@ -1750,20 +1741,7 @@ export class Serializer extends SerializerBase {
     }
     writeTextMenuItemId(value: TextMenuItemId): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeAffinity(value: Affinity): void {
         let valueSerializer: Serializer = this
@@ -2604,37 +2582,11 @@ export class Serializer extends SerializerBase {
     }
     writeNavPathStack(value: NavPathStack): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeNavPathInfo(value: NavPathInfo): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextModifier(value: TextModifier): void {
     }
@@ -2834,20 +2786,7 @@ export class Serializer extends SerializerBase {
     }
     writeLinearGradient(value: LinearGradient): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLunarSwitchStyle(value: LunarSwitchStyle): void {
         let valueSerializer: Serializer = this
@@ -3085,18 +3024,32 @@ export class Serializer extends SerializerBase {
         }
     }
     writeGestureGroupInterface(value: GestureGroupInterface): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRotationGestureInterface(value: RotationGestureInterface): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwipeGestureInterface(value: SwipeGestureInterface): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePinchGestureInterface(value: PinchGestureInterface): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePanGestureInterface(value: PanGestureInterface): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLongPressGestureInterface(value: LongPressGestureInterface): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTapGestureInterface(value: TapGestureInterface): void {
+        let valueSerializer: Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRotateOptions(value: RotateOptions): void {
         let valueSerializer: Serializer = this
@@ -3387,20 +3340,7 @@ export class Serializer extends SerializerBase {
     }
     writeDrawingCanvas(value: DrawingCanvas): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSize(value: Size): void {
         let valueSerializer: Serializer = this
@@ -3411,20 +3351,7 @@ export class Serializer extends SerializerBase {
     }
     writeFrameNode(value: FrameNode): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextStyle_alert_dialog(value: TextStyle_alert_dialog): void {
         let valueSerializer: Serializer = this
@@ -3721,20 +3648,7 @@ export class Serializer extends SerializerBase {
     }
     writeStyledString(value: StyledString): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeNavigationAnimatedTransition(value: NavigationAnimatedTransition): void {
         let valueSerializer: Serializer = this
@@ -3870,159 +3784,83 @@ export class Serializer extends SerializerBase {
         const value_styledKey = value.styledKey
         valueSerializer.writeInt32(value_styledKey)
         const value_styledValue = value.styledValue
-        valueSerializer.writeStyledStringValue(value_styledValue)
-    }
-    writeTextBackgroundStyle(value: TextBackgroundStyle): void {
-        let valueSerializer: Serializer = this
-        const value_color = value.color
-        let value_color_type: int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8(value_color_type)
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
-            const value_color_value = value_color!
-            let value_color_value_type: int32 = RuntimeType.UNDEFINED
-            value_color_value_type = runtimeType(value_color_value)
-            if (((RuntimeType.NUMBER) == (value_color_value_type)) && ((unsafeCast<int32>(value_color_value)) >= (0)) && ((unsafeCast<int32>(value_color_value)) <= (11))) {
-                valueSerializer.writeInt8(0)
-                const value_color_value_0 = unsafeCast<Color>(value_color_value)
-                valueSerializer.writeInt32(value_color_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_color_value_type) {
-                valueSerializer.writeInt8(1)
-                const value_color_value_1 = unsafeCast<number>(value_color_value)
-                valueSerializer.writeNumber(value_color_value_1)
-            }
-            else if (RuntimeType.STRING == value_color_value_type) {
-                valueSerializer.writeInt8(2)
-                const value_color_value_2 = unsafeCast<string>(value_color_value)
-                valueSerializer.writeString(value_color_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_color_value_type) {
-                valueSerializer.writeInt8(3)
-                const value_color_value_3 = unsafeCast<Resource>(value_color_value)
-                valueSerializer.writeResource(value_color_value_3)
-            }
+        let value_styledValue_type: int32 = RuntimeType.UNDEFINED
+        value_styledValue_type = runtimeType(value_styledValue)
+        if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof TextStyle_styled_string)) {
+            valueSerializer.writeInt8(0)
+            const value_styledValue_0 = unsafeCast<TextStyle_styled_string>(value_styledValue)
+            valueSerializer.writeTextStyle_styled_string(value_styledValue_0)
         }
-        const value_radius = value.radius
-        let value_radius_type: int32 = RuntimeType.UNDEFINED
-        value_radius_type = runtimeType(value_radius)
-        valueSerializer.writeInt8(value_radius_type)
-        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
-            const value_radius_value = value_radius!
-            let value_radius_value_type: int32 = RuntimeType.UNDEFINED
-            value_radius_value_type = runtimeType(value_radius_value)
-            if (((RuntimeType.NUMBER) == (value_radius_value_type)) || ((RuntimeType.STRING) == (value_radius_value_type)) || (((RuntimeType.OBJECT) == (value_radius_value_type)) && (isResource(value_radius_value)))) {
-                valueSerializer.writeInt8(0)
-                const value_radius_value_0 = unsafeCast<Dimension>(value_radius_value)
-                valueSerializer.writeLength(value_radius_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_radius_value_type)) && (((value_radius_value!.hasOwnProperty("topLeft")) || (value_radius_value!.hasOwnProperty("topRight")) || (value_radius_value!.hasOwnProperty("bottomLeft")) || (value_radius_value!.hasOwnProperty("bottomRight"))))) {
-                valueSerializer.writeInt8(1)
-                const value_radius_value_1 = unsafeCast<BorderRadiuses>(value_radius_value)
-                const value_radius_value_1_topLeft = value_radius_value_1.topLeft
-                let value_radius_value_1_topLeft_type: int32 = RuntimeType.UNDEFINED
-                value_radius_value_1_topLeft_type = runtimeType(value_radius_value_1_topLeft)
-                valueSerializer.writeInt8(value_radius_value_1_topLeft_type)
-                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_topLeft_type)) {
-                    const value_radius_value_1_topLeft_value = value_radius_value_1_topLeft!
-                    valueSerializer.writeLength(value_radius_value_1_topLeft_value)
-                }
-                const value_radius_value_1_topRight = value_radius_value_1.topRight
-                let value_radius_value_1_topRight_type: int32 = RuntimeType.UNDEFINED
-                value_radius_value_1_topRight_type = runtimeType(value_radius_value_1_topRight)
-                valueSerializer.writeInt8(value_radius_value_1_topRight_type)
-                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_topRight_type)) {
-                    const value_radius_value_1_topRight_value = value_radius_value_1_topRight!
-                    valueSerializer.writeLength(value_radius_value_1_topRight_value)
-                }
-                const value_radius_value_1_bottomLeft = value_radius_value_1.bottomLeft
-                let value_radius_value_1_bottomLeft_type: int32 = RuntimeType.UNDEFINED
-                value_radius_value_1_bottomLeft_type = runtimeType(value_radius_value_1_bottomLeft)
-                valueSerializer.writeInt8(value_radius_value_1_bottomLeft_type)
-                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_bottomLeft_type)) {
-                    const value_radius_value_1_bottomLeft_value = value_radius_value_1_bottomLeft!
-                    valueSerializer.writeLength(value_radius_value_1_bottomLeft_value)
-                }
-                const value_radius_value_1_bottomRight = value_radius_value_1.bottomRight
-                let value_radius_value_1_bottomRight_type: int32 = RuntimeType.UNDEFINED
-                value_radius_value_1_bottomRight_type = runtimeType(value_radius_value_1_bottomRight)
-                valueSerializer.writeInt8(value_radius_value_1_bottomRight_type)
-                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_bottomRight_type)) {
-                    const value_radius_value_1_bottomRight_value = value_radius_value_1_bottomRight!
-                    valueSerializer.writeLength(value_radius_value_1_bottomRight_value)
-                }
-            }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof DecorationStyle)) {
+            valueSerializer.writeInt8(1)
+            const value_styledValue_1 = unsafeCast<DecorationStyle>(value_styledValue)
+            valueSerializer.writeDecorationStyle(value_styledValue_1)
         }
-    }
-    writeCustomSpan(value: CustomSpan): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof BaselineOffsetStyle)) {
+            valueSerializer.writeInt8(2)
+            const value_styledValue_2 = unsafeCast<BaselineOffsetStyle>(value_styledValue)
+            valueSerializer.writeBaselineOffsetStyle(value_styledValue_2)
         }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof LetterSpacingStyle)) {
+            valueSerializer.writeInt8(3)
+            const value_styledValue_3 = unsafeCast<LetterSpacingStyle>(value_styledValue)
+            valueSerializer.writeLetterSpacingStyle(value_styledValue_3)
         }
-    }
-    writeImageAttachment(value: ImageAttachment): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof TextShadowStyle)) {
+            valueSerializer.writeInt8(4)
+            const value_styledValue_4 = unsafeCast<TextShadowStyle>(value_styledValue)
+            valueSerializer.writeTextShadowStyle(value_styledValue_4)
         }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof GestureStyle)) {
+            valueSerializer.writeInt8(5)
+            const value_styledValue_5 = unsafeCast<GestureStyle>(value_styledValue)
+            valueSerializer.writeGestureStyle(value_styledValue_5)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof ImageAttachment)) {
+            valueSerializer.writeInt8(6)
+            const value_styledValue_6 = unsafeCast<ImageAttachment>(value_styledValue)
+            valueSerializer.writeImageAttachment(value_styledValue_6)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof ParagraphStyle)) {
+            valueSerializer.writeInt8(7)
+            const value_styledValue_7 = unsafeCast<ParagraphStyle>(value_styledValue)
+            valueSerializer.writeParagraphStyle(value_styledValue_7)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof LineHeightStyle)) {
+            valueSerializer.writeInt8(8)
+            const value_styledValue_8 = unsafeCast<LineHeightStyle>(value_styledValue)
+            valueSerializer.writeLineHeightStyle(value_styledValue_8)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof UrlStyle)) {
+            valueSerializer.writeInt8(9)
+            const value_styledValue_9 = unsafeCast<UrlStyle>(value_styledValue)
+            valueSerializer.writeUrlStyle(value_styledValue_9)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof CustomSpan)) {
+            valueSerializer.writeInt8(10)
+            const value_styledValue_10 = unsafeCast<CustomSpan>(value_styledValue)
+            valueSerializer.writeCustomSpan(value_styledValue_10)
+        }
+        else if (RuntimeType.OBJECT == value_styledValue_type) {
+            valueSerializer.writeInt8(11)
+            const value_styledValue_11 = unsafeCast<UserDataSpan>(value_styledValue)
+            valueSerializer.writeUserDataSpan(value_styledValue_11)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof BackgroundColorStyle)) {
+            valueSerializer.writeInt8(12)
+            const value_styledValue_12 = unsafeCast<BackgroundColorStyle>(value_styledValue)
+            valueSerializer.writeBackgroundColorStyle(value_styledValue_12)
         }
     }
     writeWaterFlowAttribute(value: WaterFlowAttribute): void {
     }
     writeWaterFlowSections(value: WaterFlowSections): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScroller(value: Scroller): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSectionOptions(value: SectionOptions): void {
         let valueSerializer: Serializer = this
@@ -4068,7 +3906,7 @@ export class Serializer extends SerializerBase {
             const value_margin_value = value_margin!
             let value_margin_value_type: int32 = RuntimeType.UNDEFINED
             value_margin_value_type = runtimeType(value_margin_value)
-            if (((RuntimeType.OBJECT) == (value_margin_value_type)) && (((value_margin_value!.hasOwnProperty("top")) || (value_margin_value!.hasOwnProperty("right")) || (value_margin_value!.hasOwnProperty("bottom")) || (value_margin_value!.hasOwnProperty("left"))))) {
+            if (isPadding(value_margin_value)) {
                 valueSerializer.writeInt8(0)
                 const value_margin_value_0 = unsafeCast<Margin>(value_margin_value)
                 const value_margin_value_0_top = value_margin_value_0.top
@@ -4262,20 +4100,7 @@ export class Serializer extends SerializerBase {
     }
     writeXComponentController(value: XComponentController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeImageAnalyzerConfig(value: ImageAnalyzerConfig): void {
         let valueSerializer: Serializer = this
@@ -4361,54 +4186,15 @@ export class Serializer extends SerializerBase {
     }
     writeWebKeyboardController(value: WebKeyboardController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeEventResult(value: EventResult): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTouchEvent(value: TouchEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeNativeEmbedInfo(value: NativeEmbedInfo): void {
         let valueSerializer: Serializer = this
@@ -4533,309 +4319,75 @@ export class Serializer extends SerializerBase {
     }
     writeDataResubmissionHandler(value: DataResubmissionHandler): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeControllerHandler(value: ControllerHandler): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeClientAuthenticationHandler(value: ClientAuthenticationHandler): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSslErrorHandler(value: SslErrorHandler): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebContextMenuResult(value: WebContextMenuResult): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebContextMenuParam(value: WebContextMenuParam): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScreenCaptureHandler(value: ScreenCaptureHandler): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePermissionRequest(value: PermissionRequest): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeHttpAuthHandler(value: HttpAuthHandler): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFullScreenExitHandler(value: FullScreenExitHandler): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFileSelectorParam(value: FileSelectorParam): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFileSelectorResult(value: FileSelectorResult): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebResourceResponse(value: WebResourceResponse): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebResourceError(value: WebResourceError): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeConsoleMessage(value: ConsoleMessage): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeJsResult(value: JsResult): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeJsGeolocation(value: JsGeolocation): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebCookie(value: WebCookie): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScreenCaptureConfig(value: ScreenCaptureConfig): void {
         let valueSerializer: Serializer = this
@@ -4844,20 +4396,7 @@ export class Serializer extends SerializerBase {
     }
     writeVideoController(value: VideoController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTimePickerDialogOptions(value: TimePickerDialogOptions): void {
         let valueSerializer: Serializer = this
@@ -5091,20 +4630,7 @@ export class Serializer extends SerializerBase {
     }
     writeTextTimerController(value: TextTimerController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextPickerDialogOptions(value: TextPickerDialogOptions): void {
         let valueSerializer: Serializer = this
@@ -5634,20 +5160,7 @@ export class Serializer extends SerializerBase {
     }
     writeTextInputController(value: TextInputController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSelectionOptions(value: SelectionOptions): void {
         let valueSerializer: Serializer = this
@@ -5730,20 +5243,7 @@ export class Serializer extends SerializerBase {
     }
     writeMutableStyledString(value: MutableStyledString): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePreviewText(value: PreviewText): void {
         let valueSerializer: Serializer = this
@@ -5754,56 +5254,17 @@ export class Serializer extends SerializerBase {
     }
     writeLayoutManager(value: LayoutManager): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextClockController(value: TextClockController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextAreaAttribute(value: TextAreaAttribute): void {
     }
     writeTextAreaController(value: TextAreaController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextAttribute(value: TextAttribute): void {
     }
@@ -5847,20 +5308,7 @@ export class Serializer extends SerializerBase {
     }
     writeTextController(value: TextController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeBottomTabBarStyle(value: BottomTabBarStyle): void {
         let valueSerializer: Serializer = this
@@ -5929,7 +5377,7 @@ export class Serializer extends SerializerBase {
             const value__padding_value = value__padding!
             let value__padding_value_type: int32 = RuntimeType.UNDEFINED
             value__padding_value_type = runtimeType(value__padding_value)
-            if (((RuntimeType.OBJECT) == (value__padding_value_type)) && (((value__padding_value!.hasOwnProperty("right")) || (value__padding_value!.hasOwnProperty("left"))))) {
+            if (isPadding(value__padding_value)) {
                 valueSerializer.writeInt8(0)
                 const value__padding_value_0 = unsafeCast<Padding>(value__padding_value)
                 const value__padding_value_0_top = value__padding_value_0.top
@@ -6083,12 +5531,12 @@ export class Serializer extends SerializerBase {
             const value__padding_value = value__padding!
             let value__padding_value_type: int32 = RuntimeType.UNDEFINED
             value__padding_value_type = runtimeType(value__padding_value)
-            if ((((RuntimeType.OBJECT) == (value__padding_value_type)) && (((value__padding_value!.hasOwnProperty("top")) || (value__padding_value!.hasOwnProperty("right")) || (value__padding_value!.hasOwnProperty("bottom")) || (value__padding_value!.hasOwnProperty("left"))))) || (((RuntimeType.NUMBER) == (value__padding_value_type)) || ((RuntimeType.STRING) == (value__padding_value_type)) || (((RuntimeType.OBJECT) == (value__padding_value_type)) && (isResource(value__padding_value))))) {
+            if ((isPadding(value__padding_value)) || (((RuntimeType.NUMBER) == (value__padding_value_type)) || ((RuntimeType.STRING) == (value__padding_value_type)) || (((RuntimeType.OBJECT) == (value__padding_value_type)) && (isResource(value__padding_value))))) {
                 valueSerializer.writeInt8(0)
                 const value__padding_value_0 = unsafeCast<Padding | Dimension>(value__padding_value)
                 let value__padding_value_0_type: int32 = RuntimeType.UNDEFINED
                 value__padding_value_0_type = runtimeType(value__padding_value_0)
-                if (((RuntimeType.OBJECT) == (value__padding_value_0_type)) && (((value__padding_value_0!.hasOwnProperty("top")) || (value__padding_value_0!.hasOwnProperty("right")) || (value__padding_value_0!.hasOwnProperty("bottom")) || (value__padding_value_0!.hasOwnProperty("left"))))) {
+                if (isPadding(value__padding_value_0)) {
                     valueSerializer.writeInt8(0)
                     const value__padding_value_0_0 = unsafeCast<Padding>(value__padding_value_0)
                     const value__padding_value_0_0_top = value__padding_value_0_0.top
@@ -6294,20 +5742,7 @@ export class Serializer extends SerializerBase {
     }
     writeTabsController(value: TabsController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSymbolGlyphAttribute(value: SymbolGlyphAttribute): void {
     }
@@ -6872,20 +6307,7 @@ export class Serializer extends SerializerBase {
     }
     writeSearchController(value: SearchController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScrollAttribute(value: ScrollAttribute): void {
     }
@@ -6997,37 +6419,11 @@ export class Serializer extends SerializerBase {
     }
     writeRichEditorStyledStringController(value: RichEditorStyledStringController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRichEditorController(value: RichEditorController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRichEditorAttribute(value: RichEditorAttribute): void {
     }
@@ -7881,20 +7277,7 @@ export class Serializer extends SerializerBase {
     }
     writeNavDestinationContext(value: NavDestinationContext): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeNavigationInterception(value: NavigationInterception): void {
         let valueSerializer: Serializer = this
@@ -8318,20 +7701,7 @@ export class Serializer extends SerializerBase {
     }
     writeMatrix2D(value: Matrix2D): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeListDividerOptions(value: ListDividerOptions): void {
         let valueSerializer: Serializer = this
@@ -8424,20 +7794,7 @@ export class Serializer extends SerializerBase {
     }
     writeColorFilter(value: ColorFilter): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeBreakPoints(value: BreakPoints): void {
         let valueSerializer: Serializer = this
@@ -8466,37 +7823,11 @@ export class Serializer extends SerializerBase {
     }
     writePanGestureOptions(value: PanGestureOptions): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeEventTargetInfo(value: EventTargetInfo): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWindowStatusType(value: WindowStatusType): void {
         let valueSerializer: Serializer = this
@@ -8901,11 +8232,6 @@ export class Serializer extends SerializerBase {
     }
     writeComponent3DAttribute(value: Component3DAttribute): void {
     }
-    writeContext(value: Context): void {
-        let valueSerializer: Serializer = this
-        const value__ContextStub = value._ContextStub
-        valueSerializer.writeString(value__ContextStub)
-    }
     writeUIGestureEvent(value: UIGestureEvent): void {
     }
     writeVisibleAreaEventOptions(value: VisibleAreaEventOptions): void {
@@ -8938,20 +8264,7 @@ export class Serializer extends SerializerBase {
     }
     writeRectShape(value: RectShape): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCaretOffset(value: CaretOffset): void {
         let valueSerializer: Serializer = this
@@ -11049,71 +10362,19 @@ export class Serializer extends SerializerBase {
     }
     writePathShape(value: PathShape): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeEllipseShape(value: EllipseShape): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCircleShape(value: CircleShape): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeProgressMask(value: ProgressMask): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDragItemInfo(value: DragItemInfo): void {
         let valueSerializer: Serializer = this
@@ -11275,20 +10536,7 @@ export class Serializer extends SerializerBase {
     }
     writeDrawModifier(value: DrawModifier): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeIntentionCode(value: IntentionCode): void {
         let valueSerializer: Serializer = this
@@ -11302,20 +10550,7 @@ export class Serializer extends SerializerBase {
     }
     writeUnifiedData(value: UnifiedData): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTouchObject(value: TouchObject): void {
         let valueSerializer: Serializer = this
@@ -11339,6 +10574,11 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeNumber(value_x)
         const value_y = value.y
         valueSerializer.writeNumber(value_y)
+    }
+    writeContext(value: Context): void {
+        let valueSerializer: Serializer = this
+        const value__ContextStub = value._ContextStub
+        valueSerializer.writeString(value__ContextStub)
     }
     writeColumnSplitDividerStyle(value: ColumnSplitDividerStyle): void {
         let valueSerializer: Serializer = this
@@ -11401,88 +10641,23 @@ export class Serializer extends SerializerBase {
     }
     writeDrawingRenderingContext(value: DrawingRenderingContext): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCanvasRenderingContext2D(value: CanvasRenderingContext2D): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeOffscreenCanvasRenderingContext2D(value: OffscreenCanvasRenderingContext2D): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRenderingContextSettings(value: RenderingContextSettings): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeImageBitmap(value: ImageBitmap): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextMetrics(value: TextMetrics): void {
         let valueSerializer: Serializer = this
@@ -11515,37 +10690,11 @@ export class Serializer extends SerializerBase {
     }
     writeImageData(value: ImageData): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePath2D(value: Path2D): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCalendarDialogOptions(value: CalendarDialogOptions): void {
         let valueSerializer: Serializer = this
@@ -11725,20 +10874,7 @@ export class Serializer extends SerializerBase {
     }
     writeCalendarController(value: CalendarController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeMonthData(value: MonthData): void {
         let valueSerializer: Serializer = this
@@ -14144,20 +13280,7 @@ export class Serializer extends SerializerBase {
     }
     writeClickEvent(value: ClickEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFontOptions(value: FontOptions): void {
         let valueSerializer: Serializer = this
@@ -14349,37 +13472,11 @@ export class Serializer extends SerializerBase {
     }
     writeBaseShape(value: BaseShape): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCommonShape(value: CommonShape): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSnapshotOptions(value: SnapshotOptions): void {
         let valueSerializer: Serializer = this
@@ -14479,20 +13576,7 @@ export class Serializer extends SerializerBase {
     }
     writeLinearIndicatorController(value: LinearIndicatorController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeImageAttachmentInterface(value: ImageAttachmentInterface): void {
         let valueSerializer: Serializer = this
@@ -14529,40 +13613,6 @@ export class Serializer extends SerializerBase {
         if ((RuntimeType.UNDEFINED) != (value_layoutStyle_type)) {
             const value_layoutStyle_value = value_layoutStyle!
             valueSerializer.writeImageAttachmentLayoutStyle(value_layoutStyle_value)
-        }
-    }
-    writeUrlStyle(value: UrlStyle): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeLineHeightStyle(value: LineHeightStyle): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
         }
     }
     writeParagraphStyleInterface(value: ParagraphStyleInterface): void {
@@ -14627,23 +13677,6 @@ export class Serializer extends SerializerBase {
             }
         }
     }
-    writeParagraphStyle(value: ParagraphStyle): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeGestureStyleInterface(value: GestureStyleInterface): void {
         let valueSerializer: Serializer = this
         const value_onClick = value.onClick
@@ -14661,108 +13694,6 @@ export class Serializer extends SerializerBase {
         if ((RuntimeType.UNDEFINED) != (value_onLongPress_type)) {
             const value_onLongPress_value = value_onLongPress!
             valueSerializer.holdAndWriteCallback(value_onLongPress_value)
-        }
-    }
-    writeGestureStyle(value: GestureStyle): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeBackgroundColorStyle(value: BackgroundColorStyle): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeTextShadowStyle(value: TextShadowStyle): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeLetterSpacingStyle(value: LetterSpacingStyle): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeBaselineOffsetStyle(value: BaselineOffsetStyle): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeDecorationStyle(value: DecorationStyle): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
         }
     }
     writeTextStyleInterface(value: TextStyleInterface): void {
@@ -14856,23 +13787,6 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeInt32(value_fontStyle_value)
         }
     }
-    writeTextStyle_styled_string(value: TextStyle_styled_string): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeStyleOptions(value: StyleOptions): void {
         let valueSerializer: Serializer = this
         const value_start = value.start
@@ -14894,7 +13808,73 @@ export class Serializer extends SerializerBase {
         const value_styledKey = value.styledKey
         valueSerializer.writeInt32(value_styledKey)
         const value_styledValue = value.styledValue
-        valueSerializer.writeStyledStringValue(value_styledValue)
+        let value_styledValue_type: int32 = RuntimeType.UNDEFINED
+        value_styledValue_type = runtimeType(value_styledValue)
+        if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof TextStyle_styled_string)) {
+            valueSerializer.writeInt8(0)
+            const value_styledValue_0 = unsafeCast<TextStyle_styled_string>(value_styledValue)
+            valueSerializer.writeTextStyle_styled_string(value_styledValue_0)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof DecorationStyle)) {
+            valueSerializer.writeInt8(1)
+            const value_styledValue_1 = unsafeCast<DecorationStyle>(value_styledValue)
+            valueSerializer.writeDecorationStyle(value_styledValue_1)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof BaselineOffsetStyle)) {
+            valueSerializer.writeInt8(2)
+            const value_styledValue_2 = unsafeCast<BaselineOffsetStyle>(value_styledValue)
+            valueSerializer.writeBaselineOffsetStyle(value_styledValue_2)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof LetterSpacingStyle)) {
+            valueSerializer.writeInt8(3)
+            const value_styledValue_3 = unsafeCast<LetterSpacingStyle>(value_styledValue)
+            valueSerializer.writeLetterSpacingStyle(value_styledValue_3)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof TextShadowStyle)) {
+            valueSerializer.writeInt8(4)
+            const value_styledValue_4 = unsafeCast<TextShadowStyle>(value_styledValue)
+            valueSerializer.writeTextShadowStyle(value_styledValue_4)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof GestureStyle)) {
+            valueSerializer.writeInt8(5)
+            const value_styledValue_5 = unsafeCast<GestureStyle>(value_styledValue)
+            valueSerializer.writeGestureStyle(value_styledValue_5)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof ImageAttachment)) {
+            valueSerializer.writeInt8(6)
+            const value_styledValue_6 = unsafeCast<ImageAttachment>(value_styledValue)
+            valueSerializer.writeImageAttachment(value_styledValue_6)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof ParagraphStyle)) {
+            valueSerializer.writeInt8(7)
+            const value_styledValue_7 = unsafeCast<ParagraphStyle>(value_styledValue)
+            valueSerializer.writeParagraphStyle(value_styledValue_7)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof LineHeightStyle)) {
+            valueSerializer.writeInt8(8)
+            const value_styledValue_8 = unsafeCast<LineHeightStyle>(value_styledValue)
+            valueSerializer.writeLineHeightStyle(value_styledValue_8)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof UrlStyle)) {
+            valueSerializer.writeInt8(9)
+            const value_styledValue_9 = unsafeCast<UrlStyle>(value_styledValue)
+            valueSerializer.writeUrlStyle(value_styledValue_9)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof CustomSpan)) {
+            valueSerializer.writeInt8(10)
+            const value_styledValue_10 = unsafeCast<CustomSpan>(value_styledValue)
+            valueSerializer.writeCustomSpan(value_styledValue_10)
+        }
+        else if (RuntimeType.OBJECT == value_styledValue_type) {
+            valueSerializer.writeInt8(11)
+            const value_styledValue_11 = unsafeCast<UserDataSpan>(value_styledValue)
+            valueSerializer.writeUserDataSpan(value_styledValue_11)
+        }
+        else if (((RuntimeType.OBJECT) == (value_styledValue_type)) && (value_styledValue instanceof BackgroundColorStyle)) {
+            valueSerializer.writeInt8(12)
+            const value_styledValue_12 = unsafeCast<BackgroundColorStyle>(value_styledValue)
+            valueSerializer.writeBackgroundColorStyle(value_styledValue_12)
+        }
     }
     writeReceiveCallback(value: ReceiveCallback): void {
         let valueSerializer: Serializer = this
@@ -14942,20 +13922,7 @@ export class Serializer extends SerializerBase {
     }
     writeUIExtensionProxy(value: UIExtensionProxy): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWaterFlowOptions(value: WaterFlowOptions): void {
         let valueSerializer: Serializer = this
@@ -15975,23 +14942,6 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeBoolean(value_isOn_value)
         }
     }
-    writeTimePickerDialog(value: TimePickerDialog): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeTimePickerResult(value: TimePickerResult): void {
         let valueSerializer: Serializer = this
         const value_hour = value.hour
@@ -16082,23 +15032,6 @@ export class Serializer extends SerializerBase {
                 const value_index_1_element: number = value_index_1[i]
                 valueSerializer.writeNumber(value_index_1_element)
             }
-        }
-    }
-    writeTextPickerDialog(value: TextPickerDialog): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
         }
     }
     writeTextCascadePickerRangeContent(value: TextCascadePickerRangeContent): void {
@@ -16358,54 +15291,15 @@ export class Serializer extends SerializerBase {
     }
     writeStyledStringController(value: StyledStringController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextEditControllerEx(value: TextEditControllerEx): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextBaseController(value: TextBaseController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextClockOptions(value: TextClockOptions): void {
         let valueSerializer: Serializer = this
@@ -16487,20 +15381,7 @@ export class Serializer extends SerializerBase {
     }
     writeTabContentTransitionProxy(value: TabContentTransitionProxy): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeBarGridColumnOptions(value: BarGridColumnOptions): void {
         let valueSerializer: Serializer = this
@@ -16583,88 +15464,23 @@ export class Serializer extends SerializerBase {
     }
     writeBounceSymbolEffect(value: BounceSymbolEffect): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDisappearSymbolEffect(value: DisappearSymbolEffect): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeAppearSymbolEffect(value: AppearSymbolEffect): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeHierarchicalSymbolEffect(value: HierarchicalSymbolEffect): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwiperContentTransitionProxy(value: SwiperContentTransitionProxy): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwiperContentAnimatedTransition(value: SwiperContentAnimatedTransition): void {
         let valueSerializer: Serializer = this
@@ -16690,37 +15506,11 @@ export class Serializer extends SerializerBase {
     }
     writeIndicatorComponentController(value: IndicatorComponentController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwiperController(value: SwiperController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeStackOptions(value: StackOptions): void {
         let valueSerializer: Serializer = this
@@ -17261,20 +16051,7 @@ export class Serializer extends SerializerBase {
     }
     writeEditMenuOptions(value: EditMenuOptions): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCopyEvent(value: CopyEvent): void {
         let valueSerializer: Serializer = this
@@ -17323,20 +16100,7 @@ export class Serializer extends SerializerBase {
     }
     writeSubmitEvent(value: SubmitEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextDataDetectorConfig(value: TextDataDetectorConfig): void {
         let valueSerializer: Serializer = this
@@ -17471,20 +16235,7 @@ export class Serializer extends SerializerBase {
     }
     writeRichEditorBaseController(value: RichEditorBaseController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLocalizedBarrierStyle(value: LocalizedBarrierStyle): void {
         let valueSerializer: Serializer = this
@@ -17874,20 +16625,7 @@ export class Serializer extends SerializerBase {
     }
     writePatternLockController(value: PatternLockController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePathOptions(value: PathOptions): void {
         let valueSerializer: Serializer = this
@@ -17969,20 +16707,7 @@ export class Serializer extends SerializerBase {
     }
     writeNavigationTransitionProxy(value: NavigationTransitionProxy): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRouteInfo(value: RouteInfo): void {
         let valueSerializer: Serializer = this
@@ -18487,20 +17212,7 @@ export class Serializer extends SerializerBase {
     }
     writeListScroller(value: ListScroller): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLineOptions(value: LineOptions): void {
         let valueSerializer: Serializer = this
@@ -18938,156 +17650,66 @@ export class Serializer extends SerializerBase {
     }
     writePanRecognizer(value: PanRecognizer): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScrollableTargetInfo(value: ScrollableTargetInfo): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeTapGestureParameters(value: TapGestureParameters): void {
+        let valueSerializer: Serializer = this
+        const value_count = value.count
+        let value_count_type: int32 = RuntimeType.UNDEFINED
+        value_count_type = runtimeType(value_count)
+        valueSerializer.writeInt8(value_count_type)
+        if ((RuntimeType.UNDEFINED) != (value_count_type)) {
+            const value_count_value = value_count!
+            valueSerializer.writeNumber(value_count_value)
         }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
+        const value_fingers = value.fingers
+        let value_fingers_type: int32 = RuntimeType.UNDEFINED
+        value_fingers_type = runtimeType(value_fingers)
+        valueSerializer.writeInt8(value_fingers_type)
+        if ((RuntimeType.UNDEFINED) != (value_fingers_type)) {
+            const value_fingers_value = value_fingers!
+            valueSerializer.writeNumber(value_fingers_value)
+        }
+        const value_distanceThreshold = value.distanceThreshold
+        let value_distanceThreshold_type: int32 = RuntimeType.UNDEFINED
+        value_distanceThreshold_type = runtimeType(value_distanceThreshold)
+        valueSerializer.writeInt8(value_distanceThreshold_type)
+        if ((RuntimeType.UNDEFINED) != (value_distanceThreshold_type)) {
+            const value_distanceThreshold_value = value_distanceThreshold!
+            valueSerializer.writeNumber(value_distanceThreshold_value)
         }
     }
     writeGestureEvent(value: GestureEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwipeGestureEvent(value: SwipeGestureEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRotationGestureEvent(value: RotationGestureEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePinchGestureEvent(value: PinchGestureEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePanGestureEvent(value: PanGestureEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLongPressGestureEvent(value: LongPressGestureEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTapGestureEvent(value: TapGestureEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeGaugeIndicatorOptions(value: GaugeIndicatorOptions): void {
         let valueSerializer: Serializer = this
@@ -19467,23 +18089,6 @@ export class Serializer extends SerializerBase {
                 const value_height_value_1 = unsafeCast<number>(value_height_value)
                 valueSerializer.writeNumber(value_height_value_1)
             }
-        }
-    }
-    writeDatePickerDialog(value: DatePickerDialog): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
         }
     }
     writeDatePickerResult(value: DatePickerResult): void {
@@ -20233,37 +18838,7 @@ export class Serializer extends SerializerBase {
     }
     writeCustomDialogController(value: CustomDialogController): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeContextMenu(value: ContextMenu): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSceneOptions(value: SceneOptions): void {
         let valueSerializer: Serializer = this
@@ -20308,88 +18883,23 @@ export class Serializer extends SerializerBase {
     }
     writeUICommonEvent(value: UICommonEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeChildrenMainSize(value: ChildrenMainSize): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextContentControllerBase(value: TextContentControllerBase): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeView(value: View): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeMeasurable(value: Measurable): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSpringBackAction(value: SpringBackAction): void {
         let valueSerializer: Serializer = this
@@ -20477,20 +18987,7 @@ export class Serializer extends SerializerBase {
     }
     writeGestureRecognizer(value: GestureRecognizer): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFingerInfo(value: FingerInfo): void {
         let valueSerializer: Serializer = this
@@ -20511,20 +19008,7 @@ export class Serializer extends SerializerBase {
     }
     writeBaseGestureEvent(value: BaseGestureEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeGestureInfo(value: GestureInfo): void {
         let valueSerializer: Serializer = this
@@ -20550,20 +19034,7 @@ export class Serializer extends SerializerBase {
     }
     writeGestureModifier(value: GestureModifier): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePixelStretchEffectOptions(value: PixelStretchEffectOptions): void {
         let valueSerializer: Serializer = this
@@ -22036,54 +20507,15 @@ export class Serializer extends SerializerBase {
     }
     writeKeyEvent(value: KeyEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDragEvent(value: DragEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePixelMapMock(value: PixelMapMock): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeHistoricalPoint(value: HistoricalPoint): void {
         let valueSerializer: Serializer = this
@@ -22098,71 +20530,19 @@ export class Serializer extends SerializerBase {
     }
     writeAccessibilityHoverEvent(value: AccessibilityHoverEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeMouseEvent(value: MouseEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeHoverEvent(value: HoverEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeBaseEvent(value: BaseEvent): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePointLightStyle(value: PointLightStyle): void {
         let valueSerializer: Serializer = this
@@ -22353,37 +20733,11 @@ export class Serializer extends SerializerBase {
     }
     writeOffscreenCanvas(value: OffscreenCanvas): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCanvasRenderer(value: CanvasRenderer): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLengthMetricsUnit(value: LengthMetricsUnit): void {
         let valueSerializer: Serializer = this
@@ -22392,37 +20746,7 @@ export class Serializer extends SerializerBase {
     }
     writeCanvasPath(value: CanvasPath): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeCalendarPickerDialog(value: CalendarPickerDialog): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCalendarOptions(value: CalendarOptions): void {
         let valueSerializer: Serializer = this
@@ -23296,71 +21620,19 @@ export class Serializer extends SerializerBase {
     }
     writeScrollMotion(value: ScrollMotion): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFrictionMotion(value: FrictionMotion): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSpringMotion(value: SpringMotion): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSpringProp(value: SpringProp): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeAlphabetIndexerOptions(value: AlphabetIndexerOptions): void {
         let valueSerializer: Serializer = this
@@ -23481,23 +21753,6 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeBoolean(value_primary_value)
         }
     }
-    writeAlertDialog(value: AlertDialog): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeDismissDialogAction(value: DismissDialogAction): void {
         let valueSerializer: Serializer = this
         const value_dismiss = value.dismiss
@@ -23542,107 +21797,13 @@ export class Serializer extends SerializerBase {
         const value_action = value.action
         valueSerializer.holdAndWriteCallback(value_action)
     }
-    writeActionSheet(value: ActionSheet): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeEventEmulator(value: EventEmulator): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeNavExtender(value: NavExtender): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeReplaceSymbolEffect(value: ReplaceSymbolEffect): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScaleSymbolEffect(value: ScaleSymbolEffect): void {
         let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeGlobalScope_ohos_font(value: GlobalScope_ohos_font): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePathShapeOptions(value: PathShapeOptions): void {
         let valueSerializer: Serializer = this
@@ -23696,97 +21857,12 @@ export class Serializer extends SerializerBase {
             }
         }
     }
-    writeGlobalScope_ohos_arkui_performanceMonitor(value: GlobalScope_ohos_arkui_performanceMonitor): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeGlobalScope_ohos_arkui_componentSnapshot(value: GlobalScope_ohos_arkui_componentSnapshot): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeWebHeader(value: WebHeader): void {
         let valueSerializer: Serializer = this
         const value_headerKey = value.headerKey
         valueSerializer.writeString(value_headerKey)
         const value_headerValue = value.headerValue
         valueSerializer.writeString(value_headerValue)
-    }
-    writeSystemOps(value: SystemOps): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeLazyForEachOps(value: LazyForEachOps): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeAnimationExtender(value: AnimationExtender): void {
-        let valueSerializer: Serializer = this
-        if (value.hasOwnProperty("peer"))
-        {
-            const base: MaterializedBase = unsafeCast<MaterializedBase>(value)
-            const peer = base.getPeer()
-            let ptr: KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
     }
     writeLength(value: Length): void {
         const valueType = runtimeType(value)

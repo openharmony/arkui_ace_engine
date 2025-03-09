@@ -19,7 +19,7 @@
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,7 +33,7 @@ export class LengthMetricsInternal {
     }
 }
 export class LengthMetrics implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -67,6 +67,22 @@ export class LengthMetrics implements MaterializedBase {
         const value_casted = value as (number)
         return LengthMetrics.px_serialize(value_casted)
     }
+    public static vp(value: number): LengthMetrics {
+        const value_casted = value as (number)
+        return LengthMetrics.vp_serialize(value_casted)
+    }
+    public static fp(value: number): LengthMetrics {
+        const value_casted = value as (number)
+        return LengthMetrics.fp_serialize(value_casted)
+    }
+    public static percent(value: number): LengthMetrics {
+        const value_casted = value as (number)
+        return LengthMetrics.percent_serialize(value_casted)
+    }
+    public static lpx(value: number): LengthMetrics {
+        const value_casted = value as (number)
+        return LengthMetrics.lpx_serialize(value_casted)
+    }
     public static resource(value: Resource): LengthMetrics {
         const value_casted = value as (Resource)
         return LengthMetrics.resource_serialize(value_casted)
@@ -92,6 +108,26 @@ export class LengthMetrics implements MaterializedBase {
         const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
         return obj
     }
+    private static vp_serialize(value: number): LengthMetrics {
+        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_vp(value)
+        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        return obj
+    }
+    private static fp_serialize(value: number): LengthMetrics {
+        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_fp(value)
+        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        return obj
+    }
+    private static percent_serialize(value: number): LengthMetrics {
+        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_percent(value)
+        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        return obj
+    }
+    private static lpx_serialize(value: number): LengthMetrics {
+        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_lpx(value)
+        const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
+        return obj
+    }
     private static resource_serialize(value: Resource): LengthMetrics {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeResource(value)
@@ -105,7 +141,7 @@ export class LengthMetrics implements MaterializedBase {
         throw new Error("Object deserialization is not implemented.")
     }
     private setUnit_serialize(unit: LengthUnit): void {
-        ArkUIGeneratedNativeModule._LengthMetrics_setUnit(this.peer!.ptr, (unit.valueOf() as int32))
+        ArkUIGeneratedNativeModule._LengthMetrics_setUnit(this.peer!.ptr, ((unit as LengthUnit) as int32))
     }
     private getValue_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._LengthMetrics_getValue(this.peer!.ptr)

@@ -17,14 +17,14 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkCommonMethodComponent } from "./ArkCommon"
 import { ArkRichEditorPeer } from "./peers/ArkRichEditorPeer"
-import { UseEventsProperties } from "./use_properties"
 import { CommonMethod, Rectangle, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, CustomBuilder, DragItemInfo, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DrawContext, TouchTestInfo, TouchResult, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, LinearGradient_common, FinishCallbackType, ExpectedFrameRateRange, TransitionEffects, TransitionEdge, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, ShadowType, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, ImageModifier, OverlayOffset, TransitionHierarchyStrategy, PopupMessageOptions, SymbolGlyphModifier, MenuPreviewMode, ContextMenuAnimationOptions, BindOptions, SheetSize, SheetType, SheetTitleOptions, SheetMode, ScrollSizeMode, UIContext, SheetKeyboardAvoidMode, SourceTool, RectResult, TouchTestStrategy, EventTarget, SourceType, TouchObject, HistoricalPoint, IntentionCode, DragBehavior, Summary, DragResult, DismissPopupAction, DismissContentCoverAction, SheetDismiss, DismissSheetAction, SpringBackAction, DismissReason, SelectionOptions, MenuPolicy } from "./ArkCommonInterfaces"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, ColorMetrics, Area, Bias, Font } from "./ArkUnitsInterfaces"
+import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Area, Bias, Font } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, Curve, PlayMode, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, FontWeight, FontStyle, CopyOptions, BarState, TextDecorationType, TextDecorationStyle, TextAlign, WordBreak, LineBreakStrategy, ImageSpanAlignment, ImageFit } from "./ArkEnumsInterfaces"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
@@ -40,13 +40,21 @@ import { ProgressMask } from "./ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../handwritten"
 import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { GestureType, GestureMask, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { TapGestureInterface } from "./ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./ArkGestureGroupInterfaceMaterialized"
 import { LengthUnit, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions, RectWidthStyle, RectHeightStyle } from "./ArkArkuiExternalInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { HoverEvent } from "./ArkHoverEventMaterialized"
 import { MouseEvent } from "./ArkMouseEventMaterialized"
 import { TouchEvent } from "./ArkTouchEventMaterialized"
 import { KeyEvent } from "./ArkKeyEventMaterialized"
+import { ColorMetrics } from "./ArkColorMetricsMaterialized"
 import { ICurve } from "./ArkICurveMaterialized"
 import { DragEvent } from "./ArkDragEventMaterialized"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
@@ -75,7 +83,7 @@ import { ImageAttachment } from "./ArkImageAttachmentMaterialized"
 import { CustomSpan } from "./ArkCustomSpanMaterialized"
 /** @memo:stable */
 export class ArkRichEditorComponent extends ArkCommonMethodComponent {
-    getPeer(): ArkRichEditorPeer {
+    protected getPeer(): ArkRichEditorPeer {
         return (this.peer as ArkRichEditorPeer)
     }
     /** @memo */
@@ -100,7 +108,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onReady(value: (() => void)): this {
         if (this.checkPriority("onReady")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({RichEditor_onReady: value_casted})
             this.getPeer()?.onReadyAttribute(value_casted)
             return this
         }
@@ -110,7 +117,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onSelect(value: ((parameter: RichEditorSelection) => void)): this {
         if (this.checkPriority("onSelect")) {
             const value_casted = value as (((parameter: RichEditorSelection) => void))
-            UseEventsProperties({RichEditor_onSelect: value_casted})
             this.getPeer()?.onSelectAttribute(value_casted)
             return this
         }
@@ -120,7 +126,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onSelectionChange(value: ((parameter: RichEditorRange) => void)): this {
         if (this.checkPriority("onSelectionChange")) {
             const value_casted = value as (((parameter: RichEditorRange) => void))
-            UseEventsProperties({RichEditor_onSelectionChange: value_casted})
             this.getPeer()?.onSelectionChangeAttribute(value_casted)
             return this
         }
@@ -130,7 +135,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public aboutToIMEInput(value: ((parameter: RichEditorInsertValue) => boolean)): this {
         if (this.checkPriority("aboutToIMEInput")) {
             const value_casted = value as (((parameter: RichEditorInsertValue) => boolean))
-            UseEventsProperties({RichEditor_aboutToIMEInput: value_casted})
             this.getPeer()?.aboutToIMEInputAttribute(value_casted)
             return this
         }
@@ -140,7 +144,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onIMEInputComplete(value: ((parameter: RichEditorTextSpanResult) => void)): this {
         if (this.checkPriority("onIMEInputComplete")) {
             const value_casted = value as (((parameter: RichEditorTextSpanResult) => void))
-            UseEventsProperties({RichEditor_onIMEInputComplete: value_casted})
             this.getPeer()?.onIMEInputCompleteAttribute(value_casted)
             return this
         }
@@ -150,7 +153,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onDidIMEInput(value: ((parameter: TextRange) => void)): this {
         if (this.checkPriority("onDidIMEInput")) {
             const value_casted = value as (((parameter: TextRange) => void))
-            UseEventsProperties({RichEditor_onDidIMEInput: value_casted})
             this.getPeer()?.onDidIMEInputAttribute(value_casted)
             return this
         }
@@ -160,7 +162,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public aboutToDelete(value: ((parameter: RichEditorDeleteValue) => boolean)): this {
         if (this.checkPriority("aboutToDelete")) {
             const value_casted = value as (((parameter: RichEditorDeleteValue) => boolean))
-            UseEventsProperties({RichEditor_aboutToDelete: value_casted})
             this.getPeer()?.aboutToDeleteAttribute(value_casted)
             return this
         }
@@ -170,7 +171,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onDeleteComplete(value: (() => void)): this {
         if (this.checkPriority("onDeleteComplete")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({RichEditor_onDeleteComplete: value_casted})
             this.getPeer()?.onDeleteCompleteAttribute(value_casted)
             return this
         }
@@ -189,7 +189,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onPaste(value: PasteEventCallback): this {
         if (this.checkPriority("onPaste")) {
             const value_casted = value as (PasteEventCallback)
-            UseEventsProperties({RichEditor_onPaste: value_casted})
             this.getPeer()?.onPasteAttribute(value_casted)
             return this
         }
@@ -244,7 +243,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onEditingChange(value: ((parameter: boolean) => void)): this {
         if (this.checkPriority("onEditingChange")) {
             const value_casted = value as (((parameter: boolean) => void))
-            UseEventsProperties({RichEditor_onEditingChange: value_casted})
             this.getPeer()?.onEditingChangeAttribute(value_casted)
             return this
         }
@@ -263,7 +261,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onSubmit(value: SubmitCallback): this {
         if (this.checkPriority("onSubmit")) {
             const value_casted = value as (SubmitCallback)
-            UseEventsProperties({RichEditor_onSubmit: value_casted})
             this.getPeer()?.onSubmitAttribute(value_casted)
             return this
         }
@@ -273,7 +270,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onWillChange(value: ((parameter: RichEditorChangeValue) => boolean)): this {
         if (this.checkPriority("onWillChange")) {
             const value_casted = value as (((parameter: RichEditorChangeValue) => boolean))
-            UseEventsProperties({RichEditor_onWillChange: value_casted})
             this.getPeer()?.onWillChangeAttribute(value_casted)
             return this
         }
@@ -283,7 +279,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onDidChange(value: OnDidChangeCallback): this {
         if (this.checkPriority("onDidChange")) {
             const value_casted = value as (OnDidChangeCallback)
-            UseEventsProperties({RichEditor_onDidChange: value_casted})
             this.getPeer()?.onDidChangeAttribute(value_casted)
             return this
         }
@@ -293,7 +288,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onCut(value: ((parameter: CutEvent) => void)): this {
         if (this.checkPriority("onCut")) {
             const value_casted = value as (((parameter: CutEvent) => void))
-            UseEventsProperties({RichEditor_onCut: value_casted})
             this.getPeer()?.onCutAttribute(value_casted)
             return this
         }
@@ -303,7 +297,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
     public onCopy(value: ((parameter: CopyEvent) => void)): this {
         if (this.checkPriority("onCopy")) {
             const value_casted = value as (((parameter: CopyEvent) => void))
-            UseEventsProperties({RichEditor_onCopy: value_casted})
             this.getPeer()?.onCopyAttribute(value_casted)
             return this
         }
@@ -352,7 +345,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
             const content_casted = content as (CustomBuilder)
             const responseType_casted = responseType as (ResponseType | RichEditorResponseType)
             const options_casted = options as (SelectionMenuOptions | undefined)
-            UseEventsProperties({RichEditor_bindSelectionMenu: content_casted})
             this.getPeer()?.bindSelectionMenuAttribute(spanType_casted, content_casted, responseType_casted, options_casted)
             return this
         }
@@ -363,7 +355,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent {
         if (this.checkPriority("customKeyboard")) {
             const value_casted = value as (CustomBuilder)
             const options_casted = options as (KeyboardOptions | undefined)
-            UseEventsProperties({RichEditor_customKeyboard: value_casted})
             this.getPeer()?.customKeyboardAttribute(value_casted, options_casted)
             return this
         }

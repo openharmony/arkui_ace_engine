@@ -25,14 +25,15 @@ const sdkInfo = JSON.parse(fs.readFileSync(path.join(__dirname, "ohos-sdk.json")
 
 const dir = "./interface_sdk-js"
 
-if (fs.existsSync(dir)) {
-    //execSync(`cd ${dir} && git pull`)
-} else {
-    console.log("Downloading sdk")
-    execSync("git clone https://gitee.com/openharmony/interface_sdk-js.git")
+if (!fs.existsSync(dir)) {
+    console.log("> Downloading sdk")
+    execSync("git clone https://gitee.com/openharmony/interface_sdk-js.git") || process.exit(1)
 }
 
-const components = "interface_sdk-js/api/@internal/component/ets"
-const fakeComponents = "fake-interface-sdk-declarations/"
-
-execSync(`cd interface_sdk-js && git fetch origin && git checkout ${sdkInfo.hash}`)
+const hash = execSync(`cd ${dir} && git rev-parse HEAD`).toString().trim()
+if (hash !== sdkInfo.hash) {
+    console.log("> interface_sdk-js HEAD...")
+    execSync(`cd ${dir} && git fetch origin && git checkout ${sdkInfo.hash}`)
+} else {
+    console.log("> interface_sdk-js HEAD: " + hash.substring(0, 9))
+}

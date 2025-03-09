@@ -28,7 +28,7 @@ test memo-plugin:
   before_script:
     - !reference [.setup, script]
     - !reference [.setup, regenerate-plugin-api]
-    - npm run compile:all --prefix incremental/compat
+    - npm run compile --prefix incremental/compat
     - npm run compile --prefix incremental/common
     - npm run compile --prefix incremental/compiler-plugin
     - npm run compile --prefix incremental/runtime

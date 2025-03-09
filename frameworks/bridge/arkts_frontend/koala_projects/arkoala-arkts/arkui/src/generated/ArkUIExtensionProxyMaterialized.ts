@@ -18,22 +18,22 @@
 
 import { Callback_UIExtensionProxy_Void } from "./SyntheticDeclarations"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface UIExtensionProxy {
-    send(data: Map<string, Object>): void 
-    sendSync(data: Map<string, Object>): Map<string, Object> 
-    onAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void 
-    onSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void 
-    offAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void 
-    offSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void 
+    send(data: Map<string, Object>): void
+    sendSync(data: Map<string, Object>): Map<string, Object>
+    onAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
+    onSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
+    offAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
+    offSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
 }
 export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionProxy {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -85,18 +85,38 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
     }
     private send_serialize(data: Map<string, Object>): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeInt32(data.size as int32)
-        // TODO: map serialization not implemented
+        thisSerializer.writeInt32(data.size as int32 as int32)
+        for (const pair of data) {
+            const data_key = pair[0]
+            const data_value = pair[1]
+            thisSerializer.writeString(data_key)
+            thisSerializer.writeCustomObject("Object", data_value)
+        }
         ArkUIGeneratedNativeModule._UIExtensionProxy_send(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private sendSync_serialize(data: Map<string, Object>): Map<string, Object> {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeInt32(data.size as int32)
-        // TODO: map serialization not implemented
+        thisSerializer.writeInt32(data.size as int32 as int32)
+        for (const pair of data) {
+            const data_key = pair[0]
+            const data_value = pair[1]
+            thisSerializer.writeString(data_key)
+            thisSerializer.writeCustomObject("Object", data_value)
+        }
         const retval  = ArkUIGeneratedNativeModule._UIExtensionProxy_sendSync(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const buffer_size : int32 = retvalDeserializer.readInt32()
+        let buffer : Map<string, Object> = new Map<string, Object>()
+        // TODO: TS map resize
+        for (let buffer_i = 0; buffer_i < buffer_size; buffer_i++) {
+            const buffer_key : string = (retvalDeserializer.readString() as string)
+            const buffer_value : Object = (retvalDeserializer.readCustomObject("Object") as Object)
+            buffer.set(buffer_key, buffer_value)
+        }
+        const returnResult : Map<string, Object> = buffer
+        return returnResult
     }
     private onAsyncReceiverRegister_serialize(callback_: ((parameter: UIExtensionProxy) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()

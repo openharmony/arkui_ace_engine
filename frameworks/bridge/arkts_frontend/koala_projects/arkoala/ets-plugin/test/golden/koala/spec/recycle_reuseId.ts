@@ -3,6 +3,7 @@ import { MutableState } from "@koalaui/runtime";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
 import { observableProxy } from "@koalaui/common";
 let a: string = "aaaaaaaaaa";
+/** @memo:stable */
 class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent, HomeComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -54,6 +55,7 @@ class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent,
         });
     }
 }
+/** @memo:stable */
 class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

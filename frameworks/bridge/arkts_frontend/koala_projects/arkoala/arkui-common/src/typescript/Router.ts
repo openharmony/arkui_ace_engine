@@ -14,7 +14,7 @@
  */
 
 
-import { int32, observableProxyArray } from "@koalaui/common"
+import { int32 } from "@koalaui/common"
 import {
     MutableState,
     RunEffect,
@@ -23,8 +23,9 @@ import {
     mutableState,
     remember,
     RepeatByArray,
+    arrayState,
+    scheduleCallback,
 } from "@koalaui/runtime"
-import { ArkRouteType } from "./ArkRouteType"
 
 export enum RouterTransitionVisibility {
     Hidden,
@@ -33,14 +34,23 @@ export enum RouterTransitionVisibility {
     Hiding,
 }
 
+enum RouteType {
+    NONE,
+    None = NONE,
+    PUSH = 1,
+    Push = PUSH,
+    POP = 2,
+    Pop = POP,
+}
+
 export type MemoFunction =
 /** @memo */
 () => void
 
 export interface RouterTransitionState {
-    readonly pageId: int32
     readonly visibility: RouterTransitionVisibility
-    readonly route?: ArkRouteType
+    readonly pageId: int32
+    readonly route?: RouteType
 }
 
 class VisiblePage {
@@ -53,14 +63,14 @@ class VisiblePage {
         page: MemoFunction,
         version: number,
         visibility: RouterTransitionVisibility,
-        route?: ArkRouteType
+        route?: RouteType
     ) {
         this.page = page
         this.version = version
         this.transitionState = mutableState<RouterTransitionState>({ pageId: version, visibility, route })
     }
 
-    setTransitionState(visibility: RouterTransitionVisibility, route?: ArkRouteType) {
+    setTransitionState(visibility: RouterTransitionVisibility, route?: RouteType) {
         this.transitionState.value = { pageId: this.version, visibility, route }
     }
 
@@ -70,7 +80,7 @@ class VisiblePage {
 }
 
 class RouterState {
-    readonly visiblePages = observableProxyArray<VisiblePage>()
+    readonly visiblePages = arrayState<VisiblePage>()
     currentActivePage = mutableState(0)
     constructor(
         page: MemoFunction,
@@ -119,6 +129,8 @@ export class PageInfo {
      */
     constructor(public depth: number, public page: string) { }
 }
+
+export type PageTransition = () => void
 
 /**
  * Interface providing page routing functionality.
@@ -196,7 +208,8 @@ export interface Router {
      */
     pageInfo: PageInfo
 
-    onPageTransitionEnd(pageId: int32): void
+    onPageTransitionEnd(pageId: int32, targetVisibility: RouterTransitionVisibility): void
+    schedulePageTransition(pageId: int32, transition: PageTransition): void
 }
 
 const CURRENT_ROUTER = "ohos.arkoala.router"
@@ -235,7 +248,7 @@ class RouterImpl implements Router {
                 if (push) {
                     this.stack.push(new RouterStackEntry(this.state.url, this.state.page, this.state.params))
                 }
-                this.activate(entry, push ? ArkRouteType.PUSH : ArkRouteType.NONE, params, resolve)
+                this.activate(entry, push ? RouteType.Push : RouteType.None, params, resolve)
             } else {
                 if (this.resolver) {
                     return this
@@ -244,7 +257,7 @@ class RouterImpl implements Router {
                             if (push) {
                                 this.stack.push(new RouterStackEntry(this.state.url, this.state.page, this.state.params))
                             }
-                            this.activate(new RouterRegistryEntry(url, page), push ? ArkRouteType.PUSH : ArkRouteType.NONE, params, resolve)
+                            this.activate(new RouterRegistryEntry(url, page), push ? RouteType.Push : RouteType.None, params, resolve)
                         })
                         .catch(error => reject(error))
                 }
@@ -257,12 +270,12 @@ class RouterImpl implements Router {
     showingPage: number = -1
     hidingPage: number = -1
 
-    private activate(entry: RouterRegistryEntry, route: ArkRouteType, params: Map<string, Object> | undefined, resolve: () => void) {
+    private activate(entry: RouterRegistryEntry, route: RouteType, params: Map<string, Object> | undefined, resolve: () => void) {
         const state = this.state
         state.version.value++
-        console.log("activating", ArkRouteType[route], entry.url, "version", state.version.value)
+        console.log("activating", RouteType[route], entry.url, "version", state.version.value)
         let previousVisiblePageIndex = this.findIndexByVersion(state.currentActivePage.value)
-        let previousVisiblePage = state.visiblePages[previousVisiblePageIndex]
+        let previousVisiblePage = state.visiblePages.value[previousVisiblePageIndex]
         if (previousVisiblePage) previousVisiblePage.setTransitionState(RouterTransitionVisibility.Hiding, route)
         state.page = entry.page
         state.url = entry.url
@@ -270,26 +283,26 @@ class RouterImpl implements Router {
         state.resolve = resolve
         let newVisiblePage: VisiblePage
         switch (route) {
-            case ArkRouteType.PUSH: {
+            case RouteType.Push: {
                 newVisiblePage = new VisiblePage(entry.page, state.version.value, RouterTransitionVisibility.Showing, route)
                 state.visiblePages.splice(previousVisiblePageIndex + 1, 0, newVisiblePage)
                 break
             }
-            case ArkRouteType.POP: {
+            case RouteType.Pop: {
                 const index = this.stack.length // TODO: store uid in registry to find a page
-                newVisiblePage = state.visiblePages[index]
+                newVisiblePage = state.visiblePages.value[index]
                 newVisiblePage.setTransitionState(RouterTransitionVisibility.Showing, route)
                 // remove all hidden pages removed from the stack
                 for (let i = state.visiblePages.length - 1; i > index; i--) {
-                    const visibility = state.visiblePages[i].transition.visibility
-                    if (visibility == RouterTransitionVisibility.Hidden) state.visiblePages.splice(i)
+                    const visibility = state.visiblePages.value[i].transition.visibility
+                    if (visibility == RouterTransitionVisibility.Hidden) state.visiblePages.splice(i, undefined)
                 }
                 break
             }
-            case ArkRouteType.NONE: {
+            case RouteType.None: {
                 // TODO: can/shall we animate replace?
                 newVisiblePage = new VisiblePage(entry.page, state.version.value, RouterTransitionVisibility.Showing, route)
-                state.visiblePages[previousVisiblePageIndex] = newVisiblePage
+                state.visiblePages.set(previousVisiblePageIndex, newVisiblePage)
                 break
             }
             default:
@@ -304,33 +317,64 @@ class RouterImpl implements Router {
         const array = this.state.visiblePages
         const length = array.length
         for (let i = 0; i < length; i++) {
-            if (array[i].version == version) return i
+            if (array.value[i].version == version) return i
         }
         return -1
     }
 
-    onPageTransitionEnd(pageId: int32): void {
+    private pageTransitionMap = new Map<int32, Array<PageTransition>>()
+
+    schedulePageTransition(pageId: int32, transition: PageTransition): void {
+        let queuedTransitions = this.pageTransitionMap.get(pageId)
+        if (queuedTransitions === undefined) {
+            queuedTransitions = []
+            this.pageTransitionMap.set(pageId, queuedTransitions)
+        }
+
+        const length = queuedTransitions.length
+        queuedTransitions.splice(length, 0, transition)
+
+        if (length == 0) {
+            scheduleCallback(transition)
+        }
+    }
+
+    onPageTransitionEnd(pageId: int32, targetVisibility: RouterTransitionVisibility): void {
         const index = this.findIndexByVersion(pageId)
-        if (index < 0) return
-        const page = this.state.visiblePages[index]
-        if (page.transition.visibility == RouterTransitionVisibility.Showing) {
-            if (pageId == this.state.currentActivePage.value) {
-                console.log("PAGE VISIBLE:", page.transition.pageId)
-                page.setTransitionState(RouterTransitionVisibility.Visible)
-            } else {
-                console.log("ERROR: showing page cannot be shown:", page.transition.route ? ArkRouteType[page.transition.route] : "unknown")
-                page.setTransitionState(RouterTransitionVisibility.Hidden)
+        if (index >= 0) {
+            const page = this.state.visiblePages.value[index]
+            if (page.transition.visibility == targetVisibility) {
+                if (page.transition.visibility == RouterTransitionVisibility.Showing) {
+                    if (pageId == this.state.currentActivePage.value) {
+                        page.setTransitionState(RouterTransitionVisibility.Visible)
+                    } else {
+                        console.log("ERROR: showing page cannot be shown:", page.transition.route ? RouteType[page.transition.route] : "unknown")
+                        page.setTransitionState(RouterTransitionVisibility.Hidden)
+                    }
+                } else if (page.transition.visibility == RouterTransitionVisibility.Hiding) {
+                    if (index < this.stack.length) {
+                        console.log("PAGE HIDDEN:", page.transition.pageId)
+                        page.setTransitionState(RouterTransitionVisibility.Hidden)
+                    } else {
+                            this.state.visiblePages.splice(index, 1)
+                            console.log("PAGE REMOVED:", page.transition.pageId)
+                    }
+                } else {
+                    console.log("ERROR: no page transition:", pageId, RouterTransitionVisibility[page.transition.visibility], page.transition.route ? RouteType[page.transition.route] : "unknown")
+                }
+            } // Otherwise ignore transition because it has been updated during this animation period
+        }
+
+        let queuedTransitions = this.pageTransitionMap.get(pageId)
+        if (queuedTransitions && queuedTransitions.length > 0) {
+            queuedTransitions.splice(0, 1) // Remove current transition
+            if (queuedTransitions.length == 0) {
+                this.pageTransitionMap.delete(pageId)
             }
-        } else if (page.transition.visibility == RouterTransitionVisibility.Hiding) {
-            if (index < this.stack.length) {
-                console.log("PAGE HIDDEN:", page.transition.pageId)
-                page.setTransitionState(RouterTransitionVisibility.Hidden)
-            } else {
-                console.log("PAGE REMOVED:", page.transition.pageId)
-                this.state.visiblePages.splice(index, 1)
+
+            if (queuedTransitions.length > 0) {
+                scheduleCallback(queuedTransitions[0])
             }
-        } else {
-            console.log("ERROR: no page transition:", RouterTransitionVisibility[page.transition.visibility], page.transition.route ? ArkRouteType[page.transition.route] : "unknown")
         }
     }
 
@@ -358,7 +402,7 @@ class RouterImpl implements Router {
                 entry = this.stack.length > 0 ? this.stack.pop() : undefined
             }
             if (entry) {
-                this.activate(entry, ArkRouteType.POP, params ?? entry.params, resolve)
+                this.activate(entry, RouteType.Pop, params ?? entry.params, resolve)
             } else {
                 reject(`history is empty`)
             }
@@ -393,7 +437,7 @@ export function Routed(
             /** @memo */
             () => {
                 RepeatByArray(
-                    routerState.visiblePages,
+                    routerState.visiblePages.value,
                     (page) => page.version,
                     (page: VisiblePage) => {
                         WithRouterTransitionState(page.transition, () => {

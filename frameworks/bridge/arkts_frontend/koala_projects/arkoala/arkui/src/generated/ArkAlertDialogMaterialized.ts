@@ -26,39 +26,15 @@ import { LengthMetrics, LengthMetricsInternal } from "./ArkLengthMetricsMaterial
 import { Resource } from "./ArkResourceInterfaces"
 import { ICurve, ICurveInternal } from "./ArkICurveMaterialized"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
-export class AlertDialogInternal {
-    public static fromPtr(ptr: KPointer): AlertDialog {
-        const obj: AlertDialog = new AlertDialog()
-        obj.peer = new Finalizable(ptr, AlertDialog.getFinalizer())
-        return obj
-    }
-}
-export class AlertDialog implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_alertdialog(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._AlertDialog_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = AlertDialog.ctor_alertdialog()
-        this.peer = new Finalizable(ctorPtr, AlertDialog.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._AlertDialog_getFinalizer()
-    }
+export class AlertDialog {
     public static show(value: AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions): undefined {
         const value_casted = value as (AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions)
         return AlertDialog.show_serialize(value_casted)

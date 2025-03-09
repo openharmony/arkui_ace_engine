@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -26,11 +26,11 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface PixelMap {
     readonly isEditable: boolean
     readonly isStrideAlignment: boolean
-    readPixelsToBufferSync(dst: NativeBuffer): void 
-    writeBufferToPixels(src: NativeBuffer): void 
+    readPixelsToBufferSync(dst: NativeBuffer): void
+    writeBufferToPixels(src: NativeBuffer): void
 }
 export class PixelMapInternal implements MaterializedBase,PixelMap {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }

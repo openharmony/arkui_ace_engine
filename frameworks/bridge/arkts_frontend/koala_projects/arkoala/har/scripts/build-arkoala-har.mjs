@@ -2,6 +2,13 @@ import { execSync } from "child_process"
 import fs from "fs"
 import path from "path"
 import process from "process"
+import { dirname } from "path"
+import minimist from "minimist"
+import { fileURLToPath } from "url"
+
+var args = minimist(process.argv.slice(2))
+
+const _dirname = dirname(fileURLToPath(import.meta.url))
 
 const CWD = process.cwd()
 const BUNDLE_PATH = path.join(CWD, "arkoala-har-bundle")
@@ -17,7 +24,7 @@ const DTS = [
 
 function rollupLaunch() {
     console.log(`> Run rollup`)
-    execCmdSync("npx rollup -c")
+    execCmdSync(`npx rollup -c`)
 }
 
 function apiExtractorLaunch() {
@@ -43,7 +50,7 @@ function copyDts(from, to) {
     fs.writeFileSync(to, file, 'utf-8')
 }
 
-function copyFilesToHar(from, to) {
+function copyFileToHar(from, to) {
     if (!fs.existsSync(from)) {
         throw new Error(`file ${from} does not exist`)
     }
@@ -52,7 +59,7 @@ function copyFilesToHar(from, to) {
     fs.cpSync(from, to, { recursive: true, force: true })
 }
 
-function main() {
+function main(targetLibDir, arch) {
 
     process.chdir(BUNDLE_PATH)
 
@@ -67,12 +74,29 @@ function main() {
 
     const files = fs.readdirSync(path.join(BUNDLE_PATH, "dist"))
     files.forEach((file) => {
-        copyFilesToHar(path.join(BUNDLE_PATH, "dist", file), path.join(HAR_PATH, file))
+        copyFileToHar(path.join(BUNDLE_PATH, "dist", file), path.join(HAR_PATH, file))
     })
-}
 
-main()
+
+    if (arch == "arm64") {
+        copyFileToHar(path.join(_dirname, `../../framework/native/build-hzvm-ohos-arm64/libArkoalaNative.so`), path.join(HAR_PATH, `libs/${targetLibDir}/libArkoalaNative.so`))
+    } else if (arch == "arm") {
+        copyFileToHar(path.join(_dirname, `../../framework/native/build-hzvm-ohos-arm32/libArkoalaNative.so`), path.join(HAR_PATH, `libs/${targetLibDir}/libArkoalaNative.so`))
+    }
+
+
+}
 
 function execCmdSync(cmd, options) {
     return execSync(cmd, options).toString().trim().replace("\n", " ")
+}
+
+const arch = args["arch"]
+if (arch == "arm32") {
+    main("armeabi-v7a", "arm")
+} else if (arch == "arm64") {
+    main("arm64-v8a", arch)
+} else {
+    console.log("Unsupported architecture: ", arch)
+    exit(1)
 }

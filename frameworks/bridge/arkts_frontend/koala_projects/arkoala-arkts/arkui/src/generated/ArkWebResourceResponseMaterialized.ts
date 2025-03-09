@@ -19,7 +19,7 @@
 import { Resource } from "./ArkResourceInterfaces"
 import { Header } from "./ArkWebInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,7 +33,7 @@ export class WebResourceResponseInternal {
     }
 }
 export class WebResourceResponse implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -129,7 +129,14 @@ export class WebResourceResponse implements MaterializedBase {
     }
     private getResponseHeader_serialize(): Array<Header> {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseHeader(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<Header> = new Array<Header>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readHeader()
+        }
+        const returnResult : Array<Header> = buffer
+        return returnResult
     }
     private getResponseCode_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseCode(this.peer!.ptr)
@@ -149,12 +156,12 @@ export class WebResourceResponse implements MaterializedBase {
             const data_1  = data as number
             thisSerializer.writeNumber(data_1)
         }
-        else if (isResource(data)) {
+        else if (TypeChecker.isResource(data, false, false, false, false, false)) {
             thisSerializer.writeInt8(2 as int32)
             const data_2  = data as Resource
             thisSerializer.writeResource(data_2)
         }
-        else if (data instanceof NativeBuffer) {
+        else if (TypeChecker.isNativeBuffer(data)) {
             thisSerializer.writeInt8(3 as int32)
             const data_3  = data as NativeBuffer
             thisSerializer.writeBuffer(data_3)

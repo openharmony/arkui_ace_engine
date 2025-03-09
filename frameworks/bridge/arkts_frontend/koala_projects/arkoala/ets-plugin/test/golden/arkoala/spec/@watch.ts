@@ -1,5 +1,6 @@
 import { ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, LocalStorage, MutableState, OnChange, animateTo, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkCompAComponent extends ArkStructBase<ArkCompAComponent, CompAOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

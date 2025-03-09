@@ -21,7 +21,7 @@ import { FontStyle, Color } from "./ArkEnumsInterfaces"
 import { TextStyleInterface } from "./ArkStyledStringInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -35,7 +35,7 @@ export class TextStyle_styled_stringInternal {
     }
 }
 export class TextStyle_styled_string implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -68,7 +68,7 @@ export class TextStyle_styled_string implements MaterializedBase {
         return retval
     }
      constructor(value?: TextStyleInterface) {
-        const ctorPtr : KPointer = TextStyle_styled_string.ctor_textstyle_styled_string(value)
+        const ctorPtr : KPointer = TextStyle_styled_string.ctor_textstyle_styled_string((value)!)
         this.peer = new Finalizable(ctorPtr, TextStyle_styled_string.getFinalizer())
     }
     static getFinalizer(): KPointer {

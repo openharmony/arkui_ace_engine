@@ -19,7 +19,7 @@
 import { Literal_Number_distance_fingers_PanDirection_direction } from "./SyntheticDeclarations"
 import { PanDirection } from "./ArkGestureInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,7 +33,7 @@ export class PanGestureOptionsInternal {
     }
 }
 export class PanGestureOptions implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -58,7 +58,7 @@ export class PanGestureOptions implements MaterializedBase {
             thisSerializer.writeInt8(value_value_direction_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_value_direction_type)) {
                 const value_value_direction_value  = (value_value_direction as PanDirection)
-                thisSerializer.writeInt32((value_value_direction_value.valueOf() as int32))
+                thisSerializer.writeInt32(((value_value_direction_value as PanDirection) as int32))
             }
             const value_value_distance  = value_value.distance
             let value_value_distance_type : int32 = RuntimeType.UNDEFINED
@@ -74,7 +74,7 @@ export class PanGestureOptions implements MaterializedBase {
         return retval
     }
      constructor(value?: Literal_Number_distance_fingers_PanDirection_direction) {
-        const ctorPtr : KPointer = PanGestureOptions.ctor_pangestureoptions(value)
+        const ctorPtr : KPointer = PanGestureOptions.ctor_pangestureoptions((value)!)
         this.peer = new Finalizable(ctorPtr, PanGestureOptions.getFinalizer())
     }
     static getFinalizer(): KPointer {
@@ -96,7 +96,7 @@ export class PanGestureOptions implements MaterializedBase {
         return this.getDirection_serialize()
     }
     private setDirection_serialize(value: PanDirection): undefined {
-        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_setDirection(this.peer!.ptr, (value.valueOf() as int32))
+        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_setDirection(this.peer!.ptr, ((value as PanDirection) as int32))
         return retval
     }
     private setDistance_serialize(value: number): undefined {

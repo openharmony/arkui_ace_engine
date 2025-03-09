@@ -17,10 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SpringProp, SpringPropInternal } from "./ArkSpringPropMaterialized"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -32,21 +33,18 @@ export class SpringMotionInternal {
     }
 }
 export class SpringMotion implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     static ctor_springmotion(start: number, end: number, velocity: number, prop: SpringProp): KPointer {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeSpringProp(prop)
-        const retval = ArkUIGeneratedNativeModule._SpringMotion_ctor(start, end, velocity, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        const retval = ArkUIGeneratedNativeModule._SpringMotion_ctor(start, end, velocity, toPeerPtr(prop))
         return retval
     }
      constructor(start?: number, end?: number, velocity?: number, prop?: SpringProp) {
-        if (((start) !== (undefined)) && ((end) !== (undefined)) && ((velocity) !== (undefined)) && ((prop) !== (undefined)))
+        if (((start) !== (undefined)) || ((end) !== (undefined)) || ((velocity) !== (undefined)) || ((prop) !== (undefined)))
         {
-            const ctorPtr: KPointer = SpringMotion.ctor_springmotion(start, end, velocity, prop)
+            const ctorPtr: KPointer = SpringMotion.ctor_springmotion((start)!, (end)!, (velocity)!, (prop)!)
             this.peer = new Finalizable(ctorPtr, SpringMotion.getFinalizer())
         }
     }

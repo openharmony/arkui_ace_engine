@@ -17,12 +17,12 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkSecurityComponentMethodComponent } from "./ArkSecurityComponent"
 import { ArkSaveButtonPeer } from "./peers/ArkSaveButtonPeer"
-import { UseEventsProperties } from "./use_properties"
 import { SecurityComponentMethod, SecurityComponentLayoutDirection } from "./ArkSecurityComponentInterfaces"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions, PX, VP, FP, LPX, Percentage, Area } from "./ArkUnitsInterfaces"
 import { FontStyle, FontWeight, BorderStyle, Color } from "./ArkEnumsInterfaces"
@@ -36,7 +36,7 @@ import { EventTarget, SourceType, SourceTool } from "./ArkCommonInterfaces"
 import { ButtonType } from "./ArkButtonInterfaces"
 /** @memo:stable */
 export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent {
-    getPeer(): ArkSaveButtonPeer {
+    protected getPeer(): ArkSaveButtonPeer {
         return (this.peer as ArkSaveButtonPeer)
     }
     /** @memo */
@@ -60,7 +60,6 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
     public onClick(value: ((event: ClickEvent, result: SaveButtonOnClickResult) => void)): this {
         if (this.checkPriority("onClick")) {
             const value_casted = value as (((event: ClickEvent, result: SaveButtonOnClickResult) => void))
-            UseEventsProperties({SaveButton_onClick: value_casted})
             this.getPeer()?.onClickAttribute(value_casted)
             return this
         }

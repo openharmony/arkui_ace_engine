@@ -1,3 +1,6 @@
+#ifndef COMMON_H
+#define COMMON_H
+
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,3 +35,5 @@ char* getStringCopy(KStringPtr& ptr);
 inline KUInt unpackUInt(const KByte* bytes);
 
 es2panda_ContextState intToState(KInt state);
+
+#endif // COMMON_H

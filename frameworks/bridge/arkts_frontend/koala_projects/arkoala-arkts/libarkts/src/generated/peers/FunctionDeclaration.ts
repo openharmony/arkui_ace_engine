@@ -59,6 +59,11 @@ export class FunctionDeclaration extends Statement {
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._FunctionDeclarationAnnotationsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._FunctionDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
+    }
 }
 export function isFunctionDeclaration(node: AstNode): node is FunctionDeclaration {
     return node instanceof FunctionDeclaration

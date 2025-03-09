@@ -47,6 +47,16 @@ export class MemberExpression extends MaybeOptionalExpression {
     get object(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._MemberExpressionObjectConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setObject(object_arg: Expression): this {
+        global.generatedEs2panda._MemberExpressionSetObject(global.context, this.peer, passNode(object_arg))
+        return this
+    }
+    /** @deprecated */
+    setProperty(prop: Expression): this {
+        global.generatedEs2panda._MemberExpressionSetProperty(global.context, this.peer, passNode(prop))
+        return this
+    }
     get property(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._MemberExpressionPropertyConst(global.context, this.peer))
     }
@@ -56,8 +66,23 @@ export class MemberExpression extends MaybeOptionalExpression {
     get kind(): Es2pandaMemberExpressionKind {
         return global.generatedEs2panda._MemberExpressionKindConst(global.context, this.peer)
     }
+    /** @deprecated */
+    addMemberKind(kind: Es2pandaMemberExpressionKind): this {
+        global.generatedEs2panda._MemberExpressionAddMemberKind(global.context, this.peer, kind)
+        return this
+    }
+    /** @deprecated */
+    removeMemberKind(kind: Es2pandaMemberExpressionKind): this {
+        global.generatedEs2panda._MemberExpressionRemoveMemberKind(global.context, this.peer, kind)
+        return this
+    }
     get isIgnoreBox(): boolean {
         return global.generatedEs2panda._MemberExpressionIsIgnoreBoxConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    setIgnoreBox(): this {
+        global.generatedEs2panda._MemberExpressionSetIgnoreBox(global.context, this.peer)
+        return this
     }
 }
 export function isMemberExpression(node: AstNode): node is MemberExpression {

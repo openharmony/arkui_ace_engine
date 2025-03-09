@@ -1,5 +1,6 @@
 import { ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkTabContent, ArkTabContentComponent, ArkTabs, ArkText, ArkTextComponent, BarPosition, LocalStorage, TabsController } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkTabSimpleComponent extends ArkStructBase<ArkTabSimpleComponent, TabSimpleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

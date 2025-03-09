@@ -1,3 +1,5 @@
+import { scheduleCallback } from "@koalaui/runtime"
+
 // Annotations
 
 export @interface BuilderLambda {
@@ -11,47 +13,56 @@ export @interface State {}
 export @interface memo {}
 
 export abstract class StructBase<T, OptionsT> {
+    @memo
     @BuilderLambda("instantiateImpl")
     static $_instantiate<S extends StructBase<S, OptionsS>, OptionsS> (
         factory: () => S,
         options?: OptionsS,
-        content?: () => void
+        @memo content?: () => void
     ): S {
         throw new Error("This method should only be called through a @BuilderLambda redirect")
     }
 
+    @memo
     static instantiateImpl<S extends StructBase<S, OptionsS>, OptionsS>(
-        builder: ((instance: S)=>S)|undefined,
+        @memo builder: ((instance: S)=>S)|undefined,
         factory: () => S,
         options?: OptionsS,
-        content?: () => void
+        @memo content?: () => void
     ) {
         console.log("Struct instantiate redirected")
         const instance = factory()
         if (builder !== undefined) builder(instance)
         instance._build(builder, content, options)
     }
+
+    @memo
     build() {
         throw new Error("The struct build() should never be executed directly")
     }
 
-    protected _build(style: ((instance: T)=>T)|undefined, content: (() => void)|undefined, options: OptionsT|undefined) {
+    @memo
+    protected _build(
+        @memo
+        style: ((instance: T)=>T)|undefined, 
+        @memo
+        content: (() => void)|undefined, 
+        options: OptionsT|undefined
+    ) {
         throw new Error("The struct _build() must have a valid override")
     }
 }
 
-export enum Color {
-    White,
-    Red
-}
+export type Color = string
 
 export interface ColumnOptions {
-    space: number
+    //space: number
 }
 
 export class CommonMethod {
     onClick(callback: () => void): this {
         console.log("registered Button.onClick()")
+        scheduleCallback(callback)
         return this
     }
     width(value: number): this {
@@ -66,22 +77,24 @@ export class CommonMethod {
 
 // An attempt to put down a component
 export class Column extends CommonMethod {
+    @memo
     @BuilderLambda("instantiateImpl")
     static $_instantiate(
         factory: () => Column,
         options: ColumnOptions,
-        content: () => void
+        @memo content: () => void
     ): Column {
         throw new Error("This method should only be called through a @BuilderLambda redirect")
     }
 
+    @memo
     static instantiateImpl(
         style: (instance: Column) => Column,
         factory: () => Column,
         options: ColumnOptions,
         content: () => void
     ): void {
-        console.log("Column({space:", options.space, "})")
+        //console.log("Column({space:", options.space, "})")
         const instance = factory()
         style(instance)
         content()
@@ -93,27 +106,29 @@ export interface ButtonOptions {}
 
 // An attempt to put down a component
 export class Button extends CommonMethod {
+    @memo
     // TODO: the second argument will be gone after hte plugin is improved
     @BuilderLambda("instantiateImpl")
     static $_instantiate(
         factory: () => Button,
         options?: ButtonOptions|string,
-        //content?: () => void
+        @memo content?: () => void
     ): Button {
         throw new Error("This method should only be called through a @BuilderLambda redirect")
     }
 
+    @memo
     static instantiateImpl(
-        style: (instance: Button) => Button,
+        @memo style: (instance: Button) => Button,
         factory: () => Button,
         options?: ButtonOptions|string,
-        //content?: () => void
+        @memo content?: () => void
     ): void {
         console.log("Button(", options,  ")")
         const instance = factory()
         style(instance)
-        //content()
-
+        if (content)
+            content()
     }
 }
 
@@ -121,30 +136,33 @@ export interface TextOptions {}
 
 // An attempt to put down a component
 export class Text extends CommonMethod {
+    @memo
     @BuilderLambda("instantiateImpl")
     static $_instantiate(
         factory: () => Text,
         options?: TextOptions|string,
-        //content?: () => void
+        @memo content?: () => void
     ): Text {
         throw new Error("This method should only be called through a @BuilderLambda redirect")
     }
 
     // TODO: the second argument will be gone after hte plugin is improved
+    @memo
     static instantiateImpl(
-        style: (instance: Text) => Text,
+        @memo style: (instance: Text) => Text,
         factory: () => Text,
         options?: TextOptions|string,
-        //content?: () => void
+        @memo content?: () => void
     ): void {
         console.log("Text(", options,  ")")
         const instance = factory()
         style(instance)
-        //content()
+        if (content)
+            content()
     }
 
     fontColor(value: Color): this {
-        console.log("\.fontColor(", Color[value], ")")
+        console.log("\.fontColor(", value, ")")
         return this
     }
 }

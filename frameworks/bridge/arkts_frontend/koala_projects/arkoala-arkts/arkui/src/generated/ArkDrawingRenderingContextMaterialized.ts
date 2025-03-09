@@ -20,7 +20,7 @@ import { Size } from "./ArkCanvasInterfaces"
 import { DrawingCanvas, DrawingCanvasInternal } from "./ArkDrawingCanvasMaterialized"
 import { LengthMetricsUnit } from "./ArkUnitsInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -34,7 +34,7 @@ export class DrawingRenderingContextInternal {
     }
 }
 export class DrawingRenderingContext implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -42,7 +42,7 @@ export class DrawingRenderingContext implements MaterializedBase {
         throw new Error("Not implemented")
     }
     get canvas(): DrawingCanvas {
-        throw new Error("Not implemented")
+        return this.getCanvas()
     }
     static ctor_drawingrenderingcontext(unit?: LengthMetricsUnit): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
@@ -58,7 +58,7 @@ export class DrawingRenderingContext implements MaterializedBase {
         return retval
     }
      constructor(unit?: LengthMetricsUnit) {
-        const ctorPtr : KPointer = DrawingRenderingContext.ctor_drawingrenderingcontext(unit)
+        const ctorPtr : KPointer = DrawingRenderingContext.ctor_drawingrenderingcontext((unit)!)
         this.peer = new Finalizable(ctorPtr, DrawingRenderingContext.getFinalizer())
     }
     static getFinalizer(): KPointer {
@@ -68,7 +68,15 @@ export class DrawingRenderingContext implements MaterializedBase {
         this.invalidate_serialize()
         return
     }
+    private getCanvas(): DrawingCanvas {
+        return this.getCanvas_serialize()
+    }
     private invalidate_serialize(): void {
         ArkUIGeneratedNativeModule._DrawingRenderingContext_invalidate(this.peer!.ptr)
+    }
+    private getCanvas_serialize(): DrawingCanvas {
+        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_getCanvas(this.peer!.ptr)
+        const obj : DrawingCanvas = DrawingCanvasInternal.fromPtr(retval)
+        return obj
     }
 }

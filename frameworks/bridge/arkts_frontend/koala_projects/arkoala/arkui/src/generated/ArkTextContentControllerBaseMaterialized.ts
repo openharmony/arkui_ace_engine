@@ -17,10 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CaretOffset, RectResult } from "./ArkCommonInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -32,7 +33,7 @@ export class TextContentControllerBaseInternal {
     }
 }
 export class TextContentControllerBase implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -58,11 +59,15 @@ export class TextContentControllerBase implements MaterializedBase {
     }
     private getCaretOffset_serialize(): CaretOffset {
         const retval = ArkUIGeneratedNativeModule._TextContentControllerBase_getCaretOffset(this.peer!.ptr)
-        return new Deserializer(retval.buffer, retval.byteLength).readCaretOffset()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: CaretOffset = retvalDeserializer.readCaretOffset()
+        return returnResult
     }
     private getTextContentRect_serialize(): RectResult {
         const retval = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentRect(this.peer!.ptr)
-        return new Deserializer(retval.buffer, retval.byteLength).readRectResult()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: RectResult = retvalDeserializer.readRectResult()
+        return returnResult
     }
     private getTextContentLineCount_serialize(): number {
         const retval = ArkUIGeneratedNativeModule._TextContentControllerBase_getTextContentLineCount(this.peer!.ptr)

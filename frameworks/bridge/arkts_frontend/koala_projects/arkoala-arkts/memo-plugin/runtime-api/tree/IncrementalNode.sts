@@ -17,12 +17,6 @@ import { uint32 } from "../common"
 import { Disposable } from "../states/Disposable"
 import { ReadonlyTreeNode } from "./ReadonlyTreeNode"
 export declare class IncrementalNode implements Disposable, ReadonlyTreeNode {
-    private _disposed: boolean
-    private _child: IncrementalNode | undefined
-    private _prev: IncrementalNode | undefined
-    private _next: IncrementalNode | undefined
-    private _parent: IncrementalNode | undefined
-    private _incremental: IncrementalNode | undefined
     protected onChildInserted: ((node: IncrementalNode) => void) | undefined
     protected onChildRemoved: ((node: IncrementalNode) => void) | undefined
     readonly kind: uint32

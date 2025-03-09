@@ -21,16 +21,29 @@ import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback } from "@koalaui/int
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor, ResourceStr, Area, Length, Position, Dimension, SizeOptions, Margin, Padding, BorderRadiuses } from "./ArkUnitsInterfaces"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
-import { FontWeight, FontStyle, TextDecorationType, TextDecorationStyle, TextAlign, TextOverflow, WordBreak, ImageSpanAlignment, ImageFit } from "./ArkEnumsInterfaces"
+import { FontWeight, FontStyle, TextDecorationType, TextDecorationStyle, TextAlign, TextOverflow, WordBreak, ImageSpanAlignment, ImageFit, Color, ColoringStrategy } from "./ArkEnumsInterfaces"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { BaseEvent } from "./ArkBaseEventMaterialized"
-import { EventTarget, SourceType, SourceTool } from "./ArkCommonInterfaces"
+import { EventTarget, SourceType, SourceTool, ShadowOptions, DrawContext, ShadowType } from "./ArkCommonInterfaces"
 import { GestureEvent } from "./ArkGestureEventMaterialized"
 import { FingerInfo } from "./ArkGestureInterfaces"
 import { LeadingMarginPlaceholder } from "./ArkRichEditorInterfaces"
 import { PixelMap } from "./ArkPixelMapMaterialized"
+import { TextStyle_styled_string } from "./ArkTextStyleStyledStringMaterialized"
+import { DecorationStyle } from "./ArkDecorationStyleMaterialized"
+import { BaselineOffsetStyle } from "./ArkBaselineOffsetStyleMaterialized"
+import { LetterSpacingStyle } from "./ArkLetterSpacingStyleMaterialized"
+import { TextShadowStyle } from "./ArkTextShadowStyleMaterialized"
+import { GestureStyle } from "./ArkGestureStyleMaterialized"
+import { ImageAttachment } from "./ArkImageAttachmentMaterialized"
+import { ParagraphStyle } from "./ArkParagraphStyleMaterialized"
+import { LineHeightStyle } from "./ArkLineHeightStyleMaterialized"
+import { UrlStyle } from "./ArkUrlStyleMaterialized"
+import { CustomSpan } from "./ArkCustomSpanMaterialized"
+import { BackgroundColorStyle } from "./ArkBackgroundColorStyleMaterialized"
+import { TextBackgroundStyle } from "./ArkSpanInterfaces"
 export interface StyleOptions {
     start?: number;
     length?: number;
@@ -67,9 +80,7 @@ export interface ParagraphStyleInterface {
     wordBreak?: WordBreak;
     leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
 }
-export interface StyledStringValue {
-    stub: string;
-}
+export type StyledStringValue = TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
 export enum StyledStringKey {
     FONT,
     DECORATION = 1,

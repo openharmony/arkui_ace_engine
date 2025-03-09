@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/arkui-common",
-    "version": "1.5.7+devel",
+    "version": "1.5.8+devel",
     "description": "",
     "main": "build/lib/src/index.js",
     "exports": {

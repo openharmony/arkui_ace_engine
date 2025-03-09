@@ -1,5 +1,6 @@
 import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, LocalStorage } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkMyComponentComponent extends ArkStructBase<ArkMyComponentComponent, MyComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -32,6 +33,7 @@ class ArkMyComponentComponent extends ArkStructBase<ArkMyComponentComponent, MyC
         });
     }
 }
+/** @memo:stable */
 class ArkBannerComponent extends ArkStructBase<ArkBannerComponent, BannerOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

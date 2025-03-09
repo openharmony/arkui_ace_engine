@@ -59,6 +59,11 @@ export class ETSFunctionType extends TypeNode {
     get functionalInterface(): TSInterfaceDeclaration | undefined {
         return unpackNode(global.generatedEs2panda._ETSFunctionTypeIrFunctionalInterfaceConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setFunctionalInterface(functionalInterface: TSInterfaceDeclaration): this {
+        global.generatedEs2panda._ETSFunctionTypeIrSetFunctionalInterface(global.context, this.peer, passNode(functionalInterface))
+        return this
+    }
     get flags(): Es2pandaScriptFunctionFlags {
         return global.generatedEs2panda._ETSFunctionTypeIrFlags(global.context, this.peer)
     }

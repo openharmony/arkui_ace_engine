@@ -17,10 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { MessageLevel } from "./ArkWebInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -32,7 +33,7 @@ export class ConsoleMessageInternal {
     }
 }
 export class ConsoleMessage implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -41,9 +42,9 @@ export class ConsoleMessage implements MaterializedBase {
         return retval
     }
      constructor(message?: string, sourceId?: string, lineNumber?: number, messageLevel?: MessageLevel) {
-        if (((message) !== (undefined)) && ((sourceId) !== (undefined)) && ((lineNumber) !== (undefined)) && ((messageLevel) !== (undefined)))
+        if (((message) !== (undefined)) || ((sourceId) !== (undefined)) || ((lineNumber) !== (undefined)) || ((messageLevel) !== (undefined)))
         {
-            const ctorPtr: KPointer = ConsoleMessage.ctor_consolemessage(message, sourceId, lineNumber, messageLevel)
+            const ctorPtr: KPointer = ConsoleMessage.ctor_consolemessage((message)!, (sourceId)!, (lineNumber)!, (messageLevel)!)
             this.peer = new Finalizable(ctorPtr, ConsoleMessage.getFinalizer())
         }
     }

@@ -1,0 +1,82 @@
+/*
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+
+@memo
+@BuildLambda("ArkCommonMethod")
+export declare function ArkCommonMethod(
+    
+    @memo
+    _content?: () => void,
+): ArkCommonMethodComponent
+
+@memo
+export declare function ArkCommonMethodImpl(
+    @memo
+    _style: ((attributes: ArkCommonMethodComponent) => void) | undefined,
+    
+    @memo
+    _content?: () => void,
+): void
+@memo
+@BuildLambda("ArkCommonShapeMethod")
+export declare function ArkCommonShapeMethod(
+    
+    @memo
+    _content?: () => void,
+): ArkCommonShapeMethodComponent
+
+@memo
+export declare function ArkCommonShapeMethodImpl(
+    @memo
+    _style: ((attributes: ArkCommonShapeMethodComponent) => void) | undefined,
+    
+    @memo
+    _content?: () => void,
+): void
+@memo
+@BuildLambda("ArkCommon")
+export declare function ArkCommon(
+    
+    @memo
+    _content?: () => void,
+): ArkCommonComponent
+
+@memo
+export declare function ArkCommonImpl(
+    @memo
+    _style: ((attributes: ArkCommonComponent) => void) | undefined,
+    
+    @memo
+    _content?: () => void,
+): void
+@memo
+@BuildLambda("ArkScrollableCommonMethod")
+export declare function ArkScrollableCommonMethod(
+    
+    @memo
+    _content?: () => void,
+): ArkScrollableCommonMethodComponent
+
+@memo
+export declare function ArkScrollableCommonMethodImpl(
+    @memo
+    _style: ((attributes: ArkScrollableCommonMethodComponent) => void) | undefined,
+    
+    @memo
+    _content?: () => void,
+): void

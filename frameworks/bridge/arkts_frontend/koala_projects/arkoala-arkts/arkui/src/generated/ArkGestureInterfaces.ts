@@ -20,10 +20,16 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { GestureControl } from "./ArkGestureControlNamespace"
+import { TapGestureInterface } from "./ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./ArkGestureGroupInterfaceMaterialized"
 import { SourceTool } from "./ArkCommonInterfaces"
-import { Callback_GestureEvent_Void, Literal_Number_duration_fingers_Boolean_repeat, Callback_Void, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_angle_fingers } from "./SyntheticDeclarations"
+import { Callback_GestureEvent_Void, Callback_Void } from "./SyntheticDeclarations"
 import { GestureEvent } from "./ArkGestureEventMaterialized"
-import { PanGestureOptions } from "./ArkPanGestureOptionsMaterialized"
 export enum PanDirection {
     NONE = 0,
     None = 0,
@@ -91,27 +97,6 @@ export interface TapGestureParameters {
     count?: number;
     fingers?: number;
     distanceThreshold?: number;
-}
-export interface TapGestureInterface extends GestureInterface<TapGestureInterface> {
-    invoke(value?: TapGestureParameters): TapGestureInterface;
-}
-export interface LongPressGestureInterface extends GestureInterface<LongPressGestureInterface> {
-    invoke(value?: Literal_Number_duration_fingers_Boolean_repeat): LongPressGestureInterface;
-}
-export interface PanGestureInterface extends GestureInterface<PanGestureInterface> {
-    invoke(value?: Literal_Number_distance_fingers_PanDirection_direction | PanGestureOptions): PanGestureInterface;
-}
-export interface SwipeGestureInterface extends GestureInterface<SwipeGestureInterface> {
-    invoke(value?: Literal_Number_fingers_speed_SwipeDirection_direction): SwipeGestureInterface;
-}
-export interface PinchGestureInterface extends GestureInterface<PinchGestureInterface> {
-    invoke(value?: Literal_Number_distance_fingers): PinchGestureInterface;
-}
-export interface RotationGestureInterface extends GestureInterface<RotationGestureInterface> {
-    invoke(value?: Literal_Number_angle_fingers): RotationGestureInterface;
-}
-export interface GestureGroupInterface {
-    invoke(mode: GestureMode, gesture: Array<GestureType>): GestureGroupInterface;
 }
 export interface GestureHandler<T> {
 }

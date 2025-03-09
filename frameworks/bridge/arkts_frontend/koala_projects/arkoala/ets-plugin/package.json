@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/ets-plugin",
-    "version": "1.5.7+devel",
+    "version": "1.5.8+devel",
     "description": "",
     "main": "build/lib/src/index.js",
     "types": "build/lib/src/index.d.ts",
@@ -41,7 +41,7 @@
     },
     "keywords": [],
     "dependencies": {
-        "@koalaui/harness": "1.5.7+devel"
+        "@koalaui/harness": "1.5.8+devel"
     },
     "devDependencies": {
         "@koalaui/ets-tsc": "file:../../incremental/tools/ets-tsc",

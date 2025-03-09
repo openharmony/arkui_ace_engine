@@ -19,19 +19,19 @@
 import { SelectionOptions } from "./ArkCommonInterfaces"
 import { LayoutManager, LayoutManagerInternal } from "./ArkLayoutManagerMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface TextBaseController {
-    setSelection(selectionStart: number, selectionEnd: number, options: SelectionOptions): void 
-    closeSelectionMenu(): void 
-    getLayoutManager(): LayoutManager 
+    setSelection(selectionStart: number, selectionEnd: number, options: SelectionOptions): void
+    closeSelectionMenu(): void
+    getLayoutManager(): LayoutManager
 }
 export class TextBaseControllerInternal implements MaterializedBase,TextBaseController {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -77,7 +77,8 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
     }
     private getLayoutManager_serialize(): LayoutManager {
         const retval  = ArkUIGeneratedNativeModule._TextBaseController_getLayoutManager(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : LayoutManager = LayoutManagerInternal.fromPtr(retval)
+        return obj
     }
     public static fromPtr(ptr: KPointer): TextBaseControllerInternal {
         const obj : TextBaseControllerInternal = new TextBaseControllerInternal()

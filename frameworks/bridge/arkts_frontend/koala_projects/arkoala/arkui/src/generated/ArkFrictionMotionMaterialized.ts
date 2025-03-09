@@ -16,10 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -31,7 +32,7 @@ export class FrictionMotionInternal {
     }
 }
 export class FrictionMotion implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -40,9 +41,9 @@ export class FrictionMotion implements MaterializedBase {
         return retval
     }
      constructor(friction?: number, position?: number, velocity?: number) {
-        if (((friction) !== (undefined)) && ((position) !== (undefined)) && ((velocity) !== (undefined)))
+        if (((friction) !== (undefined)) || ((position) !== (undefined)) || ((velocity) !== (undefined)))
         {
-            const ctorPtr: KPointer = FrictionMotion.ctor_frictionmotion(friction, position, velocity)
+            const ctorPtr: KPointer = FrictionMotion.ctor_frictionmotion((friction)!, (position)!, (velocity)!)
             this.peer = new Finalizable(ctorPtr, FrictionMotion.getFinalizer())
         }
     }

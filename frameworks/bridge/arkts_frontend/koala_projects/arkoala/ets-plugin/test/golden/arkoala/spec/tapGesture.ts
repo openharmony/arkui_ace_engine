@@ -1,5 +1,6 @@
 import { ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, FlexAlign, FlexDirection, ItemAlign, LocalStorage, MutableState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkTapGestureExampleComponent extends ArkStructBase<ArkTapGestureExampleComponent, TapGestureExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

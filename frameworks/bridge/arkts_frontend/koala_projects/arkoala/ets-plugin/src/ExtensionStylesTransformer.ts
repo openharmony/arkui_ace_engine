@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +23,8 @@ import {
     adaptorComponentName,
     AnimatableExtendDecorator,
     getAnnotationArgument,
-    prependMemoComment,
+    getSingleExpression,
     dropStylesLike,
-    asString,
     ArkCommonMethodInterface,
     T_TypeParameter,
     Instance,
@@ -36,16 +35,15 @@ import {
 import { Any, getDecorator, hasDecorator, id, parameter } from './ApiUtils'
 
 function rewriteStyles(node: ts.FunctionDeclaration, importer: Importer): ts.FunctionDeclaration {
+    const singleExpression = getSingleExpression(node.body)
+    if (!singleExpression) return node // unexpected
+
     const firstParameter = parameter(
         CommonInstance,
         ts.factory.createTypeReferenceNode(
             T_TypeParameter
         )
     )
-
-    const singleExpressionStatement = node.body?.statements?.[0]
-    if (!singleExpressionStatement) return node
-    if (!ts.isExpressionStatement(singleExpressionStatement)) return node
 
     const declaration = ts.factory.createFunctionDeclaration(
         // @Styles dropped as "Illegal decorator" because of create instead of update
@@ -61,7 +59,7 @@ function rewriteStyles(node: ts.FunctionDeclaration, importer: Importer): ts.Fun
         [firstParameter, ...node.parameters],
         ts.factory.createTypeReferenceNode(T_TypeParameter),
         ts.factory.createBlock([
-            ts.factory.createReturnStatement(singleExpressionStatement.expression)
+            ts.factory.createReturnStatement(singleExpression)
         ], true)
     )
 
@@ -69,16 +67,15 @@ function rewriteStyles(node: ts.FunctionDeclaration, importer: Importer): ts.Fun
 }
 
 function rewriteStylesMethod(node: ts.MethodDeclaration, importer: Importer): ts.MethodDeclaration {
+    const singleExpression = getSingleExpression(node.body)
+    if (!singleExpression) return node // unexpected
+
     const firstParameter = parameter(
         CommonInstance,
         ts.factory.createTypeReferenceNode(
             T_TypeParameter
         )
     )
-
-    const singleExpressionStatement = node.body?.statements?.[0]
-    if (!singleExpressionStatement) return node
-    if (!ts.isExpressionStatement(singleExpressionStatement)) return node
 
     const declaration = ts.factory.createMethodDeclaration(
         dropStylesLike(node.modifiers),
@@ -93,7 +90,7 @@ function rewriteStylesMethod(node: ts.MethodDeclaration, importer: Importer): ts
         [firstParameter, ...node.parameters],
         ts.factory.createTypeReferenceNode(T_TypeParameter),
         ts.factory.createBlock([
-            ts.factory.createReturnStatement(singleExpressionStatement.expression)
+            ts.factory.createReturnStatement(singleExpression)
         ], true)
     )
 

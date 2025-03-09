@@ -21,8 +21,8 @@ import { CallbackTransformer } from "./CallbackTransformer"
 import { AccessibilityCallback, EventTarget, SourceType, SourceTool, TouchTestInfo, TouchResult, RectResult, TouchTestStrategy, CustomBuilder, DismissContentCoverAction, DismissReason, DismissPopupAction, DismissSheetAction, DragItemInfo, DragBehavior, Summary, DragResult, Rectangle, CommonMethod, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DrawContext, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, LinearGradient_common, FinishCallbackType, ExpectedFrameRateRange, TransitionEffects, TransitionEdge, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, ShadowType, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, ImageModifier, OverlayOffset, TransitionHierarchyStrategy, PopupMessageOptions, SymbolGlyphModifier, MenuPreviewMode, ContextMenuAnimationOptions, BindOptions, SheetSize, SheetType, SheetTitleOptions, SheetMode, ScrollSizeMode, UIContext, SheetKeyboardAvoidMode, TouchObject, HistoricalPoint, IntentionCode, SheetDismiss, SpringBackAction, ItemDragInfo, HoverCallback, OnMoveHandler, OnScrollCallback } from "./../ArkCommonInterfaces"
 import { AccessibilityHoverEvent } from "./../ArkAccessibilityHoverEventMaterialized"
 import { BaseEvent } from "./../ArkBaseEventMaterialized"
-import { AccessibilityHoverType, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, Curve, PlayMode, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, FontWeight, FontStyle, ImageSpanAlignment, ImageFit, TextAlign, WordBreak, LineBreakStrategy, TextDecorationType, TextDecorationStyle, FoldStatus, AppRotation, Edge, ScrollSource } from "./../ArkEnumsInterfaces"
-import { Area, Length, Position, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, ColorMetrics, Bias, Font, VoidCallback } from "./../ArkUnitsInterfaces"
+import { AccessibilityHoverType, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, Curve, PlayMode, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, FontWeight, FontStyle, ImageSpanAlignment, ImageFit, TextDecorationType, TextDecorationStyle, TextAlign, TextOverflow, WordBreak, LineBreakStrategy, FoldStatus, AppRotation, Edge, ScrollSource } from "./../ArkEnumsInterfaces"
+import { Area, Length, Position, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, VoidCallback } from "./../ArkUnitsInterfaces"
 import { Resource } from "./../ArkResourceInterfaces"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { ButtonTriggerClickCallback } from "./../ArkButtonInterfaces"
@@ -33,7 +33,7 @@ import { LocationButtonOnClickResult } from "./../ArkLocationButtonInterfaces"
 import { PasteButtonOnClickResult } from "./../ArkPasteButtonInterfaces"
 import { SaveButtonOnClickResult } from "./../ArkSaveButtonInterfaces"
 import { ComputedBarAttribute } from "./../ArkGridInterfaces"
-import { CopyEvent, CutEvent, RichEditorChangeValue, RichEditorTextSpanResult, RichEditorImageSpanResult, RichEditorSpanPosition, RichEditorTextStyleResult, RichEditorSymbolSpanStyle, RichEditorParagraphStyle, RichEditorImageSpanStyleResult, LeadingMarginPlaceholder, RichEditorLayoutStyle, RichEditorDeleteValue, RichEditorDeleteDirection, RichEditorInsertValue, RichEditorRange, RichEditorSelection, PasteEvent, MenuOnAppearCallback, PasteEventCallback, SubmitCallback } from "./../ArkRichEditorInterfaces"
+import { CopyEvent, CutEvent, LeadingMarginPlaceholder, RichEditorChangeValue, RichEditorTextSpanResult, RichEditorImageSpanResult, RichEditorSpanPosition, RichEditorTextStyleResult, RichEditorSymbolSpanStyle, RichEditorParagraphStyle, RichEditorImageSpanStyleResult, RichEditorLayoutStyle, RichEditorDeleteValue, RichEditorDeleteDirection, RichEditorInsertValue, RichEditorRange, RichEditorSelection, PasteEvent, MenuOnAppearCallback, PasteEventCallback, SubmitCallback } from "./../ArkRichEditorInterfaces"
 import { DatePickerResult } from "./../ArkDatePickerInterfaces"
 import { DeleteValue, TextDeleteDirection, InsertValue, TextRange, DecorationStyleResult, StyledStringChangeValue, EditableTextOnChangeCallback, PreviewText, OnDidChangeCallback } from "./../ArkTextCommonInterfaces"
 import { DismissDialogAction } from "./../ArkActionSheetInterfaces"
@@ -44,7 +44,7 @@ import { Callback_Extender_OnFinish, Callback_Extender_OnProgress } from "./../A
 import { FormCallbackInfo } from "./../ArkFormComponentInterfaces"
 import { FullscreenInfo, PlaybackInfo, PreparedInfo } from "./../ArkVideoInterfaces"
 import { GestureEvent } from "./../ArkGestureEventMaterialized"
-import { FingerInfo, GestureInfo, GestureJudgeResult, GestureRecognizerState, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority } from "./../ArkGestureInterfaces"
+import { FingerInfo, GestureInfo, GestureJudgeResult, GestureRecognizerState, GestureType, GestureMask, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { GestureControl } from "./../ArkGestureControlNamespace"
 import { GestureRecognizer } from "./../ArkGestureRecognizerMaterialized"
@@ -62,10 +62,18 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { LengthUnit, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions, ErrorCallback, Want, WebHeader, BusinessError } from "./../ArkArkuiExternalInterfaces"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
+import { LengthUnit, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions, ErrorCallback, Want, WebHeader } from "./../ArkArkuiExternalInterfaces"
 import { MouseEvent } from "./../ArkMouseEventMaterialized"
 import { TouchEvent } from "./../ArkTouchEventMaterialized"
 import { KeyEvent } from "./../ArkKeyEventMaterialized"
+import { ColorMetrics } from "./../ArkColorMetricsMaterialized"
 import { ICurve } from "./../ArkICurveMaterialized"
 import { PanGestureOptions } from "./../ArkPanGestureOptionsMaterialized"
 import { NativeEmbedDataInfo, NativeEmbedStatus, NativeEmbedInfo, NativeEmbedTouchInfo, OnAlertEvent, OnAudioStateChangedEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnConsoleEvent, MessageLevel, OnContextMenuShowEvent, ContextMenuMediaType, ContextMenuSourceType, ContextMenuInputFieldType, OnDataResubmittedEvent, OnDownloadStartEvent, OnErrorReceiveEvent, Header, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadInterceptEvent, OnOverScrollEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPermissionRequestEvent, OnProgressChangeEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, RenderExitReason, OnResourceLoadEvent, OnScaleChangeEvent, OnScreenCaptureRequestEvent, ScreenCaptureConfig, WebCaptureMode, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, FileSelectorMode, OnSslErrorEventReceiveEvent, SslError, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, WebKeyboardOptions, OnAdsBlockedCallback, AdsBlockedDetails, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnFullScreenEnterCallback, FullScreenEnterEvent, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, OnNavigationEntryCommittedCallback, LoadCommittedDetails, WebNavigationType, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, RenderProcessNotRespondingReason, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, ThreatType, OnSslErrorEventCallback, SslErrorEvent, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo } from "./../ArkWebInterfaces"
@@ -101,7 +109,18 @@ import { WebviewController } from "./../ArkWebviewControllerMaterialized"
 import { StyledString } from "./../ArkStyledStringMaterialized"
 import { ImageAttachment } from "./../ArkImageAttachmentMaterialized"
 import { CustomSpan } from "./../ArkCustomSpanMaterialized"
-import { StyleOptions, StyledStringKey, SpanStyle, ImageAttachmentLayoutStyle, ImageAttachmentInterface, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledStringValue } from "./../ArkStyledStringInterfaces"
+import { StyleOptions, StyledStringKey, SpanStyle, ImageAttachmentLayoutStyle, ImageAttachmentInterface, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledStringValue, UserDataSpan, TextStyleInterface, DecorationStyleInterface, GestureStyleInterface, ParagraphStyleInterface } from "./../ArkStyledStringInterfaces"
+import { TextStyle_styled_string } from "./../ArkTextStyleStyledStringMaterialized"
+import { DecorationStyle } from "./../ArkDecorationStyleMaterialized"
+import { BaselineOffsetStyle } from "./../ArkBaselineOffsetStyleMaterialized"
+import { LetterSpacingStyle } from "./../ArkLetterSpacingStyleMaterialized"
+import { TextShadowStyle } from "./../ArkTextShadowStyleMaterialized"
+import { GestureStyle } from "./../ArkGestureStyleMaterialized"
+import { ParagraphStyle } from "./../ArkParagraphStyleMaterialized"
+import { LineHeightStyle } from "./../ArkLineHeightStyleMaterialized"
+import { UrlStyle } from "./../ArkUrlStyleMaterialized"
+import { BackgroundColorStyle } from "./../ArkBackgroundColorStyleMaterialized"
+import { TextBackgroundStyle } from "./../ArkSpanInterfaces"
 import { TabContentAnimatedTransition, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../ArkTabsInterfaces"
 import { TabContentTransitionProxy } from "./../ArkTabContentTransitionProxyMaterialized"
 import { Callback_RangeUpdate } from "./../ArkArkuiCustomInterfaces"
@@ -116,6 +135,7 @@ import { UIExtensionProxy } from "./../ArkUIExtensionProxyMaterialized"
 import { WithThemeAttribute, WithThemeInterface, WithThemeOptions, CustomTheme } from "./../ArkWithThemeInterfaces"
 import { ContentDidScrollCallback, OnSwiperAnimationEndCallback, SwiperAnimationEvent, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback } from "./../ArkSwiperInterfaces"
 import { CustomNodeBuilder } from "./../ArkCustomBuilderInterfaces"
+import { BusinessError } from "./../ArkBaseInterfaces"
 import { GetItemMainSizeByIndex } from "./../ArkWaterFlowInterfaces"
 import { ImageCompleteCallback, ImageLoadResult } from "./../ArkImageSpanInterfaces"
 import { NavExtender_OnUpdateStack } from "./../ArkNavigationExtenderInterfaces"
@@ -174,7 +194,7 @@ export function deserializeAndCallCallback_Array_Number_Void(thisDeserializer: D
     const _resourceId: int32 = thisDeserializer.readInt32()
     const _call = (ResourceHolder.instance().get(_resourceId) as ((input: Array<number>) => void))
     const input_buf_length: int32 = thisDeserializer.readInt32()
-    let input_buf: Array<number> = new Array<number>()
+    let input_buf: Array<number> = new Array<number>(input_buf_length)
     for (let input_buf_i = 0; input_buf_i < input_buf_length; input_buf_i++) {
         input_buf[input_buf_i] = (thisDeserializer.readNumber() as number)
     }
@@ -185,7 +205,7 @@ export function deserializeAndCallCallback_Array_String_Void(thisDeserializer: D
     const _resourceId: int32 = thisDeserializer.readInt32()
     const _call = (ResourceHolder.instance().get(_resourceId) as ((value: Array<string>) => void))
     const value_buf_length: int32 = thisDeserializer.readInt32()
-    let value_buf: Array<string> = new Array<string>()
+    let value_buf: Array<string> = new Array<string>(value_buf_length)
     for (let value_buf_i = 0; value_buf_i < value_buf_length; value_buf_i++) {
         value_buf[value_buf_i] = (thisDeserializer.readString() as string)
     }
@@ -196,7 +216,7 @@ export function deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisD
     const _resourceId: int32 = thisDeserializer.readInt32()
     const _call = (ResourceHolder.instance().get(_resourceId) as ((value: Array<TouchTestInfo>) => TouchResult))
     const value_buf_length: int32 = thisDeserializer.readInt32()
-    let value_buf: Array<TouchTestInfo> = new Array<TouchTestInfo>()
+    let value_buf: Array<TouchTestInfo> = new Array<TouchTestInfo>(value_buf_length)
     for (let value_buf_i = 0; value_buf_i < value_buf_length; value_buf_i++) {
         value_buf[value_buf_i] = thisDeserializer.readTouchTestInfo()
     }
@@ -447,15 +467,6 @@ export function deserializeAndCallCallback_IsolatedComponentAttribute_Void(thisD
     const _call = (ResourceHolder.instance().get(_resourceId) as ((value: IsolatedComponentAttribute) => void))
     let value: IsolatedComponentAttribute = thisDeserializer.readIsolatedComponentAttribute()
     _call(value)
-}
-export function deserializeAndCallCallback_ItemDragInfo_Number_CustomBuilder(thisDeserializer: Deserializer): void {
-    const _resourceId: int32 = thisDeserializer.readInt32()
-    const _call = (ResourceHolder.instance().get(_resourceId) as ((event: ItemDragInfo, itemIndex: number) => CustomBuilder))
-    let event: ItemDragInfo = thisDeserializer.readItemDragInfo()
-    let itemIndex: number = (thisDeserializer.readNumber() as number)
-    let _continuation: ((value: CustomBuilder) => void) = thisDeserializer.readCallback_CustomBuilder_Void(true)
-    const _callResult = _call(event, itemIndex)
-    _continuation(_callResult)
 }
 export function deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisDeserializer: Deserializer): void {
     const _resourceId: int32 = thisDeserializer.readInt32()
@@ -965,7 +976,7 @@ export function deserializeAndCallCallback_Opt_Array_String_Void(thisDeserialize
     if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
     {
         const error_buf__length: int32 = thisDeserializer.readInt32()
-        let error_buf_: Array<string> = new Array<string>()
+        let error_buf_: Array<string> = new Array<string>(error_buf__length)
         for (let error_buf__i = 0; error_buf__i < error_buf__length; error_buf__i++) {
             error_buf_[error_buf__i] = (thisDeserializer.readString() as string)
         }
@@ -1001,7 +1012,7 @@ export function deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Voi
     if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
     {
         const error_buf__length: int32 = thisDeserializer.readInt32()
-        let error_buf_: Array<string> = new Array<string>()
+        let error_buf_: Array<string> = new Array<string>(error_buf__length)
         for (let error_buf__i = 0; error_buf__i < error_buf__length; error_buf__i++) {
             error_buf_[error_buf__i] = (thisDeserializer.readString() as string)
         }
@@ -1318,7 +1329,7 @@ export function deserializeAndCallCallback_Union_Number_Array_Number_Void(thisDe
     }
     else if (selected_buf_selector == 1) {
         const selected_buf_u_length: int32 = thisDeserializer.readInt32()
-        let selected_buf_u: Array<number> = new Array<number>()
+        let selected_buf_u: Array<number> = new Array<number>(selected_buf_u_length)
         for (let selected_buf_u_i = 0; selected_buf_u_i < selected_buf_u_length; selected_buf_u_i++) {
             selected_buf_u[selected_buf_u_i] = (thisDeserializer.readNumber() as number)
         }
@@ -1357,7 +1368,7 @@ export function deserializeAndCallCallback_Union_String_Array_String_Void(thisDe
     }
     else if (value_buf_selector == 1) {
         const value_buf_u_length: int32 = thisDeserializer.readInt32()
-        let value_buf_u: Array<string> = new Array<string>()
+        let value_buf_u: Array<string> = new Array<string>(value_buf_u_length)
         for (let value_buf_u_i = 0; value_buf_u_i < value_buf_u_length; value_buf_u_i++) {
             value_buf_u[value_buf_u_i] = (thisDeserializer.readString() as string)
         }
@@ -1434,7 +1445,7 @@ export function deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeseri
     let event: BaseGestureEvent = (thisDeserializer.readBaseGestureEvent() as BaseGestureEvent)
     let current: GestureRecognizer = (thisDeserializer.readGestureRecognizer() as GestureRecognizer)
     const recognizers_buf_length: int32 = thisDeserializer.readInt32()
-    let recognizers_buf: Array<GestureRecognizer> = new Array<GestureRecognizer>()
+    let recognizers_buf: Array<GestureRecognizer> = new Array<GestureRecognizer>(recognizers_buf_length)
     for (let recognizers_buf_i = 0; recognizers_buf_i < recognizers_buf_length; recognizers_buf_i++) {
         recognizers_buf[recognizers_buf_i] = (thisDeserializer.readGestureRecognizer() as GestureRecognizer)
     }
@@ -1614,6 +1625,15 @@ export function deserializeAndCallOnIntelligentTrackingPreventionCallback(thisDe
     const _call = (ResourceHolder.instance().get(_resourceId) as OnIntelligentTrackingPreventionCallback)
     let details: IntelligentTrackingPreventionDetails = thisDeserializer.readIntelligentTrackingPreventionDetails()
     _call(details)
+}
+export function deserializeAndCallonItemDragStart_event_type(thisDeserializer: Deserializer): void {
+    const _resourceId: int32 = thisDeserializer.readInt32()
+    const _call = (ResourceHolder.instance().get(_resourceId) as ((event: ItemDragInfo, itemIndex: number) => CustomBuilder))
+    let event: ItemDragInfo = thisDeserializer.readItemDragInfo()
+    let itemIndex: number = (thisDeserializer.readNumber() as number)
+    let _continuation: ((value: CustomBuilder) => void) = thisDeserializer.readCallback_CustomBuilder_Void(true)
+    const _callResult = _call(event, itemIndex)
+    _continuation(_callResult)
 }
 export function deserializeAndCallOnLargestContentfulPaintCallback(thisDeserializer: Deserializer): void {
     const _resourceId: int32 = thisDeserializer.readInt32()
@@ -1861,7 +1881,7 @@ export function deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(th
     const _call = (ResourceHolder.instance().get(_resourceId) as ShouldBuiltInRecognizerParallelWithCallback)
     let current: GestureRecognizer = (thisDeserializer.readGestureRecognizer() as GestureRecognizer)
     const others_buf_length: int32 = thisDeserializer.readInt32()
-    let others_buf: Array<GestureRecognizer> = new Array<GestureRecognizer>()
+    let others_buf: Array<GestureRecognizer> = new Array<GestureRecognizer>(others_buf_length)
     for (let others_buf_i = 0; others_buf_i < others_buf_length; others_buf_i++) {
         others_buf[others_buf_i] = (thisDeserializer.readGestureRecognizer() as GestureRecognizer)
     }
@@ -1939,7 +1959,7 @@ export function deserializeAndCallType_TextPickerAttribute_onChange_callback(thi
     }
     else if (value_buf_selector == 1) {
         const value_buf_u_length: int32 = thisDeserializer.readInt32()
-        let value_buf_u: Array<string> = new Array<string>()
+        let value_buf_u: Array<string> = new Array<string>(value_buf_u_length)
         for (let value_buf_u_i = 0; value_buf_u_i < value_buf_u_length; value_buf_u_i++) {
             value_buf_u[value_buf_u_i] = (thisDeserializer.readString() as string)
         }
@@ -1956,7 +1976,7 @@ export function deserializeAndCallType_TextPickerAttribute_onChange_callback(thi
     }
     else if (index_buf_selector == 1) {
         const index_buf_u_length: int32 = thisDeserializer.readInt32()
-        let index_buf_u: Array<number> = new Array<number>()
+        let index_buf_u: Array<number> = new Array<number>(index_buf_u_length)
         for (let index_buf_u_i = 0; index_buf_u_i < index_buf_u_length; index_buf_u_i++) {
             index_buf_u[index_buf_u_i] = (thisDeserializer.readNumber() as number)
         }
@@ -2083,7 +2103,6 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -383025085/*CallbackKind.Kind_Callback_InsertValue_Boolean*/: return deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer);
         case -1121207885/*CallbackKind.Kind_Callback_InsertValue_Void*/: return deserializeAndCallCallback_InsertValue_Void(thisDeserializer);
         case 719029905/*CallbackKind.Kind_Callback_IsolatedComponentAttribute_Void*/: return deserializeAndCallCallback_IsolatedComponentAttribute_Void(thisDeserializer);
-        case 2071721246/*CallbackKind.Kind_Callback_ItemDragInfo_Number_CustomBuilder*/: return deserializeAndCallCallback_ItemDragInfo_Number_CustomBuilder(thisDeserializer);
         case -1627362945/*CallbackKind.Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisDeserializer);
         case -918805852/*CallbackKind.Kind_Callback_ItemDragInfo_Number_Number_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Void(thisDeserializer);
         case 296908152/*CallbackKind.Kind_Callback_ItemDragInfo_Number_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Void(thisDeserializer);
@@ -2231,6 +2250,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 81230317/*CallbackKind.Kind_OnFullScreenEnterCallback*/: return deserializeAndCallOnFullScreenEnterCallback(thisDeserializer);
         case 9040430/*CallbackKind.Kind_OnHoverStatusChangeCallback*/: return deserializeAndCallOnHoverStatusChangeCallback(thisDeserializer);
         case -1377876844/*CallbackKind.Kind_OnIntelligentTrackingPreventionCallback*/: return deserializeAndCallOnIntelligentTrackingPreventionCallback(thisDeserializer);
+        case 1340995650/*CallbackKind.Kind_onItemDragStart_event_type*/: return deserializeAndCallonItemDragStart_event_type(thisDeserializer);
         case 1390640532/*CallbackKind.Kind_OnLargestContentfulPaintCallback*/: return deserializeAndCallOnLargestContentfulPaintCallback(thisDeserializer);
         case -968773856/*CallbackKind.Kind_OnLinearIndicatorChangeCallback*/: return deserializeAndCallOnLinearIndicatorChangeCallback(thisDeserializer);
         case -1200281222/*CallbackKind.Kind_OnMoveHandler*/: return deserializeAndCallOnMoveHandler(thisDeserializer);

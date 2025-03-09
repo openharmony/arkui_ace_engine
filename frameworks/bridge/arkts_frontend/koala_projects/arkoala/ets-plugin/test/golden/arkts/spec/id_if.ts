@@ -1,5 +1,6 @@
 import { ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkDivider, ArkDividerComponent, ArkList, ArkListItem, ArkListItemComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkRowComponent, ArkStructBase, ArkTabContent, ArkTabContentComponent, ArkTabs, ArkText, ArkTextComponent, ArkXComponent, ArkXComponentComponent, BarPosition, Color, ListOptions, TabsController, TabsOptions, XComponentOptions } from "@koalaui/arkts-arkui";
 import { LocalStorage } from "@koalaui/arkui-common";
+/** @memo:stable */
 class ArkMyComponentComponent extends ArkStructBase<ArkMyComponentComponent, MyComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -131,6 +132,7 @@ class ArkMyComponentComponent extends ArkStructBase<ArkMyComponentComponent, MyC
         });
     }
 }
+/** @memo:stable */
 class ArkChildComponent extends ArkStructBase<ArkChildComponent, ChildOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

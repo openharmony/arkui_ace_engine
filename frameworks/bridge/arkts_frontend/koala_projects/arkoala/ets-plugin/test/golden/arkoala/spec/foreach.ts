@@ -1,5 +1,6 @@
 import { ArkCommonMethodComponent, ArkList, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ForEach, LocalStorage, MutableState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkParentViewComponent extends ArkStructBase<ArkParentViewComponent, ParentViewOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -27,6 +28,7 @@ class ArkParentViewComponent extends ArkStructBase<ArkParentViewComponent, Paren
         });
     }
 }
+/** @memo:stable */
 class ArkParentView1Component extends ArkStructBase<ArkParentView1Component, ParentView1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -54,6 +56,7 @@ class ArkParentView1Component extends ArkStructBase<ArkParentView1Component, Par
         });
     }
 }
+/** @memo:stable */
 class ArkParentView2Component extends ArkStructBase<ArkParentView2Component, ParentView2Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -81,6 +84,7 @@ class ArkParentView2Component extends ArkStructBase<ArkParentView2Component, Par
         });
     }
 }
+/** @memo:stable */
 class ArkParentView3Component extends ArkStructBase<ArkParentView3Component, ParentView3Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -108,6 +112,7 @@ class ArkParentView3Component extends ArkStructBase<ArkParentView3Component, Par
         });
     }
 }
+/** @memo:stable */
 class ArkParentView4Component extends ArkStructBase<ArkParentView4Component, ParentView4Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -135,6 +140,7 @@ class ArkParentView4Component extends ArkStructBase<ArkParentView4Component, Par
         });
     }
 }
+/** @memo:stable */
 class ArkParentView5Component extends ArkStructBase<ArkParentView5Component, ParentView5Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

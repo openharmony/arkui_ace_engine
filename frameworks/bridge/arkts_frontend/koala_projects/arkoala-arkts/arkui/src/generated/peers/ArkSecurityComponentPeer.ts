@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -30,7 +30,7 @@ import { Resource } from "./../ArkResourceInterfaces"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -50,7 +50,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_iconSize(this.peer.ptr, value)
     }
     layoutDirectionAttribute(value: SecurityComponentLayoutDirection): void {
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_layoutDirection(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_layoutDirection(this.peer.ptr, ((value as SecurityComponentLayoutDirection) as int32))
     }
     positionAttribute(value: Position): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -90,7 +90,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_fontSize(this.peer.ptr, value)
     }
     fontStyleAttribute(value: FontStyle): void {
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontStyle(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontStyle(this.peer.ptr, ((value as FontStyle) as int32))
     }
     fontWeightAttribute(value: number | FontWeight | string): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -104,7 +104,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         else if (TypeChecker.isFontWeight(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as FontWeight
-            thisSerializer.writeInt32((value_1.valueOf() as int32))
+            thisSerializer.writeInt32(((value_1 as FontWeight) as int32))
         }
         else if (RuntimeType.STRING == value_type) {
             thisSerializer.writeInt8(2 as int32)
@@ -138,7 +138,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -165,7 +165,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -192,7 +192,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -213,7 +213,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         thisSerializer.release()
     }
     borderStyleAttribute(value: BorderStyle): void {
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_borderStyle(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_borderStyle(this.peer.ptr, ((value as BorderStyle) as int32))
     }
     borderWidthAttribute(value: Dimension): void {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_borderWidth(this.peer.ptr, value)
@@ -225,7 +225,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -252,7 +252,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
-        if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isPadding(value, false, false, false, false))) {
+        if (TypeChecker.isPadding(value, false, false, false, false)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Padding
             const value_0_top  = value_0.top
@@ -288,7 +288,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
                 thisSerializer.writeLength(value_0_left_value)
             }
         }
-        else if (((RuntimeType.NUMBER) == (value_type)) || ((RuntimeType.STRING) == (value_type)) || (((RuntimeType.OBJECT) == (value_type)) && (isResource(value)))) {
+        else if (((RuntimeType.NUMBER) == (value_type)) || ((RuntimeType.STRING) == (value_type)) || (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isResource(value, false, false, false, false, false)))) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as Dimension
             thisSerializer.writeLength(value_1)

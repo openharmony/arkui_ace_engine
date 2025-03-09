@@ -28,8 +28,6 @@
 #include "Serializers.h"
 
 
-// #define KOALA_INTEROP_MODULE ArkUIGeneratedNativeModule
-
 const GENERATED_ArkUIBasicNodeAPI* GetArkUIBasicNodeAPI();
 const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI();
 
@@ -502,8 +500,56 @@ KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, co
     }
     return (KVMObjectHandle)result;
 #elif KOALA_ANI
-    fprintf(stderr, "LoadUserView() is not implemented yet\n");
-    return nullptr;
+    ani_env* env = reinterpret_cast<ani_env*>(vm);
+    std::string className(viewClass.c_str());
+    // TODO: hack, fix it!
+    if (className == "UserApp") {
+        className = "L@koalaui.arkts-arkui.Application.UserView;";
+    } if (className == "EtsHarness") {
+        className = "L@koalaui.ets-harness.build.unmemoized.src.Page.EtsHarness;";
+    } else {
+        className = "L@koalaui.user.build.unmemoized.src.Page." + className + ";";
+    }
+    std::replace(className.begin(), className.end(), '.', '/');
+    ani_class viewClassClass = nullptr;
+    env->FindClass(className.c_str(), &viewClassClass);
+    if (!viewClassClass) {
+        LOGE("Cannot find user class %s\n", viewClass.c_str());
+        ani_boolean hasError = false;
+        env->ExistUnhandledError(&hasError);
+        if (hasError) {
+            env->DescribeError();
+            env->ResetError();
+        }
+        return nullptr;
+    }
+    ani_method viewClassCtor = nullptr;
+    env->Class_FindMethod(viewClassClass, "<ctor>", "Lstd/core/String;:V", &viewClassCtor);
+    if (!viewClassCtor) {
+        LOGE("Cannot find user class ctor");
+        ani_boolean hasError = false;
+        env->ExistUnhandledError(&hasError);
+        if (hasError) {
+            env->DescribeError();
+            env->ResetError();
+        }
+        return nullptr;
+    }
+    ani_object result = nullptr;
+    ani_string params = nullptr;
+    env->String_NewUTF8(viewParams.c_str(), viewParams.length(), &params);
+    env->Object_New(viewClassClass, viewClassCtor, &result, params);
+    if (!result) {
+        LOGE("Cannot instantiate user class");
+        ani_boolean hasError = false;
+        env->ExistUnhandledError(&hasError);
+        if (hasError) {
+            env->DescribeError();
+            env->ResetError();
+        }
+        return nullptr;
+    }
+    return (KVMObjectHandle)result;
 #else
     fprintf(stderr, "LoadUserView() is not implemented yet\n");
     return nullptr;

@@ -4,6 +4,7 @@ import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
 import { observableProxy } from "@koalaui/common";
 import { AllStarComponent } from './test/pages/ExportStarComponent';
 import TsModule from './test/pages/TsModule';
+/** @memo:stable */
 class ArkImportTestComponent extends ArkStructBase<ArkImportTestComponent, ImportTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

@@ -1,4 +1,5 @@
 import { ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, FlexAlign, FlexDirection, GestureEvent, ItemAlign, LocalStorage, MutableState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
+/** @memo:stable */
 class ArkGestureTestComponent extends ArkStructBase<ArkGestureTestComponent, GestureTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

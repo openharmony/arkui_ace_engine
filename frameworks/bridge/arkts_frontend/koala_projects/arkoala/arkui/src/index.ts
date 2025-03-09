@@ -123,15 +123,8 @@ export { _r, _rawfile, __registerResources } from "./resources"
 export * from "./ArkTransition"
 export * from "./generated/ArkDataPanel"
 export * from "./generated/ArkPanel"
-export {
-    ArkPageTransitionEnterComponent,
-    ArkPageTransitionEnterComponent as PageTransitionEnterAttribute,
-    ArkPageTransitionExitComponent,
-    ArkPageTransitionExitComponent as PageTransitionExitAttribute,
-    // todo: why we need explicit export here?
-    LocalStorage
-} from "@koalaui/arkui-common"
 export { Observed, observableProxy } from "@koalaui/common"
+export { LocalStorage } from "@koalaui/arkui-common"
 export * from "@koalaui/arkui-common"
 export * from "./shared/ArkUtils"
 export * from "./generated/peers/ArkButtonPeer"
@@ -154,6 +147,7 @@ export { Attach } from "./ComponentBase"
 export * from "./generated/ArkNavPathStackMaterialized"
 export * from "./generated/ArkTabsControllerMaterialized"
 export * from "./generated/ArkRenderingContextSettingsMaterialized"
+export * from "./generated/ArkAnimationExtenderMaterialized"
 
 export * from "./generated/ArkAlertDialogInterfaces"
 export * from "./generated/ArkAlphabetIndexerInterfaces"

@@ -54,6 +54,11 @@ export class TSFunctionType extends TypeNode {
     get returnType(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSFunctionTypeReturnTypeConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setNullable(nullable: boolean): this {
+        global.generatedEs2panda._TSFunctionTypeSetNullable(global.context, this.peer, nullable)
+        return this
+    }
 }
 export function isTSFunctionType(node: AstNode): node is TSFunctionType {
     return node instanceof TSFunctionType

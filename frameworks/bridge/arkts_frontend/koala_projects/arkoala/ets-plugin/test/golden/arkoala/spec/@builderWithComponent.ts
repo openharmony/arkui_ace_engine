@@ -4,6 +4,7 @@ import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 function myBuilder() {
     child(undefined, undefined);
 }
+/** @memo:stable */
 class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -27,6 +28,7 @@ class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

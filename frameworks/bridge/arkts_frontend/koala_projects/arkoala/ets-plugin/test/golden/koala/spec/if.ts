@@ -2,6 +2,7 @@ import { $r, $rawfile, AppStorage, ArkColumn, ArkCommonMethodComponent, ArkPageT
 import { MutableState } from "@koalaui/runtime";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkIFViewComponent extends ArkStructBase<ArkIFViewComponent, IFViewOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

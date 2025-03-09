@@ -1,5 +1,6 @@
 import { ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkImage, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, LocalStorage, MutableState, _r, _rawfile, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

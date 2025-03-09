@@ -2,6 +2,7 @@ import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, A
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkNamespaceComponent1Component extends ArkStructBase<ArkNamespaceComponent1Component, NamespaceComponent1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -89,6 +90,7 @@ class ArkNamespaceComponent1Component extends ArkStructBase<ArkNamespaceComponen
         });
     }
 }
+/** @memo:stable */
 class ArkNamespaceComponent2Component extends ArkStructBase<ArkNamespaceComponent2Component, NamespaceComponent2Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -176,6 +178,7 @@ class ArkNamespaceComponent2Component extends ArkStructBase<ArkNamespaceComponen
         });
     }
 }
+/** @memo:stable */
 class ArkNamespaceComponent3Component extends ArkStructBase<ArkNamespaceComponent3Component, NamespaceComponent3Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

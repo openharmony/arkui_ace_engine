@@ -99,11 +99,11 @@ export function hasMemoIntrinsicAnnotation(node: arkts.ScriptFunction | arkts.ET
  * @deprecated
  */
 export function isSyntheticReturnStatement(node: arkts.AstNode) {
-    return node instanceof arkts.ReturnStatement &&
-        node.argument instanceof arkts.MemberExpression &&
-        node.argument.object instanceof arkts.Identifier &&
+    return arkts.isReturnStatement(node) &&
+        node.argument && arkts.isMemberExpression(node.argument) &&
+        arkts.isIdentifier(node.argument.object) &&
         node.argument.object.name === RuntimeNames.SCOPE &&
-        node.argument.property instanceof arkts.Identifier &&
+        arkts.isIdentifier(node.argument.property) &&
         node.argument.property.name === RuntimeNames.INTERNAL_VALUE
 }
 
@@ -112,6 +112,6 @@ export function isSyntheticReturnStatement(node: arkts.AstNode) {
  * @deprecated
  */
 export function isMemoParametersDeclaration(node: arkts.AstNode) {
-    return node instanceof arkts.VariableDeclaration &&
+    return arkts.isVariableDeclaration(node) &&
         node.declarators.every((it) => it.name.name.startsWith(RuntimeNames.PARAMETER))
 }

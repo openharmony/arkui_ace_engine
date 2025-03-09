@@ -4,6 +4,7 @@ interface optionsType {
     message: string;
 }
 let options: optionsType = { message: 'Hi' };
+/** @memo:stable */
 class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -38,6 +39,7 @@ class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkChildComponent extends ArkStructBase<ArkChildComponent, ChildOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -85,6 +87,7 @@ class ArkChildComponent extends ArkStructBase<ArkChildComponent, ChildOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkChild2Component extends ArkStructBase<ArkChild2Component, Child2Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

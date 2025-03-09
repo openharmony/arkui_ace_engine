@@ -18,7 +18,7 @@
 
 import { LengthMetricsUnit } from "./ArkUnitsInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,7 +32,7 @@ export class ImageDataInternal {
     }
 }
 export class ImageData implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -59,9 +59,9 @@ export class ImageData implements MaterializedBase {
         return retval
     }
      constructor(width?: number, height?: number, data?: NativeBuffer) {
-        if (((width) !== (undefined)) && ((height) !== (undefined)) && ((data) !== (undefined)))
+        if (((width) !== (undefined)) || ((height) !== (undefined)) || ((data) !== (undefined)))
         {
-            const ctorPtr : KPointer = ImageData.ctor_imagedata(width, height, data)
+            const ctorPtr : KPointer = ImageData.ctor_imagedata((width)!, (height)!, (data)!)
             this.peer = new Finalizable(ctorPtr, ImageData.getFinalizer())
         }
     }

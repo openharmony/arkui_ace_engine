@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@ import * as ts from "@koalaui/ets-tsc"
 import { asString, collect, filterDecorators, throwError } from "./utils"
 
 export function parameter(
-    name: string|ts.Identifier,
+    name: string | ts.Identifier,
     type: ts.TypeNode | undefined,
     initializer?: ts.Expression
 ) {
@@ -32,7 +32,7 @@ export function parameter(
 }
 
 export function optionalParameter(
-    name: string|ts.Identifier,
+    name: string | ts.Identifier,
     type: ts.TypeNode | undefined,
     initializer?: ts.Expression
 ) {
@@ -220,20 +220,28 @@ export function getDeclarationsByNode(typechecker: ts.TypeChecker, node: ts.Node
     return declarations
 }
 
+export function dropModifier(modifierLikes: ts.ModifierLike[] | undefined, kind: ts.SyntaxKind): ts.ModifierLike[] | undefined {
+    return modifierLikes?.filter(it => it.kind != kind)
+}
+
+export function dropModifiers(modifierLikes: ts.ModifierLike[] | undefined, ...kinds: ts.SyntaxKind[]): ts.ModifierLike[] | undefined {
+    return modifierLikes?.filter(it => kinds.every(kind => it.kind != kind))
+}
+
 export function dropReadonly(modifierLikes: ts.ModifierLike[] | undefined): ts.ModifierLike[] | undefined {
-    return modifierLikes?.filter(it => it.kind != ts.SyntaxKind.ReadonlyKeyword)
+    return dropModifier(modifierLikes, ts.SyntaxKind.ReadonlyKeyword)
 }
 
 export function dropPublic(modifierLikes: ts.ModifierLike[] | undefined): ts.ModifierLike[] | undefined {
-    return modifierLikes?.filter(it => it.kind != ts.SyntaxKind.PublicKeyword)
+    return dropModifier(modifierLikes, ts.SyntaxKind.PublicKeyword)
 }
 
 export function dropPrivate(modifierLikes: ts.ModifierLike[] | undefined): ts.ModifierLike[] | undefined {
-    return modifierLikes?.filter(it => it.kind != ts.SyntaxKind.PrivateKeyword)
+    return dropModifier(modifierLikes, ts.SyntaxKind.PrivateKeyword)
 }
 
 export function makePrivate(modifierLikes: ts.ModifierLike[] | undefined): ts.ModifierLike[] | undefined {
-    return collect(Private(), dropPrivate(dropPublic(modifierLikes)))
+    return collect(Private(), dropModifiers(modifierLikes, ts.SyntaxKind.PublicKeyword, ts.SyntaxKind.PrivateKeyword, ts.SyntaxKind.ProtectedKeyword))
 }
 
 export function isStatic(node: ts.Node): boolean {
@@ -251,4 +259,11 @@ export function sourceStructName(node: ts.StructDeclaration) {
 export function asIdentifier(node: ts.Node): ts.Identifier {
     if (ts.isIdentifier(node)) return node
     throwError(`Expected ts.Identifier, got ${asString(node)}`)
+}
+
+export function findObjectPropertyValue(arg: ts.ObjectLiteralExpression, name: string): ts.Expression|undefined {
+    const property =  arg.properties
+        .filter(it => ts.isPropertyAssignment(it))
+        .find(it => it.name?.getText() == name) as ts.PropertyAssignment|undefined
+    return property?.initializer
 }

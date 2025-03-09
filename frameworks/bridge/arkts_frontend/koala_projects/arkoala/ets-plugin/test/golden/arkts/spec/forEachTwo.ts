@@ -2,6 +2,7 @@ import { ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommon
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

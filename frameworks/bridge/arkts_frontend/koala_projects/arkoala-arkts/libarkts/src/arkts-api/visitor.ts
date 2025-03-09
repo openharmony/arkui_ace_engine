@@ -15,29 +15,28 @@
 
 import { factory } from "./factory/nodeFactory"
 import {
-    ArrowFunctionExpression,
-    CallExpression,
-    ClassDeclaration,
-    ClassDefinition,
-    EtsImportDeclaration,
-    EtsScript,
-    ExpressionStatement,
-    FunctionDeclaration,
-    IfStatement,
-    MethodDefinition,
-    ScriptFunction,
-    StructDeclaration,
-    VariableDeclaration,
-    VariableDeclarator,
-} from "./types"
-import {
     Es2pandaClassDefinitionModifiers,
     Es2pandaModifierFlags,
     Es2pandaVariableDeclaratorFlag
 } from "../generated/Es2pandaEnums"
 import { AstNode } from "./peers/AstNode"
-import { MemberExpression } from "./to-be-generated/MemberExpression"
-import { BlockStatement, ConditionalExpression, TSInterfaceBody, TSInterfaceDeclaration } from "../generated"
+import { isBlockStatement, isConditionalExpression, isTSInterfaceBody, isTSInterfaceDeclaration, isClassDeclaration, isClassDefinition } from "../generated"
+import {
+    isEtsScript,
+    isCallExpression,
+    isFunctionDeclaration,
+    isExpressionStatement,
+    isStructDeclaration,
+    isMethodDefinition,
+    isScriptFunction,
+    isEtsImportDeclaration,
+    isMemberExpression,
+    isIfStatement,
+    isVariableDeclaration,
+    isVariableDeclarator,
+    isArrowFunctionExpression
+} from "./factory/nodeTests"
+import { classDefinitionFlags } from "./utilities/public"
 
 type Visitor = (node: AstNode) => AstNode
 
@@ -108,13 +107,13 @@ export function visitEachChild(
     node: AstNode,
     visitor: Visitor
 ): AstNode {
-    if (node instanceof EtsScript) {
+    if (isEtsScript(node)) {
         return factory.updateEtsScript(
             node,
             nodesVisitor(node.statements, visitor)
         )
     }
-    if (node instanceof CallExpression) {
+    if (isCallExpression(node)) {
         return factory.updateCallExpression(
             node,
             nodeVisitor(node.expression, visitor),
@@ -123,53 +122,54 @@ export function visitEachChild(
             nodeVisitor(node.trailingBlock, visitor)
         )
     }
-    if (node instanceof FunctionDeclaration) {
+    if (isFunctionDeclaration(node)) {
         return factory.updateFunctionDeclaration(
             node,
             nodeVisitor(node.scriptFunction, visitor),
-            node.isAnon
+            node.isAnon,
+            node.annotations,
         )
     }
-    if (node instanceof BlockStatement) {
+    if (isBlockStatement(node)) {
         return factory.updateBlock(
             node,
             nodesVisitor(node.statements, visitor),
         )
     }
-    if (node instanceof ExpressionStatement) {
+    if (isExpressionStatement(node)) {
         return factory.updateExpressionStatement(
             node,
             nodeVisitor(node.expression, visitor)
         )
     }
-    if (node instanceof ClassDeclaration) {
+    if (isClassDeclaration(node)) {
         return factory.updateClassDeclaration(
             node,
             nodeVisitor(node.definition, visitor)
         )
     }
-    if (node instanceof StructDeclaration) {
+    if (isStructDeclaration(node)) {
         return factory.updateStructDeclaration(
             node,
             nodeVisitor(node.definition, visitor)
         )
     }
-    if (node instanceof ClassDefinition) {
+    if (isClassDefinition(node)) {
         // TODO: fix
         return factory.updateClassDefinition(
             node,
-            nodeVisitor(node.name, visitor),
-            nodesVisitor(node.members, visitor),
-            // passModifiers(modifiers) | es2panda_ModifierFlags.MODIFIER_FLAGS_PUBLIC | es2panda_ModifierFlags.MODIFIER_FLAGS_STATIC,
+            node.ident,
+            node.typeParams,
+            node.superTypeParams,
+            node.implements,
+            undefined,
+            node.super,
+            nodesVisitor(node.body, visitor),
             node.modifiers,
-            // TODO: pass through modifiers
-            // Passing NONE causes failure when proceeding to CHECKED.
-            Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
-            nodeVisitor(node.typeParamsDecl, visitor),
-            nodeVisitor(node.superClass, visitor),
+            classDefinitionFlags(node)
         )
     }
-    if (node instanceof MethodDefinition) {
+    if (isMethodDefinition(node)) {
         // TODO: fix
         return factory.updateMethodDefinition(
             node,
@@ -177,23 +177,13 @@ export function visitEachChild(
             node.name,
             factory.createFunctionExpression(
                 // TODO: maybe fix
-                factory.updateScriptFunction(
-                    node.scriptFunction,
-                    nodeVisitor(node.scriptFunction.body, visitor),
-                    0,
-                    node.modifiers | Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC || Es2pandaModifierFlags.MODIFIER_FLAGS_STATIC,
-                    false,
-                    node.name,
-                    node.scriptFunction.parameters,
-                    node.scriptFunction.typeParamsDecl,
-                    node.scriptFunction.returnTypeAnnotation
-                )
+                nodeVisitor(node.scriptFunction, visitor)
             ),
             node.modifiers,
             false
         )
     }
-    if (node instanceof ScriptFunction) {
+    if (isScriptFunction(node)) {
         return factory.updateScriptFunction(
             node,
             nodeVisitor(node.body, visitor),
@@ -203,10 +193,11 @@ export function visitEachChild(
             nodeVisitor(node.ident, visitor),
             nodesVisitor(node.parameters, visitor),
             nodeVisitor(node.typeParamsDecl, visitor),
-            nodeVisitor(node.returnTypeAnnotation, visitor)
+            nodeVisitor(node.returnTypeAnnotation, visitor),
+            node.annotations
         )
     }
-    if (node instanceof EtsImportDeclaration) {
+    if (isEtsImportDeclaration(node)) {
         return factory.updateImportDeclaration(
             node,
             nodeVisitor(node.importSource, visitor),
@@ -215,7 +206,7 @@ export function visitEachChild(
             node.hasDecl
         )
     }
-    if (node instanceof MemberExpression) {
+    if (isMemberExpression(node)) {
         return factory.updateMemberExpression(
             node,
             nodeVisitor(node.object, visitor),
@@ -225,7 +216,7 @@ export function visitEachChild(
             node.optional
         )
     }
-    if (node instanceof TSInterfaceDeclaration) {
+    if (isTSInterfaceDeclaration(node)) {
         return factory.updateInterfaceDeclaration(
             node,
             nodesVisitor(node.extends, visitor),
@@ -237,13 +228,13 @@ export function visitEachChild(
             true
         )
     }
-    if (node instanceof TSInterfaceBody) {
+    if (isTSInterfaceBody(node)) {
         return factory.updateInterfaceBody(
             node,
             nodesVisitor(node.body, visitor)
         )
     }
-    if (node instanceof IfStatement) {
+    if (isIfStatement(node)) {
         return factory.updateIfStatement(
             node,
             nodeVisitor(node.test, visitor),
@@ -251,7 +242,7 @@ export function visitEachChild(
             nodeVisitor(node.alternate, visitor),
         )
     }
-    if (node instanceof ConditionalExpression) {
+    if (isConditionalExpression(node)) {
         return factory.updateConditionalExpression(
             node,
             nodeVisitor(node.test, visitor),
@@ -259,7 +250,7 @@ export function visitEachChild(
             nodeVisitor(node.alternate, visitor),
         )
     }
-    if (node instanceof VariableDeclaration) {
+    if (isVariableDeclaration(node)) {
         return factory.updateVariableDeclaration(
             node,
             0,
@@ -267,7 +258,7 @@ export function visitEachChild(
             nodesVisitor(node.declarators, visitor),
         )
     }
-    if (node instanceof VariableDeclarator) {
+    if (isVariableDeclarator(node)) {
         return factory.updateVariableDeclarator(
             node,
             Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_UNKNOWN,
@@ -275,7 +266,7 @@ export function visitEachChild(
             nodeVisitor(node.initializer, visitor),
         )
     }
-    if (node instanceof ArrowFunctionExpression) {
+    if (isArrowFunctionExpression(node)) {
         return factory.updateArrowFunction(
             node,
             nodeVisitor(node.scriptFunction, visitor),

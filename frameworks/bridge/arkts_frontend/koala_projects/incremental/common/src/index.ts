@@ -37,7 +37,9 @@ export {
     propDeepCopy,
     refEqual,
     int8Array,
-    unsafeCast
+    unsafeCast,
+    scheduleCoroutine,
+    memoryStats
 } from "@koalaui/compat"
 export { clamp, lerp, modulo, parseNumber, isFiniteNumber, getDistancePx } from "./math"
 export { hashCodeFromString } from "./stringUtils"

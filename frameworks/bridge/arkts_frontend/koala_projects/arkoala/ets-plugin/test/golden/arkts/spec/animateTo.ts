@@ -2,6 +2,7 @@ import { ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommon
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkTransitionExampleComponent extends ArkStructBase<ArkTransitionExampleComponent, TransitionExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -113,31 +114,25 @@ class ArkTransitionExampleComponent extends ArkStructBase<ArkTransitionExampleCo
                 }, undefined);
             }
             ArkButton((__instance: ArkButtonComponent) => {
-                __instance.width(this.btnW).height(this.btnH)
-                    .onClick(() => {
-                    this.btnW += 50;
-                })
-                    .animation({
+                __instance.animationStart({
                     duration: 1000,
                     curve: Curve.EaseOut,
                     delay: 200,
                     iterations: 1,
                     playMode: PlayMode.Normal // 动画模式
-                });
+                }).width(this.btnW).height(this.btnH)
+                    .onClick(() => {
+                    this.btnW += 50;
+                }).animationStop();
             }, undefined, 'animation');
             ArkColumn((__instance: ArkColumnComponent) => {
                 __instance.width("100%")
                     .height("100%");
             }, () => {
                 ArkColumn((__instance: ArkColumnComponent) => {
-                    __instance.opacity(this.opacity1)
-                        .backgroundColor(this.color)
-                        .animation({ duration: 1000 })
-                        .width(this.width1)
-                        .animation({ duration: 2000 })
-                        .height(this.height1)
-                        .borderRadius(this.borderRaius1)
-                        .animation({ duration: 3000 })
+                    __instance.animationStart({ duration: 1000 }).opacity(this.opacity1)
+                        .backgroundColor(this.color).animationStop().animationStart({ duration: 2000 }).width(this.width1).animationStop().animationStart({ duration: 3000 }).height(this.height1)
+                        .borderRadius(this.borderRaius1).animationStop()
                         .onClick(() => {
                         this.color = Color.Green;
                         this.borderRaius1 = 20;

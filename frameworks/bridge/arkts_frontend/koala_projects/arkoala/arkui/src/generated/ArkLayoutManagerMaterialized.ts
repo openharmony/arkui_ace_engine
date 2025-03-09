@@ -18,21 +18,22 @@
 
 import { PositionWithAffinity, LineMetrics, TextRange, TextBox, Affinity } from "./ArkTextCommonInterfaces"
 import { RectWidthStyle, RectHeightStyle } from "./ArkArkuiExternalInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
 export interface LayoutManager {
-    getLineCount(): number 
-    getGlyphPositionAtCoordinate(x: number, y: number): PositionWithAffinity 
-    getLineMetrics(lineNumber: number): LineMetrics 
-    getRectsForRange(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> 
+    getLineCount(): number
+    getGlyphPositionAtCoordinate(x: number, y: number): PositionWithAffinity
+    getLineMetrics(lineNumber: number): LineMetrics
+    getRectsForRange(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox>
 }
 export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -71,18 +72,29 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     }
     private getGlyphPositionAtCoordinate_serialize(x: number, y: number): PositionWithAffinity {
         const retval = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
-        return new Deserializer(retval.buffer, retval.byteLength).readPositionWithAffinity()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: PositionWithAffinity = retvalDeserializer.readPositionWithAffinity()
+        return returnResult
     }
     private getLineMetrics_serialize(lineNumber: number): LineMetrics {
         const retval = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
-        return new Deserializer(retval.buffer, retval.byteLength).readLineMetrics()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: LineMetrics = retvalDeserializer.readLineMetrics()
+        return returnResult
     }
     private getRectsForRange_serialize(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> {
         const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.writeTextRange(range)
         const retval = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length(), widthStyle, heightStyle)
         thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<TextBox> = new Array<TextBox>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readTextBox()
+        }
+        const returnResult: Array<TextBox> = buffer
+        return returnResult
     }
     public static fromPtr(ptr: KPointer): LayoutManagerInternal {
         const obj: LayoutManagerInternal = new LayoutManagerInternal()

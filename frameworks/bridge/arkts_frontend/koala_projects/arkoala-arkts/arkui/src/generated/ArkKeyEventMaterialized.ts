@@ -20,7 +20,7 @@ import { KeyType, KeySource } from "./ArkEnumsInterfaces"
 import { Callback_Void } from "./SyntheticDeclarations"
 import { IntentionCode } from "./ArkCommonInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -37,10 +37,10 @@ export interface KeyEvent {
     stopPropagation: (() => void)
     intentionCode: IntentionCode
     unicode?: number
-    getModifierKeyState(keys: Array<string>): boolean 
+    getModifierKeyState(keys: Array<string>): boolean
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -213,7 +213,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         throw new Error("Object deserialization is not implemented.")
     }
     private setType_serialize(type: KeyType): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setType(this.peer!.ptr, (type.valueOf() as int32))
+        ArkUIGeneratedNativeModule._KeyEvent_setType(this.peer!.ptr, ((type as KeyType) as int32))
     }
     private getKeyCode_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getKeyCode(this.peer!.ptr)
@@ -234,7 +234,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         throw new Error("Object deserialization is not implemented.")
     }
     private setKeySource_serialize(keySource: KeySource): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setKeySource(this.peer!.ptr, (keySource.valueOf() as int32))
+        ArkUIGeneratedNativeModule._KeyEvent_setKeySource(this.peer!.ptr, ((keySource as KeySource) as int32))
     }
     private getDeviceId_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getDeviceId(this.peer!.ptr)

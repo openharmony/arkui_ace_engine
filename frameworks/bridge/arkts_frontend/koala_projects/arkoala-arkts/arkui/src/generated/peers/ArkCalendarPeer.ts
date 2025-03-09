@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -30,7 +30,7 @@ import { CalendarController } from "./../ArkCalendarControllerMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -88,7 +88,7 @@ export class ArkCalendarPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CalendarAttribute_offDays(this.peer.ptr, value)
     }
     directionAttribute(value: Axis): void {
-        ArkUIGeneratedNativeModule._CalendarAttribute_direction(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._CalendarAttribute_direction(this.peer.ptr, ((value as Axis) as int32))
     }
     currentDayStyleAttribute(value: CurrentDayStyle): void {
         const thisSerializer : Serializer = Serializer.hold()

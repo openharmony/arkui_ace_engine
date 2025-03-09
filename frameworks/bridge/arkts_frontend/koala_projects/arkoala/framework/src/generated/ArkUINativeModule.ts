@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KInt, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, loadNativeModuleLibrary, withByteArray, Access, callCallback, nullptr, InteropNativeModule, providePlatformDefinedData, NativeStringBase, ArrayDecoder, CallbackRegistry } from "@koalaui/interop"
+import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, loadNativeModuleLibrary, withByteArray, Access, callCallback, nullptr, InteropNativeModule, providePlatformDefinedData, NativeStringBase, ArrayDecoder, CallbackRegistry } from "@koalaui/interop"
 import { int32, float32 } from "@koalaui/common"
 
 export class ArkUINativeModule {
@@ -290,20 +290,6 @@ export class ArkUINativeModule {
         if ((this._LoadOnce()) == (true))
         {
             return this._ShowCrash(message)
-        }
-        throw new Error("Not implemented")
-    }
-    static _CheckArkoalaGeneratedEvents(result: Uint8Array, size: int32): int32 {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._CheckArkoalaGeneratedEvents(result, size)
-        }
-        throw new Error("Not implemented")
-    }
-    static _InjectEvent(data: Uint8Array, size: int32): int32 {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._InjectEvent(data, size)
         }
         throw new Error("Not implemented")
     }

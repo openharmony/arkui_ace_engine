@@ -41,6 +41,11 @@ export class Expression extends TypedAstNode {
     get isGrouped(): boolean {
         return global.generatedEs2panda._ExpressionIsGroupedConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setGrouped(): this {
+        global.generatedEs2panda._ExpressionSetGrouped(global.context, this.peer)
+        return this
+    }
     get isLiteral(): boolean {
         return global.generatedEs2panda._ExpressionIsLiteralConst(global.context, this.peer)
     }

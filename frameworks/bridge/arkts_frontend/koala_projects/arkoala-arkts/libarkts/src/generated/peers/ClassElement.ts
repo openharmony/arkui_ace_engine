@@ -42,6 +42,11 @@ export class ClassElement extends TypedStatement {
     get key(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ClassElementKeyConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setValue(value: Expression): this {
+        global.generatedEs2panda._ClassElementSetValue(global.context, this.peer, passNode(value))
+        return this
+    }
     get value(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ClassElementValueConst(global.context, this.peer))
     }
@@ -50,6 +55,11 @@ export class ClassElement extends TypedStatement {
     }
     get isComputed(): boolean {
         return global.generatedEs2panda._ClassElementIsComputedConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    addDecorator(decorator: Decorator): this {
+        global.generatedEs2panda._ClassElementAddDecorator(global.context, this.peer, passNode(decorator))
+        return this
     }
 }
 export function isClassElement(node: AstNode): node is ClassElement {

@@ -49,6 +49,11 @@ export class ETSNewArrayInstanceExpression extends Expression {
     get dimension(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ETSNewArrayInstanceExpressionDimensionConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setDimension(dimension: Expression): this {
+        global.generatedEs2panda._ETSNewArrayInstanceExpressionSetDimension(global.context, this.peer, passNode(dimension))
+        return this
+    }
 }
 export function isETSNewArrayInstanceExpression(node: AstNode): node is ETSNewArrayInstanceExpression {
     return node instanceof ETSNewArrayInstanceExpression

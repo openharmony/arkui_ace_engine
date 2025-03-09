@@ -59,6 +59,16 @@ export class AnnotationUsage extends Statement {
     get propertiesPtr(): readonly AstNode[] {
         return unpackNodeArray(global.generatedEs2panda._AnnotationUsageIrPropertiesPtrConst(global.context, this.peer))
     }
+    /** @deprecated */
+    addProperty(property: AstNode): this {
+        global.generatedEs2panda._AnnotationUsageIrAddProperty(global.context, this.peer, passNode(property))
+        return this
+    }
+    /** @deprecated */
+    setProperties(properties: readonly AstNode[]): this {
+        global.generatedEs2panda._AnnotationUsageIrSetProperties(global.context, this.peer, passNodeArray(properties), properties.length)
+        return this
+    }
 }
 export function isAnnotationUsage(node: AstNode): node is AnnotationUsage {
     return node instanceof AnnotationUsage

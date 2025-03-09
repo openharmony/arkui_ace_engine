@@ -57,6 +57,11 @@ export class ArrowFunctionExpression extends Expression {
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ArrowFunctionExpressionAnnotationsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ArrowFunctionExpressionSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
+    }
 }
 export function isArrowFunctionExpression(node: AstNode): node is ArrowFunctionExpression {
     return node instanceof ArrowFunctionExpression

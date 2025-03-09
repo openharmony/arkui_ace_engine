@@ -21,7 +21,7 @@ import { EventTarget, SourceType, SourceTool, TouchObject, HistoricalPoint } fro
 import { TouchType } from "./ArkEnumsInterfaces"
 import { Callback_Void } from "./SyntheticDeclarations"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,13 +33,9 @@ export interface TouchEvent {
     changedTouches: Array<TouchObject>
     stopPropagation: (() => void)
     preventDefault: (() => void)
-    getHistoricalPoints(): Array<HistoricalPoint> 
+    getHistoricalPoints(): Array<HistoricalPoint>
 }
 export class TouchEventInternal extends BaseEventInternal implements MaterializedBase,TouchEvent {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     get type(): TouchType {
         return this.getType()
     }
@@ -127,18 +123,32 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     }
     private getHistoricalPoints_serialize(): Array<HistoricalPoint> {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getHistoricalPoints(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<HistoricalPoint> = new Array<HistoricalPoint>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readHistoricalPoint()
+        }
+        const returnResult : Array<HistoricalPoint> = buffer
+        return returnResult
     }
     private getType_serialize(): TouchType {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getType(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
     private setType_serialize(type: TouchType): void {
-        ArkUIGeneratedNativeModule._TouchEvent_setType(this.peer!.ptr, (type.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TouchEvent_setType(this.peer!.ptr, ((type as TouchType) as int32))
     }
     private getTouches_serialize(): Array<TouchObject> {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readTouchObject()
+        }
+        const returnResult : Array<TouchObject> = buffer
+        return returnResult
     }
     private setTouches_serialize(touches: Array<TouchObject>): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -152,7 +162,14 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     }
     private getChangedTouches_serialize(): Array<TouchObject> {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getChangedTouches(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<TouchObject> = new Array<TouchObject>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readTouchObject()
+        }
+        const returnResult : Array<TouchObject> = buffer
+        return returnResult
     }
     private setChangedTouches_serialize(changedTouches: Array<TouchObject>): void {
         const thisSerializer : Serializer = Serializer.hold()

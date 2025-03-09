@@ -23,7 +23,7 @@ import { LayoutManager, LayoutManagerInternal } from "./ArkLayoutManagerMaterial
 import { PreviewText } from "./ArkTextCommonInterfaces"
 import { RichEditorTextStyle } from "./ArkRichEditorInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -37,7 +37,7 @@ export class RichEditorBaseControllerInternal {
     }
 }
 export class RichEditorBaseController implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -104,7 +104,9 @@ export class RichEditorBaseController implements MaterializedBase {
     }
     private getTypingStyle_serialize(): RichEditorTextStyle {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getTypingStyle(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readRichEditorTextStyle()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : RichEditorTextStyle = retvalDeserializer.readRichEditorTextStyle()
+        return returnResult
     }
     private setTypingStyle_serialize(value: RichEditorTextStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -133,10 +135,13 @@ export class RichEditorBaseController implements MaterializedBase {
     }
     private getLayoutManager_serialize(): LayoutManager {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getLayoutManager(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : LayoutManager = LayoutManagerInternal.fromPtr(retval)
+        return obj
     }
     private getPreviewText_serialize(): PreviewText {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getPreviewText(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readPreviewText()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : PreviewText = retvalDeserializer.readPreviewText()
+        return returnResult
     }
 }

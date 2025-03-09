@@ -18,7 +18,7 @@
 
 import { LengthMetrics, LengthMetricsInternal } from "./ArkLengthMetricsMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,7 +32,7 @@ export class LineHeightStyleInternal {
     }
 }
 export class LineHeightStyle implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -40,16 +40,13 @@ export class LineHeightStyle implements MaterializedBase {
         return this.getLineHeight()
     }
     static ctor_lineheightstyle(lineHeight: LengthMetrics): KPointer {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeLengthMetrics(lineHeight)
-        const retval  = ArkUIGeneratedNativeModule._LineHeightStyle_ctor(thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        const retval  = ArkUIGeneratedNativeModule._LineHeightStyle_ctor(toPeerPtr(lineHeight))
         return retval
     }
      constructor(lineHeight?: LengthMetrics) {
         if ((lineHeight) !== (undefined))
         {
-            const ctorPtr : KPointer = LineHeightStyle.ctor_lineheightstyle(lineHeight)
+            const ctorPtr : KPointer = LineHeightStyle.ctor_lineheightstyle((lineHeight)!)
             this.peer = new Finalizable(ctorPtr, LineHeightStyle.getFinalizer())
         }
     }

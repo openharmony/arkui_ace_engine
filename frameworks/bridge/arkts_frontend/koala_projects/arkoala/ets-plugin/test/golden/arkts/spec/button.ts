@@ -1,5 +1,6 @@
 import { ArkButton, ArkButtonComponent, ArkCommonMethodComponent, ArkFlex, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkRowComponent, ArkStructBase, ArkText, ArkTextComponent, ButtonOptions, ButtonType, FlexAlign, FlexDirection, FlexOptions, ItemAlign, VerticalAlign } from "@koalaui/arkts-arkui";
 import { LocalStorage } from "@koalaui/arkui-common";
+/** @memo:stable */
 class ArkButtonExampleComponent extends ArkStructBase<ArkButtonExampleComponent, ButtonExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

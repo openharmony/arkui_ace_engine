@@ -24,10 +24,11 @@ import { Area, Length, Position } from "./ArkUnitsInterfaces"
 import { GestureEvent, GestureEventInternal } from "./ArkGestureEventMaterialized"
 import { FingerInfo } from "./ArkGestureInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -39,7 +40,7 @@ export class GestureStyleInternal {
     }
 }
 export class GestureStyle implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -57,7 +58,7 @@ export class GestureStyle implements MaterializedBase {
         return retval
     }
      constructor(value?: GestureStyleInterface) {
-        const ctorPtr: KPointer = GestureStyle.ctor_gesturestyle(value)
+        const ctorPtr: KPointer = GestureStyle.ctor_gesturestyle((value)!)
         this.peer = new Finalizable(ctorPtr, GestureStyle.getFinalizer())
     }
     static getFinalizer(): KPointer {

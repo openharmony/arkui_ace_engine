@@ -58,6 +58,11 @@ export class TSInterfaceDeclaration extends TypedStatement {
     get internalName(): string {
         return unpackString(global.generatedEs2panda._TSInterfaceDeclarationInternalNameConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setInternalName(internalName: string): this {
+        global.generatedEs2panda._TSInterfaceDeclarationSetInternalName(global.context, this.peer, internalName)
+        return this
+    }
     get isStatic(): boolean {
         return global.generatedEs2panda._TSInterfaceDeclarationIsStaticConst(global.context, this.peer)
     }
@@ -76,8 +81,18 @@ export class TSInterfaceDeclaration extends TypedStatement {
     get getAnonClass(): ClassDeclaration | undefined {
         return unpackNode(global.generatedEs2panda._TSInterfaceDeclarationGetAnonClassConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setAnonClass(anonClass: ClassDeclaration): this {
+        global.generatedEs2panda._TSInterfaceDeclarationSetAnonClass(global.context, this.peer, passNode(anonClass))
+        return this
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._TSInterfaceDeclarationAnnotationsConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._TSInterfaceDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
     }
 }
 export function isTSInterfaceDeclaration(node: AstNode): node is TSInterfaceDeclaration {

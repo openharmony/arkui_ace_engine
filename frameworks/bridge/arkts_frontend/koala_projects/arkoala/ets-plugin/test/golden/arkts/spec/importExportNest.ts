@@ -3,6 +3,7 @@ import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
 import { tExtend, tStyles, DivideTest, Base, DivideTestOptions } from './test/pages/ImportNestAll';
+/** @memo:stable */
 class ArkImportTestComponent extends ArkStructBase<ArkImportTestComponent, ImportTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

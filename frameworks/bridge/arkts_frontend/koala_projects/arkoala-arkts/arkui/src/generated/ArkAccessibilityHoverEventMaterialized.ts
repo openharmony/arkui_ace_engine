@@ -20,7 +20,7 @@ import { BaseEvent, BaseEventInternal } from "./ArkBaseEventMaterialized"
 import { EventTarget, SourceType, SourceTool } from "./ArkCommonInterfaces"
 import { AccessibilityHoverType } from "./ArkEnumsInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -36,10 +36,6 @@ export interface AccessibilityHoverEvent {
     windowY: number
 }
 export class AccessibilityHoverEventInternal extends BaseEventInternal implements MaterializedBase,AccessibilityHoverEvent {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     get type(): AccessibilityHoverType {
         return this.getType()
     }
@@ -155,7 +151,7 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
         throw new Error("Object deserialization is not implemented.")
     }
     private setType_serialize(type: AccessibilityHoverType): void {
-        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setType(this.peer!.ptr, (type.valueOf() as int32))
+        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setType(this.peer!.ptr, ((type as AccessibilityHoverType) as int32))
     }
     private getX_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getX(this.peer!.ptr)

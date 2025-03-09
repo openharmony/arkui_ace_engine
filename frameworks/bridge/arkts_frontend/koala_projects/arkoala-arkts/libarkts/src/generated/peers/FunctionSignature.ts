@@ -46,6 +46,11 @@ export class FunctionSignature extends ArktsObject {
     get typeParams(): TSTypeParameterDeclaration | undefined {
         return unpackNode(global.generatedEs2panda._FunctionSignatureTypeParamsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setReturnType(type: TypeNode): this {
+        global.generatedEs2panda._FunctionSignatureSetReturnType(global.context, this.peer, passNode(type))
+        return this
+    }
     get returnType(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._FunctionSignatureReturnTypeConst(global.context, this.peer))
     }

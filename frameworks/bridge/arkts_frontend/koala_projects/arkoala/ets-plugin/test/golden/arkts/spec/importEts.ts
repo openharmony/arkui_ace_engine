@@ -6,6 +6,7 @@ import LinkComponentDefault, { LinkComponent as LinkComponent1Ref, LinkComponent
 import DefaultComponent from "./test/pages/DefaultComponent";
 import AMDComponentDefault = require('./test/pages/AMDComponent');
 import TsModule from './test/pages/TsModule';
+/** @memo:stable */
 class ArkImportTestComponent extends ArkStructBase<ArkImportTestComponent, ImportTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

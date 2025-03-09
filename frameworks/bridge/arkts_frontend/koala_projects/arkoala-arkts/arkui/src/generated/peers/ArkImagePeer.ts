@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -47,15 +47,22 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { ColorFilter } from "./../ArkColorFilterMaterialized"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./../ArkImageCommonInterfaces"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -75,7 +82,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         const thisSerializer : Serializer = Serializer.hold()
         let src_type : int32 = RuntimeType.UNDEFINED
         src_type = runtimeType(src)
-        if (((RuntimeType.OBJECT) == (src_type)) && (TypeChecker.isPixelMap(src, false, false))) {
+        if (TypeChecker.isPixelMap(src, false, false)) {
             thisSerializer.writeInt8(0 as int32)
             const src_0  = src as PixelMap
             thisSerializer.writePixelMap(src_0)
@@ -108,7 +115,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         const thisSerializer : Serializer = Serializer.hold()
         let src_type : int32 = RuntimeType.UNDEFINED
         src_type = runtimeType(src)
-        if (((RuntimeType.OBJECT) == (src_type)) && (TypeChecker.isPixelMap(src, false, false))) {
+        if (TypeChecker.isPixelMap(src, false, false)) {
             thisSerializer.writeInt8(0 as int32)
             const src_0  = src as PixelMap
             thisSerializer.writePixelMap(src_0)
@@ -137,7 +144,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         else if (TypeChecker.isImageContent(src)) {
             thisSerializer.writeInt8(3 as int32)
             const src_3  = src as ImageContent
-            thisSerializer.writeInt32((src_3.valueOf() as int32))
+            thisSerializer.writeInt32(((src_3 as ImageContent) as int32))
         }
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
@@ -146,7 +153,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         const thisSerializer : Serializer = Serializer.hold()
         let src_type : int32 = RuntimeType.UNDEFINED
         src_type = runtimeType(src)
-        if (((RuntimeType.OBJECT) == (src_type)) && (TypeChecker.isPixelMap(src, false, false))) {
+        if (TypeChecker.isPixelMap(src, false, false)) {
             thisSerializer.writeInt8(0 as int32)
             const src_0  = src as PixelMap
             thisSerializer.writePixelMap(src_0)
@@ -185,12 +192,12 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             const value_0  = value as string
             thisSerializer.writeString(value_0)
         }
-        else if (isResource(value)) {
+        else if (TypeChecker.isResource(value, false, false, false, false, false)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        else if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isPixelMap(value, false, false))) {
+        else if (TypeChecker.isPixelMap(value, false, false)) {
             thisSerializer.writeInt8(2 as int32)
             const value_2  = value as PixelMap
             thisSerializer.writePixelMap(value_2)
@@ -211,7 +218,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -232,22 +239,22 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     objectFitAttribute(value: ImageFit): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_objectFit(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_objectFit(this.peer.ptr, ((value as ImageFit) as int32))
     }
     objectRepeatAttribute(value: ImageRepeat): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_objectRepeat(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_objectRepeat(this.peer.ptr, ((value as ImageRepeat) as int32))
     }
     autoResizeAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._ImageAttribute_autoResize(this.peer.ptr, value ? 1 : 0)
     }
     renderModeAttribute(value: ImageRenderMode): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_renderMode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_renderMode(this.peer.ptr, ((value as ImageRenderMode) as int32))
     }
     dynamicRangeModeAttribute(value: DynamicRangeMode): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_dynamicRangeMode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_dynamicRangeMode(this.peer.ptr, ((value as DynamicRangeMode) as int32))
     }
     interpolationAttribute(value: ImageInterpolation): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_interpolation(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_interpolation(this.peer.ptr, ((value as ImageInterpolation) as int32))
     }
     sourceSizeAttribute(value: ImageSourceSize): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -262,7 +269,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
-        if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isColorFilter(value))) {
+        if (TypeChecker.isColorFilter(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as ColorFilter
             thisSerializer.writeColorFilter(value_0)
@@ -276,7 +283,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     copyOptionAttribute(value: CopyOptions): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_copyOption(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_copyOption(this.peer.ptr, ((value as CopyOptions) as int32))
     }
     draggableAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._ImageAttribute_draggable(this.peer.ptr, value ? 1 : 0)

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KInt, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, loadNativeModuleLibrary } from "@koalaui/interop"
+import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, loadNativeModuleLibrary } from "@koalaui/interop"
 import { int32, float32 } from "@koalaui/common"
 import { Length } from "./ArkUnitsInterfaces"
 
@@ -343,10 +343,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _AnimatorAttribute_motion(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _AnimatorAttribute_motion(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._AnimatorAttribute_motion(ptr, thisArray, thisLength)
+            return this._AnimatorAttribute_motion(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -1351,10 +1351,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CommonMethod_transition1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _CommonMethod_transition1(ptr: KPointer, effect: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CommonMethod_transition1(ptr, thisArray, thisLength)
+            return this._CommonMethod_transition1(ptr, effect, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
@@ -1967,10 +1967,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CommonMethod_gestureModifier(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _CommonMethod_gestureModifier(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CommonMethod_gestureModifier(ptr, thisArray, thisLength)
+            return this._CommonMethod_gestureModifier(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -3871,10 +3871,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _ImageSpanAttribute_alt(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _ImageSpanAttribute_alt(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._ImageSpanAttribute_alt(ptr, thisArray, thisLength)
+            return this._ImageSpanAttribute_alt(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -4039,10 +4039,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _ListAttribute_childrenMainSize(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _ListAttribute_childrenMainSize(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._ListAttribute_childrenMainSize(ptr, thisArray, thisLength)
+            return this._ListAttribute_childrenMainSize(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -4263,10 +4263,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _ListItemGroupAttribute_childrenMainSize(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _ListItemGroupAttribute_childrenMainSize(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._ListItemGroupAttribute_childrenMainSize(ptr, thisArray, thisLength)
+            return this._ListItemGroupAttribute_childrenMainSize(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -5642,10 +5642,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _RichEditorAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _RichEditorAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._RichEditorAttribute_editMenuOptions(ptr, thisArray, thisLength)
+            return this._RichEditorAttribute_editMenuOptions(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -6265,10 +6265,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _SearchAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _SearchAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._SearchAttribute_editMenuOptions(ptr, thisArray, thisLength)
+            return this._SearchAttribute_editMenuOptions(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -6664,10 +6664,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _ShapeInterface_setShapeOptions0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _ShapeInterface_setShapeOptions0(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._ShapeInterface_setShapeOptions0(ptr, thisArray, thisLength)
+            return this._ShapeInterface_setShapeOptions0(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -6951,10 +6951,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _BaseSpan_baselineOffset(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _BaseSpan_baselineOffset(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._BaseSpan_baselineOffset(ptr, thisArray, thisLength)
+            return this._BaseSpan_baselineOffset(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -7210,10 +7210,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _SwiperAttribute_indicator1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _SwiperAttribute_indicator1(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._SwiperAttribute_indicator1(ptr, thisArray, thisLength)
+            return this._SwiperAttribute_indicator1(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -7882,10 +7882,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TextAttribute_lineSpacing(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _TextAttribute_lineSpacing(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._TextAttribute_lineSpacing(ptr, thisArray, thisLength)
+            return this._TextAttribute_lineSpacing(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -8071,10 +8071,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TextAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _TextAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._TextAttribute_editMenuOptions(ptr, thisArray, thisLength)
+            return this._TextAttribute_editMenuOptions(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -8379,10 +8379,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TextAreaAttribute_lineSpacing(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _TextAreaAttribute_lineSpacing(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._TextAreaAttribute_lineSpacing(ptr, thisArray, thisLength)
+            return this._TextAreaAttribute_lineSpacing(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -8449,10 +8449,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TextAreaAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _TextAreaAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._TextAreaAttribute_editMenuOptions(ptr, thisArray, thisLength)
+            return this._TextAreaAttribute_editMenuOptions(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -9016,10 +9016,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TextInputAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _TextInputAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._TextInputAttribute_editMenuOptions(ptr, thisArray, thisLength)
+            return this._TextInputAttribute_editMenuOptions(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -10346,10 +10346,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _WebAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _WebAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._WebAttribute_editMenuOptions(ptr, thisArray, thisLength)
+            return this._WebAttribute_editMenuOptions(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -10794,20 +10794,6 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _AnimationExtender_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._AnimationExtender_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _AnimationExtender_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._AnimationExtender_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
     static _AnimationExtender_SetClipRect(node: KPointer, x: KFloat, y: KFloat, width: KFloat, height: KFloat): void {
         if ((this._LoadOnce()) == (true))
         {
@@ -10864,24 +10850,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _UnifiedData_getTypes(ptr: KPointer): KPointer {
+    static _UnifiedData_getTypes(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._UnifiedData_getTypes(ptr)
-        }
-        throw new Error("Not implemented")
-    }
-    static _LazyForEachOps_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._LazyForEachOps_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _LazyForEachOps_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._LazyForEachOps_getFinalizer()
         }
         throw new Error("Not implemented")
     }
@@ -10913,17 +10885,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _SystemOps_ctor(): KPointer {
+    static _LazyForEachOps_NotifyChange(node: KPointer, startIndex: KInt, endIndex: KInt, count: KInt): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._SystemOps_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _SystemOps_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._SystemOps_getFinalizer()
+            return this._LazyForEachOps_NotifyChange(node, startIndex, endIndex, count)
         }
         throw new Error("Not implemented")
     }
@@ -10941,10 +10906,24 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _DrawingCanvas_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _SystemOps_syncInstanceId(instanceId: KInt): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._DrawingCanvas_ctor(thisArray, thisLength)
+            return this._SystemOps_syncInstanceId(instanceId)
+        }
+        throw new Error("Not implemented")
+    }
+    static _SystemOps_restoreInstanceId(): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._SystemOps_restoreInstanceId()
+        }
+        throw new Error("Not implemented")
+    }
+    static _DrawingCanvas_ctor(pixelmap: KPointer): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._DrawingCanvas_ctor(pixelmap)
         }
         throw new Error("Not implemented")
     }
@@ -10983,6 +10962,34 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _LengthMetrics_vp(value: number): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._LengthMetrics_vp(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _LengthMetrics_fp(value: number): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._LengthMetrics_fp(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _LengthMetrics_percent(value: number): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._LengthMetrics_percent(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _LengthMetrics_lpx(value: number): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._LengthMetrics_lpx(value)
+        }
+        throw new Error("Not implemented")
+    }
     static _LengthMetrics_resource(thisArray: Uint8Array, thisLength: int32): KPointer {
         if ((this._LoadOnce()) == (true))
         {
@@ -11018,6 +11025,83 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _ColorMetrics_ctor(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_ctor()
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_getFinalizer(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_getFinalizer()
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_numeric(value: number): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_numeric(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_rgba(red: number, green: number, blue: number, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_rgba(red, green, blue, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_resourceColor(thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_resourceColor(thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_blendColor(ptr: KPointer, overlayColor: KPointer): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_blendColor(ptr, overlayColor)
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_getColor(ptr: KPointer): string {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_getColor(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_getRed(ptr: KPointer): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_getRed(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_getGreen(ptr: KPointer): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_getGreen(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_getBlue(ptr: KPointer): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_getBlue(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _ColorMetrics_getAlpha(ptr: KPointer): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ColorMetrics_getAlpha(ptr)
+        }
+        throw new Error("Not implemented")
+    }
     static _WebviewController_ctor(): KPointer {
         if ((this._LoadOnce()) == (true))
         {
@@ -11046,38 +11130,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_ohos_arkui_componentSnapshot_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_ohos_arkui_componentSnapshot_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_ohos_arkui_componentSnapshot_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_ohos_arkui_componentSnapshot_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
     static _GlobalScope_ohos_arkui_componentSnapshot_get(id: KStringPtr, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
             return this._GlobalScope_ohos_arkui_componentSnapshot_get(id, thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_ohos_arkui_performanceMonitor_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_ohos_arkui_performanceMonitor_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_ohos_arkui_performanceMonitor_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_ohos_arkui_performanceMonitor_getFinalizer()
         }
         throw new Error("Not implemented")
     }
@@ -11403,20 +11459,6 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_ohos_font_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_ohos_font_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_ohos_font_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_ohos_font_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
     static _GlobalScope_ohos_font_registerFont(thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
@@ -11424,7 +11466,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_ohos_font_getSystemFontList(): KPointer {
+    static _GlobalScope_ohos_font_getSystemFontList(): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._GlobalScope_ohos_font_getSystemFontList()
@@ -11522,24 +11564,24 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _FrameNode_appendChild(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _FrameNode_appendChild(ptr: KPointer, node: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._FrameNode_appendChild(ptr, thisArray, thisLength)
+            return this._FrameNode_appendChild(ptr, node)
         }
         throw new Error("Not implemented")
     }
-    static _FrameNode_insertChildAfter(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _FrameNode_insertChildAfter(ptr: KPointer, child: KPointer, sibling: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._FrameNode_insertChildAfter(ptr, thisArray, thisLength)
+            return this._FrameNode_insertChildAfter(ptr, child, sibling)
         }
         throw new Error("Not implemented")
     }
-    static _FrameNode_removeChild(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _FrameNode_removeChild(ptr: KPointer, node: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._FrameNode_removeChild(ptr, thisArray, thisLength)
+            return this._FrameNode_removeChild(ptr, node)
         }
         throw new Error("Not implemented")
     }
@@ -11613,6 +11655,13 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _FrameNode_getFrameNodeByKey(name: KStringPtr): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._FrameNode_getFrameNodeByKey(name)
+        }
+        throw new Error("Not implemented")
+    }
     static _PixelMap_ctor(): KPointer {
         if ((this._LoadOnce()) == (true))
         {
@@ -11655,45 +11704,17 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _NavExtender_ctor(): KPointer {
+    static _NavExtender_setUpdateStackCallback(peer: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavExtender_ctor()
+            return this._NavExtender_setUpdateStackCallback(peer, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _NavExtender_getFinalizer(): KPointer {
+    static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavExtender_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
-    static _NavExtender_setUpdateStackCallback(thisArray: Uint8Array, thisLength: int32): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._NavExtender_setUpdateStackCallback(thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
-    static _EventEmulator_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._EventEmulator_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _EventEmulator_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._EventEmulator_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
-    static _EventEmulator_emitClickEvent(node: KPointer, thisArray: Uint8Array, thisLength: int32): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._EventEmulator_emitClickEvent(node, thisArray, thisLength)
+            return this._EventEmulator_emitClickEvent(node, event)
         }
         throw new Error("Not implemented")
     }
@@ -11704,38 +11725,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _ActionSheet_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._ActionSheet_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _ActionSheet_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._ActionSheet_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
     static _ActionSheet_show(thisArray: Uint8Array, thisLength: int32): undefined {
         if ((this._LoadOnce()) == (true))
         {
             return this._ActionSheet_show(thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
-    static _AlertDialog_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._AlertDialog_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _AlertDialog_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._AlertDialog_getFinalizer()
         }
         throw new Error("Not implemented")
     }
@@ -11760,10 +11753,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _SpringMotion_ctor(start: number, end: number, velocity: number, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _SpringMotion_ctor(start: number, end: number, velocity: number, prop: KPointer): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._SpringMotion_ctor(start, end, velocity, thisArray, thisLength)
+            return this._SpringMotion_ctor(start, end, velocity, prop)
         }
         throw new Error("Not implemented")
     }
@@ -11788,10 +11781,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _ScrollMotion_ctor(position: number, velocity: number, min: number, max: number, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _ScrollMotion_ctor(position: number, velocity: number, min: number, max: number, prop: KPointer): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._ScrollMotion_ctor(position, velocity, min, max, thisArray, thisLength)
+            return this._ScrollMotion_ctor(position, velocity, min, max, prop)
         }
         throw new Error("Not implemented")
     }
@@ -11827,20 +11820,6 @@ export class ArkUIGeneratedNativeModule {
         if ((this._LoadOnce()) == (true))
         {
             return this._CalendarController_goTo(ptr, thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
-    static _CalendarPickerDialog_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._CalendarPickerDialog_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _CalendarPickerDialog_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._CalendarPickerDialog_getFinalizer()
         }
         throw new Error("Not implemented")
     }
@@ -11963,10 +11942,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _Path2D_addPath(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _Path2D_addPath(ptr: KPointer, path: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._Path2D_addPath(ptr, thisArray, thisLength)
+            return this._Path2D_addPath(ptr, path, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
@@ -12131,10 +12110,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_clip1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _CanvasRenderer_clip1(ptr: KPointer, path: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CanvasRenderer_clip1(ptr, thisArray, thisLength)
+            return this._CanvasRenderer_clip1(ptr, path, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
@@ -12145,10 +12124,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_fill1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _CanvasRenderer_fill1(ptr: KPointer, path: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CanvasRenderer_fill1(ptr, thisArray, thisLength)
+            return this._CanvasRenderer_fill1(ptr, path, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
@@ -12159,10 +12138,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_stroke1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _CanvasRenderer_stroke1(ptr: KPointer, path: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CanvasRenderer_stroke1(ptr, thisArray, thisLength)
+            return this._CanvasRenderer_stroke1(ptr, path)
         }
         throw new Error("Not implemented")
     }
@@ -12173,10 +12152,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_createPattern(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _CanvasRenderer_createPattern(ptr: KPointer, image: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CanvasRenderer_createPattern(ptr, thisArray, thisLength)
+            return this._CanvasRenderer_createPattern(ptr, image, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
@@ -12201,10 +12180,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_createImageData1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _CanvasRenderer_createImageData1(ptr: KPointer, imagedata: KPointer): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CanvasRenderer_createImageData1(ptr, thisArray, thisLength)
+            return this._CanvasRenderer_createImageData1(ptr, imagedata)
         }
         throw new Error("Not implemented")
     }
@@ -12222,21 +12201,21 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_putImageData0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _CanvasRenderer_putImageData0(ptr: KPointer, imagedata: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CanvasRenderer_putImageData0(ptr, thisArray, thisLength)
+            return this._CanvasRenderer_putImageData0(ptr, imagedata, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_putImageData1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _CanvasRenderer_putImageData1(ptr: KPointer, imagedata: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CanvasRenderer_putImageData1(ptr, thisArray, thisLength)
+            return this._CanvasRenderer_putImageData1(ptr, imagedata, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_getLineDash(ptr: KPointer): KPointer {
+    static _CanvasRenderer_getLineDash(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._CanvasRenderer_getLineDash(ptr)
@@ -12369,10 +12348,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_transferFromImageBitmap(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _CanvasRenderer_transferFromImageBitmap(ptr: KPointer, bitmap: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._CanvasRenderer_transferFromImageBitmap(ptr, thisArray, thisLength)
+            return this._CanvasRenderer_transferFromImageBitmap(ptr, bitmap)
         }
         throw new Error("Not implemented")
     }
@@ -12740,6 +12719,13 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _CanvasRenderingContext2D_getCanvas(ptr: KPointer): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._CanvasRenderingContext2D_getCanvas(ptr)
+        }
+        throw new Error("Not implemented")
+    }
     static _OffscreenCanvasRenderingContext2D_ctor(width: number, height: number, thisArray: Uint8Array, thisLength: int32): KPointer {
         if ((this._LoadOnce()) == (true))
         {
@@ -12842,6 +12828,13 @@ export class ArkUIGeneratedNativeModule {
         if ((this._LoadOnce()) == (true))
         {
             return this._DrawingRenderingContext_invalidate(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _DrawingRenderingContext_getCanvas(ptr: KPointer): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._DrawingRenderingContext_getCanvas(ptr)
         }
         throw new Error("Not implemented")
     }
@@ -12957,10 +12950,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TransitionEffect_asymmetric(thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _TransitionEffect_asymmetric(appear: KPointer, disappear: KPointer): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._TransitionEffect_asymmetric(thisArray, thisLength)
+            return this._TransitionEffect_asymmetric(appear, disappear)
         }
         throw new Error("Not implemented")
     }
@@ -12971,31 +12964,38 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TransitionEffect_combine(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _TransitionEffect_combine(ptr: KPointer, transitionEffect: KPointer): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._TransitionEffect_combine(ptr, thisArray, thisLength)
+            return this._TransitionEffect_combine(ptr, transitionEffect)
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_focusControl_common_requestFocus(value: KStringPtr): boolean {
+    static _TransitionEffect_getIDENTITY(): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._GlobalScope_focusControl_common_requestFocus(value)
+            return this._TransitionEffect_getIDENTITY()
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_cursorControl_common_setCursor(value: KInt): void {
+    static _TransitionEffect_getOPACITY(): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._GlobalScope_cursorControl_common_setCursor(value)
+            return this._TransitionEffect_getOPACITY()
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_cursorControl_common_restoreDefault(): void {
+    static _TransitionEffect_getSLIDE(): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._GlobalScope_cursorControl_common_restoreDefault()
+            return this._TransitionEffect_getSLIDE()
+        }
+        throw new Error("Not implemented")
+    }
+    static _TransitionEffect_getSLIDE_SWITCH(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TransitionEffect_getSLIDE_SWITCH()
         }
         throw new Error("Not implemented")
     }
@@ -13615,7 +13615,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TouchEvent_getHistoricalPoints(ptr: KPointer): KPointer {
+    static _TouchEvent_getHistoricalPoints(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._TouchEvent_getHistoricalPoints(ptr)
@@ -13636,7 +13636,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TouchEvent_getTouches(ptr: KPointer): KPointer {
+    static _TouchEvent_getTouches(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._TouchEvent_getTouches(ptr)
@@ -13650,7 +13650,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TouchEvent_getChangedTouches(ptr: KPointer): KPointer {
+    static _TouchEvent_getChangedTouches(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._TouchEvent_getChangedTouches(ptr)
@@ -13769,10 +13769,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _DragEvent_setData(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _DragEvent_setData(ptr: KPointer, unifiedData: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._DragEvent_setData(ptr, thisArray, thisLength)
+            return this._DragEvent_setData(ptr, unifiedData)
         }
         throw new Error("Not implemented")
     }
@@ -14154,27 +14154,6 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _DynamicNode_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._DynamicNode_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _DynamicNode_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._DynamicNode_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
-    static _DynamicNode_onMove(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._DynamicNode_onMove(ptr, thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
     static _ChildrenMainSize_ctor(childDefaultSize: number): KPointer {
         if ((this._LoadOnce()) == (true))
         {
@@ -14329,104 +14308,6 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_common_getContext(thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_getContext(thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_postCardAction(thisArray: Uint8Array, thisLength: int32): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_postCardAction(thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_dollar_r(value: KStringPtr, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_dollar_r(value, thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_dollar_rawfile(value: KStringPtr): KInteropReturnBuffer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_dollar_rawfile(value)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_animateTo(thisArray: Uint8Array, thisLength: int32): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_animateTo(thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_animateToImmediately(thisArray: Uint8Array, thisLength: int32): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_animateToImmediately(thisArray, thisLength)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_vp2px(value: number): number {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_vp2px(value)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_px2vp(value: number): number {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_px2vp(value)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_fp2px(value: number): number {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_fp2px(value)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_px2fp(value: number): number {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_px2fp(value)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_lpx2px(value: number): number {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_lpx2px(value)
-        }
-        throw new Error("Not implemented")
-    }
-    static _GlobalScope_common_px2lpx(value: number): number {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._GlobalScope_common_px2lpx(value)
-        }
-        throw new Error("Not implemented")
-    }
-    static _ContextMenu_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._ContextMenu_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _ContextMenu_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._ContextMenu_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
     static _ContextMenu_close(): undefined {
         if ((this._LoadOnce()) == (true))
         {
@@ -14476,20 +14357,6 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _DatePickerDialog_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._DatePickerDialog_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _DatePickerDialog_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._DatePickerDialog_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
     static _DatePickerDialog_show(thisArray: Uint8Array, thisLength: int32): undefined {
         if ((this._LoadOnce()) == (true))
         {
@@ -14511,7 +14378,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _BaseGestureEvent_getFingerList(ptr: KPointer): KPointer {
+    static _BaseGestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._BaseGestureEvent_getFingerList(ptr)
@@ -14805,7 +14672,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _GestureEvent_getFingerList(ptr: KPointer): KPointer {
+    static _GestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._GestureEvent_getFingerList(ptr)
@@ -14959,6 +14826,62 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _TapGestureInterface_ctor(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TapGestureInterface_ctor()
+        }
+        throw new Error("Not implemented")
+    }
+    static _TapGestureInterface_getFinalizer(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TapGestureInterface_getFinalizer()
+        }
+        throw new Error("Not implemented")
+    }
+    static _TapGestureInterface_onAction(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TapGestureInterface_onAction(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _LongPressGestureInterface_ctor(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._LongPressGestureInterface_ctor()
+        }
+        throw new Error("Not implemented")
+    }
+    static _LongPressGestureInterface_getFinalizer(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._LongPressGestureInterface_getFinalizer()
+        }
+        throw new Error("Not implemented")
+    }
+    static _LongPressGestureInterface_onAction(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._LongPressGestureInterface_onAction(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _LongPressGestureInterface_onActionEnd(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._LongPressGestureInterface_onActionEnd(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _LongPressGestureInterface_onActionCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._LongPressGestureInterface_onActionCancel(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
     static _PanGestureOptions_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
         if ((this._LoadOnce()) == (true))
         {
@@ -14998,6 +14921,174 @@ export class ArkUIGeneratedNativeModule {
         if ((this._LoadOnce()) == (true))
         {
             return this._PanGestureOptions_getDirection(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _PanGestureInterface_ctor(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PanGestureInterface_ctor()
+        }
+        throw new Error("Not implemented")
+    }
+    static _PanGestureInterface_getFinalizer(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PanGestureInterface_getFinalizer()
+        }
+        throw new Error("Not implemented")
+    }
+    static _PanGestureInterface_onActionStart(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PanGestureInterface_onActionStart(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _PanGestureInterface_onActionUpdate(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PanGestureInterface_onActionUpdate(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _PanGestureInterface_onActionEnd(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PanGestureInterface_onActionEnd(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _PanGestureInterface_onActionCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PanGestureInterface_onActionCancel(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _SwipeGestureInterface_ctor(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._SwipeGestureInterface_ctor()
+        }
+        throw new Error("Not implemented")
+    }
+    static _SwipeGestureInterface_getFinalizer(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._SwipeGestureInterface_getFinalizer()
+        }
+        throw new Error("Not implemented")
+    }
+    static _SwipeGestureInterface_onAction(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._SwipeGestureInterface_onAction(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _PinchGestureInterface_ctor(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PinchGestureInterface_ctor()
+        }
+        throw new Error("Not implemented")
+    }
+    static _PinchGestureInterface_getFinalizer(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PinchGestureInterface_getFinalizer()
+        }
+        throw new Error("Not implemented")
+    }
+    static _PinchGestureInterface_onActionStart(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PinchGestureInterface_onActionStart(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _PinchGestureInterface_onActionUpdate(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PinchGestureInterface_onActionUpdate(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _PinchGestureInterface_onActionEnd(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PinchGestureInterface_onActionEnd(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _PinchGestureInterface_onActionCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._PinchGestureInterface_onActionCancel(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _RotationGestureInterface_ctor(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._RotationGestureInterface_ctor()
+        }
+        throw new Error("Not implemented")
+    }
+    static _RotationGestureInterface_getFinalizer(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._RotationGestureInterface_getFinalizer()
+        }
+        throw new Error("Not implemented")
+    }
+    static _RotationGestureInterface_onActionStart(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._RotationGestureInterface_onActionStart(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _RotationGestureInterface_onActionUpdate(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._RotationGestureInterface_onActionUpdate(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _RotationGestureInterface_onActionEnd(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._RotationGestureInterface_onActionEnd(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _RotationGestureInterface_onActionCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._RotationGestureInterface_onActionCancel(ptr, thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GestureGroupInterface_ctor(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GestureGroupInterface_ctor()
+        }
+        throw new Error("Not implemented")
+    }
+    static _GestureGroupInterface_getFinalizer(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GestureGroupInterface_getFinalizer()
+        }
+        throw new Error("Not implemented")
+    }
+    static _GestureGroupInterface_onCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GestureGroupInterface_onCancel(ptr, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
@@ -15155,7 +15246,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _ImageAnalyzerController_getImageAnalyzerSupportTypes(ptr: KPointer): KPointer {
+    static _ImageAnalyzerController_getImageAnalyzerSupportTypes(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._ImageAnalyzerController_getImageAnalyzerSupportTypes(ptr)
@@ -15372,17 +15463,31 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _NavDestinationContext_setPathInfo(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _NavDestinationContext_getPathInfo(ptr: KPointer): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavDestinationContext_setPathInfo(ptr, thisArray, thisLength)
+            return this._NavDestinationContext_getPathInfo(ptr)
         }
         throw new Error("Not implemented")
     }
-    static _NavDestinationContext_setPathStack(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _NavDestinationContext_setPathInfo(ptr: KPointer, pathInfo: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavDestinationContext_setPathStack(ptr, thisArray, thisLength)
+            return this._NavDestinationContext_setPathInfo(ptr, pathInfo)
+        }
+        throw new Error("Not implemented")
+    }
+    static _NavDestinationContext_getPathStack(ptr: KPointer): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._NavDestinationContext_getPathStack(ptr)
+        }
+        throw new Error("Not implemented")
+    }
+    static _NavDestinationContext_setPathStack(ptr: KPointer, pathStack: KPointer): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._NavDestinationContext_setPathStack(ptr, pathStack)
         }
         throw new Error("Not implemented")
     }
@@ -15477,31 +15582,31 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_pushPath0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _NavPathStack_pushPath0(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavPathStack_pushPath0(ptr, thisArray, thisLength)
+            return this._NavPathStack_pushPath0(ptr, info, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_pushPath1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _NavPathStack_pushPath1(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavPathStack_pushPath1(ptr, thisArray, thisLength)
+            return this._NavPathStack_pushPath1(ptr, info, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_pushDestination0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _NavPathStack_pushDestination0(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavPathStack_pushDestination0(ptr, thisArray, thisLength)
+            return this._NavPathStack_pushDestination0(ptr, info, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_pushDestination1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _NavPathStack_pushDestination1(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavPathStack_pushDestination1(ptr, thisArray, thisLength)
+            return this._NavPathStack_pushDestination1(ptr, info, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
@@ -15533,24 +15638,24 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_replacePath0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _NavPathStack_replacePath0(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavPathStack_replacePath0(ptr, thisArray, thisLength)
+            return this._NavPathStack_replacePath0(ptr, info, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_replacePath1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _NavPathStack_replacePath1(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavPathStack_replacePath1(ptr, thisArray, thisLength)
+            return this._NavPathStack_replacePath1(ptr, info, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_replaceDestination(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _NavPathStack_replaceDestination(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._NavPathStack_replaceDestination(ptr, thisArray, thisLength)
+            return this._NavPathStack_replaceDestination(ptr, info, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
@@ -15645,7 +15750,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_getAllPathName(ptr: KPointer): KPointer {
+    static _NavPathStack_getAllPathName(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._NavPathStack_getAllPathName(ptr)
@@ -15659,14 +15764,14 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_getParamByName(ptr: KPointer, name: KStringPtr): KPointer {
+    static _NavPathStack_getParamByName(ptr: KPointer, name: KStringPtr): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._NavPathStack_getParamByName(ptr, name)
         }
         throw new Error("Not implemented")
     }
-    static _NavPathStack_getIndexByName(ptr: KPointer, name: KStringPtr): KPointer {
+    static _NavPathStack_getIndexByName(ptr: KPointer, name: KStringPtr): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._NavPathStack_getIndexByName(ptr, name)
@@ -15939,14 +16044,14 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _RichEditorController_getSpans(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _RichEditorController_getSpans(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._RichEditorController_getSpans(ptr, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _RichEditorController_getParagraphs(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _RichEditorController_getParagraphs(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._RichEditorController_getParagraphs(ptr, thisArray, thisLength)
@@ -15960,10 +16065,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _RichEditorController_fromStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _RichEditorController_fromStyledString(ptr: KPointer, value: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._RichEditorController_fromStyledString(ptr, thisArray, thisLength)
+            return this._RichEditorController_fromStyledString(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -15988,10 +16093,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _RichEditorStyledStringController_setStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _RichEditorStyledStringController_setStyledString(ptr: KPointer, styledString: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._RichEditorStyledStringController_setStyledString(ptr, thisArray, thisLength)
+            return this._RichEditorStyledStringController_setStyledString(ptr, styledString)
         }
         throw new Error("Not implemented")
     }
@@ -16534,10 +16639,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TextController_setStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _TextController_setStyledString(ptr: KPointer, value: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._TextController_setStyledString(ptr, thisArray, thisLength)
+            return this._TextController_setStyledString(ptr, value)
         }
         throw new Error("Not implemented")
     }
@@ -16709,10 +16814,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _StyledStringController_setStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _StyledStringController_setStyledString(ptr: KPointer, styledString: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._StyledStringController_setStyledString(ptr, thisArray, thisLength)
+            return this._StyledStringController_setStyledString(ptr, styledString)
         }
         throw new Error("Not implemented")
     }
@@ -16758,7 +16863,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _LayoutManager_getRectsForRange(ptr: KPointer, thisArray: Uint8Array, thisLength: int32, widthStyle: KInt, heightStyle: KInt): KPointer {
+    static _LayoutManager_getRectsForRange(ptr: KPointer, thisArray: Uint8Array, thisLength: int32, widthStyle: KInt, heightStyle: KInt): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._LayoutManager_getRectsForRange(ptr, thisArray, thisLength, widthStyle, heightStyle)
@@ -16786,10 +16891,59 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TextMenuItemId_equals(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): boolean {
+    static _TextMenuItemId_equals(ptr: KPointer, id: KPointer): boolean {
         if ((this._LoadOnce()) == (true))
         {
-            return this._TextMenuItemId_equals(ptr, thisArray, thisLength)
+            return this._TextMenuItemId_equals(ptr, id)
+        }
+        throw new Error("Not implemented")
+    }
+    static _TextMenuItemId_getCUT(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TextMenuItemId_getCUT()
+        }
+        throw new Error("Not implemented")
+    }
+    static _TextMenuItemId_getCOPY(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TextMenuItemId_getCOPY()
+        }
+        throw new Error("Not implemented")
+    }
+    static _TextMenuItemId_getPASTE(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TextMenuItemId_getPASTE()
+        }
+        throw new Error("Not implemented")
+    }
+    static _TextMenuItemId_getSELECT_ALL(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TextMenuItemId_getSELECT_ALL()
+        }
+        throw new Error("Not implemented")
+    }
+    static _TextMenuItemId_getCOLLABORATION_SERVICE(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TextMenuItemId_getCOLLABORATION_SERVICE()
+        }
+        throw new Error("Not implemented")
+    }
+    static _TextMenuItemId_getCAMERA_INPUT(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TextMenuItemId_getCAMERA_INPUT()
+        }
+        throw new Error("Not implemented")
+    }
+    static _TextMenuItemId_getAI_WRITER(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._TextMenuItemId_getAI_WRITER()
         }
         throw new Error("Not implemented")
     }
@@ -16807,7 +16961,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _EditMenuOptions_onCreateMenu(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _EditMenuOptions_onCreateMenu(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._EditMenuOptions_onCreateMenu(ptr, thisArray, thisLength)
@@ -16891,20 +17045,6 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TextPickerDialog_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._TextPickerDialog_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _TextPickerDialog_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._TextPickerDialog_getFinalizer()
-        }
-        throw new Error("Not implemented")
-    }
     static _TextPickerDialog_show(thisArray: Uint8Array, thisLength: int32): undefined {
         if ((this._LoadOnce()) == (true))
         {
@@ -16944,20 +17084,6 @@ export class ArkUIGeneratedNativeModule {
         if ((this._LoadOnce()) == (true))
         {
             return this._TextTimerController_reset(ptr)
-        }
-        throw new Error("Not implemented")
-    }
-    static _TimePickerDialog_ctor(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._TimePickerDialog_ctor()
-        }
-        throw new Error("Not implemented")
-    }
-    static _TimePickerDialog_getFinalizer(): KPointer {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._TimePickerDialog_getFinalizer()
         }
         throw new Error("Not implemented")
     }
@@ -17150,7 +17276,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _FileSelectorParam_getAcceptType(ptr: KPointer): KPointer {
+    static _FileSelectorParam_getAcceptType(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._FileSelectorParam_getAcceptType(ptr)
@@ -17353,7 +17479,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _PermissionRequest_getAccessibleResource(ptr: KPointer): KPointer {
+    static _PermissionRequest_getAccessibleResource(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._PermissionRequest_getAccessibleResource(ptr)
@@ -17444,10 +17570,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _ControllerHandler_setWebController(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _ControllerHandler_setWebController(ptr: KPointer, controller: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._ControllerHandler_setWebController(ptr, thisArray, thisLength)
+            return this._ControllerHandler_setWebController(ptr, controller)
         }
         throw new Error("Not implemented")
     }
@@ -17675,7 +17801,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _WebResourceRequest_getRequestHeader(ptr: KPointer): KPointer {
+    static _WebResourceRequest_getRequestHeader(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._WebResourceRequest_getRequestHeader(ptr)
@@ -17766,7 +17892,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _WebResourceResponse_getResponseHeader(ptr: KPointer): KPointer {
+    static _WebResourceResponse_getResponseHeader(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._WebResourceResponse_getResponseHeader(ptr)
@@ -18214,7 +18340,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _WaterFlowSections_values(ptr: KPointer): KPointer {
+    static _WaterFlowSections_values(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._WaterFlowSections_values(ptr)
@@ -18249,7 +18375,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _UIExtensionProxy_sendSync(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _UIExtensionProxy_sendSync(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._UIExtensionProxy_sendSync(ptr, thisArray, thisLength)
@@ -18305,17 +18431,17 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _StyledString_getStyles(ptr: KPointer, start: number, length: number, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _StyledString_getStyles(ptr: KPointer, start: number, length: number, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._StyledString_getStyles(ptr, start, length, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _StyledString_equals(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): boolean {
+    static _StyledString_equals(ptr: KPointer, other: KPointer): boolean {
         if ((this._LoadOnce()) == (true))
         {
-            return this._StyledString_equals(ptr, thisArray, thisLength)
+            return this._StyledString_equals(ptr, other)
         }
         throw new Error("Not implemented")
     }
@@ -18333,17 +18459,17 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _StyledString_toHtml(thisArray: Uint8Array, thisLength: int32): string {
+    static _StyledString_toHtml(styledString: KPointer): string {
         if ((this._LoadOnce()) == (true))
         {
-            return this._StyledString_toHtml(thisArray, thisLength)
+            return this._StyledString_toHtml(styledString)
         }
         throw new Error("Not implemented")
     }
-    static _StyledString_marshalling(thisArray: Uint8Array, thisLength: int32): ArrayBuffer {
+    static _StyledString_marshalling(styledString: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._StyledString_marshalling(thisArray, thisLength)
+            return this._StyledString_marshalling(styledString)
         }
         throw new Error("Not implemented")
     }
@@ -18431,10 +18557,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _BaselineOffsetStyle_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _BaselineOffsetStyle_ctor(value: KPointer): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._BaselineOffsetStyle_ctor(thisArray, thisLength)
+            return this._BaselineOffsetStyle_ctor(value)
         }
         throw new Error("Not implemented")
     }
@@ -18452,10 +18578,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _LetterSpacingStyle_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _LetterSpacingStyle_ctor(value: KPointer): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._LetterSpacingStyle_ctor(thisArray, thisLength)
+            return this._LetterSpacingStyle_ctor(value)
         }
         throw new Error("Not implemented")
     }
@@ -18487,7 +18613,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _TextShadowStyle_getTextShadow(ptr: KPointer): KPointer {
+    static _TextShadowStyle_getTextShadow(ptr: KPointer): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._TextShadowStyle_getTextShadow(ptr)
@@ -18571,10 +18697,10 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _LineHeightStyle_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _LineHeightStyle_ctor(lineHeight: KPointer): KPointer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._LineHeightStyle_ctor(thisArray, thisLength)
+            return this._LineHeightStyle_ctor(lineHeight)
         }
         throw new Error("Not implemented")
     }
@@ -18683,24 +18809,24 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _MutableStyledString_replaceStyledString(ptr: KPointer, start: number, length: number, thisArray: Uint8Array, thisLength: int32): void {
+    static _MutableStyledString_replaceStyledString(ptr: KPointer, start: number, length: number, other: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._MutableStyledString_replaceStyledString(ptr, start, length, thisArray, thisLength)
+            return this._MutableStyledString_replaceStyledString(ptr, start, length, other)
         }
         throw new Error("Not implemented")
     }
-    static _MutableStyledString_insertStyledString(ptr: KPointer, start: number, thisArray: Uint8Array, thisLength: int32): void {
+    static _MutableStyledString_insertStyledString(ptr: KPointer, start: number, other: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._MutableStyledString_insertStyledString(ptr, start, thisArray, thisLength)
+            return this._MutableStyledString_insertStyledString(ptr, start, other)
         }
         throw new Error("Not implemented")
     }
-    static _MutableStyledString_appendStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    static _MutableStyledString_appendStyledString(ptr: KPointer, other: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._MutableStyledString_appendStyledString(ptr, thisArray, thisLength)
+            return this._MutableStyledString_appendStyledString(ptr, other)
         }
         throw new Error("Not implemented")
     }
@@ -18715,6 +18841,13 @@ export class ArkUIGeneratedNativeModule {
         if ((this._LoadOnce()) == (true))
         {
             return this._ImageAttachment_getFinalizer()
+        }
+        throw new Error("Not implemented")
+    }
+    static _ImageAttachment_getValue(ptr: KPointer): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._ImageAttachment_getValue(ptr)
         }
         throw new Error("Not implemented")
     }
@@ -18809,38 +18942,143 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_Profiler_inspector_registerVsyncCallback(thisArray: Uint8Array, thisLength: int32): void {
+    static _GlobalScope_getContext(thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._GlobalScope_Profiler_inspector_registerVsyncCallback(thisArray, thisLength)
+            return this._GlobalScope_getContext(thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_Profiler_inspector_unregisterVsyncCallback(): void {
+    static _GlobalScope_postCardAction(thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._GlobalScope_Profiler_inspector_unregisterVsyncCallback()
+            return this._GlobalScope_postCardAction(thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_inspector_getInspectorNodes(): KPointer {
+    static _GlobalScope_dollar_r(value: KStringPtr, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._GlobalScope_inspector_getInspectorNodes()
+            return this._GlobalScope_dollar_r(value, thisArray, thisLength)
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_inspector_getInspectorNodeById(id: number): KPointer {
+    static _GlobalScope_dollar_rawfile(value: KStringPtr): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
-            return this._GlobalScope_inspector_getInspectorNodeById(id)
+            return this._GlobalScope_dollar_rawfile(value)
         }
         throw new Error("Not implemented")
     }
-    static _GlobalScope_inspector_setAppBgColor(value: KStringPtr): void {
+    static _GlobalScope_animateTo(thisArray: Uint8Array, thisLength: int32): void {
         if ((this._LoadOnce()) == (true))
         {
-            return this._GlobalScope_inspector_setAppBgColor(value)
+            return this._GlobalScope_animateTo(thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_animateToImmediately(thisArray: Uint8Array, thisLength: int32): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_animateToImmediately(thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_vp2px(value: number): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_vp2px(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_px2vp(value: number): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_px2vp(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_fp2px(value: number): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_fp2px(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_px2fp(value: number): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_px2fp(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_lpx2px(value: number): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_lpx2px(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_px2lpx(value: number): number {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_px2lpx(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_getInspectorNodes(): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_getInspectorNodes()
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_getInspectorNodeById(id: number): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_getInspectorNodeById(id)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_setAppBgColor(value: KStringPtr): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_setAppBgColor(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_Profiler_registerVsyncCallback(thisArray: Uint8Array, thisLength: int32): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_Profiler_registerVsyncCallback(thisArray, thisLength)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_Profiler_unregisterVsyncCallback(): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_Profiler_unregisterVsyncCallback()
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_cursorControl_setCursor(value: KInt): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_cursorControl_setCursor(value)
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_cursorControl_restoreDefault(): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_cursorControl_restoreDefault()
+        }
+        throw new Error("Not implemented")
+    }
+    static _GlobalScope_focusControl_requestFocus(value: KStringPtr): boolean {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._GlobalScope_focusControl_requestFocus(value)
         }
         throw new Error("Not implemented")
     }

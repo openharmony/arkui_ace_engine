@@ -64,6 +64,31 @@ export class MethodDefinition extends ClassElement {
     get asyncPairMethod(): MethodDefinition | undefined {
         return unpackNode(global.generatedEs2panda._MethodDefinitionAsyncPairMethodConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setOverloads(overloads: readonly MethodDefinition[]): this {
+        global.generatedEs2panda._MethodDefinitionSetOverloads(global.context, this.peer, passNodeArray(overloads), overloads.length)
+        return this
+    }
+    /** @deprecated */
+    clearOverloads(): this {
+        global.generatedEs2panda._MethodDefinitionClearOverloads(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    addOverload(overload: MethodDefinition): this {
+        global.generatedEs2panda._MethodDefinitionAddOverload(global.context, this.peer, passNode(overload))
+        return this
+    }
+    /** @deprecated */
+    setBaseOverloadMethod(baseOverloadMethod: MethodDefinition): this {
+        global.generatedEs2panda._MethodDefinitionSetBaseOverloadMethod(global.context, this.peer, passNode(baseOverloadMethod))
+        return this
+    }
+    /** @deprecated */
+    setAsyncPairMethod(method: MethodDefinition): this {
+        global.generatedEs2panda._MethodDefinitionSetAsyncPairMethod(global.context, this.peer, passNode(method))
+        return this
+    }
 }
 export function isMethodDefinition(node: AstNode): node is MethodDefinition {
     return node instanceof MethodDefinition

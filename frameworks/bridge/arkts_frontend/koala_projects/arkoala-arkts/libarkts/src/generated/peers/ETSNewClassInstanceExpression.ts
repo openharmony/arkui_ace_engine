@@ -54,6 +54,16 @@ export class ETSNewClassInstanceExpression extends Expression {
     get getArguments(): readonly Expression[] {
         return unpackNodeArray(global.generatedEs2panda._ETSNewClassInstanceExpressionGetArgumentsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setArguments(_arguments: readonly Expression[]): this {
+        global.generatedEs2panda._ETSNewClassInstanceExpressionSetArguments(global.context, this.peer, passNodeArray(_arguments), _arguments.length)
+        return this
+    }
+    /** @deprecated */
+    addToArgumentsFront(expr: Expression): this {
+        global.generatedEs2panda._ETSNewClassInstanceExpressionAddToArgumentsFront(global.context, this.peer, passNode(expr))
+        return this
+    }
 }
 export function isETSNewClassInstanceExpression(node: AstNode): node is ETSNewClassInstanceExpression {
     return node instanceof ETSNewClassInstanceExpression

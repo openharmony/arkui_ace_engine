@@ -6,6 +6,7 @@ import { observableProxy } from "@koalaui/common";
 function globalFancy<T extends ArkCommonMethodInterface<T>>(CommonInstance: T): T {
     return CommonInstance.backgroundColor(Color.Red);
 }
+/** @memo:stable */
 export class ArkFancyUseExpComponent extends ArkStructBase<ArkFancyUseExpComponent, FancyUseExpOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

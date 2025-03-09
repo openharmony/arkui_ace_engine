@@ -1,5 +1,6 @@
 import { ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkNavigator, ArkNavigatorComponent, ArkPageTransitionEnter, ArkPageTransitionEnterComponent, ArkPageTransitionExit, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, Curve, LocalStorage, MutableState, NavigationType, RouteType, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkPageTransitionExample1Component extends ArkStructBase<ArkPageTransitionExample1Component, PageTransitionExample1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

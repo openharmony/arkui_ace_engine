@@ -44,6 +44,7 @@ export const AnimatableExtendDecorator = "AnimatableExtend"
 export const ArkCommonMethodInterface = "ArkCommonMethodInterface"
 export const ArkCommonMethodComponent = "ArkCommonMethodComponent"
 export const T_TypeParameter = "T"
+export const styledInstance = mangle("instance")
 export const CommonInstance = "CommonInstance"
 export const Instance = "Instance"
 export const DollarDollar = "$$"
@@ -87,6 +88,10 @@ export class CallTable {
 
 export function prependMemoComment<T extends ts.Node>(node: T): T {
     return prependComment(node, "* @memo ")
+}
+
+export function prependMemoStable<T extends ts.Node>(node: T): T {
+    return prependComment(node, "* @memo:stable ")
 }
 
 export function prependMemoCommentIfArkoala<T extends ts.Node>(node: T, importer: Importer): T {
@@ -231,7 +236,7 @@ export function deduceBuilderLambdaName(functionDeclaration: ts.FunctionDeclarat
     throw new Error("Unexpected decorator kind: " + asString(decorator.expression))
 }
 
-export function findBuilderLambdaRedirect(typechecker: ts.TypeChecker, node: ts.Node): string|undefined {
+export function findBuilderLambdaRedirect(typechecker: ts.TypeChecker, node: ts.Node): string | undefined {
     if (!ts.isCallExpression(node)) return undefined
     const func = node.expression
     if (!ts.isIdentifier(func)) return undefined
@@ -555,14 +560,19 @@ export function buildBuilderArgument(): string {
     return mangle("builder")
 }
 
-export function styleInstanceId(): ts.Identifier {
-    return id(mangle("instance"))
-}
-
 export function commonMethodComponentId(importer: Importer): ts.Identifier {
     return id(importer.withAdaptorImport(ArkCommonMethodComponent))
 }
 
 export function commonMethodComponentType(importer: Importer): ts.TypeReferenceNode {
     return ts.factory.createTypeReferenceNode(importer.withAdaptorImport(ArkCommonMethodComponent))
+}
+
+export function getSingleExpression(block?: ts.Block): ts.Expression | undefined {
+    const statement = getSingleStatement(block)
+    return statement && ts.isExpressionStatement(statement) ? statement.expression:undefined
+}
+
+export function getSingleStatement(block?: ts.Block): ts.Statement | undefined {
+    return block && block.statements.length === 1 ? block.statements[0] : undefined
 }

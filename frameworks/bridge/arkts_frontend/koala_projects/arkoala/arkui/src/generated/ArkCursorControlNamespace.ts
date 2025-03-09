@@ -16,37 +16,15 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
-import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Serializer } from "./peers/Serializer"
-import { CallbackKind } from "./peers/CallbackKind"
-import { Deserializer, createDeserializer } from "./peers/Deserializer"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
+import { PointerStyle } from "./ArkArkuiCustomInterfaces"
+import { GlobalScope } from "./peers/GlobalScope"
 export namespace cursorControl {
-    export class GlobalScope_cursorControl_common {
-        public static setCursor(value: PointerStyle): void {
-            const value_casted = value as (PointerStyle)
-            GlobalScope_cursorControl_common.setCursor_serialize(value_casted)
-            return
-        }
-        public static restoreDefault(): void {
-            GlobalScope_cursorControl_common.restoreDefault_serialize()
-            return
-        }
-        private static setCursor_serialize(value: PointerStyle): void {
-            ArkUIGeneratedNativeModule._GlobalScope_cursorControl_common_setCursor(value)
-        }
-        private static restoreDefault_serialize(): void {
-            ArkUIGeneratedNativeModule._GlobalScope_cursorControl_common_restoreDefault()
-        }
+    export function setCursor(value: PointerStyle): void {
+        GlobalScope.cursorControl_setCursor(value)
     }
 }
 export namespace cursorControl {
-    export function setCursor(value: PointerStyle): void {
-        GlobalScope_cursorControl_common.setCursor(value)
-    }
     export function restoreDefault(): void {
-        GlobalScope_cursorControl_common.restoreDefault()
+        GlobalScope.cursorControl_restoreDefault()
     }
 }

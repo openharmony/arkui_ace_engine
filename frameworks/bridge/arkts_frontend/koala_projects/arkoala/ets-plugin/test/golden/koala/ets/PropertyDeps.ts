@@ -1,6 +1,7 @@
 import { $r, $rawfile, AppStorage, AppStorageLinkState, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, CanvasRenderingContext2D, CustomDialogController, DataChangeListener, Environment, ForEach, GestureGroup, IDataSource, LocalStorage, LongPressGesture, PanGesture, PanGestureOptions, PersistentStorage, PinchGesture, RenderingContextSettings, RotationGesture, Scroller, StorageLinkState, SubscribedAbstractProperty, SwipeGesture, SwiperController, SyncedProperty, TabsController, TapGesture, TextAreaController, VideoController, animateTo, contextLocalStateOf, fp2px, getContext, getInspectorByKey, lpx2px, propState, px2fp, px2lpx, px2vp, stateOf, vp2px } from "@koalaui/arkui";
 import { MutableState } from "@koalaui/runtime";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkStateToStateComponent extends ArkStructBase<ArkStateToStateComponent, StateToStateOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -32,6 +33,7 @@ class ArkStateToStateComponent extends ArkStructBase<ArkStateToStateComponent, S
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStateToPropComponent extends ArkStructBase<ArkStateToPropComponent, StateToPropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -67,6 +69,7 @@ class ArkStateToPropComponent extends ArkStructBase<ArkStateToPropComponent, Sta
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStateToProvideComponent extends ArkStructBase<ArkStateToProvideComponent, StateToProvideOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -98,6 +101,7 @@ class ArkStateToProvideComponent extends ArkStructBase<ArkStateToProvideComponen
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStateToStorageLinkComponent extends ArkStructBase<ArkStateToStorageLinkComponent, StateToStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -129,6 +133,7 @@ class ArkStateToStorageLinkComponent extends ArkStructBase<ArkStateToStorageLink
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStateToLocalStorageLinkComponent extends ArkStructBase<ArkStateToLocalStorageLinkComponent, StateToLocalStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -160,6 +165,7 @@ class ArkStateToLocalStorageLinkComponent extends ArkStructBase<ArkStateToLocalS
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStateToStoragePropComponent extends ArkStructBase<ArkStateToStoragePropComponent, StateToStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -195,6 +201,7 @@ class ArkStateToStoragePropComponent extends ArkStructBase<ArkStateToStorageProp
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStateToLocalStoragePropComponent extends ArkStructBase<ArkStateToLocalStoragePropComponent, StateToLocalStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -230,6 +237,7 @@ class ArkStateToLocalStoragePropComponent extends ArkStructBase<ArkStateToLocalS
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStateToPlainComponent extends ArkStructBase<ArkStateToPlainComponent, StateToPlainOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -261,6 +269,7 @@ class ArkStateToPlainComponent extends ArkStructBase<ArkStateToPlainComponent, S
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPropToStateComponent extends ArkStructBase<ArkPropToStateComponent, PropToStateOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -296,6 +305,7 @@ class ArkPropToStateComponent extends ArkStructBase<ArkPropToStateComponent, Pro
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPropToPropComponent extends ArkStructBase<ArkPropToPropComponent, PropToPropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -332,6 +342,7 @@ class ArkPropToPropComponent extends ArkStructBase<ArkPropToPropComponent, PropT
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPropToProvideComponent extends ArkStructBase<ArkPropToProvideComponent, PropToProvideOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -367,6 +378,7 @@ class ArkPropToProvideComponent extends ArkStructBase<ArkPropToProvideComponent,
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPropToStorageLinkComponent extends ArkStructBase<ArkPropToStorageLinkComponent, PropToStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -402,6 +414,7 @@ class ArkPropToStorageLinkComponent extends ArkStructBase<ArkPropToStorageLinkCo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPropToLocalStorageLinkComponent extends ArkStructBase<ArkPropToLocalStorageLinkComponent, PropToLocalStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -437,6 +450,7 @@ class ArkPropToLocalStorageLinkComponent extends ArkStructBase<ArkPropToLocalSto
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPropToStoragePropComponent extends ArkStructBase<ArkPropToStoragePropComponent, PropToStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -473,6 +487,7 @@ class ArkPropToStoragePropComponent extends ArkStructBase<ArkPropToStoragePropCo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPropToLocalStoragePropComponent extends ArkStructBase<ArkPropToLocalStoragePropComponent, PropToLocalStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -509,6 +524,7 @@ class ArkPropToLocalStoragePropComponent extends ArkStructBase<ArkPropToLocalSto
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPropToPlainComponent extends ArkStructBase<ArkPropToPlainComponent, PropToPlainOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -544,6 +560,7 @@ class ArkPropToPlainComponent extends ArkStructBase<ArkPropToPlainComponent, Pro
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkProvideToStateComponent extends ArkStructBase<ArkProvideToStateComponent, ProvideToStateOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -575,6 +592,7 @@ class ArkProvideToStateComponent extends ArkStructBase<ArkProvideToStateComponen
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkProvideToPropComponent extends ArkStructBase<ArkProvideToPropComponent, ProvideToPropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -610,6 +628,7 @@ class ArkProvideToPropComponent extends ArkStructBase<ArkProvideToPropComponent,
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkProvideToProvideComponent extends ArkStructBase<ArkProvideToProvideComponent, ProvideToProvideOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -641,6 +660,7 @@ class ArkProvideToProvideComponent extends ArkStructBase<ArkProvideToProvideComp
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkProvideToStorageLinkComponent extends ArkStructBase<ArkProvideToStorageLinkComponent, ProvideToStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -672,6 +692,7 @@ class ArkProvideToStorageLinkComponent extends ArkStructBase<ArkProvideToStorage
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkProvideToLocalStorageLinkComponent extends ArkStructBase<ArkProvideToLocalStorageLinkComponent, ProvideToLocalStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -703,6 +724,7 @@ class ArkProvideToLocalStorageLinkComponent extends ArkStructBase<ArkProvideToLo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkProvideToStoragePropComponent extends ArkStructBase<ArkProvideToStoragePropComponent, ProvideToStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -738,6 +760,7 @@ class ArkProvideToStoragePropComponent extends ArkStructBase<ArkProvideToStorage
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkProvideToLocalStoragePropComponent extends ArkStructBase<ArkProvideToLocalStoragePropComponent, ProvideToLocalStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -773,6 +796,7 @@ class ArkProvideToLocalStoragePropComponent extends ArkStructBase<ArkProvideToLo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkProvideToPlainComponent extends ArkStructBase<ArkProvideToPlainComponent, ProvideToPlainOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -804,6 +828,7 @@ class ArkProvideToPlainComponent extends ArkStructBase<ArkProvideToPlainComponen
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStorageLinkToStateComponent extends ArkStructBase<ArkStorageLinkToStateComponent, StorageLinkToStateOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -835,6 +860,7 @@ class ArkStorageLinkToStateComponent extends ArkStructBase<ArkStorageLinkToState
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStorageLinkToPropComponent extends ArkStructBase<ArkStorageLinkToPropComponent, StorageLinkToPropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -870,6 +896,7 @@ class ArkStorageLinkToPropComponent extends ArkStructBase<ArkStorageLinkToPropCo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStorageLinkToProvideComponent extends ArkStructBase<ArkStorageLinkToProvideComponent, StorageLinkToProvideOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -901,6 +928,7 @@ class ArkStorageLinkToProvideComponent extends ArkStructBase<ArkStorageLinkToPro
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStorageLinkToStorageLinkComponent extends ArkStructBase<ArkStorageLinkToStorageLinkComponent, StorageLinkToStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -932,6 +960,7 @@ class ArkStorageLinkToStorageLinkComponent extends ArkStructBase<ArkStorageLinkT
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStorageLinkToLocalStorageLinkComponent extends ArkStructBase<ArkStorageLinkToLocalStorageLinkComponent, StorageLinkToLocalStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -963,6 +992,7 @@ class ArkStorageLinkToLocalStorageLinkComponent extends ArkStructBase<ArkStorage
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStorageLinkToStoragePropComponent extends ArkStructBase<ArkStorageLinkToStoragePropComponent, StorageLinkToStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -998,6 +1028,7 @@ class ArkStorageLinkToStoragePropComponent extends ArkStructBase<ArkStorageLinkT
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStorageLinkToLocalStoragePropComponent extends ArkStructBase<ArkStorageLinkToLocalStoragePropComponent, StorageLinkToLocalStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1033,6 +1064,7 @@ class ArkStorageLinkToLocalStoragePropComponent extends ArkStructBase<ArkStorage
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStorageLinkToPlainComponent extends ArkStructBase<ArkStorageLinkToPlainComponent, StorageLinkToPlainOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1064,6 +1096,7 @@ class ArkStorageLinkToPlainComponent extends ArkStructBase<ArkStorageLinkToPlain
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStorageLinkToStateComponent extends ArkStructBase<ArkLocalStorageLinkToStateComponent, LocalStorageLinkToStateOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1095,6 +1128,7 @@ class ArkLocalStorageLinkToStateComponent extends ArkStructBase<ArkLocalStorageL
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStorageLinkToPropComponent extends ArkStructBase<ArkLocalStorageLinkToPropComponent, LocalStorageLinkToPropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1130,6 +1164,7 @@ class ArkLocalStorageLinkToPropComponent extends ArkStructBase<ArkLocalStorageLi
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStorageLinkToProvideComponent extends ArkStructBase<ArkLocalStorageLinkToProvideComponent, LocalStorageLinkToProvideOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1161,6 +1196,7 @@ class ArkLocalStorageLinkToProvideComponent extends ArkStructBase<ArkLocalStorag
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStorageLinkToStorageLinkComponent extends ArkStructBase<ArkLocalStorageLinkToStorageLinkComponent, LocalStorageLinkToStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1192,6 +1228,7 @@ class ArkLocalStorageLinkToStorageLinkComponent extends ArkStructBase<ArkLocalSt
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStorageLinkToLocalStorageLinkComponent extends ArkStructBase<ArkLocalStorageLinkToLocalStorageLinkComponent, LocalStorageLinkToLocalStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1223,6 +1260,7 @@ class ArkLocalStorageLinkToLocalStorageLinkComponent extends ArkStructBase<ArkLo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStorageLinkToStoragePropComponent extends ArkStructBase<ArkLocalStorageLinkToStoragePropComponent, LocalStorageLinkToStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1258,6 +1296,7 @@ class ArkLocalStorageLinkToStoragePropComponent extends ArkStructBase<ArkLocalSt
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStorageLinkToLocalStoragePropComponent extends ArkStructBase<ArkLocalStorageLinkToLocalStoragePropComponent, LocalStorageLinkToLocalStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1293,6 +1332,7 @@ class ArkLocalStorageLinkToLocalStoragePropComponent extends ArkStructBase<ArkLo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStorageLinkToPlainComponent extends ArkStructBase<ArkLocalStorageLinkToPlainComponent, LocalStorageLinkToPlainOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1324,6 +1364,7 @@ class ArkLocalStorageLinkToPlainComponent extends ArkStructBase<ArkLocalStorageL
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStoragePropToStateComponent extends ArkStructBase<ArkStoragePropToStateComponent, StoragePropToStateOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1359,6 +1400,7 @@ class ArkStoragePropToStateComponent extends ArkStructBase<ArkStoragePropToState
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStoragePropToPropComponent extends ArkStructBase<ArkStoragePropToPropComponent, StoragePropToPropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1395,6 +1437,7 @@ class ArkStoragePropToPropComponent extends ArkStructBase<ArkStoragePropToPropCo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStoragePropToProvideComponent extends ArkStructBase<ArkStoragePropToProvideComponent, StoragePropToProvideOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1430,6 +1473,7 @@ class ArkStoragePropToProvideComponent extends ArkStructBase<ArkStoragePropToPro
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStoragePropToStorageLinkComponent extends ArkStructBase<ArkStoragePropToStorageLinkComponent, StoragePropToStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1465,6 +1509,7 @@ class ArkStoragePropToStorageLinkComponent extends ArkStructBase<ArkStoragePropT
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStoragePropToLocalStorageLinkComponent extends ArkStructBase<ArkStoragePropToLocalStorageLinkComponent, StoragePropToLocalStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1500,6 +1545,7 @@ class ArkStoragePropToLocalStorageLinkComponent extends ArkStructBase<ArkStorage
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStoragePropToStoragePropComponent extends ArkStructBase<ArkStoragePropToStoragePropComponent, StoragePropToStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1536,6 +1582,7 @@ class ArkStoragePropToStoragePropComponent extends ArkStructBase<ArkStoragePropT
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStoragePropToLocalStoragePropComponent extends ArkStructBase<ArkStoragePropToLocalStoragePropComponent, StoragePropToLocalStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1572,6 +1619,7 @@ class ArkStoragePropToLocalStoragePropComponent extends ArkStructBase<ArkStorage
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkStoragePropToPlainComponent extends ArkStructBase<ArkStoragePropToPlainComponent, StoragePropToPlainOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1607,6 +1655,7 @@ class ArkStoragePropToPlainComponent extends ArkStructBase<ArkStoragePropToPlain
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStoragePropToStateComponent extends ArkStructBase<ArkLocalStoragePropToStateComponent, LocalStoragePropToStateOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1642,6 +1691,7 @@ class ArkLocalStoragePropToStateComponent extends ArkStructBase<ArkLocalStorageP
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStoragePropToPropComponent extends ArkStructBase<ArkLocalStoragePropToPropComponent, LocalStoragePropToPropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1678,6 +1728,7 @@ class ArkLocalStoragePropToPropComponent extends ArkStructBase<ArkLocalStoragePr
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStoragePropToProvideComponent extends ArkStructBase<ArkLocalStoragePropToProvideComponent, LocalStoragePropToProvideOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1713,6 +1764,7 @@ class ArkLocalStoragePropToProvideComponent extends ArkStructBase<ArkLocalStorag
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStoragePropToStorageLinkComponent extends ArkStructBase<ArkLocalStoragePropToStorageLinkComponent, LocalStoragePropToStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1748,6 +1800,7 @@ class ArkLocalStoragePropToStorageLinkComponent extends ArkStructBase<ArkLocalSt
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStoragePropToLocalStorageLinkComponent extends ArkStructBase<ArkLocalStoragePropToLocalStorageLinkComponent, LocalStoragePropToLocalStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1783,6 +1836,7 @@ class ArkLocalStoragePropToLocalStorageLinkComponent extends ArkStructBase<ArkLo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStoragePropToStoragePropComponent extends ArkStructBase<ArkLocalStoragePropToStoragePropComponent, LocalStoragePropToStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1819,6 +1873,7 @@ class ArkLocalStoragePropToStoragePropComponent extends ArkStructBase<ArkLocalSt
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStoragePropToLocalStoragePropComponent extends ArkStructBase<ArkLocalStoragePropToLocalStoragePropComponent, LocalStoragePropToLocalStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1855,6 +1910,7 @@ class ArkLocalStoragePropToLocalStoragePropComponent extends ArkStructBase<ArkLo
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkLocalStoragePropToPlainComponent extends ArkStructBase<ArkLocalStoragePropToPlainComponent, LocalStoragePropToPlainOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1890,6 +1946,7 @@ class ArkLocalStoragePropToPlainComponent extends ArkStructBase<ArkLocalStorageP
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkBuilderToBuilderParamComponent extends ArkStructBase<ArkBuilderToBuilderParamComponent, BuilderToBuilderParamOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1942,6 +1999,7 @@ class ArkBuilderToBuilderParamComponent extends ArkStructBase<ArkBuilderToBuilde
         BuilderToBuilderParam(undefined, undefined, { builderParam: this.anotherParam } as BuilderToBuilderParamOptions);
     }
 }
+/** @memo:stable */
 class ArkBuilderParamToBuilderParamComponent extends ArkStructBase<ArkBuilderParamToBuilderParamComponent, BuilderParamToBuilderParamOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -1994,6 +2052,7 @@ class ArkBuilderParamToBuilderParamComponent extends ArkStructBase<ArkBuilderPar
         BuilderToBuilderParam(undefined, undefined, { anotherParam: this.anotherParam } as BuilderToBuilderParamOptions);
     }
 }
+/** @memo:stable */
 class ArkPlainToStateComponent extends ArkStructBase<ArkPlainToStateComponent, PlainToStateOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -2025,6 +2084,7 @@ class ArkPlainToStateComponent extends ArkStructBase<ArkPlainToStateComponent, P
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPlainToPropComponent extends ArkStructBase<ArkPlainToPropComponent, PlainToPropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -2060,6 +2120,7 @@ class ArkPlainToPropComponent extends ArkStructBase<ArkPlainToPropComponent, Pla
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPlainToProvideComponent extends ArkStructBase<ArkPlainToProvideComponent, PlainToProvideOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -2091,6 +2152,7 @@ class ArkPlainToProvideComponent extends ArkStructBase<ArkPlainToProvideComponen
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPlainToStorageLinkComponent extends ArkStructBase<ArkPlainToStorageLinkComponent, PlainToStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -2122,6 +2184,7 @@ class ArkPlainToStorageLinkComponent extends ArkStructBase<ArkPlainToStorageLink
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPlainToLocalStorageLinkComponent extends ArkStructBase<ArkPlainToLocalStorageLinkComponent, PlainToLocalStorageLinkOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -2153,6 +2216,7 @@ class ArkPlainToLocalStorageLinkComponent extends ArkStructBase<ArkPlainToLocalS
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPlainToStoragePropComponent extends ArkStructBase<ArkPlainToStoragePropComponent, PlainToStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -2188,6 +2252,7 @@ class ArkPlainToStoragePropComponent extends ArkStructBase<ArkPlainToStorageProp
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPlainToLocalStoragePropComponent extends ArkStructBase<ArkPlainToLocalStoragePropComponent, PlainToLocalStoragePropOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -2223,6 +2288,7 @@ class ArkPlainToLocalStoragePropComponent extends ArkStructBase<ArkPlainToLocalS
         ArkText(__builder, undefined, this.test);
     }
 }
+/** @memo:stable */
 class ArkPlainToPlainComponent extends ArkStructBase<ArkPlainToPlainComponent, PlainToPlainOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

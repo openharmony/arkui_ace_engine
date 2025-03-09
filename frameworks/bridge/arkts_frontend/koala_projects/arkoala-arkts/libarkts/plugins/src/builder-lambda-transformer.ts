@@ -18,7 +18,7 @@ import { AbstractVisitor } from "./AbstractVisitor";
 
 const builderLambdaInstanceName = "instance"
 
-function getLambdaArg(lambdaBody: arkts.AstNode, typeName: string|undefined): arkts.ArrowFunctionExpression {
+function getLambdaArg(lambdaBody: arkts.Expression, typeName: string|undefined): arkts.ArrowFunctionExpression {
     const body = arkts.factory.createBlock(
         [
             arkts.factory.createReturnStatement(
@@ -31,10 +31,12 @@ function getLambdaArg(lambdaBody: arkts.AstNode, typeName: string|undefined): ar
         arkts.factory.createIdentifier(
             builderLambdaInstanceName,
             // TODO: it should be the return type of the function annotated with the @BuilderLambda
-            typeName ? arkts.factory.createTypeReferenceFromId(
-                 arkts.factory.createIdentifier(
-                     typeName
-                 )
+            typeName ? arkts.factory.createTypeReference(
+                arkts.factory.createTypeReferencePart(
+                    arkts.factory.createIdentifier(
+                        typeName
+                    )
+                )
             ) : undefined,
         ),
         undefined
@@ -49,9 +51,11 @@ function getLambdaArg(lambdaBody: arkts.AstNode, typeName: string|undefined): ar
         [ param ],
         undefined,
         // TODO: it should be the return type of the function annotated with the @BuilderLambda
-        typeName ? arkts.factory.createTypeReferenceFromId(
-            arkts.factory.createIdentifier(
-                typeName
+        typeName ? arkts.factory.createTypeReference(
+            arkts.factory.createTypeReferencePart(
+                arkts.factory.createIdentifier(
+                    typeName
+                )
             )
        ) : undefined
     )
@@ -267,8 +271,8 @@ function transformBuilderLambda(node: arkts.CallExpression): arkts.AstNode {
     const typeName = builderLambdaTypeName(leaf)
     const lambdaArg = getLambdaArg(lambdaBody, typeName)
 
-    let args: arkts.AstNode[] = leaf.arguments.length < 3
-        ? leaf.arguments as arkts.AstNode[]
+    let args: readonly arkts.AstNode[] = leaf.arguments.length < 3
+        ? leaf.arguments
         : [
             ...leaf.arguments.slice(0, 2),
             builderLambdaBodyRewrite(leaf.arguments.at(2)!),

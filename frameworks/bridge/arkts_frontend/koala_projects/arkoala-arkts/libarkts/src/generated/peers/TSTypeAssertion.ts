@@ -50,6 +50,11 @@ export class TSTypeAssertion extends AnnotatedExpression {
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSTypeAssertionTypeAnnotationConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setTsTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._TSTypeAssertionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
+    }
 }
 export function isTSTypeAssertion(node: AstNode): node is TSTypeAssertion {
     return node instanceof TSTypeAssertion

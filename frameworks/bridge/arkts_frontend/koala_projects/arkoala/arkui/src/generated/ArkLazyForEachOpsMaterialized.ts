@@ -17,39 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { Callback_RangeUpdate } from "./ArkArkuiCustomInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
-export class LazyForEachOpsInternal {
-    public static fromPtr(ptr: KPointer): LazyForEachOps {
-        const obj: LazyForEachOps = new LazyForEachOps()
-        obj.peer = new Finalizable(ptr, LazyForEachOps.getFinalizer())
-        return obj
-    }
-}
-export class LazyForEachOps implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_lazyforeachops(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._LazyForEachOps_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = LazyForEachOps.ctor_lazyforeachops()
-        this.peer = new Finalizable(ctorPtr, LazyForEachOps.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._LazyForEachOps_getFinalizer()
-    }
+export class LazyForEachOps {
     public static NeedMoreElements(node: KPointer, mark: KPointer, direction: int32): KPointer {
         const node_casted = node as (KPointer)
         const mark_casted = mark as (KPointer)
@@ -76,6 +52,14 @@ export class LazyForEachOps implements MaterializedBase {
         LazyForEachOps.Prepare_serialize(node_casted, itemCount_casted, offset_casted)
         return
     }
+    public static NotifyChange(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
+        const node_casted = node as (KPointer)
+        const startIndex_casted = startIndex as (int32)
+        const endIndex_casted = endIndex as (int32)
+        const count_casted = count as (int32)
+        LazyForEachOps.NotifyChange_serialize(node_casted, startIndex_casted, endIndex_casted, count_casted)
+        return
+    }
     private static NeedMoreElements_serialize(node: KPointer, mark: KPointer, direction: int32): KPointer {
         const retval = ArkUIGeneratedNativeModule._LazyForEachOps_NeedMoreElements(node, mark, direction)
         return retval
@@ -91,5 +75,8 @@ export class LazyForEachOps implements MaterializedBase {
     }
     private static Prepare_serialize(node: KPointer, itemCount: int32, offset: int32): void {
         ArkUIGeneratedNativeModule._LazyForEachOps_Prepare(node, itemCount, offset)
+    }
+    private static NotifyChange_serialize(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
+        ArkUIGeneratedNativeModule._LazyForEachOps_NotifyChange(node, startIndex, endIndex, count)
     }
 }

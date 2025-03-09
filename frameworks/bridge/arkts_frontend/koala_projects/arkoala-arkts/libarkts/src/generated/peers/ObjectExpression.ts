@@ -51,8 +51,23 @@ export class ObjectExpression extends AnnotatedExpression {
     get decorators(): readonly Decorator[] {
         return unpackNodeArray(global.generatedEs2panda._ObjectExpressionDecoratorsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setDeclaration(): this {
+        global.generatedEs2panda._ObjectExpressionSetDeclaration(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setOptional(optional_arg: boolean): this {
+        global.generatedEs2panda._ObjectExpressionSetOptional(global.context, this.peer, optional_arg)
+        return this
+    }
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._ObjectExpressionTypeAnnotationConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setTsTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._ObjectExpressionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
     }
 }
 export function isObjectExpression(node: AstNode): node is ObjectExpression {

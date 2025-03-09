@@ -2388,29 +2388,6 @@ KBoolean impl_MemberExpressionIsPrivateReferenceConst(KNativePointer context, KN
 }
 KOALA_INTEROP_2(MemberExpressionIsPrivateReferenceConst, KBoolean, KNativePointer, KNativePointer);
 
-void impl_MemberExpressionCompileToRegConst(KNativePointer context, KNativePointer receiver, KNativePointer pg, KNativePointer objReg)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _pg = reinterpret_cast<es2panda_CodeGen*>(pg);
-    const auto _objReg = reinterpret_cast<es2panda_VReg*>(objReg);
-    GetImpl()->MemberExpressionCompileToRegConst(_context, _receiver, _pg, _objReg);
-    return ;
-}
-KOALA_INTEROP_V4(MemberExpressionCompileToRegConst, KNativePointer, KNativePointer, KNativePointer, KNativePointer);
-
-void impl_MemberExpressionCompileToRegsConst(KNativePointer context, KNativePointer receiver, KNativePointer pg, KNativePointer object_arg, KNativePointer property)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _pg = reinterpret_cast<es2panda_CodeGen*>(pg);
-    const auto _object_arg = reinterpret_cast<es2panda_VReg*>(object_arg);
-    const auto _property = reinterpret_cast<es2panda_VReg*>(property);
-    GetImpl()->MemberExpressionCompileToRegsConst(_context, _receiver, _pg, _object_arg, _property);
-    return ;
-}
-KOALA_INTEROP_V5(MemberExpressionCompileToRegsConst, KNativePointer, KNativePointer, KNativePointer, KNativePointer, KNativePointer);
-
 KNativePointer impl_CreateTSClassImplements(KNativePointer context, KNativePointer expression, KNativePointer typeParameters)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -4076,6 +4053,16 @@ KNativePointer impl_UpdateArrayExpression1(KNativePointer context, KNativePointe
 }
 KOALA_INTEROP_6(UpdateArrayExpression1, KNativePointer, KNativePointer, KNativePointer, KInt, KNativePointerArray, KUInt, KBoolean);
 
+KNativePointer impl_ArrayExpressionGetElementNodeAtIdxConst(KNativePointer context, KNativePointer receiver, KUInt idx)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    const auto _idx = static_cast<KUInt>(idx);
+    auto result = GetImpl()->ArrayExpressionGetElementNodeAtIdxConst(_context, _receiver, _idx);
+    return (void*)result;
+}
+KOALA_INTEROP_3(ArrayExpressionGetElementNodeAtIdxConst, KNativePointer, KNativePointer, KNativePointer, KUInt);
+
 KNativePointer impl_ArrayExpressionElementsConst(KNativePointer context, KNativePointer receiver)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -4172,17 +4159,16 @@ KNativePointer impl_ArrayExpressionValidateExpression(KNativePointer context, KN
 }
 KOALA_INTEROP_2(ArrayExpressionValidateExpression, KNativePointer, KNativePointer, KNativePointer);
 
-KBoolean impl_ArrayExpressionHandleNestedArrayExpression(KNativePointer context, KNativePointer receiver, KNativePointer currentElement, KBoolean isPreferredTuple, KUInt idx)
+KBoolean impl_ArrayExpressionTrySetPreferredTypeForNestedArrayExprConst(KNativePointer context, KNativePointer receiver, KNativePointer nestedArrayExpr, KUInt idx)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
     const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _currentElement = reinterpret_cast<es2panda_AstNode*>(currentElement);
-    const auto _isPreferredTuple = static_cast<KBoolean>(isPreferredTuple);
+    const auto _nestedArrayExpr = reinterpret_cast<es2panda_AstNode*>(nestedArrayExpr);
     const auto _idx = static_cast<KUInt>(idx);
-    auto result = GetImpl()->ArrayExpressionHandleNestedArrayExpression(_context, _receiver, _currentElement, _isPreferredTuple, _idx);
+    auto result = GetImpl()->ArrayExpressionTrySetPreferredTypeForNestedArrayExprConst(_context, _receiver, _nestedArrayExpr, _idx);
     return result;
 }
-KOALA_INTEROP_5(ArrayExpressionHandleNestedArrayExpression, KBoolean, KNativePointer, KNativePointer, KNativePointer, KBoolean, KUInt);
+KOALA_INTEROP_4(ArrayExpressionTrySetPreferredTypeForNestedArrayExprConst, KBoolean, KNativePointer, KNativePointer, KNativePointer, KUInt);
 
 KNativePointer impl_ArrayExpressionTypeAnnotationConst(KNativePointer context, KNativePointer receiver)
 {
@@ -4770,25 +4756,6 @@ KNativePointer impl_ETSTupleGetTupleTypeAnnotationsListConst(KNativePointer cont
 }
 KOALA_INTEROP_2(ETSTupleGetTupleTypeAnnotationsListConst, KNativePointer, KNativePointer, KNativePointer);
 
-KBoolean impl_ETSTupleHasSpreadTypeConst(KNativePointer context, KNativePointer receiver)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    auto result = GetImpl()->ETSTupleHasSpreadTypeConst(_context, _receiver);
-    return result;
-}
-KOALA_INTEROP_2(ETSTupleHasSpreadTypeConst, KBoolean, KNativePointer, KNativePointer);
-
-void impl_ETSTupleSetSpreadType(KNativePointer context, KNativePointer receiver, KNativePointer newSpreadType)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _newSpreadType = reinterpret_cast<es2panda_AstNode*>(newSpreadType);
-    GetImpl()->ETSTupleSetSpreadType(_context, _receiver, _newSpreadType);
-    return ;
-}
-KOALA_INTEROP_V3(ETSTupleSetSpreadType, KNativePointer, KNativePointer, KNativePointer);
-
 void impl_ETSTupleSetTypeAnnotationsList(KNativePointer context, KNativePointer receiver, KNativePointerArray typeNodeList, KUInt typeNodeListSequenceLength)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -4963,25 +4930,6 @@ KNativePointer impl_AstNodeAsStatementConst(KNativePointer context, KNativePoint
     return (void*)result;
 }
 KOALA_INTEROP_2(AstNodeAsStatementConst, KNativePointer, KNativePointer, KNativePointer);
-
-void impl_AstNodeSetRange(KNativePointer context, KNativePointer receiver, KNativePointer loc)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _loc = reinterpret_cast<es2panda_SourceRange*>(loc);
-    GetImpl()->AstNodeSetRange(_context, _receiver, _loc);
-    return ;
-}
-KOALA_INTEROP_V3(AstNodeSetRange, KNativePointer, KNativePointer, KNativePointer);
-
-KNativePointer impl_AstNodeRangeConst(KNativePointer context, KNativePointer receiver)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    auto result = GetImpl()->AstNodeRangeConst(_context, _receiver);
-    return (void*)result;
-}
-KOALA_INTEROP_2(AstNodeRangeConst, KNativePointer, KNativePointer, KNativePointer);
 
 KInt impl_AstNodeTypeConst(KNativePointer context, KNativePointer receiver)
 {
@@ -5425,26 +5373,6 @@ void impl_AstNodeDumpConst1(KNativePointer context, KNativePointer receiver, KNa
 }
 KOALA_INTEROP_V3(AstNodeDumpConst1, KNativePointer, KNativePointer, KNativePointer);
 
-void impl_AstNodeCompileConst(KNativePointer context, KNativePointer receiver, KNativePointer pg)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _pg = reinterpret_cast<es2panda_CodeGen*>(pg);
-    GetImpl()->AstNodeCompileConst(_context, _receiver, _pg);
-    return ;
-}
-KOALA_INTEROP_V3(AstNodeCompileConst, KNativePointer, KNativePointer, KNativePointer);
-
-void impl_AstNodeCompileConst1(KNativePointer context, KNativePointer receiver, KNativePointer etsg)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _etsg = reinterpret_cast<es2panda_CodeGen*>(etsg);
-    GetImpl()->AstNodeCompileConst1(_context, _receiver, _etsg);
-    return ;
-}
-KOALA_INTEROP_V3(AstNodeCompileConst1, KNativePointer, KNativePointer, KNativePointer);
-
 void impl_AstNodeSetTransformedNode(KNativePointer context, KNativePointer receiver, KStringPtr& transformationName, KNativePointer transformedNode)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -5455,16 +5383,6 @@ void impl_AstNodeSetTransformedNode(KNativePointer context, KNativePointer recei
     return ;
 }
 KOALA_INTEROP_V4(AstNodeSetTransformedNode, KNativePointer, KNativePointer, KStringPtr, KNativePointer);
-
-void impl_AstNodeAccept(KNativePointer context, KNativePointer receiver, KNativePointer v)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _v = reinterpret_cast<es2panda_AstVisitor*>(v);
-    GetImpl()->AstNodeAccept(_context, _receiver, _v);
-    return ;
-}
-KOALA_INTEROP_V3(AstNodeAccept, KNativePointer, KNativePointer, KNativePointer);
 
 void impl_AstNodeSetOriginalNode(KNativePointer context, KNativePointer receiver, KNativePointer originalNode)
 {
@@ -5896,17 +5814,6 @@ void impl_BinaryExpressionSetOperator(KNativePointer context, KNativePointer rec
 }
 KOALA_INTEROP_V3(BinaryExpressionSetOperator, KNativePointer, KNativePointer, KInt);
 
-void impl_BinaryExpressionCompileOperandsConst(KNativePointer context, KNativePointer receiver, KNativePointer etsg, KNativePointer lhs)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _etsg = reinterpret_cast<es2panda_CodeGen*>(etsg);
-    const auto _lhs = reinterpret_cast<es2panda_VReg*>(lhs);
-    GetImpl()->BinaryExpressionCompileOperandsConst(_context, _receiver, _etsg, _lhs);
-    return ;
-}
-KOALA_INTEROP_V4(BinaryExpressionCompileOperandsConst, KNativePointer, KNativePointer, KNativePointer, KNativePointer);
-
 KNativePointer impl_CreateSuperExpression(KNativePointer context)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -6195,16 +6102,6 @@ KBoolean impl_AssignmentExpressionConvertibleToAssignmentPattern(KNativePointer 
     return result;
 }
 KOALA_INTEROP_3(AssignmentExpressionConvertibleToAssignmentPattern, KBoolean, KNativePointer, KNativePointer, KBoolean);
-
-void impl_AssignmentExpressionCompilePatternConst(KNativePointer context, KNativePointer receiver, KNativePointer pg)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _pg = reinterpret_cast<es2panda_CodeGen*>(pg);
-    GetImpl()->AssignmentExpressionCompilePatternConst(_context, _receiver, _pg);
-    return ;
-}
-KOALA_INTEROP_V3(AssignmentExpressionCompilePatternConst, KNativePointer, KNativePointer, KNativePointer);
 
 KNativePointer impl_CreateExpressionStatement(KNativePointer context, KNativePointer expr)
 {
@@ -7236,6 +7133,60 @@ void impl_AnnotationDeclarationAddProperties(KNativePointer context, KNativePoin
 }
 KOALA_INTEROP_V4(AnnotationDeclarationAddProperties, KNativePointer, KNativePointer, KNativePointerArray, KUInt);
 
+KBoolean impl_AnnotationDeclarationIsSourceRetentionConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    auto result = GetImpl()->AnnotationDeclarationIsSourceRetentionConst(_context, _receiver);
+    return result;
+}
+KOALA_INTEROP_2(AnnotationDeclarationIsSourceRetentionConst, KBoolean, KNativePointer, KNativePointer);
+
+KBoolean impl_AnnotationDeclarationIsBytecodeRetentionConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    auto result = GetImpl()->AnnotationDeclarationIsBytecodeRetentionConst(_context, _receiver);
+    return result;
+}
+KOALA_INTEROP_2(AnnotationDeclarationIsBytecodeRetentionConst, KBoolean, KNativePointer, KNativePointer);
+
+KBoolean impl_AnnotationDeclarationIsRuntimeRetentionConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    auto result = GetImpl()->AnnotationDeclarationIsRuntimeRetentionConst(_context, _receiver);
+    return result;
+}
+KOALA_INTEROP_2(AnnotationDeclarationIsRuntimeRetentionConst, KBoolean, KNativePointer, KNativePointer);
+
+void impl_AnnotationDeclarationSetSourceRetention(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    GetImpl()->AnnotationDeclarationSetSourceRetention(_context, _receiver);
+    return ;
+}
+KOALA_INTEROP_V2(AnnotationDeclarationSetSourceRetention, KNativePointer, KNativePointer);
+
+void impl_AnnotationDeclarationSetBytecodeRetention(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    GetImpl()->AnnotationDeclarationSetBytecodeRetention(_context, _receiver);
+    return ;
+}
+KOALA_INTEROP_V2(AnnotationDeclarationSetBytecodeRetention, KNativePointer, KNativePointer);
+
+void impl_AnnotationDeclarationSetRuntimeRetention(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    GetImpl()->AnnotationDeclarationSetRuntimeRetention(_context, _receiver);
+    return ;
+}
+KOALA_INTEROP_V2(AnnotationDeclarationSetRuntimeRetention, KNativePointer, KNativePointer);
+
 KNativePointer impl_AnnotationDeclarationGetBaseNameConst(KNativePointer context, KNativePointer receiver)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
@@ -7244,6 +7195,37 @@ KNativePointer impl_AnnotationDeclarationGetBaseNameConst(KNativePointer context
     return (void*)result;
 }
 KOALA_INTEROP_2(AnnotationDeclarationGetBaseNameConst, KNativePointer, KNativePointer, KNativePointer);
+
+KNativePointer impl_AnnotationDeclarationAnnotations(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    std::size_t length;
+    auto result = GetImpl()->AnnotationDeclarationAnnotations(_context, _receiver, &length);
+    return new std::vector<void*>(result, result + length);
+}
+KOALA_INTEROP_2(AnnotationDeclarationAnnotations, KNativePointer, KNativePointer, KNativePointer);
+
+KNativePointer impl_AnnotationDeclarationAnnotationsConst(KNativePointer context, KNativePointer receiver)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    std::size_t length;
+    auto result = GetImpl()->AnnotationDeclarationAnnotationsConst(_context, _receiver, &length);
+    return (void*)new std::vector<void*>(result, result + length);
+}
+KOALA_INTEROP_2(AnnotationDeclarationAnnotationsConst, KNativePointer, KNativePointer, KNativePointer);
+
+void impl_AnnotationDeclarationSetAnnotations(KNativePointer context, KNativePointer receiver, KNativePointerArray annotations, KUInt annotationsSequenceLength)
+{
+    const auto _context = reinterpret_cast<es2panda_Context*>(context);
+    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
+    const auto _annotations = reinterpret_cast<es2panda_AstNode**>(annotations);
+    const auto _annotationsSequenceLength = static_cast<KUInt>(annotationsSequenceLength);
+    GetImpl()->AnnotationDeclarationSetAnnotations(_context, _receiver, _annotations, _annotationsSequenceLength);
+    return ;
+}
+KOALA_INTEROP_V4(AnnotationDeclarationSetAnnotations, KNativePointer, KNativePointer, KNativePointerArray, KUInt);
 
 KNativePointer impl_CreateAnnotationUsageIr(KNativePointer context, KNativePointer expr)
 {
@@ -7600,17 +7582,6 @@ KNativePointer impl_ChainExpressionGetExpression(KNativePointer context, KNative
     return result;
 }
 KOALA_INTEROP_2(ChainExpressionGetExpression, KNativePointer, KNativePointer, KNativePointer);
-
-void impl_ChainExpressionCompileToRegConst(KNativePointer context, KNativePointer receiver, KNativePointer pg, KNativePointer objReg)
-{
-    const auto _context = reinterpret_cast<es2panda_Context*>(context);
-    const auto _receiver = reinterpret_cast<es2panda_AstNode*>(receiver);
-    const auto _pg = reinterpret_cast<es2panda_CodeGen*>(pg);
-    const auto _objReg = reinterpret_cast<es2panda_VReg*>(objReg);
-    GetImpl()->ChainExpressionCompileToRegConst(_context, _receiver, _pg, _objReg);
-    return ;
-}
-KOALA_INTEROP_V4(ChainExpressionCompileToRegConst, KNativePointer, KNativePointer, KNativePointer, KNativePointer);
 
 KNativePointer impl_CreateTSIntersectionType(KNativePointer context, KNativePointerArray types, KUInt typesSequenceLength)
 {

@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -28,7 +28,7 @@ import { ScrollableCommonMethod, CommonMethod, Rectangle, TouchTestInfo, TouchRe
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
 import { DrawModifier } from "./../ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect } from "./../ArkEnumsInterfaces"
-import { Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_Number_ComputedBarAttribute, Callback_ItemDragInfo_Number_CustomBuilder, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain } from "./../SyntheticDeclarations"
+import { Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_Number_ComputedBarAttribute, onItemDragStart_event_type, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain } from "./../SyntheticDeclarations"
 import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
 import { ResizableOptions } from "./../ArkImageInterfaces"
 import { Resource } from "./../ArkResourceInterfaces"
@@ -47,17 +47,24 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./../ArkScrollInterfaces"
 import { ComputedBarAttribute, GridDirection, GridItemAlignment, GridAttribute, GridLayoutOptions } from "./../ArkGridInterfaces"
 import { ScrollState } from "./../ArkListInterfaces"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { Scroller } from "./../ArkScrollerMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -128,7 +135,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -144,7 +151,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
     scrollBarAttribute(value: BarState): void {
-        ArkUIGeneratedNativeModule._GridAttribute_scrollBar(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._GridAttribute_scrollBar(this.peer.ptr, ((value as BarState) as int32))
     }
     onScrollBarUpdateAttribute(value: ((index: number,offset: number) => ComputedBarAttribute)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -180,7 +187,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_cellLength(this.peer.ptr, value)
     }
     layoutDirectionAttribute(value: GridDirection): void {
-        ArkUIGeneratedNativeModule._GridAttribute_layoutDirection(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._GridAttribute_layoutDirection(this.peer.ptr, ((value as GridDirection) as int32))
     }
     supportAnimationAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._GridAttribute_supportAnimation(this.peer.ptr, value ? 1 : 0)
@@ -248,7 +255,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = (value as GridItemAlignment)
-            thisSerializer.writeInt32((value_value.valueOf() as int32))
+            thisSerializer.writeInt32(((value_value as GridItemAlignment) as int32))
         }
         ArkUIGeneratedNativeModule._GridAttribute_alignItems(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
@@ -298,7 +305,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeEdgeEffectOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._GridAttribute_edgeEffect(this.peer.ptr, (value.valueOf() as int32), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GridAttribute_edgeEffect(this.peer.ptr, ((value as EdgeEffect) as int32), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
 }

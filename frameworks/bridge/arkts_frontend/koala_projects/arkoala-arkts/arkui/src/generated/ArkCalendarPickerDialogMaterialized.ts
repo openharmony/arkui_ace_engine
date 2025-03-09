@@ -18,38 +18,13 @@
 
 import { CalendarDialogOptions } from "./ArkCalendarPickerInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
-export class CalendarPickerDialogInternal {
-    public static fromPtr(ptr: KPointer): CalendarPickerDialog {
-        const obj : CalendarPickerDialog = new CalendarPickerDialog()
-        obj.peer = new Finalizable(ptr, CalendarPickerDialog.getFinalizer())
-        return obj
-    }
-}
-export class CalendarPickerDialog implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_calendarpickerdialog(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._CalendarPickerDialog_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr : KPointer = CalendarPickerDialog.ctor_calendarpickerdialog()
-        this.peer = new Finalizable(ctorPtr, CalendarPickerDialog.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._CalendarPickerDialog_getFinalizer()
-    }
+export class CalendarPickerDialog {
     public static show(options?: CalendarDialogOptions): void {
         const options_casted = options as (CalendarDialogOptions | undefined)
         CalendarPickerDialog.show_serialize(options_casted)

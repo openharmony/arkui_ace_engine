@@ -2,6 +2,7 @@ import { ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, Ark
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 export class ArkCustomDialogExample1Component extends ArkStructBase<ArkCustomDialogExample1Component, CustomDialogExample1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

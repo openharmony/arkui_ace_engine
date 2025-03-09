@@ -17,14 +17,14 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkScrollableCommonMethodComponent } from "./ArkCommon"
 import { ArkGridPeer } from "./peers/ArkGridPeer"
-import { UseEventsProperties } from "./use_properties"
 import { ScrollableCommonMethod, CommonMethod, Rectangle, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, CustomBuilder, DragItemInfo, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DrawContext, TouchTestInfo, TouchResult, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, LinearGradient_common, FinishCallbackType, ExpectedFrameRateRange, TransitionEffects, TransitionEdge, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, ShadowType, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, ImageModifier, OverlayOffset, TransitionHierarchyStrategy, PopupMessageOptions, SymbolGlyphModifier, MenuPreviewMode, ContextMenuAnimationOptions, BindOptions, SheetSize, SheetType, SheetTitleOptions, SheetMode, ScrollSizeMode, UIContext, SheetKeyboardAvoidMode, SourceTool, RectResult, TouchTestStrategy, EventTarget, SourceType, TouchObject, HistoricalPoint, IntentionCode, DragBehavior, Summary, DragResult, DismissPopupAction, DismissContentCoverAction, SheetDismiss, DismissSheetAction, SpringBackAction, DismissReason, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ItemDragInfo } from "./ArkCommonInterfaces"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, ColorMetrics, Area, Bias, Font } from "./ArkUnitsInterfaces"
+import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Area, Bias, Font } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, Curve, PlayMode, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, FontWeight, FontStyle, BarState, EdgeEffect, NestedScrollMode, Edge } from "./ArkEnumsInterfaces"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
@@ -40,13 +40,21 @@ import { ProgressMask } from "./ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../handwritten"
 import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { GestureType, GestureMask, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { TapGestureInterface } from "./ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./ArkGestureGroupInterfaceMaterialized"
 import { LengthUnit, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions } from "./ArkArkuiExternalInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { HoverEvent } from "./ArkHoverEventMaterialized"
 import { MouseEvent } from "./ArkMouseEventMaterialized"
 import { TouchEvent } from "./ArkTouchEventMaterialized"
 import { KeyEvent } from "./ArkKeyEventMaterialized"
+import { ColorMetrics } from "./ArkColorMetricsMaterialized"
 import { ICurve } from "./ArkICurveMaterialized"
 import { DragEvent } from "./ArkDragEventMaterialized"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
@@ -61,7 +69,7 @@ import { ScrollState } from "./ArkListInterfaces"
 import { Scroller } from "./ArkScrollerMaterialized"
 /** @memo:stable */
 export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
-    getPeer(): ArkGridPeer {
+    protected getPeer(): ArkGridPeer {
         return (this.peer as ArkGridPeer)
     }
     /** @memo */
@@ -141,7 +149,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onScrollBarUpdate(value: ((index: number, offset: number) => ComputedBarAttribute)): this {
         if (this.checkPriority("onScrollBarUpdate")) {
             const value_casted = value as (((index: number, offset: number) => ComputedBarAttribute))
-            UseEventsProperties({Grid_onScrollBarUpdate: value_casted})
             this.getPeer()?.onScrollBarUpdateAttribute(value_casted)
             return this
         }
@@ -151,7 +158,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onScrollIndex(value: ((first: number, last: number) => void)): this {
         if (this.checkPriority("onScrollIndex")) {
             const value_casted = value as (((first: number, last: number) => void))
-            UseEventsProperties({Grid_onScrollIndex: value_casted})
             this.getPeer()?.onScrollIndexAttribute(value_casted)
             return this
         }
@@ -244,7 +250,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onItemDragStart(value: ((event: ItemDragInfo, itemIndex: number) => CustomBuilder)): this {
         if (this.checkPriority("onItemDragStart")) {
             const value_casted = value as (((event: ItemDragInfo, itemIndex: number) => CustomBuilder))
-            UseEventsProperties({Grid_onItemDragStart: value_casted})
             this.getPeer()?.onItemDragStartAttribute(value_casted)
             return this
         }
@@ -254,7 +259,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onItemDragEnter(value: ((event: ItemDragInfo) => void)): this {
         if (this.checkPriority("onItemDragEnter")) {
             const value_casted = value as (((event: ItemDragInfo) => void))
-            UseEventsProperties({Grid_onItemDragEnter: value_casted})
             this.getPeer()?.onItemDragEnterAttribute(value_casted)
             return this
         }
@@ -264,7 +268,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onItemDragMove(value: ((event: ItemDragInfo, itemIndex: number, insertIndex: number) => void)): this {
         if (this.checkPriority("onItemDragMove")) {
             const value_casted = value as (((event: ItemDragInfo, itemIndex: number, insertIndex: number) => void))
-            UseEventsProperties({Grid_onItemDragMove: value_casted})
             this.getPeer()?.onItemDragMoveAttribute(value_casted)
             return this
         }
@@ -274,7 +277,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onItemDragLeave(value: ((event: ItemDragInfo, itemIndex: number) => void)): this {
         if (this.checkPriority("onItemDragLeave")) {
             const value_casted = value as (((event: ItemDragInfo, itemIndex: number) => void))
-            UseEventsProperties({Grid_onItemDragLeave: value_casted})
             this.getPeer()?.onItemDragLeaveAttribute(value_casted)
             return this
         }
@@ -284,7 +286,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onItemDrop(value: ((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void)): this {
         if (this.checkPriority("onItemDrop")) {
             const value_casted = value as (((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void))
-            UseEventsProperties({Grid_onItemDrop: value_casted})
             this.getPeer()?.onItemDropAttribute(value_casted)
             return this
         }
@@ -330,7 +331,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onScroll(value: ((first: number, last: number) => void)): this {
         if (this.checkPriority("onScroll")) {
             const value_casted = value as (((first: number, last: number) => void))
-            UseEventsProperties({Grid_onScroll: value_casted})
             this.getPeer()?.onScrollAttribute(value_casted)
             return this
         }
@@ -340,7 +340,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onReachStart(value: (() => void)): this {
         if (this.checkPriority("onReachStart")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({Grid_onReachStart: value_casted})
             this.getPeer()?.onReachStartAttribute(value_casted)
             return this
         }
@@ -350,7 +349,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onReachEnd(value: (() => void)): this {
         if (this.checkPriority("onReachEnd")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({Grid_onReachEnd: value_casted})
             this.getPeer()?.onReachEndAttribute(value_casted)
             return this
         }
@@ -360,7 +358,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onScrollStart(value: (() => void)): this {
         if (this.checkPriority("onScrollStart")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({Grid_onScrollStart: value_casted})
             this.getPeer()?.onScrollStartAttribute(value_casted)
             return this
         }
@@ -370,7 +367,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onScrollStop(value: (() => void)): this {
         if (this.checkPriority("onScrollStop")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({Grid_onScrollStop: value_casted})
             this.getPeer()?.onScrollStopAttribute(value_casted)
             return this
         }
@@ -380,7 +376,6 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent {
     public onScrollFrameBegin(value: ((offset: number, state: ScrollState) => { offsetRemain: number })): this {
         if (this.checkPriority("onScrollFrameBegin")) {
             const value_casted = value as (((offset: number, state: ScrollState) => { offsetRemain: number }))
-            UseEventsProperties({Grid_onScrollFrameBegin: value_casted})
             this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
             return this
         }

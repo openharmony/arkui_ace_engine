@@ -4,7 +4,7 @@ import { annotation } from "./arkts-utils";
 
 function isCustomComponentClass(node: arkts.ClassDeclaration): boolean {
     const structCollection: Set<string> = arkts.GlobalInfo.getInfoInstance().getStructCollection();
-    if (structCollection.has(node.definition.name.name)) {
+    if (node.definition?.ident?.name && structCollection.has(node.definition?.ident?.name)) {
         return true;
     }
     return false;
@@ -22,7 +22,9 @@ function createStyleArgInBuildMethod(className: string): arkts.ETSParameterExpre
     const styleLambdaParams: arkts.ETSParameterExpression = arkts.factory.createParameterDeclaration(
         arkts.factory.createIdentifier(
             'instance',
-            arkts.factory.createIdentifier(className),
+            arkts.factory.createTypeReferencePart(
+                arkts.factory.createIdentifier(className)
+            )
         ),
         undefined
     );
@@ -33,7 +35,7 @@ function createStyleArgInBuildMethod(className: string): arkts.ETSParameterExpre
             [
                 styleLambdaParams
             ],
-            arkts.factory.createTypeParameter(arkts.factory.createIdentifier(className), undefined, undefined, 0),
+            arkts.factory.createTypeParameter1_(arkts.factory.createIdentifier(className), undefined, undefined),
             false
         ),
         arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_ARROW
@@ -86,8 +88,10 @@ function createInitializerArgInBuildMethod(className: string): arkts.ETSParamete
     return arkts.factory.createParameterDeclaration(
         arkts.factory.createIdentifier(
             'initializers',
-            arkts.factory.createTypeReferenceFromId(
-                arkts.factory.createIdentifier(`__Options_${className}`)
+            arkts.factory.createTypeReference(
+                arkts.factory.createTypeReferencePart(
+                    arkts.factory.createIdentifier(`__Options_${className}`)
+                )
             )
         ).setOptional(true),
         undefined
@@ -138,10 +142,13 @@ function transformBuildMethod(
 }
 
 function tranformClassMembers(node: arkts.ClassDeclaration): arkts.ClassDeclaration {
-    const definition: arkts.ClassDefinition = node.definition;
-    const className: string = node.definition.name.name;
+    const definition = node.definition
+    const className = node.definition?.ident?.name
+    if (!definition || !className) {
+        return node
+    }
 
-    const updateMembers: arkts.AstNode[] = definition.members.map((member: arkts.AstNode) => {
+    const updateMembers: arkts.AstNode[] = definition.body.map((member: arkts.AstNode) => {
         if (arkts.isMethodDefinition(member) && isKnownMethodDefinition(member, "constructor")) {
             return arkts.factory.createMethodDefinition(
                 arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_CONSTRUCTOR,
@@ -158,15 +165,18 @@ function tranformClassMembers(node: arkts.ClassDeclaration): arkts.ClassDeclarat
         return member;
     });
 
-    const updateClassDef: arkts.ClassDefinition = arkts.factory.updateClassDefinition(
+    const updateClassDef = arkts.factory.updateClassDefinition(
         definition,
-        definition.name,
+        definition.ident,
+        definition.typeParams,
+        definition.superTypeParams,
+        definition.implements,
+        undefined,
+        definition.super,
         updateMembers,
         definition.modifiers,
-        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
-        definition.typeParamsDecl,
-        definition.superClass
-    );
+        arkts.classDefinitionFlags(definition)
+    )
 
     return arkts.factory.updateClassDeclaration(node, updateClassDef);
 }

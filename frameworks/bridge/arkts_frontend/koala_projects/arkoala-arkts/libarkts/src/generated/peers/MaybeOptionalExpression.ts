@@ -38,6 +38,11 @@ export class MaybeOptionalExpression extends Expression {
     get isOptional(): boolean {
         return global.generatedEs2panda._MaybeOptionalExpressionIsOptionalConst(global.context, this.peer)
     }
+    /** @deprecated */
+    clearOptional(): this {
+        global.generatedEs2panda._MaybeOptionalExpressionClearOptional(global.context, this.peer)
+        return this
+    }
 }
 export function isMaybeOptionalExpression(node: AstNode): node is MaybeOptionalExpression {
     return node instanceof MaybeOptionalExpression

@@ -21,7 +21,7 @@ import { ResourceColor } from "./ArkUnitsInterfaces"
 import { DecorationStyleInterface } from "./ArkStyledStringInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -35,7 +35,7 @@ export class DecorationStyleInternal {
     }
 }
 export class DecorationStyle implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -58,7 +58,7 @@ export class DecorationStyle implements MaterializedBase {
      constructor(value?: DecorationStyleInterface) {
         if ((value) !== (undefined))
         {
-            const ctorPtr : KPointer = DecorationStyle.ctor_decorationstyle(value)
+            const ctorPtr : KPointer = DecorationStyle.ctor_decorationstyle((value)!)
             this.peer = new Finalizable(ctorPtr, DecorationStyle.getFinalizer())
         }
     }

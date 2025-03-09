@@ -62,11 +62,26 @@ export class TSTypeAliasDeclaration extends AnnotatedStatement {
     get decorators(): readonly Decorator[] {
         return unpackNodeArray(global.generatedEs2panda._TSTypeAliasDeclarationDecoratorsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setTypeParameters(typeParams: TSTypeParameterDeclaration): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationSetTypeParameters(global.context, this.peer, passNode(typeParams))
+        return this
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._TSTypeAliasDeclarationAnnotationsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
+    }
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSTypeAliasDeclarationTypeAnnotationConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setTsTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._TSTypeAliasDeclarationSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
     }
 }
 export function isTSTypeAliasDeclaration(node: AstNode): node is TSTypeAliasDeclaration {

@@ -18,38 +18,13 @@
 
 import { PerfMonitorActionType, PerfMonitorSourceType } from "./ArkArkuiExternalInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
-export class GlobalScope_ohos_arkui_performanceMonitorInternal {
-    public static fromPtr(ptr: KPointer): GlobalScope_ohos_arkui_performanceMonitor {
-        const obj : GlobalScope_ohos_arkui_performanceMonitor = new GlobalScope_ohos_arkui_performanceMonitor()
-        obj.peer = new Finalizable(ptr, GlobalScope_ohos_arkui_performanceMonitor.getFinalizer())
-        return obj
-    }
-}
-export class GlobalScope_ohos_arkui_performanceMonitor implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_globalscope_ohos_arkui_performancemonitor(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr : KPointer = GlobalScope_ohos_arkui_performanceMonitor.ctor_globalscope_ohos_arkui_performancemonitor()
-        this.peer = new Finalizable(ctorPtr, GlobalScope_ohos_arkui_performanceMonitor.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_getFinalizer()
-    }
+export class GlobalScope_ohos_arkui_performanceMonitor {
     public static begin(scene: string, startInputType: PerfMonitorActionType, note?: string): void {
         const scene_casted = scene as (string)
         const startInputType_casted = startInputType as (PerfMonitorActionType)
@@ -78,13 +53,13 @@ export class GlobalScope_ohos_arkui_performanceMonitor implements MaterializedBa
             const note_value  = note!
             thisSerializer.writeString(note_value)
         }
-        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_begin(scene, (startInputType.valueOf() as int32), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_begin(scene, ((startInputType as PerfMonitorActionType) as int32), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private static end_serialize(scene: string): void {
         ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_end(scene)
     }
     private static recordInputEventTime_serialize(actionType: PerfMonitorActionType, sourceType: PerfMonitorSourceType, time: number): void {
-        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_recordInputEventTime((actionType.valueOf() as int32), (sourceType.valueOf() as int32), time)
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_recordInputEventTime(((actionType as PerfMonitorActionType) as int32), ((sourceType as PerfMonitorSourceType) as int32), time)
     }
 }

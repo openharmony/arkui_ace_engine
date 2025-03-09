@@ -21,7 +21,7 @@ import { ImageAttachment, ImageAttachmentInternal } from "./ArkImageAttachmentMa
 import { CustomSpan, CustomSpanInternal } from "./ArkCustomSpanMaterialized"
 import { StyleOptions, StyledStringKey, SpanStyle } from "./ArkStyledStringInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -35,10 +35,6 @@ export class MutableStyledStringInternal {
     }
 }
 export class MutableStyledString extends StyledString implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_mutablestyledstring(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._MutableStyledString_ctor()
         return retval
@@ -137,7 +133,7 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         thisSerializer.release()
     }
     private removeStyle_serialize(start: number, length: number, styledKey: StyledStringKey): void {
-        ArkUIGeneratedNativeModule._MutableStyledString_removeStyle(this.peer!.ptr, start, length, (styledKey.valueOf() as int32))
+        ArkUIGeneratedNativeModule._MutableStyledString_removeStyle(this.peer!.ptr, start, length, ((styledKey as StyledStringKey) as int32))
     }
     private removeStyles_serialize(start: number, length: number): void {
         ArkUIGeneratedNativeModule._MutableStyledString_removeStyles(this.peer!.ptr, start, length)
@@ -146,21 +142,12 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         ArkUIGeneratedNativeModule._MutableStyledString_clearStyles(this.peer!.ptr)
     }
     private replaceStyledString_serialize(start: number, length: number, other: StyledString): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(other)
-        ArkUIGeneratedNativeModule._MutableStyledString_replaceStyledString(this.peer!.ptr, start, length, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._MutableStyledString_replaceStyledString(this.peer!.ptr, start, length, toPeerPtr(other))
     }
     private insertStyledString_serialize(start: number, other: StyledString): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(other)
-        ArkUIGeneratedNativeModule._MutableStyledString_insertStyledString(this.peer!.ptr, start, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._MutableStyledString_insertStyledString(this.peer!.ptr, start, toPeerPtr(other))
     }
     private appendStyledString_serialize(other: StyledString): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(other)
-        ArkUIGeneratedNativeModule._MutableStyledString_appendStyledString(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._MutableStyledString_appendStyledString(this.peer!.ptr, toPeerPtr(other))
     }
 }

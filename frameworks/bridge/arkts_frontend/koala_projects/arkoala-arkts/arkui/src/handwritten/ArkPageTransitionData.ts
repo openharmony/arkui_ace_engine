@@ -13,21 +13,7 @@
  * limitations under the License.
  */
 
-import { RouteType, SlideEffect, PageTransitionOptions } from "../generated"
-
-interface TranslateOptions {
-    x?: string | number | undefined;
-    y?: string | number | undefined;
-    z?: string | number | undefined;
-}
-
-interface ScaleOptions {
-    x?: number | undefined;
-    y?: number | undefined;
-    z?: number | undefined;
-    centerX?: string | number | undefined;
-    centerY?: string | number | undefined;
-}
+import { RouteType, SlideEffect, PageTransitionOptions, TranslateOptions, ScaleOptions } from "../generated"
 
 export class ArkPageTransitionData {
     params: PageTransitionOptions

@@ -42,14 +42,34 @@ export class AssignmentExpression extends Expression {
     get right(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._AssignmentExpressionRightConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setRight(expr: Expression): this {
+        global.generatedEs2panda._AssignmentExpressionSetRight(global.context, this.peer, passNode(expr))
+        return this
+    }
+    /** @deprecated */
+    setLeft(expr: Expression): this {
+        global.generatedEs2panda._AssignmentExpressionSetLeft(global.context, this.peer, passNode(expr))
+        return this
+    }
     get result(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._AssignmentExpressionResultConst(global.context, this.peer))
     }
     get operatorType(): Es2pandaTokenType {
         return global.generatedEs2panda._AssignmentExpressionOperatorTypeConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setResult(expr: Expression): this {
+        global.generatedEs2panda._AssignmentExpressionSetResult(global.context, this.peer, passNode(expr))
+        return this
+    }
     get isLogicalExtended(): boolean {
         return global.generatedEs2panda._AssignmentExpressionIsLogicalExtendedConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    setIgnoreConstAssign(): this {
+        global.generatedEs2panda._AssignmentExpressionSetIgnoreConstAssign(global.context, this.peer)
+        return this
     }
     get isIgnoreConstAssign(): boolean {
         return global.generatedEs2panda._AssignmentExpressionIsIgnoreConstAssignConst(global.context, this.peer)

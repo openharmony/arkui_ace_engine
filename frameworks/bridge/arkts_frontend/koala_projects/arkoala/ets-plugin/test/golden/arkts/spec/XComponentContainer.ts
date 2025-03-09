@@ -1,5 +1,6 @@
 import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkXComponent, XComponentOptions, XComponentType } from "@koalaui/arkts-arkui";
 import { LocalStorage } from "@koalaui/arkui-common";
+/** @memo:stable */
 class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent, HomeComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

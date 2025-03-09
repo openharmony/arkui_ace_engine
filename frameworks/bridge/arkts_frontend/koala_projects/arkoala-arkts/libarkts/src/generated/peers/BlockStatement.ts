@@ -45,6 +45,16 @@ export class BlockStatement extends Statement {
     get statements(): readonly Statement[] {
         return unpackNodeArray(global.generatedEs2panda._BlockStatementStatementsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setStatements(statementList: readonly Statement[]): this {
+        global.generatedEs2panda._BlockStatementSetStatements(global.context, this.peer, passNodeArray(statementList), statementList.length)
+        return this
+    }
+    /** @deprecated */
+    addTrailingBlock(stmt: AstNode, trailingBlock: BlockStatement): this {
+        global.generatedEs2panda._BlockStatementAddTrailingBlock(global.context, this.peer, passNode(stmt), passNode(trailingBlock))
+        return this
+    }
 }
 export function isBlockStatement(node: AstNode): node is BlockStatement {
     return node instanceof BlockStatement

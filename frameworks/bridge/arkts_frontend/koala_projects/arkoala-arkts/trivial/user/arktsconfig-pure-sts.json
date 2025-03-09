@@ -4,21 +4,28 @@
         "outDir": "build/sts/abc",
         "baseUrl": ".",
         "paths": {
-            "@ohos.arkui": ["../../arkui/src/sts"]
+            "@ohos.arkui": ["../../arkui/src/sts"],
+            "@koalaui/runtime": [
+                "../../memo-plugin/runtime-api"
+            ]
         },
-       "plugins": [
+        "plugins": [
             {
                 "transform": "@koalaui/libarkts/plugins/printer-plugin",
                 "stage": "parsed"
             },
             {
                 "transform": "@koalaui/libarkts/plugins/parsed-stage-plugin",
-                "stage": "parsed",
-                "arkui": "../../../../arkui/src/sts"
+                "stage": "parsed"
             },
             {
                 "transform": "@koalaui/libarkts/plugins/checked-stage-plugin",
                 "stage": "checked"
+            },
+            {
+                "transform": "@koalaui/memo-plugin",
+                "stage": "checked",
+                "removeEtsglobal": true
             }
         ]
     },

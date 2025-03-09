@@ -51,6 +51,8 @@ export {
     float64,
     int8Array,
     unsafeCast,
+    scheduleCoroutine,
+    memoryStats
 } from "../typescript"
 
 export {

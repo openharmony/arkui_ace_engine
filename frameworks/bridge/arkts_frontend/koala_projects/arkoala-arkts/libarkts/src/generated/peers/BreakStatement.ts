@@ -55,6 +55,11 @@ export class BreakStatement extends Statement {
     get target(): AstNode | undefined {
         return unpackNode(global.generatedEs2panda._BreakStatementTargetConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setTarget(target: AstNode): this {
+        global.generatedEs2panda._BreakStatementSetTarget(global.context, this.peer, passNode(target))
+        return this
+    }
 }
 export function isBreakStatement(node: AstNode): node is BreakStatement {
     return node instanceof BreakStatement

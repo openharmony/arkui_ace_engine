@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -47,16 +47,23 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { NavDestinationMode, NavigationSystemTransitionType, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationAttribute } from "./../ArkNavDestinationInterfaces"
 import { NavigationMenuItem, SystemBarStyle, NavigationTitleOptions, ToolbarItem, NavigationToolbarOptions } from "./../ArkNavigationInterfaces"
 import { NavDestinationContext } from "./../ArkNavDestinationContextMaterialized"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -100,7 +107,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     modeAttribute(value: NavDestinationMode): void {
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_mode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_mode(this.peer.ptr, ((value as NavDestinationMode) as int32))
     }
     backButtonIconAttribute(value: ResourceStr | PixelMap | SymbolGlyphModifier): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -122,7 +129,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeResource(value_0_1)
             }
         }
-        else if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isPixelMap(value, false, false))) {
+        else if (TypeChecker.isPixelMap(value, false, false)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as PixelMap
             thisSerializer.writePixelMap(value_1)
@@ -211,7 +218,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     systemTransitionAttribute(value: NavigationSystemTransitionType): void {
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_systemTransition(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_systemTransition(this.peer.ptr, ((value as NavigationSystemTransitionType) as int32))
     }
     titleAttribute(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource, options?: NavigationTitleOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -237,7 +244,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const value_3  = value as NavDestinationCustomTitle
             thisSerializer.writeNavDestinationCustomTitle(value_3)
         }
-        else if (isResource(value)) {
+        else if (TypeChecker.isResource(value, false, false, false, false, false)) {
             thisSerializer.writeInt8(4 as int32)
             const value_4  = value as Resource
             thisSerializer.writeResource(value_4)
@@ -302,7 +309,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt32(types_value.length as int32)
             for (let i = 0; i < types_value.length; i++) {
                 const types_value_element : LayoutSafeAreaType = types_value[i]
-                thisSerializer.writeInt32((types_value_element.valueOf() as int32))
+                thisSerializer.writeInt32(((types_value_element as LayoutSafeAreaType) as int32))
             }
         }
         let edges_type : int32 = RuntimeType.UNDEFINED
@@ -313,7 +320,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt32(edges_value.length as int32)
             for (let i = 0; i < edges_value.length; i++) {
                 const edges_value_element : LayoutSafeAreaEdge = edges_value[i]
-                thisSerializer.writeInt32((edges_value_element.valueOf() as int32))
+                thisSerializer.writeInt32(((edges_value_element as LayoutSafeAreaEdge) as int32))
             }
         }
         ArkUIGeneratedNativeModule._NavDestinationAttribute_ignoreLayoutSafeArea(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())

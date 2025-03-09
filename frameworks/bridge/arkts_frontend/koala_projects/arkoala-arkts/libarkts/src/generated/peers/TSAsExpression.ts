@@ -47,11 +47,26 @@ export class TSAsExpression extends AnnotatedExpression {
     get expr(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TSAsExpressionExprConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setExpr(expr: Expression): this {
+        global.generatedEs2panda._TSAsExpressionSetExpr(global.context, this.peer, passNode(expr))
+        return this
+    }
     get isConst(): boolean {
         return global.generatedEs2panda._TSAsExpressionIsConstConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setUncheckedCast(isUncheckedCast: boolean): this {
+        global.generatedEs2panda._TSAsExpressionSetUncheckedCast(global.context, this.peer, isUncheckedCast)
+        return this
+    }
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSAsExpressionTypeAnnotationConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setTsTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._TSAsExpressionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
     }
 }
 export function isTSAsExpression(node: AstNode): node is TSAsExpression {

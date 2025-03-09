@@ -1,5 +1,6 @@
 import { ArkCommonMethodComponent, ArkList, ArkListItem, ArkListItemComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, LocalStorage } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkParentViewComponent extends ArkStructBase<ArkParentViewComponent, ParentViewOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

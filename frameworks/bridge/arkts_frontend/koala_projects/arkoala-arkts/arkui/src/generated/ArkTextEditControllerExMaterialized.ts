@@ -21,24 +21,20 @@ import { SelectionOptions } from "./ArkCommonInterfaces"
 import { LayoutManager, LayoutManagerInternal } from "./ArkLayoutManagerMaterialized"
 import { PreviewText } from "./ArkTextCommonInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface TextEditControllerEx {
-    isEditing(): boolean 
-    stopEditing(): void 
-    setCaretOffset(offset: number): boolean 
-    getCaretOffset(): number 
-    getPreviewText(): PreviewText 
+    isEditing(): boolean
+    stopEditing(): void
+    setCaretOffset(offset: number): boolean
+    getCaretOffset(): number
+    getPreviewText(): PreviewText
 }
 export class TextEditControllerExInternal extends TextBaseControllerInternal implements MaterializedBase,TextEditControllerEx {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_texteditcontrollerex(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_ctor()
         return retval
@@ -85,7 +81,9 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
     }
     private getPreviewText_serialize(): PreviewText {
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readPreviewText()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : PreviewText = retvalDeserializer.readPreviewText()
+        return returnResult
     }
     public static fromPtr(ptr: KPointer): TextEditControllerExInternal {
         const obj : TextEditControllerExInternal = new TextEditControllerExInternal()

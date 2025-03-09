@@ -1,5 +1,6 @@
 import { ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkStructBase, ArkText, ArkTextComponent, CustomDialogController, LocalStorage, MutableState, SyncedProperty, bindCustomDialog, observableProxy, propState, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkDialogExampleComponent extends ArkStructBase<ArkDialogExampleComponent, DialogExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -102,6 +103,7 @@ class ArkDialogExampleComponent extends ArkStructBase<ArkDialogExampleComponent,
         });
     }
 }
+/** @memo:stable */
 class ArkCustomDialogUserComponent extends ArkStructBase<ArkCustomDialogUserComponent, CustomDialogUserOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

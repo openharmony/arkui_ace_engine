@@ -28,10 +28,11 @@ import { ImageData, ImageDataInternal } from "./ArkImageDataMaterialized"
 import { Matrix2D, Matrix2DInternal } from "./ArkMatrix2DMaterialized"
 import { LengthMetricsUnit } from "./ArkUnitsInterfaces"
 import { RenderingContextSettings, RenderingContextSettingsInternal } from "./ArkRenderingContextSettingsMaterialized"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -43,10 +44,6 @@ export class OffscreenCanvasRenderingContext2DInternal {
     }
 }
 export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_offscreencanvasrenderingcontext2d(width: number, height: number, settings?: RenderingContextSettings): KPointer {
         const thisSerializer: Serializer = Serializer.hold()
         let settings_type: int32 = RuntimeType.UNDEFINED
@@ -62,9 +59,9 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
     }
      constructor(width?: number, height?: number, settings?: RenderingContextSettings) {
         super()
-        if (((width) !== (undefined)) && ((height) !== (undefined)) && ((settings) !== (undefined)))
+        if (((width) !== (undefined)) || ((height) !== (undefined)) || ((settings) !== (undefined)))
         {
-            const ctorPtr: KPointer = OffscreenCanvasRenderingContext2D.ctor_offscreencanvasrenderingcontext2d(width, height, settings)
+            const ctorPtr: KPointer = OffscreenCanvasRenderingContext2D.ctor_offscreencanvasrenderingcontext2d((width)!, (height)!, (settings)!)
             this.peer = new Finalizable(ctorPtr, OffscreenCanvasRenderingContext2D.getFinalizer())
         }
     }
@@ -101,6 +98,7 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
     }
     private transferToImageBitmap_serialize(): ImageBitmap {
         const retval = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_transferToImageBitmap(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj: ImageBitmap = ImageBitmapInternal.fromPtr(retval)
+        return obj
     }
 }

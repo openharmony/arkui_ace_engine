@@ -20,6 +20,7 @@ export function Foo() {
 export function Text() {
     return "string";
 }
+/** @memo:stable */
 export class ArkStructComponent extends ArkStructBase<ArkStructComponent, StructOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -41,6 +42,7 @@ export class ArkStructComponent extends ArkStructBase<ArkStructComponent, Struct
     /** @memo */
     content?: () => void, initializers?: StructOptions) { }
 }
+/** @memo:stable */
 export class ArkStructWithContentComponent extends ArkStructBase<ArkStructWithContentComponent, StructWithContentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

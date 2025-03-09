@@ -18,7 +18,7 @@
 
 import { PixelMap, PixelMapInternal } from "./ArkPixelMapMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,21 +32,18 @@ export class DrawingCanvasInternal {
     }
 }
 export class DrawingCanvas implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     static ctor_drawingcanvas(pixelmap: PixelMap): KPointer {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writePixelMap(pixelmap)
-        const retval  = ArkUIGeneratedNativeModule._DrawingCanvas_ctor(thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        const retval  = ArkUIGeneratedNativeModule._DrawingCanvas_ctor(toPeerPtr(pixelmap))
         return retval
     }
      constructor(pixelmap?: PixelMap) {
         if ((pixelmap) !== (undefined))
         {
-            const ctorPtr : KPointer = DrawingCanvas.ctor_drawingcanvas(pixelmap)
+            const ctorPtr : KPointer = DrawingCanvas.ctor_drawingcanvas((pixelmap)!)
             this.peer = new Finalizable(ctorPtr, DrawingCanvas.getFinalizer())
         }
     }

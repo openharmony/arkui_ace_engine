@@ -17,14 +17,14 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkCommonMethodComponent } from "./ArkCommon"
 import { ArkTabsPeer } from "./peers/ArkTabsPeer"
-import { UseEventsProperties } from "./use_properties"
 import { CommonMethod, Rectangle, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, CustomBuilder, DragItemInfo, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DrawContext, TouchTestInfo, TouchResult, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, LinearGradient_common, FinishCallbackType, ExpectedFrameRateRange, TransitionEffects, TransitionEdge, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, ShadowType, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, ImageModifier, OverlayOffset, TransitionHierarchyStrategy, PopupMessageOptions, SymbolGlyphModifier, MenuPreviewMode, ContextMenuAnimationOptions, BindOptions, SheetSize, SheetType, SheetTitleOptions, SheetMode, ScrollSizeMode, UIContext, SheetKeyboardAvoidMode, SourceTool, RectResult, TouchTestStrategy, EventTarget, SourceType, TouchObject, HistoricalPoint, IntentionCode, DragBehavior, Summary, DragResult, DismissPopupAction, DismissContentCoverAction, SheetDismiss, DismissSheetAction, SpringBackAction, DismissReason } from "./ArkCommonInterfaces"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, ColorMetrics, Area, Bias, Font } from "./ArkUnitsInterfaces"
+import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Area, Bias, Font } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, Curve, PlayMode, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, FontWeight, FontStyle, EdgeEffect } from "./ArkEnumsInterfaces"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
@@ -40,13 +40,21 @@ import { ProgressMask } from "./ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../handwritten"
 import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { GestureType, GestureMask, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { TapGestureInterface } from "./ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./ArkGestureGroupInterfaceMaterialized"
 import { LengthUnit, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions } from "./ArkArkuiExternalInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { HoverEvent } from "./ArkHoverEventMaterialized"
 import { MouseEvent } from "./ArkMouseEventMaterialized"
 import { TouchEvent } from "./ArkTouchEventMaterialized"
 import { KeyEvent } from "./ArkKeyEventMaterialized"
+import { ColorMetrics } from "./ArkColorMetricsMaterialized"
 import { ICurve } from "./ArkICurveMaterialized"
 import { DragEvent } from "./ArkDragEventMaterialized"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
@@ -59,7 +67,7 @@ import { BarPosition, BarMode, AnimationMode, OnTabsAnimationStartCallback, OnTa
 import { TabsController } from "./ArkTabsControllerMaterialized"
 /** @memo:stable */
 export class ArkTabsComponent extends ArkCommonMethodComponent {
-    getPeer(): ArkTabsPeer {
+    protected getPeer(): ArkTabsPeer {
         return (this.peer as ArkTabsPeer)
     }
     /** @memo */
@@ -167,7 +175,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent {
     public onChange(value: ((index: number) => void)): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((index: number) => void))
-            UseEventsProperties({Tabs_onChange: value_casted})
             this.getPeer()?.onChangeAttribute(value_casted)
             return this
         }
@@ -177,7 +184,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent {
     public onTabBarClick(value: ((index: number) => void)): this {
         if (this.checkPriority("onTabBarClick")) {
             const value_casted = value as (((index: number) => void))
-            UseEventsProperties({Tabs_onTabBarClick: value_casted})
             this.getPeer()?.onTabBarClickAttribute(value_casted)
             return this
         }
@@ -187,7 +193,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent {
     public onAnimationStart(value: OnTabsAnimationStartCallback): this {
         if (this.checkPriority("onAnimationStart")) {
             const value_casted = value as (OnTabsAnimationStartCallback)
-            UseEventsProperties({Tabs_onAnimationStart: value_casted})
             this.getPeer()?.onAnimationStartAttribute(value_casted)
             return this
         }
@@ -197,7 +202,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent {
     public onAnimationEnd(value: OnTabsAnimationEndCallback): this {
         if (this.checkPriority("onAnimationEnd")) {
             const value_casted = value as (OnTabsAnimationEndCallback)
-            UseEventsProperties({Tabs_onAnimationEnd: value_casted})
             this.getPeer()?.onAnimationEndAttribute(value_casted)
             return this
         }
@@ -207,7 +211,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent {
     public onGestureSwipe(value: OnTabsGestureSwipeCallback): this {
         if (this.checkPriority("onGestureSwipe")) {
             const value_casted = value as (OnTabsGestureSwipeCallback)
-            UseEventsProperties({Tabs_onGestureSwipe: value_casted})
             this.getPeer()?.onGestureSwipeAttribute(value_casted)
             return this
         }
@@ -262,7 +265,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent {
     public customContentTransition(value: TabsCustomContentTransitionCallback): this {
         if (this.checkPriority("customContentTransition")) {
             const value_casted = value as (TabsCustomContentTransitionCallback)
-            UseEventsProperties({Tabs_customContentTransition: value_casted})
             this.getPeer()?.customContentTransitionAttribute(value_casted)
             return this
         }
@@ -301,7 +303,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent {
     public onContentWillChange(value: OnTabsContentWillChangeCallback): this {
         if (this.checkPriority("onContentWillChange")) {
             const value_casted = value as (OnTabsContentWillChangeCallback)
-            UseEventsProperties({Tabs_onContentWillChange: value_casted})
             this.getPeer()?.onContentWillChangeAttribute(value_casted)
             return this
         }
@@ -320,7 +321,6 @@ export class ArkTabsComponent extends ArkCommonMethodComponent {
     public _onChangeEvent_index(callback: ((index: number) => void)): void {
         if (this.checkPriority("_onChangeEvent_index")) {
             const callback_casted = callback as (((index: number) => void))
-            UseEventsProperties({Tabs__onChangeEvent_index: callback_casted})
             this.getPeer()?._onChangeEvent_indexAttribute(callback_casted)
             return
         }

@@ -2,6 +2,7 @@ import { $r, $rawfile, AppStorage, ArkCommonMethodComponent, ArkPageTransitionEn
 import { observableProxy } from "@koalaui/common";
 import { MutableState } from "@koalaui/runtime";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
+/** @memo:stable */
 class ArkCustomXComponent extends ArkStructBase<ArkCustomXComponent, CustomXOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -28,6 +29,7 @@ class ArkCustomXComponent extends ArkStructBase<ArkCustomXComponent, CustomXOpti
     content?: () => void, initializers?: CustomXOptions) {
     }
 }
+/** @memo:stable */
 class ArkCustomYComponent extends ArkStructBase<ArkCustomYComponent, CustomYOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

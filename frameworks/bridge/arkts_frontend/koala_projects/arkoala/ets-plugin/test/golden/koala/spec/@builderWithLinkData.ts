@@ -2,6 +2,7 @@ import { $r, $rawfile, AppStorage, ArkCommonMethodComponent, ArkFlex, ArkPageTra
 import { MutableState } from "@koalaui/runtime";
 import { observableProxy } from "@koalaui/common";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
+/** @memo:stable */
 class ArkTitleCompComponent extends ArkStructBase<ArkTitleCompComponent, TitleCompOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -25,6 +26,7 @@ class ArkTitleCompComponent extends ArkStructBase<ArkTitleCompComponent, TitleCo
         ArkText(__builder, undefined, this.title);
     }
 }
+/** @memo:stable */
 class ArkTestPageComponent extends ArkStructBase<ArkTestPageComponent, TestPageOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

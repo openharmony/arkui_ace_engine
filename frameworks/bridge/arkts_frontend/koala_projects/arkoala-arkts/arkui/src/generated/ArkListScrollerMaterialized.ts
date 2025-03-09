@@ -25,7 +25,7 @@ import { RectResult } from "./ArkCommonInterfaces"
 import { CloseSwipeActionOptions, VisibleListContentInfo } from "./ArkListInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -39,10 +39,6 @@ export class ListScrollerInternal {
     }
 }
 export class ListScroller extends Scroller implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_listscroller(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ListScroller_ctor()
         return retval
@@ -80,7 +76,9 @@ export class ListScroller extends Scroller implements MaterializedBase {
     }
     private getItemRectInGroup_serialize(index: number, indexInGroup: number): RectResult {
         const retval  = ArkUIGeneratedNativeModule._ListScroller_getItemRectInGroup(this.peer!.ptr, index, indexInGroup)
-        return new Deserializer(retval, retval.length).readRectResult()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : RectResult = retvalDeserializer.readRectResult()
+        return returnResult
     }
     private scrollToItemInGroup_serialize(index: number, indexInGroup: number, smooth?: boolean, align?: ScrollAlign): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -96,7 +94,7 @@ export class ListScroller extends Scroller implements MaterializedBase {
         thisSerializer.writeInt8(align_type as int32)
         if ((RuntimeType.UNDEFINED) != (align_type)) {
             const align_value  = (align as ScrollAlign)
-            thisSerializer.writeInt32((align_value.valueOf() as int32))
+            thisSerializer.writeInt32(((align_value as ScrollAlign) as int32))
         }
         ArkUIGeneratedNativeModule._ListScroller_scrollToItemInGroup(this.peer!.ptr, index, indexInGroup, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
@@ -115,6 +113,8 @@ export class ListScroller extends Scroller implements MaterializedBase {
     }
     private getVisibleListContentInfo_serialize(x: number, y: number): VisibleListContentInfo {
         const retval  = ArkUIGeneratedNativeModule._ListScroller_getVisibleListContentInfo(this.peer!.ptr, x, y)
-        return new Deserializer(retval, retval.length).readVisibleListContentInfo()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : VisibleListContentInfo = retvalDeserializer.readVisibleListContentInfo()
+        return returnResult
     }
 }

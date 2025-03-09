@@ -18,7 +18,7 @@
 
 import { SeekMode } from "./ArkVideoInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,7 +32,7 @@ export class VideoControllerInternal {
     }
 }
 export class VideoController implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -106,7 +106,7 @@ export class VideoController implements MaterializedBase {
         return retval
     }
     private setCurrentTime1_serialize(value: number, seekMode: SeekMode): undefined {
-        const retval  = ArkUIGeneratedNativeModule._VideoController_setCurrentTime1(this.peer!.ptr, value, (seekMode.valueOf() as int32))
+        const retval  = ArkUIGeneratedNativeModule._VideoController_setCurrentTime1(this.peer!.ptr, value, ((seekMode as SeekMode) as int32))
         return retval
     }
     private reset_serialize(): void {

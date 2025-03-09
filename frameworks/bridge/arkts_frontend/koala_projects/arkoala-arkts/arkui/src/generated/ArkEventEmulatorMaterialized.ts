@@ -18,38 +18,13 @@
 
 import { ClickEvent, ClickEventInternal } from "./ArkClickEventMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
-export class EventEmulatorInternal {
-    public static fromPtr(ptr: KPointer): EventEmulator {
-        const obj : EventEmulator = new EventEmulator()
-        obj.peer = new Finalizable(ptr, EventEmulator.getFinalizer())
-        return obj
-    }
-}
-export class EventEmulator implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_eventemulator(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._EventEmulator_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr : KPointer = EventEmulator.ctor_eventemulator()
-        this.peer = new Finalizable(ctorPtr, EventEmulator.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._EventEmulator_getFinalizer()
-    }
+export class EventEmulator {
     public static emitClickEvent(node: KPointer, event: ClickEvent): void {
         const node_casted = node as (KPointer)
         const event_casted = event as (ClickEvent)
@@ -63,10 +38,7 @@ export class EventEmulator implements MaterializedBase {
         return
     }
     private static emitClickEvent_serialize(node: KPointer, event: ClickEvent): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeClickEvent(event)
-        ArkUIGeneratedNativeModule._EventEmulator_emitClickEvent(node, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._EventEmulator_emitClickEvent(node, toPeerPtr(event))
     }
     private static emitTextInputEvent_serialize(node: KPointer, text: string): void {
         ArkUIGeneratedNativeModule._EventEmulator_emitTextInputEvent(node, text)

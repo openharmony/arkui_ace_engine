@@ -75,6 +75,8 @@ export class AppControl {
     }
     loadPage(page: string): AppControl {
         nativeModule()._RestartWith(page)
+        this.nextFrame()
+        this.nextFrame()
         return this
     }
 }

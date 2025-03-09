@@ -16,54 +16,52 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { GlobalScope_common } from "./ArkGlobalScopeCommonMaterialized"
 import { Context, AnimateParam } from "./ArkCommonInterfaces"
+import { GlobalScope } from "./peers/GlobalScope"
 import { Resource } from "./ArkResourceInterfaces"
 import { Callback_Void } from "./SyntheticDeclarations"
-import { GlobalScope_inspector } from "./ArkGlobalScopeInspectorMaterialized"
-import { _animateTo } from "../handwritten"
-export function getContext(component: Object): Context {
-    return GlobalScope_common.getContext(component)
+export function getContext(component?: Object | undefined): Context {
+    return GlobalScope.getContext(component)
 }
 export function postCardAction(component: Object, action: Object): void {
-    GlobalScope_common.postCardAction(component, action)
+    GlobalScope.postCardAction(component, action)
 }
 export function dollar_r(value: string, params: Array<object>): Resource {
-    return GlobalScope_common.dollar_r(value, params)
+    return GlobalScope.dollar_r(value, params)
 }
 export function dollar_rawfile(value: string): Resource {
-    return GlobalScope_common.dollar_rawfile(value)
+    return GlobalScope.dollar_rawfile(value)
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
-    _animateTo(value, event)
+    GlobalScope.animateTo(value, event)
 }
 export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
-    GlobalScope_common.animateToImmediately(value, event)
+    GlobalScope.animateToImmediately(value, event)
 }
 export function vp2px(value: number): number {
-    return GlobalScope_common.vp2px(value)
+    return GlobalScope.vp2px(value)
 }
 export function px2vp(value: number): number {
-    return GlobalScope_common.px2vp(value)
+    return GlobalScope.px2vp(value)
 }
 export function fp2px(value: number): number {
-    return GlobalScope_common.fp2px(value)
+    return GlobalScope.fp2px(value)
 }
 export function px2fp(value: number): number {
-    return GlobalScope_common.px2fp(value)
+    return GlobalScope.px2fp(value)
 }
 export function lpx2px(value: number): number {
-    return GlobalScope_common.lpx2px(value)
+    return GlobalScope.lpx2px(value)
 }
 export function px2lpx(value: number): number {
-    return GlobalScope_common.px2lpx(value)
+    return GlobalScope.px2lpx(value)
 }
 export function getInspectorNodes(): Object {
-    return GlobalScope_inspector.getInspectorNodes()
+    return GlobalScope.getInspectorNodes()
 }
 export function getInspectorNodeById(id: number): Object {
-    return GlobalScope_inspector.getInspectorNodeById(id)
+    return GlobalScope.getInspectorNodeById(id)
 }
 export function setAppBgColor(value: string): void {
-    GlobalScope_inspector.setAppBgColor(value)
+    GlobalScope.setAppBgColor(value)
 }

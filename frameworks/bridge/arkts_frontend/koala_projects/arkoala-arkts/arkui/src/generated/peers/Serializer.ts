@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-import { SerializerBase, Tags, RuntimeType, runtimeType, isResource, isInstanceOf, MaterializedBase, nullptr, KPointer } from "@koalaui/interop"
+import { SerializerBase, Tags, RuntimeType, runtimeType, toPeerPtr, MaterializedBase, nullptr, KPointer } from "@koalaui/interop"
 import { int32, float32, unsafeCast, int64 } from "@koalaui/common"
 import { TypeChecker } from "#components"
 import { KUint8ArrayPtr, NativeBuffer, InteropNativeModule } from "@koalaui/interop"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, CustomBuilder, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ShadowType, SymbolGlyphModifier, ShadowOptions, SheetSize, ShadowStyle, ComponentContent, SheetTitleOptions, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, MenuPreviewMode, DismissPopupAction, DragPreviewMode, OutlineStyle, SourceTool, SourceType, EventTarget, HoverModeAreaType, BlurStyle, Rectangle, PickerTextStyle, PickerDialogButtonStyle, MenuPolicy, BlurStyleActivePolicy, BlurOptions, AdaptiveColor, ThemeColorMode, ExpectedFrameRateRange, FinishCallbackType, SheetKeyboardAvoidMode, UIContext, SheetType, ScrollSizeMode, SheetMode, SpringBackAction, DismissSheetAction, SheetDismiss, DismissContentCoverAction, ModalTransition, ContextMenuAnimationOptions, PopupMessageOptions, TransitionHierarchyStrategy, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, DrawContext, ScrollableCommonMethod, CommonMethod, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, TransitionOptions, MotionBlurOptions, InvertOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragItemInfo, UniformDataType, PreDragStatus, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, SafeAreaType, SafeAreaEdge, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ContentCoverOptions, SheetOptions, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, RectResult, TouchObject, HistoricalPoint, TextDecorationOptions, InputCounterOptions, CaretOffset, SelectionOptions, BlurStyleOptions, ContentModifier, LayoutSafeAreaType, LayoutSafeAreaEdge, ItemDragInfo, KeyboardAvoidMode, Context, UIGestureEvent, VisibleAreaEventOptions, MeasureResult, SizeResult, DismissReason, BindOptions, FractionStop, LocalizedVerticalAlignParam, LocalizedHorizontalAlignParam, MotionBlurAnchor, RepeatMode, TouchTestStrategy, IntentionCode, DragResult, Summary, DragBehavior, LightSource, MultiShadowOptions, PointLightStyle } from "./../ArkCommonInterfaces"
+import { AccessibilityCallback, CustomBuilder, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ShadowType, SymbolGlyphModifier, ShadowOptions, SheetSize, DrawContext, ShadowStyle, ComponentContent, SheetTitleOptions, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, MenuPreviewMode, DismissPopupAction, DragPreviewMode, OutlineStyle, SourceTool, SourceType, EventTarget, HoverModeAreaType, BlurStyle, Rectangle, PickerTextStyle, PickerDialogButtonStyle, MenuPolicy, BlurStyleActivePolicy, BlurOptions, AdaptiveColor, ThemeColorMode, ExpectedFrameRateRange, FinishCallbackType, SheetKeyboardAvoidMode, UIContext, SheetType, ScrollSizeMode, SheetMode, SpringBackAction, DismissSheetAction, SheetDismiss, DismissContentCoverAction, ModalTransition, ContextMenuAnimationOptions, PopupMessageOptions, TransitionHierarchyStrategy, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, ScrollableCommonMethod, CommonMethod, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, TransitionOptions, MotionBlurOptions, InvertOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragItemInfo, UniformDataType, PreDragStatus, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, SafeAreaType, SafeAreaEdge, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ContentCoverOptions, SheetOptions, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, RectResult, TouchObject, HistoricalPoint, TextDecorationOptions, InputCounterOptions, CaretOffset, SelectionOptions, BlurStyleOptions, ContentModifier, LayoutSafeAreaType, LayoutSafeAreaEdge, ItemDragInfo, KeyboardAvoidMode, UIGestureEvent, VisibleAreaEventOptions, MeasureResult, SizeResult, DismissReason, BindOptions, FractionStop, LocalizedVerticalAlignParam, LocalizedHorizontalAlignParam, MotionBlurAnchor, RepeatMode, TouchTestStrategy, IntentionCode, DragResult, Summary, DragBehavior, Context, LightSource, MultiShadowOptions, PointLightStyle } from "./../ArkCommonInterfaces"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, LabelStyle, ControlSize, ButtonOptions } from "./../ArkButtonInterfaces"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../ArkAnimationExtenderInterfaces"
 import { Callback_RangeUpdate, PointerStyle } from "./../ArkArkuiCustomInterfaces"
 import { ContentDidScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, IndicatorStyle, SwiperAttribute, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ArrowStyle, SwiperAutoFill, SwiperAnimationEvent } from "./../ArkSwiperInterfaces"
 import { CustomNodeBuilder } from "./../ArkCustomBuilderInterfaces"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, DecorationStyleResult, MenuType, Affinity, TextRange, StyledStringChangeValue, CaretStyle, InsertValue, DeleteValue, TextMenuItem, LineMetrics, PositionWithAffinity, PreviewText, TextBox, TextDataDetectorConfig, FontSettingOptions, TextDeleteDirection, StyledStringChangedListener, TextDataDetectorType } from "./../ArkTextCommonInterfaces"
-import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController, BusinessError } from "./../ArkArkuiExternalInterfaces"
+import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController } from "./../ArkArkuiExternalInterfaces"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, SectionOptions, WaterFlowOptions } from "./../ArkWaterFlowInterfaces"
 import { ImageCompleteCallback, ImageLoadResult } from "./../ArkImageSpanInterfaces"
 import { ImageErrorCallback, ResizableOptions, DrawableDescriptor, DrawingColorFilter, ImageContent, DrawingLattice, ResolutionQuality, ImageError, ImageSourceSize, ImageInterpolation, DynamicRangeMode, ImageRenderMode } from "./../ArkImageInterfaces"
@@ -49,18 +49,31 @@ import { PluginErrorCallback, PluginComponentTemplate, PluginErrorData, PluginCo
 import { SearchSubmitCallback, CancelButtonStyle, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchAttribute, SearchType, SearchButtonOptions, SearchOptions } from "./../ArkSearchInterfaces"
 import { SliderTriggerChangeCallback, SliderAttribute, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../ArkSliderInterfaces"
 import { TextAreaSubmitCallback, ContentType, TextAreaAttribute, TextAreaType, TextAreaOptions } from "./../ArkTextAreaInterfaces"
-import { VoidCallback, Position, Length, Dimension, PX, VP, FP, LPX, Percentage, Area, Font, LocalizedPadding, Margin, BorderRadiuses, Padding, ResourceColor, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, ColorMetrics, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Offset, DividerStyleOptions, LengthMetricsUnit, LengthConstrain, DirectionalEdgesT, Bias, MarkStyle } from "./../ArkUnitsInterfaces"
+import { VoidCallback, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, BorderRadiuses, Margin, Padding, SizeOptions, Length, Position, Area, Font, LocalizedPadding, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Offset, DividerStyleOptions, LengthMetricsUnit, LengthConstrain, DirectionalEdgesT, Bias, MarkStyle } from "./../ArkUnitsInterfaces"
 import { WithThemeInterface, CustomTheme, WithThemeOptions, WithThemeAttribute } from "./../ArkWithThemeInterfaces"
 import { Resource } from "./../ArkResourceInterfaces"
-import { ColoringStrategy, Color, FontWeight, Curve, FontStyle, TextDecorationStyle, TextDecorationType, BorderStyle, TextHeightAdaptivePolicy, TextOverflow, ImageFit, ImageSpanAlignment, LineBreakStrategy, WordBreak, TextAlign, TitleHeight, GradientDirection, DialogButtonStyle, TouchType, NestedScrollMode, VerticalAlign, Axis, PlayMode, Placement, ArrowPointPosition, Alignment, SharedTransitionEffectType, ClickEffectLevel, HorizontalAlign, TransitionType, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, FlexDirection, Edge, XComponentType, CopyOptions, TextContentStyle, TextCase, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, AppRotation, FoldStatus, FlexAlign, FlexWrap, PixelRoundCalcPolicy, KeySource, KeyType, AccessibilityHoverType, MouseAction, MouseButton, IlluminatedType, HeightBreakpoint, WidthBreakpoint, MarqueeUpdateStrategy, RelateType, Week, EmbeddedType, CheckBoxShape, FillMode, AnimationStatus } from "./../ArkEnumsInterfaces"
-import { ICurve, ICurveInternal } from "./../ArkICurveMaterialized"
+import { Color, ColoringStrategy, FontWeight, Curve, WordBreak, TextOverflow, TextAlign, ImageFit, ImageSpanAlignment, TextDecorationStyle, TextDecorationType, FontStyle, BorderStyle, TextHeightAdaptivePolicy, LineBreakStrategy, TitleHeight, GradientDirection, DialogButtonStyle, TouchType, NestedScrollMode, VerticalAlign, Axis, PlayMode, Placement, ArrowPointPosition, Alignment, SharedTransitionEffectType, ClickEffectLevel, HorizontalAlign, TransitionType, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, FlexDirection, Edge, XComponentType, CopyOptions, TextContentStyle, TextCase, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, AppRotation, FoldStatus, FlexAlign, FlexWrap, PixelRoundCalcPolicy, KeySource, KeyType, AccessibilityHoverType, MouseAction, MouseButton, IlluminatedType, HeightBreakpoint, WidthBreakpoint, MarqueeUpdateStrategy, RelateType, Week, EmbeddedType, CheckBoxShape, FillMode, AnimationStatus } from "./../ArkEnumsInterfaces"
 import { PixelMap, PixelMapInternal } from "./../ArkPixelMapMaterialized"
 import { LengthMetrics, LengthMetricsInternal } from "./../ArkLengthMetricsMaterialized"
-import { Tuple_Dimension_Dimension, Callback_GestureEvent_Void, Callback_ClickEvent_Void, Callback_PopInfo_Void, Callback_SwipeActionState_Void, Callback_Void, Callback_DismissPopupAction_Void, Callback_NavigationTransitionProxy_Void, Callback_Boolean_Void, Literal_String_script_Callback_String_Void_callback_, Callback_String_Void, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Literal_Object_object__String_name_Array_String_methodList, Callback_TimePickerResult_Void, Callback_TextPickerResult_Void, Tuple_Number_Number, Callback_TabContentTransitionProxy_Void, Callback_StyledStringChangeValue_Boolean, Callback_Date_Void, Callback_DatePickerResult_Void, Callback_SheetType_Void, Callback_Number_Void, Callback_SpringBackAction_Void, Callback_DismissSheetAction_Void, Callback_SheetDismiss_Void, Callback_DismissContentCoverAction_Void, AnimationRange_Number, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Literal_Number_angle_fingers, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_duration_fingers_Boolean_repeat, Tuple_ResourceColor_Number, Callback_DismissDialogAction_Void, Callback_UIExtensionProxy_Void, Callback_Array_TouchTestInfo_TouchResult, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Literal_Boolean_next_Axis_direction, Literal_Number_surfaceHeight_surfaceWidth, Callback_OnPageEndEvent_Void, Callback_OnPageBeginEvent_Void, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, Callback_OnGeolocationShowEvent_Void, Callback_OnAlertEvent_Boolean, Callback_OnBeforeUnloadEvent_Boolean, Callback_OnConfirmEvent_Boolean, Callback_OnPromptEvent_Boolean, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, Callback_OnHttpErrorReceiveEvent_Void, Callback_OnDownloadStartEvent_Void, Callback_OnRefreshAccessedHistoryEvent_Void, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, Callback_OnInterceptRequestEvent_WebResourceResponse, Callback_OnPermissionRequestEvent_Void, Callback_OnScreenCaptureRequestEvent_Void, Callback_OnContextMenuShowEvent_Boolean, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, Callback_OnClientAuthenticationEvent_Void, Callback_OnWindowNewEvent_Void, Callback_OnTouchIconUrlReceivedEvent_Void, Callback_OnFaviconReceivedEvent_Void, Callback_OnPageVisibleEvent_Void, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, Callback_OnLoadInterceptEvent_Boolean, Callback_OnOverScrollEvent_Void, Callback_NativeEmbedDataInfo_Void, Callback_NativeEmbedTouchInfo_Void, Callback_Literal_String_plainText_Void, Literal_String_plainText, Callback_Union_String_Array_String_Void, Callback_Union_Number_Array_Number_Void, Callback_ResourceStr_Void, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, Callback_SwiperContentTransitionProxy_Void, Callback_Number_SliderChangeMode_Void, Callback_Union_Number_Resource_Void, Callback_Number_String_Void, Callback_RichEditorSelection_Void, Callback_RichEditorRange_Void, Callback_RichEditorInsertValue_Boolean, Callback_RichEditorTextSpanResult_Void, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, Callback_RichEditorChangeValue_Boolean, Callback_CutEvent_Void, Callback_CopyEvent_Void, Callback_PanelMode_Void, Callback_Boolean, Callback_NavDestinationContext_Void, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, Callback_ItemDragInfo_Number_CustomBuilder, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_Number_ComputedBarAttribute, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Callback_Number_Tuple_Number_Number, Type_SheetOptions_detents, Literal_ResourceColor_color, Literal_String_value_Callback_Void_action, Literal_Number_day_month_year, AsyncCallback_image_PixelMap_Void, Type_NavigationAttribute_customNavContentTransition_delegate, Callback_WithThemeAttribute_Void, Callback_WebResourceResponse_Void, Callback_WebKeyboardOptions_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_Tuple_Number_Number_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_TouchResult_Void, Callback_String_Unknown_Void, Callback_Pointer_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_Array_String_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_OffsetResult_Void, Callback_NavigationTitleMode_Void, Callback_NavigationMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_IsolatedComponentAttribute_Void, Callback_HitTestMode_Void, Callback_GestureRecognizer_Void, Callback_GestureJudgeResult_Void, Callback_CustomBuilder_Void, Callback_ComputedBarAttribute_Void, Callback_Array_String_Void, Callback_Literal_Number_code_Want_want_Void, Literal_Number_code_Want_want, Callback_PlaybackInfo_Void, Callback_PreparedInfo_Void, Callback_FullscreenInfo_Void, Type_TextPickerAttribute_onChange_callback, Callback_String_Number_Void, Callback_ClickEvent_SaveButtonOnClickResult_Void, Callback_RefreshStatus_Void, Callback_Array_Number_Void, Callback_ClickEvent_PasteButtonOnClickResult_Void, Callback_Number_Number_PanelMode_Void, Callback_ClickEvent_LocationButtonOnClickResult_Void, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, Callback_Any_Void, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg, Callback_FormCallbackInfo_Void, Callback_TerminationInfo_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Callback_CalendarRequestedData_Void, Callback_CalendarSelectedDate_Void } from "./../SyntheticDeclarations"
+import { Tuple_Dimension_Dimension, Callback_GestureEvent_Void, Callback_ClickEvent_Void, Callback_PopInfo_Void, Callback_SwipeActionState_Void, Callback_Void, Callback_DismissPopupAction_Void, Callback_NavigationTransitionProxy_Void, Callback_Boolean_Void, Literal_String_script_Callback_String_Void_callback_, Callback_String_Void, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Literal_Object_object__String_name_Array_String_methodList, Callback_TimePickerResult_Void, Callback_TextPickerResult_Void, Tuple_Number_Number, Callback_TabContentTransitionProxy_Void, Callback_StyledStringChangeValue_Boolean, Callback_Date_Void, Callback_DatePickerResult_Void, Callback_SheetType_Void, Callback_Number_Void, Callback_SpringBackAction_Void, Callback_DismissSheetAction_Void, Callback_SheetDismiss_Void, Callback_DismissContentCoverAction_Void, AnimationRange_Number, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Literal_Number_angle_fingers, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_duration_fingers_Boolean_repeat, Tuple_ResourceColor_Number, Callback_DismissDialogAction_Void, Callback_UIExtensionProxy_Void, Callback_Array_TouchTestInfo_TouchResult, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Literal_Boolean_next_Axis_direction, Literal_Number_surfaceHeight_surfaceWidth, Callback_OnPageEndEvent_Void, Callback_OnPageBeginEvent_Void, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, Callback_OnGeolocationShowEvent_Void, Callback_OnAlertEvent_Boolean, Callback_OnBeforeUnloadEvent_Boolean, Callback_OnConfirmEvent_Boolean, Callback_OnPromptEvent_Boolean, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, Callback_OnHttpErrorReceiveEvent_Void, Callback_OnDownloadStartEvent_Void, Callback_OnRefreshAccessedHistoryEvent_Void, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, Callback_OnInterceptRequestEvent_WebResourceResponse, Callback_OnPermissionRequestEvent_Void, Callback_OnScreenCaptureRequestEvent_Void, Callback_OnContextMenuShowEvent_Boolean, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, Callback_OnClientAuthenticationEvent_Void, Callback_OnWindowNewEvent_Void, Callback_OnTouchIconUrlReceivedEvent_Void, Callback_OnFaviconReceivedEvent_Void, Callback_OnPageVisibleEvent_Void, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, Callback_OnLoadInterceptEvent_Boolean, Callback_OnOverScrollEvent_Void, Callback_NativeEmbedDataInfo_Void, Callback_NativeEmbedTouchInfo_Void, Callback_Literal_String_plainText_Void, Literal_String_plainText, Callback_Union_String_Array_String_Void, Callback_Union_Number_Array_Number_Void, Callback_ResourceStr_Void, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, Callback_SwiperContentTransitionProxy_Void, Callback_Number_SliderChangeMode_Void, Callback_Union_Number_Resource_Void, Callback_Number_String_Void, Callback_RichEditorSelection_Void, Callback_RichEditorRange_Void, Callback_RichEditorInsertValue_Boolean, Callback_RichEditorTextSpanResult_Void, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, Callback_RichEditorChangeValue_Boolean, Callback_CutEvent_Void, Callback_CopyEvent_Void, Callback_PanelMode_Void, Callback_Boolean, Callback_NavDestinationContext_Void, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, onItemDragStart_event_type, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_Number_ComputedBarAttribute, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Callback_Number_Tuple_Number_Number, Type_SheetOptions_detents, Literal_ResourceColor_color, Literal_String_value_Callback_Void_action, Literal_Number_day_month_year, AsyncCallback_image_PixelMap_Void, Type_NavigationAttribute_customNavContentTransition_delegate, Callback_WithThemeAttribute_Void, Callback_WebResourceResponse_Void, Callback_WebKeyboardOptions_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_Tuple_Number_Number_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_TouchResult_Void, Callback_String_Unknown_Void, Callback_Pointer_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_Array_String_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_OffsetResult_Void, Callback_NavigationTitleMode_Void, Callback_NavigationMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_IsolatedComponentAttribute_Void, Callback_HitTestMode_Void, Callback_GestureRecognizer_Void, Callback_GestureJudgeResult_Void, Callback_CustomBuilder_Void, Callback_ComputedBarAttribute_Void, Callback_Array_String_Void, Callback_Literal_Number_code_Want_want_Void, Literal_Number_code_Want_want, Callback_PlaybackInfo_Void, Callback_PreparedInfo_Void, Callback_FullscreenInfo_Void, Type_TextPickerAttribute_onChange_callback, Callback_String_Number_Void, Callback_ClickEvent_SaveButtonOnClickResult_Void, Callback_RefreshStatus_Void, Callback_Array_Number_Void, Callback_ClickEvent_PasteButtonOnClickResult_Void, Callback_Number_Number_PanelMode_Void, Callback_ClickEvent_LocationButtonOnClickResult_Void, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, Callback_Any_Void, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg, Callback_FormCallbackInfo_Void, Callback_TerminationInfo_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Callback_CalendarRequestedData_Void, Callback_CalendarSelectedDate_Void } from "./../SyntheticDeclarations"
+import { ICurve, ICurveInternal } from "./../ArkICurveMaterialized"
+import { TextBackgroundStyle } from "./../ArkSpanInterfaces"
+import { ImageAttachmentLayoutStyle, UserDataSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, ParagraphStyleInterface, ImageAttachmentInterface, GestureStyleInterface, DecorationStyleInterface, TextStyleInterface, StyledStringKey, StyleOptions, SpanStyle, StyledStringValue } from "./../ArkStyledStringInterfaces"
 import { GridRowSizeOption, BreakpointsReference, GridRowColumnOption, GutterOption, GridRowDirection, BreakPoints, GridRowOptions } from "./../ArkGridRowInterfaces"
+import { BackgroundColorStyle, BackgroundColorStyleInternal } from "./../ArkBackgroundColorStyleMaterialized"
+import { CustomSpan, CustomSpanInternal } from "./../ArkCustomSpanMaterialized"
+import { UrlStyle, UrlStyleInternal } from "./../ArkUrlStyleMaterialized"
+import { LineHeightStyle, LineHeightStyleInternal } from "./../ArkLineHeightStyleMaterialized"
+import { ParagraphStyle, ParagraphStyleInternal } from "./../ArkParagraphStyleMaterialized"
+import { ImageAttachment, ImageAttachmentInternal } from "./../ArkImageAttachmentMaterialized"
+import { GestureStyle, GestureStyleInternal } from "./../ArkGestureStyleMaterialized"
+import { TextShadowStyle, TextShadowStyleInternal } from "./../ArkTextShadowStyleMaterialized"
+import { LetterSpacingStyle, LetterSpacingStyleInternal } from "./../ArkLetterSpacingStyleMaterialized"
+import { BaselineOffsetStyle, BaselineOffsetStyleInternal } from "./../ArkBaselineOffsetStyleMaterialized"
+import { DecorationStyle, DecorationStyleInternal } from "./../ArkDecorationStyleMaterialized"
+import { TextStyle_styled_string, TextStyle_styled_stringInternal } from "./../ArkTextStyleStyledStringMaterialized"
 import { TabBarSymbol, TabBarIconStyle, LayoutMode, BoardStyle, SelectedMode, TabBarOptions } from "./../ArkTabContentInterfaces"
 import { SymbolRenderingStrategy, SymbolEffectStrategy, SymbolGlyphAttribute, EffectFillStyle } from "./../ArkSymbolglyphInterfaces"
-import { DecorationStyleInterface, StyledStringValue, StyledStringKey, ImageAttachmentLayoutStyle, StyleOptions, SpanStyle, CustomSpanDrawInfo, CustomSpanMetrics, CustomSpanMeasureInfo, ImageAttachmentInterface, ParagraphStyleInterface, GestureStyleInterface, TextStyleInterface } from "./../ArkStyledStringInterfaces"
 import { GestureEvent, GestureEventInternal } from "./../ArkGestureEventMaterialized"
 import { ClickEvent, ClickEventInternal } from "./../ArkClickEventMaterialized"
 import { SwipeActionState, SwipeActionItem, SwipeEdgeEffect, EditMode, ListItemStyle, SwipeActionOptions, ListItemOptions, Sticky } from "./../ArkListItemInterfaces"
@@ -69,6 +82,7 @@ import { CanvasPattern, CanvasPatternInternal } from "./../ArkCanvasPatternMater
 import { Matrix2D, Matrix2DInternal } from "./../ArkMatrix2DMaterialized"
 import { CanvasGradient, CanvasGradientInternal } from "./../ArkCanvasGradientMaterialized"
 import { NavigationTransitionProxy, NavigationTransitionProxyInternal } from "./../ArkNavigationTransitionProxyMaterialized"
+import { ColorMetrics, ColorMetricsInternal } from "./../ArkColorMetricsMaterialized"
 import { ImageAnalyzerController, ImageAnalyzerControllerInternal } from "./../ArkImageAnalyzerControllerMaterialized"
 import { ImageAnalyzerType, ImageAIOptions, ImageAnalyzerConfig } from "./../ArkImageCommonInterfaces"
 import { WebResourceRequest, WebResourceRequestInternal } from "./../ArkWebResourceRequestMaterialized"
@@ -87,11 +101,18 @@ import { NavPathStack, NavPathStackInternal } from "./../ArkNavPathStackMaterial
 import { NavPathInfo, NavPathInfoInternal } from "./../ArkNavPathInfoMaterialized"
 import { NavDestinationContext, NavDestinationContextInternal } from "./../ArkNavDestinationContextMaterialized"
 import { GridColColumnOption, GridColOptions } from "./../ArkGridColInterfaces"
+import { PanDirection, GestureMode, GestureType, GestureInterface, SwipeDirection, TapGestureParameters, GestureInfo, GestureJudgeResult, GestureMask, GestureRecognizerState, GestureHandler, GesturePriority, FingerInfo } from "./../ArkGestureInterfaces"
 import { LinearGradient, LinearGradientInternal } from "./../ArkLinearGradientMaterialized"
 import { ColorStop, DataPanelType, DataPanelShadowOptions, DataPanelOptions } from "./../ArkDataPanelInterfaces"
 import { DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, DatePickerOptions } from "./../ArkDatePickerInterfaces"
 import { Scene, Component3DAttribute, ModelType, SceneOptions } from "./../ArkComponent3dInterfaces"
-import { GestureGroupInterface, GestureMode, GestureType, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureInterface, SwipeDirection, PanDirection, TapGestureParameters, GestureInfo, GestureJudgeResult, GestureMask, GestureRecognizerState, GestureHandler, GesturePriority, FingerInfo } from "./../ArkGestureInterfaces"
+import { GestureGroupInterface, GestureGroupInterfaceInternal } from "./../ArkGestureGroupInterfaceMaterialized"
+import { TapGestureInterface, TapGestureInterfaceInternal } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface, LongPressGestureInterfaceInternal } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface, PanGestureInterfaceInternal } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface, PinchGestureInterfaceInternal } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface, SwipeGestureInterfaceInternal } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface, RotationGestureInterfaceInternal } from "./../ArkRotationGestureInterfaceMaterialized"
 import { PanGestureOptions, PanGestureOptionsInternal } from "./../ArkPanGestureOptionsMaterialized"
 import { DrawingCanvas, DrawingCanvasInternal } from "./../ArkDrawingCanvasMaterialized"
 import { Size, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, TextMetrics } from "./../ArkCanvasInterfaces"
@@ -99,9 +120,6 @@ import { FrameNode, FrameNodeInternal } from "./../ArkFrameNodeMaterialized"
 import { BadgePosition, BadgeStyle, BadgeParamWithString, BadgeParam, BadgeParamWithNumber } from "./../ArkBadgeInterfaces"
 import { DismissDialogAction, ActionSheetOffset, ActionSheetButtonOptions, ActionSheetOptions, SheetInfo } from "./../ArkActionSheetInterfaces"
 import { StyledString, StyledStringInternal } from "./../ArkStyledStringMaterialized"
-import { ImageAttachment, ImageAttachmentInternal } from "./../ArkImageAttachmentMaterialized"
-import { CustomSpan, CustomSpanInternal } from "./../ArkCustomSpanMaterialized"
-import { TextBackgroundStyle } from "./../ArkSpanInterfaces"
 import { DpiFollowStrategy, ReceiveCallback, UIExtensionOptions } from "./../ArkUiExtensionComponentInterfaces"
 import { UIExtensionProxy, UIExtensionProxyInternal } from "./../ArkUIExtensionProxyMaterialized"
 import { DrawModifier, DrawModifierInternal } from "./../ArkDrawModifierMaterialized"
@@ -214,19 +232,7 @@ import { MonthData, CalendarDay, CalendarRequestedData, CalendarSelectedDate, Wo
 import { BaseShape, BaseShapeInternal } from "./../ArkBaseShapeMaterialized"
 import { CommonShape, CommonShapeInternal } from "./../ArkCommonShapeMaterialized"
 import { LinearIndicatorController, LinearIndicatorControllerInternal } from "./../ArkLinearIndicatorControllerMaterialized"
-import { UrlStyle, UrlStyleInternal } from "./../ArkUrlStyleMaterialized"
-import { LineHeightStyle, LineHeightStyleInternal } from "./../ArkLineHeightStyleMaterialized"
-import { ParagraphStyle, ParagraphStyleInternal } from "./../ArkParagraphStyleMaterialized"
-import { GestureStyle, GestureStyleInternal } from "./../ArkGestureStyleMaterialized"
-import { BackgroundColorStyle, BackgroundColorStyleInternal } from "./../ArkBackgroundColorStyleMaterialized"
-import { TextShadowStyle, TextShadowStyleInternal } from "./../ArkTextShadowStyleMaterialized"
-import { LetterSpacingStyle, LetterSpacingStyleInternal } from "./../ArkLetterSpacingStyleMaterialized"
-import { BaselineOffsetStyle, BaselineOffsetStyleInternal } from "./../ArkBaselineOffsetStyleMaterialized"
-import { DecorationStyle, DecorationStyleInternal } from "./../ArkDecorationStyleMaterialized"
-import { TextStyle_styled_string, TextStyle_styled_stringInternal } from "./../ArkTextStyleStyledStringMaterialized"
-import { TimePickerDialog, TimePickerDialogInternal } from "./../ArkTimePickerDialogMaterialized"
 import { TextTimerOptions } from "./../ArkTextTimerInterfaces"
-import { TextPickerDialog, TextPickerDialogInternal } from "./../ArkTextPickerDialogMaterialized"
 import { SubmitEvent, SubmitEventInternal } from "./../ArkSubmitEventMaterialized"
 import { TextClockOptions } from "./../ArkTextClockInterfaces"
 import { BounceSymbolEffect, BounceSymbolEffectInternal } from "./../ArkBounceSymbolEffectMaterialized"
@@ -267,12 +273,11 @@ import { LongPressGestureEvent, LongPressGestureEventInternal } from "./../ArkLo
 import { TapGestureEvent, TapGestureEventInternal } from "./../ArkTapGestureEventMaterialized"
 import { GaugeIndicatorOptions, GaugeShadowOptions, GaugeOptions } from "./../ArkGaugeInterfaces"
 import { FormLinkOptions } from "./../ArkFormLinkInterfaces"
+import { BusinessError } from "./../ArkBaseInterfaces"
 import { TerminationInfo } from "./../ArkEmbeddedComponentInterfaces"
 import { EllipseOptions } from "./../ArkEllipseInterfaces"
-import { DatePickerDialog, DatePickerDialogInternal } from "./../ArkDatePickerDialogMaterialized"
 import { CustomDialogControllerOptions } from "./../ArkCustomDialogControllerInterfaces"
 import { CustomDialogController, CustomDialogControllerInternal } from "./../ArkCustomDialogControllerMaterialized"
-import { ContextMenu, ContextMenuInternal } from "./../ArkContextMenuMaterialized"
 import { UICommonEvent, UICommonEventInternal } from "./../ArkUICommonEventMaterialized"
 import { View, ViewInternal } from "./../ArkViewMaterialized"
 import { Measurable, MeasurableInternal } from "./../ArkMeasurableMaterialized"
@@ -281,23 +286,12 @@ import { PixelMapMock, PixelMapMockInternal } from "./../ArkPixelMapMockMaterial
 import { ColumnOptions } from "./../ArkColumnInterfaces"
 import { CircleOptions } from "./../ArkCircleInterfaces"
 import { OffscreenCanvas, OffscreenCanvasInternal } from "./../ArkOffscreenCanvasMaterialized"
-import { CalendarPickerDialog, CalendarPickerDialogInternal } from "./../ArkCalendarPickerDialogMaterialized"
 import { ScrollMotion, ScrollMotionInternal } from "./../ArkScrollMotionMaterialized"
 import { SpringProp, SpringPropInternal } from "./../ArkSpringPropMaterialized"
 import { FrictionMotion, FrictionMotionInternal } from "./../ArkFrictionMotionMaterialized"
 import { SpringMotion, SpringMotionInternal } from "./../ArkSpringMotionMaterialized"
-import { AlertDialog, AlertDialogInternal } from "./../ArkAlertDialogMaterialized"
-import { ActionSheet, ActionSheetInternal } from "./../ArkActionSheetMaterialized"
-import { EventEmulator, EventEmulatorInternal } from "./../ArkEventEmulatorMaterialized"
-import { NavExtender, NavExtenderInternal } from "./../ArkNavExtenderMaterialized"
 import { ReplaceSymbolEffect, ReplaceSymbolEffectInternal } from "./../ArkReplaceSymbolEffectMaterialized"
 import { ScaleSymbolEffect, ScaleSymbolEffectInternal } from "./../ArkScaleSymbolEffectMaterialized"
-import { GlobalScope_ohos_font, GlobalScope_ohos_fontInternal } from "./../ArkGlobalScopeOhosFontMaterialized"
-import { GlobalScope_ohos_arkui_performanceMonitor, GlobalScope_ohos_arkui_performanceMonitorInternal } from "./../ArkGlobalScopeOhosArkuiPerformanceMonitorMaterialized"
-import { GlobalScope_ohos_arkui_componentSnapshot, GlobalScope_ohos_arkui_componentSnapshotInternal } from "./../ArkGlobalScopeOhosArkuiComponentSnapshotMaterialized"
-import { SystemOps, SystemOpsInternal } from "./../ArkSystemOpsMaterialized"
-import { LazyForEachOps, LazyForEachOpsInternal } from "./../ArkLazyForEachOpsMaterialized"
-import { AnimationExtender, AnimationExtenderInternal } from "./../ArkAnimationExtenderMaterialized"
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
     private static poolTop: int32 = -1
@@ -365,55 +359,280 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeNumber(value_type_value)
         }
     }
-    writeICurve(value: ICurve): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writePixelMap(value: PixelMap): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLengthMetrics(value: LengthMetrics): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeLeadingMarginPlaceholder(value: LeadingMarginPlaceholder): void {
+        let valueSerializer : Serializer = this
+        const value_pixelMap  = value.pixelMap
+        valueSerializer.writePixelMap(value_pixelMap)
+        const value_size  = value.size
+        const value_size_0  = value_size[0]
+        valueSerializer.writeLength(value_size_0)
+        const value_size_1  = value_size[1]
+        valueSerializer.writeLength(value_size_1)
+    }
+    writeICurve(value: ICurve): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeTextBackgroundStyle(value: TextBackgroundStyle): void {
+        let valueSerializer : Serializer = this
+        const value_color  = value.color
+        let value_color_type : int32 = RuntimeType.UNDEFINED
+        value_color_type = runtimeType(value_color)
+        valueSerializer.writeInt8(value_color_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+            const value_color_value  = value_color!
+            let value_color_value_type : int32 = RuntimeType.UNDEFINED
+            value_color_value_type = runtimeType(value_color_value)
+            if (TypeChecker.isColor(value_color_value)) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_color_value_0  = value_color_value as Color
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
+            }
+            else if (RuntimeType.NUMBER == value_color_value_type) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_color_value_1  = value_color_value as number
+                valueSerializer.writeNumber(value_color_value_1)
+            }
+            else if (RuntimeType.STRING == value_color_value_type) {
+                valueSerializer.writeInt8(2 as int32)
+                const value_color_value_2  = value_color_value as string
+                valueSerializer.writeString(value_color_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_color_value_type) {
+                valueSerializer.writeInt8(3 as int32)
+                const value_color_value_3  = value_color_value as Resource
+                valueSerializer.writeResource(value_color_value_3)
+            }
         }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
+        const value_radius  = value.radius
+        let value_radius_type : int32 = RuntimeType.UNDEFINED
+        value_radius_type = runtimeType(value_radius)
+        valueSerializer.writeInt8(value_radius_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
+            const value_radius_value  = value_radius!
+            let value_radius_value_type : int32 = RuntimeType.UNDEFINED
+            value_radius_value_type = runtimeType(value_radius_value)
+            if (((RuntimeType.NUMBER) == (value_radius_value_type)) || ((RuntimeType.STRING) == (value_radius_value_type)) || (((RuntimeType.OBJECT) == (value_radius_value_type)) && (TypeChecker.isResource(value_radius_value, false, false, false, false, false)))) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_radius_value_0  = value_radius_value as Dimension
+                valueSerializer.writeLength(value_radius_value_0)
+            }
+            else if (((RuntimeType.OBJECT) == (value_radius_value_type)) && (TypeChecker.isBorderRadiuses(value_radius_value, false, false, false, false))) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_radius_value_1  = value_radius_value as BorderRadiuses
+                const value_radius_value_1_topLeft  = value_radius_value_1.topLeft
+                let value_radius_value_1_topLeft_type : int32 = RuntimeType.UNDEFINED
+                value_radius_value_1_topLeft_type = runtimeType(value_radius_value_1_topLeft)
+                valueSerializer.writeInt8(value_radius_value_1_topLeft_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_topLeft_type)) {
+                    const value_radius_value_1_topLeft_value  = value_radius_value_1_topLeft!
+                    valueSerializer.writeLength(value_radius_value_1_topLeft_value)
+                }
+                const value_radius_value_1_topRight  = value_radius_value_1.topRight
+                let value_radius_value_1_topRight_type : int32 = RuntimeType.UNDEFINED
+                value_radius_value_1_topRight_type = runtimeType(value_radius_value_1_topRight)
+                valueSerializer.writeInt8(value_radius_value_1_topRight_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_topRight_type)) {
+                    const value_radius_value_1_topRight_value  = value_radius_value_1_topRight!
+                    valueSerializer.writeLength(value_radius_value_1_topRight_value)
+                }
+                const value_radius_value_1_bottomLeft  = value_radius_value_1.bottomLeft
+                let value_radius_value_1_bottomLeft_type : int32 = RuntimeType.UNDEFINED
+                value_radius_value_1_bottomLeft_type = runtimeType(value_radius_value_1_bottomLeft)
+                valueSerializer.writeInt8(value_radius_value_1_bottomLeft_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_bottomLeft_type)) {
+                    const value_radius_value_1_bottomLeft_value  = value_radius_value_1_bottomLeft!
+                    valueSerializer.writeLength(value_radius_value_1_bottomLeft_value)
+                }
+                const value_radius_value_1_bottomRight  = value_radius_value_1.bottomRight
+                let value_radius_value_1_bottomRight_type : int32 = RuntimeType.UNDEFINED
+                value_radius_value_1_bottomRight_type = runtimeType(value_radius_value_1_bottomRight)
+                valueSerializer.writeInt8(value_radius_value_1_bottomRight_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_bottomRight_type)) {
+                    const value_radius_value_1_bottomRight_value  = value_radius_value_1_bottomRight!
+                    valueSerializer.writeLength(value_radius_value_1_bottomRight_value)
+                }
+            }
+        }
+    }
+    writeImageAttachmentLayoutStyle(value: ImageAttachmentLayoutStyle): void {
+        let valueSerializer : Serializer = this
+        const value_margin  = value.margin
+        let value_margin_type : int32 = RuntimeType.UNDEFINED
+        value_margin_type = runtimeType(value_margin)
+        valueSerializer.writeInt8(value_margin_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_margin_type)) {
+            const value_margin_value  = value_margin!
+            let value_margin_value_type : int32 = RuntimeType.UNDEFINED
+            value_margin_value_type = runtimeType(value_margin_value)
+            if (TypeChecker.isLengthMetrics(value_margin_value, false, false)) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_margin_value_0  = value_margin_value as LengthMetrics
+                valueSerializer.writeLengthMetrics(value_margin_value_0)
+            }
+            else if (TypeChecker.isPadding(value_margin_value, false, false, false, false)) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_margin_value_1  = value_margin_value as Margin
+                const value_margin_value_1_top  = value_margin_value_1.top
+                let value_margin_value_1_top_type : int32 = RuntimeType.UNDEFINED
+                value_margin_value_1_top_type = runtimeType(value_margin_value_1_top)
+                valueSerializer.writeInt8(value_margin_value_1_top_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_top_type)) {
+                    const value_margin_value_1_top_value  = value_margin_value_1_top!
+                    valueSerializer.writeLength(value_margin_value_1_top_value)
+                }
+                const value_margin_value_1_right  = value_margin_value_1.right
+                let value_margin_value_1_right_type : int32 = RuntimeType.UNDEFINED
+                value_margin_value_1_right_type = runtimeType(value_margin_value_1_right)
+                valueSerializer.writeInt8(value_margin_value_1_right_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_right_type)) {
+                    const value_margin_value_1_right_value  = value_margin_value_1_right!
+                    valueSerializer.writeLength(value_margin_value_1_right_value)
+                }
+                const value_margin_value_1_bottom  = value_margin_value_1.bottom
+                let value_margin_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
+                value_margin_value_1_bottom_type = runtimeType(value_margin_value_1_bottom)
+                valueSerializer.writeInt8(value_margin_value_1_bottom_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_bottom_type)) {
+                    const value_margin_value_1_bottom_value  = value_margin_value_1_bottom!
+                    valueSerializer.writeLength(value_margin_value_1_bottom_value)
+                }
+                const value_margin_value_1_left  = value_margin_value_1.left
+                let value_margin_value_1_left_type : int32 = RuntimeType.UNDEFINED
+                value_margin_value_1_left_type = runtimeType(value_margin_value_1_left)
+                valueSerializer.writeInt8(value_margin_value_1_left_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_left_type)) {
+                    const value_margin_value_1_left_value  = value_margin_value_1_left!
+                    valueSerializer.writeLength(value_margin_value_1_left_value)
+                }
+            }
+        }
+        const value_padding  = value.padding
+        let value_padding_type : int32 = RuntimeType.UNDEFINED
+        value_padding_type = runtimeType(value_padding)
+        valueSerializer.writeInt8(value_padding_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_padding_type)) {
+            const value_padding_value  = value_padding!
+            let value_padding_value_type : int32 = RuntimeType.UNDEFINED
+            value_padding_value_type = runtimeType(value_padding_value)
+            if (TypeChecker.isLengthMetrics(value_padding_value, false, false)) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_padding_value_0  = value_padding_value as LengthMetrics
+                valueSerializer.writeLengthMetrics(value_padding_value_0)
+            }
+            else if (TypeChecker.isPadding(value_padding_value, false, false, false, false)) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_padding_value_1  = value_padding_value as Padding
+                const value_padding_value_1_top  = value_padding_value_1.top
+                let value_padding_value_1_top_type : int32 = RuntimeType.UNDEFINED
+                value_padding_value_1_top_type = runtimeType(value_padding_value_1_top)
+                valueSerializer.writeInt8(value_padding_value_1_top_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_top_type)) {
+                    const value_padding_value_1_top_value  = value_padding_value_1_top!
+                    valueSerializer.writeLength(value_padding_value_1_top_value)
+                }
+                const value_padding_value_1_right  = value_padding_value_1.right
+                let value_padding_value_1_right_type : int32 = RuntimeType.UNDEFINED
+                value_padding_value_1_right_type = runtimeType(value_padding_value_1_right)
+                valueSerializer.writeInt8(value_padding_value_1_right_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_right_type)) {
+                    const value_padding_value_1_right_value  = value_padding_value_1_right!
+                    valueSerializer.writeLength(value_padding_value_1_right_value)
+                }
+                const value_padding_value_1_bottom  = value_padding_value_1.bottom
+                let value_padding_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
+                value_padding_value_1_bottom_type = runtimeType(value_padding_value_1_bottom)
+                valueSerializer.writeInt8(value_padding_value_1_bottom_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_bottom_type)) {
+                    const value_padding_value_1_bottom_value  = value_padding_value_1_bottom!
+                    valueSerializer.writeLength(value_padding_value_1_bottom_value)
+                }
+                const value_padding_value_1_left  = value_padding_value_1.left
+                let value_padding_value_1_left_type : int32 = RuntimeType.UNDEFINED
+                value_padding_value_1_left_type = runtimeType(value_padding_value_1_left)
+                valueSerializer.writeInt8(value_padding_value_1_left_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_left_type)) {
+                    const value_padding_value_1_left_value  = value_padding_value_1_left!
+                    valueSerializer.writeLength(value_padding_value_1_left_value)
+                }
+            }
+        }
+        const value_borderRadius  = value.borderRadius
+        let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
+        value_borderRadius_type = runtimeType(value_borderRadius)
+        valueSerializer.writeInt8(value_borderRadius_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_borderRadius_type)) {
+            const value_borderRadius_value  = value_borderRadius!
+            let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
+            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
+            if (TypeChecker.isLengthMetrics(value_borderRadius_value, false, false)) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_borderRadius_value_0  = value_borderRadius_value as LengthMetrics
+                valueSerializer.writeLengthMetrics(value_borderRadius_value_0)
+            }
+            else if (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (TypeChecker.isBorderRadiuses(value_borderRadius_value, false, false, false, false))) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_borderRadius_value_1  = value_borderRadius_value as BorderRadiuses
+                const value_borderRadius_value_1_topLeft  = value_borderRadius_value_1.topLeft
+                let value_borderRadius_value_1_topLeft_type : int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_1_topLeft_type = runtimeType(value_borderRadius_value_1_topLeft)
+                valueSerializer.writeInt8(value_borderRadius_value_1_topLeft_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_topLeft_type)) {
+                    const value_borderRadius_value_1_topLeft_value  = value_borderRadius_value_1_topLeft!
+                    valueSerializer.writeLength(value_borderRadius_value_1_topLeft_value)
+                }
+                const value_borderRadius_value_1_topRight  = value_borderRadius_value_1.topRight
+                let value_borderRadius_value_1_topRight_type : int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_1_topRight_type = runtimeType(value_borderRadius_value_1_topRight)
+                valueSerializer.writeInt8(value_borderRadius_value_1_topRight_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_topRight_type)) {
+                    const value_borderRadius_value_1_topRight_value  = value_borderRadius_value_1_topRight!
+                    valueSerializer.writeLength(value_borderRadius_value_1_topRight_value)
+                }
+                const value_borderRadius_value_1_bottomLeft  = value_borderRadius_value_1.bottomLeft
+                let value_borderRadius_value_1_bottomLeft_type : int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_1_bottomLeft_type = runtimeType(value_borderRadius_value_1_bottomLeft)
+                valueSerializer.writeInt8(value_borderRadius_value_1_bottomLeft_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_bottomLeft_type)) {
+                    const value_borderRadius_value_1_bottomLeft_value  = value_borderRadius_value_1_bottomLeft!
+                    valueSerializer.writeLength(value_borderRadius_value_1_bottomLeft_value)
+                }
+                const value_borderRadius_value_1_bottomRight  = value_borderRadius_value_1.bottomRight
+                let value_borderRadius_value_1_bottomRight_type : int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_1_bottomRight_type = runtimeType(value_borderRadius_value_1_bottomRight)
+                valueSerializer.writeInt8(value_borderRadius_value_1_bottomRight_type as int32)
+                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_bottomRight_type)) {
+                    const value_borderRadius_value_1_bottomRight_value  = value_borderRadius_value_1_bottomRight!
+                    valueSerializer.writeLength(value_borderRadius_value_1_bottomRight_value)
+                }
+            }
+        }
+    }
+    writeSizeOptions(value: SizeOptions): void {
+        let valueSerializer : Serializer = this
+        const value_width  = value.width
+        let value_width_type : int32 = RuntimeType.UNDEFINED
+        value_width_type = runtimeType(value_width)
+        valueSerializer.writeInt8(value_width_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+            const value_width_value  = value_width!
+            valueSerializer.writeLength(value_width_value)
+        }
+        const value_height  = value.height
+        let value_height_type : int32 = RuntimeType.UNDEFINED
+        value_height_type = runtimeType(value_height)
+        valueSerializer.writeInt8(value_height_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
+            const value_height_value  = value_height!
+            valueSerializer.writeLength(value_height_value)
         }
     }
     writePosition(value: Position): void {
@@ -440,16 +659,6 @@ export class Serializer extends SerializerBase {
         const value__SymbolGlyphModifierStub  = value._SymbolGlyphModifierStub
         valueSerializer.writeString(value__SymbolGlyphModifierStub)
     }
-    writeLeadingMarginPlaceholder(value: LeadingMarginPlaceholder): void {
-        let valueSerializer : Serializer = this
-        const value_pixelMap  = value.pixelMap
-        valueSerializer.writePixelMap(value_pixelMap)
-        const value_size  = value.size
-        const value_size_0  = value_size[0]
-        valueSerializer.writeLength(value_size_0)
-        const value_size_1  = value_size[1]
-        valueSerializer.writeLength(value_size_1)
-    }
     writeShadowOptions(value: ShadowOptions): void {
         let valueSerializer : Serializer = this
         const value_radius  = value.radius
@@ -471,7 +680,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_type_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type_type)) {
             const value_type_value  = (value_type as ShadowType)
-            valueSerializer.writeInt32((value_type_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_type_value as ShadowType) as int32))
         }
         const value_color  = value.color
         let value_color_type : int32 = RuntimeType.UNDEFINED
@@ -484,7 +693,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.STRING == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -499,7 +708,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isColoringStrategy(value_color_value)) {
                 valueSerializer.writeInt8(3 as int32)
                 const value_color_value_3  = value_color_value as ColoringStrategy
-                valueSerializer.writeInt32((value_color_value_3 as int32))
+                valueSerializer.writeInt32(TypeChecker.ColoringStrategy_ToOrdinal(value_color_value_3))
             }
         }
         const value_offsetX  = value.offsetX
@@ -600,6 +809,56 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeLength(value_xxl_value)
         }
     }
+    writeBackgroundColorStyle(value: BackgroundColorStyle): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeUserDataSpan(value: UserDataSpan): void {
+    }
+    writeCustomSpan(value: CustomSpan): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeUrlStyle(value: UrlStyle): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeLineHeightStyle(value: LineHeightStyle): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeParagraphStyle(value: ParagraphStyle): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeImageAttachment(value: ImageAttachment): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeGestureStyle(value: GestureStyle): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeTextShadowStyle(value: TextShadowStyle): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeLetterSpacingStyle(value: LetterSpacingStyle): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeBaselineOffsetStyle(value: BaselineOffsetStyle): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeDecorationStyle(value: DecorationStyle): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeTextStyle_styled_string(value: TextStyle_styled_string): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
     writeArea(value: Area): void {
         let valueSerializer : Serializer = this
         const value_width  = value.width
@@ -632,7 +891,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isFontWeight(value_weight_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_weight_value_0  = value_weight_value as FontWeight
-                valueSerializer.writeInt32((value_weight_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_weight_value_0 as FontWeight) as int32))
             }
             else if (RuntimeType.NUMBER == value_weight_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -670,7 +929,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as FontStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as FontStyle) as int32))
         }
     }
     writeLocalizedPadding(value: LocalizedPadding): void {
@@ -747,7 +1006,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isCurve(value_curve_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_curve_value_0  = value_curve_value as Curve
-                valueSerializer.writeInt32((value_curve_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_curve_value_0 as Curve) as int32))
             }
             else if (RuntimeType.OBJECT == value_curve_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -774,12 +1033,12 @@ export class Serializer extends SerializerBase {
             const value_margin_value  = value_margin!
             let value_margin_value_type : int32 = RuntimeType.UNDEFINED
             value_margin_value_type = runtimeType(value_margin_value)
-            if (((RuntimeType.NUMBER) == (value_margin_value_type)) || ((RuntimeType.STRING) == (value_margin_value_type)) || (((RuntimeType.OBJECT) == (value_margin_value_type)) && (isResource(value_margin_value)))) {
+            if (((RuntimeType.NUMBER) == (value_margin_value_type)) || ((RuntimeType.STRING) == (value_margin_value_type)) || (((RuntimeType.OBJECT) == (value_margin_value_type)) && (TypeChecker.isResource(value_margin_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_margin_value_0  = value_margin_value as Dimension
                 valueSerializer.writeLength(value_margin_value_0)
             }
-            else if (((RuntimeType.OBJECT) == (value_margin_value_type)) && (TypeChecker.isPadding(value_margin_value, false, false, false, false))) {
+            else if (TypeChecker.isPadding(value_margin_value, false, false, false, false)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_margin_value_1  = value_margin_value as Margin
                 const value_margin_value_1_top  = value_margin_value_1.top
@@ -824,7 +1083,7 @@ export class Serializer extends SerializerBase {
             const value_borderRadius_value  = value_borderRadius!
             let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if (((RuntimeType.NUMBER) == (value_borderRadius_value_type)) || ((RuntimeType.STRING) == (value_borderRadius_value_type)) || (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (isResource(value_borderRadius_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderRadius_value_type)) || ((RuntimeType.STRING) == (value_borderRadius_value_type)) || (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (TypeChecker.isResource(value_borderRadius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderRadius_value_0  = value_borderRadius_value as Dimension
                 valueSerializer.writeLength(value_borderRadius_value_0)
@@ -870,14 +1129,14 @@ export class Serializer extends SerializerBase {
     writeDecorationStyleResult(value: DecorationStyleResult): void {
         let valueSerializer : Serializer = this
         const value_type  = value.type
-        valueSerializer.writeInt32((value_type.valueOf() as int32))
+        valueSerializer.writeInt32(((value_type as TextDecorationType) as int32))
         const value_color  = value.color
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         if (TypeChecker.isColor(value_color)) {
             valueSerializer.writeInt8(0 as int32)
             const value_color_0  = value_color as Color
-            valueSerializer.writeInt32((value_color_0.valueOf() as int32))
+            valueSerializer.writeInt32(((value_color_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_color_type) {
             valueSerializer.writeInt8(1 as int32)
@@ -900,13 +1159,13 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as TextDecorationStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as TextDecorationStyle) as int32))
         }
     }
     writeDecorationStyleInterface(value: DecorationStyleInterface): void {
         let valueSerializer : Serializer = this
         const value_type  = value.type
-        valueSerializer.writeInt32((value_type.valueOf() as int32))
+        valueSerializer.writeInt32(((value_type as TextDecorationType) as int32))
         const value_color  = value.color
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
@@ -918,7 +1177,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -942,7 +1201,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as TextDecorationStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as TextDecorationStyle) as int32))
         }
     }
     writeLocalizedEdgeColors(value: LocalizedEdgeColors): void {
@@ -958,7 +1217,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_top_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_top_value_0  = value_top_value as Color
-                valueSerializer.writeInt32((value_top_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_top_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_top_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -987,7 +1246,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_end_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_end_value_0  = value_end_value as Color
-                valueSerializer.writeInt32((value_end_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_end_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_end_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -1016,7 +1275,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_bottom_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_bottom_value_0  = value_bottom_value as Color
-                valueSerializer.writeInt32((value_bottom_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_bottom_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_bottom_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -1045,7 +1304,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_start_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_start_value_0  = value_start_value as Color
-                valueSerializer.writeInt32((value_start_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_start_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_start_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -1136,20 +1395,7 @@ export class Serializer extends SerializerBase {
     }
     writeTransitionEffect(value: TransitionEffect): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLocalizedBorderRadiuses(value: LocalizedBorderRadiuses): void {
         let valueSerializer : Serializer = this
@@ -1188,236 +1434,19 @@ export class Serializer extends SerializerBase {
     }
     writeCanvasPattern(value: CanvasPattern): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCanvasGradient(value: CanvasGradient): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeColorMetrics(value: ColorMetrics): void {
         let valueSerializer : Serializer = this
-        const value__ColorMetricsStub  = value._ColorMetricsStub
-        valueSerializer.writeString(value__ColorMetricsStub)
-    }
-    writeStyledStringValue(value: StyledStringValue): void {
-        let valueSerializer : Serializer = this
-        const value_stub  = value.stub
-        valueSerializer.writeString(value_stub)
-    }
-    writeImageAttachmentLayoutStyle(value: ImageAttachmentLayoutStyle): void {
-        let valueSerializer : Serializer = this
-        const value_margin  = value.margin
-        let value_margin_type : int32 = RuntimeType.UNDEFINED
-        value_margin_type = runtimeType(value_margin)
-        valueSerializer.writeInt8(value_margin_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_margin_type)) {
-            const value_margin_value  = value_margin!
-            let value_margin_value_type : int32 = RuntimeType.UNDEFINED
-            value_margin_value_type = runtimeType(value_margin_value)
-            if (((RuntimeType.OBJECT) == (value_margin_value_type)) && (TypeChecker.isLengthMetrics(value_margin_value, false, false))) {
-                valueSerializer.writeInt8(0 as int32)
-                const value_margin_value_0  = value_margin_value as LengthMetrics
-                valueSerializer.writeLengthMetrics(value_margin_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_margin_value_type)) && (TypeChecker.isPadding(value_margin_value, false, false, false, false))) {
-                valueSerializer.writeInt8(1 as int32)
-                const value_margin_value_1  = value_margin_value as Margin
-                const value_margin_value_1_top  = value_margin_value_1.top
-                let value_margin_value_1_top_type : int32 = RuntimeType.UNDEFINED
-                value_margin_value_1_top_type = runtimeType(value_margin_value_1_top)
-                valueSerializer.writeInt8(value_margin_value_1_top_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_top_type)) {
-                    const value_margin_value_1_top_value  = value_margin_value_1_top!
-                    valueSerializer.writeLength(value_margin_value_1_top_value)
-                }
-                const value_margin_value_1_right  = value_margin_value_1.right
-                let value_margin_value_1_right_type : int32 = RuntimeType.UNDEFINED
-                value_margin_value_1_right_type = runtimeType(value_margin_value_1_right)
-                valueSerializer.writeInt8(value_margin_value_1_right_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_right_type)) {
-                    const value_margin_value_1_right_value  = value_margin_value_1_right!
-                    valueSerializer.writeLength(value_margin_value_1_right_value)
-                }
-                const value_margin_value_1_bottom  = value_margin_value_1.bottom
-                let value_margin_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
-                value_margin_value_1_bottom_type = runtimeType(value_margin_value_1_bottom)
-                valueSerializer.writeInt8(value_margin_value_1_bottom_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_bottom_type)) {
-                    const value_margin_value_1_bottom_value  = value_margin_value_1_bottom!
-                    valueSerializer.writeLength(value_margin_value_1_bottom_value)
-                }
-                const value_margin_value_1_left  = value_margin_value_1.left
-                let value_margin_value_1_left_type : int32 = RuntimeType.UNDEFINED
-                value_margin_value_1_left_type = runtimeType(value_margin_value_1_left)
-                valueSerializer.writeInt8(value_margin_value_1_left_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_margin_value_1_left_type)) {
-                    const value_margin_value_1_left_value  = value_margin_value_1_left!
-                    valueSerializer.writeLength(value_margin_value_1_left_value)
-                }
-            }
-        }
-        const value_padding  = value.padding
-        let value_padding_type : int32 = RuntimeType.UNDEFINED
-        value_padding_type = runtimeType(value_padding)
-        valueSerializer.writeInt8(value_padding_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_padding_type)) {
-            const value_padding_value  = value_padding!
-            let value_padding_value_type : int32 = RuntimeType.UNDEFINED
-            value_padding_value_type = runtimeType(value_padding_value)
-            if (((RuntimeType.OBJECT) == (value_padding_value_type)) && (TypeChecker.isLengthMetrics(value_padding_value, false, false))) {
-                valueSerializer.writeInt8(0 as int32)
-                const value_padding_value_0  = value_padding_value as LengthMetrics
-                valueSerializer.writeLengthMetrics(value_padding_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_padding_value_type)) && (TypeChecker.isPadding(value_padding_value, false, false, false, false))) {
-                valueSerializer.writeInt8(1 as int32)
-                const value_padding_value_1  = value_padding_value as Padding
-                const value_padding_value_1_top  = value_padding_value_1.top
-                let value_padding_value_1_top_type : int32 = RuntimeType.UNDEFINED
-                value_padding_value_1_top_type = runtimeType(value_padding_value_1_top)
-                valueSerializer.writeInt8(value_padding_value_1_top_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_top_type)) {
-                    const value_padding_value_1_top_value  = value_padding_value_1_top!
-                    valueSerializer.writeLength(value_padding_value_1_top_value)
-                }
-                const value_padding_value_1_right  = value_padding_value_1.right
-                let value_padding_value_1_right_type : int32 = RuntimeType.UNDEFINED
-                value_padding_value_1_right_type = runtimeType(value_padding_value_1_right)
-                valueSerializer.writeInt8(value_padding_value_1_right_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_right_type)) {
-                    const value_padding_value_1_right_value  = value_padding_value_1_right!
-                    valueSerializer.writeLength(value_padding_value_1_right_value)
-                }
-                const value_padding_value_1_bottom  = value_padding_value_1.bottom
-                let value_padding_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
-                value_padding_value_1_bottom_type = runtimeType(value_padding_value_1_bottom)
-                valueSerializer.writeInt8(value_padding_value_1_bottom_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_bottom_type)) {
-                    const value_padding_value_1_bottom_value  = value_padding_value_1_bottom!
-                    valueSerializer.writeLength(value_padding_value_1_bottom_value)
-                }
-                const value_padding_value_1_left  = value_padding_value_1.left
-                let value_padding_value_1_left_type : int32 = RuntimeType.UNDEFINED
-                value_padding_value_1_left_type = runtimeType(value_padding_value_1_left)
-                valueSerializer.writeInt8(value_padding_value_1_left_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_padding_value_1_left_type)) {
-                    const value_padding_value_1_left_value  = value_padding_value_1_left!
-                    valueSerializer.writeLength(value_padding_value_1_left_value)
-                }
-            }
-        }
-        const value_borderRadius  = value.borderRadius
-        let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
-        value_borderRadius_type = runtimeType(value_borderRadius)
-        valueSerializer.writeInt8(value_borderRadius_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_borderRadius_type)) {
-            const value_borderRadius_value  = value_borderRadius!
-            let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
-            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (TypeChecker.isLengthMetrics(value_borderRadius_value, false, false))) {
-                valueSerializer.writeInt8(0 as int32)
-                const value_borderRadius_value_0  = value_borderRadius_value as LengthMetrics
-                valueSerializer.writeLengthMetrics(value_borderRadius_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (TypeChecker.isBorderRadiuses(value_borderRadius_value, false, false, false, false))) {
-                valueSerializer.writeInt8(1 as int32)
-                const value_borderRadius_value_1  = value_borderRadius_value as BorderRadiuses
-                const value_borderRadius_value_1_topLeft  = value_borderRadius_value_1.topLeft
-                let value_borderRadius_value_1_topLeft_type : int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_1_topLeft_type = runtimeType(value_borderRadius_value_1_topLeft)
-                valueSerializer.writeInt8(value_borderRadius_value_1_topLeft_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_topLeft_type)) {
-                    const value_borderRadius_value_1_topLeft_value  = value_borderRadius_value_1_topLeft!
-                    valueSerializer.writeLength(value_borderRadius_value_1_topLeft_value)
-                }
-                const value_borderRadius_value_1_topRight  = value_borderRadius_value_1.topRight
-                let value_borderRadius_value_1_topRight_type : int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_1_topRight_type = runtimeType(value_borderRadius_value_1_topRight)
-                valueSerializer.writeInt8(value_borderRadius_value_1_topRight_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_topRight_type)) {
-                    const value_borderRadius_value_1_topRight_value  = value_borderRadius_value_1_topRight!
-                    valueSerializer.writeLength(value_borderRadius_value_1_topRight_value)
-                }
-                const value_borderRadius_value_1_bottomLeft  = value_borderRadius_value_1.bottomLeft
-                let value_borderRadius_value_1_bottomLeft_type : int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_1_bottomLeft_type = runtimeType(value_borderRadius_value_1_bottomLeft)
-                valueSerializer.writeInt8(value_borderRadius_value_1_bottomLeft_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_bottomLeft_type)) {
-                    const value_borderRadius_value_1_bottomLeft_value  = value_borderRadius_value_1_bottomLeft!
-                    valueSerializer.writeLength(value_borderRadius_value_1_bottomLeft_value)
-                }
-                const value_borderRadius_value_1_bottomRight  = value_borderRadius_value_1.bottomRight
-                let value_borderRadius_value_1_bottomRight_type : int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_1_bottomRight_type = runtimeType(value_borderRadius_value_1_bottomRight)
-                valueSerializer.writeInt8(value_borderRadius_value_1_bottomRight_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_borderRadius_value_1_bottomRight_type)) {
-                    const value_borderRadius_value_1_bottomRight_value  = value_borderRadius_value_1_bottomRight!
-                    valueSerializer.writeLength(value_borderRadius_value_1_bottomRight_value)
-                }
-            }
-        }
-    }
-    writeSizeOptions(value: SizeOptions): void {
-        let valueSerializer : Serializer = this
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8(value_width_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
-            const value_width_value  = value_width!
-            valueSerializer.writeLength(value_width_value)
-        }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8(value_height_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
-            const value_height_value  = value_height!
-            valueSerializer.writeLength(value_height_value)
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeImageAnalyzerController(value: ImageAnalyzerController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeEventTarget(value: EventTarget): void {
         let valueSerializer : Serializer = this
@@ -1426,54 +1455,15 @@ export class Serializer extends SerializerBase {
     }
     writeWebResourceRequest(value: WebResourceRequest): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebviewController(value: WebviewController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebController(value: WebController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDateTimeOptions(value: DateTimeOptions): void {
         let valueSerializer : Serializer = this
@@ -1528,7 +1518,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -1563,7 +1553,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_type_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type_type)) {
             const value_type_value  = (value_type as ButtonType)
-            valueSerializer.writeInt32((value_type_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_type_value as ButtonType) as int32))
         }
         const value_style  = value.style
         let value_style_type : int32 = RuntimeType.UNDEFINED
@@ -1571,7 +1561,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as ButtonStyleMode)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as ButtonStyleMode) as int32))
         }
         const value_role  = value.role
         let value_role_type : int32 = RuntimeType.UNDEFINED
@@ -1579,7 +1569,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_role_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_role_type)) {
             const value_role_value  = (value_role as ButtonRole)
-            valueSerializer.writeInt32((value_role_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_role_value as ButtonRole) as int32))
         }
         const value_fontSize  = value.fontSize
         let value_fontSize_type : int32 = RuntimeType.UNDEFINED
@@ -1600,7 +1590,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_fontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontColor_value_0  = value_fontColor_value as Color
-                valueSerializer.writeInt32((value_fontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_fontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -1629,7 +1619,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isFontWeight(value_fontWeight_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontWeight_value_0  = value_fontWeight_value as FontWeight
-                valueSerializer.writeInt32((value_fontWeight_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontWeight_value_0 as FontWeight) as int32))
             }
             else if (RuntimeType.NUMBER == value_fontWeight_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -1648,7 +1638,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_fontStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_fontStyle_type)) {
             const value_fontStyle_value  = (value_fontStyle as FontStyle)
-            valueSerializer.writeInt32((value_fontStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_fontStyle_value as FontStyle) as int32))
         }
         const value_fontFamily  = value.fontFamily
         let value_fontFamily_type : int32 = RuntimeType.UNDEFINED
@@ -1680,7 +1670,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -1706,7 +1696,7 @@ export class Serializer extends SerializerBase {
             const value_borderRadius_value  = value_borderRadius!
             let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if (((RuntimeType.NUMBER) == (value_borderRadius_value_type)) || ((RuntimeType.STRING) == (value_borderRadius_value_type)) || (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (isResource(value_borderRadius_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderRadius_value_type)) || ((RuntimeType.STRING) == (value_borderRadius_value_type)) || (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (TypeChecker.isResource(value_borderRadius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderRadius_value_0  = value_borderRadius_value as Length
                 valueSerializer.writeLength(value_borderRadius_value_0)
@@ -1759,20 +1749,7 @@ export class Serializer extends SerializerBase {
     }
     writeTextMenuItemId(value: TextMenuItemId): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeAffinity(value: Affinity): void {
         let valueSerializer : Serializer = this
@@ -1792,7 +1769,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_selectedColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_selectedColor_value_0  = value_selectedColor_value as Color
-                valueSerializer.writeInt32((value_selectedColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_selectedColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_selectedColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -1821,7 +1798,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_unselectedColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_unselectedColor_value_0  = value_unselectedColor_value as Color
-                valueSerializer.writeInt32((value_unselectedColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_unselectedColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_unselectedColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -1848,7 +1825,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_overflow_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_overflow_type)) {
             const value_overflow_value  = (value_overflow as TextOverflow)
-            valueSerializer.writeInt32((value_overflow_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_overflow_value as TextOverflow) as int32))
         }
         const value_maxLines  = value.maxLines
         let value_maxLines_type : int32 = RuntimeType.UNDEFINED
@@ -1924,7 +1901,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_heightAdaptivePolicy_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_heightAdaptivePolicy_type)) {
             const value_heightAdaptivePolicy_value  = (value_heightAdaptivePolicy as TextHeightAdaptivePolicy)
-            valueSerializer.writeInt32((value_heightAdaptivePolicy_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_heightAdaptivePolicy_value as TextHeightAdaptivePolicy) as int32))
         }
         const value_font  = value.font
         let value_font_type : int32 = RuntimeType.UNDEFINED
@@ -2007,7 +1984,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -2036,7 +2013,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_selectedColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_selectedColor_value_0  = value_selectedColor_value as Color
-                valueSerializer.writeInt32((value_selectedColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_selectedColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_selectedColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -2084,7 +2061,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -2130,9 +2107,9 @@ export class Serializer extends SerializerBase {
         const value_size_1  = value_size[1]
         valueSerializer.writeNumber(value_size_1)
         const value_verticalAlign  = value.verticalAlign
-        valueSerializer.writeInt32((value_verticalAlign.valueOf() as int32))
+        valueSerializer.writeInt32(((value_verticalAlign as ImageSpanAlignment) as int32))
         const value_objectFit  = value.objectFit
-        valueSerializer.writeInt32((value_objectFit.valueOf() as int32))
+        valueSerializer.writeInt32(((value_objectFit as ImageFit) as int32))
         const value_layoutStyle  = value.layoutStyle
         let value_layoutStyle_type : int32 = RuntimeType.UNDEFINED
         value_layoutStyle_type = runtimeType(value_layoutStyle)
@@ -2160,7 +2137,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_textAlign_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_textAlign_type)) {
             const value_textAlign_value  = (value_textAlign as TextAlign)
-            valueSerializer.writeInt32((value_textAlign_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_textAlign_value as TextAlign) as int32))
         }
         const value_leadingMargin  = value.leadingMargin
         let value_leadingMargin_type : int32 = RuntimeType.UNDEFINED
@@ -2170,7 +2147,7 @@ export class Serializer extends SerializerBase {
             const value_leadingMargin_value  = value_leadingMargin!
             let value_leadingMargin_value_type : int32 = RuntimeType.UNDEFINED
             value_leadingMargin_value_type = runtimeType(value_leadingMargin_value)
-            if (((RuntimeType.NUMBER) == (value_leadingMargin_value_type)) || ((RuntimeType.STRING) == (value_leadingMargin_value_type)) || (((RuntimeType.OBJECT) == (value_leadingMargin_value_type)) && (isResource(value_leadingMargin_value)))) {
+            if (((RuntimeType.NUMBER) == (value_leadingMargin_value_type)) || ((RuntimeType.STRING) == (value_leadingMargin_value_type)) || (((RuntimeType.OBJECT) == (value_leadingMargin_value_type)) && (TypeChecker.isResource(value_leadingMargin_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_leadingMargin_value_0  = value_leadingMargin_value as Dimension
                 valueSerializer.writeLength(value_leadingMargin_value_0)
@@ -2187,7 +2164,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_wordBreak_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_wordBreak_type)) {
             const value_wordBreak_value  = (value_wordBreak as WordBreak)
-            valueSerializer.writeInt32((value_wordBreak_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_wordBreak_value as WordBreak) as int32))
         }
         const value_lineBreakStrategy  = value.lineBreakStrategy
         let value_lineBreakStrategy_type : int32 = RuntimeType.UNDEFINED
@@ -2195,7 +2172,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_lineBreakStrategy_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_lineBreakStrategy_type)) {
             const value_lineBreakStrategy_value  = (value_lineBreakStrategy as LineBreakStrategy)
-            valueSerializer.writeInt32((value_lineBreakStrategy_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_lineBreakStrategy_value as LineBreakStrategy) as int32))
         }
     }
     writeRichEditorSymbolSpanStyle(value: RichEditorSymbolSpanStyle): void {
@@ -2238,7 +2215,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_fontColor_value_element)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_fontColor_value_element_0  = value_fontColor_value_element as Color
-                    valueSerializer.writeInt32((value_fontColor_value_element_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_fontColor_value_element_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_fontColor_value_element_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -2273,7 +2250,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isFontWeight(value_fontWeight_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_fontWeight_value_1  = value_fontWeight_value as FontWeight
-                valueSerializer.writeInt32((value_fontWeight_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontWeight_value_1 as FontWeight) as int32))
             }
             else if (RuntimeType.STRING == value_fontWeight_value_type) {
                 valueSerializer.writeInt8(2 as int32)
@@ -2287,7 +2264,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_effectStrategy_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_effectStrategy_type)) {
             const value_effectStrategy_value  = (value_effectStrategy as SymbolEffectStrategy)
-            valueSerializer.writeInt32((value_effectStrategy_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_effectStrategy_value as SymbolEffectStrategy) as int32))
         }
         const value_renderingStrategy  = value.renderingStrategy
         let value_renderingStrategy_type : int32 = RuntimeType.UNDEFINED
@@ -2295,7 +2272,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_renderingStrategy_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_renderingStrategy_type)) {
             const value_renderingStrategy_value  = (value_renderingStrategy as SymbolRenderingStrategy)
-            valueSerializer.writeInt32((value_renderingStrategy_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_renderingStrategy_value as SymbolRenderingStrategy) as int32))
         }
     }
     writeRichEditorTextStyleResult(value: RichEditorTextStyleResult): void {
@@ -2306,7 +2283,7 @@ export class Serializer extends SerializerBase {
         if (TypeChecker.isColor(value_fontColor)) {
             valueSerializer.writeInt8(0 as int32)
             const value_fontColor_0  = value_fontColor as Color
-            valueSerializer.writeInt32((value_fontColor_0.valueOf() as int32))
+            valueSerializer.writeInt32(((value_fontColor_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_fontColor_type) {
             valueSerializer.writeInt8(1 as int32)
@@ -2326,7 +2303,7 @@ export class Serializer extends SerializerBase {
         const value_fontSize  = value.fontSize
         valueSerializer.writeNumber(value_fontSize)
         const value_fontStyle  = value.fontStyle
-        valueSerializer.writeInt32((value_fontStyle.valueOf() as int32))
+        valueSerializer.writeInt32(((value_fontStyle as FontStyle) as int32))
         const value_fontWeight  = value.fontWeight
         valueSerializer.writeNumber(value_fontWeight)
         const value_fontFamily  = value.fontFamily
@@ -2389,7 +2366,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_verticalAlign_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_verticalAlign_type)) {
             const value_verticalAlign_value  = (value_verticalAlign as ImageSpanAlignment)
-            valueSerializer.writeInt32((value_verticalAlign_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_verticalAlign_value as ImageSpanAlignment) as int32))
         }
         const value_objectFit  = value.objectFit
         let value_objectFit_type : int32 = RuntimeType.UNDEFINED
@@ -2397,7 +2374,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_objectFit_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_objectFit_type)) {
             const value_objectFit_value  = (value_objectFit as ImageFit)
-            valueSerializer.writeInt32((value_objectFit_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_objectFit_value as ImageFit) as int32))
         }
         const value_layoutStyle  = value.layoutStyle
         let value_layoutStyle_type : int32 = RuntimeType.UNDEFINED
@@ -2421,7 +2398,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_fontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontColor_value_0  = value_fontColor_value as Color
-                valueSerializer.writeInt32((value_fontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_fontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -2447,7 +2424,7 @@ export class Serializer extends SerializerBase {
             const value_fontSize_value  = value_fontSize!
             let value_fontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_fontSize_value_type = runtimeType(value_fontSize_value)
-            if (((RuntimeType.NUMBER) == (value_fontSize_value_type)) || ((RuntimeType.STRING) == (value_fontSize_value_type)) || (((RuntimeType.OBJECT) == (value_fontSize_value_type)) && (isResource(value_fontSize_value)))) {
+            if (((RuntimeType.NUMBER) == (value_fontSize_value_type)) || ((RuntimeType.STRING) == (value_fontSize_value_type)) || (((RuntimeType.OBJECT) == (value_fontSize_value_type)) && (TypeChecker.isResource(value_fontSize_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontSize_value_0  = value_fontSize_value as Length
                 valueSerializer.writeLength(value_fontSize_value_0)
@@ -2464,7 +2441,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_fontStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_fontStyle_type)) {
             const value_fontStyle_value  = (value_fontStyle as FontStyle)
-            valueSerializer.writeInt32((value_fontStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_fontStyle_value as FontStyle) as int32))
         }
         const value_fontWeight  = value.fontWeight
         let value_fontWeight_type : int32 = RuntimeType.UNDEFINED
@@ -2482,7 +2459,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isFontWeight(value_fontWeight_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_fontWeight_value_1  = value_fontWeight_value as FontWeight
-                valueSerializer.writeInt32((value_fontWeight_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontWeight_value_1 as FontWeight) as int32))
             }
             else if (RuntimeType.STRING == value_fontWeight_value_type) {
                 valueSerializer.writeInt8(2 as int32)
@@ -2613,37 +2590,11 @@ export class Serializer extends SerializerBase {
     }
     writeNavPathStack(value: NavPathStack): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeNavPathInfo(value: NavPathInfo): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextModifier(value: TextModifier): void {
     }
@@ -2759,7 +2710,7 @@ export class Serializer extends SerializerBase {
             const value_x_value  = value_x!
             let value_x_value_type : int32 = RuntimeType.UNDEFINED
             value_x_value_type = runtimeType(value_x_value)
-            if (((RuntimeType.NUMBER) == (value_x_value_type)) || ((RuntimeType.STRING) == (value_x_value_type)) || (((RuntimeType.OBJECT) == (value_x_value_type)) && (isResource(value_x_value)))) {
+            if (((RuntimeType.NUMBER) == (value_x_value_type)) || ((RuntimeType.STRING) == (value_x_value_type)) || (((RuntimeType.OBJECT) == (value_x_value_type)) && (TypeChecker.isResource(value_x_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_x_value_0  = value_x_value as Length
                 valueSerializer.writeLength(value_x_value_0)
@@ -2778,7 +2729,7 @@ export class Serializer extends SerializerBase {
             const value_y_value  = value_y!
             let value_y_value_type : int32 = RuntimeType.UNDEFINED
             value_y_value_type = runtimeType(value_y_value)
-            if (((RuntimeType.NUMBER) == (value_y_value_type)) || ((RuntimeType.STRING) == (value_y_value_type)) || (((RuntimeType.OBJECT) == (value_y_value_type)) && (isResource(value_y_value)))) {
+            if (((RuntimeType.NUMBER) == (value_y_value_type)) || ((RuntimeType.STRING) == (value_y_value_type)) || (((RuntimeType.OBJECT) == (value_y_value_type)) && (TypeChecker.isResource(value_y_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_y_value_0  = value_y_value as Length
                 valueSerializer.writeLength(value_y_value_0)
@@ -2843,20 +2794,7 @@ export class Serializer extends SerializerBase {
     }
     writeLinearGradient(value: LinearGradient): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLunarSwitchStyle(value: LunarSwitchStyle): void {
         let valueSerializer : Serializer = this
@@ -2871,7 +2809,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_selectedColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_selectedColor_value_0  = value_selectedColor_value as Color
-                valueSerializer.writeInt32((value_selectedColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_selectedColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_selectedColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -2900,7 +2838,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_unselectedColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_unselectedColor_value_0  = value_unselectedColor_value as Color
-                valueSerializer.writeInt32((value_unselectedColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_unselectedColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_unselectedColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -2929,7 +2867,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_strokeColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_strokeColor_value_0  = value_strokeColor_value as Color
-                valueSerializer.writeInt32((value_strokeColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_strokeColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_strokeColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -3013,7 +2951,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_textColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_textColor_value_0  = value_textColor_value as Color
-                valueSerializer.writeInt32((value_textColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_textColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_textColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -3094,18 +3032,32 @@ export class Serializer extends SerializerBase {
         }
     }
     writeGestureGroupInterface(value: GestureGroupInterface): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRotationGestureInterface(value: RotationGestureInterface): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwipeGestureInterface(value: SwipeGestureInterface): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePinchGestureInterface(value: PinchGestureInterface): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePanGestureInterface(value: PanGestureInterface): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLongPressGestureInterface(value: LongPressGestureInterface): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTapGestureInterface(value: TapGestureInterface): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRotateOptions(value: RotateOptions): void {
         let valueSerializer : Serializer = this
@@ -3353,7 +3305,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as GradientDirection)
-            valueSerializer.writeInt32((value_direction_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_direction_value as GradientDirection) as int32))
         }
         const value_colors  = value.colors
         valueSerializer.writeInt32(value_colors.length as int32)
@@ -3365,7 +3317,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_colors_element_0)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_colors_element_0_0  = value_colors_element_0 as Color
-                valueSerializer.writeInt32((value_colors_element_0_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_colors_element_0_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_colors_element_0_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -3396,20 +3348,7 @@ export class Serializer extends SerializerBase {
     }
     writeDrawingCanvas(value: DrawingCanvas): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSize(value: Size): void {
         let valueSerializer : Serializer = this
@@ -3420,20 +3359,7 @@ export class Serializer extends SerializerBase {
     }
     writeFrameNode(value: FrameNode): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextStyle_alert_dialog(value: TextStyle_alert_dialog): void {
         let valueSerializer : Serializer = this
@@ -3443,7 +3369,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_wordBreak_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_wordBreak_type)) {
             const value_wordBreak_value  = (value_wordBreak as WordBreak)
-            valueSerializer.writeInt32((value_wordBreak_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_wordBreak_value as WordBreak) as int32))
         }
     }
     writeAlertDialogButtonBaseOptions(value: AlertDialogButtonBaseOptions): void {
@@ -3470,7 +3396,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as DialogButtonStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as DialogButtonStyle) as int32))
         }
         const value_value  = value.value
         let value_value_type : int32 = RuntimeType.UNDEFINED
@@ -3496,7 +3422,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_fontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontColor_value_0  = value_fontColor_value as Color
-                valueSerializer.writeInt32((value_fontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_fontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -3525,7 +3451,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -3609,7 +3535,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as DialogButtonStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as DialogButtonStyle) as int32))
         }
         const value_value  = value.value
         let value_value_type : int32 = RuntimeType.UNDEFINED
@@ -3701,8 +3627,13 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_parameters_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_parameters_type)) {
             const value_parameters_value  = value_parameters!
-            valueSerializer.writeInt32(value_parameters_value.size as int32)
-            // TODO: map serialization not implemented
+            valueSerializer.writeInt32(value_parameters_value.size as int32 as int32)
+            for (const pair of value_parameters_value) {
+                const value_parameters_value_key = pair[0]
+                const value_parameters_value_value = pair[1]
+                valueSerializer.writeString(value_parameters_value_key)
+                valueSerializer.writeCustomObject("Object", value_parameters_value_value)
+            }
         }
         const value_entities  = value.entities
         let value_entities_type : int32 = RuntimeType.UNDEFINED
@@ -3727,20 +3658,7 @@ export class Serializer extends SerializerBase {
     }
     writeStyledString(value: StyledString): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeNavigationAnimatedTransition(value: NavigationAnimatedTransition): void {
         let valueSerializer : Serializer = this
@@ -3874,161 +3792,85 @@ export class Serializer extends SerializerBase {
         const value_length  = value.length
         valueSerializer.writeNumber(value_length)
         const value_styledKey  = value.styledKey
-        valueSerializer.writeInt32((value_styledKey.valueOf() as int32))
+        valueSerializer.writeInt32(((value_styledKey as StyledStringKey) as int32))
         const value_styledValue  = value.styledValue
-        valueSerializer.writeStyledStringValue(value_styledValue)
-    }
-    writeTextBackgroundStyle(value: TextBackgroundStyle): void {
-        let valueSerializer : Serializer = this
-        const value_color  = value.color
-        let value_color_type : int32 = RuntimeType.UNDEFINED
-        value_color_type = runtimeType(value_color)
-        valueSerializer.writeInt8(value_color_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
-            const value_color_value  = value_color!
-            let value_color_value_type : int32 = RuntimeType.UNDEFINED
-            value_color_value_type = runtimeType(value_color_value)
-            if (TypeChecker.isColor(value_color_value)) {
-                valueSerializer.writeInt8(0 as int32)
-                const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
-            }
-            else if (RuntimeType.NUMBER == value_color_value_type) {
-                valueSerializer.writeInt8(1 as int32)
-                const value_color_value_1  = value_color_value as number
-                valueSerializer.writeNumber(value_color_value_1)
-            }
-            else if (RuntimeType.STRING == value_color_value_type) {
-                valueSerializer.writeInt8(2 as int32)
-                const value_color_value_2  = value_color_value as string
-                valueSerializer.writeString(value_color_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_color_value_type) {
-                valueSerializer.writeInt8(3 as int32)
-                const value_color_value_3  = value_color_value as Resource
-                valueSerializer.writeResource(value_color_value_3)
-            }
+        let value_styledValue_type : int32 = RuntimeType.UNDEFINED
+        value_styledValue_type = runtimeType(value_styledValue)
+        if (TypeChecker.isTextStyle_styled_string(value_styledValue, false, false, false, false, false)) {
+            valueSerializer.writeInt8(0 as int32)
+            const value_styledValue_0  = value_styledValue as TextStyle_styled_string
+            valueSerializer.writeTextStyle_styled_string(value_styledValue_0)
         }
-        const value_radius  = value.radius
-        let value_radius_type : int32 = RuntimeType.UNDEFINED
-        value_radius_type = runtimeType(value_radius)
-        valueSerializer.writeInt8(value_radius_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
-            const value_radius_value  = value_radius!
-            let value_radius_value_type : int32 = RuntimeType.UNDEFINED
-            value_radius_value_type = runtimeType(value_radius_value)
-            if (((RuntimeType.NUMBER) == (value_radius_value_type)) || ((RuntimeType.STRING) == (value_radius_value_type)) || (((RuntimeType.OBJECT) == (value_radius_value_type)) && (isResource(value_radius_value)))) {
-                valueSerializer.writeInt8(0 as int32)
-                const value_radius_value_0  = value_radius_value as Dimension
-                valueSerializer.writeLength(value_radius_value_0)
-            }
-            else if (((RuntimeType.OBJECT) == (value_radius_value_type)) && (TypeChecker.isBorderRadiuses(value_radius_value, false, false, false, false))) {
-                valueSerializer.writeInt8(1 as int32)
-                const value_radius_value_1  = value_radius_value as BorderRadiuses
-                const value_radius_value_1_topLeft  = value_radius_value_1.topLeft
-                let value_radius_value_1_topLeft_type : int32 = RuntimeType.UNDEFINED
-                value_radius_value_1_topLeft_type = runtimeType(value_radius_value_1_topLeft)
-                valueSerializer.writeInt8(value_radius_value_1_topLeft_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_topLeft_type)) {
-                    const value_radius_value_1_topLeft_value  = value_radius_value_1_topLeft!
-                    valueSerializer.writeLength(value_radius_value_1_topLeft_value)
-                }
-                const value_radius_value_1_topRight  = value_radius_value_1.topRight
-                let value_radius_value_1_topRight_type : int32 = RuntimeType.UNDEFINED
-                value_radius_value_1_topRight_type = runtimeType(value_radius_value_1_topRight)
-                valueSerializer.writeInt8(value_radius_value_1_topRight_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_topRight_type)) {
-                    const value_radius_value_1_topRight_value  = value_radius_value_1_topRight!
-                    valueSerializer.writeLength(value_radius_value_1_topRight_value)
-                }
-                const value_radius_value_1_bottomLeft  = value_radius_value_1.bottomLeft
-                let value_radius_value_1_bottomLeft_type : int32 = RuntimeType.UNDEFINED
-                value_radius_value_1_bottomLeft_type = runtimeType(value_radius_value_1_bottomLeft)
-                valueSerializer.writeInt8(value_radius_value_1_bottomLeft_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_bottomLeft_type)) {
-                    const value_radius_value_1_bottomLeft_value  = value_radius_value_1_bottomLeft!
-                    valueSerializer.writeLength(value_radius_value_1_bottomLeft_value)
-                }
-                const value_radius_value_1_bottomRight  = value_radius_value_1.bottomRight
-                let value_radius_value_1_bottomRight_type : int32 = RuntimeType.UNDEFINED
-                value_radius_value_1_bottomRight_type = runtimeType(value_radius_value_1_bottomRight)
-                valueSerializer.writeInt8(value_radius_value_1_bottomRight_type as int32)
-                if ((RuntimeType.UNDEFINED) != (value_radius_value_1_bottomRight_type)) {
-                    const value_radius_value_1_bottomRight_value  = value_radius_value_1_bottomRight!
-                    valueSerializer.writeLength(value_radius_value_1_bottomRight_value)
-                }
-            }
+        else if (TypeChecker.isDecorationStyle(value_styledValue, false, false, false)) {
+            valueSerializer.writeInt8(1 as int32)
+            const value_styledValue_1  = value_styledValue as DecorationStyle
+            valueSerializer.writeDecorationStyle(value_styledValue_1)
         }
-    }
-    writeCustomSpan(value: CustomSpan): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
+        else if (TypeChecker.isBaselineOffsetStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(2 as int32)
+            const value_styledValue_2  = value_styledValue as BaselineOffsetStyle
+            valueSerializer.writeBaselineOffsetStyle(value_styledValue_2)
         }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
+        else if (TypeChecker.isLetterSpacingStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(3 as int32)
+            const value_styledValue_3  = value_styledValue as LetterSpacingStyle
+            valueSerializer.writeLetterSpacingStyle(value_styledValue_3)
         }
-    }
-    writeImageAttachment(value: ImageAttachment): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
+        else if (TypeChecker.isTextShadowStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(4 as int32)
+            const value_styledValue_4  = value_styledValue as TextShadowStyle
+            valueSerializer.writeTextShadowStyle(value_styledValue_4)
         }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
+        else if (TypeChecker.isGestureStyle(value_styledValue)) {
+            valueSerializer.writeInt8(5 as int32)
+            const value_styledValue_5  = value_styledValue as GestureStyle
+            valueSerializer.writeGestureStyle(value_styledValue_5)
+        }
+        else if (TypeChecker.isImageAttachment(value_styledValue, false, false, false, false, false)) {
+            valueSerializer.writeInt8(6 as int32)
+            const value_styledValue_6  = value_styledValue as ImageAttachment
+            valueSerializer.writeImageAttachment(value_styledValue_6)
+        }
+        else if (TypeChecker.isParagraphStyle(value_styledValue, false, false, false, false, false, false)) {
+            valueSerializer.writeInt8(7 as int32)
+            const value_styledValue_7  = value_styledValue as ParagraphStyle
+            valueSerializer.writeParagraphStyle(value_styledValue_7)
+        }
+        else if (TypeChecker.isLineHeightStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(8 as int32)
+            const value_styledValue_8  = value_styledValue as LineHeightStyle
+            valueSerializer.writeLineHeightStyle(value_styledValue_8)
+        }
+        else if (TypeChecker.isUrlStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(9 as int32)
+            const value_styledValue_9  = value_styledValue as UrlStyle
+            valueSerializer.writeUrlStyle(value_styledValue_9)
+        }
+        else if (TypeChecker.isCustomSpan(value_styledValue)) {
+            valueSerializer.writeInt8(10 as int32)
+            const value_styledValue_10  = value_styledValue as CustomSpan
+            valueSerializer.writeCustomSpan(value_styledValue_10)
+        }
+        else if (RuntimeType.OBJECT == value_styledValue_type) {
+            valueSerializer.writeInt8(11 as int32)
+            const value_styledValue_11  = value_styledValue as UserDataSpan
+            valueSerializer.writeUserDataSpan(value_styledValue_11)
+        }
+        else if (TypeChecker.isBackgroundColorStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(12 as int32)
+            const value_styledValue_12  = value_styledValue as BackgroundColorStyle
+            valueSerializer.writeBackgroundColorStyle(value_styledValue_12)
         }
     }
     writeWaterFlowAttribute(value: WaterFlowAttribute): void {
     }
     writeWaterFlowSections(value: WaterFlowSections): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScroller(value: Scroller): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSectionOptions(value: SectionOptions): void {
         let valueSerializer : Serializer = this
@@ -4074,7 +3916,7 @@ export class Serializer extends SerializerBase {
             const value_margin_value  = value_margin!
             let value_margin_value_type : int32 = RuntimeType.UNDEFINED
             value_margin_value_type = runtimeType(value_margin_value)
-            if (((RuntimeType.OBJECT) == (value_margin_value_type)) && (TypeChecker.isPadding(value_margin_value, false, false, false, false))) {
+            if (TypeChecker.isPadding(value_margin_value, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_margin_value_0  = value_margin_value as Margin
                 const value_margin_value_0_top  = value_margin_value_0.top
@@ -4110,7 +3952,7 @@ export class Serializer extends SerializerBase {
                     valueSerializer.writeLength(value_margin_value_0_left_value)
                 }
             }
-            else if (((RuntimeType.NUMBER) == (value_margin_value_type)) || ((RuntimeType.STRING) == (value_margin_value_type)) || (((RuntimeType.OBJECT) == (value_margin_value_type)) && (isResource(value_margin_value)))) {
+            else if (((RuntimeType.NUMBER) == (value_margin_value_type)) || ((RuntimeType.STRING) == (value_margin_value_type)) || (((RuntimeType.OBJECT) == (value_margin_value_type)) && (TypeChecker.isResource(value_margin_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_margin_value_1  = value_margin_value as Dimension
                 valueSerializer.writeLength(value_margin_value_1)
@@ -4145,7 +3987,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -4190,12 +4032,12 @@ export class Serializer extends SerializerBase {
             const value_shown_0  = value_shown as string
             valueSerializer.writeString(value_shown_0)
         }
-        else if (((RuntimeType.OBJECT) == (value_shown_type)) && (TypeChecker.isPixelMap(value_shown, false, false))) {
+        else if (TypeChecker.isPixelMap(value_shown, false, false)) {
             valueSerializer.writeInt8(1 as int32)
             const value_shown_1  = value_shown as PixelMap
             valueSerializer.writePixelMap(value_shown_1)
         }
-        else if (isResource(value_shown)) {
+        else if (TypeChecker.isResource(value_shown, false, false, false, false, false)) {
             valueSerializer.writeInt8(2 as int32)
             const value_shown_2  = value_shown as Resource
             valueSerializer.writeResource(value_shown_2)
@@ -4208,12 +4050,12 @@ export class Serializer extends SerializerBase {
             const value_hidden_0  = value_hidden as string
             valueSerializer.writeString(value_hidden_0)
         }
-        else if (((RuntimeType.OBJECT) == (value_hidden_type)) && (TypeChecker.isPixelMap(value_hidden, false, false))) {
+        else if (TypeChecker.isPixelMap(value_hidden, false, false)) {
             valueSerializer.writeInt8(1 as int32)
             const value_hidden_1  = value_hidden as PixelMap
             valueSerializer.writePixelMap(value_hidden_1)
         }
-        else if (isResource(value_hidden)) {
+        else if (TypeChecker.isResource(value_hidden, false, false, false, false, false)) {
             valueSerializer.writeInt8(2 as int32)
             const value_hidden_2  = value_hidden as Resource
             valueSerializer.writeResource(value_hidden_2)
@@ -4231,12 +4073,12 @@ export class Serializer extends SerializerBase {
                 const value_switching_value_0  = value_switching_value as string
                 valueSerializer.writeString(value_switching_value_0)
             }
-            else if (((RuntimeType.OBJECT) == (value_switching_value_type)) && (TypeChecker.isPixelMap(value_switching_value, false, false))) {
+            else if (TypeChecker.isPixelMap(value_switching_value, false, false)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_switching_value_1  = value_switching_value as PixelMap
                 valueSerializer.writePixelMap(value_switching_value_1)
             }
-            else if (isResource(value_switching_value)) {
+            else if (TypeChecker.isResource(value_switching_value, false, false, false, false, false)) {
                 valueSerializer.writeInt8(2 as int32)
                 const value_switching_value_2  = value_switching_value as Resource
                 valueSerializer.writeResource(value_switching_value_2)
@@ -4254,7 +4096,7 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeInt32(value_types_value.length as int32)
             for (let i = 0; i < value_types_value.length; i++) {
                 const value_types_value_element : ImageAnalyzerType = value_types_value[i]
-                valueSerializer.writeInt32((value_types_value_element.valueOf() as int32))
+                valueSerializer.writeInt32(((value_types_value_element as ImageAnalyzerType) as int32))
             }
         }
         const value_aiController  = value.aiController
@@ -4268,20 +4110,7 @@ export class Serializer extends SerializerBase {
     }
     writeXComponentController(value: XComponentController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeImageAnalyzerConfig(value: ImageAnalyzerConfig): void {
         let valueSerializer : Serializer = this
@@ -4289,7 +4118,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt32(value_types.length as int32)
         for (let i = 0; i < value_types.length; i++) {
             const value_types_element : ImageAnalyzerType = value_types[i]
-            valueSerializer.writeInt32((value_types_element.valueOf() as int32))
+            valueSerializer.writeInt32(((value_types_element as ImageAnalyzerType) as int32))
         }
     }
     writeSurfaceRect(value: SurfaceRect): void {
@@ -4362,59 +4191,20 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_menuType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_menuType_type)) {
             const value_menuType_value  = (value_menuType as MenuType)
-            valueSerializer.writeInt32((value_menuType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_menuType_value as MenuType) as int32))
         }
     }
     writeWebKeyboardController(value: WebKeyboardController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeEventResult(value: EventResult): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTouchEvent(value: TouchEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeNativeEmbedInfo(value: NativeEmbedInfo): void {
         let valueSerializer : Serializer = this
@@ -4488,8 +4278,13 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_params_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_params_type)) {
             const value_params_value  = value_params!
-            valueSerializer.writeInt32(value_params_value.size as int32)
-            // TODO: map serialization not implemented
+            valueSerializer.writeInt32(value_params_value.size as int32 as int32)
+            for (const pair of value_params_value) {
+                const value_params_value_key = pair[0]
+                const value_params_value_value = pair[1]
+                valueSerializer.writeString(value_params_value_key)
+                valueSerializer.writeString(value_params_value_value)
+            }
         }
     }
     writeNestedScrollOptionsExt(value: NestedScrollOptionsExt): void {
@@ -4500,7 +4295,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_scrollUp_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_scrollUp_type)) {
             const value_scrollUp_value  = (value_scrollUp as NestedScrollMode)
-            valueSerializer.writeInt32((value_scrollUp_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_scrollUp_value as NestedScrollMode) as int32))
         }
         const value_scrollDown  = value.scrollDown
         let value_scrollDown_type : int32 = RuntimeType.UNDEFINED
@@ -4508,7 +4303,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_scrollDown_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_scrollDown_type)) {
             const value_scrollDown_value  = (value_scrollDown as NestedScrollMode)
-            valueSerializer.writeInt32((value_scrollDown_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_scrollDown_value as NestedScrollMode) as int32))
         }
         const value_scrollRight  = value.scrollRight
         let value_scrollRight_type : int32 = RuntimeType.UNDEFINED
@@ -4516,7 +4311,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_scrollRight_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_scrollRight_type)) {
             const value_scrollRight_value  = (value_scrollRight as NestedScrollMode)
-            valueSerializer.writeInt32((value_scrollRight_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_scrollRight_value as NestedScrollMode) as int32))
         }
         const value_scrollLeft  = value.scrollLeft
         let value_scrollLeft_type : int32 = RuntimeType.UNDEFINED
@@ -4524,343 +4319,96 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_scrollLeft_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_scrollLeft_type)) {
             const value_scrollLeft_value  = (value_scrollLeft as NestedScrollMode)
-            valueSerializer.writeInt32((value_scrollLeft_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_scrollLeft_value as NestedScrollMode) as int32))
         }
     }
     writeNestedScrollOptions(value: NestedScrollOptions): void {
         let valueSerializer : Serializer = this
         const value_scrollForward  = value.scrollForward
-        valueSerializer.writeInt32((value_scrollForward.valueOf() as int32))
+        valueSerializer.writeInt32(((value_scrollForward as NestedScrollMode) as int32))
         const value_scrollBackward  = value.scrollBackward
-        valueSerializer.writeInt32((value_scrollBackward.valueOf() as int32))
+        valueSerializer.writeInt32(((value_scrollBackward as NestedScrollMode) as int32))
     }
     writeDataResubmissionHandler(value: DataResubmissionHandler): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeControllerHandler(value: ControllerHandler): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeClientAuthenticationHandler(value: ClientAuthenticationHandler): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSslErrorHandler(value: SslErrorHandler): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebContextMenuResult(value: WebContextMenuResult): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebContextMenuParam(value: WebContextMenuParam): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScreenCaptureHandler(value: ScreenCaptureHandler): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePermissionRequest(value: PermissionRequest): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeHttpAuthHandler(value: HttpAuthHandler): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFullScreenExitHandler(value: FullScreenExitHandler): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFileSelectorParam(value: FileSelectorParam): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFileSelectorResult(value: FileSelectorResult): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebResourceResponse(value: WebResourceResponse): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebResourceError(value: WebResourceError): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeConsoleMessage(value: ConsoleMessage): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeJsResult(value: JsResult): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeJsGeolocation(value: JsGeolocation): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWebCookie(value: WebCookie): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScreenCaptureConfig(value: ScreenCaptureConfig): void {
         let valueSerializer : Serializer = this
         const value_captureMode  = value.captureMode
-        valueSerializer.writeInt32((value_captureMode.valueOf() as int32))
+        valueSerializer.writeInt32(((value_captureMode as WebCaptureMode) as int32))
     }
     writeVideoController(value: VideoController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTimePickerDialogOptions(value: TimePickerDialogOptions): void {
         let valueSerializer : Serializer = this
@@ -4878,7 +4426,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_format_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_format_type)) {
             const value_format_value  = (value_format as TimePickerFormat)
-            valueSerializer.writeInt32((value_format_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_format_value as TimePickerFormat) as int32))
         }
         const value_useMilitaryTime  = value.useMilitaryTime
         let value_useMilitaryTime_type : int32 = RuntimeType.UNDEFINED
@@ -4942,7 +4490,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignment_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
-            valueSerializer.writeInt32((value_alignment_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignment_value as DialogAlignment) as int32))
         }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
@@ -4990,7 +4538,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -5014,7 +4562,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_onDidAppear  = value.onDidAppear
         let value_onDidAppear_type : int32 = RuntimeType.UNDEFINED
@@ -5064,7 +4612,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_dateTimeOptions  = value.dateTimeOptions
@@ -5089,25 +4637,12 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hoverModeArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
-            valueSerializer.writeInt32((value_hoverModeArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hoverModeArea_value as HoverModeAreaType) as int32))
         }
     }
     writeTextTimerController(value: TextTimerController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextPickerDialogOptions(value: TextPickerDialogOptions): void {
         let valueSerializer : Serializer = this
@@ -5136,7 +4671,7 @@ export class Serializer extends SerializerBase {
                 }
             }
         }
-        else if (isResource(value_range)) {
+        else if (TypeChecker.isResource(value_range, false, false, false, false, false)) {
             valueSerializer.writeInt8(2 as int32)
             const value_range_2  = value_range as Resource
             valueSerializer.writeResource(value_range_2)
@@ -5310,7 +4845,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignment_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
-            valueSerializer.writeInt32((value_alignment_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignment_value as DialogAlignment) as int32))
         }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
@@ -5334,7 +4869,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -5358,7 +4893,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_onDidAppear  = value.onDidAppear
         let value_onDidAppear_type : int32 = RuntimeType.UNDEFINED
@@ -5408,7 +4943,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_enableHoverMode  = value.enableHoverMode
@@ -5425,7 +4960,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hoverModeArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
-            valueSerializer.writeInt32((value_hoverModeArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hoverModeArea_value as HoverModeAreaType) as int32))
         }
     }
     writeDividerOptions(value: DividerOptions): void {
@@ -5449,7 +4984,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -5529,7 +5064,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_typing_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_typing_value_0  = value_typing_value as Color
-                valueSerializer.writeInt32((value_typing_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_typing_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_typing_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -5558,7 +5093,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_normal_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_normal_value_0  = value_normal_value as Color
-                valueSerializer.writeInt32((value_normal_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_normal_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_normal_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -5587,7 +5122,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_error_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_error_value_0  = value_error_value as Color
-                valueSerializer.writeInt32((value_error_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_error_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_error_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -5616,7 +5151,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_disable_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_disable_value_0  = value_disable_value as Color
-                valueSerializer.writeInt32((value_disable_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_disable_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_disable_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -5637,20 +5172,7 @@ export class Serializer extends SerializerBase {
     }
     writeTextInputController(value: TextInputController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSelectionOptions(value: SelectionOptions): void {
         let valueSerializer : Serializer = this
@@ -5660,7 +5182,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_menuPolicy_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_menuPolicy_type)) {
             const value_menuPolicy_value  = (value_menuPolicy as MenuPolicy)
-            valueSerializer.writeInt32((value_menuPolicy_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_menuPolicy_value as MenuPolicy) as int32))
         }
     }
     writeTextRange(value: TextRange): void {
@@ -5733,20 +5255,7 @@ export class Serializer extends SerializerBase {
     }
     writeMutableStyledString(value: MutableStyledString): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePreviewText(value: PreviewText): void {
         let valueSerializer : Serializer = this
@@ -5757,56 +5266,17 @@ export class Serializer extends SerializerBase {
     }
     writeLayoutManager(value: LayoutManager): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextClockController(value: TextClockController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextAreaAttribute(value: TextAreaAttribute): void {
     }
     writeTextAreaController(value: TextAreaController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextAttribute(value: TextAttribute): void {
     }
@@ -5834,7 +5304,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_menuType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_menuType_type)) {
             const value_menuType_value  = (value_menuType as MenuType)
-            valueSerializer.writeInt32((value_menuType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_menuType_value as MenuType) as int32))
         }
     }
     writeFontSettingOptions(value: FontSettingOptions): void {
@@ -5850,20 +5320,7 @@ export class Serializer extends SerializerBase {
     }
     writeTextController(value: TextController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeBottomTabBarStyle(value: BottomTabBarStyle): void {
         let valueSerializer : Serializer = this
@@ -5932,7 +5389,7 @@ export class Serializer extends SerializerBase {
             const value__padding_value  = value__padding!
             let value__padding_value_type : int32 = RuntimeType.UNDEFINED
             value__padding_value_type = runtimeType(value__padding_value)
-            if (((RuntimeType.OBJECT) == (value__padding_value_type)) && (TypeChecker.isPadding(value__padding_value, true, false, true, false))) {
+            if (TypeChecker.isPadding(value__padding_value, false, false, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value__padding_value_0  = value__padding_value as Padding
                 const value__padding_value_0_top  = value__padding_value_0.top
@@ -5968,7 +5425,7 @@ export class Serializer extends SerializerBase {
                     valueSerializer.writeLength(value__padding_value_0_left_value)
                 }
             }
-            else if (((RuntimeType.NUMBER) == (value__padding_value_type)) || ((RuntimeType.STRING) == (value__padding_value_type)) || (((RuntimeType.OBJECT) == (value__padding_value_type)) && (isResource(value__padding_value)))) {
+            else if (((RuntimeType.NUMBER) == (value__padding_value_type)) || ((RuntimeType.STRING) == (value__padding_value_type)) || (((RuntimeType.OBJECT) == (value__padding_value_type)) && (TypeChecker.isResource(value__padding_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value__padding_value_1  = value__padding_value as Dimension
                 valueSerializer.writeLength(value__padding_value_1)
@@ -5985,7 +5442,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value__layoutMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value__layoutMode_type)) {
             const value__layoutMode_value  = (value__layoutMode as LayoutMode)
-            valueSerializer.writeInt32((value__layoutMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value__layoutMode_value as LayoutMode) as int32))
         }
         const value__verticalAlign  = value._verticalAlign
         let value__verticalAlign_type : int32 = RuntimeType.UNDEFINED
@@ -5993,7 +5450,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value__verticalAlign_type as int32)
         if ((RuntimeType.UNDEFINED) != (value__verticalAlign_type)) {
             const value__verticalAlign_value  = (value__verticalAlign as VerticalAlign)
-            valueSerializer.writeInt32((value__verticalAlign_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value__verticalAlign_value as VerticalAlign) as int32))
         }
         const value__symmetricExtensible  = value._symmetricExtensible
         let value__symmetricExtensible_type : int32 = RuntimeType.UNDEFINED
@@ -6035,7 +5492,7 @@ export class Serializer extends SerializerBase {
                 const value__content_value_0  = value__content_value as string
                 valueSerializer.writeString(value__content_value_0)
             }
-            else if (isResource(value__content_value)) {
+            else if (TypeChecker.isResource(value__content_value, false, false, false, false, false)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value__content_value_1  = value__content_value as Resource
                 valueSerializer.writeResource(value__content_value_1)
@@ -6060,7 +5517,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value__selectedMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value__selectedMode_type)) {
             const value__selectedMode_value  = (value__selectedMode as SelectedMode)
-            valueSerializer.writeInt32((value__selectedMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value__selectedMode_value as SelectedMode) as int32))
         }
         const value__board  = value._board
         let value__board_type : int32 = RuntimeType.UNDEFINED
@@ -6086,12 +5543,12 @@ export class Serializer extends SerializerBase {
             const value__padding_value  = value__padding!
             let value__padding_value_type : int32 = RuntimeType.UNDEFINED
             value__padding_value_type = runtimeType(value__padding_value)
-            if ((((RuntimeType.OBJECT) == (value__padding_value_type)) && (TypeChecker.isPadding(value__padding_value, false, false, false, false))) || (((RuntimeType.NUMBER) == (value__padding_value_type)) || ((RuntimeType.STRING) == (value__padding_value_type)) || (((RuntimeType.OBJECT) == (value__padding_value_type)) && (isResource(value__padding_value))))) {
+            if ((TypeChecker.isPadding(value__padding_value, false, false, false, false)) || (((RuntimeType.NUMBER) == (value__padding_value_type)) || ((RuntimeType.STRING) == (value__padding_value_type)) || (((RuntimeType.OBJECT) == (value__padding_value_type)) && (TypeChecker.isResource(value__padding_value, false, false, false, false, false))))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value__padding_value_0  = value__padding_value as Padding | Dimension
                 let value__padding_value_0_type : int32 = RuntimeType.UNDEFINED
                 value__padding_value_0_type = runtimeType(value__padding_value_0)
-                if (((RuntimeType.OBJECT) == (value__padding_value_0_type)) && (TypeChecker.isPadding(value__padding_value_0, false, false, false, false))) {
+                if (TypeChecker.isPadding(value__padding_value_0, false, false, false, false)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value__padding_value_0_0  = value__padding_value_0 as Padding
                     const value__padding_value_0_0_top  = value__padding_value_0_0.top
@@ -6127,7 +5584,7 @@ export class Serializer extends SerializerBase {
                         valueSerializer.writeLength(value__padding_value_0_0_left_value)
                     }
                 }
-                else if (((RuntimeType.NUMBER) == (value__padding_value_0_type)) || ((RuntimeType.STRING) == (value__padding_value_0_type)) || (((RuntimeType.OBJECT) == (value__padding_value_0_type)) && (isResource(value__padding_value_0)))) {
+                else if (((RuntimeType.NUMBER) == (value__padding_value_0_type)) || ((RuntimeType.STRING) == (value__padding_value_0_type)) || (((RuntimeType.OBJECT) == (value__padding_value_0_type)) && (TypeChecker.isResource(value__padding_value_0, false, false, false, false, false)))) {
                     valueSerializer.writeInt8(1 as int32)
                     const value__padding_value_0_1  = value__padding_value_0 as Dimension
                     valueSerializer.writeLength(value__padding_value_0_1)
@@ -6199,7 +5656,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_colorMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_colorMode_type)) {
             const value_colorMode_value  = (value_colorMode as ThemeColorMode)
-            valueSerializer.writeInt32((value_colorMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_colorMode_value as ThemeColorMode) as int32))
         }
         const value_adaptiveColor  = value.adaptiveColor
         let value_adaptiveColor_type : int32 = RuntimeType.UNDEFINED
@@ -6207,7 +5664,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_adaptiveColor_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_adaptiveColor_type)) {
             const value_adaptiveColor_value  = (value_adaptiveColor as AdaptiveColor)
-            valueSerializer.writeInt32((value_adaptiveColor_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_adaptiveColor_value as AdaptiveColor) as int32))
         }
         const value_scale  = value.scale
         let value_scale_type : int32 = RuntimeType.UNDEFINED
@@ -6231,7 +5688,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_policy_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_policy_type)) {
             const value_policy_value  = (value_policy as BlurStyleActivePolicy)
-            valueSerializer.writeInt32((value_policy_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_policy_value as BlurStyleActivePolicy) as int32))
         }
         const value_inactiveColor  = value.inactiveColor
         let value_inactiveColor_type : int32 = RuntimeType.UNDEFINED
@@ -6244,7 +5701,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_inactiveColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_inactiveColor_value_0  = value_inactiveColor_value as Color
-                valueSerializer.writeInt32((value_inactiveColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_inactiveColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_inactiveColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -6279,7 +5736,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_nonScrollableLayoutStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_nonScrollableLayoutStyle_type)) {
             const value_nonScrollableLayoutStyle_value  = (value_nonScrollableLayoutStyle as LayoutStyle)
-            valueSerializer.writeInt32((value_nonScrollableLayoutStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_nonScrollableLayoutStyle_value as LayoutStyle) as int32))
         }
     }
     writeTabContentAnimatedTransition(value: TabContentAnimatedTransition): void {
@@ -6297,20 +5754,7 @@ export class Serializer extends SerializerBase {
     }
     writeTabsController(value: TabsController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSymbolGlyphAttribute(value: SymbolGlyphAttribute): void {
     }
@@ -6377,7 +5821,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value__fontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value__fontColor_value_0  = value__fontColor_value as Color
-                valueSerializer.writeInt32((value__fontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value__fontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value__fontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -6406,7 +5850,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value__selectedFontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value__selectedFontColor_value_0  = value__selectedFontColor_value as Color
-                valueSerializer.writeInt32((value__selectedFontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value__selectedFontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value__selectedFontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -6542,7 +5986,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value__color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value__color_value_0  = value__color_value as Color
-                valueSerializer.writeInt32((value__color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value__color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value__color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -6571,7 +6015,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value__selectedColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value__selectedColor_value_0  = value__selectedColor_value as Color
-                valueSerializer.writeInt32((value__selectedColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value__selectedColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value__selectedColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -6653,7 +6097,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -6690,7 +6134,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_arrowColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_arrowColor_value_0  = value_arrowColor_value as Color
-                valueSerializer.writeInt32((value_arrowColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_arrowColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_arrowColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -6808,7 +6252,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_fontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontColor_value_0  = value_fontColor_value as Color
-                valueSerializer.writeInt32((value_fontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_fontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -6843,7 +6287,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as CancelButtonStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as CancelButtonStyle) as int32))
         }
         const value_icon  = value.icon
         let value_icon_type : int32 = RuntimeType.UNDEFINED
@@ -6862,7 +6306,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as CancelButtonStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as CancelButtonStyle) as int32))
         }
         const value_icon  = value.icon
         let value_icon_type : int32 = RuntimeType.UNDEFINED
@@ -6875,20 +6319,7 @@ export class Serializer extends SerializerBase {
     }
     writeSearchController(value: SearchController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScrollAttribute(value: ScrollAttribute): void {
     }
@@ -7000,37 +6431,11 @@ export class Serializer extends SerializerBase {
     }
     writeRichEditorStyledStringController(value: RichEditorStyledStringController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRichEditorController(value: RichEditorController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRichEditorAttribute(value: RichEditorAttribute): void {
     }
@@ -7055,7 +6460,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_fontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontColor_value_0  = value_fontColor_value as Color
-                valueSerializer.writeInt32((value_fontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_fontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -7632,7 +7037,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_borderColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as Color
-                valueSerializer.writeInt32((value_borderColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_borderColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_borderColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -7685,7 +7090,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_fontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontColor_value_0  = value_fontColor_value as Color
-                valueSerializer.writeInt32((value_fontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_fontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -7744,7 +7149,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_status_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_status_type)) {
             const value_status_value  = (value_status as ProgressStatus)
-            valueSerializer.writeInt32((value_status_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_status_value as ProgressStatus) as int32))
         }
     }
     writeLinearStyleOptions(value: LinearStyleOptions): void {
@@ -7810,7 +7215,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -7863,7 +7268,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_mode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_mode_type)) {
             const value_mode_value  = (value_mode as NavDestinationMode)
-            valueSerializer.writeInt32((value_mode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_mode_value as NavDestinationMode) as int32))
         }
         const value_param  = value.param
         let value_param_type : int32 = RuntimeType.UNDEFINED
@@ -7884,20 +7289,7 @@ export class Serializer extends SerializerBase {
     }
     writeNavDestinationContext(value: NavDestinationContext): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeNavigationInterception(value: NavigationInterception): void {
         let valueSerializer : Serializer = this
@@ -7934,7 +7326,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_launchMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_launchMode_type)) {
             const value_launchMode_value  = (value_launchMode as LaunchMode)
-            valueSerializer.writeInt32((value_launchMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_launchMode_value as LaunchMode) as int32))
         }
         const value_animated  = value.animated
         let value_animated_type : int32 = RuntimeType.UNDEFINED
@@ -7960,7 +7352,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -7984,7 +7376,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_barStyle  = value.barStyle
         let value_barStyle_type : int32 = RuntimeType.UNDEFINED
@@ -7992,7 +7384,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_barStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_barStyle_type)) {
             const value_barStyle_value  = (value_barStyle as BarStyle)
-            valueSerializer.writeInt32((value_barStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_barStyle_value as BarStyle) as int32))
         }
     }
     writeNavigationTitleOptions(value: NavigationTitleOptions): void {
@@ -8008,7 +7400,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -8032,7 +7424,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_barStyle  = value.barStyle
         let value_barStyle_type : int32 = RuntimeType.UNDEFINED
@@ -8040,7 +7432,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_barStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_barStyle_type)) {
             const value_barStyle_value  = (value_barStyle as BarStyle)
-            valueSerializer.writeInt32((value_barStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_barStyle_value as BarStyle) as int32))
         }
         const value_paddingStart  = value.paddingStart
         let value_paddingStart_type : int32 = RuntimeType.UNDEFINED
@@ -8093,9 +7485,9 @@ export class Serializer extends SerializerBase {
         if (TypeChecker.isTitleHeight(value_height)) {
             valueSerializer.writeInt8(0 as int32)
             const value_height_0  = value_height as TitleHeight
-            valueSerializer.writeInt32((value_height_0.valueOf() as int32))
+            valueSerializer.writeInt32(((value_height_0 as TitleHeight) as int32))
         }
-        else if (((RuntimeType.NUMBER) == (value_height_type)) || ((RuntimeType.STRING) == (value_height_type)) || (((RuntimeType.OBJECT) == (value_height_type)) && (isResource(value_height)))) {
+        else if (((RuntimeType.NUMBER) == (value_height_type)) || ((RuntimeType.STRING) == (value_height_type)) || (((RuntimeType.OBJECT) == (value_height_type)) && (TypeChecker.isResource(value_height, false, false, false, false, false)))) {
             valueSerializer.writeInt8(1 as int32)
             const value_height_1  = value_height as Length
             valueSerializer.writeLength(value_height_1)
@@ -8268,7 +7660,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -8321,20 +7713,7 @@ export class Serializer extends SerializerBase {
     }
     writeMatrix2D(value: Matrix2D): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeListDividerOptions(value: ListDividerOptions): void {
         let valueSerializer : Serializer = this
@@ -8351,7 +7730,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -8398,7 +7777,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_itemGroupArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_itemGroupArea_type)) {
             const value_itemGroupArea_value  = (value_itemGroupArea as ListItemGroupArea)
-            valueSerializer.writeInt32((value_itemGroupArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_itemGroupArea_value as ListItemGroupArea) as int32))
         }
         const value_itemIndexInGroup  = value.itemIndexInGroup
         let value_itemIndexInGroup_type : int32 = RuntimeType.UNDEFINED
@@ -8427,20 +7806,7 @@ export class Serializer extends SerializerBase {
     }
     writeColorFilter(value: ColorFilter): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeBreakPoints(value: BreakPoints): void {
         let valueSerializer : Serializer = this
@@ -8462,44 +7828,18 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_reference_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_reference_type)) {
             const value_reference_value  = (value_reference as BreakpointsReference)
-            valueSerializer.writeInt32((value_reference_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_reference_value as BreakpointsReference) as int32))
         }
     }
     writeGridAttribute(value: GridAttribute): void {
     }
     writePanGestureOptions(value: PanGestureOptions): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeEventTargetInfo(value: EventTargetInfo): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWindowStatusType(value: WindowStatusType): void {
         let valueSerializer : Serializer = this
@@ -8645,7 +7985,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignment_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
-            valueSerializer.writeInt32((value_alignment_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignment_value as DialogAlignment) as int32))
         }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
@@ -8709,7 +8049,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -8733,7 +8073,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_onDidAppear  = value.onDidAppear
         let value_onDidAppear_type : int32 = RuntimeType.UNDEFINED
@@ -8783,7 +8123,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_dateTimeOptions  = value.dateTimeOptions
@@ -8808,7 +8148,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hoverModeArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
-            valueSerializer.writeInt32((value_hoverModeArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hoverModeArea_value as HoverModeAreaType) as int32))
         }
     }
     writeAnimateParam(value: AnimateParam): void {
@@ -8840,7 +8180,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isCurve(value_curve_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_curve_value_0  = value_curve_value as Curve
-                valueSerializer.writeInt32((value_curve_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_curve_value_0 as Curve) as int32))
             }
             else if (RuntimeType.STRING == value_curve_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -8875,7 +8215,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_playMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_playMode_type)) {
             const value_playMode_value  = (value_playMode as PlayMode)
-            valueSerializer.writeInt32((value_playMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_playMode_value as PlayMode) as int32))
         }
         const value_onFinish  = value.onFinish
         let value_onFinish_type : int32 = RuntimeType.UNDEFINED
@@ -8891,7 +8231,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_finishCallbackType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_finishCallbackType_type)) {
             const value_finishCallbackType_value  = (value_finishCallbackType as FinishCallbackType)
-            valueSerializer.writeInt32((value_finishCallbackType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_finishCallbackType_value as FinishCallbackType) as int32))
         }
         const value_expectedFrameRateRange  = value.expectedFrameRateRange
         let value_expectedFrameRateRange_type : int32 = RuntimeType.UNDEFINED
@@ -8903,11 +8243,6 @@ export class Serializer extends SerializerBase {
         }
     }
     writeComponent3DAttribute(value: Component3DAttribute): void {
-    }
-    writeContext(value: Context): void {
-        let valueSerializer : Serializer = this
-        const value__ContextStub  = value._ContextStub
-        valueSerializer.writeString(value__ContextStub)
     }
     writeUIGestureEvent(value: UIGestureEvent): void {
     }
@@ -8941,20 +8276,7 @@ export class Serializer extends SerializerBase {
     }
     writeRectShape(value: RectShape): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCaretOffset(value: CaretOffset): void {
         let valueSerializer : Serializer = this
@@ -9042,7 +8364,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -9103,9 +8425,9 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isSheetSize(value_height_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_height_value_0  = value_height_value as SheetSize
-                valueSerializer.writeInt32((value_height_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_height_value_0 as SheetSize) as int32))
             }
-            else if (((RuntimeType.NUMBER) == (value_height_value_type)) || ((RuntimeType.STRING) == (value_height_value_type)) || (((RuntimeType.OBJECT) == (value_height_value_type)) && (isResource(value_height_value)))) {
+            else if (((RuntimeType.NUMBER) == (value_height_value_type)) || ((RuntimeType.STRING) == (value_height_value_type)) || (((RuntimeType.OBJECT) == (value_height_value_type)) && (TypeChecker.isResource(value_height_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_height_value_1  = value_height_value as Length
                 valueSerializer.writeLength(value_height_value_1)
@@ -9130,7 +8452,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_maskColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_maskColor_value_0  = value_maskColor_value as Color
-                valueSerializer.writeInt32((value_maskColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_maskColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_maskColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -9160,9 +8482,9 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isSheetSize(value_detents_value_0)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_detents_value_0_0  = value_detents_value_0 as SheetSize
-                valueSerializer.writeInt32((value_detents_value_0_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_detents_value_0_0 as SheetSize) as int32))
             }
-            else if (((RuntimeType.NUMBER) == (value_detents_value_0_type)) || ((RuntimeType.STRING) == (value_detents_value_0_type)) || (((RuntimeType.OBJECT) == (value_detents_value_0_type)) && (isResource(value_detents_value_0)))) {
+            else if (((RuntimeType.NUMBER) == (value_detents_value_0_type)) || ((RuntimeType.STRING) == (value_detents_value_0_type)) || (((RuntimeType.OBJECT) == (value_detents_value_0_type)) && (TypeChecker.isResource(value_detents_value_0, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_detents_value_0_1  = value_detents_value_0 as Length
                 valueSerializer.writeLength(value_detents_value_0_1)
@@ -9178,9 +8500,9 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isSheetSize(value_detents_value_1_value)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_detents_value_1_value_0  = value_detents_value_1_value as SheetSize
-                    valueSerializer.writeInt32((value_detents_value_1_value_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_detents_value_1_value_0 as SheetSize) as int32))
                 }
-                else if (((RuntimeType.NUMBER) == (value_detents_value_1_value_type)) || ((RuntimeType.STRING) == (value_detents_value_1_value_type)) || (((RuntimeType.OBJECT) == (value_detents_value_1_value_type)) && (isResource(value_detents_value_1_value)))) {
+                else if (((RuntimeType.NUMBER) == (value_detents_value_1_value_type)) || ((RuntimeType.STRING) == (value_detents_value_1_value_type)) || (((RuntimeType.OBJECT) == (value_detents_value_1_value_type)) && (TypeChecker.isResource(value_detents_value_1_value, false, false, false, false, false)))) {
                     valueSerializer.writeInt8(1 as int32)
                     const value_detents_value_1_value_1  = value_detents_value_1_value as Length
                     valueSerializer.writeLength(value_detents_value_1_value_1)
@@ -9197,9 +8519,9 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isSheetSize(value_detents_value_2_value)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_detents_value_2_value_0  = value_detents_value_2_value as SheetSize
-                    valueSerializer.writeInt32((value_detents_value_2_value_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_detents_value_2_value_0 as SheetSize) as int32))
                 }
-                else if (((RuntimeType.NUMBER) == (value_detents_value_2_value_type)) || ((RuntimeType.STRING) == (value_detents_value_2_value_type)) || (((RuntimeType.OBJECT) == (value_detents_value_2_value_type)) && (isResource(value_detents_value_2_value)))) {
+                else if (((RuntimeType.NUMBER) == (value_detents_value_2_value_type)) || ((RuntimeType.STRING) == (value_detents_value_2_value_type)) || (((RuntimeType.OBJECT) == (value_detents_value_2_value_type)) && (TypeChecker.isResource(value_detents_value_2_value, false, false, false, false, false)))) {
                     valueSerializer.writeInt8(1 as int32)
                     const value_detents_value_2_value_1  = value_detents_value_2_value as Length
                     valueSerializer.writeLength(value_detents_value_2_value_1)
@@ -9212,7 +8534,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_blurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_blurStyle_type)) {
             const value_blurStyle_value  = (value_blurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_blurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_blurStyle_value as BlurStyle) as int32))
         }
         const value_showClose  = value.showClose
         let value_showClose_type : int32 = RuntimeType.UNDEFINED
@@ -9239,7 +8561,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_preferType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_preferType_type)) {
             const value_preferType_value  = (value_preferType as SheetType)
-            valueSerializer.writeInt32((value_preferType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_preferType_value as SheetType) as int32))
         }
         const value_title  = value.title
         let value_title_type : int32 = RuntimeType.UNDEFINED
@@ -9308,7 +8630,7 @@ export class Serializer extends SerializerBase {
             const value_borderWidth_value  = value_borderWidth!
             let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_borderWidth_value_type = runtimeType(value_borderWidth_value)
-            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (isResource(value_borderWidth_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (TypeChecker.isResource(value_borderWidth_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderWidth_value_0  = value_borderWidth_value as Dimension
                 valueSerializer.writeLength(value_borderWidth_value_0)
@@ -9371,7 +8693,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_borderColor_value_0)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_borderColor_value_0_0  = value_borderColor_value_0 as Color
-                    valueSerializer.writeInt32((value_borderColor_value_0_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderColor_value_0_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_borderColor_value_0_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -9403,7 +8725,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_top_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_top_value_0  = value_borderColor_value_1_top_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_top_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_top_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_top_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -9432,7 +8754,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_right_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_right_value_0  = value_borderColor_value_1_right_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_right_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_right_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_right_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -9461,7 +8783,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_bottom_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_bottom_value_0  = value_borderColor_value_1_bottom_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_bottom_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_bottom_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_bottom_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -9490,7 +8812,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_left_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_left_value_0  = value_borderColor_value_1_left_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_left_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_left_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_left_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -9526,7 +8848,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isBorderStyle(value_borderStyle_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderStyle_value_0  = value_borderStyle_value as BorderStyle
-                valueSerializer.writeInt32((value_borderStyle_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_borderStyle_value_0 as BorderStyle) as int32))
             }
             else if (RuntimeType.OBJECT == value_borderStyle_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -9537,7 +8859,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_top_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_top_type)) {
                     const value_borderStyle_value_1_top_value  = (value_borderStyle_value_1_top as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_top_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_top_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_right  = value_borderStyle_value_1.right
                 let value_borderStyle_value_1_right_type : int32 = RuntimeType.UNDEFINED
@@ -9545,7 +8867,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_right_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_right_type)) {
                     const value_borderStyle_value_1_right_value  = (value_borderStyle_value_1_right as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_right_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_right_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_bottom  = value_borderStyle_value_1.bottom
                 let value_borderStyle_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -9553,7 +8875,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_bottom_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_bottom_type)) {
                     const value_borderStyle_value_1_bottom_value  = (value_borderStyle_value_1_bottom as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_bottom_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_bottom_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_left  = value_borderStyle_value_1.left
                 let value_borderStyle_value_1_left_type : int32 = RuntimeType.UNDEFINED
@@ -9561,7 +8883,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_left_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_left_type)) {
                     const value_borderStyle_value_1_left_value  = (value_borderStyle_value_1_left as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_left_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_left_value as BorderStyle) as int32))
                 }
             }
         }
@@ -9581,7 +8903,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_onHeightDidChange  = value.onHeightDidChange
@@ -9598,7 +8920,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_mode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_mode_type)) {
             const value_mode_value  = (value_mode as SheetMode)
-            valueSerializer.writeInt32((value_mode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_mode_value as SheetMode) as int32))
         }
         const value_scrollSizeMode  = value.scrollSizeMode
         let value_scrollSizeMode_type : int32 = RuntimeType.UNDEFINED
@@ -9606,7 +8928,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_scrollSizeMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_scrollSizeMode_type)) {
             const value_scrollSizeMode_value  = (value_scrollSizeMode as ScrollSizeMode)
-            valueSerializer.writeInt32((value_scrollSizeMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_scrollSizeMode_value as ScrollSizeMode) as int32))
         }
         const value_onDetentsDidChange  = value.onDetentsDidChange
         let value_onDetentsDidChange_type : int32 = RuntimeType.UNDEFINED
@@ -9646,7 +8968,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_keyboardAvoidMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_keyboardAvoidMode_type)) {
             const value_keyboardAvoidMode_value  = (value_keyboardAvoidMode as SheetKeyboardAvoidMode)
-            valueSerializer.writeInt32((value_keyboardAvoidMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_keyboardAvoidMode_value as SheetKeyboardAvoidMode) as int32))
         }
     }
     writeContentCoverOptions(value: ContentCoverOptions): void {
@@ -9662,7 +8984,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -9718,7 +9040,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_modalTransition_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_modalTransition_type)) {
             const value_modalTransition_value  = (value_modalTransition as ModalTransition)
-            valueSerializer.writeInt32((value_modalTransition_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_modalTransition_value as ModalTransition) as int32))
         }
         const value_onWillDismiss  = value.onWillDismiss
         let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
@@ -9753,7 +9075,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_placement_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_placement_type)) {
             const value_placement_value  = (value_placement as Placement)
-            valueSerializer.writeInt32((value_placement_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_placement_value as Placement) as int32))
         }
         const value_enableArrow  = value.enableArrow
         let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
@@ -9782,7 +9104,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isMenuPreviewMode(value_preview_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_preview_value_0  = value_preview_value as MenuPreviewMode
-                valueSerializer.writeInt32((value_preview_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_preview_value_0 as MenuPreviewMode) as int32))
             }
             else if (RuntimeType.FUNCTION == value_preview_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -9798,7 +9120,7 @@ export class Serializer extends SerializerBase {
             const value_borderRadius_value  = value_borderRadius!
             let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if (((RuntimeType.NUMBER) == (value_borderRadius_value_type)) || ((RuntimeType.STRING) == (value_borderRadius_value_type)) || (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (isResource(value_borderRadius_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderRadius_value_type)) || ((RuntimeType.STRING) == (value_borderRadius_value_type)) || (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (TypeChecker.isResource(value_borderRadius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderRadius_value_0  = value_borderRadius_value as Length
                 valueSerializer.writeLength(value_borderRadius_value_0)
@@ -9935,7 +9257,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -9959,7 +9281,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_transition  = value.transition
         let value_transition_type : int32 = RuntimeType.UNDEFINED
@@ -9994,7 +9316,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_placement_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_placement_type)) {
             const value_placement_value  = (value_placement as Placement)
-            valueSerializer.writeInt32((value_placement_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_placement_value as Placement) as int32))
         }
         const value_enableArrow  = value.enableArrow
         let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
@@ -10023,7 +9345,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isMenuPreviewMode(value_preview_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_preview_value_0  = value_preview_value as MenuPreviewMode
-                valueSerializer.writeInt32((value_preview_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_preview_value_0 as MenuPreviewMode) as int32))
             }
             else if (RuntimeType.FUNCTION == value_preview_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -10039,7 +9361,7 @@ export class Serializer extends SerializerBase {
             const value_borderRadius_value  = value_borderRadius!
             let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if (((RuntimeType.NUMBER) == (value_borderRadius_value_type)) || ((RuntimeType.STRING) == (value_borderRadius_value_type)) || (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (isResource(value_borderRadius_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderRadius_value_type)) || ((RuntimeType.STRING) == (value_borderRadius_value_type)) || (((RuntimeType.OBJECT) == (value_borderRadius_value_type)) && (TypeChecker.isResource(value_borderRadius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderRadius_value_0  = value_borderRadius_value as Length
                 valueSerializer.writeLength(value_borderRadius_value_0)
@@ -10176,7 +9498,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -10200,7 +9522,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_transition  = value.transition
         let value_transition_type : int32 = RuntimeType.UNDEFINED
@@ -10256,7 +9578,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_placement_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_placement_type)) {
             const value_placement_value  = (value_placement as Placement)
-            valueSerializer.writeInt32((value_placement_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_placement_value as Placement) as int32))
         }
         const value_maskColor  = value.maskColor
         let value_maskColor_type : int32 = RuntimeType.UNDEFINED
@@ -10269,7 +9591,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_maskColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_maskColor_value_0  = value_maskColor_value as Color
-                valueSerializer.writeInt32((value_maskColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_maskColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.STRING == value_maskColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -10298,7 +9620,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_popupColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_popupColor_value_0  = value_popupColor_value as Color
-                valueSerializer.writeInt32((value_popupColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_popupColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.STRING == value_popupColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -10378,7 +9700,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_mask_value_1_color)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_mask_value_1_color_0  = value_mask_value_1_color as Color
-                    valueSerializer.writeInt32((value_mask_value_1_color_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_mask_value_1_color_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_mask_value_1_color_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -10427,7 +9749,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_arrowPointPosition_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_arrowPointPosition_type)) {
             const value_arrowPointPosition_value  = (value_arrowPointPosition as ArrowPointPosition)
-            valueSerializer.writeInt32((value_arrowPointPosition_value as int32))
+            valueSerializer.writeInt32(TypeChecker.ArrowPointPosition_ToOrdinal(value_arrowPointPosition_value))
         }
         const value_arrowWidth  = value.arrowWidth
         let value_arrowWidth_type : int32 = RuntimeType.UNDEFINED
@@ -10469,7 +9791,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_backgroundBlurStyle  = value.backgroundBlurStyle
@@ -10478,7 +9800,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_focusable  = value.focusable
         let value_focusable_type : int32 = RuntimeType.UNDEFINED
@@ -10550,7 +9872,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_placement_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_placement_type)) {
             const value_placement_value  = (value_placement as Placement)
-            valueSerializer.writeInt32((value_placement_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_placement_value as Placement) as int32))
         }
         const value_primaryButton  = value.primaryButton
         let value_primaryButton_type : int32 = RuntimeType.UNDEFINED
@@ -10620,7 +9942,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_mask_value_1_color)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_mask_value_1_color_0  = value_mask_value_1_color as Color
-                    valueSerializer.writeInt32((value_mask_value_1_color_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_mask_value_1_color_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_mask_value_1_color_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -10682,7 +10004,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_popupColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_popupColor_value_0  = value_popupColor_value as Color
-                valueSerializer.writeInt32((value_popupColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_popupColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.STRING == value_popupColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -10722,7 +10044,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_arrowPointPosition_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_arrowPointPosition_type)) {
             const value_arrowPointPosition_value  = (value_arrowPointPosition as ArrowPointPosition)
-            valueSerializer.writeInt32((value_arrowPointPosition_value as int32))
+            valueSerializer.writeInt32(TypeChecker.ArrowPointPosition_ToOrdinal(value_arrowPointPosition_value))
         }
         const value_arrowWidth  = value.arrowWidth
         let value_arrowWidth_type : int32 = RuntimeType.UNDEFINED
@@ -10764,7 +10086,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_backgroundBlurStyle  = value.backgroundBlurStyle
@@ -10773,7 +10095,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_transition  = value.transition
         let value_transition_type : int32 = RuntimeType.UNDEFINED
@@ -10835,7 +10157,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hierarchyStrategy_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hierarchyStrategy_type)) {
             const value_hierarchyStrategy_value  = (value_hierarchyStrategy as TransitionHierarchyStrategy)
-            valueSerializer.writeInt32((value_hierarchyStrategy_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hierarchyStrategy_value as TransitionHierarchyStrategy) as int32))
         }
     }
     writeBlender(value: Blender): void {
@@ -10851,7 +10173,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_align_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_align_type)) {
             const value_align_value  = (value_align as Alignment)
-            valueSerializer.writeInt32((value_align_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_align_value as Alignment) as int32))
         }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
@@ -10894,7 +10216,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isDragPreviewMode(value_mode_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_mode_value_0  = value_mode_value as DragPreviewMode
-                valueSerializer.writeInt32((value_mode_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_mode_value_0 as DragPreviewMode) as int32))
             }
             else if (RuntimeType.OBJECT == value_mode_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -10902,7 +10224,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt32(value_mode_value_1.length as int32)
                 for (let i = 0; i < value_mode_value_1.length; i++) {
                     const value_mode_value_1_element : DragPreviewMode = value_mode_value_1[i]
-                    valueSerializer.writeInt32((value_mode_value_1_element.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_mode_value_1_element as DragPreviewMode) as int32))
                 }
             }
         }
@@ -10955,7 +10277,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isCurve(value_curve_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_curve_value_0  = value_curve_value as Curve
-                valueSerializer.writeInt32((value_curve_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_curve_value_0 as Curve) as int32))
             }
             else if (RuntimeType.STRING == value_curve_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -10998,7 +10320,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_type_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type_type)) {
             const value_type_value  = (value_type as SharedTransitionEffectType)
-            valueSerializer.writeInt32((value_type_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_type_value as SharedTransitionEffectType) as int32))
         }
     }
     writeLinearGradientBlurOptions(value: LinearGradientBlurOptions): void {
@@ -11013,7 +10335,7 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeNumber(value_fractionStops_element_1)
         }
         const value_direction  = value.direction
-        valueSerializer.writeInt32((value_direction.valueOf() as int32))
+        valueSerializer.writeInt32(((value_direction as GradientDirection) as int32))
     }
     writeForegroundBlurStyleOptions(value: ForegroundBlurStyleOptions): void {
         let valueSerializer : Serializer = this
@@ -11023,7 +10345,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_colorMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_colorMode_type)) {
             const value_colorMode_value  = (value_colorMode as ThemeColorMode)
-            valueSerializer.writeInt32((value_colorMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_colorMode_value as ThemeColorMode) as int32))
         }
         const value_adaptiveColor  = value.adaptiveColor
         let value_adaptiveColor_type : int32 = RuntimeType.UNDEFINED
@@ -11031,7 +10353,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_adaptiveColor_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_adaptiveColor_type)) {
             const value_adaptiveColor_value  = (value_adaptiveColor as AdaptiveColor)
-            valueSerializer.writeInt32((value_adaptiveColor_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_adaptiveColor_value as AdaptiveColor) as int32))
         }
         const value_scale  = value.scale
         let value_scale_type : int32 = RuntimeType.UNDEFINED
@@ -11052,71 +10374,19 @@ export class Serializer extends SerializerBase {
     }
     writePathShape(value: PathShape): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeEllipseShape(value: EllipseShape): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCircleShape(value: CircleShape): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeProgressMask(value: ProgressMask): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDragItemInfo(value: DragItemInfo): void {
         let valueSerializer : Serializer = this
@@ -11148,7 +10418,7 @@ export class Serializer extends SerializerBase {
     writeClickEffect(value: ClickEffect): void {
         let valueSerializer : Serializer = this
         const value_level  = value.level
-        valueSerializer.writeInt32((value_level.valueOf() as int32))
+        valueSerializer.writeInt32(((value_level as ClickEffectLevel) as int32))
         const value_scale  = value.scale
         let value_scale_type : int32 = RuntimeType.UNDEFINED
         value_scale_type = runtimeType(value_scale)
@@ -11182,14 +10452,14 @@ export class Serializer extends SerializerBase {
         const value_anchor  = value.anchor
         valueSerializer.writeString(value_anchor)
         const value_align  = value.align
-        valueSerializer.writeInt32((value_align.valueOf() as int32))
+        valueSerializer.writeInt32(((value_align as VerticalAlign) as int32))
     }
     writeLocalizedHorizontalAlignParam(value: LocalizedHorizontalAlignParam): void {
         let valueSerializer : Serializer = this
         const value_anchor  = value.anchor
         valueSerializer.writeString(value_anchor)
         const value_align  = value.align
-        valueSerializer.writeInt32((value_align.valueOf() as int32))
+        valueSerializer.writeInt32(((value_align as HorizontalAlign) as int32))
     }
     writeLocalizedPosition(value: LocalizedPosition): void {
         let valueSerializer : Serializer = this
@@ -11236,7 +10506,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_type_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type_type)) {
             const value_type_value  = (value_type as TransitionType)
-            valueSerializer.writeInt32((value_type_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_type_value as TransitionType) as int32))
         }
         const value_opacity  = value.opacity
         let value_opacity_type : int32 = RuntimeType.UNDEFINED
@@ -11278,20 +10548,7 @@ export class Serializer extends SerializerBase {
     }
     writeDrawModifier(value: DrawModifier): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeIntentionCode(value: IntentionCode): void {
         let valueSerializer : Serializer = this
@@ -11305,25 +10562,12 @@ export class Serializer extends SerializerBase {
     }
     writeUnifiedData(value: UnifiedData): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTouchObject(value: TouchObject): void {
         let valueSerializer : Serializer = this
         const value_type  = value.type
-        valueSerializer.writeInt32((value_type.valueOf() as int32))
+        valueSerializer.writeInt32(((value_type as TouchType) as int32))
         const value_id  = value.id
         valueSerializer.writeNumber(value_id)
         const value_displayX  = value.displayX
@@ -11342,6 +10586,11 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeNumber(value_x)
         const value_y  = value.y
         valueSerializer.writeNumber(value_y)
+    }
+    writeContext(value: Context): void {
+        let valueSerializer : Serializer = this
+        const value__ContextStub  = value._ContextStub
+        valueSerializer.writeString(value__ContextStub)
     }
     writeColumnSplitDividerStyle(value: ColumnSplitDividerStyle): void {
         let valueSerializer : Serializer = this
@@ -11383,7 +10632,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -11404,88 +10653,23 @@ export class Serializer extends SerializerBase {
     }
     writeDrawingRenderingContext(value: DrawingRenderingContext): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCanvasRenderingContext2D(value: CanvasRenderingContext2D): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeOffscreenCanvasRenderingContext2D(value: OffscreenCanvasRenderingContext2D): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRenderingContextSettings(value: RenderingContextSettings): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeImageBitmap(value: ImageBitmap): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextMetrics(value: TextMetrics): void {
         let valueSerializer : Serializer = this
@@ -11518,37 +10702,11 @@ export class Serializer extends SerializerBase {
     }
     writeImageData(value: ImageData): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePath2D(value: Path2D): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCalendarDialogOptions(value: CalendarDialogOptions): void {
         let valueSerializer : Serializer = this
@@ -11614,7 +10772,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -11638,7 +10796,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_acceptButtonStyle  = value.acceptButtonStyle
         let value_acceptButtonStyle_type : int32 = RuntimeType.UNDEFINED
@@ -11704,7 +10862,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_enableHoverMode  = value.enableHoverMode
@@ -11721,27 +10879,14 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hoverModeArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
-            valueSerializer.writeInt32((value_hoverModeArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hoverModeArea_value as HoverModeAreaType) as int32))
         }
     }
     writeCalendarPickerAttribute(value: CalendarPickerAttribute): void {
     }
     writeCalendarController(value: CalendarController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeMonthData(value: MonthData): void {
         let valueSerializer : Serializer = this
@@ -11769,7 +10914,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -11836,7 +10981,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_badgeColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_badgeColor_value_0  = value_badgeColor_value as Color
-                valueSerializer.writeInt32((value_badgeColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_badgeColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_badgeColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -11865,7 +11010,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_borderColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as Color
-                valueSerializer.writeInt32((value_borderColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_borderColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_borderColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -11907,7 +11052,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isFontWeight(value_fontWeight_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_fontWeight_value_1  = value_fontWeight_value as FontWeight
-                valueSerializer.writeInt32((value_fontWeight_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontWeight_value_1 as FontWeight) as int32))
             }
             else if (RuntimeType.STRING == value_fontWeight_value_type) {
                 valueSerializer.writeInt8(2 as int32)
@@ -11993,7 +11138,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignment_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
-            valueSerializer.writeInt32((value_alignment_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignment_value as DialogAlignment) as int32))
         }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
@@ -12049,7 +11194,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -12073,7 +11218,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_onWillDismiss  = value.onWillDismiss
         let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
@@ -12099,7 +11244,7 @@ export class Serializer extends SerializerBase {
             const value_cornerRadius_value  = value_cornerRadius!
             let value_cornerRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_cornerRadius_value_type = runtimeType(value_cornerRadius_value)
-            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (isResource(value_cornerRadius_value)))) {
+            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (TypeChecker.isResource(value_cornerRadius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_cornerRadius_value_0  = value_cornerRadius_value as Dimension
                 valueSerializer.writeLength(value_cornerRadius_value_0)
@@ -12170,7 +11315,7 @@ export class Serializer extends SerializerBase {
             const value_borderWidth_value  = value_borderWidth!
             let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_borderWidth_value_type = runtimeType(value_borderWidth_value)
-            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (isResource(value_borderWidth_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (TypeChecker.isResource(value_borderWidth_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderWidth_value_0  = value_borderWidth_value as Dimension
                 valueSerializer.writeLength(value_borderWidth_value_0)
@@ -12233,7 +11378,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_borderColor_value_0)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_borderColor_value_0_0  = value_borderColor_value_0 as Color
-                    valueSerializer.writeInt32((value_borderColor_value_0_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderColor_value_0_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_borderColor_value_0_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -12265,7 +11410,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_top_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_top_value_0  = value_borderColor_value_1_top_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_top_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_top_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_top_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -12294,7 +11439,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_right_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_right_value_0  = value_borderColor_value_1_right_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_right_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_right_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_right_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -12323,7 +11468,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_bottom_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_bottom_value_0  = value_borderColor_value_1_bottom_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_bottom_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_bottom_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_bottom_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -12352,7 +11497,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_left_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_left_value_0  = value_borderColor_value_1_left_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_left_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_left_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_left_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -12388,7 +11533,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isBorderStyle(value_borderStyle_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderStyle_value_0  = value_borderStyle_value as BorderStyle
-                valueSerializer.writeInt32((value_borderStyle_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_borderStyle_value_0 as BorderStyle) as int32))
             }
             else if (RuntimeType.OBJECT == value_borderStyle_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -12399,7 +11544,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_top_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_top_type)) {
                     const value_borderStyle_value_1_top_value  = (value_borderStyle_value_1_top as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_top_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_top_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_right  = value_borderStyle_value_1.right
                 let value_borderStyle_value_1_right_type : int32 = RuntimeType.UNDEFINED
@@ -12407,7 +11552,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_right_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_right_type)) {
                     const value_borderStyle_value_1_right_value  = (value_borderStyle_value_1_right as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_right_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_right_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_bottom  = value_borderStyle_value_1.bottom
                 let value_borderStyle_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -12415,7 +11560,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_bottom_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_bottom_type)) {
                     const value_borderStyle_value_1_bottom_value  = (value_borderStyle_value_1_bottom as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_bottom_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_bottom_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_left  = value_borderStyle_value_1.left
                 let value_borderStyle_value_1_left_type : int32 = RuntimeType.UNDEFINED
@@ -12423,7 +11568,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_left_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_left_type)) {
                     const value_borderStyle_value_1_left_value  = (value_borderStyle_value_1_left as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_left_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_left_value as BorderStyle) as int32))
                 }
             }
         }
@@ -12443,7 +11588,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_textStyle  = value.textStyle
@@ -12468,7 +11613,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hoverModeArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
-            valueSerializer.writeInt32((value_hoverModeArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hoverModeArea_value as HoverModeAreaType) as int32))
         }
         const value_buttons  = value.buttons
         valueSerializer.writeInt32(value_buttons.length as int32)
@@ -12482,7 +11627,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_buttonDirection_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_buttonDirection_type)) {
             const value_buttonDirection_value  = (value_buttonDirection as DialogButtonDirection)
-            valueSerializer.writeInt32((value_buttonDirection_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_buttonDirection_value as DialogButtonDirection) as int32))
         }
     }
     writeAlertDialogParamWithButtons(value: AlertDialogParamWithButtons): void {
@@ -12560,7 +11705,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignment_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
-            valueSerializer.writeInt32((value_alignment_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignment_value as DialogAlignment) as int32))
         }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
@@ -12616,7 +11761,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -12640,7 +11785,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_onWillDismiss  = value.onWillDismiss
         let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
@@ -12666,7 +11811,7 @@ export class Serializer extends SerializerBase {
             const value_cornerRadius_value  = value_cornerRadius!
             let value_cornerRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_cornerRadius_value_type = runtimeType(value_cornerRadius_value)
-            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (isResource(value_cornerRadius_value)))) {
+            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (TypeChecker.isResource(value_cornerRadius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_cornerRadius_value_0  = value_cornerRadius_value as Dimension
                 valueSerializer.writeLength(value_cornerRadius_value_0)
@@ -12737,7 +11882,7 @@ export class Serializer extends SerializerBase {
             const value_borderWidth_value  = value_borderWidth!
             let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_borderWidth_value_type = runtimeType(value_borderWidth_value)
-            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (isResource(value_borderWidth_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (TypeChecker.isResource(value_borderWidth_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderWidth_value_0  = value_borderWidth_value as Dimension
                 valueSerializer.writeLength(value_borderWidth_value_0)
@@ -12800,7 +11945,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_borderColor_value_0)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_borderColor_value_0_0  = value_borderColor_value_0 as Color
-                    valueSerializer.writeInt32((value_borderColor_value_0_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderColor_value_0_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_borderColor_value_0_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -12832,7 +11977,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_top_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_top_value_0  = value_borderColor_value_1_top_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_top_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_top_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_top_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -12861,7 +12006,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_right_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_right_value_0  = value_borderColor_value_1_right_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_right_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_right_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_right_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -12890,7 +12035,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_bottom_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_bottom_value_0  = value_borderColor_value_1_bottom_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_bottom_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_bottom_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_bottom_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -12919,7 +12064,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_left_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_left_value_0  = value_borderColor_value_1_left_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_left_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_left_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_left_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -12955,7 +12100,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isBorderStyle(value_borderStyle_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderStyle_value_0  = value_borderStyle_value as BorderStyle
-                valueSerializer.writeInt32((value_borderStyle_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_borderStyle_value_0 as BorderStyle) as int32))
             }
             else if (RuntimeType.OBJECT == value_borderStyle_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -12966,7 +12111,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_top_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_top_type)) {
                     const value_borderStyle_value_1_top_value  = (value_borderStyle_value_1_top as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_top_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_top_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_right  = value_borderStyle_value_1.right
                 let value_borderStyle_value_1_right_type : int32 = RuntimeType.UNDEFINED
@@ -12974,7 +12119,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_right_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_right_type)) {
                     const value_borderStyle_value_1_right_value  = (value_borderStyle_value_1_right as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_right_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_right_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_bottom  = value_borderStyle_value_1.bottom
                 let value_borderStyle_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -12982,7 +12127,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_bottom_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_bottom_type)) {
                     const value_borderStyle_value_1_bottom_value  = (value_borderStyle_value_1_bottom as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_bottom_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_bottom_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_left  = value_borderStyle_value_1.left
                 let value_borderStyle_value_1_left_type : int32 = RuntimeType.UNDEFINED
@@ -12990,7 +12135,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_left_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_left_type)) {
                     const value_borderStyle_value_1_left_value  = (value_borderStyle_value_1_left as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_left_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_left_value as BorderStyle) as int32))
                 }
             }
         }
@@ -13010,7 +12155,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_textStyle  = value.textStyle
@@ -13035,7 +12180,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hoverModeArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
-            valueSerializer.writeInt32((value_hoverModeArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hoverModeArea_value as HoverModeAreaType) as int32))
         }
         const value_primaryButton  = value.primaryButton
         valueSerializer.writeAlertDialogButtonBaseOptions(value_primaryButton)
@@ -13117,7 +12262,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignment_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
-            valueSerializer.writeInt32((value_alignment_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignment_value as DialogAlignment) as int32))
         }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
@@ -13173,7 +12318,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -13197,7 +12342,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_onWillDismiss  = value.onWillDismiss
         let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
@@ -13223,7 +12368,7 @@ export class Serializer extends SerializerBase {
             const value_cornerRadius_value  = value_cornerRadius!
             let value_cornerRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_cornerRadius_value_type = runtimeType(value_cornerRadius_value)
-            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (isResource(value_cornerRadius_value)))) {
+            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (TypeChecker.isResource(value_cornerRadius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_cornerRadius_value_0  = value_cornerRadius_value as Dimension
                 valueSerializer.writeLength(value_cornerRadius_value_0)
@@ -13294,7 +12439,7 @@ export class Serializer extends SerializerBase {
             const value_borderWidth_value  = value_borderWidth!
             let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_borderWidth_value_type = runtimeType(value_borderWidth_value)
-            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (isResource(value_borderWidth_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (TypeChecker.isResource(value_borderWidth_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderWidth_value_0  = value_borderWidth_value as Dimension
                 valueSerializer.writeLength(value_borderWidth_value_0)
@@ -13357,7 +12502,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_borderColor_value_0)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_borderColor_value_0_0  = value_borderColor_value_0 as Color
-                    valueSerializer.writeInt32((value_borderColor_value_0_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderColor_value_0_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_borderColor_value_0_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -13389,7 +12534,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_top_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_top_value_0  = value_borderColor_value_1_top_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_top_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_top_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_top_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -13418,7 +12563,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_right_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_right_value_0  = value_borderColor_value_1_right_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_right_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_right_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_right_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -13447,7 +12592,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_bottom_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_bottom_value_0  = value_borderColor_value_1_bottom_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_bottom_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_bottom_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_bottom_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -13476,7 +12621,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_left_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_left_value_0  = value_borderColor_value_1_left_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_left_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_left_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_left_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -13512,7 +12657,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isBorderStyle(value_borderStyle_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderStyle_value_0  = value_borderStyle_value as BorderStyle
-                valueSerializer.writeInt32((value_borderStyle_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_borderStyle_value_0 as BorderStyle) as int32))
             }
             else if (RuntimeType.OBJECT == value_borderStyle_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -13523,7 +12668,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_top_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_top_type)) {
                     const value_borderStyle_value_1_top_value  = (value_borderStyle_value_1_top as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_top_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_top_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_right  = value_borderStyle_value_1.right
                 let value_borderStyle_value_1_right_type : int32 = RuntimeType.UNDEFINED
@@ -13531,7 +12676,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_right_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_right_type)) {
                     const value_borderStyle_value_1_right_value  = (value_borderStyle_value_1_right as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_right_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_right_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_bottom  = value_borderStyle_value_1.bottom
                 let value_borderStyle_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -13539,7 +12684,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_bottom_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_bottom_type)) {
                     const value_borderStyle_value_1_bottom_value  = (value_borderStyle_value_1_bottom as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_bottom_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_bottom_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_left  = value_borderStyle_value_1.left
                 let value_borderStyle_value_1_left_type : int32 = RuntimeType.UNDEFINED
@@ -13547,7 +12692,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_left_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_left_type)) {
                     const value_borderStyle_value_1_left_value  = (value_borderStyle_value_1_left as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_left_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_left_value as BorderStyle) as int32))
                 }
             }
         }
@@ -13567,7 +12712,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_textStyle  = value.textStyle
@@ -13592,7 +12737,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hoverModeArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
-            valueSerializer.writeInt32((value_hoverModeArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hoverModeArea_value as HoverModeAreaType) as int32))
         }
         const value_confirm  = value.confirm
         let value_confirm_type : int32 = RuntimeType.UNDEFINED
@@ -13686,7 +12831,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignment_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
-            valueSerializer.writeInt32((value_alignment_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignment_value as DialogAlignment) as int32))
         }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
@@ -13731,7 +12876,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -13755,7 +12900,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_onWillDismiss  = value.onWillDismiss
         let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
@@ -13781,7 +12926,7 @@ export class Serializer extends SerializerBase {
             const value_cornerRadius_value  = value_cornerRadius!
             let value_cornerRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_cornerRadius_value_type = runtimeType(value_cornerRadius_value)
-            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (isResource(value_cornerRadius_value)))) {
+            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (TypeChecker.isResource(value_cornerRadius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_cornerRadius_value_0  = value_cornerRadius_value as Dimension
                 valueSerializer.writeLength(value_cornerRadius_value_0)
@@ -13852,7 +12997,7 @@ export class Serializer extends SerializerBase {
             const value_borderWidth_value  = value_borderWidth!
             let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_borderWidth_value_type = runtimeType(value_borderWidth_value)
-            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (isResource(value_borderWidth_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (TypeChecker.isResource(value_borderWidth_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderWidth_value_0  = value_borderWidth_value as Dimension
                 valueSerializer.writeLength(value_borderWidth_value_0)
@@ -13915,7 +13060,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_borderColor_value_0)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_borderColor_value_0_0  = value_borderColor_value_0 as Color
-                    valueSerializer.writeInt32((value_borderColor_value_0_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderColor_value_0_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_borderColor_value_0_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -13947,7 +13092,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_top_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_top_value_0  = value_borderColor_value_1_top_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_top_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_top_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_top_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -13976,7 +13121,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_right_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_right_value_0  = value_borderColor_value_1_right_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_right_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_right_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_right_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -14005,7 +13150,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_bottom_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_bottom_value_0  = value_borderColor_value_1_bottom_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_bottom_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_bottom_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_bottom_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -14034,7 +13179,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_left_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_left_value_0  = value_borderColor_value_1_left_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_left_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_left_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_left_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -14070,7 +13215,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isBorderStyle(value_borderStyle_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderStyle_value_0  = value_borderStyle_value as BorderStyle
-                valueSerializer.writeInt32((value_borderStyle_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_borderStyle_value_0 as BorderStyle) as int32))
             }
             else if (RuntimeType.OBJECT == value_borderStyle_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -14081,7 +13226,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_top_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_top_type)) {
                     const value_borderStyle_value_1_top_value  = (value_borderStyle_value_1_top as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_top_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_top_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_right  = value_borderStyle_value_1.right
                 let value_borderStyle_value_1_right_type : int32 = RuntimeType.UNDEFINED
@@ -14089,7 +13234,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_right_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_right_type)) {
                     const value_borderStyle_value_1_right_value  = (value_borderStyle_value_1_right as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_right_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_right_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_bottom  = value_borderStyle_value_1.bottom
                 let value_borderStyle_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -14097,7 +13242,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_bottom_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_bottom_type)) {
                     const value_borderStyle_value_1_bottom_value  = (value_borderStyle_value_1_bottom as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_bottom_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_bottom_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_left  = value_borderStyle_value_1.left
                 let value_borderStyle_value_1_left_type : int32 = RuntimeType.UNDEFINED
@@ -14105,7 +13250,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_left_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_left_type)) {
                     const value_borderStyle_value_1_left_value  = (value_borderStyle_value_1_left as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_left_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_left_value as BorderStyle) as int32))
                 }
             }
         }
@@ -14125,7 +13270,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_enableHoverMode  = value.enableHoverMode
@@ -14142,25 +13287,12 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hoverModeArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
-            valueSerializer.writeInt32((value_hoverModeArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hoverModeArea_value as HoverModeAreaType) as int32))
         }
     }
     writeClickEvent(value: ClickEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFontOptions(value: FontOptions): void {
         let valueSerializer : Serializer = this
@@ -14352,37 +13484,11 @@ export class Serializer extends SerializerBase {
     }
     writeBaseShape(value: BaseShape): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCommonShape(value: CommonShape): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSnapshotOptions(value: SnapshotOptions): void {
         let valueSerializer : Serializer = this
@@ -14421,7 +13527,7 @@ export class Serializer extends SerializerBase {
         if (TypeChecker.isCurve(value_curve)) {
             valueSerializer.writeInt8(0 as int32)
             const value_curve_0  = value_curve as Curve
-            valueSerializer.writeInt32((value_curve_0.valueOf() as int32))
+            valueSerializer.writeInt32(((value_curve_0 as Curve) as int32))
         }
         else if (RuntimeType.STRING == value_curve_type) {
             valueSerializer.writeInt8(1 as int32)
@@ -14466,7 +13572,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_colorMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_colorMode_type)) {
             const value_colorMode_value  = (value_colorMode as ThemeColorMode)
-            valueSerializer.writeInt32((value_colorMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_colorMode_value as ThemeColorMode) as int32))
         }
     }
     writeIsolatedOptions(value: IsolatedOptions): void {
@@ -14482,20 +13588,7 @@ export class Serializer extends SerializerBase {
     }
     writeLinearIndicatorController(value: LinearIndicatorController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeImageAttachmentInterface(value: ImageAttachmentInterface): void {
         let valueSerializer : Serializer = this
@@ -14515,7 +13608,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_verticalAlign_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_verticalAlign_type)) {
             const value_verticalAlign_value  = (value_verticalAlign as ImageSpanAlignment)
-            valueSerializer.writeInt32((value_verticalAlign_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_verticalAlign_value as ImageSpanAlignment) as int32))
         }
         const value_objectFit  = value.objectFit
         let value_objectFit_type : int32 = RuntimeType.UNDEFINED
@@ -14523,7 +13616,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_objectFit_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_objectFit_type)) {
             const value_objectFit_value  = (value_objectFit as ImageFit)
-            valueSerializer.writeInt32((value_objectFit_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_objectFit_value as ImageFit) as int32))
         }
         const value_layoutStyle  = value.layoutStyle
         let value_layoutStyle_type : int32 = RuntimeType.UNDEFINED
@@ -14534,40 +13627,6 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeImageAttachmentLayoutStyle(value_layoutStyle_value)
         }
     }
-    writeUrlStyle(value: UrlStyle): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeLineHeightStyle(value: LineHeightStyle): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeParagraphStyleInterface(value: ParagraphStyleInterface): void {
         let valueSerializer : Serializer = this
         const value_textAlign  = value.textAlign
@@ -14576,7 +13635,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_textAlign_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_textAlign_type)) {
             const value_textAlign_value  = (value_textAlign as TextAlign)
-            valueSerializer.writeInt32((value_textAlign_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_textAlign_value as TextAlign) as int32))
         }
         const value_textIndent  = value.textIndent
         let value_textIndent_type : int32 = RuntimeType.UNDEFINED
@@ -14600,7 +13659,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_overflow_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_overflow_type)) {
             const value_overflow_value  = (value_overflow as TextOverflow)
-            valueSerializer.writeInt32((value_overflow_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_overflow_value as TextOverflow) as int32))
         }
         const value_wordBreak  = value.wordBreak
         let value_wordBreak_type : int32 = RuntimeType.UNDEFINED
@@ -14608,7 +13667,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_wordBreak_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_wordBreak_type)) {
             const value_wordBreak_value  = (value_wordBreak as WordBreak)
-            valueSerializer.writeInt32((value_wordBreak_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_wordBreak_value as WordBreak) as int32))
         }
         const value_leadingMargin  = value.leadingMargin
         let value_leadingMargin_type : int32 = RuntimeType.UNDEFINED
@@ -14618,7 +13677,7 @@ export class Serializer extends SerializerBase {
             const value_leadingMargin_value  = value_leadingMargin!
             let value_leadingMargin_value_type : int32 = RuntimeType.UNDEFINED
             value_leadingMargin_value_type = runtimeType(value_leadingMargin_value)
-            if (((RuntimeType.OBJECT) == (value_leadingMargin_value_type)) && (TypeChecker.isLengthMetrics(value_leadingMargin_value, false, false))) {
+            if (TypeChecker.isLengthMetrics(value_leadingMargin_value, false, false)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_leadingMargin_value_0  = value_leadingMargin_value as LengthMetrics
                 valueSerializer.writeLengthMetrics(value_leadingMargin_value_0)
@@ -14628,23 +13687,6 @@ export class Serializer extends SerializerBase {
                 const value_leadingMargin_value_1  = value_leadingMargin_value as LeadingMarginPlaceholder
                 valueSerializer.writeLeadingMarginPlaceholder(value_leadingMargin_value_1)
             }
-        }
-    }
-    writeParagraphStyle(value: ParagraphStyle): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
         }
     }
     writeGestureStyleInterface(value: GestureStyleInterface): void {
@@ -14666,108 +13708,6 @@ export class Serializer extends SerializerBase {
             valueSerializer.holdAndWriteCallback(value_onLongPress_value)
         }
     }
-    writeGestureStyle(value: GestureStyle): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeBackgroundColorStyle(value: BackgroundColorStyle): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeTextShadowStyle(value: TextShadowStyle): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeLetterSpacingStyle(value: LetterSpacingStyle): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeBaselineOffsetStyle(value: BaselineOffsetStyle): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeDecorationStyle(value: DecorationStyle): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeTextStyleInterface(value: TextStyleInterface): void {
         let valueSerializer : Serializer = this
         const value_fontColor  = value.fontColor
@@ -14781,7 +13721,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_fontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontColor_value_0  = value_fontColor_value as Color
-                valueSerializer.writeInt32((value_fontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_fontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -14842,7 +13782,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isFontWeight(value_fontWeight_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_fontWeight_value_1  = value_fontWeight_value as FontWeight
-                valueSerializer.writeInt32((value_fontWeight_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontWeight_value_1 as FontWeight) as int32))
             }
             else if (RuntimeType.STRING == value_fontWeight_value_type) {
                 valueSerializer.writeInt8(2 as int32)
@@ -14856,24 +13796,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_fontStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_fontStyle_type)) {
             const value_fontStyle_value  = (value_fontStyle as FontStyle)
-            valueSerializer.writeInt32((value_fontStyle_value.valueOf() as int32))
-        }
-    }
-    writeTextStyle_styled_string(value: TextStyle_styled_string): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
+            valueSerializer.writeInt32(((value_fontStyle_value as FontStyle) as int32))
         }
     }
     writeStyleOptions(value: StyleOptions): void {
@@ -14895,9 +13818,75 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeNumber(value_length_value)
         }
         const value_styledKey  = value.styledKey
-        valueSerializer.writeInt32((value_styledKey.valueOf() as int32))
+        valueSerializer.writeInt32(((value_styledKey as StyledStringKey) as int32))
         const value_styledValue  = value.styledValue
-        valueSerializer.writeStyledStringValue(value_styledValue)
+        let value_styledValue_type : int32 = RuntimeType.UNDEFINED
+        value_styledValue_type = runtimeType(value_styledValue)
+        if (TypeChecker.isTextStyle_styled_string(value_styledValue, false, false, false, false, false)) {
+            valueSerializer.writeInt8(0 as int32)
+            const value_styledValue_0  = value_styledValue as TextStyle_styled_string
+            valueSerializer.writeTextStyle_styled_string(value_styledValue_0)
+        }
+        else if (TypeChecker.isDecorationStyle(value_styledValue, false, false, false)) {
+            valueSerializer.writeInt8(1 as int32)
+            const value_styledValue_1  = value_styledValue as DecorationStyle
+            valueSerializer.writeDecorationStyle(value_styledValue_1)
+        }
+        else if (TypeChecker.isBaselineOffsetStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(2 as int32)
+            const value_styledValue_2  = value_styledValue as BaselineOffsetStyle
+            valueSerializer.writeBaselineOffsetStyle(value_styledValue_2)
+        }
+        else if (TypeChecker.isLetterSpacingStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(3 as int32)
+            const value_styledValue_3  = value_styledValue as LetterSpacingStyle
+            valueSerializer.writeLetterSpacingStyle(value_styledValue_3)
+        }
+        else if (TypeChecker.isTextShadowStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(4 as int32)
+            const value_styledValue_4  = value_styledValue as TextShadowStyle
+            valueSerializer.writeTextShadowStyle(value_styledValue_4)
+        }
+        else if (TypeChecker.isGestureStyle(value_styledValue)) {
+            valueSerializer.writeInt8(5 as int32)
+            const value_styledValue_5  = value_styledValue as GestureStyle
+            valueSerializer.writeGestureStyle(value_styledValue_5)
+        }
+        else if (TypeChecker.isImageAttachment(value_styledValue, false, false, false, false, false)) {
+            valueSerializer.writeInt8(6 as int32)
+            const value_styledValue_6  = value_styledValue as ImageAttachment
+            valueSerializer.writeImageAttachment(value_styledValue_6)
+        }
+        else if (TypeChecker.isParagraphStyle(value_styledValue, false, false, false, false, false, false)) {
+            valueSerializer.writeInt8(7 as int32)
+            const value_styledValue_7  = value_styledValue as ParagraphStyle
+            valueSerializer.writeParagraphStyle(value_styledValue_7)
+        }
+        else if (TypeChecker.isLineHeightStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(8 as int32)
+            const value_styledValue_8  = value_styledValue as LineHeightStyle
+            valueSerializer.writeLineHeightStyle(value_styledValue_8)
+        }
+        else if (TypeChecker.isUrlStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(9 as int32)
+            const value_styledValue_9  = value_styledValue as UrlStyle
+            valueSerializer.writeUrlStyle(value_styledValue_9)
+        }
+        else if (TypeChecker.isCustomSpan(value_styledValue)) {
+            valueSerializer.writeInt8(10 as int32)
+            const value_styledValue_10  = value_styledValue as CustomSpan
+            valueSerializer.writeCustomSpan(value_styledValue_10)
+        }
+        else if (RuntimeType.OBJECT == value_styledValue_type) {
+            valueSerializer.writeInt8(11 as int32)
+            const value_styledValue_11  = value_styledValue as UserDataSpan
+            valueSerializer.writeUserDataSpan(value_styledValue_11)
+        }
+        else if (TypeChecker.isBackgroundColorStyle(value_styledValue, false)) {
+            valueSerializer.writeInt8(12 as int32)
+            const value_styledValue_12  = value_styledValue as BackgroundColorStyle
+            valueSerializer.writeBackgroundColorStyle(value_styledValue_12)
+        }
     }
     writeReceiveCallback(value: ReceiveCallback): void {
         let valueSerializer : Serializer = this
@@ -14928,8 +13917,13 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_areaChangePlaceholder_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_areaChangePlaceholder_type)) {
             const value_areaChangePlaceholder_value  = value_areaChangePlaceholder!
-            valueSerializer.writeInt32(value_areaChangePlaceholder_value.size as int32)
-            // TODO: map serialization not implemented
+            valueSerializer.writeInt32(value_areaChangePlaceholder_value.size as int32 as int32)
+            for (const pair of value_areaChangePlaceholder_value) {
+                const value_areaChangePlaceholder_value_key = pair[0]
+                const value_areaChangePlaceholder_value_value = pair[1]
+                valueSerializer.writeString(value_areaChangePlaceholder_value_key)
+                valueSerializer.writeComponentContent(value_areaChangePlaceholder_value_value)
+            }
         }
         const value_dpiFollowStrategy  = value.dpiFollowStrategy
         let value_dpiFollowStrategy_type : int32 = RuntimeType.UNDEFINED
@@ -14937,25 +13931,12 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_dpiFollowStrategy_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_dpiFollowStrategy_type)) {
             const value_dpiFollowStrategy_value  = (value_dpiFollowStrategy as DpiFollowStrategy)
-            valueSerializer.writeInt32((value_dpiFollowStrategy_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_dpiFollowStrategy_value as DpiFollowStrategy) as int32))
         }
     }
     writeUIExtensionProxy(value: UIExtensionProxy): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeWaterFlowOptions(value: WaterFlowOptions): void {
         let valueSerializer : Serializer = this
@@ -14989,7 +13970,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_layoutMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_layoutMode_type)) {
             const value_layoutMode_value  = (value_layoutMode as WaterFlowLayoutMode)
-            valueSerializer.writeInt32((value_layoutMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_layoutMode_value as WaterFlowLayoutMode) as int32))
         }
     }
     writeWindowAnimationTarget(value: WindowAnimationTarget): void {
@@ -15049,7 +14030,7 @@ export class Serializer extends SerializerBase {
     writeXComponentOptions(value: XComponentOptions): void {
         let valueSerializer : Serializer = this
         const value_type  = value.type
-        valueSerializer.writeInt32((value_type.valueOf() as int32))
+        valueSerializer.writeInt32(((value_type as XComponentType) as int32))
         const value_controller  = value.controller
         valueSerializer.writeXComponentController(value_controller)
         const value_imageAIOptions  = value.imageAIOptions
@@ -15098,8 +14079,13 @@ export class Serializer extends SerializerBase {
         const value_controller  = value.controller
         valueSerializer.writeWebKeyboardController(value_controller)
         const value_attributes  = value.attributes
-        valueSerializer.writeInt32(value_attributes.size as int32)
-        // TODO: map serialization not implemented
+        valueSerializer.writeInt32(value_attributes.size as int32 as int32)
+        for (const pair of value_attributes) {
+            const value_attributes_key = pair[0]
+            const value_attributes_value = pair[1]
+            valueSerializer.writeString(value_attributes_key)
+            valueSerializer.writeString(value_attributes_value)
+        }
     }
     writeExpandedMenuItemOptions(value: ExpandedMenuItemOptions): void {
         let valueSerializer : Serializer = this
@@ -15145,7 +14131,7 @@ export class Serializer extends SerializerBase {
         const value_pid  = value.pid
         valueSerializer.writeNumber(value_pid)
         const value_reason  = value.reason
-        valueSerializer.writeInt32((value_reason.valueOf() as int32))
+        valueSerializer.writeInt32(((value_reason as RenderProcessNotRespondingReason) as int32))
     }
     writeNativeMediaPlayerConfig(value: NativeMediaPlayerConfig): void {
         let valueSerializer : Serializer = this
@@ -15196,7 +14182,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_status_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_status_type)) {
             const value_status_value  = (value_status as NativeEmbedStatus)
-            valueSerializer.writeInt32((value_status_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_status_value as NativeEmbedStatus) as int32))
         }
         const value_surfaceId  = value.surfaceId
         let value_surfaceId_type : int32 = RuntimeType.UNDEFINED
@@ -15250,7 +14236,7 @@ export class Serializer extends SerializerBase {
         const value_didReplaceEntry  = value.didReplaceEntry
         valueSerializer.writeBoolean(value_didReplaceEntry)
         const value_navigationType  = value.navigationType
-        valueSerializer.writeInt32((value_navigationType.valueOf() as int32))
+        valueSerializer.writeInt32(((value_navigationType as WebNavigationType) as int32))
         const value_url  = value.url
         valueSerializer.writeString(value_url)
     }
@@ -15407,7 +14393,7 @@ export class Serializer extends SerializerBase {
         const value_handler  = value.handler
         valueSerializer.writeSslErrorHandler(value_handler)
         const value_error  = value.error
-        valueSerializer.writeInt32((value_error.valueOf() as int32))
+        valueSerializer.writeInt32(((value_error as SslError) as int32))
         const value_url  = value.url
         valueSerializer.writeString(value_url)
         const value_originalUrl  = value.originalUrl
@@ -15424,7 +14410,7 @@ export class Serializer extends SerializerBase {
         const value_handler  = value.handler
         valueSerializer.writeSslErrorHandler(value_handler)
         const value_error  = value.error
-        valueSerializer.writeInt32((value_error.valueOf() as int32))
+        valueSerializer.writeInt32(((value_error as SslError) as int32))
         const value_certChainData  = value.certChainData
         let value_certChainData_type : int32 = RuntimeType.UNDEFINED
         value_certChainData_type = runtimeType(value_certChainData)
@@ -15528,7 +14514,7 @@ export class Serializer extends SerializerBase {
     writeOnRenderExitedEvent(value: OnRenderExitedEvent): void {
         let valueSerializer : Serializer = this
         const value_renderExitReason  = value.renderExitReason
-        valueSerializer.writeInt32((value_renderExitReason.valueOf() as int32))
+        valueSerializer.writeInt32(((value_renderExitReason as RenderExitReason) as int32))
     }
     writeOnRefreshAccessedHistoryEvent(value: OnRefreshAccessedHistoryEvent): void {
         let valueSerializer : Serializer = this
@@ -15668,12 +14654,12 @@ export class Serializer extends SerializerBase {
         const value_controller  = value.controller
         let value_controller_type : int32 = RuntimeType.UNDEFINED
         value_controller_type = runtimeType(value_controller)
-        if (((RuntimeType.OBJECT) == (value_controller_type)) && (TypeChecker.isWebController(value_controller))) {
+        if (TypeChecker.isWebController(value_controller)) {
             valueSerializer.writeInt8(0 as int32)
             const value_controller_0  = value_controller as WebController
             valueSerializer.writeWebController(value_controller_0)
         }
-        else if (((RuntimeType.OBJECT) == (value_controller_type)) && (TypeChecker.isWebviewController(value_controller))) {
+        else if (TypeChecker.isWebviewController(value_controller)) {
             valueSerializer.writeInt8(1 as int32)
             const value_controller_1  = value_controller as WebviewController
             valueSerializer.writeWebviewController(value_controller_1)
@@ -15717,12 +14703,12 @@ export class Serializer extends SerializerBase {
         const value_controller  = value.controller
         let value_controller_type : int32 = RuntimeType.UNDEFINED
         value_controller_type = runtimeType(value_controller)
-        if (((RuntimeType.OBJECT) == (value_controller_type)) && (TypeChecker.isWebController(value_controller))) {
+        if (TypeChecker.isWebController(value_controller)) {
             valueSerializer.writeInt8(0 as int32)
             const value_controller_0  = value_controller as WebController
             valueSerializer.writeWebController(value_controller_0)
         }
-        else if (((RuntimeType.OBJECT) == (value_controller_type)) && (TypeChecker.isWebviewController(value_controller))) {
+        else if (TypeChecker.isWebviewController(value_controller)) {
             valueSerializer.writeInt8(1 as int32)
             const value_controller_1  = value_controller as WebviewController
             valueSerializer.writeWebviewController(value_controller_1)
@@ -15733,7 +14719,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_renderMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_renderMode_type)) {
             const value_renderMode_value  = (value_renderMode as RenderMode)
-            valueSerializer.writeInt32((value_renderMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_renderMode_value as RenderMode) as int32))
         }
         const value_incognitoMode  = value.incognitoMode
         let value_incognitoMode_type : int32 = RuntimeType.UNDEFINED
@@ -15816,7 +14802,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isPlaybackSpeed(value_currentProgressRate_value)) {
                 valueSerializer.writeInt8(2 as int32)
                 const value_currentProgressRate_value_2  = value_currentProgressRate_value as PlaybackSpeed
-                valueSerializer.writeInt32((value_currentProgressRate_value_2.valueOf() as int32))
+                valueSerializer.writeInt32(((value_currentProgressRate_value_2 as PlaybackSpeed) as int32))
             }
         }
         const value_previewUri  = value.previewUri
@@ -15832,12 +14818,12 @@ export class Serializer extends SerializerBase {
                 const value_previewUri_value_0  = value_previewUri_value as string
                 valueSerializer.writeString(value_previewUri_value_0)
             }
-            else if (((RuntimeType.OBJECT) == (value_previewUri_value_type)) && (TypeChecker.isPixelMap(value_previewUri_value, false, false))) {
+            else if (TypeChecker.isPixelMap(value_previewUri_value, false, false)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_previewUri_value_1  = value_previewUri_value as PixelMap
                 valueSerializer.writePixelMap(value_previewUri_value_1)
             }
-            else if (isResource(value_previewUri_value)) {
+            else if (TypeChecker.isResource(value_previewUri_value, false, false, false, false, false)) {
                 valueSerializer.writeInt8(2 as int32)
                 const value_previewUri_value_2  = value_previewUri_value as Resource
                 valueSerializer.writeResource(value_previewUri_value_2)
@@ -15892,7 +14878,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_unselectedColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_unselectedColor_value_0  = value_unselectedColor_value as Color
-                valueSerializer.writeInt32((value_unselectedColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_unselectedColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_unselectedColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -15921,7 +14907,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_pointColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_pointColor_value_0  = value_pointColor_value as Color
-                valueSerializer.writeInt32((value_pointColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_pointColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_pointColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -15962,7 +14948,7 @@ export class Serializer extends SerializerBase {
     writeToggleOptions(value: ToggleOptions): void {
         let valueSerializer : Serializer = this
         const value_type  = value.type
-        valueSerializer.writeInt32((value_type.valueOf() as int32))
+        valueSerializer.writeInt32(((value_type as ToggleType) as int32))
         const value_isOn  = value.isOn
         let value_isOn_type : int32 = RuntimeType.UNDEFINED
         value_isOn_type = runtimeType(value_isOn)
@@ -15970,23 +14956,6 @@ export class Serializer extends SerializerBase {
         if ((RuntimeType.UNDEFINED) != (value_isOn_type)) {
             const value_isOn_value  = value_isOn!
             valueSerializer.writeBoolean(value_isOn_value)
-        }
-    }
-    writeTimePickerDialog(value: TimePickerDialog): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
         }
     }
     writeTimePickerResult(value: TimePickerResult): void {
@@ -16014,7 +14983,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_format_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_format_type)) {
             const value_format_value  = (value_format as TimePickerFormat)
-            valueSerializer.writeInt32((value_format_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_format_value as TimePickerFormat) as int32))
         }
     }
     writeTextTimerOptions(value: TextTimerOptions): void {
@@ -16079,23 +15048,6 @@ export class Serializer extends SerializerBase {
                 const value_index_1_element : number = value_index_1[i]
                 valueSerializer.writeNumber(value_index_1_element)
             }
-        }
-    }
-    writeTextPickerDialog(value: TextPickerDialog): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
         }
     }
     writeTextCascadePickerRangeContent(value: TextCascadePickerRangeContent): void {
@@ -16188,7 +15140,7 @@ export class Serializer extends SerializerBase {
                 }
             }
         }
-        else if (isResource(value_range)) {
+        else if (TypeChecker.isResource(value_range, false, false, false, false, false)) {
             valueSerializer.writeInt8(2 as int32)
             const value_range_2  = value_range as Resource
             valueSerializer.writeResource(value_range_2)
@@ -16355,54 +15307,15 @@ export class Serializer extends SerializerBase {
     }
     writeStyledStringController(value: StyledStringController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextEditControllerEx(value: TextEditControllerEx): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextBaseController(value: TextBaseController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextClockOptions(value: TextClockOptions): void {
         let valueSerializer : Serializer = this
@@ -16475,7 +15388,7 @@ export class Serializer extends SerializerBase {
     writeTextOverflowOptions(value: TextOverflowOptions): void {
         let valueSerializer : Serializer = this
         const value_overflow  = value.overflow
-        valueSerializer.writeInt32((value_overflow.valueOf() as int32))
+        valueSerializer.writeInt32(((value_overflow as TextOverflow) as int32))
     }
     writeTextOptions(value: TextOptions): void {
         let valueSerializer : Serializer = this
@@ -16484,20 +15397,7 @@ export class Serializer extends SerializerBase {
     }
     writeTabContentTransitionProxy(value: TabContentTransitionProxy): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeBarGridColumnOptions(value: BarGridColumnOptions): void {
         let valueSerializer : Serializer = this
@@ -16559,7 +15459,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_barPosition_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_barPosition_type)) {
             const value_barPosition_value  = (value_barPosition as BarPosition)
-            valueSerializer.writeInt32((value_barPosition_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_barPosition_value as BarPosition) as int32))
         }
         const value_index  = value.index
         let value_index_type : int32 = RuntimeType.UNDEFINED
@@ -16580,88 +15480,23 @@ export class Serializer extends SerializerBase {
     }
     writeBounceSymbolEffect(value: BounceSymbolEffect): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDisappearSymbolEffect(value: DisappearSymbolEffect): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeAppearSymbolEffect(value: AppearSymbolEffect): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeHierarchicalSymbolEffect(value: HierarchicalSymbolEffect): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwiperContentTransitionProxy(value: SwiperContentTransitionProxy): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwiperContentAnimatedTransition(value: SwiperContentAnimatedTransition): void {
         let valueSerializer : Serializer = this
@@ -16687,37 +15522,11 @@ export class Serializer extends SerializerBase {
     }
     writeIndicatorComponentController(value: IndicatorComponentController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwiperController(value: SwiperController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeStackOptions(value: StackOptions): void {
         let valueSerializer : Serializer = this
@@ -16727,7 +15536,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignContent_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignContent_type)) {
             const value_alignContent_value  = (value_alignContent as Alignment)
-            valueSerializer.writeInt32((value_alignContent_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignContent_value as Alignment) as int32))
         }
     }
     writeSlideRange(value: SlideRange): void {
@@ -16752,7 +15561,7 @@ export class Serializer extends SerializerBase {
     writeSliderBlockStyle(value: SliderBlockStyle): void {
         let valueSerializer : Serializer = this
         const value_type  = value.type
-        valueSerializer.writeInt32((value_type.valueOf() as int32))
+        valueSerializer.writeInt32(((value_type as SliderBlockType) as int32))
         const value_image  = value.image
         let value_image_type : int32 = RuntimeType.UNDEFINED
         value_image_type = runtimeType(value_image)
@@ -16821,7 +15630,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as SliderStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as SliderStyle) as int32))
         }
         const value_direction  = value.direction
         let value_direction_type : int32 = RuntimeType.UNDEFINED
@@ -16829,7 +15638,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as Axis)
-            valueSerializer.writeInt32((value_direction_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_direction_value as Axis) as int32))
         }
         const value_reverse  = value.reverse
         let value_reverse_type : int32 = RuntimeType.UNDEFINED
@@ -16967,7 +15776,7 @@ export class Serializer extends SerializerBase {
         const value_deleteOffset  = value.deleteOffset
         valueSerializer.writeNumber(value_deleteOffset)
         const value_direction  = value.direction
-        valueSerializer.writeInt32((value_direction.valueOf() as int32))
+        valueSerializer.writeInt32(((value_direction as TextDeleteDirection) as int32))
         const value_deleteValue  = value.deleteValue
         valueSerializer.writeString(value_deleteValue)
     }
@@ -16981,7 +15790,7 @@ export class Serializer extends SerializerBase {
     writeTextDecorationOptions(value: TextDecorationOptions): void {
         let valueSerializer : Serializer = this
         const value_type  = value.type
-        valueSerializer.writeInt32((value_type.valueOf() as int32))
+        valueSerializer.writeInt32(((value_type as TextDecorationType) as int32))
         const value_color  = value.color
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
@@ -16993,7 +15802,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -17017,7 +15826,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as TextDecorationStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as TextDecorationStyle) as int32))
         }
     }
     writeCaretStyle(value: CaretStyle): void {
@@ -17041,7 +15850,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -17116,7 +15925,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as ScrollBarDirection)
-            valueSerializer.writeInt32((value_direction_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_direction_value as ScrollBarDirection) as int32))
         }
         const value_state  = value.state
         let value_state_type : int32 = RuntimeType.UNDEFINED
@@ -17124,7 +15933,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_state_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_state_type)) {
             const value_state_value  = (value_state as BarState)
-            valueSerializer.writeInt32((value_state_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_state_value as BarState) as int32))
         }
     }
     writeOffsetOptions(value: OffsetOptions): void {
@@ -17149,7 +15958,7 @@ export class Serializer extends SerializerBase {
     writeScrollSnapOptions(value: ScrollSnapOptions): void {
         let valueSerializer : Serializer = this
         const value_snapAlign  = value.snapAlign
-        valueSerializer.writeInt32((value_snapAlign.valueOf() as int32))
+        valueSerializer.writeInt32(((value_snapAlign as ScrollSnapAlign) as int32))
         const value_snapPagination  = value.snapPagination
         let value_snapPagination_type : int32 = RuntimeType.UNDEFINED
         value_snapPagination_type = runtimeType(value_snapPagination)
@@ -17158,7 +15967,7 @@ export class Serializer extends SerializerBase {
             const value_snapPagination_value  = value_snapPagination!
             let value_snapPagination_value_type : int32 = RuntimeType.UNDEFINED
             value_snapPagination_value_type = runtimeType(value_snapPagination_value)
-            if (((RuntimeType.NUMBER) == (value_snapPagination_value_type)) || ((RuntimeType.STRING) == (value_snapPagination_value_type)) || (((RuntimeType.OBJECT) == (value_snapPagination_value_type)) && (isResource(value_snapPagination_value)))) {
+            if (((RuntimeType.NUMBER) == (value_snapPagination_value_type)) || ((RuntimeType.STRING) == (value_snapPagination_value_type)) || (((RuntimeType.OBJECT) == (value_snapPagination_value_type)) && (TypeChecker.isResource(value_snapPagination_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_snapPagination_value_0  = value_snapPagination_value as Dimension
                 valueSerializer.writeLength(value_snapPagination_value_0)
@@ -17203,7 +16012,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_icon_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_icon_type)) {
             const value_icon_value  = (value_icon as SaveIconStyle)
-            valueSerializer.writeInt32((value_icon_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_icon_value as SaveIconStyle) as int32))
         }
         const value_text  = value.text
         let value_text_type : int32 = RuntimeType.UNDEFINED
@@ -17211,7 +16020,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_text_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_text_type)) {
             const value_text_value  = (value_text as SaveDescription)
-            valueSerializer.writeInt32((value_text_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_text_value as SaveDescription) as int32))
         }
         const value_buttonType  = value.buttonType
         let value_buttonType_type : int32 = RuntimeType.UNDEFINED
@@ -17219,7 +16028,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_buttonType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_buttonType_type)) {
             const value_buttonType_value  = (value_buttonType as ButtonType)
-            valueSerializer.writeInt32((value_buttonType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_buttonType_value as ButtonType) as int32))
         }
     }
     writeRowOptions(value: RowOptions): void {
@@ -17258,20 +16067,7 @@ export class Serializer extends SerializerBase {
     }
     writeEditMenuOptions(value: EditMenuOptions): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCopyEvent(value: CopyEvent): void {
         let valueSerializer : Serializer = this
@@ -17320,20 +16116,7 @@ export class Serializer extends SerializerBase {
     }
     writeSubmitEvent(value: SubmitEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextDataDetectorConfig(value: TextDataDetectorConfig): void {
         let valueSerializer : Serializer = this
@@ -17341,7 +16124,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt32(value_types.length as int32)
         for (let i = 0; i < value_types.length; i++) {
             const value_types_element : TextDataDetectorType = value_types[i]
-            valueSerializer.writeInt32((value_types_element.valueOf() as int32))
+            valueSerializer.writeInt32(((value_types_element as TextDataDetectorType) as int32))
         }
         const value_onDetectResultUpdate  = value.onDetectResultUpdate
         let value_onDetectResultUpdate_type : int32 = RuntimeType.UNDEFINED
@@ -17362,7 +16145,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -17405,7 +16188,7 @@ export class Serializer extends SerializerBase {
         const value_offset  = value.offset
         valueSerializer.writeNumber(value_offset)
         const value_direction  = value.direction
-        valueSerializer.writeInt32((value_direction.valueOf() as int32))
+        valueSerializer.writeInt32(((value_direction as RichEditorDeleteDirection) as int32))
         const value_length  = value.length
         valueSerializer.writeNumber(value_length)
         const value_richEditorDeleteSpans  = value.richEditorDeleteSpans
@@ -17468,27 +16251,14 @@ export class Serializer extends SerializerBase {
     }
     writeRichEditorBaseController(value: RichEditorBaseController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLocalizedBarrierStyle(value: LocalizedBarrierStyle): void {
         let valueSerializer : Serializer = this
         const value_id  = value.id
         valueSerializer.writeString(value_id)
         const value_localizedDirection  = value.localizedDirection
-        valueSerializer.writeInt32((value_localizedDirection.valueOf() as int32))
+        valueSerializer.writeInt32(((value_localizedDirection as LocalizedBarrierDirection) as int32))
         const value_referencedId  = value.referencedId
         valueSerializer.writeInt32(value_referencedId.length as int32)
         for (let i = 0; i < value_referencedId.length; i++) {
@@ -17501,7 +16271,7 @@ export class Serializer extends SerializerBase {
         const value_id  = value.id
         valueSerializer.writeString(value_id)
         const value_direction  = value.direction
-        valueSerializer.writeInt32((value_direction.valueOf() as int32))
+        valueSerializer.writeInt32(((value_direction as BarrierDirection) as int32))
         const value_referencedId  = value.referencedId
         valueSerializer.writeInt32(value_referencedId.length as int32)
         for (let i = 0; i < value_referencedId.length; i++) {
@@ -17514,7 +16284,7 @@ export class Serializer extends SerializerBase {
         const value_id  = value.id
         valueSerializer.writeString(value_id)
         const value_direction  = value.direction
-        valueSerializer.writeInt32((value_direction.valueOf() as int32))
+        valueSerializer.writeInt32(((value_direction as Axis) as int32))
         const value_position  = value.position
         valueSerializer.writeGuideLinePosition(value_position)
     }
@@ -17637,7 +16407,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_checkedBackgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_checkedBackgroundColor_value_0  = value_checkedBackgroundColor_value as Color
-                valueSerializer.writeInt32((value_checkedBackgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_checkedBackgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_checkedBackgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -17666,7 +16436,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_uncheckedBorderColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_uncheckedBorderColor_value_0  = value_uncheckedBorderColor_value as Color
-                valueSerializer.writeInt32((value_uncheckedBorderColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_uncheckedBorderColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_uncheckedBorderColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -17695,7 +16465,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_indicatorColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_indicatorColor_value_0  = value_indicatorColor_value as Color
-                valueSerializer.writeInt32((value_indicatorColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_indicatorColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_indicatorColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -17726,7 +16496,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_indicatorType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_indicatorType_type)) {
             const value_indicatorType_value  = (value_indicatorType as RadioIndicatorType)
-            valueSerializer.writeInt32((value_indicatorType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_indicatorType_value as RadioIndicatorType) as int32))
         }
         const value_indicatorBuilder  = value.indicatorBuilder
         let value_indicatorBuilder_type : int32 = RuntimeType.UNDEFINED
@@ -17755,7 +16525,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as ProgressStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as ProgressStyle) as int32))
         }
         const value_type  = value.type
         let value_type_type : int32 = RuntimeType.UNDEFINED
@@ -17763,7 +16533,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_type_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type_type)) {
             const value_type_value  = (value_type as ProgressType)
-            valueSerializer.writeInt32((value_type_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_type_value as ProgressType) as int32))
         }
     }
     writePolylineOptions(value: PolylineOptions): void {
@@ -17871,20 +16641,7 @@ export class Serializer extends SerializerBase {
     }
     writePatternLockController(value: PatternLockController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePathOptions(value: PathOptions): void {
         let valueSerializer : Serializer = this
@@ -17943,7 +16700,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_icon_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_icon_type)) {
             const value_icon_value  = (value_icon as PasteIconStyle)
-            valueSerializer.writeInt32((value_icon_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_icon_value as PasteIconStyle) as int32))
         }
         const value_text  = value.text
         let value_text_type : int32 = RuntimeType.UNDEFINED
@@ -17951,7 +16708,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_text_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_text_type)) {
             const value_text_value  = (value_text as PasteDescription)
-            valueSerializer.writeInt32((value_text_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_text_value as PasteDescription) as int32))
         }
         const value_buttonType  = value.buttonType
         let value_buttonType_type : int32 = RuntimeType.UNDEFINED
@@ -17959,27 +16716,14 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_buttonType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_buttonType_type)) {
             const value_buttonType_value  = (value_buttonType as ButtonType)
-            valueSerializer.writeInt32((value_buttonType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_buttonType_value as ButtonType) as int32))
         }
     }
     writeNodeController(value: NodeController): void {
     }
     writeNavigationTransitionProxy(value: NavigationTransitionProxy): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRouteInfo(value: RouteInfo): void {
         let valueSerializer : Serializer = this
@@ -18050,7 +16794,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_status_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_status_type)) {
             const value_status_value  = (value_status as ToolbarItemStatus)
-            valueSerializer.writeInt32((value_status_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_status_value as ToolbarItemStatus) as int32))
         }
         const value_activeIcon  = value.activeIcon
         let value_activeIcon_type : int32 = RuntimeType.UNDEFINED
@@ -18248,7 +16992,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_icon_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_icon_type)) {
             const value_icon_value  = (value_icon as LocationIconStyle)
-            valueSerializer.writeInt32((value_icon_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_icon_value as LocationIconStyle) as int32))
         }
         const value_text  = value.text
         let value_text_type : int32 = RuntimeType.UNDEFINED
@@ -18256,7 +17000,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_text_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_text_type)) {
             const value_text_value  = (value_text as LocationDescription)
-            valueSerializer.writeInt32((value_text_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_text_value as LocationDescription) as int32))
         }
         const value_buttonType  = value.buttonType
         let value_buttonType_type : int32 = RuntimeType.UNDEFINED
@@ -18264,7 +17008,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_buttonType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_buttonType_type)) {
             const value_buttonType_value  = (value_buttonType as ButtonType)
-            valueSerializer.writeInt32((value_buttonType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_buttonType_value as ButtonType) as int32))
         }
     }
     writeListItemGroupOptions(value: ListItemGroupOptions): void {
@@ -18326,7 +17070,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as ListItemGroupStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as ListItemGroupStyle) as int32))
         }
     }
     writeSwipeActionOptions(value: SwipeActionOptions): void {
@@ -18375,7 +17119,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_edgeEffect_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_edgeEffect_type)) {
             const value_edgeEffect_value  = (value_edgeEffect as SwipeEdgeEffect)
-            valueSerializer.writeInt32((value_edgeEffect_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_edgeEffect_value as SwipeEdgeEffect) as int32))
         }
         const value_onOffsetChange  = value.onOffsetChange
         let value_onOffsetChange_type : int32 = RuntimeType.UNDEFINED
@@ -18394,7 +17138,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as ListItemStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as ListItemStyle) as int32))
         }
     }
     writeChainAnimationOptions(value: ChainAnimationOptions): void {
@@ -18425,7 +17169,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_edgeEffect_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_edgeEffect_type)) {
             const value_edgeEffect_value  = (value_edgeEffect as ChainEdgeEffect)
-            valueSerializer.writeInt32((value_edgeEffect_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_edgeEffect_value as ChainEdgeEffect) as int32))
         }
         const value_stiffness  = value.stiffness
         let value_stiffness_type : int32 = RuntimeType.UNDEFINED
@@ -18484,20 +17228,7 @@ export class Serializer extends SerializerBase {
     }
     writeListScroller(value: ListScroller): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLineOptions(value: LineOptions): void {
         let valueSerializer : Serializer = this
@@ -18571,12 +17302,12 @@ export class Serializer extends SerializerBase {
             const value_src_0  = value_src as string
             valueSerializer.writeString(value_src_0)
         }
-        else if (isResource(value_src)) {
+        else if (TypeChecker.isResource(value_src, false, false, false, false, false)) {
             valueSerializer.writeInt8(1 as int32)
             const value_src_1  = value_src as Resource
             valueSerializer.writeResource(value_src_1)
         }
-        else if (((RuntimeType.OBJECT) == (value_src_type)) && (TypeChecker.isPixelMap(value_src, false, false))) {
+        else if (TypeChecker.isPixelMap(value_src, false, false)) {
             valueSerializer.writeInt8(2 as int32)
             const value_src_2  = value_src as PixelMap
             valueSerializer.writePixelMap(value_src_2)
@@ -18697,7 +17428,7 @@ export class Serializer extends SerializerBase {
             const value_gutter_value  = value_gutter!
             let value_gutter_value_type : int32 = RuntimeType.UNDEFINED
             value_gutter_value_type = runtimeType(value_gutter_value)
-            if (((RuntimeType.NUMBER) == (value_gutter_value_type)) || ((RuntimeType.STRING) == (value_gutter_value_type)) || (((RuntimeType.OBJECT) == (value_gutter_value_type)) && (isResource(value_gutter_value)))) {
+            if (((RuntimeType.NUMBER) == (value_gutter_value_type)) || ((RuntimeType.STRING) == (value_gutter_value_type)) || (((RuntimeType.OBJECT) == (value_gutter_value_type)) && (TypeChecker.isResource(value_gutter_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_gutter_value_0  = value_gutter_value as Length
                 valueSerializer.writeLength(value_gutter_value_0)
@@ -18741,7 +17472,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as GridRowDirection)
-            valueSerializer.writeInt32((value_direction_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_direction_value as GridRowDirection) as int32))
         }
     }
     writeGridContainerOptions(value: GridContainerOptions): void {
@@ -18771,7 +17502,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_sizeType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_sizeType_type)) {
             const value_sizeType_value  = (value_sizeType as SizeType)
-            valueSerializer.writeInt32((value_sizeType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_sizeType_value as SizeType) as int32))
         }
         const value_gutter  = value.gutter
         let value_gutter_type : int32 = RuntimeType.UNDEFINED
@@ -18880,7 +17611,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as GridItemStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as GridItemStyle) as int32))
         }
     }
     writeItemDragInfo(value: ItemDragInfo): void {
@@ -18935,156 +17666,66 @@ export class Serializer extends SerializerBase {
     }
     writePanRecognizer(value: PanRecognizer): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScrollableTargetInfo(value: ScrollableTargetInfo): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeTapGestureParameters(value: TapGestureParameters): void {
+        let valueSerializer : Serializer = this
+        const value_count  = value.count
+        let value_count_type : int32 = RuntimeType.UNDEFINED
+        value_count_type = runtimeType(value_count)
+        valueSerializer.writeInt8(value_count_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_count_type)) {
+            const value_count_value  = value_count!
+            valueSerializer.writeNumber(value_count_value)
         }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
+        const value_fingers  = value.fingers
+        let value_fingers_type : int32 = RuntimeType.UNDEFINED
+        value_fingers_type = runtimeType(value_fingers)
+        valueSerializer.writeInt8(value_fingers_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_fingers_type)) {
+            const value_fingers_value  = value_fingers!
+            valueSerializer.writeNumber(value_fingers_value)
+        }
+        const value_distanceThreshold  = value.distanceThreshold
+        let value_distanceThreshold_type : int32 = RuntimeType.UNDEFINED
+        value_distanceThreshold_type = runtimeType(value_distanceThreshold)
+        valueSerializer.writeInt8(value_distanceThreshold_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_distanceThreshold_type)) {
+            const value_distanceThreshold_value  = value_distanceThreshold!
+            valueSerializer.writeNumber(value_distanceThreshold_value)
         }
     }
     writeGestureEvent(value: GestureEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSwipeGestureEvent(value: SwipeGestureEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeRotationGestureEvent(value: RotationGestureEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePinchGestureEvent(value: PinchGestureEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePanGestureEvent(value: PanGestureEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLongPressGestureEvent(value: LongPressGestureEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTapGestureEvent(value: TapGestureEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeGaugeIndicatorOptions(value: GaugeIndicatorOptions): void {
         let valueSerializer : Serializer = this
@@ -19278,7 +17919,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_dimension_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_dimension_type)) {
             const value_dimension_value  = (value_dimension as FormDimension)
-            valueSerializer.writeInt32((value_dimension_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_dimension_value as FormDimension) as int32))
         }
         const value_temporary  = value.temporary
         let value_temporary_type : int32 = RuntimeType.UNDEFINED
@@ -19302,7 +17943,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_renderingMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_renderingMode_type)) {
             const value_renderingMode_value  = (value_renderingMode as FormRenderingMode)
-            valueSerializer.writeInt32((value_renderingMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_renderingMode_value as FormRenderingMode) as int32))
         }
         const value_shape  = value.shape
         let value_shape_type : int32 = RuntimeType.UNDEFINED
@@ -19310,24 +17951,24 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_shape_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_shape_type)) {
             const value_shape_value  = (value_shape as FormShape)
-            valueSerializer.writeInt32((value_shape_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_shape_value as FormShape) as int32))
         }
     }
     writeHoverEventParam(value: HoverEventParam): void {
         let valueSerializer : Serializer = this
         const value_foldStatus  = value.foldStatus
-        valueSerializer.writeInt32((value_foldStatus.valueOf() as int32))
+        valueSerializer.writeInt32(((value_foldStatus as FoldStatus) as int32))
         const value_isHoverMode  = value.isHoverMode
         valueSerializer.writeBoolean(value_isHoverMode)
         const value_appRotation  = value.appRotation
-        valueSerializer.writeInt32((value_appRotation.valueOf() as int32))
+        valueSerializer.writeInt32(((value_appRotation as AppRotation) as int32))
         const value_windowStatusType  = value.windowStatusType
         valueSerializer.writeWindowStatusType(value_windowStatusType)
     }
     writeOnFoldStatusChangeInfo(value: OnFoldStatusChangeInfo): void {
         let valueSerializer : Serializer = this
         const value_foldStatus  = value.foldStatus
-        valueSerializer.writeInt32((value_foldStatus.valueOf() as int32))
+        valueSerializer.writeInt32(((value_foldStatus as FoldStatus) as int32))
     }
     writeFolderStackOptions(value: FolderStackOptions): void {
         let valueSerializer : Serializer = this
@@ -19352,7 +17993,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as FlexDirection)
-            valueSerializer.writeInt32((value_direction_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_direction_value as FlexDirection) as int32))
         }
         const value_wrap  = value.wrap
         let value_wrap_type : int32 = RuntimeType.UNDEFINED
@@ -19360,7 +18001,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_wrap_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_wrap_type)) {
             const value_wrap_value  = (value_wrap as FlexWrap)
-            valueSerializer.writeInt32((value_wrap_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_wrap_value as FlexWrap) as int32))
         }
         const value_justifyContent  = value.justifyContent
         let value_justifyContent_type : int32 = RuntimeType.UNDEFINED
@@ -19368,7 +18009,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_justifyContent_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_justifyContent_type)) {
             const value_justifyContent_value  = (value_justifyContent as FlexAlign)
-            valueSerializer.writeInt32((value_justifyContent_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_justifyContent_value as FlexAlign) as int32))
         }
         const value_alignItems  = value.alignItems
         let value_alignItems_type : int32 = RuntimeType.UNDEFINED
@@ -19376,7 +18017,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignItems_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignItems_type)) {
             const value_alignItems_value  = (value_alignItems as ItemAlign)
-            valueSerializer.writeInt32((value_alignItems_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignItems_value as ItemAlign) as int32))
         }
         const value_alignContent  = value.alignContent
         let value_alignContent_type : int32 = RuntimeType.UNDEFINED
@@ -19384,7 +18025,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignContent_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignContent_type)) {
             const value_alignContent_value  = (value_alignContent as FlexAlign)
-            valueSerializer.writeInt32((value_alignContent_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignContent_value as FlexAlign) as int32))
         }
         const value_space  = value.space
         let value_space_type : int32 = RuntimeType.UNDEFINED
@@ -19464,23 +18105,6 @@ export class Serializer extends SerializerBase {
                 const value_height_value_1  = value_height_value as number
                 valueSerializer.writeNumber(value_height_value_1)
             }
-        }
-    }
-    writeDatePickerDialog(value: DatePickerDialog): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
         }
     }
     writeDatePickerResult(value: DatePickerResult): void {
@@ -19615,7 +18239,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_colors_value_element_0)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_colors_value_element_0_0  = value_colors_value_element_0 as Color
-                        valueSerializer.writeInt32((value_colors_value_element_0_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_colors_value_element_0_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_colors_value_element_0_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -19633,7 +18257,7 @@ export class Serializer extends SerializerBase {
                         valueSerializer.writeResource(value_colors_value_element_0_3)
                     }
                 }
-                else if (((RuntimeType.OBJECT) == (value_colors_value_element_type)) && (TypeChecker.isLinearGradient(value_colors_value_element))) {
+                else if (TypeChecker.isLinearGradient(value_colors_value_element)) {
                     valueSerializer.writeInt8(1 as int32)
                     const value_colors_value_element_1  = value_colors_value_element as LinearGradient
                     valueSerializer.writeLinearGradient(value_colors_value_element_1)
@@ -19663,7 +18287,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_type_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type_type)) {
             const value_type_value  = (value_type as DataPanelType)
-            valueSerializer.writeInt32((value_type_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_type_value as DataPanelType) as int32))
         }
     }
     writeColorStop(value: ColorStop): void {
@@ -19674,7 +18298,7 @@ export class Serializer extends SerializerBase {
         if (TypeChecker.isColor(value_color)) {
             valueSerializer.writeInt8(0 as int32)
             const value_color_0  = value_color as Color
-            valueSerializer.writeInt32((value_color_0.valueOf() as int32))
+            valueSerializer.writeInt32(((value_color_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_color_type) {
             valueSerializer.writeInt8(1 as int32)
@@ -19720,7 +18344,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_alignment_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
-            valueSerializer.writeInt32((value_alignment_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_alignment_value as DialogAlignment) as int32))
         }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
@@ -19760,7 +18384,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_maskColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_maskColor_value_0  = value_maskColor_value as Color
-                valueSerializer.writeInt32((value_maskColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_maskColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_maskColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -19821,7 +18445,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -19847,7 +18471,7 @@ export class Serializer extends SerializerBase {
             const value_cornerRadius_value  = value_cornerRadius!
             let value_cornerRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_cornerRadius_value_type = runtimeType(value_cornerRadius_value)
-            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (isResource(value_cornerRadius_value)))) {
+            if (((RuntimeType.NUMBER) == (value_cornerRadius_value_type)) || ((RuntimeType.STRING) == (value_cornerRadius_value_type)) || (((RuntimeType.OBJECT) == (value_cornerRadius_value_type)) && (TypeChecker.isResource(value_cornerRadius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_cornerRadius_value_0  = value_cornerRadius_value as Dimension
                 valueSerializer.writeLength(value_cornerRadius_value_0)
@@ -19929,7 +18553,7 @@ export class Serializer extends SerializerBase {
             const value_borderWidth_value  = value_borderWidth!
             let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_borderWidth_value_type = runtimeType(value_borderWidth_value)
-            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (isResource(value_borderWidth_value)))) {
+            if (((RuntimeType.NUMBER) == (value_borderWidth_value_type)) || ((RuntimeType.STRING) == (value_borderWidth_value_type)) || (((RuntimeType.OBJECT) == (value_borderWidth_value_type)) && (TypeChecker.isResource(value_borderWidth_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderWidth_value_0  = value_borderWidth_value as Dimension
                 valueSerializer.writeLength(value_borderWidth_value_0)
@@ -19987,7 +18611,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_borderColor_value_0)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_borderColor_value_0_0  = value_borderColor_value_0 as Color
-                    valueSerializer.writeInt32((value_borderColor_value_0_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderColor_value_0_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_borderColor_value_0_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -20019,7 +18643,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_top_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_top_value_0  = value_borderColor_value_1_top_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_top_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_top_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_top_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -20048,7 +18672,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_right_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_right_value_0  = value_borderColor_value_1_right_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_right_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_right_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_right_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -20077,7 +18701,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_bottom_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_bottom_value_0  = value_borderColor_value_1_bottom_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_bottom_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_bottom_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_bottom_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -20106,7 +18730,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_borderColor_value_1_left_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_borderColor_value_1_left_value_0  = value_borderColor_value_1_left_value as Color
-                        valueSerializer.writeInt32((value_borderColor_value_1_left_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_borderColor_value_1_left_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_borderColor_value_1_left_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -20137,7 +18761,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isBorderStyle(value_borderStyle_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderStyle_value_0  = value_borderStyle_value as BorderStyle
-                valueSerializer.writeInt32((value_borderStyle_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_borderStyle_value_0 as BorderStyle) as int32))
             }
             else if (RuntimeType.OBJECT == value_borderStyle_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -20148,7 +18772,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_top_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_top_type)) {
                     const value_borderStyle_value_1_top_value  = (value_borderStyle_value_1_top as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_top_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_top_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_right  = value_borderStyle_value_1.right
                 let value_borderStyle_value_1_right_type : int32 = RuntimeType.UNDEFINED
@@ -20156,7 +18780,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_right_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_right_type)) {
                     const value_borderStyle_value_1_right_value  = (value_borderStyle_value_1_right as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_right_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_right_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_bottom  = value_borderStyle_value_1.bottom
                 let value_borderStyle_value_1_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -20164,7 +18788,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_bottom_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_bottom_type)) {
                     const value_borderStyle_value_1_bottom_value  = (value_borderStyle_value_1_bottom as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_bottom_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_bottom_value as BorderStyle) as int32))
                 }
                 const value_borderStyle_value_1_left  = value_borderStyle_value_1.left
                 let value_borderStyle_value_1_left_type : int32 = RuntimeType.UNDEFINED
@@ -20172,7 +18796,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_borderStyle_value_1_left_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_borderStyle_value_1_left_type)) {
                     const value_borderStyle_value_1_left_value  = (value_borderStyle_value_1_left as BorderStyle)
-                    valueSerializer.writeInt32((value_borderStyle_value_1_left_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_borderStyle_value_1_left_value as BorderStyle) as int32))
                 }
             }
         }
@@ -20192,7 +18816,7 @@ export class Serializer extends SerializerBase {
             else if (TypeChecker.isShadowStyle(value_shadow_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32((value_shadow_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_shadow_value_1 as ShadowStyle) as int32))
             }
         }
         const value_backgroundBlurStyle  = value.backgroundBlurStyle
@@ -20201,7 +18825,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32((value_backgroundBlurStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_backgroundBlurStyle_value as BlurStyle) as int32))
         }
         const value_keyboardAvoidMode  = value.keyboardAvoidMode
         let value_keyboardAvoidMode_type : int32 = RuntimeType.UNDEFINED
@@ -20209,7 +18833,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_keyboardAvoidMode_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_keyboardAvoidMode_type)) {
             const value_keyboardAvoidMode_value  = (value_keyboardAvoidMode as KeyboardAvoidMode)
-            valueSerializer.writeInt32((value_keyboardAvoidMode_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_keyboardAvoidMode_value as KeyboardAvoidMode) as int32))
         }
         const value_enableHoverMode  = value.enableHoverMode
         let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
@@ -20225,42 +18849,12 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_hoverModeArea_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
-            valueSerializer.writeInt32((value_hoverModeArea_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_hoverModeArea_value as HoverModeAreaType) as int32))
         }
     }
     writeCustomDialogController(value: CustomDialogController): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeContextMenu(value: ContextMenu): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSceneOptions(value: SceneOptions): void {
         let valueSerializer : Serializer = this
@@ -20300,93 +18894,28 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_modelType_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_modelType_type)) {
             const value_modelType_value  = (value_modelType as ModelType)
-            valueSerializer.writeInt32((value_modelType_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_modelType_value as ModelType) as int32))
         }
     }
     writeUICommonEvent(value: UICommonEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeChildrenMainSize(value: ChildrenMainSize): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeTextContentControllerBase(value: TextContentControllerBase): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeView(value: View): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeMeasurable(value: Measurable): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSpringBackAction(value: SpringBackAction): void {
         let valueSerializer : Serializer = this
@@ -20398,7 +18927,7 @@ export class Serializer extends SerializerBase {
         const value_dismiss  = value.dismiss
         valueSerializer.holdAndWriteCallback(value_dismiss)
         const value_reason  = value.reason
-        valueSerializer.writeInt32((value_reason.valueOf() as int32))
+        valueSerializer.writeInt32(((value_reason as DismissReason) as int32))
     }
     writeSheetDismiss(value: SheetDismiss): void {
         let valueSerializer : Serializer = this
@@ -20410,7 +18939,7 @@ export class Serializer extends SerializerBase {
         const value_dismiss  = value.dismiss
         valueSerializer.holdAndWriteCallback(value_dismiss)
         const value_reason  = value.reason
-        valueSerializer.writeInt32((value_reason.valueOf() as int32))
+        valueSerializer.writeInt32(((value_reason as DismissReason) as int32))
     }
     writeMenuElement(value: MenuElement): void {
         let valueSerializer : Serializer = this
@@ -20470,24 +18999,11 @@ export class Serializer extends SerializerBase {
         const value_dismiss  = value.dismiss
         valueSerializer.holdAndWriteCallback(value_dismiss)
         const value_reason  = value.reason
-        valueSerializer.writeInt32((value_reason.valueOf() as int32))
+        valueSerializer.writeInt32(((value_reason as DismissReason) as int32))
     }
     writeGestureRecognizer(value: GestureRecognizer): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFingerInfo(value: FingerInfo): void {
         let valueSerializer : Serializer = this
@@ -20508,20 +19024,7 @@ export class Serializer extends SerializerBase {
     }
     writeBaseGestureEvent(value: BaseGestureEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeGestureInfo(value: GestureInfo): void {
         let valueSerializer : Serializer = this
@@ -20534,7 +19037,7 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeString(value_tag_value)
         }
         const value_type  = value.type
-        valueSerializer.writeInt32((value_type.valueOf() as int32))
+        valueSerializer.writeInt32(((value_type as GestureControl.GestureType) as int32))
         const value_isSystemGesture  = value.isSystemGesture
         valueSerializer.writeBoolean(value_isSystemGesture)
     }
@@ -20547,20 +19050,7 @@ export class Serializer extends SerializerBase {
     }
     writeGestureModifier(value: GestureModifier): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePixelStretchEffectOptions(value: PixelStretchEffectOptions): void {
         let valueSerializer : Serializer = this
@@ -20723,7 +19213,7 @@ export class Serializer extends SerializerBase {
             const value_left_value_anchor  = value_left_value.anchor
             valueSerializer.writeString(value_left_value_anchor)
             const value_left_value_align  = value_left_value.align
-            valueSerializer.writeInt32((value_left_value_align.valueOf() as int32))
+            valueSerializer.writeInt32(((value_left_value_align as HorizontalAlign) as int32))
         }
         const value_right  = value.right
         let value_right_type : int32 = RuntimeType.UNDEFINED
@@ -20734,7 +19224,7 @@ export class Serializer extends SerializerBase {
             const value_right_value_anchor  = value_right_value.anchor
             valueSerializer.writeString(value_right_value_anchor)
             const value_right_value_align  = value_right_value.align
-            valueSerializer.writeInt32((value_right_value_align.valueOf() as int32))
+            valueSerializer.writeInt32(((value_right_value_align as HorizontalAlign) as int32))
         }
         const value_middle  = value.middle
         let value_middle_type : int32 = RuntimeType.UNDEFINED
@@ -20745,7 +19235,7 @@ export class Serializer extends SerializerBase {
             const value_middle_value_anchor  = value_middle_value.anchor
             valueSerializer.writeString(value_middle_value_anchor)
             const value_middle_value_align  = value_middle_value.align
-            valueSerializer.writeInt32((value_middle_value_align.valueOf() as int32))
+            valueSerializer.writeInt32(((value_middle_value_align as HorizontalAlign) as int32))
         }
         const value_top  = value.top
         let value_top_type : int32 = RuntimeType.UNDEFINED
@@ -20756,7 +19246,7 @@ export class Serializer extends SerializerBase {
             const value_top_value_anchor  = value_top_value.anchor
             valueSerializer.writeString(value_top_value_anchor)
             const value_top_value_align  = value_top_value.align
-            valueSerializer.writeInt32((value_top_value_align.valueOf() as int32))
+            valueSerializer.writeInt32(((value_top_value_align as VerticalAlign) as int32))
         }
         const value_bottom  = value.bottom
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -20767,7 +19257,7 @@ export class Serializer extends SerializerBase {
             const value_bottom_value_anchor  = value_bottom_value.anchor
             valueSerializer.writeString(value_bottom_value_anchor)
             const value_bottom_value_align  = value_bottom_value.align
-            valueSerializer.writeInt32((value_bottom_value_align.valueOf() as int32))
+            valueSerializer.writeInt32(((value_bottom_value_align as VerticalAlign) as int32))
         }
         const value_center  = value.center
         let value_center_type : int32 = RuntimeType.UNDEFINED
@@ -20778,7 +19268,7 @@ export class Serializer extends SerializerBase {
             const value_center_value_anchor  = value_center_value.anchor
             valueSerializer.writeString(value_center_value_anchor)
             const value_center_value_align  = value_center_value.align
-            valueSerializer.writeInt32((value_center_value_align.valueOf() as int32))
+            valueSerializer.writeInt32(((value_center_value_align as VerticalAlign) as int32))
         }
         const value_bias  = value.bias
         let value_bias_type : int32 = RuntimeType.UNDEFINED
@@ -20869,7 +19359,7 @@ export class Serializer extends SerializerBase {
                     valueSerializer.writeLength(value_width_value_0_left_value)
                 }
             }
-            else if (((RuntimeType.NUMBER) == (value_width_value_type)) || ((RuntimeType.STRING) == (value_width_value_type)) || (((RuntimeType.OBJECT) == (value_width_value_type)) && (isResource(value_width_value)))) {
+            else if (((RuntimeType.NUMBER) == (value_width_value_type)) || ((RuntimeType.STRING) == (value_width_value_type)) || (((RuntimeType.OBJECT) == (value_width_value_type)) && (TypeChecker.isResource(value_width_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_width_value_1  = value_width_value as Dimension
                 valueSerializer.writeLength(value_width_value_1)
@@ -20897,7 +19387,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_color_value_0_top_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_color_value_0_top_value_0  = value_color_value_0_top_value as Color
-                        valueSerializer.writeInt32((value_color_value_0_top_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_color_value_0_top_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_color_value_0_top_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -20926,7 +19416,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_color_value_0_right_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_color_value_0_right_value_0  = value_color_value_0_right_value as Color
-                        valueSerializer.writeInt32((value_color_value_0_right_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_color_value_0_right_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_color_value_0_right_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -20955,7 +19445,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_color_value_0_bottom_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_color_value_0_bottom_value_0  = value_color_value_0_bottom_value as Color
-                        valueSerializer.writeInt32((value_color_value_0_bottom_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_color_value_0_bottom_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_color_value_0_bottom_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -20984,7 +19474,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_color_value_0_left_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_color_value_0_left_value_0  = value_color_value_0_left_value as Color
-                        valueSerializer.writeInt32((value_color_value_0_left_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_color_value_0_left_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_color_value_0_left_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -21011,7 +19501,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_color_value_1)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_color_value_1_0  = value_color_value_1 as Color
-                    valueSerializer.writeInt32((value_color_value_1_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_color_value_1_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_color_value_1_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -21079,7 +19569,7 @@ export class Serializer extends SerializerBase {
                     valueSerializer.writeLength(value_radius_value_0_bottomRight_value)
                 }
             }
-            else if (((RuntimeType.NUMBER) == (value_radius_value_type)) || ((RuntimeType.STRING) == (value_radius_value_type)) || (((RuntimeType.OBJECT) == (value_radius_value_type)) && (isResource(value_radius_value)))) {
+            else if (((RuntimeType.NUMBER) == (value_radius_value_type)) || ((RuntimeType.STRING) == (value_radius_value_type)) || (((RuntimeType.OBJECT) == (value_radius_value_type)) && (TypeChecker.isResource(value_radius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_radius_value_1  = value_radius_value as Dimension
                 valueSerializer.writeLength(value_radius_value_1)
@@ -21102,7 +19592,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_style_value_0_top_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_style_value_0_top_type)) {
                     const value_style_value_0_top_value  = (value_style_value_0_top as OutlineStyle)
-                    valueSerializer.writeInt32((value_style_value_0_top_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_style_value_0_top_value as OutlineStyle) as int32))
                 }
                 const value_style_value_0_right  = value_style_value_0.right
                 let value_style_value_0_right_type : int32 = RuntimeType.UNDEFINED
@@ -21110,7 +19600,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_style_value_0_right_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_style_value_0_right_type)) {
                     const value_style_value_0_right_value  = (value_style_value_0_right as OutlineStyle)
-                    valueSerializer.writeInt32((value_style_value_0_right_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_style_value_0_right_value as OutlineStyle) as int32))
                 }
                 const value_style_value_0_bottom  = value_style_value_0.bottom
                 let value_style_value_0_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -21118,7 +19608,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_style_value_0_bottom_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_style_value_0_bottom_type)) {
                     const value_style_value_0_bottom_value  = (value_style_value_0_bottom as OutlineStyle)
-                    valueSerializer.writeInt32((value_style_value_0_bottom_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_style_value_0_bottom_value as OutlineStyle) as int32))
                 }
                 const value_style_value_0_left  = value_style_value_0.left
                 let value_style_value_0_left_type : int32 = RuntimeType.UNDEFINED
@@ -21126,13 +19616,13 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_style_value_0_left_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_style_value_0_left_type)) {
                     const value_style_value_0_left_value  = (value_style_value_0_left as OutlineStyle)
-                    valueSerializer.writeInt32((value_style_value_0_left_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_style_value_0_left_value as OutlineStyle) as int32))
                 }
             }
             else if (TypeChecker.isOutlineStyle(value_style_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_style_value_1  = value_style_value as OutlineStyle
-                valueSerializer.writeInt32((value_style_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_style_value_1 as OutlineStyle) as int32))
             }
         }
     }
@@ -21146,7 +19636,7 @@ export class Serializer extends SerializerBase {
             const value_slice_value  = value_slice!
             let value_slice_value_type : int32 = RuntimeType.UNDEFINED
             value_slice_value_type = runtimeType(value_slice_value)
-            if (((RuntimeType.NUMBER) == (value_slice_value_type)) || ((RuntimeType.STRING) == (value_slice_value_type)) || (((RuntimeType.OBJECT) == (value_slice_value_type)) && (isResource(value_slice_value)))) {
+            if (((RuntimeType.NUMBER) == (value_slice_value_type)) || ((RuntimeType.STRING) == (value_slice_value_type)) || (((RuntimeType.OBJECT) == (value_slice_value_type)) && (TypeChecker.isResource(value_slice_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_slice_value_0  = value_slice_value as Length
                 valueSerializer.writeLength(value_slice_value_0)
@@ -21199,7 +19689,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_repeat_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_repeat_type)) {
             const value_repeat_value  = (value_repeat as RepeatMode)
-            valueSerializer.writeInt32((value_repeat_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_repeat_value as RepeatMode) as int32))
         }
         const value_source  = value.source
         let value_source_type : int32 = RuntimeType.UNDEFINED
@@ -21214,7 +19704,7 @@ export class Serializer extends SerializerBase {
                 const value_source_value_0  = value_source_value as string
                 valueSerializer.writeString(value_source_value_0)
             }
-            else if (isResource(value_source_value)) {
+            else if (TypeChecker.isResource(value_source_value, false, false, false, false, false)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_source_value_1  = value_source_value as Resource
                 valueSerializer.writeResource(value_source_value_1)
@@ -21233,7 +19723,7 @@ export class Serializer extends SerializerBase {
             const value_width_value  = value_width!
             let value_width_value_type : int32 = RuntimeType.UNDEFINED
             value_width_value_type = runtimeType(value_width_value)
-            if (((RuntimeType.NUMBER) == (value_width_value_type)) || ((RuntimeType.STRING) == (value_width_value_type)) || (((RuntimeType.OBJECT) == (value_width_value_type)) && (isResource(value_width_value)))) {
+            if (((RuntimeType.NUMBER) == (value_width_value_type)) || ((RuntimeType.STRING) == (value_width_value_type)) || (((RuntimeType.OBJECT) == (value_width_value_type)) && (TypeChecker.isResource(value_width_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_width_value_0  = value_width_value as Length
                 valueSerializer.writeLength(value_width_value_0)
@@ -21288,7 +19778,7 @@ export class Serializer extends SerializerBase {
             const value_outset_value  = value_outset!
             let value_outset_value_type : int32 = RuntimeType.UNDEFINED
             value_outset_value_type = runtimeType(value_outset_value)
-            if (((RuntimeType.NUMBER) == (value_outset_value_type)) || ((RuntimeType.STRING) == (value_outset_value_type)) || (((RuntimeType.OBJECT) == (value_outset_value_type)) && (isResource(value_outset_value)))) {
+            if (((RuntimeType.NUMBER) == (value_outset_value_type)) || ((RuntimeType.STRING) == (value_outset_value_type)) || (((RuntimeType.OBJECT) == (value_outset_value_type)) && (TypeChecker.isResource(value_outset_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_outset_value_0  = value_outset_value as Length
                 valueSerializer.writeLength(value_outset_value_0)
@@ -21390,7 +19880,7 @@ export class Serializer extends SerializerBase {
                     valueSerializer.writeLength(value_width_value_0_left_value)
                 }
             }
-            else if (((RuntimeType.NUMBER) == (value_width_value_type)) || ((RuntimeType.STRING) == (value_width_value_type)) || (((RuntimeType.OBJECT) == (value_width_value_type)) && (isResource(value_width_value)))) {
+            else if (((RuntimeType.NUMBER) == (value_width_value_type)) || ((RuntimeType.STRING) == (value_width_value_type)) || (((RuntimeType.OBJECT) == (value_width_value_type)) && (TypeChecker.isResource(value_width_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_width_value_1  = value_width_value as Length
                 valueSerializer.writeLength(value_width_value_1)
@@ -21423,7 +19913,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_color_value_0_top_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_color_value_0_top_value_0  = value_color_value_0_top_value as Color
-                        valueSerializer.writeInt32((value_color_value_0_top_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_color_value_0_top_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_color_value_0_top_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -21452,7 +19942,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_color_value_0_right_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_color_value_0_right_value_0  = value_color_value_0_right_value as Color
-                        valueSerializer.writeInt32((value_color_value_0_right_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_color_value_0_right_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_color_value_0_right_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -21481,7 +19971,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_color_value_0_bottom_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_color_value_0_bottom_value_0  = value_color_value_0_bottom_value as Color
-                        valueSerializer.writeInt32((value_color_value_0_bottom_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_color_value_0_bottom_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_color_value_0_bottom_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -21510,7 +20000,7 @@ export class Serializer extends SerializerBase {
                     if (TypeChecker.isColor(value_color_value_0_left_value)) {
                         valueSerializer.writeInt8(0 as int32)
                         const value_color_value_0_left_value_0  = value_color_value_0_left_value as Color
-                        valueSerializer.writeInt32((value_color_value_0_left_value_0.valueOf() as int32))
+                        valueSerializer.writeInt32(((value_color_value_0_left_value_0 as Color) as int32))
                     }
                     else if (RuntimeType.NUMBER == value_color_value_0_left_value_type) {
                         valueSerializer.writeInt8(1 as int32)
@@ -21537,7 +20027,7 @@ export class Serializer extends SerializerBase {
                 if (TypeChecker.isColor(value_color_value_1)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_color_value_1_0  = value_color_value_1 as Color
-                    valueSerializer.writeInt32((value_color_value_1_0.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_color_value_1_0 as Color) as int32))
                 }
                 else if (RuntimeType.NUMBER == value_color_value_1_type) {
                     valueSerializer.writeInt8(1 as int32)
@@ -21605,7 +20095,7 @@ export class Serializer extends SerializerBase {
                     valueSerializer.writeLength(value_radius_value_0_bottomRight_value)
                 }
             }
-            else if (((RuntimeType.NUMBER) == (value_radius_value_type)) || ((RuntimeType.STRING) == (value_radius_value_type)) || (((RuntimeType.OBJECT) == (value_radius_value_type)) && (isResource(value_radius_value)))) {
+            else if (((RuntimeType.NUMBER) == (value_radius_value_type)) || ((RuntimeType.STRING) == (value_radius_value_type)) || (((RuntimeType.OBJECT) == (value_radius_value_type)) && (TypeChecker.isResource(value_radius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_radius_value_1  = value_radius_value as Length
                 valueSerializer.writeLength(value_radius_value_1)
@@ -21633,7 +20123,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_style_value_0_top_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_style_value_0_top_type)) {
                     const value_style_value_0_top_value  = (value_style_value_0_top as BorderStyle)
-                    valueSerializer.writeInt32((value_style_value_0_top_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_style_value_0_top_value as BorderStyle) as int32))
                 }
                 const value_style_value_0_right  = value_style_value_0.right
                 let value_style_value_0_right_type : int32 = RuntimeType.UNDEFINED
@@ -21641,7 +20131,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_style_value_0_right_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_style_value_0_right_type)) {
                     const value_style_value_0_right_value  = (value_style_value_0_right as BorderStyle)
-                    valueSerializer.writeInt32((value_style_value_0_right_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_style_value_0_right_value as BorderStyle) as int32))
                 }
                 const value_style_value_0_bottom  = value_style_value_0.bottom
                 let value_style_value_0_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -21649,7 +20139,7 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_style_value_0_bottom_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_style_value_0_bottom_type)) {
                     const value_style_value_0_bottom_value  = (value_style_value_0_bottom as BorderStyle)
-                    valueSerializer.writeInt32((value_style_value_0_bottom_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_style_value_0_bottom_value as BorderStyle) as int32))
                 }
                 const value_style_value_0_left  = value_style_value_0.left
                 let value_style_value_0_left_type : int32 = RuntimeType.UNDEFINED
@@ -21657,13 +20147,13 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeInt8(value_style_value_0_left_type as int32)
                 if ((RuntimeType.UNDEFINED) != (value_style_value_0_left_type)) {
                     const value_style_value_0_left_value  = (value_style_value_0_left as BorderStyle)
-                    valueSerializer.writeInt32((value_style_value_0_left_value.valueOf() as int32))
+                    valueSerializer.writeInt32(((value_style_value_0_left_value as BorderStyle) as int32))
                 }
             }
             else if (TypeChecker.isBorderStyle(value_style_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_style_value_1  = value_style_value as BorderStyle
-                valueSerializer.writeInt32((value_style_value_1.valueOf() as int32))
+                valueSerializer.writeInt32(((value_style_value_1 as BorderStyle) as int32))
             }
         }
         const value_dashGap  = value.dashGap
@@ -21710,7 +20200,7 @@ export class Serializer extends SerializerBase {
                     valueSerializer.writeLength(value_dashGap_value_0_left_value)
                 }
             }
-            else if (((RuntimeType.OBJECT) == (value_dashGap_value_type)) && (TypeChecker.isLengthMetrics(value_dashGap_value, false, false))) {
+            else if (TypeChecker.isLengthMetrics(value_dashGap_value, false, false)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_dashGap_value_1  = value_dashGap_value as LengthMetrics
                 valueSerializer.writeLengthMetrics(value_dashGap_value_1)
@@ -21765,7 +20255,7 @@ export class Serializer extends SerializerBase {
                     valueSerializer.writeLength(value_dashWidth_value_0_left_value)
                 }
             }
-            else if (((RuntimeType.OBJECT) == (value_dashWidth_value_type)) && (TypeChecker.isLengthMetrics(value_dashWidth_value, false, false))) {
+            else if (TypeChecker.isLengthMetrics(value_dashWidth_value, false, false)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_dashWidth_value_1  = value_dashWidth_value as LengthMetrics
                 valueSerializer.writeLengthMetrics(value_dashWidth_value_1)
@@ -21873,7 +20363,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_color_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_color_value_0  = value_color_value as Color
-                valueSerializer.writeInt32((value_color_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_color_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_color_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -21897,7 +20387,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_adaptiveColor_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_adaptiveColor_type)) {
             const value_adaptiveColor_value  = (value_adaptiveColor as AdaptiveColor)
-            valueSerializer.writeInt32((value_adaptiveColor_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_adaptiveColor_value as AdaptiveColor) as int32))
         }
         const value_blurOptions  = value.blurOptions
         let value_blurOptions_type : int32 = RuntimeType.UNDEFINED
@@ -21913,7 +20403,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_policy_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_policy_type)) {
             const value_policy_value  = (value_policy as BlurStyleActivePolicy)
-            valueSerializer.writeInt32((value_policy_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_policy_value as BlurStyleActivePolicy) as int32))
         }
         const value_inactiveColor  = value.inactiveColor
         let value_inactiveColor_type : int32 = RuntimeType.UNDEFINED
@@ -21926,7 +20416,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_inactiveColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_inactiveColor_value_0  = value_inactiveColor_value as Color
-                valueSerializer.writeInt32((value_inactiveColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_inactiveColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_inactiveColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -21953,7 +20443,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_start_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_start_type)) {
             const value_start_value  = (value_start as PixelRoundCalcPolicy)
-            valueSerializer.writeInt32((value_start_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_start_value as PixelRoundCalcPolicy) as int32))
         }
         const value_top  = value.top
         let value_top_type : int32 = RuntimeType.UNDEFINED
@@ -21961,7 +20451,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_top_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_top_type)) {
             const value_top_value  = (value_top as PixelRoundCalcPolicy)
-            valueSerializer.writeInt32((value_top_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_top_value as PixelRoundCalcPolicy) as int32))
         }
         const value_end  = value.end
         let value_end_type : int32 = RuntimeType.UNDEFINED
@@ -21969,7 +20459,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_end_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_end_type)) {
             const value_end_value  = (value_end as PixelRoundCalcPolicy)
-            valueSerializer.writeInt32((value_end_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_end_value as PixelRoundCalcPolicy) as int32))
         }
         const value_bottom  = value.bottom
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -21977,7 +20467,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_bottom_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
             const value_bottom_value  = (value_bottom as PixelRoundCalcPolicy)
-            valueSerializer.writeInt32((value_bottom_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_bottom_value as PixelRoundCalcPolicy) as int32))
         }
     }
     writeChainWeightOptions(value: ChainWeightOptions): void {
@@ -22002,7 +20492,7 @@ export class Serializer extends SerializerBase {
     writeTouchResult(value: TouchResult): void {
         let valueSerializer : Serializer = this
         const value_strategy  = value.strategy
-        valueSerializer.writeInt32((value_strategy.valueOf() as int32))
+        valueSerializer.writeInt32(((value_strategy as TouchTestStrategy) as int32))
         const value_id  = value.id
         let value_id_type : int32 = RuntimeType.UNDEFINED
         value_id_type = runtimeType(value_id)
@@ -22033,54 +20523,15 @@ export class Serializer extends SerializerBase {
     }
     writeKeyEvent(value: KeyEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDragEvent(value: DragEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePixelMapMock(value: PixelMapMock): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeHistoricalPoint(value: HistoricalPoint): void {
         let valueSerializer : Serializer = this
@@ -22095,71 +20546,19 @@ export class Serializer extends SerializerBase {
     }
     writeAccessibilityHoverEvent(value: AccessibilityHoverEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeMouseEvent(value: MouseEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeHoverEvent(value: HoverEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeBaseEvent(value: BaseEvent): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePointLightStyle(value: PointLightStyle): void {
         let valueSerializer : Serializer = this
@@ -22177,7 +20576,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_illuminated_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_illuminated_type)) {
             const value_illuminated_value  = (value_illuminated as IlluminatedType)
-            valueSerializer.writeInt32((value_illuminated_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_illuminated_value as IlluminatedType) as int32))
         }
         const value_bloom  = value.bloom
         let value_bloom_type : int32 = RuntimeType.UNDEFINED
@@ -22260,7 +20659,7 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeString(value_name_element)
         }
         const value_status  = value.status
-        valueSerializer.writeInt32((value_status.valueOf() as int32))
+        valueSerializer.writeInt32(((value_status as SelectStatus) as int32))
     }
     writeCheckboxGroupOptions(value: CheckboxGroupOptions): void {
         let valueSerializer : Serializer = this
@@ -22286,7 +20685,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_strokeColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_strokeColor_value_0  = value_strokeColor_value as Color
-                valueSerializer.writeInt32((value_strokeColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_strokeColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_strokeColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22350,37 +20749,11 @@ export class Serializer extends SerializerBase {
     }
     writeOffscreenCanvas(value: OffscreenCanvas): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCanvasRenderer(value: CanvasRenderer): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeLengthMetricsUnit(value: LengthMetricsUnit): void {
         let valueSerializer : Serializer = this
@@ -22389,37 +20762,7 @@ export class Serializer extends SerializerBase {
     }
     writeCanvasPath(value: CanvasPath): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeCalendarPickerDialog(value: CalendarPickerDialog): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeCalendarOptions(value: CalendarOptions): void {
         let valueSerializer : Serializer = this
@@ -22486,7 +20829,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_workDayMarkColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_workDayMarkColor_value_0  = value_workDayMarkColor_value as Color
-                valueSerializer.writeInt32((value_workDayMarkColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_workDayMarkColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_workDayMarkColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22515,7 +20858,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_offDayMarkColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_offDayMarkColor_value_0  = value_offDayMarkColor_value as Color
-                valueSerializer.writeInt32((value_offDayMarkColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_offDayMarkColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_offDayMarkColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22587,7 +20930,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_weekColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_weekColor_value_0  = value_weekColor_value as Color
-                valueSerializer.writeInt32((value_weekColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_weekColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_weekColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22616,7 +20959,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_weekendDayColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_weekendDayColor_value_0  = value_weekendDayColor_value as Color
-                valueSerializer.writeInt32((value_weekendDayColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_weekendDayColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_weekendDayColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22645,7 +20988,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_weekendLunarColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_weekendLunarColor_value_0  = value_weekendLunarColor_value as Color
-                valueSerializer.writeInt32((value_weekendLunarColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_weekendLunarColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_weekendLunarColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22709,7 +21052,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_focusedDayColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_focusedDayColor_value_0  = value_focusedDayColor_value as Color
-                valueSerializer.writeInt32((value_focusedDayColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_focusedDayColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_focusedDayColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22738,7 +21081,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_focusedLunarColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_focusedLunarColor_value_0  = value_focusedLunarColor_value as Color
-                valueSerializer.writeInt32((value_focusedLunarColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_focusedLunarColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_focusedLunarColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22767,7 +21110,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_focusedAreaBackgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_focusedAreaBackgroundColor_value_0  = value_focusedAreaBackgroundColor_value as Color
-                valueSerializer.writeInt32((value_focusedAreaBackgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_focusedAreaBackgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_focusedAreaBackgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22807,7 +21150,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_nonCurrentMonthDayColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_nonCurrentMonthDayColor_value_0  = value_nonCurrentMonthDayColor_value as Color
-                valueSerializer.writeInt32((value_nonCurrentMonthDayColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_nonCurrentMonthDayColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_nonCurrentMonthDayColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22836,7 +21179,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_nonCurrentMonthLunarColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_nonCurrentMonthLunarColor_value_0  = value_nonCurrentMonthLunarColor_value as Color
-                valueSerializer.writeInt32((value_nonCurrentMonthLunarColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_nonCurrentMonthLunarColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_nonCurrentMonthLunarColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22865,7 +21208,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_nonCurrentMonthWorkDayMarkColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_nonCurrentMonthWorkDayMarkColor_value_0  = value_nonCurrentMonthWorkDayMarkColor_value as Color
-                valueSerializer.writeInt32((value_nonCurrentMonthWorkDayMarkColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_nonCurrentMonthWorkDayMarkColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_nonCurrentMonthWorkDayMarkColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22894,7 +21237,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_nonCurrentMonthOffDayMarkColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_nonCurrentMonthOffDayMarkColor_value_0  = value_nonCurrentMonthOffDayMarkColor_value as Color
-                valueSerializer.writeInt32((value_nonCurrentMonthOffDayMarkColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_nonCurrentMonthOffDayMarkColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_nonCurrentMonthOffDayMarkColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22926,7 +21269,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_dayColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_dayColor_value_0  = value_dayColor_value as Color
-                valueSerializer.writeInt32((value_dayColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_dayColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_dayColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22955,7 +21298,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_lunarColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_lunarColor_value_0  = value_lunarColor_value as Color
-                valueSerializer.writeInt32((value_lunarColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_lunarColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_lunarColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -22984,7 +21327,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_markLunarColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_markLunarColor_value_0  = value_markLunarColor_value as Color
-                valueSerializer.writeInt32((value_markLunarColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_markLunarColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_markLunarColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -23196,7 +21539,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_type_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type_type)) {
             const value_type_value  = (value_type as ButtonType)
-            valueSerializer.writeInt32((value_type_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_type_value as ButtonType) as int32))
         }
         const value_stateEffect  = value.stateEffect
         let value_stateEffect_type : int32 = RuntimeType.UNDEFINED
@@ -23212,7 +21555,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_buttonStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_buttonStyle_type)) {
             const value_buttonStyle_value  = (value_buttonStyle as ButtonStyleMode)
-            valueSerializer.writeInt32((value_buttonStyle_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_buttonStyle_value as ButtonStyleMode) as int32))
         }
         const value_controlSize  = value.controlSize
         let value_controlSize_type : int32 = RuntimeType.UNDEFINED
@@ -23220,7 +21563,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_controlSize_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_controlSize_type)) {
             const value_controlSize_value  = (value_controlSize as ControlSize)
-            valueSerializer.writeInt32((value_controlSize_value as int32))
+            valueSerializer.writeInt32(TypeChecker.ControlSize_ToOrdinal(value_controlSize_value))
         }
         const value_role  = value.role
         let value_role_type : int32 = RuntimeType.UNDEFINED
@@ -23228,7 +21571,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_role_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_role_type)) {
             const value_role_value  = (value_role as ButtonRole)
-            valueSerializer.writeInt32((value_role_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_role_value as ButtonRole) as int32))
         }
     }
     writeBadgeParamWithString(value: BadgeParamWithString): void {
@@ -23244,7 +21587,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isBadgePosition(value_position_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_position_value_0  = value_position_value as BadgePosition
-                valueSerializer.writeInt32((value_position_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_position_value_0 as BadgePosition) as int32))
             }
             else if (RuntimeType.OBJECT == value_position_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -23270,7 +21613,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isBadgePosition(value_position_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_position_value_0  = value_position_value as BadgePosition
-                valueSerializer.writeInt32((value_position_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_position_value_0 as BadgePosition) as int32))
             }
             else if (RuntimeType.OBJECT == value_position_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -23293,71 +21636,19 @@ export class Serializer extends SerializerBase {
     }
     writeScrollMotion(value: ScrollMotion): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeFrictionMotion(value: FrictionMotion): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSpringMotion(value: SpringMotion): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeSpringProp(value: SpringProp): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeAlphabetIndexerOptions(value: AlphabetIndexerOptions): void {
         let valueSerializer : Serializer = this
@@ -23394,7 +21685,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_style_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_style_type)) {
             const value_style_value  = (value_style as DialogButtonStyle)
-            valueSerializer.writeInt32((value_style_value.valueOf() as int32))
+            valueSerializer.writeInt32(((value_style_value as DialogButtonStyle) as int32))
         }
         const value_value  = value.value
         let value_value_type : int32 = RuntimeType.UNDEFINED
@@ -23420,7 +21711,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_fontColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_fontColor_value_0  = value_fontColor_value as Color
-                valueSerializer.writeInt32((value_fontColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_fontColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_fontColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -23449,7 +21740,7 @@ export class Serializer extends SerializerBase {
             if (TypeChecker.isColor(value_backgroundColor_value)) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32((value_backgroundColor_value_0.valueOf() as int32))
+                valueSerializer.writeInt32(((value_backgroundColor_value_0 as Color) as int32))
             }
             else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
                 valueSerializer.writeInt8(1 as int32)
@@ -23478,29 +21769,12 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeBoolean(value_primary_value)
         }
     }
-    writeAlertDialog(value: AlertDialog): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeDismissDialogAction(value: DismissDialogAction): void {
         let valueSerializer : Serializer = this
         const value_dismiss  = value.dismiss
         valueSerializer.holdAndWriteCallback(value_dismiss)
         const value_reason  = value.reason
-        valueSerializer.writeInt32((value_reason.valueOf() as int32))
+        valueSerializer.writeInt32(((value_reason as DismissReason) as int32))
     }
     writeSheetInfo(value: SheetInfo): void {
         let valueSerializer : Serializer = this
@@ -23539,107 +21813,13 @@ export class Serializer extends SerializerBase {
         const value_action  = value.action
         valueSerializer.holdAndWriteCallback(value_action)
     }
-    writeActionSheet(value: ActionSheet): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeEventEmulator(value: EventEmulator): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeNavExtender(value: NavExtender): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeReplaceSymbolEffect(value: ReplaceSymbolEffect): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeScaleSymbolEffect(value: ScaleSymbolEffect): void {
         let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeGlobalScope_ohos_font(value: GlobalScope_ohos_font): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writePathShapeOptions(value: PathShapeOptions): void {
         let valueSerializer : Serializer = this
@@ -23693,97 +21873,12 @@ export class Serializer extends SerializerBase {
             }
         }
     }
-    writeGlobalScope_ohos_arkui_performanceMonitor(value: GlobalScope_ohos_arkui_performanceMonitor): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeGlobalScope_ohos_arkui_componentSnapshot(value: GlobalScope_ohos_arkui_componentSnapshot): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
     writeWebHeader(value: WebHeader): void {
         let valueSerializer : Serializer = this
         const value_headerKey  = value.headerKey
         valueSerializer.writeString(value_headerKey)
         const value_headerValue  = value.headerValue
         valueSerializer.writeString(value_headerValue)
-    }
-    writeSystemOps(value: SystemOps): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeLazyForEachOps(value: LazyForEachOps): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
-    }
-    writeAnimationExtender(value: AnimationExtender): void {
-        let valueSerializer : Serializer = this
-        if (TypeChecker.typeInstanceOf<MaterializedBase>(value, "peer"))
-        {
-            const base : MaterializedBase = TypeChecker.typeCast<MaterializedBase>(value)
-            const peer  = base.getPeer()
-            let ptr : KPointer = nullptr
-            if (peer != undefined)
-                ptr = peer.ptr
-            valueSerializer.writePointer(ptr)
-            return
-        }
-        else
-        {
-            throw new Error("Value is not a MaterializedBase instance!")
-        }
     }
     writeLength(value: Length): void {
         const valueType  = runtimeType(value)

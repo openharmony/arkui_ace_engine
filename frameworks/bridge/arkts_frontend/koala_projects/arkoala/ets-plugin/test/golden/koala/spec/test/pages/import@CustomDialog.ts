@@ -1,6 +1,7 @@
 import { $r, $rawfile, AppStorage, ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, ArkTextInput, ArkTextInputComponent, CanvasRenderingContext2D, Color, CustomDialogController, DataChangeListener, Environment, FlexAlign, ForEach, GestureGroup, IDataSource, LocalStorage, LongPressGesture, PanGesture, PanGestureOptions, PersistentStorage, PinchGesture, RenderingContextSettings, RotationGesture, Scroller, SubscribedAbstractProperty, SwipeGesture, SwiperController, TabsController, TapGesture, TextAreaController, VideoController, animateTo, bindCustomDialog, fp2px, getContext, getInspectorByKey, lpx2px, px2fp, px2lpx, px2vp, vp2px } from "@koalaui/arkui";
 import { MutableState } from "@koalaui/runtime";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 export class ArkCustomDialogExample1Component extends ArkStructBase<ArkCustomDialogExample1Component, CustomDialogExample1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

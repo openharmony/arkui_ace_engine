@@ -2,6 +2,7 @@ import { ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, Ark
 import { MutableState, contextLocal } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkCompAComponent extends ArkStructBase<ArkCompAComponent, CompAOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -36,6 +37,7 @@ class ArkCompAComponent extends ArkStructBase<ArkCompAComponent, CompAOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkCompBComponent extends ArkStructBase<ArkCompBComponent, CompBOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -53,6 +55,7 @@ class ArkCompBComponent extends ArkStructBase<ArkCompBComponent, CompBOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkCompCComponent extends ArkStructBase<ArkCompCComponent, CompCOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

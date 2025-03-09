@@ -15,10 +15,9 @@
 import { InteropNativeModule } from "@koalaui/interop"
 import { int32, int8Array } from "@koalaui/common"
 
-
 export type UserViewBuilder =
 /** @memo */
-(/*root: PeerNode*/) => void
+() => void
 
 export class UserView {
     constructor() {}

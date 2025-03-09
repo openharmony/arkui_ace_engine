@@ -42,8 +42,13 @@ export class factory {
     // Parameters
     static createContextParameter(): arkts.ETSParameterExpression {
         return arkts.factory.createParameterDeclaration(
-            arkts.factory.createIdentifier(RuntimeNames.CONTEXT,
-                arkts.factory.createIdentifier(RuntimeNames.CONTEXT_TYPE)
+            arkts.factory.createIdentifier(
+                RuntimeNames.CONTEXT,
+                arkts.factory.createTypeReference(
+                    arkts.factory.createTypeReferencePart(
+                        arkts.factory.createIdentifier(RuntimeNames.CONTEXT_TYPE)
+                    )
+                )
             ),
             undefined
         )
@@ -51,13 +56,29 @@ export class factory {
     static createIdParameter(): arkts.ETSParameterExpression {
         return arkts.factory.createParameterDeclaration(
             arkts.factory.createIdentifier(RuntimeNames.ID,
-                arkts.factory.createIdentifier(RuntimeNames.ID_TYPE)
+                arkts.factory.createTypeReference(
+                    arkts.factory.createTypeReferencePart(
+                        arkts.factory.createIdentifier(RuntimeNames.ID_TYPE)
+                    )
+                )
             ),
             undefined
         )
     }
     static createHiddenParameters(): arkts.ETSParameterExpression[] {
         return [factory.createContextParameter(), factory.createIdParameter()]
+    }
+    static updateFunctionTypeWithMemoParameters(type: arkts.ETSFunctionType): arkts.ETSFunctionType {
+        return arkts.factory.updateFunctionType(
+            type,
+            arkts.factory.createFunctionSignature(
+                undefined,
+                [...factory.createHiddenParameters(), ...type.params],
+                type.returnType,
+                false,
+            ),
+            arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_ARROW,
+        )
     }
 
     // Arguments
@@ -67,8 +88,8 @@ export class factory {
     static createIdArgument(hash: arkts.NumberLiteral | arkts.StringLiteral): arkts.AstNode {
         return arkts.factory.createBinaryExpression(
             arkts.factory.createIdentifier(RuntimeNames.ID),
+            hash,
             arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_PLUS,
-            hash
         )
     }
     static createHiddenArguments(hash: arkts.NumberLiteral | arkts.StringLiteral): arkts.AstNode[] {
@@ -108,7 +129,21 @@ export class factory {
             false,
         )
     }
-    static createMemoParameterAccessMemo(name: string, hash: arkts.NumberLiteral | arkts.StringLiteral, passArgs?: arkts.AstNode[]): arkts.CallExpression {
+    static createMemoParameterAccessMemoWithScope(name: string, hash: arkts.NumberLiteral | arkts.StringLiteral, passArgs?: arkts.AstNode[]): arkts.CallExpression {
+        const updatedArgs = passArgs ? passArgs : []
+        return arkts.factory.createCallExpression(
+            arkts.factory.createMemberExpression(
+                factory.createMemoParameterIdentifier(name),
+                arkts.factory.createIdentifier(RuntimeNames.VALUE),
+                arkts.Es2pandaMemberExpressionKind.MEMBER_EXPRESSION_KIND_GETTER,
+                false,
+                false,
+            ),
+            undefined,
+            [...factory.createHiddenArguments(hash), ...updatedArgs],
+        )
+    }
+    static createMemoParameterAccessMemoWithoutScope(name: string, hash: arkts.NumberLiteral | arkts.StringLiteral, passArgs?: arkts.AstNode[]): arkts.CallExpression {
         const updatedArgs = passArgs ? passArgs : []
         return arkts.factory.createCallExpression(
             arkts.factory.createIdentifier(name),
@@ -127,12 +162,12 @@ export class factory {
                 false,
             ),
             undefined,
-            [...factory.createHiddenArguments(hash), ...updatedArgs],
+            [...updatedArgs],
         )
     }
 
     // Recache
-    static createScopeDeclaration(returnTypeAnnotation: arkts.AstNode | undefined, hash: arkts.NumberLiteral | arkts.StringLiteral, cnt: number): arkts.VariableDeclaration {
+    static createScopeDeclaration(returnTypeAnnotation: arkts.TypeNode | undefined, hash: arkts.NumberLiteral | arkts.StringLiteral, cnt: number): arkts.VariableDeclaration {
         return arkts.factory.createVariableDeclaration(
             0,
             arkts.Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_CONST,
@@ -196,7 +231,7 @@ export class factory {
     }
 
     // Compute
-    static createLambdaWrapper(node: arkts.AstNode): arkts.ArrowFunctionExpression {
+    static createLambdaWrapper(node: arkts.Expression): arkts.ArrowFunctionExpression {
         return arkts.factory.createArrowFunction(
             arkts.factory.createScriptFunction(
                 arkts.factory.createBlock([
@@ -212,7 +247,7 @@ export class factory {
             )
         )
     }
-    static createComputeExpression(hash: arkts.NumberLiteral | arkts.StringLiteral, node: arkts.AstNode): arkts.CallExpression {
+    static createComputeExpression(hash: arkts.NumberLiteral | arkts.StringLiteral, node: arkts.Expression): arkts.CallExpression {
         return arkts.factory.createCallExpression(
             arkts.factory.createMemberExpression(
                 arkts.factory.createIdentifier(RuntimeNames.CONTEXT),

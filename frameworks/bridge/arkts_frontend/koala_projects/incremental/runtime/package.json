@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/runtime",
-    "version": "1.5.7+devel",
+    "version": "1.5.8+devel",
     "description": "",
     "main": "./build/lib/src/index.js",
     "types": "./build/lib/src/index.d.ts",
@@ -11,7 +11,7 @@
         "oh-package.json5"
     ],
     "scripts": {
-        "compile": "ets-tsc -p .",
+        "compile": "npm run build:compiler-plugin && ets-tsc -p .",
         "compile:test": "ets-tsc -b tsconfig-test.json",
         "clean": "rimraf build",
         "test": "mocha",
@@ -23,6 +23,7 @@
         "unmemoize:with:tests": "npm run compile:all --prefix ../harness && mkdir -p build/unmemoized/abc && mkdir -p build/test/lib && ets-tsc -b tsconfig-unmemoize-with-tests.json && mkdir -p build/test/lib",
         "compile:arkts": "npm run unmemoize && ../tools/panda/arkts/arktsc --arktsconfig arktsconfig-run-unmemoized.json",
         "build:compat": "npm run build:compat --prefix ../compat",
+        "build:compiler-plugin": "npm run compile --prefix ../compiler-plugin",
         "build:compat:inc": "npm run build:compat:inc --prefix ../compat",
         "build:common": "npm run build:common --prefix ../common",
         "build:common:inc": "npm run build:common:inc --prefix ../common",
@@ -37,7 +38,7 @@
         "link:incremental": "../tools/panda/arkts/arklink --output build/incremental.abc -- ../compat/build/compat.abc ../common/build/common.abc build/runtime.abc",
         "build:incremental": "npm run build:incremental:components && npm run link:incremental",
         "build:incremental:inc": "npm run build:incremental:components:inc && npm run link:incremental",
-        "clean:incremental": "npm run clean"
+        "clean:incremental": "npm run clean && npm run clean -C ../compat && npm run clean -C ../common"
     },
     "keywords": [],
     "dependencies": {

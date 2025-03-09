@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -47,17 +47,24 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { RichEditorSelection, RichEditorRange, RichEditorInsertValue, RichEditorTextSpanResult, RichEditorDeleteValue, PasteEventCallback, SubmitCallback, RichEditorChangeValue, CutEvent, CopyEvent, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, RichEditorAttribute, KeyboardOptions, PlaceholderStyle, RichEditorOptions, RichEditorStyledStringOptions } from "./../ArkRichEditorInterfaces"
 import { TextRange, TextDataDetectorConfig, OnDidChangeCallback } from "./../ArkTextCommonInterfaces"
 import { EnterKeyType } from "./../ArkTextInputInterfaces"
 import { EditMenuOptions } from "./../ArkEditMenuOptionsMaterialized"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -134,7 +141,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     copyOptionsAttribute(value: CopyOptions): void {
-        ArkUIGeneratedNativeModule._RichEditorAttribute_copyOptions(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._RichEditorAttribute_copyOptions(this.peer.ptr, ((value as CopyOptions) as int32))
     }
     onPasteAttribute(value: PasteEventCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -161,7 +168,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -188,7 +195,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -215,7 +222,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     enterKeyTypeAttribute(value: EnterKeyType): void {
-        ArkUIGeneratedNativeModule._RichEditorAttribute_enterKeyType(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._RichEditorAttribute_enterKeyType(this.peer.ptr, ((value as EnterKeyType) as int32))
     }
     onSubmitAttribute(value: SubmitCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -248,10 +255,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     editMenuOptionsAttribute(value: EditMenuOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeEditMenuOptions(value)
-        ArkUIGeneratedNativeModule._RichEditorAttribute_editMenuOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._RichEditorAttribute_editMenuOptions(this.peer.ptr, toPeerPtr(value))
     }
     enableKeyboardOnFocusAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._RichEditorAttribute_enableKeyboardOnFocus(this.peer.ptr, value ? 1 : 0)
@@ -260,7 +264,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_enableHapticFeedback(this.peer.ptr, value ? 1 : 0)
     }
     barStateAttribute(value: BarState): void {
-        ArkUIGeneratedNativeModule._RichEditorAttribute_barState(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._RichEditorAttribute_barState(this.peer.ptr, ((value as BarState) as int32))
     }
     bindSelectionMenuAttribute(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType | RichEditorResponseType, options?: SelectionMenuOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -270,12 +274,12 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isResponseType(responseType)) {
             thisSerializer.writeInt8(0 as int32)
             const responseType_0  = responseType as ResponseType
-            thisSerializer.writeInt32((responseType_0.valueOf() as int32))
+            thisSerializer.writeInt32(((responseType_0 as ResponseType) as int32))
         }
         else if (TypeChecker.isRichEditorResponseType(responseType)) {
             thisSerializer.writeInt8(1 as int32)
             const responseType_1  = responseType as RichEditorResponseType
-            thisSerializer.writeInt32((responseType_1.valueOf() as int32))
+            thisSerializer.writeInt32(((responseType_1 as RichEditorResponseType) as int32))
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
@@ -284,7 +288,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeSelectionMenuOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._RichEditorAttribute_bindSelectionMenu(this.peer.ptr, (spanType.valueOf() as int32), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._RichEditorAttribute_bindSelectionMenu(this.peer.ptr, ((spanType as RichEditorSpanType) as int32), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     customKeyboardAttribute(value: CustomBuilder, options?: KeyboardOptions): void {

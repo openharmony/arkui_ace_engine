@@ -3,6 +3,7 @@ import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
 import { CustomDialogExample1 as CustomDialogExample, CustomDialogExampleOptions } from './test/pages/import@CustomDialog';
+/** @memo:stable */
 class ArkCustomDialogUserComponent extends ArkStructBase<ArkCustomDialogUserComponent, CustomDialogUserOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

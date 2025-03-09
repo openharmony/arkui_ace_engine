@@ -170,9 +170,11 @@ suite(util.basename(__filename), () => {
                             arkts.factory.createParameterDeclaration(
                                 arkts.factory.createIdentifier(
                                     'y',
-                                    arkts.factory.createTypeReferenceFromId(
-                                        arkts.factory.createIdentifier(
-                                            'string'
+                                    arkts.factory.createTypeReference(
+                                        arkts.factory.createTypeReferencePart(
+                                            arkts.factory.createIdentifier(
+                                                'string'
+                                            )
                                         )
                                     )
                                 ),

@@ -21,10 +21,11 @@ import { GestureControl } from "./ArkGestureControlNamespace"
 import { GestureRecognizerState, PanDirection } from "./ArkGestureInterfaces"
 import { EventTargetInfo, EventTargetInfoInternal } from "./ArkEventTargetInfoMaterialized"
 import { PanGestureOptions, PanGestureOptionsInternal } from "./ArkPanGestureOptionsMaterialized"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -36,10 +37,6 @@ export class PanRecognizerInternal {
     }
 }
 export class PanRecognizer extends GestureRecognizer implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_panrecognizer(): KPointer {
         const retval = ArkUIGeneratedNativeModule._PanRecognizer_ctor()
         return retval
@@ -57,6 +54,7 @@ export class PanRecognizer extends GestureRecognizer implements MaterializedBase
     }
     private getPanGestureOptions_serialize(): PanGestureOptions {
         const retval = ArkUIGeneratedNativeModule._PanRecognizer_getPanGestureOptions(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj: PanGestureOptions = PanGestureOptionsInternal.fromPtr(retval)
+        return obj
     }
 }

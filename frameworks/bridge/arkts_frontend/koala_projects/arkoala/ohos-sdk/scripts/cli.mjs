@@ -71,6 +71,15 @@ app.command("oh-build")
         }
     })
 
+app.command("oh-log")
+    .description("Log the OpenHarmony project")
+    .option("-a, --all", "show all log")
+    .option("-b, --bundle-name <name>", "show log by application bundle name")
+    .action(async (options) => {
+        const { log } = await import("./ohos-app/log.mjs")
+        await log(options)
+    })
+
 app.command("oh-exec")
     .description("Execute an instruction on an OpenHarmony device")
     .option("-i, --install", "install the project hap file on a device")

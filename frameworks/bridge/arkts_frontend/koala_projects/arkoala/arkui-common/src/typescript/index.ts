@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-export * from "./ArkPageTransition"
-export * from "./ArkRouteType"
 export * from "./Storage"
 export * from "./Router"
 

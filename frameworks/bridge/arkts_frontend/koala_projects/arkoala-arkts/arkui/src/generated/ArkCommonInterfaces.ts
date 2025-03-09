@@ -21,12 +21,12 @@ import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, Color, ColoringStrategy, TouchType, BorderStyle, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, HitTestMode, ImageSize, Alignment, HoverEffect, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, PixelRoundCalcPolicy, BarState, EdgeEffect, IlluminatedType } from "./ArkEnumsInterfaces"
 import { ResourceColor, Length, Bias, Area, Font, BorderRadiuses, EdgeWidths, LocalizedEdgeWidths, SizeOptions, ResourceStr, Dimension, EdgeColors, LocalizedEdgeColors, EdgeStyles, Position, LocalizedBorderRadiuses, Margin, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, LocalizedMargin, BorderOptions, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, EdgeWidth } from "./ArkUnitsInterfaces"
+import { Resource } from "./ArkResourceInterfaces"
 import { ICurve } from "./ArkICurveMaterialized"
 import { Callback_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Literal_TransitionEffect_appear_disappear, Tuple_Number_Number, Callback_DismissContentCoverAction_Void, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_Number_Void, Callback_SheetType_Void, Literal_String_value_Callback_Void_action, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Literal_ResourceColor_color, Callback_DismissPopupAction_Void, AnimationRange_Number, Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void } from "./SyntheticDeclarations"
 import { TransitionEffect } from "./ArkTransitionEffectMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./ArkButtonInterfaces"
-import { Resource } from "./ArkResourceInterfaces"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { GestureRecognizer } from "./ArkGestureRecognizerMaterialized"
 import { GestureJudgeResult, GestureInfo, GestureType, GestureMask, GestureHandler, GesturePriority } from "./ArkGestureInterfaces"
@@ -67,9 +67,11 @@ export interface ProvideOptions {
 }
 export interface AnimatableArithmetic<T> {
 }
+declare function getContext(arg0: Object): Context
 export interface Context {
     _ContextStub: string;
 }
+declare function postCardAction(arg0: Object, arg1: Object): void
 export interface Configuration {
     colorMode: string;
     fontScale: number;
@@ -85,6 +87,8 @@ export interface ExpectedFrameRateRange {
     max: number;
     expected: number;
 }
+declare function dollar_r(arg0: string, arg1: Array<object>): Resource
+declare function dollar_rawfile(arg0: string): Resource
 export enum FinishCallbackType {
     REMOVED = 0,
     LOGICALLY = 1
@@ -236,6 +240,14 @@ export interface DragItemInfo {
     builder?: CustomBuilder;
     extraInfo?: string;
 }
+declare function animateTo(arg0: AnimateParam, arg1: (() => void)): void
+declare function animateToImmediately(arg0: AnimateParam, arg1: (() => void)): void
+declare function vp2px(arg0: number): number
+declare function px2vp(arg0: number): number
+declare function fp2px(arg0: number): number
+declare function px2fp(arg0: number): number
+declare function lpx2px(arg0: number): number
+declare function px2lpx(arg0: number): number
 export interface EventTarget {
     area: Area;
 }
@@ -1067,6 +1079,8 @@ export interface OnWillScrollCallback {
 }
 export type OnScrollCallback = (scrollOffset: number, scrollState: ScrollState) => void;
 export type OnMoveHandler = (from: number, to: number) => void;
+export interface DynamicNode<T> {
+}
 export interface EdgeEffectOptions {
     alwaysEnabled: boolean;
 }

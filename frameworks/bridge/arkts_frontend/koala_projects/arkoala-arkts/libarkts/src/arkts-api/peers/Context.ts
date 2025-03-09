@@ -14,6 +14,7 @@
  */
 
 import { ArktsObject } from "./ArktsObject"
+import { Program } from "./Program"
 import { global } from "../static/global"
 import { throwError } from "../../utils"
 import { passString } from "../utilities/private"
@@ -37,5 +38,9 @@ export class Context extends ArktsObject {
                 passString(global.filePath)
             )
         )
+    }
+
+    get program(): Program {
+        return new Program(global.es2panda._ContextProgram(this.peer));
     }
 }

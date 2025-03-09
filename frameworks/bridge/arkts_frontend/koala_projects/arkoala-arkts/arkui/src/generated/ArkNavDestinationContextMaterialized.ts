@@ -20,7 +20,7 @@ import { NavPathInfo, NavPathInfoInternal } from "./ArkNavPathInfoMaterialized"
 import { NavPathStack, NavPathStackInternal } from "./ArkNavPathStackMaterialized"
 import { RouteMapConfig } from "./ArkNavDestinationInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -30,21 +30,21 @@ export interface NavDestinationContext {
     pathInfo: NavPathInfo
     pathStack: NavPathStack
     navDestinationId?: string
-    getConfigInRouteMap(): RouteMapConfig | undefined 
+    getConfigInRouteMap(): RouteMapConfig | undefined
 }
 export class NavDestinationContextInternal implements MaterializedBase,NavDestinationContext {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     get pathInfo(): NavPathInfo {
-        throw new Error("Not implemented")
+        return this.getPathInfo()
     }
     set pathInfo(pathInfo: NavPathInfo) {
         this.setPathInfo(pathInfo)
     }
     get pathStack(): NavPathStack {
-        throw new Error("Not implemented")
+        return this.getPathStack()
     }
     set pathStack(pathStack: NavPathStack) {
         this.setPathStack(pathStack)
@@ -70,10 +70,16 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
     public getConfigInRouteMap(): RouteMapConfig | undefined {
         return this.getConfigInRouteMap_serialize()
     }
+    private getPathInfo(): NavPathInfo {
+        return this.getPathInfo_serialize()
+    }
     private setPathInfo(pathInfo: NavPathInfo): void {
         const pathInfo_casted = pathInfo as (NavPathInfo)
         this.setPathInfo_serialize(pathInfo_casted)
         return
+    }
+    private getPathStack(): NavPathStack {
+        return this.getPathStack_serialize()
     }
     private setPathStack(pathStack: NavPathStack): void {
         const pathStack_casted = pathStack as (NavPathStack)
@@ -92,17 +98,21 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
         const retval  = ArkUIGeneratedNativeModule._NavDestinationContext_getConfigInRouteMap(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
+    private getPathInfo_serialize(): NavPathInfo {
+        const retval  = ArkUIGeneratedNativeModule._NavDestinationContext_getPathInfo(this.peer!.ptr)
+        const obj : NavPathInfo = NavPathInfoInternal.fromPtr(retval)
+        return obj
+    }
     private setPathInfo_serialize(pathInfo: NavPathInfo): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeNavPathInfo(pathInfo)
-        ArkUIGeneratedNativeModule._NavDestinationContext_setPathInfo(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._NavDestinationContext_setPathInfo(this.peer!.ptr, toPeerPtr(pathInfo))
+    }
+    private getPathStack_serialize(): NavPathStack {
+        const retval  = ArkUIGeneratedNativeModule._NavDestinationContext_getPathStack(this.peer!.ptr)
+        const obj : NavPathStack = NavPathStackInternal.fromPtr(retval)
+        return obj
     }
     private setPathStack_serialize(pathStack: NavPathStack): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeNavPathStack(pathStack)
-        ArkUIGeneratedNativeModule._NavDestinationContext_setPathStack(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._NavDestinationContext_setPathStack(this.peer!.ptr, toPeerPtr(pathStack))
     }
     private getNavDestinationId_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._NavDestinationContext_getNavDestinationId(this.peer!.ptr)

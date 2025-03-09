@@ -2,9 +2,9 @@
     "name": "peer-generator",
     "description": "",
     "config": {
-        "idlizer_version": "2.0.34",
+        "idlizer_version": "2.0.40",
         "idlizer_current": "../../../../arkgen",
-        "api_version": "120",
+        "api_version": "122",
         "input_dir": "../../arkui-common/interface_sdk-js/api/@internal/component/ets/,../../arkui-common/interface_sdk-js/api/global"
     },
     "scripts": {

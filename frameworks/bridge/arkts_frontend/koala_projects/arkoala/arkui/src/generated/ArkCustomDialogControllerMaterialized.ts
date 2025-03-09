@@ -24,10 +24,11 @@ import { BorderStyle, Curve, PlayMode, Color, ColoringStrategy } from "./ArkEnum
 import { ICurve, ICurveInternal } from "./ArkICurveMaterialized"
 import { DismissDialogAction } from "./ArkActionSheetInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -39,7 +40,7 @@ export class CustomDialogControllerInternal {
     }
 }
 export class CustomDialogController implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -53,9 +54,10 @@ export class CustomDialogController implements MaterializedBase {
      constructor(value?: CustomDialogControllerOptions) {
         if ((value) !== (undefined))
         {
-            const ctorPtr: KPointer = CustomDialogController.ctor_customdialogcontroller(value)
+            const ctorPtr: KPointer = CustomDialogController.ctor_customdialogcontroller((value)!)
             this.peer = new Finalizable(ctorPtr, CustomDialogController.getFinalizer())
         }
+        if (value) value.builder.buildOptions.controller = this
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CustomDialogController_getFinalizer()

@@ -760,12 +760,6 @@ export class Es2pandaNativeModule {
     _MemberExpressionIsPrivateReferenceConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _MemberExpressionCompileToRegConst(context: KNativePointer, receiver: KNativePointer, pg: KNativePointer, objReg: KNativePointer): void {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _MemberExpressionCompileToRegsConst(context: KNativePointer, receiver: KNativePointer, pg: KNativePointer, object_arg: KNativePointer, property: KNativePointer): void {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
     _CreateTSClassImplements(context: KNativePointer, expression: KNativePointer, typeParameters: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -1279,6 +1273,9 @@ export class Es2pandaNativeModule {
     _UpdateArrayExpression1(context: KNativePointer, original: KNativePointer, nodeType: KInt, elements: BigUint64Array, elementsSequenceLength: KUInt, trailingComma: KBoolean): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
+    _ArrayExpressionGetElementNodeAtIdxConst(context: KNativePointer, receiver: KNativePointer, idx: KUInt): KNativePointer {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
     _ArrayExpressionElementsConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -1309,7 +1306,7 @@ export class Es2pandaNativeModule {
     _ArrayExpressionValidateExpression(context: KNativePointer, receiver: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _ArrayExpressionHandleNestedArrayExpression(context: KNativePointer, receiver: KNativePointer, currentElement: KNativePointer, isPreferredTuple: KBoolean, idx: KUInt): KBoolean {
+    _ArrayExpressionTrySetPreferredTypeForNestedArrayExprConst(context: KNativePointer, receiver: KNativePointer, nestedArrayExpr: KNativePointer, idx: KUInt): KBoolean {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _ArrayExpressionTypeAnnotationConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
@@ -1495,12 +1492,6 @@ export class Es2pandaNativeModule {
     _ETSTupleGetTupleTypeAnnotationsListConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _ETSTupleHasSpreadTypeConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _ETSTupleSetSpreadType(context: KNativePointer, receiver: KNativePointer, newSpreadType: KNativePointer): void {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
     _ETSTupleSetTypeAnnotationsList(context: KNativePointer, receiver: KNativePointer, typeNodeList: BigUint64Array, typeNodeListSequenceLength: KUInt): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -1556,12 +1547,6 @@ export class Es2pandaNativeModule {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _AstNodeAsStatementConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _AstNodeSetRange(context: KNativePointer, receiver: KNativePointer, loc: KNativePointer): void {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _AstNodeRangeConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _AstNodeTypeConst(context: KNativePointer, receiver: KNativePointer): KInt {
@@ -1708,16 +1693,7 @@ export class Es2pandaNativeModule {
     _AstNodeDumpConst1(context: KNativePointer, receiver: KNativePointer, dumper: KNativePointer): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _AstNodeCompileConst(context: KNativePointer, receiver: KNativePointer, pg: KNativePointer): void {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _AstNodeCompileConst1(context: KNativePointer, receiver: KNativePointer, etsg: KNativePointer): void {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
     _AstNodeSetTransformedNode(context: KNativePointer, receiver: KNativePointer, transformationName: KStringPtr, transformedNode: KNativePointer): void {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _AstNodeAccept(context: KNativePointer, receiver: KNativePointer, v: KNativePointer): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _AstNodeSetOriginalNode(context: KNativePointer, receiver: KNativePointer, originalNode: KNativePointer): void {
@@ -1855,9 +1831,6 @@ export class Es2pandaNativeModule {
     _BinaryExpressionSetOperator(context: KNativePointer, receiver: KNativePointer, operatorType: KInt): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _BinaryExpressionCompileOperandsConst(context: KNativePointer, receiver: KNativePointer, etsg: KNativePointer, lhs: KNativePointer): void {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
     _CreateSuperExpression(context: KNativePointer): KNativePointer {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -1946,9 +1919,6 @@ export class Es2pandaNativeModule {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _AssignmentExpressionConvertibleToAssignmentPattern(context: KNativePointer, receiver: KNativePointer, mustBePattern: KBoolean): KBoolean {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _AssignmentExpressionCompilePatternConst(context: KNativePointer, receiver: KNativePointer, pg: KNativePointer): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _CreateExpressionStatement(context: KNativePointer, expr: KNativePointer): KNativePointer {
@@ -2269,7 +2239,34 @@ export class Es2pandaNativeModule {
     _AnnotationDeclarationAddProperties(context: KNativePointer, receiver: KNativePointer, properties: BigUint64Array, propertiesSequenceLength: KUInt): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
+    _AnnotationDeclarationIsSourceRetentionConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _AnnotationDeclarationIsBytecodeRetentionConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _AnnotationDeclarationIsRuntimeRetentionConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _AnnotationDeclarationSetSourceRetention(context: KNativePointer, receiver: KNativePointer): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _AnnotationDeclarationSetBytecodeRetention(context: KNativePointer, receiver: KNativePointer): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _AnnotationDeclarationSetRuntimeRetention(context: KNativePointer, receiver: KNativePointer): void {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
     _AnnotationDeclarationGetBaseNameConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _AnnotationDeclarationAnnotations(context: KNativePointer, receiver: KNativePointer): KNativePointer {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _AnnotationDeclarationAnnotationsConst(context: KNativePointer, receiver: KNativePointer): KNativePointer {
+        throw new Error("This methods was not overloaded by native module initialization")
+    }
+    _AnnotationDeclarationSetAnnotations(context: KNativePointer, receiver: KNativePointer, annotations: BigUint64Array, annotationsSequenceLength: KUInt): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _CreateAnnotationUsageIr(context: KNativePointer, expr: KNativePointer): KNativePointer {
@@ -2381,9 +2378,6 @@ export class Es2pandaNativeModule {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _ChainExpressionGetExpression(context: KNativePointer, receiver: KNativePointer): KNativePointer {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _ChainExpressionCompileToRegConst(context: KNativePointer, receiver: KNativePointer, pg: KNativePointer, objReg: KNativePointer): void {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _CreateTSIntersectionType(context: KNativePointer, types: BigUint64Array, typesSequenceLength: KUInt): KNativePointer {

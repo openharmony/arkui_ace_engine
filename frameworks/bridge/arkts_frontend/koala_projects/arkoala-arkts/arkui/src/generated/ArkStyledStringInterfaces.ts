@@ -26,6 +26,18 @@ import { Callback_ClickEvent_Void, Callback_GestureEvent_Void } from "./Syntheti
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { GestureEvent } from "./ArkGestureEventMaterialized"
 import { LeadingMarginPlaceholder } from "./ArkRichEditorInterfaces"
+import { TextStyle_styled_string } from "./ArkTextStyleStyledStringMaterialized"
+import { DecorationStyle } from "./ArkDecorationStyleMaterialized"
+import { BaselineOffsetStyle } from "./ArkBaselineOffsetStyleMaterialized"
+import { LetterSpacingStyle } from "./ArkLetterSpacingStyleMaterialized"
+import { TextShadowStyle } from "./ArkTextShadowStyleMaterialized"
+import { GestureStyle } from "./ArkGestureStyleMaterialized"
+import { ImageAttachment } from "./ArkImageAttachmentMaterialized"
+import { ParagraphStyle } from "./ArkParagraphStyleMaterialized"
+import { LineHeightStyle } from "./ArkLineHeightStyleMaterialized"
+import { UrlStyle } from "./ArkUrlStyleMaterialized"
+import { CustomSpan } from "./ArkCustomSpanMaterialized"
+import { BackgroundColorStyle } from "./ArkBackgroundColorStyleMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 export interface StyleOptions {
     start?: number;
@@ -63,9 +75,7 @@ export interface ParagraphStyleInterface {
     wordBreak?: WordBreak;
     leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
 }
-export interface StyledStringValue {
-    stub: string;
-}
+export type StyledStringValue = TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
 export enum StyledStringKey {
     FONT = 0,
     DECORATION = 1,

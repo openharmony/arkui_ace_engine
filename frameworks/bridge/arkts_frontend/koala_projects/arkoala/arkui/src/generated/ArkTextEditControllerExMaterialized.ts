@@ -21,25 +21,22 @@ import { SelectionOptions, MenuPolicy } from "./ArkCommonInterfaces"
 import { LayoutManager, LayoutManagerInternal } from "./ArkLayoutManagerMaterialized"
 import { PreviewText, PositionWithAffinity, LineMetrics, TextRange, TextBox, Affinity } from "./ArkTextCommonInterfaces"
 import { RectWidthStyle, RectHeightStyle } from "./ArkArkuiExternalInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
 export interface TextEditControllerEx {
-    isEditing(): boolean 
-    stopEditing(): void 
-    setCaretOffset(offset: number): boolean 
-    getCaretOffset(): number 
-    getPreviewText(): PreviewText 
+    isEditing(): boolean
+    stopEditing(): void
+    setCaretOffset(offset: number): boolean
+    getCaretOffset(): number
+    getPreviewText(): PreviewText
 }
 export class TextEditControllerExInternal extends TextBaseControllerInternal implements MaterializedBase,TextEditControllerEx {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_texteditcontrollerex(): KPointer {
         const retval = ArkUIGeneratedNativeModule._TextEditControllerEx_ctor()
         return retval
@@ -86,7 +83,9 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
     }
     private getPreviewText_serialize(): PreviewText {
         const retval = ArkUIGeneratedNativeModule._TextEditControllerEx_getPreviewText(this.peer!.ptr)
-        return new Deserializer(retval.buffer, retval.byteLength).readPreviewText()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: PreviewText = retvalDeserializer.readPreviewText()
+        return returnResult
     }
     public static fromPtr(ptr: KPointer): TextEditControllerExInternal {
         const obj: TextEditControllerExInternal = new TextEditControllerExInternal()

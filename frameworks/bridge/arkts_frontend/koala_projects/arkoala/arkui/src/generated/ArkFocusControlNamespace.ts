@@ -16,27 +16,9 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
-import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Serializer } from "./peers/Serializer"
-import { CallbackKind } from "./peers/CallbackKind"
-import { Deserializer, createDeserializer } from "./peers/Deserializer"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
-export namespace focusControl {
-    export class GlobalScope_focusControl_common {
-        public static requestFocus(value: string): boolean {
-            const value_casted = value as (string)
-            return GlobalScope_focusControl_common.requestFocus_serialize(value_casted)
-        }
-        private static requestFocus_serialize(value: string): boolean {
-            const retval = ArkUIGeneratedNativeModule._GlobalScope_focusControl_common_requestFocus(value)
-            return retval
-        }
-    }
-}
+import { GlobalScope } from "./peers/GlobalScope"
 export namespace focusControl {
     export function requestFocus(value: string): boolean {
-        return GlobalScope_focusControl_common.requestFocus(value)
+        return GlobalScope.focusControl_requestFocus(value)
     }
 }

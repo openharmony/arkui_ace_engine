@@ -49,8 +49,18 @@ export class ClassProperty extends ClassElement {
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._ClassPropertyTypeAnnotationConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._ClassPropertySetTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ClassPropertyAnnotationsConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ClassPropertySetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
     }
 }
 export function isClassProperty(node: AstNode): node is ClassProperty {

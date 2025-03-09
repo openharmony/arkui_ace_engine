@@ -53,6 +53,11 @@ export class TryStatement extends Statement {
     get finallyCanCompleteNormally(): boolean {
         return global.generatedEs2panda._TryStatementFinallyCanCompleteNormallyConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setFinallyCanCompleteNormally(finallyCanCompleteNormally: boolean): this {
+        global.generatedEs2panda._TryStatementSetFinallyCanCompleteNormally(global.context, this.peer, finallyCanCompleteNormally)
+        return this
+    }
 }
 export function isTryStatement(node: AstNode): node is TryStatement {
     return node instanceof TryStatement

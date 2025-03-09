@@ -1,5 +1,6 @@
 import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent } from "@koalaui/arkts-arkui";
 import { LocalStorage } from "@koalaui/arkui-common";
+/** @memo:stable */
 class ArkHomePreviewComponentComponent extends ArkStructBase<ArkHomePreviewComponentComponent, HomePreviewComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -28,6 +29,7 @@ class ArkHomePreviewComponentComponent extends ArkStructBase<ArkHomePreviewCompo
         }, undefined, this.value);
     }
 }
+/** @memo:stable */
 class ArkHomePreviewComponent_PreviewComponent extends ArkStructBase<ArkHomePreviewComponent_PreviewComponent, HomePreviewComponent_PreviewOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

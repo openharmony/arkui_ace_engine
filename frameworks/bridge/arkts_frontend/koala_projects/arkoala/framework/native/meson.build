@@ -25,7 +25,6 @@ libace_sources = [
 arkoala_sources = [
     './src/events.cc',
     './src/vsync.cc',
-    './src/generated/all_events.cc',
     './src/generated/bridge_generated.cc',
     './src/generated/callback_deserialize_call.cc',
     './src/generated/callback_managed_caller.cc',
@@ -50,11 +49,12 @@ node_api_headers = run_command('node', '-p', 'require.resolve("node-api-headers/
 
 is_node = get_option('vm_kind') == 'node'
 is_hzvm = get_option('vm_kind') == 'hzvm'
-is_panda = get_option('vm_kind') == 'panda'
+is_etsapi = get_option('vm_kind') == 'panda'
+is_ani = get_option('vm_kind') == 'panda-ani'
 is_jvm = get_option('vm_kind') == 'jvm'
 is_msvc = meson.get_compiler('cpp').get_id() == 'msvc'
 is_napi = is_node or is_hzvm
-is_etsapi = is_panda
+is_panda = is_etsapi or is_ani
 is_jni = is_jvm
 # To control if we use dummy or libace based implementation
 is_dummy_impl = is_node
@@ -79,6 +79,9 @@ if is_jni
 endif
 if is_etsapi
     library_use_name += '_ark'
+endif
+if is_ani
+    library_use_name += '_ani'
 endif
 
 cflags = []
@@ -167,6 +170,19 @@ if is_etsapi
         '-DKOALA_ETS_NAPI',
     ]
 endif
+if is_ani
+    sources += [
+        interop_src / 'ani/convertors-ani.cc',
+        interop_src / 'types/signatures.cc',
+    ]
+    include_dirs += [
+        interop_src / 'ani',
+        interop_src / 'types',
+    ]
+    cflags += [
+        '-DKOALA_ANI',
+    ]
+endif
 if is_jni
     sources += [
         interop_src / 'jni/convertors-jni.cc',
@@ -207,6 +223,11 @@ endif
 if is_panda
     cflags += [
         '-DKOALA_USE_PANDA_VM',
+        '-DKOALA_FOREIGN_NAPI'
+    ]
+    include_dirs += [
+        interop_src / 'napi',
+        node_api_headers / 'include'
     ]
     module_prefix = platform_prefix
     module_suffix = platform_suffix

@@ -18,7 +18,7 @@
 
 import { SymbolEffect, EffectScope } from "./ArkArkuiExternalInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,7 +32,7 @@ export class AppearSymbolEffectInternal {
     }
 }
 export class AppearSymbolEffect implements MaterializedBase,SymbolEffect {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -50,14 +50,14 @@ export class AppearSymbolEffect implements MaterializedBase,SymbolEffect {
         thisSerializer.writeInt8(scope_type as int32)
         if ((RuntimeType.UNDEFINED) != (scope_type)) {
             const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32((scope_value.valueOf() as int32))
+            thisSerializer.writeInt32(((scope_value as EffectScope) as int32))
         }
         const retval  = ArkUIGeneratedNativeModule._AppearSymbolEffect_ctor(thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
      constructor(scope?: EffectScope) {
-        const ctorPtr : KPointer = AppearSymbolEffect.ctor_appearsymboleffect(scope)
+        const ctorPtr : KPointer = AppearSymbolEffect.ctor_appearsymboleffect((scope)!)
         this.peer = new Finalizable(ctorPtr, AppearSymbolEffect.getFinalizer())
     }
     static getFinalizer(): KPointer {
@@ -76,6 +76,6 @@ export class AppearSymbolEffect implements MaterializedBase,SymbolEffect {
         throw new Error("Object deserialization is not implemented.")
     }
     private setScope_serialize(scope: EffectScope): void {
-        ArkUIGeneratedNativeModule._AppearSymbolEffect_setScope(this.peer!.ptr, (scope.valueOf() as int32))
+        ArkUIGeneratedNativeModule._AppearSymbolEffect_setScope(this.peer!.ptr, ((scope as EffectScope) as int32))
     }
 }

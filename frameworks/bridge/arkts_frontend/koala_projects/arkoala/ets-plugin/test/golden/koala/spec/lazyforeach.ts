@@ -64,6 +64,7 @@ class MyDataSource extends BasicDataSource {
         this.notifyDataAdd(this.dataArray.length - 1);
     }
 }
+/** @memo:stable */
 class ArkTestComponent extends ArkStructBase<ArkTestComponent, TestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

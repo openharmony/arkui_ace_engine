@@ -18,7 +18,7 @@
 
 import { SpringProp, SpringPropInternal } from "./ArkSpringPropMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,21 +32,18 @@ export class ScrollMotionInternal {
     }
 }
 export class ScrollMotion implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     static ctor_scrollmotion(position: number, velocity: number, min: number, max: number, prop: SpringProp): KPointer {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeSpringProp(prop)
-        const retval  = ArkUIGeneratedNativeModule._ScrollMotion_ctor(position, velocity, min, max, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        const retval  = ArkUIGeneratedNativeModule._ScrollMotion_ctor(position, velocity, min, max, toPeerPtr(prop))
         return retval
     }
      constructor(position?: number, velocity?: number, min?: number, max?: number, prop?: SpringProp) {
-        if (((position) !== (undefined)) && ((velocity) !== (undefined)) && ((min) !== (undefined)) && ((max) !== (undefined)) && ((prop) !== (undefined)))
+        if (((position) !== (undefined)) || ((velocity) !== (undefined)) || ((min) !== (undefined)) || ((max) !== (undefined)) || ((prop) !== (undefined)))
         {
-            const ctorPtr : KPointer = ScrollMotion.ctor_scrollmotion(position, velocity, min, max, prop)
+            const ctorPtr : KPointer = ScrollMotion.ctor_scrollmotion((position)!, (velocity)!, (min)!, (max)!, (prop)!)
             this.peer = new Finalizable(ctorPtr, ScrollMotion.getFinalizer())
         }
     }
