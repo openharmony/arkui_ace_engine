@@ -25,6 +25,7 @@
 
 #include "accessor_test_base.h"
 #include "accessor_test_utils.h"
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 
 namespace OHOS::Ace {
 bool operator==(const TextSpanOptions& lhs, const TextSpanOptions& rhs)
@@ -306,20 +307,25 @@ HWTEST_F(RichEditorControllerAccessorTest, addSymbolSpanTest, TestSize.Level1)
  * @tc.desc: Check the functionality of addBuilderSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorControllerAccessorTest, DISABLED_addBuilderSpanTest, TestSize.Level1)
+HWTEST_F(RichEditorControllerAccessorTest, addBuilderSpanTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->addBuilderSpan, nullptr);
 
-    SpanOptionBase spanOptions;
-    spanOptions.offset = TEST_OFFSET;
-
-    CustomNodeBuilder  value{}; // Ark_CustomBuilder is not supported
+    SpanOptionBase spanOptions = {.offset = TEST_OFFSET};
     auto options = Converter::ArkValue<Opt_RichEditorBuilderSpanOptions>(spanOptions);
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
-    auto uiNode = static_cast<RefPtr<UINode>>(spanNode);
-    EXPECT_CALL(*mockRichEditorController_, AddPlaceholderSpan(uiNode, spanOptions)).Times(1);
-    accessor_->addBuilderSpan(peer_, &value, &options);
+    auto nodeId = 123;
+    // Creating custom node
+    auto customSpanNode = SpanNode::GetOrCreateSpanNode(nodeId);
+    auto customUI_Node = static_cast<RefPtr<UINode>>(customSpanNode);
+    auto customNodeHandle = reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(customSpanNode));
+    // Creating custom node builder with helper and customNodeHandle
+    int callsCount = 0;
+    CustomNodeBuilderTestHelper<RichEditorControllerAccessorTest> builderHelper(this, nullptr, customNodeHandle);
+    const auto builder = builderHelper.GetBuilder();
+    // Testing custom node builder
+    EXPECT_CALL(*mockRichEditorController_, AddPlaceholderSpan(customUI_Node, spanOptions)).Times(1);
+    accessor_->addBuilderSpan(peer_, &builder, &options);
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 }
 
 /**
