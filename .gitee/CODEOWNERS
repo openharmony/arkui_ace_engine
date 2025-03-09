@@ -2403,6 +2403,7 @@ frameworks/core/components_ng/pattern/hyperlink/ @huawei_g_five
 frameworks/core/components_ng/pattern/image_animator/ @arkui_image
 frameworks/core/components_ng/pattern/image/ @arkui_image
 frameworks/core/components_ng/pattern/indexer/ @arkuiscroll
+frameworks/core/components_ng/pattern/lazy_layout/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_indicator/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_layout/ @arkuilayout
 frameworks/core/components_ng/pattern/linear_split/ @arkuilayout
