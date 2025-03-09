@@ -2131,6 +2131,9 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper))) {
             predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1 });
         }
+        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete()) {
+            return curIndex - 1;
+        }
         auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
         auto endPos = currPos + GetMainAxisSize(childSize, axis_);
         int32_t id = wrapper->GetHostNode()->GetId();
@@ -2173,6 +2176,9 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
         if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper))) {
             predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount });
+        }
+        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete()) {
+            return curIndex + 1;
         }
         auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
         auto startPos = currPos - GetMainAxisSize(childSize, axis_);
