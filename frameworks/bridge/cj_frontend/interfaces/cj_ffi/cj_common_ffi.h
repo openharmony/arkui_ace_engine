@@ -416,5 +416,7 @@ void AssambleCJEventTarget(
 
 void AssambleCJClickInfo(const OHOS::Ace::GestureEvent& event, CJClickInfo& clickInfo, CJEventTarget& eventTarget,
     CJArea& area, CJPosition& position, CJPosition& globalPosition);
+
+void ReleaseCJDragItemInfo(CJDragItemInfo& info);
 } // namespace OHOS::Ace
 #endif // OHOS_ACE_FRAMEWORK_CJ_COMMON_FFI_H
