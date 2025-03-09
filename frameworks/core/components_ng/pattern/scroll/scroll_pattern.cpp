@@ -28,6 +28,11 @@ constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t SCROLL_LAYOUT_INFO_COUNT = 30;
 constexpr int32_t SCROLL_MEASURE_INFO_COUNT = 30;
 constexpr double SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE = 1.0;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr int32_t CROWN_EVENT_NUN_THRESH_MIN = 5;
+constexpr int64_t CROWN_VIBRATOR_INTERVAL_TIME = 30 * 1000 * 1000;
+constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
+#endif
 } // namespace
 
 void ScrollPattern::OnModifyDone()
@@ -235,6 +240,9 @@ void ScrollPattern::OnScrollEndCallback()
         scrollStop_ = true;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    crownEventNum_ = 0;
+#endif
 }
 
 void ScrollPattern::ResetPosition()
@@ -537,8 +545,32 @@ void ScrollPattern::HandleCrashBottom()
     AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_EDGE);
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void ScrollPattern::StartVibrateFeedback()
+{
+    if (!GetCrownEventDragging()) {
+        return;
+    }
+    if (crownEventNum_ < CROWN_EVENT_NUN_THRESH_MIN) {
+        crownEventNum_++;
+    }
+    auto currentTime = GetSysTimestamp();
+    if (!reachBoundary_ &&
+        (crownEventNum_ >= CROWN_EVENT_NUN_THRESH_MIN && currentTime - lastTime_ > CROWN_VIBRATOR_INTERVAL_TIME)) {
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+        lastTime_ = GetSysTimestamp();
+    }
+}
+#endif
+
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (source == SCROLL_FROM_CROWN) {
+        StartVibrateFeedback();
+    }
+#endif
+
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (source != SCROLL_FROM_JUMP && !HandleEdgeEffect(delta, source, viewSize_)) {

@@ -44,6 +44,10 @@ constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr int DEFAULT_HEADER_VALUE = 2;
 constexpr int DEFAULT_FOOTER_VALUE = 3;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
+constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.base.short.6";
+#endif
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -3120,4 +3124,26 @@ SizeF ListPattern::GetChildrenExpandedSize()
     }
     return SizeF();
 }
+
+void ListPattern::OnMidIndexChanged(int32_t lastIndex, int32_t curIndex)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
+
+    StartVibrator(curIndex == 0 || curIndex == totalCnt - 1);
+#endif
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ListPattern::StartVibrator(bool bEdge)
+{
+    if (!GetCrownEventDragging()) {
+        return;
+    }
+    const char* effectId = bEdge ? HAPTIC_STRENGTH5 : HAPTIC_STRENGTH1;
+    VibratorUtils::StartVibraFeedback(effectId);
+}
+#endif
 } // namespace OHOS::Ace::NG
