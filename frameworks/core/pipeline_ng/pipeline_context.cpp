@@ -1647,15 +1647,15 @@ void PipelineContext::PostKeyboardAvoidTask()
     }
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
     taskExecutor_->PostTask(
-        [weakContext = WeakClaim(this), keyboardRect = textFieldManager->GetLaterAvoidKeyboardRect(),
-            positionY = textFieldManager->GetLaterAvoidPositionY(),
-            height = textFieldManager->GetLaterAvoidHeight(),
-            weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
-            auto context = weakContext.Upgrade();
-            CHECK_NULL_VOID(context);
-            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, true);
+        [weakContext = WeakClaim(this), weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto manager = weakManager.Upgrade();
             CHECK_NULL_VOID(manager);
+            auto context = weakContext.Upgrade();
+            CHECK_NULL_VOID(context);
+            auto keyboardRect = manager->GetLaterAvoidKeyboardRect();
+            auto positionY = manager->GetLaterAvoidPositionY();
+            auto height = manager->GetLaterAvoidHeight();
+            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, true);
             manager->SetLaterAvoid(false);
             manager->SetFocusFieldAlreadyTriggerWsCallback(false);
         },
