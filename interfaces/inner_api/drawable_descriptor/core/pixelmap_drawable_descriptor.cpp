@@ -88,6 +88,24 @@ int32_t PixelmapDrawableDescriptor::GetOriginalHeight() const
     return 0;
 }
 
+std::shared_ptr<Media::PixelMap> PixelmapDrawableDescriptor::GetPixelMap()
+{
+    if (pixelMap_) {
+        return pixelMap_->GetPixelMapSharedPtr();
+    }
+    return nullptr;
+}
+
+void PixelmapDrawableDescriptor::SetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    pixelMap_ = PixelMap::Create(pixelMap);
+}
+
+DrawableType PixelmapDrawableDescriptor::GetDrawableType() const
+{
+    return DrawableType::PIXELMAP;
+}
+
 void PixelmapDrawableDescriptor::RegisterRedrawCallback(RedrawCallback&& callback)
 {
     redrawCallbacks_.push_back(callback);

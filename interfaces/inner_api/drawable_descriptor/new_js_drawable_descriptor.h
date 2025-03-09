@@ -33,8 +33,6 @@ public:
         DrawableDescriptor::DrawableType type = DrawableDescriptor::DrawableType::LAYERED);
 
     static DRAWABLE_FORCE_EXPORT constexpr char MODULE_NAME[] = "arkui.drawableDescriptor";
-    static std::shared_ptr<Media::PixelMap> GetPixelMapFromNapi(napi_env env, napi_value napiValue);
-    static std::shared_ptr<Media::PixelMap> GetPixelMapFromDrawableNapi(napi_env env, napi_value napiValue);
 
 private:
     static napi_value InitDrawable(napi_env env);
@@ -47,6 +45,7 @@ private:
     static napi_value PixelMapConstructor(napi_env env, napi_callback_info info);
     static napi_value LayeredConstructor(napi_env env, napi_callback_info info);
     static void Destructor(napi_env env, void* nativeObject, void* finalize);
+    static void OldDestructor(napi_env env, void* nativeObject, void* finalize);
 
     // drawable descriptor and pixel map drawable descriptor methods
     static napi_value GetPixelMap(napi_env env, napi_callback_info info);
