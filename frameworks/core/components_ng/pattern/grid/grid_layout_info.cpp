@@ -1009,7 +1009,7 @@ int32_t GridLayoutInfo::FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, 
 
 void GridLayoutInfo::PrintMatrix()
 {
-    TAG_LOGD(ACE_GRID, "-----------start print gridMatrix------------");
+    TAG_LOGI(ACE_GRID, "-----------start print gridMatrix------------");
     std::string res = std::string("");
     for (auto item : gridMatrix_) {
         res.append(std::to_string(item.first));
@@ -1021,18 +1021,58 @@ void GridLayoutInfo::PrintMatrix()
                 .append(std::to_string(index.second))
                 .append("] ");
         }
-        TAG_LOGD(ACE_GRID, "%{public}s", res.c_str());
+        TAG_LOGI(ACE_GRID, "%{public}s", res.c_str());
         res.clear();
     }
-    TAG_LOGD(ACE_GRID, "-----------end print gridMatrix------------");
+    TAG_LOGI(ACE_GRID, "-----------end print gridMatrix------------");
 }
 
 void GridLayoutInfo::PrintLineHeight()
 {
-    TAG_LOGD(ACE_GRID, "-----------start print lineHeightMap------------");
+    TAG_LOGI(ACE_GRID, "-----------start print lineHeightMap------------");
     for (auto item : lineHeightMap_) {
-        TAG_LOGD(ACE_GRID, "%{public}d : %{public}f", item.first, item.second);
+        TAG_LOGI(ACE_GRID, "%{public}d : %{public}f", item.first, item.second);
     }
-    TAG_LOGD(ACE_GRID, "-----------end print lineHeightMap------------");
+    TAG_LOGI(ACE_GRID, "-----------end print lineHeightMap------------");
+}
+
+bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
+{
+    auto endRow = gridMatrix_.upper_bound(endMainLineIndex_);
+    while (endRow != gridMatrix_.end()) {
+        if (endRow->first > endMainLineIndex_ + cachedCount) {
+            break;
+        }
+        for (const auto& cell : endRow->second) {
+            if (cell.second < endIndex_) {
+                TAG_LOGW(AceLogTag::ACE_GRID,
+                    "check grid matrix failed, index %{public}d is less than endIndex %{public}d", cell.second,
+                    endIndex_);
+                PrintMatrix();
+                return false;
+            }
+        }
+        ++endRow;
+    }
+
+    auto startRow = gridMatrix_.lower_bound(startMainLineIndex_);
+    if (startRow == gridMatrix_.end() || startRow == gridMatrix_.begin()) {
+        return true;
+    }
+    while ((--startRow) != gridMatrix_.begin()) {
+        if (startRow->first < startMainLineIndex_ - cachedCount) {
+            break;
+        }
+        for (const auto& cell : startRow->second) {
+            if (cell.second > startIndex_) {
+                TAG_LOGW(AceLogTag::ACE_GRID,
+                    "check grid matrix failed, index %{public}d is greater than startIndex %{public}d", cell.second,
+                    startIndex_);
+                PrintMatrix();
+                return false;
+            }
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
