@@ -2128,10 +2128,11 @@ public:
     {}
     ~TempLayoutRange()
     {
+        const int32_t diff = CalcDiff();
         info_.startIndex_ = subStart_;
-        info_.startMainLineIndex_ = subStartLine_;
+        info_.startMainLineIndex_ = subStartLine_ - diff;
         info_.endIndex_ = subEnd_;
-        info_.endMainLineIndex_ = subEndLine_;
+        info_.endMainLineIndex_ = subEndLine_ - diff;
     }
 
     const int32_t subStart_;
@@ -2141,6 +2142,21 @@ public:
 
 private:
     GridLayoutInfo& info_;
+
+    /**
+     * @brief after SyncPreload, need adjust startMainLineIdx and endMainLineIdx according to startIndex_.
+     * Because in AddForwardLines, it may change the gridMatrix_ and make the original start/endMainLineIdx invalid.
+     */
+    int32_t CalcDiff()
+    {
+        if (subStartLine_ > subEndLine_) {
+            // need not adjust when there has no items in viewport.
+            return 0;
+        }
+        auto newStartMainLineIdx = subStartLine_;
+        info_.GetLineIndexByIndex(subStart_, newStartMainLineIdx);
+        return subStartLine_ - newStartMainLineIdx;
+    }
 
     ACE_DISALLOW_COPY_AND_MOVE(TempLayoutRange);
 };
