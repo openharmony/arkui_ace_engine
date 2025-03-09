@@ -48,10 +48,6 @@ enum class AvoidanceMode {
     AVOID_AROUND_TARGET,
 };
 
-struct Avoidance {
-    AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
-};
-
 struct SelectParam {
     std::string text;
     std::string icon;
@@ -98,7 +94,7 @@ public:
     virtual void SetSpace(const Dimension& value);
     virtual void SetArrowPosition(const ArrowPosition value);
     virtual void SetMenuAlign(const MenuAlign& menuAlign);
-    virtual void SetAvoidance(const Avoidance& avoidance);
+    virtual void SetAvoidance(AvoidanceMode mode);
     virtual void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent);
     virtual void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent);
     virtual void SetOptionWidth(const Dimension& value);

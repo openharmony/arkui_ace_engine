@@ -20188,10 +20188,6 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, MenuAlignModifier.identity, MenuAlignModifier, menuAlign);
     return this;
   }
-  avoidance(mode) {
-    modifierWithKey(this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
-    return this;
-  }
   menuBackgroundColor(value) {
     modifierWithKey(
       this._modifiersWithKeys, MenuBackgroundColorModifier.identity, MenuBackgroundColorModifier, value);
@@ -20238,6 +20234,10 @@ class ArkSelectComponent extends ArkComponent {
   menuOutline(outline) {
     modifierWithKey(
       this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
+    return this;
+  }
+  avoidance(mode) {
+    modifierWithKey(this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
     return this;
   }
 }
@@ -20456,22 +20456,6 @@ class MenuAlignModifier extends ModifierWithKey {
   }
 }
 MenuAlignModifier.identity = Symbol('selectMenuAlign');
-class AvoidanceModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().select.resetAvoidance(node);
-    } else {
-      getUINativeModule().select.setAvoidance(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-AvoidanceModifier.identity = Symbol('selectAvoidance');
 class SelectDividerModifier extends ModifierWithKey {
   constructor(value) {
       super(value);
@@ -20814,6 +20798,22 @@ if (globalThis.Select !== undefined) {
     component.menuItemContentModifier(modifier);
   };
 }
+class AvoidanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetAvoidance(node);
+    } else {
+      getUINativeModule().select.setAvoidance(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+AvoidanceModifier.identity = Symbol('selectAvoidance');
 
 /// <reference path='./import.ts' />
 class ArkRadioComponent extends ArkComponent {

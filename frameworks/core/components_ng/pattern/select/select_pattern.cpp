@@ -1453,14 +1453,13 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
 
-void SelectPattern::SetAvoidance(const Avoidance& avoidance)
+void SelectPattern::SetAvoidance(AvoidanceMode mode)
 {
-    avoidance_ = avoidance;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateSelectAvoidanceMode(avoidance.mode);
+    menuLayoutProps->UpdateSelectAvoidanceMode(mode);
 }
 
 std::string SelectPattern::ProvideRestoreInfo()
