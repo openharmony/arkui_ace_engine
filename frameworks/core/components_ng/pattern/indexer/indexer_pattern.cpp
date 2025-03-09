@@ -125,9 +125,10 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
             if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
-                    lastCollapsingMode_ == IndexerCollapsingMode::FIVE) &&
-                (propSelect > sharpItemCount_)) {
+                    lastCollapsingMode_ == IndexerCollapsingMode::FIVE) && (propSelect > sharpItemCount_)) {
                 propSelect = GetAutoCollapseIndex(propSelect);
+            } else {
+                collapsedIndex_ = 0;
             }
         } else {
             sharpItemCount_ = 0;
@@ -139,7 +140,9 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
         sharpItemCount_ = 0;
         itemCountChanged = (itemCount_ != 0);
         itemCount_ = 0;
+        collapsedIndex_ = 0;
         arrayValue_.clear();
+        collapsedItemNums_.clear();
     }
     if (propSelect != selected_ || collapsedIndex_ != lastCollapsedIndex_) {
         selected_ = propSelect;
