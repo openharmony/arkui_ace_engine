@@ -129,6 +129,11 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, MenuAlignModifier.identity, MenuAlignModifier, menuAlign);
     return this;
   }
+  avoidance(mode: AvoidanceMode): this {
+    modifierWithKey(
+      this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
+    return this;
+  }
   menuBackgroundColor(value: ResourceColor): this {
     modifierWithKey(
       this._modifiersWithKeys, MenuBackgroundColorModifier.identity, MenuBackgroundColorModifier, value);
@@ -164,6 +169,11 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
   divider(value: DividerOptions | null): this {
     modifierWithKey(
       this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
+    return this;
+  }
+  dividerStyle(value: Optional<DividerStyleOptions>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, SelectDividerStyleModifier.identity, SelectDividerStyleModifier, value);
     return this;
   }
   direction(value: Direction): this {
@@ -342,6 +352,22 @@ class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType> {
   }
 }
 
+class AvoidanceModifier extends ModifierWithKey<AvoidanceMode> {
+  constructor(value: AvoidanceMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectAvoidance');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetAvoidance(node);
+    } else {
+      getUINativeModule().select.setAvoidance(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
 
 class ControlSizeModifier extends ModifierWithKey<ControlSize> {
   constructor(value: ControlSize) {
@@ -593,6 +619,34 @@ class SelectDividerModifier extends ModifierWithKey<DividerOptions | null> {
       this.stageValue?.color === this.value?.color &&
       this.stageValue?.startMargin === this.value?.startMargin &&
       this.stageValue?.endMargin === this.value?.endMargin);
+  }
+}
+
+class SelectDividerStyleModifier extends ModifierWithKey<Optional<DividerStyleOptions>> {
+  constructor(value: Optional<DividerStyleOptions>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectDividerStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().select.resetDividerStyle(node);
+    } else {
+      getUINativeModule().select.setDividerStyle(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin, this.value.mode);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
+        (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
+        (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
+        (this.stageValue as DividerStyleOptions).endMargin === (this.value as DividerStyleOptions).endMargin &&
+        (this.stageValue as DividerStyleOptions).mode === (this.value as DividerStyleOptions).mode);
+    } else {
+      return true;
+    }
   }
 }
 

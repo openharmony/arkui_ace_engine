@@ -192,6 +192,101 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetOverScrollOffset002
+ * @tc.desc: Test GetOverScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetOverScrollOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. !IsScrollSnapAlignCenter
+     */
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    CreateDone();
+    OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    OverScrollOffset expectOffset = { 0, ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    ScrollTo(ITEM_MAIN_SIZE);
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    expectOffset = { 0, ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    /**
+     * @tc.steps: step2. !IsScrollSnapAlignCenter
+     */
+    ClearOldNodes();
+    model = CreateList();
+    model.SetStackFromEnd(true);
+    CreateListItemGroups(1);
+    CreateDone();
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE * 5);
+    expectOffset = { 500, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    ScrollTo(ITEM_MAIN_SIZE);
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    expectOffset = { ITEM_MAIN_SIZE, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+}
+
+/**
+ * @tc.name: GetOverScrollOffset003
+ * @tc.desc: Test GetOverScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetOverScrollOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. IsScrollSnapAlignCenter
+     */
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
+    CreateListItemGroups(2);
+    CreateDone();
+    OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    OverScrollOffset expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE);
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE * 4);
+    expectOffset = { 0, -ITEM_MAIN_SIZE * 4 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    /**
+     * @tc.steps: step2. has no group, groupAtStart and groupAtEnd are false
+     */
+    ClearOldNodes();
+    model = CreateList();
+    model.SetStackFromEnd(true);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+}
+
+/**
  * @tc.name: ContentEndOffset001
  * @tc.desc: Test ContentEndOffset should change behavior of IsAtBottom
  * @tc.type: FUNC
@@ -2458,5 +2553,47 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest002, TestSize.Level1)
     }
     FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 100.f);
+}
+
+/**
+ * @tc.name: ListAddDelChildTest003
+ * @tc.desc: Test list del child when list is layout from end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListAddDelChildTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    CreateListItems(10);
+    CreateDone();
+
+    EXPECT_TRUE(Position(-600.0f));
+
+    /**
+     * @tc.steps: step2. Scroll to mid item.
+     * @tc.expected: current offset is 200
+     */
+    ScrollToIndex(5, false, ScrollAlign::END);
+    EXPECT_TRUE(Position(-200.0f));
+
+    /**
+     * @tc.steps: step3. Delete mid item.
+     * @tc.expected: current offset is 100
+     */
+    frameNode_->RemoveChildAtIndex(5);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetEndIndex(), 4);
+
+    /**
+     * @tc.steps: step2. add ListItem
+     * @tc.expected: ListItem position is correct.
+     */
+    AddListItem();
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetEndIndex(), 5);
 }
 } // namespace OHOS::Ace::NG

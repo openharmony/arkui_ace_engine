@@ -29,7 +29,10 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const std::string SYMBOL_FONT_FAMILY = "Symbol_Test_CustomSymbol";
+constexpr int32_t DEFAULT_SYMBOL_ID = 983242;
+} // namespace
 
 class TextTestFiveNg : public TextBases {
 public:
@@ -801,20 +804,20 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::RTL);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::RTL);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
@@ -877,7 +880,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     LayoutConstraintF contentConstraint;
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyle, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyle, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 
     textStyle.SetAdaptTextSize(Dimension(100, DimensionUnit::PERCENT),
         Dimension(10, DimensionUnit::PERCENT), Dimension(10, DimensionUnit::PERCENT));
@@ -886,13 +889,13 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     contentConstraint.maxSize.SetHeight(-1.0);
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyle, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyle, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 
     contentConstraint.maxSize.SetWidth(1.0);
     contentConstraint.maxSize.SetHeight(1.0);
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyle, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyle, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 
     TextStyle textStyleFP;
     textStyleFP.SetAdaptTextSize(Dimension(100, DimensionUnit::FP),
@@ -900,7 +903,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     textStyleFP.SetFontSize(Dimension(10, DimensionUnit::FP));
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyleFP, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyleFP, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 }
 
 /**
@@ -1121,6 +1124,44 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolTextStyle001, TestSize.Level1)
     textStyle.SetRenderStrategy(-1);
     textStyle.SetEffectStrategy(-1);
     textStyle.SetSymbolEffectOptions(symbolEffectOptions);
+    EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
+        textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), true);
+}
+
+/**
+ * @tc.name: UpdateSymbolTextStyle002
+ * @tc.desc: test text_layout_algorithm.cpp UpdateSymbolTextStyle function for custom symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateSymbolTextStyle002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->selectOverlayProxy_ = nullptr;
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(DEFAULT_SYMBOL_ID));
+
+    TextStyle textStyle;
+    ParagraphStyle paragraphStyle;
+    textStyle.SetSymbolType(SymbolType::SYSTEM);
+
+    EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
+        textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), true);
+
+    textStyle.SetSymbolType(SymbolType::CUSTOM);
+
+    EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
+        textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), false);
+
+    std::vector<std::string> fontFamilies;
+    fontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    textStyle.SetFontFamilies(fontFamilies);
     EXPECT_EQ(textLayoutAlgorithm->UpdateSymbolTextStyle(
         textStyle, paragraphStyle, AceType::RawPtr(frameNode), frameNode), true);
 }
@@ -1949,6 +1990,44 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSymbolSpanParagraph002
+ * @tc.desc: test span_node.cpp UpdateSymbolSpanParagraph function for customSymbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    int32_t callPushStyleCount = 0;
+    EXPECT_CALL(*paragraph, PushStyle(_)).WillRepeatedly([&callPushStyleCount](){ callPushStyleCount++; });
+
+    EXPECT_EQ(callPushStyleCount, 0);
+
+    spanItem->fontStyle->UpdateFontSize(Dimension(1));
+    spanItem->fontStyle->UpdateSymbolType(SymbolType::SYSTEM);
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
+    EXPECT_EQ(callPushStyleCount, 1);
+
+    spanItem->fontStyle->UpdateSymbolType(SymbolType::CUSTOM);
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
+    EXPECT_EQ(callPushStyleCount, 1);
+
+    std::vector<std::string> fontFamilies;
+    fontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    spanItem->fontStyle->UpdateFontFamily(fontFamilies);
+    spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
+    EXPECT_EQ(callPushStyleCount, 2);
+}
+
+/**
  * @tc.name: UpdateSymbolSpanColor001
  * @tc.desc: test span_node.cpp UpdateSymbolSpanColor function
  * @tc.type: FUNC
@@ -2622,14 +2701,14 @@ HWTEST_F(TextTestFiveNg, HandleSurfaceChanged001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateMaxLines(0);
 
-    pattern->HandleSurfaceChanged(100, 100, 100, 100);
-    pattern->HandleSurfaceChanged(100, 100, 10, 100);
-    pattern->HandleSurfaceChanged(100, 100, 100, 10);
-    pattern->HandleSurfaceChanged(100, 100, 10, 10);
+    pattern->HandleSurfaceChanged(100, 100, 100, 100, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(100, 100, 10, 100, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(100, 100, 100, 10, WindowSizeChangeReason::DRAG);
+    pattern->HandleSurfaceChanged(100, 100, 10, 10, WindowSizeChangeReason::DRAG);
 
     manager->shareOverlayInfo_->menuInfo.menuType = OptionMenuType::MOUSE_MENU;
 
-    pattern->HandleSurfaceChanged(100, 100, 10, 10);
+    pattern->HandleSurfaceChanged(100, 100, 10, 10, WindowSizeChangeReason::DRAG);
     EXPECT_EQ(pattern->textSelector_.GetStart(), -1);
 }
 

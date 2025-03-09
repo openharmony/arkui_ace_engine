@@ -16,6 +16,7 @@
 #include "core/components/button/render_button.h"
 
 #include "base/log/event_report.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

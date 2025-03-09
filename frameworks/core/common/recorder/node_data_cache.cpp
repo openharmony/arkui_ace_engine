@@ -87,7 +87,6 @@ void NodeDataCache::OnBeforePagePop(bool destroy)
         Clear(pageUrl_);
     }
     shouldCollectFull_ = false;
-    EventRecorder::Get().SetContainerChanged();
 }
 
 void NodeDataCache::UpdateConfig(std::shared_ptr<MergedConfig>&& mergedConfig)

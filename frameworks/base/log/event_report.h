@@ -243,6 +243,7 @@ public:
         const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType);
     static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
     static void ReportClipboardFailEvent(const std::string& errorType);
+    static void ReportReusedNodeSkipMeasureApp();
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

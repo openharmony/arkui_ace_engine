@@ -105,7 +105,7 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     pickerPattern->SetIsShowInDialog(true);
     pickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
     pickerPattern->SetTextProperties(settingData.properties);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         isEnableHapticFeedback_ = settingData.isEnableHapticFeedback;
         pickerPattern->SetEnableHapticFeedback(isEnableHapticFeedback_);
         pickerPattern->ColumnPatternInitHapticController();
@@ -528,9 +528,9 @@ void DatePickerDialogView::SwitchDatePickerPage(const RefPtr<FrameNode>& dateNod
 
     auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
-    if (datePickerMode_ == DatePickerMode::YEAR_AND_MONTH) {
+    if (!isShowTime_ && datePickerMode_ == DatePickerMode::YEAR_AND_MONTH) {
         datePickerPattern->SetCurrentFocusKeyID(FIRST_STACK);
-    } else if (datePickerMode_ == DatePickerMode::MONTH_AND_DAY) {
+    } else if (!isShowTime_ && datePickerMode_ == DatePickerMode::MONTH_AND_DAY) {
         datePickerPattern->SetCurrentFocusKeyID(SECOND_STACK);
     } else {
         datePickerPattern->SetCurrentFocusKeyID(switchDatePickerFlag_ ? SECOND_STACK : FIRST_STACK);
@@ -607,7 +607,7 @@ void DatePickerDialogView::SwitchContentRowButton(const RefPtr<FrameNode>& conte
     auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (!switchFlag_) {
-        if (datePickerMode_ == DatePickerMode::DATE) {
+        if (isShowTime_ || datePickerMode_ == DatePickerMode::DATE) {
             nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
         } else {
@@ -660,7 +660,7 @@ void DatePickerDialogView::ShowContentRowButton(const RefPtr<FrameNode>& content
         CHECK_NULL_VOID(textNextPrevNode);
         auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        if (datePickerMode_ == DatePickerMode::DATE) {
+        if (isShowTime_ || datePickerMode_ == DatePickerMode::DATE) {
             divideLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             nextButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
@@ -849,7 +849,7 @@ void DatePickerDialogView::UpdateButtonLayoutProperty(
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -1021,7 +1021,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
 
     PickerDate parseStartDate;
     PickerDate parseEndDate;
-    PickerDate parseSelectedDate;
+    PickerDate parseSelectedDate = PickerDate::Current();
     SetShowLunar(dateNode, isLunar);
     SetDateTextProperties(dateNode, properties);
     auto iterStart = datePickerProperty.find("start");
@@ -1037,8 +1037,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     auto iterSelected = datePickerProperty.find("selected");
     if (iterSelected != datePickerProperty.end()) {
         parseSelectedDate = iterSelected->second;
-        SetSelectedDate(dateNode, parseSelectedDate);
     }
+    SetSelectedDate(dateNode, parseSelectedDate);
     return dateNode;
 }
 
@@ -1081,7 +1081,7 @@ void DatePickerDialogView::CreateNormalDateNode(const RefPtr<FrameNode>& dateNod
     datePickerPattern->SetColumn(dayColumnNode);
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (datePickerMode_ == DatePickerMode::DATE) {
+        if (isShowTime_ || datePickerMode_ == DatePickerMode::DATE) {
             MountColumnNodeToPicker(yearColumnNode, dateNode, RATIO_THREE);
             MountColumnNodeToPicker(monthColumnNode, dateNode, RATIO_TWO);
             MountColumnNodeToPicker(dayColumnNode, dateNode, RATIO_TWO);
@@ -1117,7 +1117,7 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
     }
 
     {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             datePickerPattern->SetEnableHapticFeedback(isEnableHapticFeedback_);
             datePickerPattern->ColumnPatternInitHapticController(monthDaysColumnNode);
         }
@@ -1238,7 +1238,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -2021,7 +2021,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonNextPrevLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);

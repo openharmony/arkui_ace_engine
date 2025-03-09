@@ -103,6 +103,11 @@ struct LeadingMargin {
         return size == other.size && pixmap == other.pixmap;
     }
 
+    bool IsValid()
+    {
+        return size.Width().IsValid() || size.Height().IsValid();
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -142,6 +147,7 @@ struct ParagraphStyle {
     bool halfLeading = false;
     Dimension indent;
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
+    Dimension paragraphSpacing;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -149,7 +155,8 @@ struct ParagraphStyle {
                fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
                leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
-               halfLeading == others.halfLeading && indent == others.indent;
+               halfLeading == others.halfLeading && indent == others.indent &&
+               paragraphSpacing == others.paragraphSpacing;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -219,6 +226,8 @@ class Paragraph : public virtual AceType {
 
 public:
     static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
+    static RefPtr<Paragraph> CreateRichEditorParagraph(
+        const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
 
     static RefPtr<Paragraph> Create(void* paragraph);
     // whether the paragraph has been build
@@ -282,6 +291,10 @@ public:
     virtual void TxtGetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) = 0;
+    virtual bool empty() const
+    {
+        return false;
+    };
 };
 } // namespace OHOS::Ace::NG
 

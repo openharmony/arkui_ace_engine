@@ -236,6 +236,7 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
         points[i].operatingHand = fingureIterator == fingureEnd ? 0 : fingureIterator->operatingHand_;
@@ -322,6 +323,7 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
     rawInputEvent.actionTouchPoint.tiltX = info->GetTiltX().value_or(0.0f);
     rawInputEvent.actionTouchPoint.tiltY = info->GetTiltY().value_or(0.0f);
+    rawInputEvent.actionTouchPoint.rollAngle = info->GetRollAngle().value_or(0.0f);
     rawInputEvent.actionTouchPoint.toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
     rawInputEvent.actionTouchPoint.pressure = info->GetForce();
     std::array<ArkUITouchPoint, MAX_POINTS> points;
@@ -337,6 +339,7 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
         points[i].nodeY = fingureIterator->localLocation_.GetY();
         points[i].tiltX = rawInputEvent.actionTouchPoint.tiltX;
         points[i].tiltY = rawInputEvent.actionTouchPoint.tiltY;
+        points[i].rollAngle = rawInputEvent.actionTouchPoint.rollAngle;
         fingureIterator++;
     }
     rawInputEvent.touchPointes = &(points[0]);
@@ -623,7 +626,44 @@ void clearGestures(ArkUINodeHandle node)
 
 // <fingerid, iterator of touchTestResults in eventManager>
 using TouchRecoginerTarget = std::vector<std::pair<int32_t, TouchTestResult::iterator>>;
-using TouchRecognizerMap = std::map<RefPtr<TouchEventTarget>*, TouchRecoginerTarget>;
+using TouchRecognizerMap = std::map<TouchEventTarget*, TouchRecoginerTarget>;
+
+bool IsFingerCollectedByTarget(TouchRecoginerTarget& target, int32_t fingerId)
+{
+    for (const auto& item : target) {
+        if (item.first == fingerId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void CollectTouchEventTarget(
+    TouchRecognizerMap& dict, std::list<RefPtr<TouchEventTarget>>& targets, FrameNode* borderNode, int32_t fingerId)
+{
+    for (auto iter = targets.begin(); iter != targets.end(); ++iter) {
+        auto& target = *iter;
+        if (AceType::DynamicCast<NG::NGGestureRecognizer>(target)) {
+            continue;
+        }
+        auto targetPtr = AceType::RawPtr(target);
+        if (dict.find(targetPtr) != dict.end() && IsFingerCollectedByTarget(dict[AceType::RawPtr(target)], fingerId)) {
+            continue;
+        }
+        auto targetNode = target->GetAttachedNode().Upgrade();
+        if (targetNode && targetNode == borderNode) {
+            dict[targetPtr].emplace_back(fingerId, iter);
+            return;
+        }
+        while (targetNode) {
+            if (targetNode == borderNode) {
+                dict[targetPtr].emplace_back(fingerId, iter);
+                break;
+            }
+            targetNode = targetNode->GetParentFrameNode();
+        }
+    }
+}
 
 TouchRecognizerMap* CreateTouchRecognizers(
     FrameNode* frameNode, const std::shared_ptr<BaseGestureEvent>& info, ArkUIGestureInterruptInfo& interruptInfo)
@@ -639,16 +679,7 @@ TouchRecognizerMap* CreateTouchRecognizers(
     const auto& fingerList = info->GetFingerList();
     for (const auto& finger : fingerList) {
         auto& touchTargetList = touchTestResult[finger.fingerId_];
-        auto self = std::find_if(touchTargetList.begin(), touchTargetList.end(),
-            [frameNode](
-                const RefPtr<TouchEventTarget>& target) -> bool { return (target->GetAttachedNode() == frameNode); });
-        if (AceType::DynamicCast<NG::NGGestureRecognizer>(*self)) {
-            continue;
-        }
-        for (auto iter = touchTargetList.begin(); iter != self; iter++) {
-            touchRecognizerMap[&(*iter)].emplace_back(finger.fingerId_, iter);
-        }
-        touchRecognizerMap[&(*self)].emplace_back(finger.fingerId_, self);
+        CollectTouchEventTarget(touchRecognizerMap, touchTargetList, frameNode, finger.fingerId_);
     }
     touchRecoginers = new TouchRecognizerMap::value_type*[touchRecognizerMap.size()];
     int32_t i = 0;
@@ -673,16 +704,16 @@ void DestroyTouchRecognizers(TouchRecognizerMap* recognizers, ArkUIGestureInterr
 ArkUINodeHandle touchRecognizerGetNodeHandle(void* recognizer)
 {
     auto iter = static_cast<TouchRecognizerMap::value_type*>(recognizer);
-    RefPtr<TouchEventTarget> touchEventTarget = *(iter->first);
+    TouchEventTarget* touchEventTarget = iter->first;
     auto frameNode = touchEventTarget->GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, nullptr);
-    return reinterpret_cast<ArkUINodeHandle>(frameNode.GetRawPtr());
+    return reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(frameNode));
 }
 
 ArkUI_Bool touchRecognizerCancelTouch(void* recognizer)
 {
     auto iter = static_cast<TouchRecognizerMap::value_type*>(recognizer);
-    RefPtr<TouchEventTarget> touchEventTarget = *(iter->first);
+    TouchEventTarget* touchEventTarget = iter->first;
     TouchRecoginerTarget& touchRecognizerTarget = iter->second;
     auto node = touchEventTarget->GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(node, false);
@@ -690,18 +721,25 @@ ArkUI_Bool touchRecognizerCancelTouch(void* recognizer)
     CHECK_NULL_RETURN(pipeline, false);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_RETURN(eventManager, false);
-    eventManager->DispatchTouchCancelToRecognizer(touchEventTarget, touchRecognizerTarget);
-    return true;
+    if (!touchRecognizerTarget.empty()) {
+        eventManager->DispatchTouchCancelToRecognizer(touchEventTarget, touchRecognizerTarget);
+        touchRecognizerTarget.clear();
+        return true;
+    }
+    return false;
 }
 
 void setGestureInterrupterToNodeWithUserData(
     ArkUINodeHandle node, void* userData, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     auto onGestureRecognizerJudgeBegin =
-        [frameNode, userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
+        [weak = AceType::WeakClaim(frameNode), userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
             const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        auto node = weak.Upgrade();
+        CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
         GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
@@ -736,8 +774,7 @@ void setGestureInterrupterToNodeWithUserData(
         ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
         interruptInfo.inputEvent = &inputEvent;
         interruptInfo.gestureEvent = &arkUIGestureEvent;
-
-        auto touchRecognizers = CreateTouchRecognizers(frameNode, info, interruptInfo);
+        auto touchRecognizers = CreateTouchRecognizers(AceType::RawPtr(node), info, interruptInfo);
         auto result = interrupter(&interruptInfo);
         delete[] othersRecognizer;
         DestroyTouchRecognizers(touchRecognizers, interruptInfo);

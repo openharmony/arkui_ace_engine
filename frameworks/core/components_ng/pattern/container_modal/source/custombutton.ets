@@ -37,7 +37,6 @@ const EVENT_NAME_BUTTON_SIZE_CHANGE: string = 'arkui_button_size_change'
 const EVENT_NAME_BUTTON_SPACING_CHANGE: string = 'arkui_button_spacing_change'
 const EVENT_NAME_COLOR_MODE_LOCKED: string = 'arkui_color_mode_locked'
 const EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE: string = 'arkui_button_right_offset_change'
-const EVENT_NAME_TITLE_ROW_UPDATE: string = 'arkui_custom_title_row_update'
 
 const maximizeNormalResource: Resource = {
   bundleName: '',
@@ -54,7 +53,7 @@ const recoverNormalResource: Resource = {
   type: 20000
 }
 
-const buttonNormalBackgroundColor: Color =  Color.Transparent
+const buttonNormalBackgroundColor: Color = Color.Transparent
 
 const buttonNormalIconFillColor: Resource = {
   bundleName: '',
@@ -80,7 +79,7 @@ const buttonHoverIconFillColor: Resource = {
   type: 10001
 }
 
-const closeNormalBackgroundColor : Color =  Color.Transparent
+const closeNormalBackgroundColor: Color = Color.Transparent
 
 const closeNormalIconFillColor: Resource = {
   bundleName: '',
@@ -122,7 +121,7 @@ const splitItemFillColor: Resource = {
   type: 10001
 }
 
-//锁定深色或者浅色模式，锁定颜色时，深浅色资源切换的时候，取固定值
+// lock the dark or light color mode
 class ColorGroup {
   public light: string = '#000000';
   public dark: string = '#FFFFFF';
@@ -132,7 +131,7 @@ class ColorGroup {
     this.light = light;
   }
 }
-const colorMap:Map<Resource,ColorGroup> = new Map<Resource,ColorGroup>([
+const colorMap: Map<Resource, ColorGroup> = new Map<Resource, ColorGroup>([
   [buttonNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
   [buttonHoverBackgroundColor, new ColorGroup('#0C000000', '#26FFFFFF')],
   [buttonHoverIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
@@ -210,13 +209,13 @@ struct custombutton {
   @State rightSplitBackgroundColor: ResourceColor = Color.Transparent
   @State rowOpacity: number = 1.0
   @State menuWidth: string = '224vp';
-  //按鍵热区间的间距 12-28vp
+  // button spacing between hotArea 12-28vp
   @State buttonSpacing: number = 12;
-  //底板大小 20-28vp
+  // button size 20-28vp
   @State buttonSize: number = 28;
-  //最后一个按钮离右侧的间距
+  // spacing from the last button to the right
   @State buttonRightOffset: number = 20;
-  //锁定当前的颜色模式
+  // lock the current color mode
   colorConfigurationLocked: boolean = false;
 
   isFocused: boolean = true;
@@ -271,27 +270,28 @@ struct custombutton {
     }
   }
 
-  //设置底板的间距
-  setButtonSpacing(param:string) {
+  // set the spacing between buttons
+  setButtonSpacing(param: string) {
     this.buttonSpacing = parseInt(param);
   }
-  //设置底板的大小
-  setButtonButtonSize(param:string) {
+
+  // set button size
+  setButtonButtonSize(param: string) {
     this.buttonSize = parseInt(param);
   }
-  //最后一个按键离右侧的距离
-  setButtonRightOffset(param:string) {
+
+  // the last button right offset
+  setButtonRightOffset(param: string) {
     this.buttonRightOffset = parseInt(param);
   }
 
-  // 锁定当前三键的颜色
-  setColorModeLocked(param:string) {
+  // lock current button color
+  setColorModeLocked(param: string) {
     const colorMode = parseInt(param);
     if (colorMode === -1) {
       this.colorConfigurationLocked = false;
       return;
     }
-    // 是否锁定深色模式
     this.isDark = (colorMode === 0);
     this.colorConfigurationLocked = true;
     this.maximizeFillColor = this.getResourceColor(buttonNormalIconFillColor)
@@ -299,8 +299,8 @@ struct custombutton {
     this.closeFillColor = this.getResourceColor(buttonNormalIconFillColor)
   }
 
-  //适配三键相关的颜色资源锁定深色模式
-  getResourceColor(resource: Resource) : Resource | string  {
+  // get resource color for lock color mode
+  getResourceColor(resource: Resource): Resource | string {
     if (this.colorConfigurationLocked && colorMap.has(resource)) {
       const colorGroup = colorMap.get(resource);
       if (colorGroup) {
@@ -337,7 +337,7 @@ struct custombutton {
 
   }
 
-  onAreaChangeEvent(oldValue: Area, newValue: Area) {
+  onAreaChangeEvent(oldValue: SizeOptions, newValue: SizeOptions) {
 
   }
 
@@ -402,7 +402,7 @@ struct custombutton {
 
   onHoverMaximizeButton(isHover: boolean) {
     if (isHover) {
-      this.maximizeBackgroundColor =  this.getResourceColor(buttonHoverBackgroundColor)
+      this.maximizeBackgroundColor = this.getResourceColor(buttonHoverBackgroundColor)
       this.maximizeFillColor = this.getResourceColor(buttonHoverIconFillColor)
     } else {
       this.maximizeBackgroundColor = buttonNormalBackgroundColor
@@ -445,9 +445,6 @@ struct custombutton {
   }
 
   aboutToAppear(): void {
-  }
-
-  onDidBuild(): void {
   }
 
   @Builder
@@ -538,7 +535,7 @@ struct custombutton {
     })
   }
 
-  menuDisappearTimer(disappearTime : number ) {
+  menuDisappearTimer(disappearTime: number) {
     this.cancelMenuDisappearTimer()
     this.menuDisappearTimeoutId = setTimeout(() => {
       this.isShowMenu = false
@@ -566,7 +563,6 @@ struct custombutton {
         }
         .id('EnhanceMaximizeBtn')
         .backgroundColor(this.maximizeBackgroundColor)
-        // 底板可修改
         .width(this.buttonSize + 'vp')
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
@@ -663,8 +659,6 @@ struct custombutton {
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
-        //右间距在父组件中体现
-        // .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
         .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
@@ -689,8 +683,8 @@ struct custombutton {
 
       }.id('containerModalButtonRowId')
       .height('100%')
-      .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset +'vp'})
-      .onAreaChange((oldValue: Area, newValue: Area) => {
+      .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset + 'vp' })
+      .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
         this.onAreaChangeEvent(oldValue, newValue)
       })
       .gesture(PanGesture())

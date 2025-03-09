@@ -20,10 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
@@ -33,6 +30,8 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 namespace OHOS::Ace::NG {
+struct InspectorConfig;
+class InspectorFilter;
 enum class ComponentButtonType { POPUP, BUTTON, STEPPER, NAVIGATION };
 class ButtonPattern : public Pattern {
     DECLARE_ACE_TYPE(ButtonPattern, Pattern);
@@ -67,34 +66,6 @@ public:
         return MakeRefPtr<ButtonLayoutProperty>();
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        if (buttonType_ == ComponentButtonType::POPUP || buttonType_ == ComponentButtonType::STEPPER) {
-            FocusPaintParam focusPaintParam;
-            focusPaintParam.SetPaintColor(focusBorderColor_);
-            return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
-        }
-        if (buttonType_ == ComponentButtonType::NAVIGATION) {
-            FocusPaintParam focusPaintParam;
-            focusPaintParam.SetPaintColor(focusBorderColor_);
-            focusPaintParam.SetPaintWidth(focusBorderWidth_);
-            return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
-        }
-        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
-    }
-
-    bool IsNeedAdjustByAspectRatio() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
-        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_RETURN(host, false);
-        auto isNeedAdjust = layoutProperty->HasAspectRatio() &&
-               layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
-
-        return isNeedAdjust;
-    }
-
     void SetClickedColor(const Color& color)
     {
         clickedColor_ = color;
@@ -120,175 +91,6 @@ public:
     void setComponentButtonType(const ComponentButtonType& buttonType)
     {
         buttonType_ = buttonType;
-    }
-
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        Pattern::ToJsonValue(json, filter);
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto context = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto buttonTheme = context->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        auto textStyle = buttonTheme->GetTextStyle();
-        auto buttonType = layoutProperty->GetType().value_or(ButtonType::CAPSULE);
-        json->PutExtAttr("type", host->GetTag() == "Toggle" ? "ToggleType.Button" :
-            ConvertButtonTypeToString(buttonType).c_str(), filter);
-        json->PutExtAttr("fontSize",
-            layoutProperty->GetFontSizeValue(layoutProperty->HasLabel() ? textStyle.GetFontSize() : Dimension(0))
-                .ToString()
-                .c_str(), filter);
-        json->PutExtAttr("fontWeight", V2::ConvertWrapFontWeightToStirng(
-            layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str(), filter);
-        json->PutExtAttr("fontColor", layoutProperty->GetFontColor()
-                                   .value_or(layoutProperty->HasLabel() ? textStyle.GetTextColor() : Color::BLACK)
-                                   .ColorToString()
-                                   .c_str(), filter);
-        json->PutExtAttr("fontStyle",
-            layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ?
-                "FontStyle.Normal" : "FontStyle.Italic", filter);
-        json->PutExtAttr("label", layoutProperty->GetLabelValue("").c_str(), filter);
-        auto eventHub = host->GetEventHub<ButtonEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        json->PutExtAttr("stateEffect", eventHub->GetStateEffect() ? "true" : "false", filter);
-
-        auto optionJson = JsonUtil::Create(true);
-        optionJson->Put(
-            "type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
-
-        optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
-        json->PutExtAttr("options", optionJson->ToString().c_str(), filter);
-        ToJsonValueAttribute(json, filter);
-    }
-
-    void ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto fontFamilyVector =
-            layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
-        std::string fontFamily;
-        if (!fontFamilyVector.empty()) {
-            fontFamily = fontFamilyVector.at(0);
-            for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
-                fontFamily += ',' + fontFamilyVector.at(i);
-            }
-        }
-        json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
-        auto fontJsValue = JsonUtil::Create(true);
-        fontJsValue->Put("size", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
-        fontJsValue->Put("weight",
-            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str());
-        fontJsValue->Put("family", fontFamily.c_str());
-        fontJsValue->Put(
-            "style", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-                         ? "FontStyle.Normal"
-                         : "FontStyle.Italic");
-        auto labelJsValue = JsonUtil::Create(true);
-        labelJsValue->Put("overflow",
-            V2::ConvertWrapTextOverflowToString(layoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP))
-                .c_str());
-        labelJsValue->Put("maxLines", std::to_string(layoutProperty->GetMaxLines().value_or(DEFAULT_MAXLINES)).c_str());
-        labelJsValue->Put("minFontSize", layoutProperty->GetMinFontSizeValue(Dimension(0)).ToString().c_str());
-        labelJsValue->Put("maxFontSize", layoutProperty->GetMaxFontSizeValue(Dimension(0)).ToString().c_str());
-        labelJsValue->Put("heightAdaptivePolicy",
-            V2::ConvertWrapTextHeightAdaptivePolicyToString(
-                layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
-                .c_str());
-        labelJsValue->Put("font", fontJsValue->ToString().c_str());
-        json->PutExtAttr("labelStyle", labelJsValue->ToString().c_str(), filter);
-
-        json->PutExtAttr("buttonStyle",
-            ConvertButtonStyleToString(layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE))
-            .c_str(), filter);
-        json->PutExtAttr("controlSize",
-            ConvertControlSizeToString(layoutProperty->GetControlSize().value_or(ControlSize::NORMAL))
-            .c_str(), filter);
-        json->PutExtAttr(
-            "role", ConvertButtonRoleToString(layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL))
-            .c_str(), filter);
-    }
-
-    static std::string ConvertButtonRoleToString(ButtonRole buttonRole)
-    {
-        std::string result;
-        switch (buttonRole) {
-            case ButtonRole::NORMAL:
-                result = "ButtonRole.NORMAL";
-                break;
-            case ButtonRole::ERROR:
-                result = "ButtonRole.ERROR";
-                break;
-            default:
-                break;
-        }
-        return result;
-    }
-
-    static std::string ConvertButtonTypeToString(ButtonType buttonType)
-    {
-        std::string result;
-        switch (buttonType) {
-            case ButtonType::NORMAL:
-                result = "ButtonType.Normal";
-                break;
-            case ButtonType::CAPSULE:
-                result = "ButtonType.Capsule";
-                break;
-            case ButtonType::CIRCLE:
-                result = "ButtonType.Circle";
-                break;
-            case ButtonType::ROUNDED_RECTANGLE:
-                result = "ButtonType.ROUNDED_RECTANGLE";
-                break;
-            default:
-                break;
-        }
-        return result;
-    }
-
-    static std::string ConvertButtonStyleToString(ButtonStyleMode buttonStyle)
-    {
-        std::string result;
-        switch (buttonStyle) {
-            case ButtonStyleMode::NORMAL:
-                result = "ButtonStyleMode.NORMAL";
-                break;
-            case ButtonStyleMode::EMPHASIZE:
-                result = "ButtonStyleMode.EMPHASIZED";
-                break;
-            case ButtonStyleMode::TEXT:
-                result = "ButtonStyleMode.TEXTUAL";
-                break;
-            default:
-                break;
-        }
-        return result;
-    }
-
-    static std::string ConvertControlSizeToString(ControlSize controlSize)
-    {
-        std::string result;
-        switch (controlSize) {
-            case ControlSize::SMALL:
-                result = "ControlSize.SMALL";
-                break;
-            case ControlSize::NORMAL:
-                result = "ControlSize.NORMAL";
-                break;
-            default:
-                break;
-        }
-        return result;
     }
 
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
@@ -368,6 +170,22 @@ public:
     {
         isFocus_ = isFocus;
     }
+
+    FocusPattern GetFocusPattern() const override;
+
+    bool IsNeedAdjustByAspectRatio() override;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    void ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+
+    static std::string ConvertButtonRoleToString(ButtonRole buttonRole);
+
+    static std::string ConvertButtonTypeToString(ButtonType buttonType);
+
+    static std::string ConvertButtonStyleToString(ButtonStyleMode buttonStyle);
+
+    static std::string ConvertControlSizeToString(ControlSize controlSize);
 
     bool IsDynamicSwitchButtonStyle(const BorderColorProperty& color, RefPtr<ButtonTheme>& buttonTheme);
 

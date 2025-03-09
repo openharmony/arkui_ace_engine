@@ -77,6 +77,10 @@ public:
 
     void SetBackgroundTransparent(bool backgroundTransparent);
 
+    void OnVisibleChange(bool visible) override;
+    void OnWindowShow() override;
+    void OnWindowHide() override;
+
 private:
     void InitializeRender(void* runtime);
     DCResultCode CheckConstraint();
@@ -101,6 +105,7 @@ private:
     int32_t uiExtensionId_ = 0;
     RefPtr<AccessibilitySessionAdapterIsolatedComponent> accessibilitySessionAdapter_;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_ = nullptr;
+    bool isVisible_ = true;
 
     static int32_t dynamicGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(DynamicPattern);

@@ -27,11 +27,11 @@ class SymbolEffectOptions {
 public:
     explicit SymbolEffectOptions(SymbolEffectType effectType);
 
-    SymbolEffectOptions(SymbolEffectType effectType, ScopeType scopeType)
+    SymbolEffectOptions(SymbolEffectType effectType, Ace::ScopeType scopeType)
         : effectType_(effectType), scopeType_(scopeType)
     {}
 
-    SymbolEffectOptions(SymbolEffectType effectType, ScopeType scopeType, CommonSubType commonSubType)
+    SymbolEffectOptions(SymbolEffectType effectType, Ace::ScopeType scopeType, CommonSubType commonSubType)
         : effectType_(effectType), scopeType_(scopeType), commonSubType_(commonSubType)
     {}
 
@@ -47,7 +47,7 @@ public:
         effectType_ = effectType;
     }
 
-    void SetScopeType(ScopeType scopeType)
+    void SetScopeType(Ace::ScopeType scopeType)
     {
         scopeType_ = scopeType;
     }
@@ -137,7 +137,7 @@ public:
         return effectType_;
     }
 
-    const std::optional<ScopeType>& GetScopeType() const
+    const std::optional<Ace::ScopeType>& GetScopeType() const
     {
         return scopeType_;
     }
@@ -180,29 +180,11 @@ public:
     bool operator==(const SymbolEffectOptions& info) const;
     bool operator!=(const SymbolEffectOptions& info) const;
 
-    std::string ToString() const
-    {
-        auto json = JsonUtil::Create(true);
-        json->Put("effectType", static_cast<int32_t>(effectType_));
-        json->Put("scopeType", static_cast<int32_t>(scopeType_.value_or(ScopeType::LAYER)));
-        json->Put("commonSubType", static_cast<int32_t>(commonSubType_.value_or(CommonSubType::DOWN)));
-        json->Put("fillStyle", static_cast<int32_t>(fillStyle_.value_or(FillStyle::CUMULATIVE)));
-        json->Put("isTxtActive", isTxtActive_);
-        if (triggerNum_.has_value()) {
-            json->Put("triggerNum", triggerNum_.value());
-        }
-        if (isTriggerNumChanged_.has_value()) {
-            json->Put("isTriggerNumChanged", isTriggerNumChanged_.value());
-        }
-        if (isActive_.has_value()) {
-            json->Put("isActive", isActive_.value());
-        }
-        return json->ToString();
-    }
+    std::string ToString() const;
 
 private:
     SymbolEffectType effectType_ = SymbolEffectType::NONE;
-    std::optional<ScopeType> scopeType_;
+    std::optional<Ace::ScopeType> scopeType_;
     std::optional<CommonSubType> commonSubType_;
     std::optional<FillStyle> fillStyle_;
     std::optional<bool> isActive_;

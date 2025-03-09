@@ -51,6 +51,8 @@ constexpr int32_t DIGIT_INDICATOR_LEFT = 8;
 constexpr int32_t DIGIT_INDICATOR_TOP = 9;
 constexpr int32_t DIGIT_INDICATOR_RIGHT = 10;
 constexpr int32_t DIGIT_INDICATOR_BOTTOM = 11;
+constexpr int32_t DIGIT_INDICATOR_IGNORE_SIZE = 12;
+constexpr int32_t DIGIT_INDICATOR_SET_IGNORE_SIZE = 13;
 constexpr int32_t DOT_INDICATOR_ITEM_WIDTH = 2;
 constexpr int32_t DOT_INDICATOR_ITEM_HEIGHT = 3;
 constexpr int32_t DOT_INDICATOR_SELECTED_ITEM_WIDTH = 4;
@@ -63,6 +65,9 @@ constexpr int32_t DOT_INDICATOR_TOP = 10;
 constexpr int32_t DOT_INDICATOR_RIGHT = 11;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 12;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 13;
+constexpr int32_t DOT_INDICATOR_SPACE = 14;
+constexpr int32_t DOT_INDICATOR_IGNORE_SIZE = 15;
+constexpr int32_t DOT_INDICATOR_SET_IGNORE_SIZE = 16;
 constexpr double DEFAULT_PERCENT_VALUE = 100.0;
 constexpr int32_t DEFAULT_ANIMATION_MODE = 0;
 constexpr int32_t STOP_WHEN_TOUCHED = 2;
@@ -680,6 +685,75 @@ std::string GetIntStringByValueRef(const EcmaVM* vm, const Local<JSValueRef>& js
     result = ArkTSUtils::ParseJsInteger(vm, jsValue, intValue) ? std::to_string(intValue) : "0";
     return result;
 }
+
+std::string ParseBottom(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool hasIgnoreSize)
+{
+    std::string bottom = "-";
+    if (jsValue->IsUndefined()) {
+        return bottom;
+    }
+    if (hasIgnoreSize) {
+        CalcDimension bottomcCalc;
+        bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, bottomcCalc);
+        bottomcCalc = (parseOK && bottomcCalc > 0.0_vp) ? bottomcCalc : 0.0_vp;
+        bottom = bottomcCalc.ToString();
+    } else {
+        bottom = GetIntStringByValueRef(vm, jsValue);
+    }
+    return bottom;
+}
+
+std::optional<bool> ParseIgrnoreSize(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool hasIgrnoreSize)
+{
+    std::optional<bool> ignoreSize;
+    if (!hasIgrnoreSize) {
+        return ignoreSize;
+    }
+    ignoreSize = false;
+    if (!jsValue->IsNull() && !jsValue->IsUndefined() && jsValue->IsBoolean()) {
+        ignoreSize = jsValue->ToBoolean(vm)->Value();
+    }
+    return ignoreSize;
+}
+
+std::string ParseSpace(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    std::string result = "-";
+    if (jsValue->IsUndefined()) {
+        return result;
+    }
+    CalcDimension calc;
+    bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, calc);
+    calc = (parseOK && !(calc < 0.0_vp) && calc.Unit() != DimensionUnit::PERCENT) ?
+        calc : 8.0_vp;
+    return calc.ToString();
+}
+
+void GetSpaceAndBottom(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::string& bottom,
+    std::string& spaceAndIgnoreSize)
+{
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_BOTTOM);
+    Local<JSValueRef> spaceArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_SPACE);
+    Local<JSValueRef> ignoreSizeArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_IGNORE_SIZE);
+    Local<JSValueRef> setIgnoreSizeArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_SET_IGNORE_SIZE);
+
+    auto hasIgnoreSize = (setIgnoreSizeArg->IsBoolean() && setIgnoreSizeArg->ToBoolean(vm)->Value()) ? true : false;
+    std::optional<bool> ignoreSize = ParseIgrnoreSize(vm, ignoreSizeArg, hasIgnoreSize);
+    std::string ignoreSizeStr = "-";
+    if (ignoreSize.has_value()) {
+        ignoreSizeStr = ignoreSize.value()  ? "1" : "0";
+    }
+
+    std::string setIgnoreSizeStr = "-";
+    if (!setIgnoreSizeArg->IsUndefined()) {
+        setIgnoreSizeStr = setIgnoreSizeArg->ToBoolean(vm)->Value() ? "1" : "0";
+    }
+
+    bottom = ParseBottom(vm, bottomArg, hasIgnoreSize);
+    std::string space = ParseSpace(vm, spaceArg);
+    spaceAndIgnoreSize =  space + "|" + ignoreSizeStr + "|" + setIgnoreSizeStr;
+}
+
 std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
 {
     Local<JSValueRef> itemWidthArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_ITEM_WIDTH);
@@ -692,7 +766,7 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
     Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_LEFT);
     Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_TOP);
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_RIGHT);
-    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_BOTTOM);
+
     CalcDimension calc;
     std::string itemWidth = ArkTSUtils::ParseJsDimension(vm, itemWidthArg, calc, DimensionUnit::VP, false)
                                 ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
@@ -719,12 +793,15 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
     std::string left = GetStringByValueRef(vm, leftArg);
     std::string top = GetStringByValueRef(vm, topArg);
     std::string right = GetStringByValueRef(vm, rightArg);
-    std::string bottom = GetStringByValueRef(vm, bottomArg);
     Local<JSValueRef> maxDisplayCountArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_MAX_DISPLAY_COUNT);
     auto maxDisplayCount = GetIntStringByValueRef(vm, maxDisplayCountArg);
+    std::string bottom = "-";
+    std::string spaceAndBottom = "-";
+    GetSpaceAndBottom(runtimeCallInfo, vm, bottom, spaceAndBottom);
     std::string indicatorStr = itemWidth + "|" + itemHeight + "|" + selectedItemWidth + "|" +
                                selectedItemHeight + "|" + mask + "|" + colorStr + "|" + selectedColor + "|" + left +
-                               "|" + top + "|" + right + "|" + bottom + "|" + maxDisplayCount;
+                               "|" + top + "|" + right + "|" + bottom + "|" + maxDisplayCount + "|" +
+                               spaceAndBottom;
     return indicatorStr;
 }
 std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
@@ -741,6 +818,8 @@ std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaV
     Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_TOP);
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_RIGHT);
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_BOTTOM);
+    Local<JSValueRef> ignoreSizeArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_IGNORE_SIZE);
+    Local<JSValueRef> setIgnoreSizeArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_SET_IGNORE_SIZE);
     Color color;
     CalcDimension calc;
     std::string fontColor =
@@ -759,10 +838,22 @@ std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaV
     std::string left = GetStringByValueRef(vm, leftArg);
     std::string top = GetStringByValueRef(vm, topArg);
     std::string right = GetStringByValueRef(vm, rightArg);
-    std::string bottom = GetStringByValueRef(vm, bottomArg);
+    
+    std::string setIgnoreSize = "-";
+    if (!setIgnoreSizeArg->IsUndefined()) {
+        setIgnoreSize = setIgnoreSizeArg->ToBoolean(vm)->Value() ? "1" : "0";
+    }
+
+    auto hasIgnoreSize = (setIgnoreSizeArg->IsBoolean() && setIgnoreSizeArg->ToBoolean(vm)->Value()) ? true : false;
+    std::optional<bool> ignoreSize = ParseIgrnoreSize(vm, ignoreSizeArg, hasIgnoreSize);
+    std::string ignoreSizeStr = "-";
+    if (ignoreSize.has_value()) {
+        ignoreSizeStr = ignoreSize.value()  ? "1" : "0";
+    }
+    std::string bottom = ParseBottom(vm, bottomArg, hasIgnoreSize);
     std::string indicatorStr = fontColor + "|" + selectedFontColor + "|" + digitFontSize + "|" + digitFontWeight +
                    "|" + selectedDigitFontSize + "|" + selectedDigitFontWeight + "|" + left + "|" + top + "|" + right +
-                   "|" + bottom;
+                   "|" + bottom + "|" + ignoreSizeStr + "|" + setIgnoreSize;
     return indicatorStr;
 }
 ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo)

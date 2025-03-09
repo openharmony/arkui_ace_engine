@@ -269,7 +269,7 @@ sptr<IRemoteObject> AceContainer::GetParentToken()
 {
     return parentToken_;
 }
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     return {};
 }

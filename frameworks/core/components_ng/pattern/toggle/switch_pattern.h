@@ -90,7 +90,7 @@ public:
 
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
-        auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
+        auto switchTheme = pipelineContext->GetTheme<SwitchTheme>(GetThemeScopeId());
         CHECK_NULL_RETURN(switchTheme, FocusPattern());
 
         auto focusPaintcolor = switchTheme->GetActiveColor();
@@ -143,6 +143,7 @@ public:
     }
 
     void SetSwitchIsOn(bool value);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnAttachToFrameNode() override;

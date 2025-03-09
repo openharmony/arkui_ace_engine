@@ -422,22 +422,6 @@ export struct SubHeader {
     return false;
   }
 
-  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
-    if (typeof resource === 'string' || typeof resource === 'undefined') {
-      return resource;
-    } else {
-      let resourceString: string = '';
-      try {
-        resourceString = getContext()?.resourceManager?.getStringSync(resource);
-      } catch (err) {
-        let code: number = (err as BusinessError)?.code;
-        let message: string = (err as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
-      }
-      return resourceString;
-    }
-  }
-
   private getRightAreaAccessibilityLevel(): string {
     if (this.operationItem![0].accessibilityLevel && this.operationItem![0].accessibilityLevel !== '') {
       return this.operationItem![0].accessibilityLevel;
@@ -467,7 +451,7 @@ export struct SubHeader {
       return '';
     }
     if (this.operationItem[0].accessibilityText && this.operationItem[0].accessibilityText !== '') {
-      return this.toStringFormat(this.operationItem[0].accessibilityText);
+      return this.operationItem[0].accessibilityText as string;
     } else {
       if (this.operationType === OperationType.TEXT_ARROW && this.operationItem[0].value.toString().length <= 0) {
         // 播报：更多、more等, 使用的字段是：sys.string.ohos_toolbar_more
@@ -482,7 +466,7 @@ export struct SubHeader {
       return '';
     }
     if (this.operationItem[0].accessibilityDescription && this.operationItem[0].accessibilityDescription !== '') {
-      return this.toStringFormat(this.operationItem[0].accessibilityDescription)
+      return this.operationItem[0].accessibilityDescription as string;
     }
     return '';
   }
@@ -677,6 +661,9 @@ export struct SubHeader {
     }
     if (this.operationType === OperationType.LOADING) {
       this.LoadingProcessStyle();
+    }
+    if (this.operationType === undefined && (this.operationItem && this.operationItem.length > 0)) {
+      this.ButtonStyle(this.operationItem[0]);
     }
   }
 
@@ -894,7 +881,6 @@ export struct SubHeader {
         .fontSize(RIGHT_SINGLE_ICON_SIZE)
         .fontColor([this.subHeaderTheme.iconArrowColor])
         .draggable(false)
-        .focusable(true)
         .width(ARROW_ICON_WIDTH)
         .height(OPERATE_ITEM_LENGTH)
     }
@@ -994,30 +980,28 @@ export struct SubHeader {
   IconGroupStyle(operationItem: Array<OperationOption>): void {
     Row() {
       ForEach(operationItem, (item: OperationOption, index: number) => {
-        if (Util.isResourceType(item.value)) {
-          if (index <= INDEX_TWO) {
-            SingleIconStyle({
-              item: {
-                iconOptions: {
-                  icon: item.value as Resource,
-                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
-                  this.operationSymbolOptions[index] : null,
-                },
-                action: item.action,
-                defaultFocus: item.defaultFocus,
-                accessibilityLevel: item.accessibilityLevel,
-                accessibilityText: item.accessibilityText,
-                accessibilityDescription: item.accessibilityDescription,
+        if (index <= INDEX_TWO) {
+          SingleIconStyle({
+            item: {
+              iconOptions: {
+                icon: item.value as Resource,
+                symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
+                this.operationSymbolOptions[index] : null,
               },
-              isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER,
+              action: item.action,
+              defaultFocus: item.defaultFocus,
+              accessibilityLevel: item.accessibilityLevel,
+              accessibilityText: item.accessibilityText,
+              accessibilityDescription: item.accessibilityDescription,
+            },
+            isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER,
+          })
+            .margin({
+              start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+              bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level3')),
             })
-              .margin({
-                start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
-                bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level3')),
-              })
-          } else {
-            // 最大支持3个ICON,此场景不支持
-          }
+        } else {
+          // 最大支持3个ICON,此场景不支持
         }
       })
     }
@@ -1060,9 +1044,7 @@ struct SingleIconStyle {
 
   private getRightIconAccessibilityText(): string | undefined {
     if (this.item?.accessibilityText) {
-      let iconAccessibilityText = typeof this.item.accessibilityText === 'string' ? this.item.accessibilityText :
-      getContext()?.resourceManager?.getStringSync(this.item.accessibilityText)
-      return iconAccessibilityText;
+      return this.item.accessibilityText as string;
     }
     return '';
   }
@@ -1074,25 +1056,9 @@ struct SingleIconStyle {
     return 'auto';
   }
 
-  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
-    if (typeof resource === 'string' || typeof resource === 'undefined') {
-      return resource;
-    } else {
-      let resourceString: string = '';
-      try {
-        resourceString = getContext()?.resourceManager?.getStringSync(resource);
-      } catch (err) {
-        let code: number = (err as BusinessError)?.code;
-        let message: string = (err as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
-      }
-      return resourceString;
-    }
-  }
-
   private  getRightIconAccessibilityDescription(): string | undefined {
     if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
-      return this.toStringFormat(this.item?.accessibilityDescription);
+      return this.item?.accessibilityDescription as string;
     }
     return '';
   }

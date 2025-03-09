@@ -195,6 +195,11 @@ struct CJArea {
     CJPosition* globalPosition;
 };
 
+struct CJSizeOptions {
+    double width;
+    double height;
+};
+
 struct CJEventTarget {
     CJArea* area;
 };
@@ -309,6 +314,14 @@ struct CJBaseEvent {
     int64_t deviceId;
 };
 
+struct NativeFont {
+    double size;
+    int32_t sizeUnit;
+    const char* weight;
+    const char* family;
+    uint32_t style;
+};
+
 struct AtCPackage;
 
 struct AtCOHOSAceFrameworkCJInstanceLoadEntryParams {
@@ -354,10 +367,6 @@ struct AtCPackage {
     void (*atCOHOSAceFrameworkLazyForEachFuncsRemoveChildGroup)(int64_t self, const char* composedId) = nullptr;
     void (*atCOHOSAceFrameworkLazyForEachFuncsDataChangeListenerRegister)(int64_t self, int64_t idx) = nullptr;
     void (*atCOHOSAceFrameworkLazyForEachFuncsDataChangeListenerUnregister)(int64_t self, int64_t idx) = nullptr;
-    void (*atCOHOSAceFrameworkRemoteViewOnDidBuild)(int64_t self) = nullptr;
-    void (*atCOHOSAceFrameworkRemoteViewAboutToReuse)(int64_t self, const char* params) = nullptr;
-    void (*atCOHOSAceFrameworkRemoteViewAboutToRecycle)(int64_t self) = nullptr;
-    void (*atCOHOSAceFrameworkRemoteViewRecycleSelf)(int64_t self, const char* params) = nullptr;
 };
 
 struct AtCXComponentCallback {
@@ -366,8 +375,15 @@ struct AtCXComponentCallback {
     void (*atCXComponentControllerOnSurfaceDestroyed)(int64_t self, int64_t idx) = nullptr;
 };
 
+struct AtCPackageV2 {
+    void (*atCOHOSAceFrameworkRemoteViewOnDidBuild)(int64_t self) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewAboutToReuse)(int64_t self, const char* params) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewAboutToRecycle)(int64_t self) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewRecycleSelf)(int64_t self, const char* params) = nullptr;
+};
 
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs);
+CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncsV2(void (*callback)(AtCPackageV2* cjFuncs));
 
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCallback cjCtrFuncs);
 

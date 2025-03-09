@@ -23,23 +23,13 @@ class ArkThemeWhiteList {
         'AlphabetIndexer',
         'Badge',
         'Button',
-        'Checkbox',
-        'CheckboxGroup',
-        'Counter',
         'DataPanel',
-        'LoadingProgress',
-        'Menu',
-        'MenuItem',
         'PatternLock',
-        'Progress',
         'QRCode',
         'Radio',
         'Scroll',
-        'Select',
         'Swiper',
         'Text',
-        'TextClock',
-        'Toggle',
     ];
 
     /**

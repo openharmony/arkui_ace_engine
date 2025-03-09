@@ -888,9 +888,9 @@ HWTEST_F(TabsAttrTestNg, TabsModelPop001, TestSize.Level1)
     tabBarNode_->focusHub_ = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(tabBarNode_)));
     ASSERT_NE(tabBarNode_->focusHub_, nullptr);
     tabBarPattern_->OnModifyDone();
-    tabBarPattern_->swiperController_->removeTabBarEventCallback_();
-    tabBarPattern_->swiperController_->addTabBarEventCallback_();
-    EXPECT_NE(tabBarPattern_->swiperController_, nullptr);
+    swiperController_->GetRemoveTabBarEventCallback()();
+    swiperController_->GetAddTabBarEventCallback()();
+    EXPECT_NE(swiperController_, nullptr);
 }
 
 /**
@@ -1511,7 +1511,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelLabelStyle001, TestSize.Level1)
     /**
      * @tc.steps: step2. check label style after swipeTo.
      */
-    SwipeToWithoutAnimation(0);
+    ChangeIndex(0);
     EXPECT_EQ(textLayoutProperty1->GetFontWeight(), FontWeight::MEDIUM);
     EXPECT_EQ(textLayoutProperty1->GetTextColor(), tabTheme->GetSubTabTextOnColor());
     EXPECT_EQ(textLayoutProperty2->GetFontWeight(), FontWeight::NORMAL);
@@ -1560,8 +1560,175 @@ HWTEST_F(TabsAttrTestNg, TabContentModelIconStyle001, TestSize.Level1)
     /**
      * @tc.steps: step2. check icon style after swipeTo.
      */
-    SwipeToWithoutAnimation(0);
+    ChangeIndex(0);
     EXPECT_EQ(imagePaintProperty1->GetSvgFillColor().value(), tabTheme->GetBottomTabIconOn());
     EXPECT_EQ(imagePaintProperty2->GetSvgFillColor().value(), tabTheme->GetBottomTabIconOff());
+}
+
+/**
+ * @tc.name: CachedMaxCount001
+ * @tc.desc: test cachedMaxCount attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, CachedMaxCount001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. test invalid param.
+     */
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+    layoutProperty_->UpdateCachedMaxCount(-1);
+    ChangeIndex(1);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+    layoutProperty_->UpdateCachedMaxCount(TABCONTENT_NUMBER);
+    ChangeIndex(2);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+
+    /**
+     * @tc.steps: step2. test SwipeToSwipeToWithoutAnimation.
+     */
+    layoutProperty_->UpdateCachedMaxCount(1);
+    tabBarPattern_->SetAnimationDuration(0);
+    tabBarPattern_->UpdateAnimationDuration();
+    ChangeIndex(0);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 2);
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(2) == swiperPattern_->itemsNeedClean_.end());
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(3) == swiperPattern_->itemsNeedClean_.end());
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+
+    /**
+     * @tc.steps: step3. test SwipeTo.
+     */
+    tabBarPattern_->SetAnimationDuration(300);
+    tabBarPattern_->UpdateAnimationDuration();
+    ChangeIndex(1);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 1);
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(3) == swiperPattern_->itemsNeedClean_.end());
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+
+    /**
+     * @tc.steps: step4. test CustomAnimation.
+     */
+    swiperLayoutProperty_->UpdateIsCustomAnimation(true);
+    ChangeIndex(3);
+    swiperPattern_->OnCustomAnimationFinish(1, 3, false);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 2);
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(0) == swiperPattern_->itemsNeedClean_.end());
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(1) == swiperPattern_->itemsNeedClean_.end());
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+}
+
+/**
+ * @tc.name: CachedMaxCount002
+ * @tc.desc: test cachedMaxCount attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, CachedMaxCount002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    layoutProperty_->UpdateCachedMaxCount(1);
+    layoutProperty_->UpdateCacheMode(TabsCacheMode::CACHE_LATEST_SWITCHED);
+    EXPECT_EQ(swiperPattern_->itemsLatestSwitched_.size(), 0);
+
+    /**
+     * @tc.steps: step1. test SwipeToWithoutAnimation.
+     */
+    tabBarPattern_->SetAnimationDuration(0);
+    tabBarPattern_->UpdateAnimationDuration();
+    ChangeIndex(1);
+    EXPECT_EQ(swiperPattern_->itemsLatestSwitched_.size(), 1);
+    EXPECT_FALSE(std::find(swiperPattern_->itemsLatestSwitched_.begin(), swiperPattern_->itemsLatestSwitched_.begin(),
+                  1) == swiperPattern_->itemsLatestSwitched_.end());
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 3);
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(0) == swiperPattern_->itemsNeedClean_.end());
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(2) == swiperPattern_->itemsNeedClean_.end());
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(3) == swiperPattern_->itemsNeedClean_.end());
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+
+    /**
+     * @tc.steps: step2. test SwipeTo.
+     */
+    tabBarPattern_->SetAnimationDuration(300);
+    tabBarPattern_->UpdateAnimationDuration();
+    ChangeIndex(3);
+    EXPECT_EQ(swiperPattern_->itemsLatestSwitched_.size(), 2);
+    EXPECT_FALSE(std::find(swiperPattern_->itemsLatestSwitched_.begin(), swiperPattern_->itemsLatestSwitched_.begin(),
+                     1) == swiperPattern_->itemsLatestSwitched_.end());
+    EXPECT_FALSE(std::find(swiperPattern_->itemsLatestSwitched_.begin(), swiperPattern_->itemsLatestSwitched_.begin(),
+                     3) == swiperPattern_->itemsLatestSwitched_.end());
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 2);
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(0) == swiperPattern_->itemsNeedClean_.end());
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(2) == swiperPattern_->itemsNeedClean_.end());
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+
+    /**
+     * @tc.steps: step3. test MarkDirtyNode.
+     */
+    swiperNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(swiperPattern_->itemsLatestSwitched_.size(), 2);
+    EXPECT_FALSE(std::find(swiperPattern_->itemsLatestSwitched_.begin(), swiperPattern_->itemsLatestSwitched_.begin(),
+                     1) == swiperPattern_->itemsLatestSwitched_.end());
+    EXPECT_FALSE(std::find(swiperPattern_->itemsLatestSwitched_.begin(), swiperPattern_->itemsLatestSwitched_.begin(),
+                     3) == swiperPattern_->itemsLatestSwitched_.end());
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 2);
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(0) == swiperPattern_->itemsNeedClean_.end());
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(2) == swiperPattern_->itemsNeedClean_.end());
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
+}
+
+/**
+ * @tc.name: CachedMaxCount003
+ * @tc.desc: test cachedMaxCount attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, CachedMaxCount003, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. test invalid param.
+     */
+    EXPECT_EQ(swiperPattern_->itemsLatestSwitched_.size(), 0);
+    layoutProperty_->UpdateCachedMaxCount(-1);
+    ChangeIndex(1);
+    EXPECT_EQ(swiperPattern_->itemsLatestSwitched_.size(), 0);
+    layoutProperty_->UpdateCachedMaxCount(TABCONTENT_NUMBER);
+    ChangeIndex(2);
+    EXPECT_EQ(swiperPattern_->itemsLatestSwitched_.size(), 0);
+    layoutProperty_->UpdateCachedMaxCount(1);
+    ChangeIndex(3);
+    EXPECT_EQ(swiperPattern_->itemsLatestSwitched_.size(), 0);
+
+    /**
+     * @tc.steps: step2. test CustomAnimation.
+     */
+    layoutProperty_->UpdateCacheMode(TabsCacheMode::CACHE_LATEST_SWITCHED);
+    swiperLayoutProperty_->UpdateIsCustomAnimation(true);
+    ChangeIndex(1);
+    swiperPattern_->OnCustomAnimationFinish(3, 1, false);
+    EXPECT_EQ(swiperPattern_->itemsLatestSwitched_.size(), 1);
+    EXPECT_FALSE(std::find(swiperPattern_->itemsLatestSwitched_.begin(), swiperPattern_->itemsLatestSwitched_.begin(),
+                     1) == swiperPattern_->itemsLatestSwitched_.end());
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 3);
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(0) == swiperPattern_->itemsNeedClean_.end());
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(2) == swiperPattern_->itemsNeedClean_.end());
+    EXPECT_FALSE(swiperPattern_->itemsNeedClean_.find(3) == swiperPattern_->itemsNeedClean_.end());
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,7 @@ public:
     RefPtr<PaintProperty> Clone() const override
     {
         auto paintProperty = MakeRefPtr<ProgressPaintProperty>();
+        paintProperty->UpdatePaintPropertyHost(this);
         paintProperty->propProgressPaintDate_ = CloneProgressPaintDate();
         paintProperty->propColor_ = CloneColor();
         paintProperty->propBackgroundColor_ = CloneBackgroundColor();
@@ -97,6 +98,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressStatus, ProgressStatus, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableSmoothEffect, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSensitive, bool, PROPERTY_UPDATE_MEASURE);
+
+    int32_t GetThemeScopeId() const;
 };
 } // namespace OHOS::Ace::NG
 

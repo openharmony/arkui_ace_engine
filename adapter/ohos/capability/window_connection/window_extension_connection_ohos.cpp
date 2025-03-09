@@ -57,8 +57,7 @@ public:
                 ability->FireConnect();
             }
         };
-        PostTaskToUI(
-            std::move(task), "ArkUIWindowExtensionConnect", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        PostTaskToUI(std::move(task), "ArkUIWindowExtensionConnect");
     }
 
     void OnExtensionDisconnected() override
@@ -79,8 +78,7 @@ public:
                 ability->FireDisconnect();
             }
         };
-        PostTaskToUI(std::move(task), "ArkUIWindowExtensionDisconnect",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        PostTaskToUI(std::move(task), "ArkUIWindowExtensionDisconnect");
     }
 
     void OnKeyEvent(const std::shared_ptr<MMI::KeyEvent>& event) override {}
@@ -88,7 +86,7 @@ public:
     void OnBackPress() override {}
 
 private:
-    void PostTaskToUI(const std::function<void()>&& task, const std::string& name, PriorityType priorityType) const
+    void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const
     {
         CHECK_NULL_VOID(task);
         auto container = AceEngine::Get().GetContainer(instanceId_);

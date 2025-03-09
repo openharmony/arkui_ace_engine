@@ -712,18 +712,20 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         mode = paramObj->GetProperty("mode");
     }
     ParseStartEndDate(startDate, endDate);
+
+    PickerDate parseSelectedDate = PickerDate::Current();
     if (selectedDate->IsObject()) {
         JSRef<JSObject> selectedDateObj = JSRef<JSObject>::Cast(selectedDate);
         JSRef<JSVal> changeEventVal = selectedDateObj->GetProperty("changeEvent");
-        PickerDate parseSelectedDate;
         if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
             ParseSelectedDateTimeObject(info, selectedDateObj, true);
             parseSelectedDate = ParseDate(selectedDateObj->GetProperty("value"));
         } else {
             parseSelectedDate = ParseDate(selectedDate);
         }
-        DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
+    DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
+
     ParseDatePickerMode(mode);
     SetDefaultAttributes();
 }
@@ -1196,8 +1198,8 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()) ||
-        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()
         && !info[0]->IsEmpty())) {
         return;
     }
@@ -1781,8 +1783,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()) ||
-        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()
         && !info[0]->IsEmpty())) {
         return;
     }
@@ -2048,6 +2050,14 @@ PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal, PickerTime
         return pickerTime;
     }
     auto timeObj = JSRef<JSObject>::Cast(timeVal);
+    auto yearFuncJsVal = timeObj->GetProperty("getFullYear");
+    if (yearFuncJsVal->IsFunction()) {
+        auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
+        JSRef<JSVal> year = yearFunc->Call(timeObj);
+        if (year->IsNumber() && LessOrEqual(year->ToNumber<int32_t>(), 0)) {
+            return pickerTime;
+        }
+    }
     auto hourFuncJsVal = timeObj->GetProperty("getHours");
     auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
     auto secondFuncJsVal = timeObj->GetProperty("getSeconds");

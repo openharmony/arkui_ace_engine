@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
@@ -58,6 +59,10 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t MAX_SIZE_OF_LOG = 2000;
+}
+
 class InspectorFilter;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
@@ -167,7 +172,7 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpTextStyleInfo();
     void DumpTextStyleInfo2();
     void DumpTextStyleInfo3();
@@ -330,7 +335,8 @@ public:
 
     void InitSurfaceChangedCallback();
     void InitSurfacePositionChangedCallback();
-    virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfaceChanged(
+        int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type);
     virtual void HandleSurfacePositionChanged(int32_t posX, int32_t posY) {};
     bool HasSurfaceChangedCallback()
     {
@@ -457,9 +463,9 @@ public:
     // It is currently used by RichEditorPattern.
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
 
-    virtual std::list<ParagraphManager::ParagraphInfo> GetParagraphs() const
+    virtual std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const
     {
-        std::list<ParagraphManager::ParagraphInfo> res;
+        std::vector<ParagraphManager::ParagraphInfo> res;
         CHECK_NULL_RETURN(pManager_, res);
         return pManager_->GetParagraphs();
     }
@@ -706,10 +712,15 @@ public:
         paintInfo_ = area + paintOffset.ToString();
     }
 
-    void DumpRecord(const std::string& record)
+    void DumpRecord(const std::string& record, bool stateChange = false)
     {
-        frameRecord_ = record;
+        if (stateChange || frameRecord_.length() > MAX_SIZE_OF_LOG) {
+            frameRecord_.clear();
+        }
+        frameRecord_.append("[" + record + "]");
     }
+
+    void LogForFormRender(const std::string& logTag);
 
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
@@ -783,6 +794,7 @@ public:
     bool GetOriginCaretPosition(OffsetF& offset) const;
     void ResetOriginCaretPosition();
     bool RecordOriginCaretPosition(const OffsetF& offset);
+    TextDragInfo CreateTextDragInfo();
 
 protected:
     int32_t GetClickedSpanPosition()
@@ -881,6 +893,7 @@ protected:
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
+    virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -958,7 +971,6 @@ private:
     void HandleUrlTouchEvent(const TouchEventInfo& info);
     void URLOnHover(bool isHover);
     bool HandleUrlClick();
-    std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
     void SetAccessibilityAction();
@@ -1014,11 +1026,16 @@ private:
     bool GlobalOffsetInSelectedArea(const Offset& globalOffset);
     bool LocalOffsetInSelectedArea(const Offset& localOffset);
     void HandleOnCopyWithoutSpanString(const std::string& pasteData);
+    void CheckPressedSpanPosition(const Offset& textOffset);
     void EncodeTlvNoChild(const std::string& pasteData, std::vector<uint8_t>& buff);
     void EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
     void UpdateMarqueeStartPolicy();
+    void ProcessVisibleAreaCallback();
+    void PauseSymbolAnimation();
+    void ResumeSymbolAnimation();
+    bool IsLocationInFrameRegion(const Offset& localOffset) const;
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1030,6 +1047,7 @@ private:
     bool isSensitive_ = false;
     bool hasSpanStringLongPressEvent_ = false;
     int32_t clickedSpanPosition_ = -1;
+    Offset leftMousePressedOffset_;
     bool isEnableHapticFeedback_ = true;
 
     bool urlTouchEventInitialized_ = false;

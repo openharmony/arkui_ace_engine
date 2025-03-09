@@ -31,6 +31,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
 enum class ImageAnalyzerState;

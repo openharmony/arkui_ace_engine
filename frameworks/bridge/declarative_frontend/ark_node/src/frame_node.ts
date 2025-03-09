@@ -391,8 +391,9 @@ class FrameNode {
 
   getChildrenCount(isExpanded?: boolean): number {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
     __JSScopeUtil__.restoreInstanceId();
+    return childrenCount;
   }
 
   moveTo(targetParent: FrameNode, index?: number): void {
@@ -596,9 +597,9 @@ class FrameNode {
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
-      this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     }
     this._commonAttribute.setNodePtr(this.nodePtr_);
+    this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonAttribute;
   }
 

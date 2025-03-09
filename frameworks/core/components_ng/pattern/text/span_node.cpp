@@ -41,6 +41,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+
 std::string GetDeclaration(const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
     const std::optional<TextDecorationStyle>& textDecorationStyle)
 {
@@ -221,6 +224,7 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
 {
     BaseSpan::UpdateTextBackgroundFromParent(style);
     spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->MarkDirty();
 }
 
 void SpanNode::DumpInfo()
@@ -375,6 +379,29 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     return -1;
 }
 
+bool SpanItem::UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle)
+{
+    auto symbolType = symbolSpanStyle.GetSymbolType();
+    std::vector<std::string> fontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        auto symbolFontFamily = symbolSpanStyle.GetFontFamilies();
+        for (auto& name : symbolFontFamily) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                fontFamilies.push_back(name);
+                break;
+            }
+        }
+        if (fontFamilies.empty()) {
+            return false;
+        }
+        symbolSpanStyle.SetFontFamilies(fontFamilies);
+    } else {
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        symbolSpanStyle.SetFontFamilies(fontFamilies);
+    }
+    return true;
+}
+
 void SpanItem::UpdateSymbolSpanParagraph(
     const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder, bool isDragging)
 {
@@ -398,7 +425,9 @@ void SpanItem::UpdateSymbolSpanParagraph(
         if (!symbolEffectSwitch_ || isDragging) {
             symbolSpanStyle.SetEffectStrategy(0);
         }
-        symbolSpanStyle.SetFontFamilies({"HM Symbol"});
+        if (!UpdateSymbolSpanFontFamily(symbolSpanStyle)) {
+            return;
+        }
         builder->PushStyle(symbolSpanStyle);
     }
     textStyle_ = symbolSpanStyle;
@@ -683,6 +712,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     COPY_TEXT_STYLE(textLineStyle, LineBreakStrategy, UpdateLineBreakStrategy);
     COPY_TEXT_STYLE(textLineStyle, EllipsisMode, UpdateEllipsisMode);
     COPY_TEXT_STYLE(textLineStyle, HalfLeading, UpdateHalfLeading);
+    COPY_TEXT_STYLE(textLineStyle, ParagraphSpacing, UpdateParagraphSpacing);
     if (textStyle_.has_value()) {
         sameSpan->textStyle_ = textStyle_;
     }
@@ -739,6 +769,8 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
         TLVUtil::WriteUint8(buff, TLV_SPAN_BACKGROUND_GROUPID);
         TLVUtil::WriteInt32(buff, backgroundStyle->groupId);
     }
+    WRITE_TLV_INHERIT(textLineStyle, ParagraphSpacing, TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING, Dimension,
+        ParagraphSpacing);
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
     return true;
 };
@@ -849,11 +881,15 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
                 sameSpan->backgroundStyle->groupId = TLVUtil::ReadInt32(buff, cursor);
                 break;
             }
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateParagraphSpacing,
+                TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING, Dimension);
             default:
                 break;
         }
     }
-
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        sameSpan->textLineStyle->ResetParagraphSpacing();
+    }
     return sameSpan;
 }
 

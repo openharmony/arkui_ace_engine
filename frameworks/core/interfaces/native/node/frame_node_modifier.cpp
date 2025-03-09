@@ -20,7 +20,9 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
@@ -429,8 +431,11 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
         return nullptr;
     }
 
-    if (!AceType::InstanceOf<NG::FrameNode>(node)) {
+    if (!AceType::InstanceOf<NG::FrameNode>(node) || AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
         auto parent = node->GetParent();
+        if (parent && parent->GetTag() == V2::RECYCLE_VIEW_ETS_TAG) {
+            parent = parent->GetParent();
+        }
         if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
             node = parent;
         } else {
@@ -451,8 +456,7 @@ ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGF("GetAttachedNodeHandleById doesn't run on UI thread");
-        abort();
+        LOGF_ABORT("GetAttachedNodeHandleById doesn't run on UI thread");
     }
     auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(key);
     CHECK_NULL_RETURN(node, nullptr);
@@ -844,8 +848,7 @@ ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
     auto context = frameNode->GetAttachedContext();
     CHECK_NULL_RETURN(context, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
     if (!context->CheckThreadSafe()) {
-        LOGF("GetWindowInfoByNode doesn't run on UI thread");
-        abort();
+        LOGF_ABORT("GetWindowInfoByNode doesn't run on UI thread");
     }
     auto window = context->GetWindow();
     CHECK_NULL_RETURN(window, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
@@ -866,6 +869,7 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     static const std::vector<const char*> nodeTypeArray = {
         OHOS::Ace::V2::STACK_ETS_TAG,
         OHOS::Ace::V2::XCOMPONENT_ETS_TAG,
+        OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG,
     };
     auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), moveNode->GetTag());
     if (pos == nodeTypeArray.end()) {
@@ -873,21 +877,21 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     }
     auto pipeline = moveNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGF("MoveNodeTo doesn't run on UI thread");
-        abort();
+        LOGF_ABORT("MoveNodeTo doesn't run on UI thread");
     }
     auto oldParent = moveNode->GetParent();
     moveNode->setIsMoving(true);
+    auto moveNodeRef = AceType::Claim(moveNode);
     if (oldParent) {
-        oldParent->RemoveChild(AceType::Claim(moveNode));
+        oldParent->RemoveChild(moveNodeRef);
         oldParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     int32_t childCount = toNode->TotalChildCount();
     if (index >= childCount || index < 0) {
-        toNode->AddChild(AceType::Claim(moveNode));
+        toNode->AddChild(moveNodeRef);
     } else {
         auto indexChild = toNode->GetChildAtIndex(index);
-        toNode->AddChildBefore(AceType::Claim(moveNode), indexChild);
+        toNode->AddChildBefore(moveNodeRef, indexChild);
     }
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);

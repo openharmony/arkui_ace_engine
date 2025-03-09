@@ -25,19 +25,26 @@
 extern "C" struct NavigationItemFFI {
     const char* value;
     const char* icon;
-    int64_t builder;
+    bool isEnable;
+    int64_t action;
+    int32_t status;
+    const char* activeIcon;
 };
 
 struct NavigationItem {
     std::string value;
     std::string icon;
-    int64_t builderFFI;
-    std::function<void()> builder;
+    bool isEnable;
+    int64_t actionFFI;
+    std::function<void()> action;
+    int32_t status;
+    std::string activeIcon;
     NavigationItem() = default;
     explicit NavigationItem(const NavigationItemFFI& source);
     NavigationItemFFI ToFFI()
     {
-        return NavigationItemFFI { .value = value.c_str(), .icon = icon.c_str(), .builder = builderFFI };
+        return NavigationItemFFI { .value = value.c_str(), .icon = icon.c_str(), .isEnable = isEnable,
+            .action = actionFFI, .status = status, .activeIcon = activeIcon.c_str() };
     }
 };
 

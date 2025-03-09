@@ -369,6 +369,7 @@ declare class ArkImageComponent extends ArkComponent implements ImageAttribute {
     border(value: BorderOptions): this;
     opacity(value: number | Resource): this;
     transition(value: TransitionOptions | TransitionEffect): this;
+    resizable(value: ResizableOptions): this;
 }
 declare class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>> {
     constructor(value: Array<ImageFrameInfo>);
@@ -958,6 +959,7 @@ declare class ArkSelectComponent extends ArkComponent implements SelectAttribute
     space(value: Length): this;
     arrowPosition(value: ArrowPosition): this;
     menuAlign(alignType: MenuAlignType, offset?: Offset): this;
+    avoidance(mode: AvoidanceMode): this;
 }
 declare class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1896,6 +1898,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect): TabsAttribute;
     pageFlipMode(value: PageFlipMode): TabsAttribute;
+    cachedMaxCount(count: number, mode: CacheMode): TabsAttribute;
 }
 declare class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -2037,6 +2040,8 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     fontWeight(value: number | FontWeight | string): SymbolGlyphAttribute;
     renderingStrategy(value: SymbolRenderingStrategy): SymbolGlyphAttribute;
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
+    minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
+    maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

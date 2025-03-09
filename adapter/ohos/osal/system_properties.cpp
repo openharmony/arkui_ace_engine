@@ -15,7 +15,6 @@
 
 #include "base/utils/system_properties.h"
 
-#include <shared_mutex>
 #include <regex>
 
 #include "display_info.h"
@@ -27,6 +26,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/window_utils.h"
 #include "core/common/ace_application_info.h"
+
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
 #endif
@@ -183,7 +183,7 @@ bool IsFocusCanBeActive()
 
 bool IsCacheNavigationNodeEnable()
 {
-    return system::GetParameter("persist.ace.navigation.groupnode.cached", "false") == "true";
+    return system::GetParameter("persist.ace.navigation.groupnode.cached", "true") == "true";
 }
 
 bool IsHookModeEnabled()
@@ -246,6 +246,16 @@ bool IsAccessibilityEnabled()
 bool IsDebugEnabled()
 {
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
+}
+
+int64_t GetDebugFlags()
+{
+    return system::GetIntParameter<int64_t>("persist.ace.debug.flags", 0);
+}
+
+bool IsContainerDeleteFlag()
+{
+    return (system::GetParameter("persist.container.delete", "true") == "true");
 }
 
 bool IsLayoutDetectEnabled()
@@ -421,6 +431,12 @@ int32_t ReadDragDropFrameworkStatus()
     return system::GetIntParameter("debug.ace.drag.drop.framework.status", 0);
 }
 
+bool IsAsyncInitializeEnabled()
+{
+    return system::GetBoolParameter("persist.ace.async.initialize", true);
+}
+
+std::atomic<bool> SystemProperties::asyncInitializeEnabled_(IsAsyncInitializeEnabled()); 
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -458,7 +474,6 @@ std::string SystemProperties::releaseType_ = INVALID_PARAM;
 std::string SystemProperties::paramDeviceType_ = INVALID_PARAM;
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
 int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
-ACE_WEAK_SYM ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
@@ -471,6 +486,8 @@ bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+ACE_WEAK_SYM DebugFlags SystemProperties::debugFlags_ = GetDebugFlags();
+ACE_WEAK_SYM bool SystemProperties::containerDeleteFlag_ = IsContainerDeleteFlag();
 ACE_WEAK_SYM bool SystemProperties::layoutDetectEnabled_ = IsLayoutDetectEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
@@ -611,7 +628,6 @@ void SystemProperties::InitDeviceInfo(
 {
     // SetDeviceOrientation should be earlier than deviceWidth/deviceHeight init.
     SetDeviceOrientation(orientation);
-
     isRound_ = isRound;
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
@@ -625,6 +641,7 @@ void SystemProperties::InitDeviceInfo(
     paramDeviceType_ = ::GetDeviceType();
     needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
     debugEnabled_ = IsDebugEnabled();
+    debugFlags_ = GetDebugFlags();
     layoutDetectEnabled_ = IsLayoutDetectEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);
@@ -650,6 +667,7 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
+    asyncInitializeEnabled_.store(IsAsyncInitializeEnabled());
     focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
@@ -659,7 +677,6 @@ void SystemProperties::InitDeviceInfo(
     } else {
         screenShape_ = ScreenShape::NOT_ROUND;
     }
-
     InitDeviceTypeBySystemProperty();
 }
 
@@ -685,6 +702,11 @@ ACE_WEAK_SYM float SystemProperties::GetFontScale()
 {
     // Default value of font size scale is 1.0.
     return fontScale_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return containerDeleteFlag_;
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
@@ -906,6 +928,12 @@ void SystemProperties::OnFocusActiveChanged(const char* key, const char* value, 
     }
     if (focusCanBeActive != focusCanBeActive_) {
         SetFocusCanBeActive(focusCanBeActive);
+        if (!focusCanBeActive) {
+            auto container = reinterpret_cast<Platform::AceContainer*>(context);
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            container->SetIsFocusActive(focusCanBeActive);
+        }
         LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
     }
     return;
@@ -1023,6 +1051,11 @@ double SystemProperties::GetSrollableFriction()
 double SystemProperties::GetScrollableDistance()
 {
     return scrollableDistance_;
+}
+
+bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
+{
+    return system::GetBoolParameter("web.debug.maximize_resize_optimize", true);
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()

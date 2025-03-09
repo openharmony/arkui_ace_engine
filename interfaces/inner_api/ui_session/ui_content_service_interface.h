@@ -48,6 +48,7 @@ public:
         SEND_TRANSLATE_RESULT_STR,
         END_WEB_TRANSLATE,
         GET_CURRENT_SHOWING_IMAGE,
+        GET_CURRENT_PAGE_NAME,
     };
 
     /**
@@ -174,6 +175,12 @@ public:
     virtual int32_t GetWebViewCurrentLanguage(const EventCallback& eventCallback) = 0;
 
     /**
+     * @description:get web component current page name
+     * @return: result number
+     */
+    virtual int32_t GetCurrentPageName(const std::function<void(std::string)>& finishCallback) = 0;
+
+    /**
      * @description:get all image with use imageComponents
      * @return: result number
      */
@@ -204,6 +211,7 @@ public:
         SEND_CURRENT_LANGUAGE,
         SEND_TEXT,
         SEND_IMAGES,
+        SEND_CURRENT_PAGE_NAME,
     };
 
     /**
@@ -255,6 +263,11 @@ public:
      * @description: define ui collect all pixelMap for sa service
      */
     virtual void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) = 0;
+
+    /**
+     * @description: define ui send page name for sa service
+     */
+    virtual void SendCurrentPageName(const std::string& data) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

@@ -125,6 +125,11 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
+private:
+    RefPtr<NavigationBarTheme> GetNavigationBarTheme();
+
 private:
     RefPtr<ClickEvent> clickListener_;
     ImageSourceInfo info_;

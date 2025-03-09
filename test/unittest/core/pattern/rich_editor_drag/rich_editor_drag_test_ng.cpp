@@ -44,6 +44,7 @@ const std::string MODULE_NAME = "moduleName";
 void RichEditorDragTestNG::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
 }
@@ -75,7 +76,7 @@ void RichEditorDragTestNG::CreateRichEditor(Callback&& callback, uint32_t childS
         callback(model);
     }
     CreateDragNodeWithImageSpan(childSpanNum);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void RichEditorDragTestNG::CreateDragNodeWithImageSpan(uint32_t childSpanNum)

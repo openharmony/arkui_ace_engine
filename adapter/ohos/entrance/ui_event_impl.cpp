@@ -16,7 +16,6 @@
 #include "adapter/ohos/entrance/ui_event_impl.h"
 
 #include <dlfcn.h>
-#include <string>
 
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
@@ -45,20 +44,38 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetNodeProperty(
     Recorder::NodeDataCache::Get().GetNodeData(pageUrl, nodeProperties);
 }
 
+std::string GetWebLanguageByNodeId(int32_t nodeId)
+{
+    auto& weakNodeCache = Recorder::EventRecorder::Get().GetWeakNodeMap();
+    auto iter = weakNodeCache.find(nodeId);
+    if (iter == weakNodeCache.end()) {
+        return "";
+    }
+    auto node = iter->second.Upgrade();
+    CHECK_NULL_RETURN(node, "");
+    auto pattern = node->GetPattern();
+    CHECK_NULL_RETURN(pattern, "");
+    return pattern->GetCurrentLanguage();
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree)
 {
     TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTree.");
-    auto containerId = Recorder::EventRecorder::Get().GetContainerId();
+    auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
     auto container = Container::GetContainer(containerId);
     if (!container) {
         return;
     }
-    if (params.isWindowIdOnly) {
+    if (params.isWindowIdOnly || params.infoType == InspectorInfoType::WINDOW_ID) {
         tree = std::to_string(container->GetWindowId());
         return;
     }
+    if (params.infoType == InspectorInfoType::WEB_LANG) {
+        tree = GetWebLanguageByNodeId(params.webId);
+        return;
+    }
     if (container->IsUseNewPipeline()) {
-        tree = NG::Inspector::GetSimplifiedInspector(containerId, params, true);
+        tree = NG::Inspector::GetSimplifiedInspector(containerId, params);
     }
 }
 
@@ -66,15 +83,14 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTreeAsync(
     const TreeParams& params, OnInspectorTreeResult&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTreeAsync.");
-    auto containerId = Recorder::EventRecorder::Get().GetContainerId();
+    auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
     auto container = Container::GetContainer(containerId);
     if (!container) {
         return;
     }
     if (container->IsUseNewPipeline()) {
-        Recorder::InspectorTreeCollector::Get().GetTree(
-            [containerId, params]() { NG::Inspector::GetSimplifiedInspector(containerId, params, false); },
-            std::move(callback));
+        auto collector = std::make_shared<Recorder::InspectorTreeCollector>(std::move(callback));
+        NG::Inspector::GetSimplifiedInspectorAsync(containerId, params, collector);
     }
 }
 

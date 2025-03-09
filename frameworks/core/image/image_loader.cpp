@@ -30,6 +30,7 @@
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -214,7 +215,7 @@ bool NetworkImageLoader::DownloadImage(
     DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId)
 {
     // If the API version is greater or equal than 14, use the preload module to download the URL.
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
                           std::move(downloadCallback), src, Container::CurrentId(), nodeId)
                     : DownloadManager::GetInstance()->DownloadAsyncWithPreload(
@@ -529,11 +530,12 @@ bool ResourceImageLoader::GetResourceName(const std::string& uri, std::string& r
 std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
+    int32_t instanceId = Container::CurrentIdSafely();
     auto uri = imageSourceInfo.GetSrc();
     auto bundleName = imageSourceInfo.GetBundleName();
     auto moudleName = imageSourceInfo.GetModuleName();
 
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName, instanceId);
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
@@ -543,7 +545,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
         if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
             resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
         } else {
-            resConfig.SetColorMode(SystemProperties::GetColorMode());
+            resConfig.SetColorMode(Container::CurrentColorMode());
         }
         ConfigurationChange configChange { .colorModeUpdate = true };
         resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
@@ -619,6 +621,7 @@ std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageS
 
     // check image orientation
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;
@@ -807,6 +810,7 @@ std::string AstcImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
     CHECK_NULL_RETURN(fd >= 0, "");
 
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;

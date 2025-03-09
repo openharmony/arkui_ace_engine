@@ -178,9 +178,13 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle001, TestSize.Level1)
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    layoutProperty_->UpdateErrorText(u"Error!");
+    layoutProperty_->UpdateShowErrorText(true);
+    layoutProperty_->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
     layoutProperty_->UpdateTextIndent(Dimension(10));
     textInputLayoutAlgorithm->UpdateTextStyleMore(frameNode_, layoutProperty_, textStyle, true);
     textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
+    textInputLayoutAlgorithm->ErrorLayout(&layoutWrapper);
     EXPECT_EQ(textStyle.GetTextIndent(), Dimension(10));
 }
 
@@ -205,6 +209,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle002, TestSize.Level1)
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
     textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, false);
+    textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
 }
 
 /**
@@ -224,6 +229,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdatePlaceholderTextStyle, TestSize.Level1)
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    layoutProperty_->UpdatePlaceholderTextAlign(TextAlign::START);
     textInputLayoutAlgorithm->UpdatePlaceholderTextStyle(
         frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
     EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::ELLIPSIS);

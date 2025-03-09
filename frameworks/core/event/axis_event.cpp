@@ -245,6 +245,8 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.time = timeStamp_;
     axisEvent.localX = static_cast<float>(localLocation_.GetX());
     axisEvent.localY = static_cast<float>(localLocation_.GetY());
+    axisEvent.sourceType = deviceType_;
+    axisEvent.sourceTool = sourceTool_;
     const auto& targetLocalOffset = GetTarget().area.GetOffset();
     const auto& targetOrigin = GetTarget().origin;
     // width height x y globalx globaly

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "gesture_recognizer.h"
 
 #include "core/components_ng/base/observer_handler.h"
 
@@ -572,6 +571,7 @@ void NGGestureRecognizer::ResetStateVoluntarily()
     }
     group->ResetStateVoluntarily();
     auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(group);
+    CHECK_NULL_VOID(recognizerGroup);
     recognizerGroup->CheckAndSetRecognizerCleanFlag(Claim(this));
 }
 
@@ -585,19 +585,14 @@ bool NGGestureRecognizer::IsNeedResetRecognizerState()
     return isNeedResetRecognizerState_;
 }
 
-void NGGestureRecognizer::UpdateCallbackState(const std::unique_ptr<GestureEventFunc>& callback)
+void NGGestureRecognizer::CheckPendingRecognizerIsInAttachedNode(const TouchEvent& event)
 {
-    if (callback == onActionStart_) {
-        callbackState_ = CallbackState::START;
-    }
-    if (callback == onActionUpdate_) {
-        callbackState_ = CallbackState::UPDATE;
-    }
-    if (callback == onActionEnd_) {
-        callbackState_ = CallbackState::END;
-    }
-    if (callback == onActionCancel_) {
-        callbackState_ = CallbackState::CANCEL;
+    bool isInAttachedNode = IsInAttachedNode(event, !AceType::InstanceOf<ClickRecognizer>(this));
+    if (!isInAttachedNode) {
+        if ((refereeState_ == RefereeState::PENDING || refereeState_ == RefereeState::PENDING_BLOCKED) &&
+            AceType::InstanceOf<ClickRecognizer>(this)) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@
 
 #include "core/components/theme/app_theme.h"
 
+#include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 namespace OHOS::Ace {
 namespace {
@@ -39,7 +40,7 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
         theme->focusColor_ = color;
     } else {
         if (SystemProperties::GetResourceDecoupling()) {
-            auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+            auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
             theme->focusColor_ = resAdapter->GetColor(FOCUS_COLOR);
         }
     }

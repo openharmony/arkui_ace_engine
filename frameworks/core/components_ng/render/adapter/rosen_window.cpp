@@ -21,6 +21,7 @@
 #include "base/log/jank_frame_report.h"
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
@@ -71,8 +72,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             onVsync();
             return;
         }
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     if (window->GetSurfaceNode()) {
@@ -88,20 +88,16 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
                 task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
         },
         id);
+}
+
+void RosenWindow::Init()
+{
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
         self->RequestFrame();
     });
-}
-
-void RosenWindow::Init()
-{
-    CHECK_NULL_VOID(rsWindow_);
-    auto surfaceNode = rsWindow_->GetSurfaceNode();
-    if (rsUIDirector_ && surfaceNode) {
-        rsUIDirector_->SetRSSurfaceNode(surfaceNode);
-    }
 }
 
 void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)

@@ -27,6 +27,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT SymbolSpanModel {
@@ -40,6 +41,8 @@ public:
     virtual void SetFontColor(std::vector<Color>& symbolColor) = 0;
     virtual void SetSymbolRenderingStrategy(const uint32_t renderingStrategy) = 0;
     virtual void SetSymbolEffect(const uint32_t effectStrategy) = 0;
+    virtual void SetFontFamilies(std::vector<std::string>& familyNames) = 0;
+    virtual void SetSymbolType(SymbolType value) = 0;
 
 private:
     static std::unique_ptr<SymbolSpanModel> instance_;

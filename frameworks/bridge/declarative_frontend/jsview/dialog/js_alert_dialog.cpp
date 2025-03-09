@@ -399,6 +399,7 @@ void ParseAlertLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
         return;
     }
 
+    properties.levelOrder = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
     auto levelOrderValue = obj->GetProperty("levelOrder");
     if (!levelOrderValue->IsObject()) {
         return;
@@ -502,6 +503,8 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismissFunc = nullptr;
         ParseDialogCallback(obj, onWillDismissFunc);
         AlertDialogModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
+
+        JSViewAbstract::ParseAppearDialogCallback(args, properties);
 
         // Parse showInSubWindowValue.
         auto showInSubWindowValue = obj->GetProperty("showInSubWindow");

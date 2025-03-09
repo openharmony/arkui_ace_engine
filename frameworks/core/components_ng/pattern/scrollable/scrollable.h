@@ -187,7 +187,7 @@ public:
         springVelocityScale_ = scale;
     }
 
-    void HandleTouchDown();
+    void HandleTouchDown(bool fromcrown = false);
     void HandleTouchUp();
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
@@ -492,11 +492,7 @@ public:
         return endPos_;
     }
 
-    void SetMaxFlingVelocity(double max)
-    {
-        double density = PipelineBase::GetCurrentDensity();
-        maxFlingVelocity_ = max * density;
-    }
+    void SetMaxFlingVelocity(double max);
 
     double GetMaxFlingVelocity() const
     {
@@ -543,11 +539,6 @@ public:
     void SetCrownEventDragging(bool draging)
     {
         isCrownEventDragging_ = draging;
-    }
-
-    void SetReachBoundary(bool flag)
-    {
-        reachBoundary_ = flag;
     }
 #endif
 
@@ -714,6 +705,7 @@ private:
     bool nestedScrolling_ = false;
     float axisSnapDistance_ = 0.f;
     SnapDirection snapDirection_ = SnapDirection::NONE;
+    bool isSlow_ = false;
 
     RefPtr<AxisAnimator> axisAnimator_;
 #ifdef SUPPORT_DIGITAL_CROWN

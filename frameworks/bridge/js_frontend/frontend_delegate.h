@@ -157,10 +157,8 @@ public:
     virtual void TriggerPageUpdate(int32_t pageId, bool directExecute = false) = 0;
 
     // posting js task from jsengine
-    virtual void PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priority) = 0;
-    virtual void PostUITask(
-        std::function<void()>&& task, const std::string& name, PriorityType priority = PriorityType::LOW)
-    {}
+    virtual void PostJsTask(std::function<void()>&& task, const std::string& name) = 0;
+    virtual void PostUITask(std::function<void()>&& task, const std::string& name) {}
 
     // ----------------
     // system.app

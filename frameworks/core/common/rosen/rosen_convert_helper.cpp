@@ -15,12 +15,14 @@
 
 #include "core/common/rosen/rosen_convert_helper.h"
 
+#include "core/common/container.h"
+
 namespace OHOS::Ace {
 MATERIAL_BLUR_STYLE GetRosenBlurStyleValue(const BlurStyleOption& option)
 {
     ThemeColorMode colorMode = option.colorMode;
     if (option.colorMode == ThemeColorMode::SYSTEM) {
-        colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+        colorMode = Container::CurrentColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
     }
     const static std::map<std::pair<BlurStyle, ThemeColorMode>, MATERIAL_BLUR_STYLE> mp = {
         { { BlurStyle::THIN, ThemeColorMode::LIGHT }, MATERIAL_BLUR_STYLE::STYLE_CARD_THIN_LIGHT },

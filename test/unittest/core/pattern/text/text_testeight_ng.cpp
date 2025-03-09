@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
+#include "foundation/arkui/ace_engine/test/mock/core/rosen/testing_canvas.h"
 #include "gmock/gmock.h"
-
 #include "text_base.h"
 
-#include "core/components_ng/pattern/text/span_model_ng.h"
-#include "foundation/arkui/ace_engine/test/mock/core/rosen/testing_canvas.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 
-#define private protected
+#include "core/components_ng/pattern/text/span_model_ng.h"
+
+#define private public
 #define protected public
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #undef protected
@@ -625,6 +626,228 @@ HWTEST_F(TextTestEightNg, HandleUrlMouseEvent002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DoTextSelectionTouchCancel001
+ * @tc.desc: test DoTextSelectionTouchCancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, DoTextSelectionTouchCancel001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
+    pattern->magnifierController_->magnifierNodeExist_ = false;
+    pattern->DoTextSelectionTouchCancel();
+    EXPECT_EQ(pattern->magnifierController_->magnifierNodeExist_, false);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged001
+ * @tc.desc: test OnWindowSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnWindowSizeChanged001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    pattern->selectOverlay_->OnBind(manager);
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(frameNode);
+    manager->selectOverlayNode_ = overlayNode;
+    manager->shareOverlayInfo_ = std::move(shareOverlayInfo);
+    ASSERT_NE(manager->shareOverlayInfo_, nullptr);
+    manager->shareOverlayInfo_->menuInfo.menuIsShow = true;
+
+    int32_t width = 1;
+    int32_t height = 2;
+    pattern->OnWindowSizeChanged(width, height, WindowSizeChangeReason::ROTATION);
+    pattern->OnWindowSizeChanged(width, height, WindowSizeChangeReason::MAXIMIZE);
+}
+
+/**
+ * @tc.name: GetCaretColor001
+ * @tc.desc: test GetCaretColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, GetCaretColor001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+
+    auto ret = pattern->GetCaretColor();
+    EXPECT_EQ(ret, "#FF000000");
+}
+
+/**
+ * @tc.name: GetSelectedBackgroundColor001
+ * @tc.desc: test GetSelectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, GetSelectedBackgroundColor001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+
+    auto ret = pattern->GetSelectedBackgroundColor();
+    EXPECT_EQ(ret, "#FF000000");
+}
+
+/**
+ * @tc.name: MarkDirtyNodeRender001
+ * @tc.desc: test MarkDirtyNodeRender.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, MarkDirtyNodeRender001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->MarkDirtyNodeRender();
+}
+
+/**
+ * @tc.name: OnSelectionMenuOptionsUpdate001
+ * @tc.desc: test OnSelectionMenuOptionsUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnSelectionMenuOptionsUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    GestureEvent info;
+    info.localLocation_ = Offset(1, 1);
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    /**
+     * @tc.steps: step2. construct menuOptionItems
+     */
+    pattern->copyOption_ = CopyOptions::InApp;
+    pattern->textForDisplay_ = u"test";
+    pattern->textSelector_.Update(0, 20);
+    OnCreateMenuCallback onCreateMenuCallback;
+    OnMenuItemClickCallback onMenuItemClick;
+    pattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+
+    /**
+     * @tc.steps: step2. call ShowSelectOverlay function
+     * @tc.expected: the property of selectInfo is assigned.
+     */
+    pattern->ShowSelectOverlay();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+}
+
+/**
+ * @tc.name: OnHandleSelectionMenuCallback001
+ * @tc.desc: test OnHandleSelectionMenuCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnHandleSelectionMenuCallback001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::NONE, nullptr, nullptr, nullptr, TextResponseType::NONE);
+    pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_SHOW, menuParams);
+}
+
+/**
+ * @tc.name: OnHandleSelectionMenuCallback002
+ * @tc.desc: test OnHandleSelectionMenuCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnHandleSelectionMenuCallback002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::NONE, nullptr, nullptr, nullptr, TextResponseType::NONE);
+    pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_APPEAR, menuParams);
+}
+
+/**
+ * @tc.name: OnHandleSelectionMenuCallback003
+ * @tc.desc: test OnHandleSelectionMenuCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnHandleSelectionMenuCallback003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::NONE, nullptr, nullptr, nullptr, TextResponseType::NONE);
+    pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_HIDE, menuParams);
+}
+
+/**
+ * @tc.name: OnHandleSelectionMenuCallback004
+ * @tc.desc: test OnHandleSelectionMenuCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnHandleSelectionMenuCallback004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::NONE, nullptr, [](int32_t a, int32_t b) -> void {}, nullptr, TextResponseType::NONE);
+    pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_APPEAR, menuParams);
+}
+
+/**
+ * @tc.name: ResetCustomFontColor001
+ * @tc.desc: test ResetCustomFontColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, ResetCustomFontColor001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->ResetCustomFontColor();
+}
+
+/**
  * @tc.name: SetTextStyleDumpInfo001
  * @tc.desc: test SetTextStyleDumpInfo.
  * @tc.type: FUNC
@@ -718,7 +941,7 @@ HWTEST_F(TextTestEightNg, GetSuitableSizeLD001, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     double stepSize = 0.0;
     auto result = rowLayoutAlgorithm->GetSuitableSizeLD(
-        textStyle, content, contentConstraint, layoutWrapper.GetRawPtr(), stepSize);
+        textStyle, content, contentConstraint, Referenced::RawPtr(layoutWrapper), stepSize);
     EXPECT_FALSE(result.first);
 }
 
@@ -742,7 +965,7 @@ HWTEST_F(TextTestEightNg, GetSuitableSizeLD002, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     double stepSize = 1.0;
     auto result = rowLayoutAlgorithm->GetSuitableSizeLD(
-        textStyle, content, contentConstraint, layoutWrapper.GetRawPtr(), stepSize);
+        textStyle, content, contentConstraint, Referenced::RawPtr(layoutWrapper), stepSize);
     EXPECT_FALSE(result.first);
 }
 
@@ -806,8 +1029,8 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan001, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {10, 20, "example content1", TextDataDetectType::EMAIL};
-    AISpan span2 = {101, 20, "example content2", TextDataDetectType::EMAIL};
+    AISpan span1 = { 10, 20, "example content1", TextDataDetectType::EMAIL };
+    AISpan span2 = { 101, 20, "example content2", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -832,8 +1055,8 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan002, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {10, 50, "example content1", TextDataDetectType::EMAIL};
-    AISpan span2 = {10, 20, "example content2", TextDataDetectType::EMAIL};
+    AISpan span1 = { 10, 50, "example content1", TextDataDetectType::EMAIL };
+    AISpan span2 = { 10, 20, "example content2", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -856,7 +1079,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan003, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {10, 50, "example content1", TextDataDetectType::EMAIL};
+    AISpan span1 = { 10, 50, "example content1", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
     EXPECT_EQ(subComponentInfos.back().spanText, "example content1");
@@ -878,7 +1101,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan004, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {40, 60, "example content1", TextDataDetectType::EMAIL};
+    AISpan span1 = { 40, 60, "example content1", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -901,7 +1124,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan005, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {50, 54, "example content", TextDataDetectType::EMAIL};
+    AISpan span1 = { 50, 54, "example content", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);

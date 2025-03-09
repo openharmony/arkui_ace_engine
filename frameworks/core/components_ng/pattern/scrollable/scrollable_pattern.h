@@ -54,8 +54,11 @@ class InspectorFilter;
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
+constexpr double SLOW_FRICTION_THRESHOLD = 3000.0;
+constexpr double SLOW_FRICTION = 1.0;
 constexpr double MAX_VELOCITY = 9000.0;
 constexpr double VELOCITY_SCALE = 1.0;
+constexpr double SLOW_VELOCITY_SCALE = 1.2;
 constexpr double NEW_VELOCITY_SCALE = 1.5;
 #else
 constexpr double FRICTION = 0.9;
@@ -78,10 +81,8 @@ class ScrollablePattern : public NestableScrollContainer, public virtual StatusB
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
-    ScrollablePattern() = default;
-    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
-        : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
-    {}
+    ScrollablePattern();
+    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled);
 
     ~ScrollablePattern() override;
 
@@ -211,20 +212,13 @@ public:
     RefPtr<InputEventHub> GetInputHub();
 
     // edgeEffect
-    const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
-    {
-        return scrollEffect_;
-    }
+    const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const;
     bool CanFadeEffect(float offset, bool isAtTop, bool isAtBottom) const;
     bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
     void HandleFadeEffect(float offset, int32_t source, const SizeF& size,
         bool isNotPositiveScrollableDistance);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
-    bool IsRestrictBoundary()
-    {
-        return !scrollEffect_ || scrollEffect_->IsRestrictBoundary();
-    }
-
+    bool IsRestrictBoundary();
     // scrollBar
     virtual void UpdateScrollBarOffset() = 0;
     void SetScrollBar(const std::unique_ptr<ScrollBarProperty>& property);
@@ -290,11 +284,7 @@ public:
         return false;
     }
 
-    bool IsScrollableSpringEffect() const
-    {
-        CHECK_NULL_RETURN(scrollEffect_, false);
-        return scrollEffect_->IsSpringEffect();
-    }
+    bool IsScrollableSpringEffect() const;
 
     void SetCoordEventNeedSpringEffect(bool IsCoordEventNeedSpring)
     {
@@ -760,14 +750,6 @@ public:
         CHECK_NULL_RETURN(scrollable, false);
         return scrollable->GetCrownEventDragging();
     }
-
-    void SetReachBoundary(bool flag)
-    {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID(scrollable);
-        scrollable->SetReachBoundary(flag);
-    }
 #endif
 
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
@@ -965,7 +947,7 @@ private:
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
-    virtual bool IsItemSelected(const GestureEvent& info)
+    virtual bool IsItemSelected(float offsetX, float offsetY)
     {
         return false;
     }

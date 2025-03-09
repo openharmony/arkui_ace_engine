@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -104,7 +105,6 @@ const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
-constexpr int32_t POST_CLONED_EVENT_FAILED = 180004;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -1004,7 +1004,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = container->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }
@@ -3556,7 +3556,7 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension radius;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         radius = CalcDimension(radiusArg, DimensionUnit::VP);
     } else {
         radius = CalcDimension(radiusArg, DimensionUnit::PX);
@@ -3701,6 +3701,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
             previewOption.isMultiTiled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW):
+            previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
+            break;
         default:
             break;
     }
@@ -3729,6 +3732,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     } else {
         option.isShowBadge = dragPreviewOptions.isShowBadge;
     }
+    option.sizeChangeEffect = static_cast<NG::DraggingSizeChangeEffect>(dragPreviewOptions.sizeChangeEffect);
     option.isNumber = dragPreviewOptions.isBadgeNumber;
     option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
@@ -3901,6 +3905,20 @@ void ResetAccessibilityScrollTriggerable(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, true, true);
+}
+
+void SetAccessibilityFocusDrawLevel(ArkUINodeHandle node, ArkUI_Int32 drawLevel)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
+}
+
+void ResetAccessibilityFocusDrawLevel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, 0);
 }
 
 void SetHoverEffect(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue)
@@ -6562,27 +6580,27 @@ ArkUI_Int32 PostTouchEventToFrameNode(ArkUINodeHandle node, TouchEvent& touchEve
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     if (!frameNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenode is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     auto frameNodePtr = AceType::Claim<FrameNode>(frameNode);
     if (!frameNodePtr) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenodeptr is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     auto pipelineContext = frameNodePtr->GetContext();
     if (!pipelineContext) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent pipeline context is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     auto postEventManager = pipelineContext->GetPostEventManager();
     if (!postEventManager) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event manager is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
     }
     bool res = postEventManager->PostEvent(frameNodePtr, touchEvent);
     if (!res) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event fail!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT;
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -6591,7 +6609,7 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
 {
     if (!arkUITouchEvent) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent touchevent is null!");
-        return POST_CLONED_EVENT_FAILED;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     TouchEvent touchEvent;
     touchEvent.type = static_cast<TouchType>(arkUITouchEvent->action);
@@ -6860,6 +6878,20 @@ void SetNodeBackdropBlur(
     ViewAbstract::SetNodeBackdropBlur(frameNode, dimensionRadius, blurOption);
 }
 
+void SetPrivacySensitve(ArkUINodeHandle node, ArkUI_Int32 sensitive)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPrivacySensitive(frameNode, static_cast<bool>(sensitive));
+}
+
+void ResetPrivacySensitve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPrivacySensitive(frameNode, false);
+}
+
 ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
 {
     ArkUIBackdropBlur backdropBlur;
@@ -7122,6 +7154,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAccessibilityUseSamePage = ResetAccessibilityUseSamePage,
         .setAccessibilityScrollTriggerable = SetAccessibilityScrollTriggerable,
         .resetAccessibilityScrollTriggerable = ResetAccessibilityScrollTriggerable,
+        .setAccessibilityFocusDrawLevel = SetAccessibilityFocusDrawLevel,
+        .resetAccessibilityFocusDrawLevel = ResetAccessibilityFocusDrawLevel,
         .setHoverEffect = SetHoverEffect,
         .resetHoverEffect = ResetHoverEffect,
         .setClickEffect = SetClickEffect,
@@ -7329,6 +7363,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .getNodeBackdropBlur = GetNodeBackdropBlur,
         .setDisableDataPrefetch = SetDisableDataPrefetch,
         .setOnVisibleAreaApproximateChange = SetOnVisibleAreaApproximateChange,
+        .setPrivacySensitive = SetPrivacySensitve,
+        .resetPrivacySensitive = ResetPrivacySensitve,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -8188,6 +8224,7 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.contactAreaHeight = locationInfo.GetSize();
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
+    touchPoint.rollAngle = locationInfo.GetRollAngle().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
     touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
     touchPoint.operatingHand = locationInfo.GetOperatingHand();
@@ -8223,6 +8260,7 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
         points[i].operatingHand = touchPoint.operatingHand;
@@ -8445,6 +8483,8 @@ void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverIn
     // tiltX tiltY
     event.hoverEvent.tiltX = info.GetTiltX().value_or(0.0f);
     event.hoverEvent.tiltY = info.GetTiltX().value_or(0.0f);
+    // rollAngle
+    event.hoverEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
     // stoppropagation
     event.hoverEvent.stopPropagation = false;
     SendArkUISyncEvent(&event);
@@ -8486,6 +8526,7 @@ void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY();
         event.touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
         event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
+        event.touchEvent.actionTouchPoint.rollAngle = info.GetRollAngle().value_or(0.0f);
         SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnHoverMove(frameNode, onEvent);

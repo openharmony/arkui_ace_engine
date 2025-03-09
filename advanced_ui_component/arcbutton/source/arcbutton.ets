@@ -176,32 +176,6 @@ interface ArcButtonThemeInterface {
   CHAMFER_CIRCLE_RADIUS: number,
 }
 
-const arcButtonTheme: ArcButtonThemeInterface = {
-  BUTTON_HEIGHT: getArcButtonThemeVpValue($r('sys.float.arc_button_height')),
-  ARC_CIRCLE_DIAMETER: getArcButtonThemeVpValue($r('sys.float.arc_button_auxiliary_circle_diameter')),
-  DIAL_CIRCLE_DIAMETER: getArcButtonThemeVpValue($r('sys.float.arc_button_dial_circle_diameter')),
-  CHAMFER_CIRCLE_RADIUS: getArcButtonThemeVpValue($r('sys.float.arc_button_chamfer_radius'))
-}
-
-function getArcButtonThemeVpValue(res: Resource): number {
-  if (!res) {
-    return 0
-  }
-  let metrics = LengthMetrics.resource(res)
-  let value = metrics.value
-  switch (metrics.unit) {
-    case LengthUnit.PX:
-      return px2vp(value)
-
-    case LengthUnit.LPX:
-      return px2vp(lpx2px(value))
-
-    case LengthUnit.FP:
-      return px2vp(fp2px(value))
-  }
-  return value
-}
-
 @ObservedV2
 export class ArcButtonOptions {
   @Trace public position: ArcButtonPosition;
@@ -270,8 +244,14 @@ export struct ArcButton {
   private isUp: boolean = false;
   private curves: ICurve = Curves.interpolatingSpring(10, 1, 350, 35);
   private scaleValue: number = 1;
-  private dataProcessUtil: DataProcessUtil = new DataProcessUtil();
   private textPressColor: ColorMetrics = ColorMetrics.resourceColor(Color.White);
+  private arcButtonTheme: ArcButtonThemeInterface = {
+    BUTTON_HEIGHT: this.getArcButtonThemeVpValue($r('sys.float.arc_button_height')),
+    ARC_CIRCLE_DIAMETER: this.getArcButtonThemeVpValue($r('sys.float.arc_button_auxiliary_circle_diameter')),
+    DIAL_CIRCLE_DIAMETER: this.getArcButtonThemeVpValue($r('sys.float.arc_button_dial_circle_diameter')),
+    CHAMFER_CIRCLE_RADIUS: this.getArcButtonThemeVpValue($r('sys.float.arc_button_chamfer_radius'))
+  }
+  private dataProcessUtil: DataProcessUtil = new DataProcessUtil(this.arcButtonTheme);
 
   @Monitor('options.label', 'options.type', 'options.fontSize', 'options.styleMode', 'options.status',
   'options.backgroundColor', 'options.fontColor')
@@ -347,6 +327,25 @@ export struct ArcButton {
     this.changeStatus();
   }
 
+  private getArcButtonThemeVpValue(res: Resource): number {
+    if (!res) {
+      return 0
+    }
+    let metrics = LengthMetrics.resource(res)
+    let value = metrics.value
+    switch (metrics.unit) {
+      case LengthUnit.PX:
+        return px2vp(value)
+
+      case LengthUnit.LPX:
+        return px2vp(lpx2px(value))
+
+      case LengthUnit.FP:
+        return px2vp(fp2px(value))
+    }
+    return value
+  }
+
   /**
    * 判断是否超出文本框宽度
    */
@@ -363,7 +362,7 @@ export struct ArcButton {
   }
 
   aboutToAppear() {
-    if (arcButtonTheme.BUTTON_HEIGHT === 0) {
+    if (this.arcButtonTheme.BUTTON_HEIGHT === 0) {
       console.error("arcbutton can't obtain sys float value.")
       return
     }
@@ -399,13 +398,13 @@ export struct ArcButton {
     canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER;
 
     const leftTopPoint = this.calculateActualPosition(data.leftTopPoint, canvasLeftTopPoint);
-    const upperArcCircleR: number = this.getUIContext().vp2px(arcButtonTheme.ARC_CIRCLE_DIAMETER / 2);
+    const upperArcCircleR: number = this.getUIContext().vp2px(this.arcButtonTheme.ARC_CIRCLE_DIAMETER / 2);
 
     const rightTopPoint = this.calculateActualPosition(data.rightTopPoint, canvasLeftTopPoint);
-    const chamferCircleR: number = this.getUIContext().vp2px(arcButtonTheme.CHAMFER_CIRCLE_RADIUS);
+    const chamferCircleR: number = this.getUIContext().vp2px(this.arcButtonTheme.CHAMFER_CIRCLE_RADIUS);
 
     const rightBottomPoint = this.calculateActualPosition(data.rightBottomPoint, canvasLeftTopPoint);
-    const lowerArcCircleR: number = this.getUIContext().vp2px(arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2);
+    const lowerArcCircleR: number = this.getUIContext().vp2px(this.arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2);
 
     const leftBottomPoint = this.calculateActualPosition(data.leftBottomPoint, canvasLeftTopPoint);
 
@@ -500,11 +499,11 @@ export struct ArcButton {
         .backgroundColor(this.btnColor.color)
         .backgroundBlurStyle(this.options.backgroundBlurStyle)
         .shadow(this.getShadow())
-        if (this.isExceed) {
-          this.TextBuilderIsExceed()
-        } else {
-          this.TextBuilderNormal()
-        }
+      if (this.isExceed) {
+        this.TextBuilderIsExceed()
+      } else {
+        this.TextBuilderNormal()
+      }
     }
     .enabled(this.options.status !== ArcButtonStatus.DISABLED)
     .opacity((this.options.styleMode === ArcButtonStyleMode.EMPHASIZED_LIGHT &&
@@ -553,20 +552,25 @@ class DataProcessUtil {
   private arc: ArcButtonCircle = new ArcButtonCircle(0, 0, 0);
   private height: number = 0;
   private width: number = 0;
+  private arcButtonTheme: ArcButtonThemeInterface | undefined = undefined
+
+  constructor(theme: ArcButtonThemeInterface) {
+    this.arcButtonTheme = theme
+  }
 
   initData() {
-    const dialRadius = arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2;
+    const dialRadius = this.arcButtonTheme!.DIAL_CIRCLE_DIAMETER / 2;
     this.dial = new ArcButtonCircle(dialRadius, dialRadius, dialRadius);
 
-    const arcRadius = arcButtonTheme.ARC_CIRCLE_DIAMETER / 2;
-    this.height = arcButtonTheme.BUTTON_HEIGHT;
+    const arcRadius = this.arcButtonTheme!.ARC_CIRCLE_DIAMETER / 2;
+    this.height = this.arcButtonTheme!.BUTTON_HEIGHT;
     const arcX = this.dial.center.x;
     const arcY = this.dial.center.y + dialRadius + arcRadius - this.height;
     this.arc = new ArcButtonCircle(arcRadius, arcX, arcY);
   }
 
   calculate(): AllPoints {
-    const chamferCircleR = arcButtonTheme.CHAMFER_CIRCLE_RADIUS;
+    const chamferCircleR = this.arcButtonTheme!.CHAMFER_CIRCLE_RADIUS;
     const innerDial = new ArcButtonCircle(this.dial.radius - chamferCircleR, this.dial.center.x, this.dial.center.y);
     const innerArc = new ArcButtonCircle(this.arc.radius - chamferCircleR, this.arc.center.x, this.arc.center.y);
     const intersections = this.findCircleIntersections(innerArc, innerDial);

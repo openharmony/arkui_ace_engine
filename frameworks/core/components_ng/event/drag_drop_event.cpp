@@ -209,7 +209,9 @@ bool DragDropEventActuator::GetIsNotInPreviewState() const
 
 RefPtr<PixelMap> DragDropEventActuator::GetPreScaledPixelMapForDragThroughTouch(float& preScale)
 {
-    if (dragDropInitiatingHandler_) {
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    if (dragDropInitiatingHandler_ && !gestureHub->GetTextDraggable()) {
         return dragDropInitiatingHandler_->GetPreScaledPixelMapForDragThroughTouch(preScale);
     }
     return nullptr;
@@ -252,7 +254,9 @@ void DragDropEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool is
         TouchEvent touchEvent;
         touchEvent.type = info.GetTouches().front().GetTouchType();
         touchEvent.x = info.GetTouches().front().GetGlobalLocation().GetX();
-        touchEvent.x = info.GetTouches().front().GetGlobalLocation().GetY();
+        touchEvent.y = info.GetTouches().front().GetGlobalLocation().GetY();
+        touchEvent.screenX = info.GetTouches().front().GetScreenLocation().GetX();
+        touchEvent.screenY = info.GetTouches().front().GetScreenLocation().GetY();
         touchEvent.id = info.GetTouches().front().GetFingerId();
         dragDropInitiatingHandler_->NotifyTouchEvent(touchEvent);
     }

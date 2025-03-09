@@ -98,6 +98,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
 
+    auto symbolType = textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM);
+    textStyle.SetSymbolType(symbolType);
+
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
     textStyle_ = textStyle;
@@ -217,6 +220,9 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     }
     if (lineStyle->HasHalfLeading()) {
         pStyle.halfLeading = lineStyle->GetHalfLeadingValue();
+    }
+    if (lineStyle->HasParagraphSpacing()) {
+        pStyle.paragraphSpacing = lineStyle->GetParagraphSpacingValue();
     }
     if (layoutWrapper) {
         pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
@@ -419,7 +425,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .indent = textStyle.GetTextIndent(),
-        .halfLeading = textStyle.GetHalfLeading()
+        .halfLeading = textStyle.GetHalfLeading(),
+        .paragraphSpacing = textStyle.GetParagraphSpacing()
         };
 }
 
@@ -527,7 +534,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                     textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
             }
         }
-        auto&& paragraph = Paragraph::Create(spanParagraphStyle, FontCollection::Current());
+        auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle, aiSpanMap);
         CHECK_NULL_RETURN(paragraph, false);
         auto paraStart = spanTextLength;
         paragraphIndex++;
@@ -593,10 +600,12 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         preParagraphsPlaceholderCount_ += currentParagraphPlaceholderCount_;
         currentParagraphPlaceholderCount_ = 0;
         shadowOffset_ += GetShadowOffset(group);
-        HandleEmptyParagraph(paragraph, group);
-        paragraph->Build();
-        ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
-        UpdateSymbolSpanEffect(frameNode, paragraph, group);
+        if (!useParagraphCache_) {
+            HandleEmptyParagraph(paragraph, group);
+            paragraph->Build();
+            ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
+            UpdateSymbolSpanEffect(frameNode, paragraph, group);
+        }
         if (paraStyle.maxLines != UINT32_MAX) {
             paragraph->Layout(static_cast<float>(maxWidth));
         }
@@ -612,7 +621,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
 
 void MultipleParagraphLayoutAlgorithm::InheritParentTextStyle(const TextStyle& textStyle)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         inheritTextStyle_ = textStyle_.value_or(TextStyle());
     } else {
         inheritTextStyle_ = textStyle;

@@ -565,8 +565,8 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. create PanRecognizer.
      */
-    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
-    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN),
+    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY),
         AceApplicationInfo::GetInstance().GetApiTargetVersion());
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
@@ -1615,8 +1615,8 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest006, TestSize
     /**
      * @tc.steps: step1. create PanRecognizer.
      */
-    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
-    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN),
+    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY),
         AceApplicationInfo::GetInstance().GetApiTargetVersion());
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
@@ -1803,8 +1803,8 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest009, TestSize
     /**
      * @tc.steps: step1. create PanRecognizer.
      */
-    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
-    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN),
+    APIVersionGuard aPIVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+    ASSERT_EQ(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY),
         AceApplicationInfo::GetInstance().GetApiTargetVersion());
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);

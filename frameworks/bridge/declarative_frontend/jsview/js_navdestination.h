@@ -53,6 +53,7 @@ public:
     static void BindToScrollable(const JSCallbackInfo& info);
     static void BindToNestedScrollable(const JSCallbackInfo& info);
     static void SetCustomTransition(const JSCallbackInfo& info);
+    static void SetOnNewParam(const JSCallbackInfo& info);
 
 private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);

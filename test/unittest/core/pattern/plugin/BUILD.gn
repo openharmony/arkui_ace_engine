@@ -36,6 +36,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/animatable_color.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/plugin/plugin_window.cpp",
     "$ace_root/frameworks/core/components/plugin/resource/plugin_manager_delegate.cpp",

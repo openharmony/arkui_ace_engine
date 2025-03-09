@@ -47,9 +47,8 @@ public:
         task();
     }
 
-    void UpdatePromiseConfig(const T& config, std::function<void()>&& task, const RefPtr<Container>& container,
-        const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM,
-        PriorityType priorityType = PriorityType::LOW)
+    void UpdatePromiseConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,
+        const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM)
     {
         std::lock_guard<std::mutex> taskLock(updateTaskMutex_);
         CancelUselessTaskLocked();
@@ -57,12 +56,11 @@ public:
 
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(std::move(task), type, taskName, priorityType);
+        taskExecutor->PostTask(std::move(task), type, taskName);
     }
 
-    void UpdateConfig(const T& config, std::function<void()>&& task, const RefPtr<Container>& container,
-        const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM,
-        PriorityType priorityType = PriorityType::LOW)
+    void UpdateConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,
+        const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM)
     {
         CancelableCallback<void()> cancelableTask(std::move(task));
 
@@ -74,7 +72,7 @@ public:
             // Try to cancel useless task.
             CancelUselessTaskLocked();
             // Post new task.
-            PostUpdateConfigTaskLocked(config, std::move(cancelableTask), container, taskName, type, priorityType);
+            PostUpdateConfigTaskLocked(config, std::move(cancelableTask), container, taskName, type);
         }
     }
 
@@ -88,9 +86,8 @@ public:
         return aceConfig_.config_ == other;
     }
 private:
-    void PostUpdateConfigTaskLocked(const T& config, CancelableCallback<void()>&& task,
-        const RefPtr<Container>& container, const std::string& taskName, TaskExecutor::TaskType type,
-        PriorityType priorityType)
+    void PostUpdateConfigTaskLocked(const T& config, CancelableCallback<void()> &&task,
+        const RefPtr<Container>& container, const std::string& taskName, TaskExecutor::TaskType type)
     {
         currentTask_ = {
             .updateTask = std::move(task),
@@ -98,7 +95,7 @@ private:
         };
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(currentTask_.updateTask, type, taskName, priorityType);
+        taskExecutor->PostTask(currentTask_.updateTask, type, taskName);
     }
 
     void CancelUselessTaskLocked()

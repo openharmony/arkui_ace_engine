@@ -321,6 +321,26 @@ public:
         userSetSwiperCurve_ = userSetSwiperCurve;
     }
 
+    void SetIndicatorDotItemSpace(const Dimension& indicatorDotItemSpace)
+    {
+        indicatorDotItemSpace_ = indicatorDotItemSpace;
+    }
+
+    const Dimension& GetIndicatorDotItemSpace() const
+    {
+        return indicatorDotItemSpace_;
+    }
+
+    std::pair<float, float> GetTargetCenter() const
+    {
+        return bottomCenterX_;
+    }
+
+    bool GetIsBottomAnimationFinished() const
+    {
+        return isBottomAnimationFinished_;
+    }
+    void FinishAnimationToTargetImmediately(std::pair<float, float> centerX);
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -373,6 +393,8 @@ protected:
     RefPtr<AnimatablePropertyColor> touchBottomPointColor_;
     bool isTouchBottomLoop_ = false;
     bool ifNeedFinishCallback_ = false;
+    bool isBottomAnimationFinished_ = true;
+    std::pair<float, float> bottomCenterX_;
     TouchBottomAnimationStage animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     std::optional<int32_t> normalToHoverIndex_ = std::nullopt;
     std::optional<int32_t> hoverToNormalIndex_ = std::nullopt;
@@ -395,6 +417,7 @@ protected:
     Color originalUnselectColor_;
     Color originalSelectColor_;
     Dimension paddingSide_;
+    Dimension indicatorDotItemSpace_ = 8.0_vp;
     float scaleIndicator_ = 1.33f;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);

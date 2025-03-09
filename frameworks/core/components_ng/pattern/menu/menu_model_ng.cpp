@@ -34,6 +34,13 @@ void MenuModelNG::Create()
         // default min width
         layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>(menuNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    if (menuNode->GetThemeScopeId()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, theme->GetFontColor());
+    }
 }
 
 void MenuModelNG::SetFontSize(const Dimension& fontSize)
@@ -57,10 +64,14 @@ void MenuModelNG::SetFontStyle(Ace::FontStyle style)
 
 void MenuModelNG::SetFontColor(const std::optional<Color>& color)
 {
+    auto pattern = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<InnerMenuPattern>();
+    CHECK_NULL_VOID(pattern);
     if (color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value());
+        pattern->SetActiveSetting(true);
     } else {
         ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
+        pattern->SetActiveSetting(false);
     }
 }
 
@@ -119,32 +130,41 @@ void MenuModelNG::SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingM
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode, frameNode);
 }
 
-void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider)
+void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider);
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode);
 }
 
-void MenuModelNG::SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+void MenuModelNG::SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode, frameNode);
 }
 
-void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider)
+void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider);
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, mode);
 }
 
-void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, mode, frameNode);
 }
 
 void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPatternPtr<InnerMenuPattern>();
+    CHECK_NULL_VOID(pattern);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value(), frameNode);
+        pattern->SetActiveSetting(true);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, frameNode);
+        pattern->SetActiveSetting(false);
     }
 }
 

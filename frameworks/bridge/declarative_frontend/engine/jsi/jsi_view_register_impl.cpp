@@ -122,6 +122,7 @@
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
 #include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
+#include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
@@ -339,6 +340,12 @@ void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>&
                 return view->FireOnBackPress();
             }
             return false;
+        });
+        pagePattern->SetOnNewParam([weak = Referenced::WeakClaim(view)](const std::string& newParam) {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnNewParam(newParam);
+            }
         });
         auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(pageRootNode);
 
@@ -573,6 +580,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Panel", JSSlidingPanel::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
     { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
+    { "RepeatVirtualScroll2Native", JSRepeatVirtualScroll2::JSBind },
     { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "NativeNavPathStack", JSNavPathStack::JSBind },
@@ -933,6 +941,8 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "TextTimer") {
         JSTextTimerController::JSBind(globalObj);
+    } else if ((*func).first == "TextClock") {
+        JSTextClockController::JSBind(globalObj);
     } else if ((*func).first == "Canvas") {
         JSCanvasPattern::JSBind(globalObj);
         JSCanvasGradient::JSBind(globalObj);
@@ -1115,7 +1125,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     }
 }
 
-void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
+void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runtime,
+    void* nativeEngine, const shared_ptr<JsValue> globalPtr)
 {
     JSCanvasGradient::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
@@ -1127,6 +1138,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSPath2D::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
+    JSMock::JSBind(globalObj, runtime, globalPtr);
 }
 
 } // namespace OHOS::Ace::Framework

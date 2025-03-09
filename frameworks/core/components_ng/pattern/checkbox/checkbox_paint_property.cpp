@@ -15,9 +15,11 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 
+#include "core/components/checkable/checkable_theme.h"
+#include "core/pipeline/pipeline_base.h"
+
 namespace OHOS::Ace::NG {
 namespace {
-const Color DEFAULT_SELECTED_COLOR = Color(0xFF007DFF);
 const Dimension DEFAULT_CHECKMARK_SIZE = Dimension(0, DimensionUnit::VP);
 } // namespace
 
@@ -25,7 +27,8 @@ void CheckBoxPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
+    auto host = GetHost();
+    auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
     CHECK_NULL_VOID(checkboxTheme);
     PaintProperty::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
@@ -33,8 +36,8 @@ void CheckBoxPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         return;
     }
     json->PutExtAttr("isOn", GetCheckBoxSelect().value_or(false) ? "true" : "false", filter);
-    json->PutExtAttr("selectedColor",
-        GetCheckBoxSelectedColor().value_or(DEFAULT_SELECTED_COLOR).ColorToString().c_str(), filter);
+    json->PutExtAttr("selectedColor", GetCheckBoxSelectedColor().value_or(
+        checkboxTheme->GetActiveColor()).ColorToString().c_str(), filter);
     json->PutExtAttr("unselectedColor", GetCheckBoxUnSelectedColor().value_or(
         checkboxTheme->GetInactiveColor()).ColorToString().c_str(), filter);
     auto markJsValue = JsonUtil::Create(true);

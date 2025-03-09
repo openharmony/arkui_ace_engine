@@ -31,7 +31,7 @@ private:
     void SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper) override;
     void SkipIrregularLines(LayoutWrapper* layoutWrapper, bool forward) override;
 
-    void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem) override;
+    void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper) override;
 
     void GetTargetIndexInfoWithBenchMark(
         LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex) override;
@@ -56,6 +56,10 @@ private:
     void FillOneLineForwardWithoutUpdatingStartIndex(
         float crossSize, float mainSize, LayoutWrapper* layoutWrapper) override
     {}
+
+    std::pair<int32_t, int32_t> CalculateCachedCount(LayoutWrapper* layoutWrapper, int32_t cachedCount) override;
+    int32_t CalculateStartCachedCount(const GridLayoutOptions& options, int32_t cachedCount);
+    int32_t CalculateEndCachedCount(const GridLayoutOptions& options, int32_t cachedCount);
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollWithOptionsLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

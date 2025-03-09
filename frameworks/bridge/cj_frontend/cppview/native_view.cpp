@@ -97,18 +97,25 @@ RefPtr<AceType> NativeView::CreateUI()
             ContainerScope scope(self->instanceId_);
             self->cjView_->Reload(deep);
         },
-        .completeReloadFunc = [weakThis](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
-            auto view = weakThis.promote();
-            CHECK_NULL_RETURN(view, nullptr);
-            ContainerScope scope(view->instanceId_);
-            return view->InitialUIRender();
-        },
         .didBuildFunc =
             [weakThis]() {
                 auto self = weakThis.promote();
                 CHECK_NULL_VOID(self);
                 ContainerScope scope(self->instanceId_);
                 self->cjView_->OnDidBuild();
+            },
+        .completeReloadFunc = [weakThis](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
+            auto view = weakThis.promote();
+            CHECK_NULL_RETURN(view, nullptr);
+            ContainerScope scope(view->instanceId_);
+            return view->InitialUIRender();
+        },
+        .recycleFunc =
+            [weakThis]() {
+                auto self = weakThis.promote();
+                CHECK_NULL_VOID(self);
+                ContainerScope scope(self->instanceId_);
+                self->cjView_->AboutToRecycle();
             },
         .reuseFunc =
             [weakThis](void* params) {
@@ -119,13 +126,6 @@ RefPtr<AceType> NativeView::CreateUI()
                 std::string* val = static_cast<std::string*>(params);
                 CHECK_NULL_VOID(val);
                 self->cjView_->AboutToReuse(*val);
-            },
-        .recycleFunc =
-            [weakThis]() {
-                auto self = weakThis.promote();
-                CHECK_NULL_VOID(self);
-                ContainerScope scope(self->instanceId_);
-                self->cjView_->AboutToRecycle();
             },
         .recycleCustomNodeFunc = [weakThis](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
             auto self = weakThis.promote();
@@ -147,9 +147,7 @@ RefPtr<AceType> NativeView::CreateUI()
         },
     };
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(partialUpdateCallbacks));
-
     node_ = node;
-
     return node;
 }
 
@@ -413,12 +411,13 @@ void RemoteView::OnDisappear()
 
 void RemoteView::OnDidBuild()
 {
-    VoidCallback(CJRuntimeDelegate::GetInstance()->GetCJFuncs().atCOHOSAceFrameworkRemoteViewOnDidBuild, "OnDidBuild");
+    VoidCallback(
+        CJRuntimeDelegate::GetInstance()->GetCJFuncsV2().atCOHOSAceFrameworkRemoteViewOnDidBuild, "OnDidBuild");
 }
 
 void RemoteView::AboutToReuse(const std::string& value)
 {
-    auto aboutToReuseFunc = CJRuntimeDelegate::GetInstance()->GetCJFuncs().atCOHOSAceFrameworkRemoteViewAboutToReuse;
+    auto aboutToReuseFunc = CJRuntimeDelegate::GetInstance()->GetCJFuncsV2().atCOHOSAceFrameworkRemoteViewAboutToReuse;
     if (!aboutToReuseFunc) {
         LOGE("CJFunc: RemoteView::AboutToReuse is empty.");
         return;
@@ -429,12 +428,12 @@ void RemoteView::AboutToReuse(const std::string& value)
 void RemoteView::AboutToRecycle()
 {
     VoidCallback(
-        CJRuntimeDelegate::GetInstance()->GetCJFuncs().atCOHOSAceFrameworkRemoteViewAboutToRecycle, "AboutToRecycle");
+        CJRuntimeDelegate::GetInstance()->GetCJFuncsV2().atCOHOSAceFrameworkRemoteViewAboutToRecycle, "AboutToRecycle");
 }
 
 void RemoteView::RecycleSelf(const std::string& value)
 {
-    auto recycleSelfFunc = CJRuntimeDelegate::GetInstance()->GetCJFuncs().atCOHOSAceFrameworkRemoteViewRecycleSelf;
+    auto recycleSelfFunc = CJRuntimeDelegate::GetInstance()->GetCJFuncsV2().atCOHOSAceFrameworkRemoteViewRecycleSelf;
     if (!recycleSelfFunc) {
         LOGE("CJFunc: RemoteView::RecycleSelf is empty.");
         return;

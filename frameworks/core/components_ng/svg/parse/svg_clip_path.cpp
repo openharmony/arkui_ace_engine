@@ -28,6 +28,7 @@ void SvgClipPath::OnClipEffect(RSCanvas& canvas, const SvgCoordinateSystemContex
     CHECK_NULL_VOID(context);
     SvgLengthScaleRule clipPathRule =
         svgCoordinateSystemContext.BuildScaleRule(attributes_.clipState.GetClipPathUnits());
+    clipPathRule.SetPathTransform(true);
     auto clipPath = AsPath(clipPathRule);
     if (!clipPath.IsValid()) {
         LOGW("OnClipPath abandon, clipPath is empty");

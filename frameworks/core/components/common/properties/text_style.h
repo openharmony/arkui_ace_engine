@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -260,6 +260,7 @@ public:
     TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight, FontStyle fontStyle,
         const Color& textColor);
     TextStyle(double fontSize) : fontSize_(fontSize) {}
+    TextStyle(const Color& textColor) : textColor_(textColor) {}
     ~TextStyle() = default;
 
     bool operator==(const TextStyle& rhs) const;
@@ -468,6 +469,16 @@ public:
     void SetLineSpacing(const Dimension& lineSpacing)
     {
         lineSpacing_ = lineSpacing;
+    }
+
+    const Dimension& GetParagraphSpacing() const
+    {
+        return paragraphSpacing_;
+    }
+
+    void SetParagraphSpacing(const Dimension& paragraphSpacing)
+    {
+        paragraphSpacing_ = paragraphSpacing;
     }
 
     bool HasHeightOverride() const
@@ -770,6 +781,16 @@ public:
         lineBreakStrategy_ = breakStrategy;
     }
 
+    SymbolType GetSymbolType() const
+    {
+        return symbolType_;
+    }
+
+    void SetSymbolType(const SymbolType symbolType)
+    {
+        symbolType_ = symbolType;
+    }
+
     const std::optional<NG::SymbolEffectOptions> GetSymbolEffectOptions() const
     {
         return symbolEffectOptions_;
@@ -795,6 +816,7 @@ private:
     Dimension textIndent_ { 0.0f, DimensionUnit::PX };
     Dimension letterSpacing_;
     Dimension lineSpacing_;
+    Dimension paragraphSpacing_ { 0.0f, DimensionUnit::PX };
     FontWeight fontWeight_ { FontWeight::NORMAL };
     FontStyle fontStyle_ { FontStyle::NORMAL };
     TextBaseline textBaseline_ { TextBaseline::ALPHABETIC };
@@ -831,6 +853,7 @@ private:
     bool heightOnly_ = false;
     std::u16string ellipsis_;
     std::string locale_;
+    SymbolType symbolType_ = SymbolType::SYSTEM;
 };
 
 namespace StringUtils {

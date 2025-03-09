@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,8 @@ using DragEventCallBack = std::function<void(const DragPointerEvent&, const Drag
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
+
+class PipelineBase;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -216,10 +218,7 @@ public:
 
     virtual FoldStatus GetCurrentFoldStatus();
 
-    virtual NG::SafeAreaInsets GetKeyboardSafeArea()
-    {
-        return {};
-    }
+    virtual NG::SafeAreaInsets GetKeyboardSafeArea();
 
     virtual std::string GetHapPath() const
     {
@@ -346,6 +345,7 @@ public:
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
+    static ColorMode CurrentColorMode();
 
     void SetUseNewPipeline()
     {
@@ -395,11 +395,7 @@ public:
         return container ? container->IsSubContainer() : false;
     }
 
-    Window* GetWindow() const
-    {
-        auto context = GetPipelineContext();
-        return context ? context->GetWindow() : nullptr;
-    }
+    Window* GetWindow() const;
 
     virtual uint64_t GetDisplayId() const
     {
@@ -562,57 +558,28 @@ public:
      *this interface is just use before api12(not include api12),after api12 when you judge version,use
      *LessThanAPITargetVersion(PlatformVersion version)
      */
-    static bool LessThanAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersion(PlatformVersion version);
 
     /*
      *this interface is just use before api12(not include api12),after api12 when you judge version,use
      *GreatOrEqualAPITargetVersion(PlatformVersion version)
      */
-    static bool GreatOrEqualAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
     /*
      *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
      */
-    static bool LessThanAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
-                             static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersionWithCheck(PlatformVersion version);
 
     /*
      *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
      */
-    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
-                             static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        if (!container) {
-            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-            return apiTargetVersion < static_cast<int32_t>(version);
-        }
+        CHECK_NULL_RETURN(container, false);
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion < static_cast<int32_t>(version);
     }
@@ -716,6 +683,16 @@ public:
         return currentDisplayId_;
     }
 
+    virtual void SetColorMode(ColorMode mode)
+    {
+        colorMode_ = mode;
+    }
+
+    virtual ColorMode GetColorMode() const
+    {
+        return colorMode_;
+    }
+
     virtual ResourceConfiguration GetResourceConfiguration() const = 0;
 
     void DestroySelectOverlaySubwindow(int32_t instanceId);
@@ -733,6 +710,8 @@ public:
     {
         return Rect();
     }
+
+    static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);
@@ -753,6 +732,7 @@ protected:
     bool isDynamicRender_ = false;
     // for common handler
     WeakPtr<ContainerHandler> containerHandler_;
+    RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:
     std::string bundleName_;
@@ -771,6 +751,7 @@ private:
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     uint64_t currentDisplayId_ = 0;
+    ColorMode colorMode_ = ColorMode::LIGHT;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

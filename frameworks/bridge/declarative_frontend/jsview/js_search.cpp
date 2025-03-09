@@ -314,12 +314,12 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 
         // set button font size, unit FP
         auto fontSize = param->GetProperty("fontSize");
-        CalcDimension size = theme->GetFontSize();
+        CalcDimension size = theme->GetButtonFontSize();
         if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
             GreatOrEqual(size.Value(), 0.0)) {
             ParseJsDimensionFp(fontSize, size);
         } else {
-            size = theme->GetFontSize();
+            size = theme->GetButtonFontSize();
         }
         SearchModel::GetInstance()->SetSearchButtonFontSize(size);
 
@@ -337,7 +337,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
             SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
         }
     } else {
-        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
+        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetButtonFontSize());
         SearchModel::GetInstance()->ResetSearchButtonFontColor();
     }
 }

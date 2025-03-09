@@ -16,7 +16,6 @@
 #include "gtest/gtest.h"
 
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
-#include "interfaces/inner_api/drawable_descriptor/image_converter.h"
 #include "interfaces/inner_api/drawable_descriptor/js_drawable_descriptor.h"
 #include "node_extened.h"
 #include "native_drawable_descriptor.h"

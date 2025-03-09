@@ -106,6 +106,7 @@ void CustomNode::FlushReload()
     CHECK_NULL_VOID(completeReloadFunc_);
     Clean();
     renderFunction_ = completeReloadFunc_;
+    executeFireOnAppear_ = false;
     Build(nullptr);
 }
 

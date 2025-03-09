@@ -57,6 +57,8 @@ const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
 const int32_t PARAM_ZERO = 0;
 const int32_t PARAM_ONE = 1;
 const int32_t PARAM_TWO = 2;
+constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
+constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 
 void EraseSpace(std::string& data)
 {
@@ -1914,7 +1916,6 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
-    JSClass<JSWeb>::StaticMethod("enableSmoothDragResize", &JSWeb::EnableSmoothDragResize);
     JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
@@ -2029,6 +2030,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
+    JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -3326,8 +3328,16 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     }
     auto menuType = menuOptions->GetProperty("menuType");
     bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::DISABLED;
     if (isPreviewMenu) {
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
+        auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
+        if (previewMenuOptions->IsObject()) {
+            auto hapticFeedbackMode = JSRef<JSObject>::Cast(previewMenuOptions)->GetProperty("hapticFeedbackMode");
+            if (hapticFeedbackMode->IsNumber()) {
+                menuParam.hapticFeedbackMode = HapticFeedbackMode(hapticFeedbackMode->ToNumber<int32_t>());
+            }
+        }
         RefPtr<JsFunction> previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -3339,6 +3349,30 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
             func->Execute();
         };
     }
+}
+
+NG::MenuParam GetSelectionMenuParam(
+    const JSCallbackInfo& info, ResponseType responseType, std::function<void()> previewBuilder)
+{
+    NG::MenuParam menuParam;
+    if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
+        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
+    }
+
+    if (responseType != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    NG::PaddingProperty paddings;
+    paddings.start = NG::CalcLength(PREVIEW_MENU_MARGIN_LEFT);
+    paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
+    menuParam.layoutRegionMargin = paddings;
+    menuParam.disappearScaleToTarget = true;
+    menuParam.isPreviewContainScale = true;
+    menuParam.isShow = true;
+    return menuParam;
 }
 
 void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
@@ -3376,18 +3410,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     };
 
     std::function<void()> previewBuilder = nullptr;
-    NG::MenuParam menuParam;
-    if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
-        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
-    }
-
-    if (responseType != ResponseType::LONG_PRESS) {
-        menuParam.previewMode = MenuPreviewMode::NONE;
-        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
-    }
-    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
-    menuParam.type = NG::MenuType::CONTEXT_MENU;
-    menuParam.isShow = true;
+    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder);
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
         elementType, responseType, menuBuilder, previewBuilder, menuParam);
@@ -3488,11 +3511,6 @@ void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     WebModel::GetInstance()->RegisterNativeEmbedRule(tag, type);
-}
-
-void JSWeb::EnableSmoothDragResize(bool isSmoothDragResizeEnabled)
-{
-    WebModel::GetInstance()->SetSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
@@ -5629,5 +5647,10 @@ void JSWeb::EnableWebAVSession(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetWebMediaAVSessionEnabled(isEnabled);
+}
+
+void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
 }
 } // namespace OHOS::Ace::Framework

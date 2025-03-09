@@ -43,6 +43,15 @@ struct MenuAlign {
     DimensionOffset offset = DimensionOffset(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
 };
 
+enum class AvoidanceMode {
+    COVER_TARGET = 0,
+    AVOID_AROUND_TARGET,
+};
+
+struct Avoidance {
+    AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
+};
+
 struct SelectParam {
     std::string text;
     std::string icon;
@@ -89,6 +98,7 @@ public:
     virtual void SetSpace(const Dimension& value);
     virtual void SetArrowPosition(const ArrowPosition value);
     virtual void SetMenuAlign(const MenuAlign& menuAlign);
+    virtual void SetAvoidance(const Avoidance& avoidance);
     virtual void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent);
     virtual void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent);
     virtual void SetOptionWidth(const Dimension& value);
@@ -98,9 +108,14 @@ public:
     virtual void SetMenuBackgroundColor(const Color& color);
     virtual void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle);
     virtual void SetDivider(const NG::SelectDivider& divider);
+    virtual void SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode);
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize);
     virtual void SetLayoutDirection(TextDirection value);
     virtual ControlSize GetControlSize();
+    virtual void BackgroundColor(const Color& color) = 0;
+    virtual void ResetBackgroundColor() = 0;
+    virtual void ResetFontColor() {};
+
 private:
     static std::unique_ptr<SelectModel> instance_;
     static std::mutex mutex_;

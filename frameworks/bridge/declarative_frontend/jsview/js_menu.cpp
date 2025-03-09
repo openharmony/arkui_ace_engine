@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/menu/menu_model.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/property/measure_property.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_theme.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<MenuModel> MenuModel::instance_ = nullptr;
@@ -51,7 +50,6 @@ namespace OHOS::Ace::Framework {
 void JSMenu::Create(const JSCallbackInfo& /* info */)
 {
     MenuModel::GetInstance()->Create();
-    JSMenuTheme::ApplyTheme();
 }
 
 void JSMenu::FontSize(const JSCallbackInfo& info)
@@ -213,6 +211,7 @@ void JSMenu::SetExpandingMode(const JSCallbackInfo& info)
 
 void JSMenu::SetItemGroupDivider(const JSCallbackInfo& args)
 {
+    auto mode = DividerMode::FLOATING_ABOVE_MENU;
     auto divider = V2::ItemDivider{
         .strokeWidth = Dimension(0.0f, DimensionUnit::INVALID),
         .color = Color::FOREGROUND,
@@ -250,36 +249,51 @@ void JSMenu::SetItemGroupDivider(const JSCallbackInfo& args)
         if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
             divider.color = Color::FOREGROUND;
         }
+        auto modeVal = obj->GetProperty("mode");
+        if (modeVal->IsNumber() && modeVal->ToNumber<int32_t>() == 1) {
+            mode = DividerMode::EMBEDDED_IN_MENU;
+        }
     }
-    MenuModel::GetInstance()->SetItemGroupDivider(divider);
+    MenuModel::GetInstance()->SetItemGroupDivider(divider, mode);
     args.ReturnSelf();
 }
 
 void JSMenu::SetItemDivider(const JSCallbackInfo& args)
 {
+    auto mode = DividerMode::FLOATING_ABOVE_MENU;
     V2::ItemDivider divider;
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        auto modeVal = obj->GetProperty("mode");
+        if (modeVal->IsNumber() && modeVal->ToNumber<int32_t>() == 1) {
+            mode = DividerMode::EMBEDDED_IN_MENU;
+        }
         CalcDimension value;
         if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value)) {
             value.Reset();
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         if (value.IsNegative()) {
             value.Reset();
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         divider.strokeWidth = value;
         if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value)) {
             value.Reset();
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         if (value.IsNegative()) {
             value.Reset();
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         divider.startMargin = value;
         if (!ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value)) {
             value.Reset();
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         if (value.IsNegative()) {
             value.Reset();
+            value.SetUnit(mode == DividerMode::EMBEDDED_IN_MENU ? DimensionUnit::INVALID : DimensionUnit::PX);
         }
         divider.endMargin = value;
 
@@ -287,7 +301,7 @@ void JSMenu::SetItemDivider(const JSCallbackInfo& args)
             divider.color = Color::TRANSPARENT;
         }
     }
-    MenuModel::GetInstance()->SetItemDivider(divider);
+    MenuModel::GetInstance()->SetItemDivider(divider, mode);
     args.ReturnSelf();
 }
 

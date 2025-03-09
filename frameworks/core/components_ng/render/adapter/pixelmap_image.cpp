@@ -26,6 +26,7 @@
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -444,7 +445,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRe
 
 void PixelMapImage::Cache(const std::string& key)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_VOID(cache);
@@ -453,7 +454,7 @@ void PixelMapImage::Cache(const std::string& key)
 
 RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);

@@ -17,6 +17,7 @@
 
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,10 +31,10 @@ RefPtr<SvgNode> SvgMask::Create()
 void SvgMask::OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
 {
     auto maskRule = svgCoordinateSystemContext.BuildScaleRule(maskAttr_.maskUnits);
-    auto measuredX = GetMeasuredPosition(maskAttr_.x, maskRule, SvgLengthType::HORIZONTAL);
-    auto measuredY = GetMeasuredPosition(maskAttr_.y, maskRule, SvgLengthType::VERTICAL);
-    auto measuredWidth = GetMeasuredLength(maskAttr_.width, maskRule, SvgLengthType::HORIZONTAL);
-    auto measuredHeight = GetMeasuredLength(maskAttr_.height, maskRule, SvgLengthType::VERTICAL);
+    auto measuredX = GetRegionPosition(maskAttr_.x, maskRule, SvgLengthType::HORIZONTAL);
+    auto measuredY = GetRegionPosition(maskAttr_.y, maskRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetRegionLength(maskAttr_.width, maskRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetRegionLength(maskAttr_.height, maskRule, SvgLengthType::VERTICAL);
     Rect maskRect = {
         measuredX,
         measuredY,
@@ -47,7 +48,10 @@ void SvgMask::OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& s
     // ready to render mask content
     auto canvasLayerCount = static_cast<int32_t>(canvas.GetSaveCount());
     RosenSvgPainter::SetMask(&canvas);
-    auto maskContentRule = svgCoordinateSystemContext.BuildScaleRule(maskAttr_.maskContentUnits);
+    auto maskContentRule = TransformForCurrentOBB(canvas, svgCoordinateSystemContext, maskAttr_.maskContentUnits,
+        svgCoordinateSystemContext.GetContainerRect().Left(), svgCoordinateSystemContext.GetContainerRect().Top());
+    // subgraph does not use image components parameter fillColor
+    maskContentRule.SetUseFillColor(false);
     DrawChildren(canvas, maskContentRule);
     canvas.RestoreToCount(canvasLayerCount);
     // create content layer and render content
@@ -130,7 +134,7 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
     static const LinearMapNode<void (*)(const std::string&, SvgMaskAttribute&)> attrs[] = {
         { SVG_HEIGHT,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.height = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.height);
             } },
         { SVG_MASK_CONTENT_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
@@ -139,20 +143,25 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             } },
         { SVG_MASK_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
+                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                    attr.maskUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
+                        SvgLengthScaleUnit::USER_SPACE_ON_USE;
+                    return;
+                }
                 attr.maskUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
                     SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
             } },
         { SVG_WIDTH,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.width = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.width);
             } },
         { SVG_X,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.x = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.x);
             } },
         { SVG_Y,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.y = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.y);
             } },
     };
     std::string key = name;

@@ -1627,4 +1627,34 @@ HWTEST_F(EventManagerTestNg, ParallelRecognizerAxisDirection001, TestSize.Level1
     ASSERT_NE(parallelVerticalFree, nullptr);
     EXPECT_EQ(parallelVerticalFree->GetAxisDirection(), Axis::FREE);
 }
+
+/**
+ * @tc.name: EventManagerTest090
+ * @tc.desc: Test DispatchMouseEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest090, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    MouseEvent event;
+    event.mockFlushEvent = true;
+    bool result = eventManager->DispatchMouseEventNG(event);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: EventManagerTest091
+ * @tc.desc: Test DispatchMouseEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest091, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    MouseEvent event;
+    event.mockFlushEvent = false;
+    bool result = eventManager->DispatchMouseEventNG(event);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG

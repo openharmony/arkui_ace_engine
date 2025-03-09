@@ -133,6 +133,11 @@ public:
         }
     }
 
+    bool HasUserCallback()
+    {
+        return userCallback_ != nullptr;
+    }
+
     void ClearJSFrameNodeCallback()
     {
         if (userJSFrameNodeCallback_) {

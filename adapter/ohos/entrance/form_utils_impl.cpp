@@ -16,13 +16,8 @@
 #include "adapter/ohos/entrance/form_utils_impl.h"
 
 #include "form_mgr.h"
-#include "want.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
-#include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "base/utils/utils.h"
-#include "core/common/container_scope.h"
-
 
 namespace OHOS::Ace {
 namespace {

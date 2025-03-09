@@ -183,6 +183,7 @@ public:
             slideRange->Put("to", std::to_string(slideRangeValues.value()->GetToValue()).c_str());
             json->PutExtAttr("slideRange", slideRange, filter);
         }
+        json->PutExtAttr("enableHapticFeedback", GetEnableHapticFeedback().value_or(true) ? "true" : "false", filter);
 #ifdef SUPPORT_DIGITAL_CROWN
         static const std::array<std::string, 3> SLIDER_CROWN_SENSITIVITY_TO_STRING = {
             "CrownSensitivity.LOW",
@@ -258,6 +259,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, ValidSlideRange, RefPtr<SliderModel::SliderValidRange>, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, EnableHapticFeedback, bool, PROPERTY_UPDATE_RENDER)
 #ifdef SUPPORT_DIGITAL_CROWN
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, DigitalCrownSensitivity, CrownSensitivity, PROPERTY_UPDATE_RENDER)

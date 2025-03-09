@@ -99,7 +99,7 @@ std::unordered_map<int32_t, std::string> UICONTEXT_ERROR_MAP = {
     { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "The ComponentContent already exists. " },
     { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "The ComponentContent cannot be found. " },
     { ERROR_CODE_TARGET_INFO_NOT_EXIST, "The targetId does not exist. " },
-    { ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE, "The node of targetId is not in the component tree. " }
+    { ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE, "The node of targetId is not in the component tree. " }
 };
 
 void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
@@ -139,15 +139,6 @@ bool CheckContainer(const RefPtr<Container>& container)
     }
     auto executor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(executor, false);
-    return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
-}
-
-bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
-{
-    auto container = Container::GetContainer(currentId);
-    CHECK_NULL_RETURN(container, defaultRes);
-    auto executor = container->GetTaskExecutor();
-    CHECK_NULL_RETURN(executor, defaultRes);
     return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
 }
 
@@ -308,7 +299,7 @@ int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext
 bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option)
 {
     CHECK_NULL_RETURN(pipelineContext, false);
-    return pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRender() &&
+    return pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRenderExceptDynamicComponent() &&
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
 }
 
@@ -361,6 +352,17 @@ AnimationOption ParseKeyframeOverallParam(const JSExecutionContext& executionCon
     }
     auto delay = obj->GetPropertyValue<int32_t>("delay", 0);
     auto iterations = obj->GetPropertyValue<int32_t>("iterations", 1);
+    JSRef<JSVal> rateRangeObjectArgs = obj->GetProperty("expectedFrameRateRange");
+    if (rateRangeObjectArgs->IsObject()) {
+        JSRef<JSObject> rateRangeObj = JSRef<JSObject>::Cast(rateRangeObjectArgs);
+        int32_t fRRmin = rateRangeObj->GetPropertyValue<int32_t>("min", -1);
+        int32_t fRRmax = rateRangeObj->GetPropertyValue<int32_t>("max", -1);
+        int32_t fRRExpected = rateRangeObj->GetPropertyValue<int32_t>("expected", -1);
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[keyframe] SetExpectedFrameRateRange"
+            "{%{public}d, %{public}d, %{public}d}", fRRmin, fRRmax, fRRExpected);
+        RefPtr<FrameRateRange> frameRateRange = AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+        option.SetFrameRateRange(frameRateRange);
+    }
     option.SetDelay(delay);
     option.SetIteration(iterations);
     return option;
@@ -593,7 +595,8 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContextBase);
-    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+    if (pipelineContextBase->IsFormAnimationFinishCallback() &&
+        pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
         GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
         TAG_LOGW(
             AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
@@ -622,8 +625,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         };
     }
 
-    option = CreateAnimation(obj, pipelineContextBase->IsFormRender());
-    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+    option = CreateAnimation(obj, pipelineContextBase->IsFormRenderExceptDynamicComponent());
+    if (pipelineContextBase->IsFormAnimationFinishCallback() &&
+        pipelineContextBase->IsFormRenderExceptDynamicComponent() &&
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
         TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
@@ -667,14 +671,17 @@ void RecordAnimationFinished(int32_t count)
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
-    if (!CheckRunOnThreadByThreadId(currentId, true)) {
+    bool needCheck = false;
+    if (!Container::CheckRunOnThreadByThreadId(currentId, false)) {
         // fix DynamicComponent get wrong container when calling the animateTo function.
         auto localContainerId = ContainerScope::CurrentLocalId();
         TAG_LOGI(AceLogTag::ACE_ANIMATION,
             "AnimateToInner not run on running thread, currentId: %{public}d, localId: %{public}d",
             currentId, localContainerId);
-        if (localContainerId > 0 && CheckRunOnThreadByThreadId(localContainerId, false)) {
+        if (localContainerId > 0 && Container::CheckRunOnThreadByThreadId(localContainerId, false)) {
             currentId = localContainerId;
+        } else {
+            needCheck = true;
         }
     }
     ContainerScope scope(currentId);
@@ -683,7 +690,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         // this case usually means there is no foreground container, need to figure out the reason.
         const char* funcName = immediately ? "animateToImmediately" : "animateTo";
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
-            "can not find current context, %{public}s failed, please use uiContext.%{public}s to specify the context",
+            "can not find currnet context ,%{pubic}s faild, please use uiContext.%{public}s to specify the context",
             funcName, funcName);
         return;
     }
@@ -700,9 +707,17 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 
     auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
+    if (needCheck && !Container::CheckRunOnThreadByThreadId(container->GetInstanceId(), false)) {
+        const char* funcName = immediately ? "animateToImmediately" : "animateTo";
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "the context found cannot run on current thread, %{public}s failed, "
+            "please use uiContext.%{public}s to specify the context",
+            funcName, funcName);
+        return;
+    }
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRender() &&
+    if (pipelineContext->IsFormAnimationFinishCallback() && pipelineContext->IsFormRenderExceptDynamicComponent() &&
         GetFormAnimationTimeInterval(pipelineContext) > DEFAULT_DURATION) {
         TAG_LOGW(
             AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
@@ -710,7 +725,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
+    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRenderExceptDynamicComponent());
     auto iterations = option.GetIteration();
     JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
     std::function<void()> onFinishEvent;
@@ -817,6 +832,11 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
 
     auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
+    if (!Container::CheckRunOnThreadByThreadId(container->GetInstanceId(), false)) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "the context found cannot run current thread, KeyframeAnimateTo "
+                                           "failed, please use correct ui context.");
+        return;
+    }
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -1002,6 +1022,10 @@ int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
             auto targetComponentIdNode =
                 ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(componentId);
             CHECK_NULL_RETURN(targetComponentIdNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
+            if (targetComponentIdNode->GetInspectorId().value_or("") == targetIdString) {
+                targetId = targetComponentIdNode->GetId();
+                return ERROR_CODE_NO_ERROR;
+            }
             auto targetNode = NG::FrameNode::FindChildByName(targetComponentIdNode, targetIdString);
             CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
             targetId = targetNode->GetId();
@@ -1207,9 +1231,10 @@ void JSViewContext::JSOpenMenu(const JSCallbackInfo& info)
     }
     JSViewAbstract::ParseContentMenuCommonParam(info, menuObj, menuParam);
     auto ret = JSViewAbstract::OpenMenu(menuParam, menuContentNode, targetId);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
@@ -1249,9 +1274,10 @@ void JSViewContext::JSUpdateMenu(const JSCallbackInfo& info)
         return;
     }
     auto ret = JSViewAbstract::UpdateMenu(menuParam, menuContentNode);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 
@@ -1268,9 +1294,10 @@ void JSViewContext::JSCloseMenu(const JSCallbackInfo& info)
         return;
     }
     auto ret = JSViewAbstract::CloseMenu(menuContentNode);
-    if (ret != ERROR_CODE_INTERNAL_ERROR) {
-        ReturnPromise(info, ret);
+    if (ret == ERROR_CODE_INTERNAL_ERROR) {
+        ret = ERROR_CODE_NO_ERROR;
     }
+    ReturnPromise(info, ret);
     return;
 }
 

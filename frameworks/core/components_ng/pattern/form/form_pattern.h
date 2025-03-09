@@ -172,7 +172,8 @@ private:
     bool ISAllowUpdate() const;
     void EnableDrag();
     void UpdateConfiguration();
-    void HandleFormComponent(const RequestFormInfo& info);
+    void HandleFormComponent(RequestFormInfo& info);
+    void SetParamForWantTask(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
     void AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline);
     void AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info);
@@ -236,7 +237,8 @@ private:
     void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
     void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
-    bool IsFormBundleLocked(const std::string &bundleName, int64_t formId) const;
+    bool IsFormBundleExempt(int64_t formId) const;
+    bool IsFormBundleProtected(const std::string &bundleName, int64_t formId) const;
     void HandleLockEvent(bool isLock);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);

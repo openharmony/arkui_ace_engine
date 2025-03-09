@@ -21,6 +21,7 @@
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -472,14 +473,13 @@ void MovingPhotoPattern::ResetMediaPlayer()
 {
     CHECK_NULL_VOID(mediaPlayer_);
     isPrepared_ = false;
+    ContainerScope scope(instanceId_);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     mediaPlayer_->ResetMediaPlayer();
     RegisterMediaPlayerEvent();
     if (!mediaPlayer_->SetSourceByFd(fd_)) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer failed.");
-        ContainerScope scope(instanceId_);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
             [weak = WeakClaim(this)] {
@@ -488,8 +488,7 @@ void MovingPhotoPattern::ResetMediaPlayer()
                 ContainerScope scope(pattern->instanceId_);
                 pattern->FireMediaPlayerError();
             },
-            "ArkUIMovingPhotoReset");
-        return;
+            "ArkUIMovingPhotoResetMediaPlayer");
     }
 }
 
@@ -864,6 +863,7 @@ SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,
 
 void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
 {
+    isUsedMediaPlayerStatusChanged_ = true;
     currentPlayStatus_ = status;
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is %{public}d.", status);
     switch (status) {
@@ -1120,6 +1120,7 @@ void MovingPhotoPattern::PausePlayback()
 
 void MovingPhotoPattern::RefreshMovingPhoto()
 {
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto start.");
     if (uri_ == "") {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto RefreshMovingPhoto uri is null.");
         return;
@@ -1142,20 +1143,19 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     src.SetSrc(imageSrc);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
     UpdateImageNode();
+    if (fd_ > 0) {
+        close(fd_);
+    }
     fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-        autoAndRepeatLevel_ = PlaybackMode::NONE;
-        historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
         Pause();
-        StopAnimation();
     }
+    autoAndRepeatLevel_ = PlaybackMode::NONE;
+    historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     ResetMediaPlayer();
-    if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
-        autoAndRepeatLevel_ = PlaybackMode::AUTO;
-    }
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
         UpdateAnalyzerOverlay();
     }

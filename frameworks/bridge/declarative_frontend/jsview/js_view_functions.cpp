@@ -36,6 +36,7 @@
 
 namespace OHOS::Ace::Framework {
 const std::string EMPTY_STATUS_DATA = "empty_status_data";
+const std::string JS_STRINGIFIED_UNDEFINED = "undefined";
 
 #ifdef USE_ARK_ENGINE
 
@@ -197,16 +198,18 @@ void ViewFunctions::ExecutePrebuildComponent()
     }
 }
 
-void ViewFunctions::ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase)
+bool ViewFunctions::ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase)
 {
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false)
     auto func = jsSetPrebuildPhase_.Lock();
     if (!func->IsEmpty()) {
         auto jsPrebuildPhase = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(prebuildPhase)));
         func->Call(jsObject_.Lock(), 1, &jsPrebuildPhase);
+        return true;
     } else {
         LOGE("the set prebuild phase func is null");
     }
+    return false;
 }
 
 bool ViewFunctions::ExecuteIsEnablePrebuildInMultiFrame()
@@ -467,6 +470,11 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsOnFormRecoverFunc = jsObject->GetProperty("onFormRecover");
     if (jsOnFormRecoverFunc->IsFunction()) {
         jsOnFormRecoverFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecoverFunc);
+    }
+
+    JSRef<JSVal> jsOnNewParam = jsObject->GetProperty("onNewParam");
+    if (jsOnNewParam->IsFunction()) {
+        jsOnNewParam_ = JSRef<JSFunc>::Cast(jsOnNewParam);
     }
 }
 
@@ -797,5 +805,19 @@ void ViewFunctions::ExecuteOnFormRecover(const std::string& statusData)
     auto jsData = JSRef<JSVal>::Make(ToJSValue(data));
     auto func = jsOnFormRecoverFunc_.Lock();
     func->Call(jsObject_.Lock(), 1, &jsData);
+}
+
+void ViewFunctions::ExecuteOnNewParam(const std::string& newParam)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsOnNewParam_.IsEmpty()) {
+        return;
+    }
+    auto argv = JSRef<JSVal>::Make();
+    if (!newParam.empty() && newParam != JS_STRINGIFIED_UNDEFINED) {
+        argv = JSRef<JSObject>::New()->ToJsonObject(newParam.c_str());
+    }
+    auto func = jsOnNewParam_.Lock();
+    func->Call(jsObject_.Lock(), 1, &argv);
 }
 } // namespace OHOS::Ace::Framework

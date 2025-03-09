@@ -42,7 +42,8 @@ private:
     void MeasureItemViews(LayoutConstraintF& childConstraint,
         std::optional<LayoutConstraintF>& layoutConstraint,
         LayoutWrapper* layoutWrapper);
-    void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
+    void MeasureRow(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& row,
+        const LayoutConstraintF& constraint);
     void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
@@ -50,10 +51,14 @@ private:
     float GetMenuItemVerticalPadding();
     std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
     void UpdateIconMargin(LayoutWrapper* layoutWrapper);
+    void UpdateIdealSize(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props,
+        std::optional<LayoutConstraintF>& layoutConstraint);
     void MeasureMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
         const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint);
     void MeasureOption(LayoutWrapper* layoutWrapper, const RefPtr<SelectTheme>& selectTheme,
         const RefPtr<LayoutProperty>& props, const std::optional<LayoutConstraintF>& layoutConstraint);
+    float CalcRowTopSpace(float rowsHeight, float itemHeight, LayoutWrapper* layoutWrapper,
+        float leftOrRightRowHeight);
     void LayoutMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
     void LayoutOption(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
     void ExtendTextAndRowNode(const RefPtr<LayoutWrapper>& row, const SizeF& optSize,
@@ -70,6 +75,7 @@ private:
     float verInterval_ = 0.0f;
     float idealWidth_ = 0.0f;
     float userHeight_ = 0.0f;
+    float idealHeight_ = 0.0f;
     float emptyWidth_ = 0.0f;
     float maxRowWidth_ = 0.0f;
     float middleSpace_ = 0.0f;

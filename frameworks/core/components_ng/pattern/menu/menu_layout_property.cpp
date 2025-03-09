@@ -77,10 +77,15 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("title", GetTitle().value_or("").c_str(), filter);
     json->PutExtAttr("offset", GetPositionOffset().value_or(OffsetF()).ToString().c_str(), filter);
     auto context = PipelineBase::GetCurrentContext();
-    auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto theme = context ? context->GetTheme<SelectTheme>(host->GetThemeScopeId()) : nullptr;
     auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
     json->PutExtAttr("fontSize", GetFontSize().value_or(defaultFontSize).ToString().c_str(), filter);
     auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;
+    if (host->GetThemeScopeId()) {
+        defaultFontColor = theme ? theme->GetFontColor() : defaultFontColor;
+    }
     json->PutExtAttr("fontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str(), filter);
     auto fontJsonObject = JsonUtil::Create(true);
     fontJsonObject->Put("size", GetFontSize().value_or(defaultFontSize).ToString().c_str());

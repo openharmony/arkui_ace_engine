@@ -33,15 +33,10 @@ using VectorFloat64Ptr = void*;
 
 namespace OHOS::Ace::Framework {
 
-static RefPtr<PipelineBase> GetPipelineContext()
-{
-    auto currentObj = Container::Current();
-    CHECK_NULL_RETURN(currentObj, nullptr);
-    return currentObj->GetPipelineContext();
-}
+RefPtr<PipelineBase> GetPipelineContext();
 
 template<typename T>
-static RefPtr<T> GetTheme()
+RefPtr<T> GetTheme()
 {
     auto pipelineContext = GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
@@ -266,6 +261,24 @@ struct NativeOptionEdgeStyle {
 };
 
 struct CJSheetOptions {
+    NativeOptionUInt32 backgroundColor;
+    NativeOptionCallBack onAppear;
+    NativeOptionCallBack onDisappear;
+    NativeOptionCallBack onWillAppear;
+    NativeOptionCallBack onWillDisappear;
+    NativeOptionInt32 height;
+    NativeOptionCArrInt32 detents;
+    NativeOptionInt32 preferType;
+    NativeOptionBool showClose;
+    NativeOptionBool dragBarl;
+    NativeOptionInt32 blurStyle;
+    NativeOptionUInt32 maskColor;
+    NativeOptionCallBack title;
+    NativeOptionBool enableOutsideInteractive;
+    NativeOptionCallBack shouldDismiss;
+};
+
+struct CJSheetOptionsV2 {
     NativeOptionUInt32 backgroundColor;
     NativeOptionCallBack onAppear;
     NativeOptionCallBack onDisappear;
@@ -533,8 +546,11 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleX(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleY(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOpacity(double opacity);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParamV2(bool isShow, void (*builder)(), CJSheetOptionsV2 option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractDismiss();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSpringBack();
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractHitTestBehavior(int32_t hitTestMode);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractHoverEffect(int32_t hoverEffectValue);
 
 struct CJSetRotate {
     float dx;
@@ -758,7 +774,16 @@ struct NativeOptionOnWillDismiss {
     bool hasValue;
     void (*value)(CJDismissContentCoverAction action);
 };
+
 struct CJContentCoverOptions {
+    uint32_t modalTransition;
+    NativeOptionUInt32 backgroundColor;
+    NativeOptionCallBack onAppear;
+    NativeOptionCallBack onDisappear;
+    NativeOptionCallBack onWillAppear;
+    NativeOptionCallBack onWillDisappear;
+};
+struct CJContentCoverOptionsV2 {
     uint32_t modalTransition;
     NativeOptionOnWillDismiss onWillDismiss;
     NativeOptionInt64 transition;
@@ -768,7 +793,9 @@ struct CJContentCoverOptions {
     NativeOptionCallBack onWillAppear;
     NativeOptionCallBack onWillDisappear;
 };
+
 CJ_EXPORT void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJContentCoverOptions options);
+CJ_EXPORT void FFIOHOSAceFrameworkBindContentCoverV2(bool isShow, void (*builder)(), CJContentCoverOptionsV2 options);
 
 CJ_EXPORT ExternalString FFIGetResourceString(NativeResourceObject obj);
 CJ_EXPORT ExternalString FFIGetResourceMedia(NativeResourceObject obj);

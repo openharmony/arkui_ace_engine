@@ -53,6 +53,7 @@ public:
         const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback) override;
     int32_t SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) override;
     int32_t EndWebViewTranslate() override;
+    int32_t GetCurrentPageName(const std::function<void(std::string)>& finishCallback) override;
     int32_t SendTranslateResult(int32_t nodeId, std::string result) override;
     int32_t GetCurrentImagesShowing(
         const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)

@@ -591,6 +591,7 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         }
         if (!parent) {
             auto willShowIndex = tabsLayoutProperty->GetIndex().value_or(0);
+            swiperPattern->FireSelectedEvent(-1, willShowIndex);
             swiperPattern->FireWillShowEvent(willShowIndex);
         }
         isInit_ = false;

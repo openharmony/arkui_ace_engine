@@ -22,10 +22,9 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
-#include "base/utils/utils.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/components/theme/theme_attributes.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace {
 namespace {
 constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
@@ -130,6 +129,22 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
 ResourceAdapterImplV2::ResourceAdapterImplV2(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
 {
     sysResourceManager_ = resourceManager;
+}
+
+ResourceAdapterImplV2::ResourceAdapterImplV2(
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager, int32_t instanceId)
+{
+    sysResourceManager_ = resourceManager;
+    std::shared_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    resourceManager->GetResConfig(*resConfig);
+    resConfig_ = resConfig;
+    appHasDarkRes_ = resConfig->GetAppDarkRes();
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    if (container) {
+        std::string hapPath = container->GetHapPath();
+        std::string resPath = container->GetPackagePathStr();
+        packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
+    }
 }
 
 ResourceAdapterImplV2::ResourceAdapterImplV2(

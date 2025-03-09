@@ -178,6 +178,19 @@ void TextFieldController::DeleteText(int32_t start, int32_t end)
     textFieldPattern->DeleteRange(start, end, false);
 }
 
+void TextFieldController::ClearPreviewText()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    PreviewRange range = {
+        textFieldPattern->GetPreviewTextStart(),
+        textFieldPattern->GetPreviewTextEnd(),
+    };
+    textFieldPattern->SetPreviewText(u"", range);
+    textFieldPattern->FinishTextPreviewOperation();
+    textFieldPattern->NotifyImfFinishTextPreview();
+}
+
 SelectionInfo TextFieldController::GetSelection()
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());

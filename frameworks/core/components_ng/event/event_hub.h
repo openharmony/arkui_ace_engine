@@ -26,6 +26,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/state_style_manager.h"
+#include "core/components_ng/event/visible_ratio_callback.h"
 
 namespace OHOS::Ace::NG {
 
@@ -195,7 +196,7 @@ public:
     bool HasStateStyle(UIState state) const;
     void AddSupportedState(UIState state);
     void SetSupportedStates(UIState state);
-    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)> callback, bool isInner);
+    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner);
     void RemoveSupportedUIState(UIState state, bool isInner);
     bool IsCurrentStateOn(UIState state);
     void SetKeyboardShortcut(

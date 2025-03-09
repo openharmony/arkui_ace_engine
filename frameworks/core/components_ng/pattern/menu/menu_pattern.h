@@ -58,15 +58,10 @@ struct MenuItemInfo {
 };
 
 struct PreviewMenuAnimationInfo {
-    float previewScale = -1.0f;
-    float menuScale = -1.0f;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(Dimension(-1.0f));
 
     // for hoverScale animation
     float clipRate = -1.0f;
-
-    OffsetF previewOffset = OffsetF();
-    OffsetF menuOffset = OffsetF();
 };
 
 class MenuPattern : public Pattern, public FocusView {
@@ -613,14 +608,23 @@ public:
         return customNode_.Upgrade();
     }
 
+    void SetActiveSetting(bool active)
+    {
+        activeSetting_ = active;
+    }
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
     float GetSelectMenuWidthFromTheme() const;
 
     bool IsSelectOverlayDefaultModeRightClickMenu();
-
+    void UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+        const RefPtr<MenuLayoutProperty>& property, int32_t& index);
+    void RemoveLastNodeDivider(const RefPtr<UINode>& lastNode);
+    void UpdateMenuItemDivider();
+    void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 protected:
-    void UpdateMenuItemChildren(RefPtr<UINode>& host);
+    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
@@ -648,6 +652,7 @@ private:
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
     void ResetScrollTheme(const RefPtr<FrameNode>& host);
+    void ResetThemeByInnerMenuCount();
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -742,7 +747,7 @@ private:
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
     bool needHideAfterTouch_ = true;
-
+    bool activeSetting_ = false;
     std::optional<OffsetF> lastPosition_;
     std::optional<Placement> lastPlacement_;
     OffsetF originOffset_;

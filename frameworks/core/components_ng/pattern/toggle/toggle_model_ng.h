@@ -39,7 +39,7 @@ class ACE_EXPORT ToggleModelNG : public OHOS::Ace::ToggleModel {
 public:
     void Create(ToggleType toggleType, bool isOn) override;
     void SetSelectedColor(const std::optional<Color>& selectedColor) override;
-    void SetSwitchPointColor(const Color& switchPointColor) override;
+    void SetSwitchPointColor(const std::optional<Color>& switchPointColor) override;
     void OnChange(ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
@@ -62,7 +62,7 @@ public:
     static void ResetTrackBorderRadius(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
-    static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
+    static void SetSwitchPointColor(FrameNode* frameNode, const std::optional<Color>& switchPointColor);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void OnChange(FrameNode* frameNode, ChangeEvent&& onChange);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);

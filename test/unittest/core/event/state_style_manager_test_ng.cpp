@@ -574,13 +574,14 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest018, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
-    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL, [](UIState){}, true);
+    std::function<void(UIState)> callback = [](UIState state) {};
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL, callback, true);
     EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_NORMAL));
        
-    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, [](UIState){}, true);
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, callback, true);
     EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_PRESSED));
 
-    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, [](UIState){}, false);
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, callback, false);
     bool flag = (stateStyleMgr->userStateStyleSubscribers_.first & UI_STATE_PRESSED) == UI_STATE_PRESSED;
     EXPECT_TRUE(flag);
 }
@@ -598,8 +599,9 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest019, TestSize.Level1)
     EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_NORMAL));
     EXPECT_FALSE(stateStyleMgr->HasStateStyle(UI_STATE_PRESSED));
 
-    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_PRESSED, [](UIState){}, true);
-    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_PRESSED, [](UIState){}, false);
+    std::function<void(UIState)> callback = [](UIState state) {};
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_PRESSED, callback, true);
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_PRESSED, callback, false);
     EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_PRESSED));
 
     stateStyleMgr->RemoveSupportedUIState(UI_STATE_PRESSED, true);
@@ -619,12 +621,13 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest020, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
 
-    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, [](UIState){}, true);
+    std::function<void(UIState)> callback = [](UIState state) {};
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, callback, true);
     EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_NORMAL | UI_STATE_PRESSED));
     stateStyleMgr->HandleStateChangeInternal(UI_STATE_PRESSED, stateStyleMgr->currentState_, true);
     EXPECT_TRUE(stateStyleMgr->innerStateStyleSubscribers_.second);
 
-    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, [](UIState){}, false);
+    stateStyleMgr->AddSupportedUIStateWithCallback(UI_STATE_NORMAL | UI_STATE_PRESSED, callback, false);
     EXPECT_TRUE(stateStyleMgr->HasStateStyle(UI_STATE_NORMAL | UI_STATE_PRESSED));
     stateStyleMgr->HandleStateChangeInternal(UI_STATE_PRESSED, stateStyleMgr->currentState_, false);
     EXPECT_TRUE(stateStyleMgr->userStateStyleSubscribers_.second);

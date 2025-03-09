@@ -564,7 +564,7 @@ void Terminate(const shared_ptr<JsRuntime>& runtime)
                 pipelineContext->Finish();
             }
         },
-        "ArkUIJsTerminate", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        "ArkUIJsTerminate");
 }
 
 void GetPackageInfoCallback(
@@ -3051,8 +3051,7 @@ void JsiEngineInstance::SetDebuggerPostTask(std::string& library_path)
             LOGE("delegate is nullptr");
             return;
         }
-        delegate->PostJsTask(
-            std::move(task), "ArkUIDebuggerTask", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        delegate->PostJsTask(std::move(task), "ArkUIDebuggerTask");
     };
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
@@ -3124,7 +3123,7 @@ void JsiEngine::SetPostTask(NativeEngine* nativeEngine)
                 ContainerScope scope(id);
                 nativeEngine->Loop(LOOP_NOWAIT, needSync);
             },
-            "ArkUISetNativeEngineLoop", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }

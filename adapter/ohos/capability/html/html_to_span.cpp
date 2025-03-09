@@ -15,27 +15,6 @@
 
 #include "html_to_span.h"
 
-#include "base/geometry/dimension.h"
-#include "base/image/file_uri_helper.h"
-#include "base/image/image_source.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utf_helper.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/image_provider/image_provider.h"
-#include "core/components_ng/pattern/text/span/mutable_span_string.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
@@ -417,7 +396,7 @@ Color HtmlToSpan::ToSpanColor(const std::string& value)
     std::string color = value;
     std::string tmp = value;
     tmp.erase(std::remove(tmp.begin(), tmp.end(), ' '), tmp.end());
-    auto regStr = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+    auto regStr = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
         "#[0-9A-Fa-f]{6,8}" : "#[0-9A-Fa-f]{7,8}";
     if (std::regex_match(tmp, matches, std::regex(regStr))) {
         auto rgb = tmp.substr(1);
@@ -691,6 +670,8 @@ void HtmlToSpan::HandleImgSpanOption(const Styles& styleMap, ImageSpanOptions& o
             options.imageAttribute->verticalAlign = StringToTextVerticalAlign(trimVal);
         } else if (key == "width" || key == "height") {
             HandleImageSize(key, trimVal, options);
+        } else if (key == "sync-load") {
+            options.imageAttribute->syncLoad = V2::ConvertStringToBool(trimVal);
         }
     }
 }
@@ -707,12 +688,17 @@ void HtmlToSpan::HandleImagePixelMap(const std::string& src, ImageSpanOptions& o
     ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
     auto image = ctx->MoveCanvasImage();
     if (image != nullptr) {
-        option.imagePixelMap = image->GetPixelMap();
+        auto pixelMap = image->GetPixelMap();
+        if (pixelMap) {
+            option.imagePixelMap = pixelMap;
+        }
     }
     if (option.imagePixelMap.has_value() && option.imagePixelMap.value() != nullptr) {
         auto pixel = option.imagePixelMap.value();
         LOGI("img height: %{public}d, width: %{public}d, size:%{public}d", pixel->GetHeight(),
             pixel->GetWidth(), pixel->GetByteCount());
+    } else {
+        option.image = src;
     }
 }
 
@@ -963,9 +949,13 @@ void HtmlToSpan::ToSpan(
     ParseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
     if (curNode->type == XML_ELEMENT_NODE) {
         if (htmlTag == "p") {
-            allContent += "\n";
-            childPos++;
-            ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+            if (curNode->parent == nullptr || curNode->parent->type != XML_ELEMENT_NODE ||
+                xmlStrcmp(curNode->parent->name, (const xmlChar*)"span") != 0) {
+                // The <p> contained in <span> is discarded. It is not considered as a standard writing method.
+                allContent += "\n";
+                childPos++;
+                ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+            }
         } else if (htmlTag == "img") {
             childPos++;
             ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);

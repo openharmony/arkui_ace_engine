@@ -117,9 +117,8 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     if (dirtyLayoutNodes_.empty()) {
         return;
     }
-    if (isLayouting_) {
-        LOGF("you are already in flushing layout!");
-        abort();
+    if (isLayouting_ && SystemProperties::GetLayoutDetectEnabled()) {
+        LOGF_ABORT("you are already in flushing layout!");
     }
 
 #ifdef FFRT_EXISTS

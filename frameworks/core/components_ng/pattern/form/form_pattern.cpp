@@ -87,11 +87,12 @@ public:
         auto formPattern_ = weakFormPattern_.Upgrade();
         CHECK_NULL_VOID(formPattern_);
         auto subContainer = formPattern_->GetSubContainer();
-        CHECK_NULL_VOID(subContainer);
-        auto formId = subContainer->GetRunningCardId();
-        TAG_LOGI(AceLogTag::ACE_FORM,
-            "formImage height: %{public}d, width: %{public}d, size:%{public}d, formId: %{public}" PRId64,
-            pixelMap->GetHeight(), pixelMap->GetWidth(), pixelMap->GetByteCount(), formId);
+        if (subContainer != nullptr && pixelMap != nullptr) {
+            auto formId = subContainer->GetRunningCardId();
+            TAG_LOGI(AceLogTag::ACE_FORM,
+                "formImage height: %{public}d, width: %{public}d, size:%{public}d, formId: %{public}" PRId64,
+                pixelMap->GetHeight(), pixelMap->GetWidth(), pixelMap->GetByteCount(), formId);
+        }
         formPattern_->OnSnapshot(pixelMap);
     }
 
@@ -265,8 +266,8 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
         return;
     }
 
-    if (colorMode != SystemProperties::GetColorMode()) {
-        colorMode = SystemProperties::GetColorMode();
+    if (colorMode != Container::CurrentColorMode()) {
+        colorMode = Container::CurrentColorMode();
         HandleUnTrustForm();
     }
 }
@@ -391,6 +392,7 @@ void FormPattern::SnapshotSurfaceNode()
     CHECK_NULL_VOID(externalContext);
     auto rsNode = externalContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
+    externalContext->AddRsNodeForCapture();
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<FormSnapshotCallback>(WeakClaim(this)));
 }
@@ -517,9 +519,11 @@ RefPtr<FrameNode> FormPattern::CreateImageNode()
     CHECK_NULL_RETURN(formNode, nullptr);
     auto imageId = formNode->GetImageId();
     auto subContainer = GetSubContainer();
-    CHECK_NULL_RETURN(subContainer, nullptr);
-    auto formId = subContainer->GetRunningCardId();
-    TAG_LOGI(AceLogTag::ACE_FORM, "CreateImageNode imageId: %{public}d, formId: %{public}" PRId64, imageId, formId);
+    if (subContainer != nullptr) {
+        auto formId = subContainer->GetRunningCardId();
+        TAG_LOGI(AceLogTag::ACE_FORM, "CreateImageNode imageId: %{public}d, formId: %{public}" PRId64,
+            imageId, formId);
+    }
     RefPtr<FrameNode> imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId,
         AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(imageNode, nullptr);
@@ -649,7 +653,8 @@ void FormPattern::OnModifyDone()
     }
     // Convert DimensionUnit to DimensionUnit::PX
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnModifyDone, info.id: %{public}" PRId64, info.id);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "FormPattern::OnModifyDone, info.id: %{public}" PRId64 ", info.index: %{public}" PRId64, info.id, info.index);
     info.width = Dimension(width.ConvertToPx());
     info.height = Dimension(height.ConvertToPx());
     auto &&borderWidthProperty = layoutProperty->GetBorderWidthProperty();
@@ -660,8 +665,6 @@ void FormPattern::OnModifyDone()
     info.borderWidth = borderWidth;
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
-    info.obscuredMode = isFormObscured_;
-    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleLocked(info.bundleName, info.id));
     auto wantWrap = info.wantWrap;
     if (wantWrap) {
         bool isEnable = wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
@@ -703,18 +706,19 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     layoutProperty->UpdateRequestFormInfo(info);
 
     UpdateBackgroundColorWhenUnTrustForm();
-    info.obscuredMode = isFormObscured_;
-    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleLocked(info.bundleName, info.id));
     HandleFormComponent(info);
     return true;
 }
 
-void FormPattern::HandleFormComponent(const RequestFormInfo& info)
+void FormPattern::HandleFormComponent(RequestFormInfo& info)
 {
     ACE_FUNCTION_TRACE();
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
+        info.obscuredMode = isFormObscured_;
+        info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) ||
+            IsFormBundleProtected(info.bundleName, info.id));
         AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
@@ -780,10 +784,10 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
         formSpecialStyle_.SetInitDone();
         return;
     }
-    bool isFormLocked = IsFormBundleLocked(info.bundleName, info.id);
-    if (isFormLocked || isFormBundleForbidden)  {
+    bool isFormProtected = IsFormBundleProtected(info.bundleName, info.id);
+    if (isFormProtected || isFormBundleForbidden)  {
         auto newFormSpecialStyle = formSpecialStyle_;
-        newFormSpecialStyle.SetIsLockedByAppLock(isFormLocked);
+        newFormSpecialStyle.SetIsLockedByAppLock(isFormProtected);
         newFormSpecialStyle.SetIsForbiddenByParentControl(isFormBundleForbidden);
         newFormSpecialStyle.SetInitDone();
         PostUITask([weak = WeakClaim(this), info, newFormSpecialStyle] {
@@ -821,12 +825,21 @@ void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFo
         }, "ArkUIAddFormComponentUI");
 }
 
+void FormPattern::SetParamForWantTask(const RequestFormInfo& info)
+{
+    PostBgTask([weak = WeakClaim(this), info] {
+        ACE_SCOPED_TRACE("ArkUISetParamForWant");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formManagerBridge_->SetParamForWant(info);
+        }, "ArkUISetParamForWant");
+}
+
 void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 {
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
-        std::lock_guard<std::mutex> lock(formManagerBridge_->GetRecycleMutex());
-        formManagerBridge_->SetParamForWant(info);
+        SetParamForWantTask(info);
 #endif
     }
     auto host = GetHost();
@@ -971,7 +984,7 @@ void FormPattern::UpdateAppLockCfg()
     CHECK_NULL_VOID(imageLayoutProperty);
     auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
     auto currentColor = sourceInfo->GetFillColor();
-    auto newColor = SystemProperties::GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
+    auto newColor = Container::CurrentColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
     if (currentColor != newColor) {
         sourceInfo->SetFillColor(newColor);
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
@@ -1082,7 +1095,7 @@ void FormPattern::LoadFormSkeleton(bool isRefresh)
     CHECK_NULL_VOID(columnNode);
     double cardWidth = cardInfo_.width.Value();
     double cardHeight = cardInfo_.height.Value();
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     bool isDarkMode = colorMode == ColorMode::DARK;
     std::shared_ptr<FormSkeletonParams> params = std::make_shared<FormSkeletonParams>(cardWidth,
         cardHeight, dimension, dimensionHeight, isDarkMode);
@@ -1187,7 +1200,7 @@ RefPtr<FrameNode> FormPattern::CreateTimeLimitNode()
     textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
     Dimension fontSize(GetTimeLimitFontSize());
     textLayoutProperty->UpdateFontSize(fontSize);
-    textLayoutProperty->UpdateTextColor(SystemProperties::GetColorMode() == ColorMode::DARK ?
+    textLayoutProperty->UpdateTextColor(Container::CurrentColorMode() == ColorMode::DARK ?
         Color(FONT_COLOR_DARK) : Color(FONT_COLOR_LIGHT));
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(textNode->GetRenderContext());
@@ -1210,7 +1223,7 @@ RefPtr<FrameNode> FormPattern::CreateAppLockNode()
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     auto info = ImageSourceInfo("");
     info.SetResourceId(InternalResource::ResourceId::APP_LOCK_SVG);
-    info.SetFillColor(SystemProperties::GetColorMode() == ColorMode::DARK ? Color::BLACK:Color::WHITE);
+    info.SetFillColor(Container::CurrentColorMode() == ColorMode::DARK ? Color::BLACK:Color::WHITE);
     imageLayoutProperty->UpdateImageSourceInfo(info);
     CalcSize idealSize = { CalcLength(32, DimensionUnit::VP), CalcLength(32, DimensionUnit::VP) };
     imageLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
@@ -1685,7 +1698,7 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
     json->Put("idString", std::to_string(id).c_str());
     bool isLocked = formSpecialStyle_.IsInited() ?
         formSpecialStyle_.IsLockedByAppLock() :
-        (IsFormBundleLocked(cardInfo_.bundleName, id) && !formSpecialStyle_.IsMultiAppForm());
+        (!IsFormBundleExempt(id) && !formSpecialStyle_.IsMultiAppForm());
     json->Put("isLocked", isLocked);
     eventHub->FireOnAcquired(json->ToString());
 }
@@ -1954,12 +1967,13 @@ void FormPattern::RemoveFormChildNode(FormChildNodeType formChildNodeType)
     
     if (formChildNodeType == FormChildNodeType::FORM_STATIC_IMAGE_NODE) {
         auto formNode = DynamicCast<FormNode>(host);
-        CHECK_NULL_VOID(formNode);
-        auto imageId = formNode->GetImageId();
         auto subContainer = GetSubContainer();
-        CHECK_NULL_VOID(subContainer);
-        auto formId = subContainer->GetRunningCardId();
-        TAG_LOGI(AceLogTag::ACE_FORM, "RemoveImageNode imageId: %{public}d, formId: %{public}" PRId64, imageId, formId);
+        if (subContainer != nullptr && formNode != nullptr) {
+            auto imageId = formNode->GetImageId();
+            auto formId = subContainer->GetRunningCardId();
+            TAG_LOGI(AceLogTag::ACE_FORM, "RemoveImageNode imageId: %{public}d, formId: %{public}" PRId64,
+                imageId, formId);
+        }
     }
     host->RemoveChild(childNode);
     TAG_LOGI(AceLogTag::ACE_FORM, "Remove child node: %{public}d sucessfully.",
@@ -2470,10 +2484,16 @@ void FormPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     TAG_LOGW(AceLogTag::ACE_FORM, "not supported");
 }
 
-bool FormPattern::IsFormBundleLocked(const std::string& bundleName, int64_t formId) const
+bool FormPattern::IsFormBundleExempt(int64_t formId) const
 {
     CHECK_NULL_RETURN(formManagerBridge_, false);
-    return formManagerBridge_->IsFormBundleLocked(bundleName, formId);
+    return formManagerBridge_->IsFormBundleExempt(formId);
+}
+
+bool FormPattern::IsFormBundleProtected(const std::string& bundleName, int64_t formId) const
+{
+    CHECK_NULL_RETURN(formManagerBridge_, false);
+    return formManagerBridge_->IsFormBundleProtected(bundleName, formId);
 }
 
 void FormPattern::HandleLockEvent(bool isLock)
@@ -2517,7 +2537,7 @@ void FormPattern::UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &rend
 {
     Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    bool isDarkMode = SystemProperties::GetColorMode() == ColorMode::DARK;
+    bool isDarkMode = Container::CurrentColorMode() == ColorMode::DARK;
     GradientColor beginGredientColor =
         GradientColor(isDarkMode ? Color(TOP_BG_COLOR_DARK) : Color(TOP_BG_COLOR_LIGHT));
     beginGredientColor.SetDimension(CalcDimension(0, DimensionUnit::PERCENT));

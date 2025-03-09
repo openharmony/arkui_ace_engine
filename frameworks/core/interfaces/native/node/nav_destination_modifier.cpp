@@ -149,7 +149,9 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
         finalOptions.bgOptions.color = Color(options.colorValue.value);
     }
     if (options.blurStyle.isSet) {
-        finalOptions.bgOptions.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        BlurStyleOption blurStyleOption;
+        blurStyleOption.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        finalOptions.bgOptions.blurStyleOption = blurStyleOption;
     }
     if (options.barStyle.isSet) {
         finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);
@@ -293,7 +295,8 @@ void SetNavDestinationOnCoordScrollStartAction(
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
-        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
         onCoordScrollStartAction(nodeHandle);
     };
     NavDestinationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
@@ -306,8 +309,9 @@ void SetNavDestinationOnCoordScrollUpdateAction(ArkUINodeHandle node,
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollUpdateActionCallBack =
         [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
-            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
-            onCoordScrollUpdateAction(nodeHandle, currentOffset);
+            auto frameNode = node.Upgrade();
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+                onCoordScrollUpdateAction(nodeHandle, currentOffset);
         };
     NavDestinationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
 }
@@ -317,7 +321,8 @@ void SetNavDestinationOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoor
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
-        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(node.Upgrade().GetRawPtr());
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
         onCoordScrollEndAction(nodeHandle);
     };
     NavDestinationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));

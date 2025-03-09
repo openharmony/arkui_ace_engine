@@ -22,6 +22,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "frameworks/core/components/common/properties/decoration.h"
 
 // avoid windows build error about macro defined in wincon.h
 #ifdef DOUBLE_CLICK
@@ -93,6 +94,9 @@ struct TextSelector {
         }
         bool isChanged = baseOffset != destinationOffset || base != destination;
         baseOffset = base;
+        if (baseOffset >= 0) {
+            lastValidStart = baseOffset;
+        }
         destinationOffset = destination;
         if (isChanged) {
             FireAccessibilityCallback();
@@ -109,6 +113,9 @@ struct TextSelector {
         }
         baseOffset = both;
         destinationOffset = both;
+        if (baseOffset >= 0) {
+            lastValidStart = baseOffset;
+        }
     }
 
     void ReverseTextSelector()
@@ -226,6 +233,7 @@ struct TextSelector {
     OffsetF firstHandleOffset_;
     OffsetF secondHandleOffset_;
     OnAccessibilityCallback onAccessibilityCallback_;
+    int32_t lastValidStart = 0;
 };
 
 enum class TextSpanType : int32_t {
@@ -248,12 +256,17 @@ enum class SelectionMenuType : int32_t {
     PREVIEW_MENU = 1,
 };
 
+struct PreviewMenuOptions {
+    HapticFeedbackMode hapticFeedbackMode = HapticFeedbackMode::DISABLED;
+};
+
 struct SelectMenuParam {
     std::function<void(int32_t, int32_t)> onAppear;
     std::function<void()> onDisappear;
     std::function<void(int32_t, int32_t)> onMenuShow;
     std::function<void(int32_t, int32_t)> onMenuHide;
     bool isValid = true;
+    PreviewMenuOptions previewMenuOptions;
 };
 
 struct SelectionMenuParams {

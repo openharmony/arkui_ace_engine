@@ -22,12 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/event/ace_events.h"
-#include "core/event/touch_event.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -611,7 +606,7 @@ void TextFieldSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFi
     CHECK_NULL_VOID(pattern);
     auto recognizer = pattern->GetMultipleClickRecognizer();
     CHECK_NULL_VOID(recognizer);
-    if (recognizer->IsRunning() && recognizer->IsValidClick(event)) {
+    if (recognizer->IsValidClick(event)) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield overlayClick multiple click recognizer is running.");
         auto overlayEvent = event;
         overlayEvent.SetLocalLocation(recognizer->GetBeginLocalLocation());

@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include "gesture_recognizer.h"
-#include "pan_recognizer.h"
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -28,6 +27,7 @@ constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
 constexpr float MIN_SPEED_THRESHOLD = 500.0f;
+constexpr float TOUCHPAD_STILL_THRESHOLD = 0.1;
 
 } // namespace
 
@@ -181,6 +181,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
     auto revertAxisValue = event.ConvertToSummationAxisValue(lastAxisEvent_);
     pesudoTouchEvent.x = revertAxisValue.first;
     pesudoTouchEvent.y = revertAxisValue.second;
+    pesudoTouchEvent.sourceTool = event.sourceTool;
     panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, end);
     lastAxisEvent_ = event;
     if (!end) {
@@ -281,6 +282,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     auto revertAxisValue = event.ConvertToSummationAxisValue(lastAxisEvent_);
     pesudoTouchEvent.x = revertAxisValue.first;
     pesudoTouchEvent.y = revertAxisValue.second;
+    pesudoTouchEvent.sourceTool = event.sourceTool;
     panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, false);
     refereeState_ = RefereeState::DETECTING;
 }
@@ -651,8 +653,8 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
         judgeDistance = mouseDistance_;
     }
-    // when version >= 16, if distance_ = 0, panGesture will accept when receive Down event
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+    // when version >= 20, if distance_ = 0, panGesture will accept when receive Down event
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) &&
         NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
         return GestureAcceptResult::ACCEPT;
     }
@@ -695,19 +697,24 @@ void PanRecognizer::OnSucceedCancel()
     SendCallbackMsg(onActionCancel_);
 }
 
+void PanRecognizer::GetGestureEventHalfInfo(GestureEvent* info)
+{
+    info->SetDeviceId(deviceId_);
+    info->SetFingerList(fingerList_);
+    info->SetSourceDevice(deviceType_);
+    info->SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
+    info->SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
+    info->SetDelta(delta_);
+    info->SetVelocity(panVelocity_.GetVelocity());
+    info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
+}
+
 GestureEvent PanRecognizer::GetGestureEventInfo()
 {
     GestureEvent info;
     info.SetTimeStamp(time_);
     UpdateFingerListInfo();
-    info.SetDeviceId(deviceId_);
-    info.SetFingerList(fingerList_);
-    info.SetSourceDevice(deviceType_);
-    info.SetOffsetX((direction_.type & PanDirection::HORIZONTAL) == 0 ? 0.0 : averageDistance_.GetX());
-    info.SetOffsetY((direction_.type & PanDirection::VERTICAL) == 0 ? 0.0 : averageDistance_.GetY());
-    info.SetDelta(delta_);
-    info.SetVelocity(panVelocity_.GetVelocity());
-    info.SetMainVelocity(panVelocity_.GetMainAxisVelocity());
+    GetGestureEventHalfInfo(&info);
     TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
@@ -741,6 +748,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetForce(lastTouchEvent_.force);
     info.SetTiltX(lastTouchEvent_.tiltX.value_or(0.0));
     info.SetTiltY(lastTouchEvent_.tiltY.value_or(0.0));
+    info.SetRollAngle(lastTouchEvent_.rollAngle.value_or(0.0));
     info.SetPointerEvent(lastPointEvent_);
     info.SetIsPostEventResult(isPostEventResult_);
     info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
@@ -749,20 +757,13 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
-    UpdateCallbackState(callback);
     if (callback && *callback && IsEnabled() && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
+        HandlePanGestureAccept(info, PanGestureState::BEFORE, callback);
         callbackFunction(info);
-    }
-}
-
-void PanRecognizer::CheckCallbackState()
-{
-    if ((callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) &&
-        currentFingers_ == 0) {
-        SendCallbackMsg(onActionEnd_);
+        HandlePanGestureAccept(info, PanGestureState::AFTER, callback);
     }
 }
 
@@ -800,6 +801,9 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     }
     if (lastTouchEvent_.tiltY.has_value()) {
         info->SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    if (lastTouchEvent_.rollAngle.has_value()) {
+        info->SetRollAngle(lastTouchEvent_.rollAngle.value());
     }
     if (gestureInfo_) {
         gestureInfo_->SetInputEventType(inputEventType_);
@@ -977,7 +981,8 @@ double PanRecognizer::PanVelocity::GetMainAxisVelocity()
 
 void PanRecognizer::PanVelocity::UpdateTouchPoint(int32_t id, const TouchEvent& event, bool end)
 {
-    trackerMap_[id].UpdateTouchPoint(event, end);
+    trackerMap_[id].UpdateTouchPoint(event, end,
+        event.sourceTool == SourceTool::TOUCHPAD ? TOUCHPAD_STILL_THRESHOLD : VelocityTracker::TOUCH_STILL_THRESHOLD);
 }
 
 void PanRecognizer::PanVelocity::Reset(int32_t id)
@@ -1057,6 +1062,22 @@ void PanRecognizer::DumpVelocityInfo(int32_t fingerId)
         velocityTrackerIter->second.DumpVelocityPoints();
     } else {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Dump velocity fail with fingerId:%{public}d", fingerId);
+    }
+}
+
+void PanRecognizer::HandlePanGestureAccept(
+    const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback)
+{
+    if (callback == onActionStart_) {
+        currentCallbackState_ = CurrentCallbackState::START;
+        auto node = GetAttachedNode().Upgrade();
+        UIObserverHandler::GetInstance().NotifyPanGestureStateChange(
+            info, Claim(this), node, { panGestureState, currentCallbackState_ });
+    } else if (callback == onActionEnd_) {
+        currentCallbackState_ = CurrentCallbackState::END;
+        auto node = GetAttachedNode().Upgrade();
+        UIObserverHandler::GetInstance().NotifyPanGestureStateChange(
+            info, Claim(this), node, { panGestureState, currentCallbackState_ });
     }
 }
 } // namespace OHOS::Ace::NG

@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT SymbolModel {
@@ -48,6 +49,8 @@ public:
     virtual void SetSymbolEffectOptions(NG::SymbolEffectOptions& symbolEffectOptions) = 0;
     virtual void SetMinFontScale(const float value) = 0;
     virtual void SetMaxFontScale(const float value) = 0;
+    virtual void SetFontFamilies(std::vector<std::string>& familyNames) = 0;
+    virtual void SetSymbolType(SymbolType value) = 0;
 
 private:
     static std::unique_ptr<SymbolModel> instance_;

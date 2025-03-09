@@ -112,6 +112,14 @@ public:
         accessibilityHoverEventActuator_->ReplaceInputEvent(std::move(onAccessibilityHoverEventFunc));
     }
 
+    bool HasAccessibilityHoverEvent()
+    {
+        if (accessibilityHoverEventActuator_) {
+            return accessibilityHoverEventActuator_->HasUserCallback();
+        }
+        return false;
+    }
+
     void SetJSFrameNodeOnHoverEvent(OnHoverFunc&& onHoverEventFunc)
     {
         if (!hoverEventActuator_) {

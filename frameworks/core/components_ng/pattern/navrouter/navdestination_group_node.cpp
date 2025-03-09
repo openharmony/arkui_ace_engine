@@ -36,8 +36,10 @@ constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
 constexpr int32_t MAX_RENDER_GROUP_TEXT_NODE_COUNT = 50;
 constexpr float MAX_RENDER_GROUP_TEXT_NODE_HEIGHT = 150.0f;
 constexpr int32_t INVALID_ANIMATION_ID = -1;
-constexpr int32_t SYSTEM_FADE_TRANSITION_DURATION = 200;
-constexpr int32_t SYSTEM_FADE_TRANSITION_DELAY = 50;
+constexpr int32_t SYSTEM_ENTER_FADE_TRANSITION_DURATION = 250;
+constexpr int32_t SYSTEM_EXIT_FADE_TRANSITION_DURATION = 200;
+constexpr int32_t SYSTEM_ENTER_FADE_TRANSITION_DELAY = 50;
+constexpr int32_t SYSTEM_EXIT_FADE_TRANSITION_DELAY = 0;
 constexpr int32_t SYSTEM_EXPLODE_TRANSITION_MASK_DURATION = 300;
 constexpr int32_t SYSTEM_ENTER_POP_EXPLODE_OPACITY_DURATION = 250;
 constexpr int32_t SYSTEM_ENTER_POP_EXPLODE_OPACITY_DELAY = 50;
@@ -58,6 +60,14 @@ const char* TransitionTypeToString(NavigationSystemTransitionType type)
             return "NavigationSystemTransitionType.TITLE";
         case NavigationSystemTransitionType::CONTENT:
             return "NavigationSystemTransitionType.CONTENT";
+        case NavigationSystemTransitionType::FADE:
+            return "NavigationSystemTransitionType.FADE";
+        case NavigationSystemTransitionType::EXPLODE:
+            return "NavigationSystemTransitionType.EXPLODE";
+        case NavigationSystemTransitionType::SLIDE_RIGHT:
+            return "NavigationSystemTransitionType.SLIDE_RIGHT";
+        case NavigationSystemTransitionType::SLIDE_BOTTOM:
+            return "NavigationSystemTransitionType.SLIDE_BOTTOM";
         default:
             return "NavigationSystemTransitionType.DEFAULT";
     }
@@ -719,8 +729,10 @@ int32_t NavDestinationGroupNode::DoSystemFadeTransition(bool isEnter)
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
-    auto option = BuildAnimationOption(
-        Curves::SHARP, BuildTransitionFinishCallback(), SYSTEM_FADE_TRANSITION_DURATION, SYSTEM_FADE_TRANSITION_DELAY);
+    SetIsOnAnimation(true);
+    auto option = BuildAnimationOption(Curves::SHARP, BuildTransitionFinishCallback(),
+        isEnter ? SYSTEM_ENTER_FADE_TRANSITION_DURATION : SYSTEM_EXIT_FADE_TRANSITION_DURATION,
+        isEnter ? SYSTEM_ENTER_FADE_TRANSITION_DELAY : SYSTEM_EXIT_FADE_TRANSITION_DELAY);
     renderContext->OpacityAnimation(option, isEnter ? 0.0f : 1.0f, isEnter ? 1.0f : 0.0f);
     return animationId_;
 }
@@ -732,6 +744,7 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
+    SetIsOnAnimation(true);
     if ((operation == NavigationOperation::POP) ^ isEnter) {
         // translate animation
         bool isRight = (systemTransitionType_ & NavigationSystemTransitionType::SLIDE_RIGHT)
@@ -781,6 +794,7 @@ int32_t NavDestinationGroupNode::DoSystemEnterExplodeTransition(NavigationOperat
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
+    SetIsOnAnimation(true);
     if (operation == NavigationOperation::POP) {
         // mask animation
         DoMaskAnimation(BuildAnimationOption(Curves::FRICTION, nullptr, SYSTEM_EXPLODE_TRANSITION_MASK_DURATION),
@@ -811,6 +825,7 @@ int32_t NavDestinationGroupNode::DoSystemExitExplodeTransition(NavigationOperati
         eventHub->SetEnabledInternal(false);
     }
     animationId_ = MakeUniqueAnimationId();
+    SetIsOnAnimation(true);
     if (operation == NavigationOperation::POP) {
         // opacity animation
         renderContext->OpacityAnimation(
@@ -868,7 +883,9 @@ int32_t NavDestinationGroupNode::DoCustomTransition(NavigationOperation operatio
             longestAnimationDuration = transition.duration + transition.delay;
         }
     }
-    if (longestAnimationDuration == INT32_MIN) {
+    if (longestAnimationDuration != INT32_MIN) {
+        SetIsOnAnimation(true);
+    } else {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "navDestination custom transition array is empty!");
     }
     auto pipeline = GetContext();
@@ -896,7 +913,6 @@ void NavDestinationGroupNode::StartCustomTransitionAnimation(NavDestinationTrans
             // do necessary system-side tasks
             auto navDestination = weak.Upgrade();
             CHECK_NULL_VOID(navDestination);
-            navDestination->SetIsOnAnimation(true);
             if (!hasResetProperties && isEnter) {
                 auto pattern = navDestination->GetPattern<NavDestinationPattern>();
                 CHECK_NULL_VOID(pattern);
@@ -993,5 +1009,12 @@ void NavDestinationGroupNode::ResetCustomTransitionAnimationProperties()
     renderContext->UpdateTranslateInXY({ 0.0f, 0.0f });
     renderContext->SetOpacity(userSetOpacity_);
     renderContext->SetActualForegroundColor(Color::TRANSPARENT);
+}
+
+RefPtr<UINode> NavDestinationGroupNode::GetNavigationNode()
+{
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, nullptr);
+    return navDestinationPattern->GetNavigationNode();
 }
 } // namespace OHOS::Ace::NG

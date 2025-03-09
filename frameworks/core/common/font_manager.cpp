@@ -50,7 +50,8 @@ void FontManager::RegisterFont(const std::string& familyName, const std::string&
     RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
     fontLoaders_.emplace_back(fontLoader);
     TAG_LOGI(AceLogTag::ACE_FONT,
-        "RegisterFont [familyName:%{public}s],[familySrc:%{public}s],[bundleName:%{public}s],[moduleName:%{public}s]",
+        "RegisterFont "
+        "[familyName:%{public}s],[familySrc:%{public}s],[bundleName:%{public}s],[moduleName:%{public}s]",
         familyName.c_str(), familySrc.c_str(), bundleName.c_str(), moduleName.c_str());
     fontLoader->AddFont(context, bundleName, moduleName);
 

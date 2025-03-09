@@ -107,10 +107,6 @@ static napi_value JSAddFrameNodeWithOrder(napi_env env, napi_callback_info info)
         levelOrder = ParseLevelOrder(env, argv[1]);
     }
 
-    if (!levelOrder.has_value()) {
-        levelOrder = std::make_optional(0.0);
-    }
-
     delegate->AddFrameNodeWithOrder(AceType::Claim(frameNode), levelOrder);
     return nullptr;
 }

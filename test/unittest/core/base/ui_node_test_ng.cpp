@@ -2644,17 +2644,17 @@ HWTEST_F(UINodeTestNg, GetPageId_API13, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPageId_API16
- * @tc.desc: Test ui node method GetPageId in API16
+ * @tc.name: GetPageId_API18
+ * @tc.desc: Test ui node method GetPageId in API18
  * @tc.type: FUNC
  */
 HWTEST_F(UINodeTestNg, GetPageId_API16, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set API13.
+     * @tc.steps: step1. set API18.
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
 
     /**
      * @tc.steps: step2. create FrameNode with child

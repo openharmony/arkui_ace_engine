@@ -61,6 +61,7 @@ void CheckBoxPatternTestNG::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
 
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
@@ -1127,6 +1128,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest036, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -1179,6 +1181,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest037, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->offset_ = OffsetF(1, 1);
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
@@ -1232,6 +1235,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest038, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(1, 1);
@@ -1286,6 +1290,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest039, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(1, 1);
@@ -1340,6 +1345,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest040, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(20, 30); //20 is x offset of checkbox, 30 is y offset of checkbox
@@ -1394,6 +1400,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest041, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(20, 30); //20 is x offset of checkbox, 30 is y offset of checkbox
@@ -1448,6 +1455,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest042, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(20, 30); //20 is x offset of checkbox, 30 is y offset of checkbox
@@ -1502,6 +1510,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest043, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(1, 1);
@@ -1556,6 +1565,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest044, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
     pattern->paintMethod_->UpdateContentModifier(paintWrapper);
@@ -1608,6 +1618,7 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest045, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 100.0_px; //10.0_px is value of focusPaintPadding_
     pattern->offset_ = OffsetF(-5, -5); //-5 is value of offset_

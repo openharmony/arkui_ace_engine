@@ -40,16 +40,16 @@ RefPtr<FrameNode> CreateGridNodeWithChild(size_t childCount, const GridItemStyle
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() {return AceType::MakeRefPtr<GridPattern>(); });
-    ViewAbstract::SetWidth(frameNode.GetRawPtr(), CalcLength(GRID_WIDTH));
-    ViewAbstract::SetHeight(frameNode.GetRawPtr(), CalcLength(GRID_HEIGHT));
+    ViewAbstract::SetWidth(Referenced::RawPtr(frameNode), CalcLength(GRID_WIDTH));
+    ViewAbstract::SetHeight(Referenced::RawPtr(frameNode), CalcLength(GRID_HEIGHT));
     std::list<RefPtr<FrameNode>> childNodes;
 
     for (size_t i = 0; i < childCount; ++i) {
         auto chidNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto childNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, chidNodeId,
             [itemStyle = gridItemStyle]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
-        ViewAbstract::SetWidth(childNode.GetRawPtr(), CalcLength(ITEM_WIDTH));
-        ViewAbstract::SetHeight(childNode.GetRawPtr(), CalcLength(ITEM_HEIGHT));
+        ViewAbstract::SetWidth(Referenced::RawPtr(childNode), CalcLength(ITEM_WIDTH));
+        ViewAbstract::SetHeight(Referenced::RawPtr(childNode), CalcLength(ITEM_HEIGHT));
         childNode->MountToParent(frameNode);
         childNodes.emplace_back(childNode);
     }
@@ -1964,6 +1964,7 @@ HWTEST_F(GestureEventHubTestNg, GetSelectItemSize001, TestSize.Level1)
      * @tc.steps: step1. Create grid with gridItem frame node tree.
      * @tc.expected: instance is not null.
      */
+    SystemProperties::dragDropFrameworkStatus_ = 3;
     auto gridNode = ProcessDragItemGroupScene();
     ASSERT_NE(gridNode, nullptr);
     auto gridItem = AceType::DynamicCast<FrameNode>(gridNode->GetChildByIndex(0));

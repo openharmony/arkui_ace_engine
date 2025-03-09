@@ -42,6 +42,19 @@ const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 const RefPtr<CubicCurve> replaceCurve = AceType::MakeRefPtr<CubicCurve>(0.33, 0.0, 0.67, 1.0);
 
+void ExitWindow(PipelineContext* context)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsUIExtensionWindow()) {
+        container->TerminateUIExtension();
+    } else {
+        auto windowManager = context->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->WindowPerformBack();
+    }
+}
+
 void UpdateTransitionAnimationId(const RefPtr<FrameNode>& node, int32_t id)
 {
     auto navDestinationBaseNode = AceType::DynamicCast<NavDestinationNodeBase>(node);
@@ -380,12 +393,13 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         if (isOverride) {
             result = eventHub->FireOnBackPressedEvent();
         }
+        auto navigation = navigationWeak.Upgrade();
+        CHECK_NULL_RETURN(navigation, false);
+        navigation->CheckIsNeedForceExitWindow(result);
         if (result) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation user onBackPress return true");
             return true;
         }
-        auto navigation = navigationWeak.Upgrade();
-        CHECK_NULL_RETURN(navigation, false);
         // if set hideNavBar and stack size is one, return false
         auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(navigation->GetLayoutProperty());
         CHECK_NULL_RETURN(navigationLayoutProperty, false);
@@ -471,6 +485,49 @@ bool NavigationGroupNode::CheckCanHandleBack(bool& isEntry)
         navDestinationPattern->GetName().c_str());
     GestureEvent gestureEvent;
     return navDestination->GetNavDestinationBackButtonEvent()(gestureEvent);
+}
+
+void NavigationGroupNode::CheckIsNeedForceExitWindow(bool result)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (!context->GetInstallationFree() || !result) {
+        // if is not atommic service and result is false, don't process.
+        return;
+    }
+    
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    auto isHasParentNavigation = navigationPattern->GetParentNavigationPattern();
+    auto navigationStack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_VOID(navigationStack);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    int32_t pageSize =
+        stageManager->GetStageNode() ? static_cast<int32_t>(stageManager->GetStageNode()->GetChildren().size()) : 0;
+    if (navigationStack->GetSize() != 1 || isHasParentNavigation || !overlayManager->IsModalEmpty() || pageSize != 1) {
+        return;
+    }
+    
+    /*
+    * when stack size is one, there four situations.
+    * 1.split mode, navbar visible.
+    * 2.split mode, navbar invisible.
+    * 3.stack mode, navbar visible.
+    * 4.stack mode, navbar invisible.
+    * Only the third situation don't need to be intercepted
+    */
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    bool isSplitMode = GetNavigationMode() == NavigationMode::SPLIT;
+    bool isLastNavdesNeedIntercept = isSplitMode || layoutProperty->GetHideNavBar().value_or(false);
+    if (!isLastNavdesNeedIntercept) {
+        return;
+    }
+    ExitWindow(context);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navdestination onbackpress intercepted, exit window.");
 }
 
 bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastChild, bool isOverride)
@@ -695,7 +752,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
     int32_t preAnimationId)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 
@@ -1799,6 +1856,7 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
                     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 }
             }
+            navigation->RemoveDialogDestination();
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();

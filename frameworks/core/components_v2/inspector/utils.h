@@ -85,6 +85,15 @@ inline std::string ConvertBoolToString(bool flag)
     return flag ? "true" : "false";
 }
 
+inline bool ConvertStringToBool(const std::string& str)
+{
+    if (str == "true") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 inline std::string ConvertTabBarModeToString(TabBarMode barMode)
 {
     std::string result = "";

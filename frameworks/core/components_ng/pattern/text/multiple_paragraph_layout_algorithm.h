@@ -63,7 +63,6 @@ protected:
         CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
         return spanGroup.front();
     }
-
     void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
         const TextStyle& textStyle);
     void ConstructTextStyles(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
@@ -90,14 +89,34 @@ protected:
         return ss.str();
     }
 
-    std::list<ParagraphManager::ParagraphInfo> GetParagraphs()
+    virtual RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,
+        const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap) {
+        useParagraphCache_ = false;
+        return Paragraph::Create(paraStyle, FontCollection::Current());
+    }
+
+    std::vector<ParagraphManager::ParagraphInfo> GetParagraphs()
     {
-        std::list<ParagraphManager::ParagraphInfo> paragraphInfo;
+        std::vector<ParagraphManager::ParagraphInfo> paragraphInfo;
         if (paragraphManager_) {
             paragraphInfo = paragraphManager_->GetParagraphs();
         }
         return paragraphInfo;
     }
+
+    virtual void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& iterItem,
+        const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
+        const TextStyle& textStyle);
+    virtual void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
+        const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
+        const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);
+    virtual void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper,
+        const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength, CustomSpanPlaceholderInfo& customSpanPlaceholder);
+
+    virtual void AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
+        const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
+    virtual void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
+        const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
@@ -109,6 +128,9 @@ protected:
     bool isSpanStringMode_ = false;
     bool isMarquee_ = false;
     bool needReCreateParagraph_ = true;
+    bool useParagraphCache_ = false;
+    int32_t preParagraphsPlaceholderCount_ = 0;
+    int32_t currentParagraphPlaceholderCount_ = 0;
 
 private:
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) = 0;
@@ -130,25 +152,8 @@ private:
     void SetFontSizePropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
         const RefPtr<TextContentModifier>&, const TextStyle& textStyle);
 
-    void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& iterItem,
-        const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
-        const TextStyle& textStyle);
-    void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
-        const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
-        const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);
-    void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper,
-        const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength, CustomSpanPlaceholderInfo& customSpanPlaceholder);
-
-    void AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
-        const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
-    void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
-        const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
-
     void GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex);
     void InheritParentTextStyle(const TextStyle& textStyle);
-
-    int32_t preParagraphsPlaceholderCount_ = 0;
-    int32_t currentParagraphPlaceholderCount_ = 0;
 
     float paragraphFontSize_ = 0.0f;
 

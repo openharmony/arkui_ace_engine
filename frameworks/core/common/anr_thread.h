@@ -20,8 +20,6 @@
 #include <cstdint>
 #include <string>
 
-#include "base/thread/task_executor.h"
-
 namespace OHOS::Ace {
 class AnrThread {
 
@@ -29,8 +27,7 @@ public:
     static void Start();
     static void Stop();
     using Task = std::function<void()>;
-    static bool PostTaskToTaskRunner(
-        Task&& task, uint32_t delayTime, const std::string& name, PriorityType priorityType);
+    static bool PostTaskToTaskRunner(Task&& task, uint32_t delayTime, const std::string& name);
 };
 } // namespace OHOS::Ace
 #endif

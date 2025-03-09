@@ -397,7 +397,7 @@ ArkUINativeModuleValue ImageSpanBridge::SetBorderRadius(ArkUIRuntimeCallInfo *ru
         ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
     }
     auto directionChanged = false;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         directionChanged = isRightToLeft && isLengthMetrics;
     }

@@ -1314,4 +1314,57 @@ bool JSNavigationStack::ExecutePopCallback(const RefPtr<NG::UINode>& uiNode,
     callback->Call(JSRef<JSObject>(), 1, params);
     return true;
 }
+
+bool JSNavigationStack::HasSingletonMoved()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto hasSingletonMoved = dataSourceObj_->GetProperty("hasSingletonMoved");
+    if (!hasSingletonMoved->IsBoolean()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "hasSingletonMoved invalid!");
+        return false;
+    }
+    return hasSingletonMoved->ToBoolean();
+}
+
+bool JSNavigationStack::IsTopFromSingletonMoved()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto len = GetSize();
+    if (len == 0) {
+        return false;
+    }
+    auto top = GetJsPathInfo(len - 1);
+    if (top->IsEmpty()) {
+        return false;
+    }
+    auto isFromSingletonMoved = top->GetProperty("singletonMoved");
+    if (!isFromSingletonMoved->IsBoolean()) {
+        return false;
+    }
+    return isFromSingletonMoved->ToBoolean();
+}
+
+void JSNavigationStack::ResetSingletonMoved()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto hasSingletonMoved = dataSourceObj_->GetProperty("hasSingletonMoved");
+    if (!hasSingletonMoved->IsBoolean() || !hasSingletonMoved->ToBoolean()) {
+        return;
+    }
+    auto len = GetSize();
+    for (auto index = 0; index < len; index++) {
+        auto info = GetJsPathInfo(index);
+        if (info->IsEmpty()) {
+            continue;
+        }
+        info->SetProperty<bool>("singletonMoved", false);
+    }
+    dataSourceObj_->SetProperty<bool>("hasSingletonMoved", false);
+}
 } // namespace OHOS::Ace::Framework

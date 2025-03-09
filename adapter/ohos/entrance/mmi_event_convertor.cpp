@@ -15,7 +15,6 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
-#include "input_manager.h"
 
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -72,6 +71,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.force = static_cast<float>(pointerItem.GetPressure());
     touchPoint.tiltX = pointerItem.GetTiltX();
     touchPoint.tiltY = pointerItem.GetTiltY();
+    touchPoint.rollAngle = pointerItem.GetAngle();
     touchPoint.sourceTool = GetSourceTool(pointerItem.GetToolType());
     touchPoint.originalId = pointerItem.GetOriginPointerId();
     touchPoint.width = pointerItem.GetWidth();
@@ -98,6 +98,7 @@ void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, To
             continue;
         }
         auto touchPoint = ConvertTouchPoint(item);
+        touchPoint.CovertId();
         touchEvent.pointers.emplace_back(std::move(touchPoint));
     }
     touchEvent.CovertId();
@@ -174,6 +175,7 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetForce(touchPoint.force)
         .SetTiltX(touchPoint.tiltX)
         .SetTiltY(touchPoint.tiltY)
+        .SetRollAngle(touchPoint.rollAngle)
         .SetSourceType(SourceType::NONE)
         .SetSourceTool(touchPoint.sourceTool)
         .SetOriginalId(touchPoint.originalId)
@@ -327,10 +329,6 @@ MouseButton GetMouseEventButton(int32_t button)
             return MouseButton::RIGHT_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE:
             return MouseButton::MIDDLE_BUTTON;
-        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_SIDE:
-            return MouseButton::SIDE_BUTTON;
-        case OHOS::MMI::PointerEvent::MOUSE_BUTTON_EXTRA:
-            return MouseButton::EXTRA_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_FORWARD:
             return MouseButton::FORWARD_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_BACK:

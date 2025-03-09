@@ -187,7 +187,7 @@ void JSPinchRecognizer::GetDistance(const JSCallbackInfo& args)
         auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         double distance = context->ConvertPxToVp(Dimension(distance_, DimensionUnit::PX));
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(distance)));
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(distance))));
     }
 }
 
@@ -243,7 +243,7 @@ void JSSwipeRecognizer::GetSpeed(const JSCallbackInfo& args)
         auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         double speed = context->ConvertPxToVp(Dimension(speed_, DimensionUnit::PX));
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(speed)));
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(speed))));
     }
 }
 
