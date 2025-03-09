@@ -622,6 +622,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGeometryTransition));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGeometryTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetGeometryTransition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBindTips"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBindTips));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBindTips"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBindTips));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBindMenu"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBindMenu));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setClip"),
