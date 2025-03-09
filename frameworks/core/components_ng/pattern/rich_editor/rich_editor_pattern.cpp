@@ -4196,6 +4196,7 @@ void RichEditorPattern::SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, i
         spanStart += static_cast<int32_t>(placeholderGains);
         if (spanItem->spanItemType == SpanItemType::NORMAL) {
             newSpanItem = spanItem->GetSameStyleSpanItem();
+            newSpanItem->urlAddress = spanItem->urlAddress;
             newSpanItem->content = spanItem->content
                     .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart));
         } else {
@@ -4301,6 +4302,7 @@ RefPtr<SpanItem> RichEditorPattern::GetSameSpanItem(const RefPtr<SpanItem>& span
         return newSpanItem;
     } else if (spanItem->spanItemType == SpanItemType::NORMAL) {
         auto newSpanItem = spanItem->GetSameStyleSpanItem();
+        newSpanItem->urlAddress = spanItem->urlAddress;
         return newSpanItem;
     }
     return nullptr;
@@ -4342,7 +4344,8 @@ void RichEditorPattern::SetSubMap(RefPtr<SpanString>& spanString)
                 spanString->ToGestureSpan(spanItem, start, end),
                 spanString->ToParagraphStyleSpan(spanItem, start, end),
                 spanString->ToLineHeightSpan(spanItem, start, end),
-                spanString->ToBackgroundColorSpan(spanItem, start, end) };
+                spanString->ToBackgroundColorSpan(spanItem, start, end),
+                spanString->ToUrlSpan(spanItem, start, end) };
         }
         for (auto& spanBase : spanBases) {
             if (!spanBase) {

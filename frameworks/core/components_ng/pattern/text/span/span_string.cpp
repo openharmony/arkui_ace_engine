@@ -1140,4 +1140,12 @@ RefPtr<BackgroundColorSpan> SpanString::ToBackgroundColorSpan(
     }
     return AceType::MakeRefPtr<BackgroundColorSpan>(backgroundStyle, start, end);
 }
+
+RefPtr<UrlSpan> SpanString::ToUrlSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(spanItem && spanItem->urlOnRelease && !spanItem->urlAddress.empty(), nullptr);
+    std::string urlAddress = UtfUtils::Str16DebugToStr8(spanItem->urlAddress);
+    return AceType::MakeRefPtr<UrlSpan>(urlAddress, start, end);
+}
+
 } // namespace OHOS::Ace
