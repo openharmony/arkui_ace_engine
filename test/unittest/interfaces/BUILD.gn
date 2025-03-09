@@ -1106,9 +1106,11 @@ ohos_unittest("js_drawable_descriptor_test") {
   module_out_path = interface_test_output_path
 
   sources = [
-    "$ace_root/interfaces/inner_api/drawable_descriptor/base/image_data_preview.cpp",
-    "$ace_root/interfaces/inner_api/drawable_descriptor/base/pixel_map_preview.cpp",
-    "$ace_root/interfaces/inner_api/drawable_descriptor/base/resource_adapter_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/file_uri_utils_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/image_data_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/pixel_map_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/resource_adapter_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/task_pool_preview.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/base/source_info.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/core/pixelmap_drawable_descriptor.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp",
@@ -1117,7 +1119,6 @@ ohos_unittest("js_drawable_descriptor_test") {
     "$ace_root/interfaces/inner_api/drawable_descriptor/loader/resource_image_loader.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/utils/napi_utils.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/utils/resource_manager.cpp",
-    "$ace_root/interfaces/inner_api/drawable_descriptor/utils/task_pool_preview.cpp",
     "$ace_root/interfaces/native/node/native_drawable_descriptor.cpp",
     "js_drawable_descriptor_test.cpp",
   ]

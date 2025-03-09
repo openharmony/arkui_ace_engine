@@ -15,7 +15,6 @@
 
 #include <memory>
 
-#include "image_data.h"
 #include "image_source.h"
 #include "image_type.h"
 #include "media_errors.h"
