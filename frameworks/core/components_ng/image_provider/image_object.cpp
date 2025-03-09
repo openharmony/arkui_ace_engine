@@ -35,17 +35,20 @@ const ImageSourceInfo& ImageObject::GetSourceInfo() const
 
 const RefPtr<ImageData>& ImageObject::GetData() const
 {
+    std::shared_lock lock(dataMutex_);
     return data_;
 }
 
 void ImageObject::SetData(const RefPtr<ImageData>& data)
 {
+    std::unique_lock lock(dataMutex_);
     data_ = data;
 }
 
 void ImageObject::ClearData()
 {
-    data_ = nullptr;
+    std::unique_lock lock(dataMutex_);
+    data_.Reset();
 }
 
 int32_t ImageObject::GetFrameCount() const
