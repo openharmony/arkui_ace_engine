@@ -2985,8 +2985,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         return;
     }
 
+    auto taskId = viewportConfigMgr_->MakeTaskId();
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
-                    isDynamicRender = isDynamicRender_, animationOpt, avoidAreas]() {
+                    isDynamicRender = isDynamicRender_, animationOpt, avoidAreas, taskId,
+                    viewportConfigMgr = viewportConfigMgr_]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
@@ -3028,6 +3030,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
+        viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
     };
     auto changeBrightnessTask = [container]() {
         auto pipelineContext = container->GetPipelineContext();
@@ -3045,10 +3048,13 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
         }
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
+        if (rsTransaction != nullptr) {
+            viewportConfigMgr_->CancelAllPromiseTaskLocked();
+        }
     } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
         // When avoidAreas need updating, the task shouldn't be cancelled.
-        viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
+        viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container, taskId,
             "ArkUIPromiseViewportConfig");
     } else {
         if (container->IsUIExtensionWindow()) {
