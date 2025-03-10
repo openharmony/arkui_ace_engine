@@ -445,10 +445,6 @@ export struct ToolBarV2 {
     .width('100%')
     .height('100%')
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-    .padding({
-      start: LengthMetrics.resource($r('sys.float.padding_level2')),
-      end: LengthMetrics.resource($r('sys.float.padding_level2')),
-    })
     .focusable(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
     .focusOnTouch(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
     .focusBox({
