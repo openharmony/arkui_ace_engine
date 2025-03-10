@@ -65,10 +65,10 @@ HWTEST_F(SubmitEventAccessorTest, GetTextTest, TestSize.Level1)
 {
     auto info = peer_->GetEventInfo();
     ASSERT_NE(info, nullptr);
-    const std::u16string TEST_VALUE(u"string text");
+    const std::string TEST_VALUE("string text");
     info->SetText(TEST_VALUE);
     auto arkText = accessor_->getText(peer_);
-    auto text = Converter::Convert<std::u16string>(arkText);
+    auto text = Converter::Convert<std::string>(arkText);
     EXPECT_FALSE(text.empty());
     EXPECT_EQ(text, TEST_VALUE);
 }

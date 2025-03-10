@@ -40,7 +40,7 @@ void KeepEditableStateImpl(Ark_SubmitEvent peer)
 }
 Ark_String GetTextImpl(Ark_SubmitEvent peer)
 {
-    std::u16string result = u"";
+    std::string result = "";
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_String>(result, Converter::FC));
     CHECK_NULL_RETURN(peer->GetEventInfo(), Converter::ArkValue<Ark_String>(result, Converter::FC));
     result = peer->GetEventInfo()->GetText();
