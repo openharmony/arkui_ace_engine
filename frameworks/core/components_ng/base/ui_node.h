@@ -271,17 +271,6 @@ public:
         }
     }
 
-    void SetHostPageIdByParent(int32_t id)
-    {
-        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG || tag_ == V2::STAGE_ETS_TAG) {
-            return;
-        }
-        hostPageId_ = id;
-        for (auto& child : children_) {
-            child->SetHostPageIdByParent(id);
-        }
-    }
-
     void SetRemoveSilently(bool removeSilently)
     {
         removeSilently_ = removeSilently;
@@ -1010,7 +999,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = Infinity<int32_t>();
+    int32_t depth_ = 1;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
