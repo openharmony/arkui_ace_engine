@@ -137,6 +137,7 @@ public:
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
         paintMethod->SetItemCount(swiperPattern->RealTotalCount());
+        paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
         paintMethod->SetGestureState(swiperPattern->GetGestureState());
         paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
         paintMethod->SetTouchBottomTypeLoop(swiperPattern->GetTouchBottomTypeLoop());
