@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import GridRowBootcampTest from './GridAndColumnLayout/GridRowBootcamp.test'
 
 export default function testsuite() {
   abilityTest();
+  GridRowBootcampTest();
 }
