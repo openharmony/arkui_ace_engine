@@ -62,6 +62,7 @@ ace_unittest("capi_all_accessors_test") {
     "key_event_accessor_test.cpp",
     "layout_manager_accessor_test.cpp",
     "list_scroller_accessor_test.cpp",
+    "long_press_gesture_event_accessor_test.cpp",
     "matrix2d_accessor_test.cpp",
     "mouse_event_accessor_test.cpp",
     "mutable_styled_string_accessor_test.cpp",
