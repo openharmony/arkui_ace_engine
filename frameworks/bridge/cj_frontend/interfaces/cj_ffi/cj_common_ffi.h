@@ -298,7 +298,7 @@ struct CJDragEvent {
 struct CJDragItemInfo {
     int64_t pixelMapId;
     void (*builder)();
-    const char* extraInfo;
+    char* extraInfo;
 };
 
 struct CJBaseEvent {
@@ -388,6 +388,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncsV2(void (*callback)(AtCPackageV
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCallback cjCtrFuncs);
 
 CJ_EXPORT int64_t FfiGeneralSizeOfPointer();
+
+CJ_EXPORT bool FfiOHOSAceFrameworkCanIUse(char* syscapString);
 
 struct CJIndicator {
     double left;

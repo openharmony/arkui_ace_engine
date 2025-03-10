@@ -15,7 +15,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 
-#include <stdlib.h>
+#include <malloc.h>
 
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 
@@ -41,6 +41,11 @@ void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCallback cjCtr
 int64_t FfiGeneralSizeOfPointer()
 {
     return sizeof(void*);
+}
+
+CJ_EXPORT bool FfiOHOSAceFrameworkCanIUse(char* syscapString)
+{
+    return OHOS::Ace::SystemProperties::IsSyscapExist(syscapString);
 }
 }
 
