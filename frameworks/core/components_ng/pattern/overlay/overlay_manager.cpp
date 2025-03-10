@@ -5408,6 +5408,11 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
     keyboardOffsetInfo.finalOffset = finalOffset;
     keyboardOffsetInfo.inAniStartOffset = pageHeight;
     keyboardOffsetInfo.outAniEndOffset = finalOffset + keyboardHeight;
+    auto container = Container::Current();
+    if (container && safeAreaManager->GetSystemSafeArea().bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
+        auto diff = safeAreaManager->GetSystemSafeArea().bottom_.start - pageHeight;
+        keyboardOffsetInfo.finalOffset -= diff;
+    }
     return keyboardOffsetInfo;
 }
 
