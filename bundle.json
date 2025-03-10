@@ -116,7 +116,8 @@
             "group_type": {
                 "base_group": [],
                 "fwk_group": [
-                    "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages"
+                    "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages",
+                    "//foundation/arkui/ace_engine/frameworks/ani:ani_packages_ace_engine"
                 ],
                 "service_group": [
                     "//foundation/arkui/ace_engine/adapter/ohos/services:services_target",
