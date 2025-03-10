@@ -554,28 +554,47 @@ public:
         return nullptr;
     }
 
-    /*
-     *this interface is just use before api12(not include api12),after api12 when you judge version,use
-     *LessThanAPITargetVersion(PlatformVersion version)
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use LessThanAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
     static bool LessThanAPIVersion(PlatformVersion version);
 
-    /*
-     *this interface is just use before api12(not include api12),after api12 when you judge version,use
-     *GreatOrEqualAPITargetVersion(PlatformVersion version)
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use GreatOrEqualAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
     static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
-    /*
-     *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
+    /**
+     * @description: Compare whether the min compatible api version of the application is less than the incoming target
+     * version. This interface is just for when you use LessThanAPIVersion in instance does not exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
     static bool LessThanAPIVersionWithCheck(PlatformVersion version);
 
-    /*
-     *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
+    /**
+     * @description: Compare whether the min compatible api version of the application is greater than or equal to the
+     * incoming target version. This interface is just for when you use GreatOrEqualAPIVersion in instance does not
+     * exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
     static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
 
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming target
+     * version.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
@@ -584,6 +603,12 @@ public:
         return apiTargetVersion < static_cast<int32_t>(version);
     }
 
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
@@ -624,11 +649,19 @@ public:
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetFontWeightScale(int32_t instanceId, float fontScale);
 
+    /**
+     * @description: Get the target api version of the application.
+     * @return: The target api version of the application.
+     */
     int32_t GetApiTargetVersion() const
     {
         return apiTargetVersion_;
     }
 
+    /**
+     * @description: Set the target api version of the application.
+     * @param: The target api version of the application.
+     */
     void SetApiTargetVersion(int32_t apiTargetVersion)
     {
         apiTargetVersion_ = apiTargetVersion % 1000;

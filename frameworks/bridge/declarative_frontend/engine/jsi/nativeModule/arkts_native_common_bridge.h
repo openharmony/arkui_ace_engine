@@ -395,8 +395,24 @@ public:
     static ArkUINativeModuleValue ResetChainMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetPixelRound(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetPixelRound(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target. This interface is used for JS API.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static ArkUINativeModuleValue GreatOrEqualAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming target. This
+     * interface is used for JS API.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static ArkUINativeModuleValue LessThanAPITargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    /**
+     * @description: Get the target api version of the application. This interface is used for JS API.
+     * @return: The target api version of the application.
+     */
     static ArkUINativeModuleValue GetApiTargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo);
