@@ -232,7 +232,7 @@ void PipelineContext::FreezeCanvasNode(bool freezeFlag)
 void PipelineContext::RemoveCanvasNode()
 {
     if (canvasNode_) {
-        TAG_LOGD(AceLogTga::ACE_WINDOW, "RemoveCanvasNode.");
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveCanvasNode.");
         canvasNode_->RemoveFromeTree();
         canvasNode_ = nullptr;
     }
@@ -242,7 +242,7 @@ bool PipelineContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t de
 {
     static bool animationFlag = false;
     if (animationFlag) {
-        TAG_LOGD(AceLogTga::ACE_WINDOW, "animationFlag is true.");
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "animationFlag is true.");
         return false;
     }
     if (!canvasNode_) {
@@ -295,7 +295,7 @@ void PipelineContext::LinkCanvasNodeToRootNode(std::shared_ptr<Rosen::RSCanvasNo
 {
     canvasNode_ = canvasNode;
     if (canvasNode_ && rootNode_) {
-        TAG_LOGD(AceLogTga::ACE_WINDOW, "SetLinkedRootNodeId");
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
         canvasNode_->SetLinkedRootNodeId(rootNode_->GetRenderContext()->GetNodeId());
         window_->FlushTasks();
     }
@@ -304,7 +304,7 @@ void PipelineContext::LinkCanvasNodeToRootNode(std::shared_ptr<Rosen::RSCanvasNo
 std::shared_ptr<Rosen::RSCanvasNode> PipelineContext::GetCanvasNode()
 {
     if (!canvasNode_) {
-        TAG_LOGD(AceLogTga::ACE_WINDOW, "Create RSCanvasNode.");
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSCanvasNode.");
         canvasNode_ = Rosen::RSCanvasNode::Create();
         window_->FlushTasks();
     }

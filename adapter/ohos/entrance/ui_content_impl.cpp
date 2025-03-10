@@ -2881,9 +2881,10 @@ void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvas
     }
 }
 
-void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
+    OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     TAG_LOGD(AceLogTag::ACE_WINDOW, "CacheAnimateInfo.");
     cachedAnimateFlag_.store(true);
@@ -2897,7 +2898,7 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 {
     if (cachedAnimateFlag_.load()) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "ExecKeyFrameCachedAnimateAction.");
-        UpdateViewportConfig(cachedConfig_, cachedReason_, cachedRsTransaction_, cahcedAvoidAreas_);
+        UpdateViewportConfig(cachedConfig_, cachedReason_, cachedRsTransaction_, cachedAvoidAreas_);
         cachedAnimateFlag_.store(false);
     }
 }
