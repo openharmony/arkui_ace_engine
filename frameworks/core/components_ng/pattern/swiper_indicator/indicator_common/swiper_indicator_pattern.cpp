@@ -1157,6 +1157,7 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
     overlongDotIndicatorModifier_->SetLongPointHeadCurve(
         swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
     overlongDotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
+    overlongDotIndicatorModifier_->SetIsBindIndicator(swiperPattern->IsBindIndicator());
 
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
@@ -1288,6 +1289,7 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     overlongPaintMethod->SetKeepStatus(keepStatus);
     overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
     overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
+    overlongPaintMethod->SetIsBindIndicator(swiperPattern->IsBindIndicator());
     overlongDotIndicatorModifier_->SetIsSwiperTouchDown(isSwiperTouchDown);
     overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
     overlongDotIndicatorModifier_->SetIsAutoPlay(swiperPattern->IsAutoPlay());

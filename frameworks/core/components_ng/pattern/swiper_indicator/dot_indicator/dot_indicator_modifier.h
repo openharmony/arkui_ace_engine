@@ -121,7 +121,8 @@ public:
     void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter,
         const LinearVector<float>& itemHalfSizes, bool isOverlong = false);
     void PaintMask(DrawingContext& context);
-    void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
+    void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount = 0,
+        bool isBindIndicator = false);
     virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
     void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
@@ -366,6 +367,8 @@ protected:
     RefPtr<InterpolatingSpring> GetTailCurve();
     AnimationOption CreateTailOption(
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState, bool isNormal);
+    std::tuple<float, float, float, float> CalcAndAdjustIndicatorPaintRect(
+        const ContentProperty& contentProperty, float& rectWidth, float& rectHeight);
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
