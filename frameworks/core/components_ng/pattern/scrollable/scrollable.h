@@ -596,6 +596,7 @@ private:
     float endPos_ = 0.0;
     bool isSnapAnimation_ = false;
     bool nestedScrolling_ = false;
+    bool isSlow_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -45,7 +45,10 @@ constexpr uint32_t MULTI_FLING_DISTANCE = 125;
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
+constexpr double SLOW_FRICTION_THRESHOLD = 3000.0;
+constexpr double SLOW_FRICTION = 1.0;
 constexpr double VELOCITY_SCALE = 1.0;
+constexpr double SLOW_VELOCITY_SCALE = 1.2;
 constexpr double NEW_VELOCITY_SCALE = 1.5;
 constexpr double ADJUSTABLE_VELOCITY = 3000.0;
 #else
@@ -434,10 +437,11 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 
 void Scrollable::LayoutDirectionEst(double& correctVelocity)
 {
+    auto defaultVelocityScale = isSlow_ ? SLOW_VELOCITY_SCALE : velocityScale_;
     if (isReverseCallback_ && isReverseCallback_()) {
-        correctVelocity = -correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+        correctVelocity = -correctVelocity * sVelocityScale_.value_or(defaultVelocityScale) * GetGain(GetDragOffset());
     } else {
-        correctVelocity = correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+        correctVelocity = correctVelocity * sVelocityScale_.value_or(defaultVelocityScale) * GetGain(GetDragOffset());
     }
 }
 
@@ -461,6 +465,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     scrollPause_ = false;
     lastVelocity_ = GetPanDirection() == Axis::NONE ? 0.0 : info.GetMainVelocity();
     double gestureVelocity = GetPanDirection() == Axis::NONE ? 0.0 : info.GetMainVelocity();
+    isSlow_ = LessNotEqual(std::abs(gestureVelocity), SLOW_FRICTION_THRESHOLD);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     LayoutDirectionEst(gestureVelocity);
     // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
@@ -507,6 +512,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     if (dragEndCallback_) {
         dragEndCallback_();
     }
+    isSlow_ = false;
     isTouching_ = false;
 }
 
@@ -521,7 +527,8 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     StopSnapController();
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}f, velocity is %{public}f",
         mainPosition, correctVelocity);
-    float friction = sFriction_.value_or(friction_);
+    auto defaultFriction = isSlow_ ? SLOW_FRICTION : friction_;
+    float friction = sFriction_.value_or(defaultFriction);
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
 
