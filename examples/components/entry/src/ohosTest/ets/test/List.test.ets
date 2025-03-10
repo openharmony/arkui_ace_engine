@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import RelativeContainerBootcampTest from './RowsColumnsAndStacking/RelativeContainerBootcamp.test'
 
 export default function testsuite() {
   abilityTest();
+  RelativeContainerBootcampTest();
 }
