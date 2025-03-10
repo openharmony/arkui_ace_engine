@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -37,19 +38,24 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Array_Header GetRequestHeaderImpl(Ark_WebResourceRequest peer)
 {
-    CHECK_NULL_RETURN(peer && peer->webRequest, {});
-    peer->webRequest->GetHeaders();
-    // headers need to be returned
-    LOGE("WebResourceRequestPeer::GetRequestHeaderImpl - return value need to be supported");
-    return {};
+    std::vector<Converter::Header> result;
+    CHECK_NULL_RETURN(peer && peer->webRequest, Converter::ArkValue<Array_Header>(result, Converter::FC));
+    auto headers = peer->webRequest->GetHeaders();
+    for (const auto& pair : headers) {
+        Converter::Header header {
+            .headerKey = pair.first,
+            .headerValue = pair.second
+        };
+        result.push_back(header);
+    }
+    return Converter::ArkValue<Array_Header>(result, Converter::FC);
 }
 Ark_String GetRequestUrlImpl(Ark_WebResourceRequest peer)
 {
-    CHECK_NULL_RETURN(peer && peer->webRequest, {});
-    peer->webRequest->GetUrl();
-    // url need to be returned
-    LOGE("WebResourceRequestPeer::GetRequestUrlImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->webRequest, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->webRequest->GetUrl();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_Boolean IsRequestGestureImpl(Ark_WebResourceRequest peer)
 {
@@ -68,11 +74,10 @@ Ark_Boolean IsRedirectImpl(Ark_WebResourceRequest peer)
 }
 Ark_String GetRequestMethodImpl(Ark_WebResourceRequest peer)
 {
-    CHECK_NULL_RETURN(peer && peer->webRequest, {});
-    peer->webRequest->GetMethod();
-    // method need to be returned
-    LOGE("WebResourceRequestPeer::GetRequestMethodImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->webRequest, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->webRequest->GetMethod();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 } // WebResourceRequestAccessor
 const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor()
