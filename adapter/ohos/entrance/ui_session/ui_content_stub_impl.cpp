@@ -54,6 +54,17 @@ int32_t UIContentServiceStubImpl::RegisterWebUnfocusEventCallback(
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::SendCommand(int32_t id, const std::string& command)
+{
+    UiSessionManager::GetInstance()->NotifySendCommandPattern(id, command);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::SendCommandAsync(int32_t id, const std::string& command)
+{
+    return UiSessionManager::GetInstance()->NotifySendCommandAsyncPattern(id, command);
+}
+
 int32_t UIContentServiceStubImpl::UnregisterClickEventCallback()
 {
     UiSessionManager::GetInstance()->SetClickEventRegistered(false);

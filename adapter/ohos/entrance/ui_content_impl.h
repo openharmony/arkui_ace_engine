@@ -398,7 +398,9 @@ public:
 
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
     void SetTopWindowBoundaryByID(const std::string& stringId) override;
+    void SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline);
     void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
+    void InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
     void EnableContainerModalCustomGesture(bool enable) override;
 

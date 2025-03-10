@@ -44,7 +44,11 @@ public:
     void AddValueForTree(int32_t id, const std::string& value) override;
     void WebTaskNumsChange(int32_t num) override;
     void ReportInspectorTreeValue(const std::string& data) override;
+    void SaveForSendCommandFunction(NotifySendCommandFunction&& function) override;
+    void SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function) override;
     void NotifyAllWebPattern(bool isRegister) override;
+    void NotifySendCommandPattern(int32_t id, const std::string& command) override;
+    int32_t NotifySendCommandAsyncPattern(int32_t id, const std::string& command) override;
     void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) override;
     bool GetWebFocusRegistered() override;
     void OnRouterChange(const std::string& path, const std::string& event) override;

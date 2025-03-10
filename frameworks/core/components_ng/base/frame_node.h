@@ -415,6 +415,11 @@ public:
 
     bool IsAtomicNode() const override;
 
+    int32_t OnRecvCommand(const std::string& command) override
+    {
+        return 0;
+    }
+
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void RebuildRenderContextTree() override;
