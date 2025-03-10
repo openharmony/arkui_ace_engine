@@ -63,7 +63,6 @@ namespace {
 constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
 constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
-constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
 constexpr float PX_EPSILON = 0.01f;
@@ -2653,7 +2652,7 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionEndTask()
         auto mainDelta = pattern->IsHorizontalAndRightToLeft() ? -info.GetMainDelta() : info.GetMainDelta();
         pattern->HandleDragEnd(velocity, mainDelta);
         pattern->InitIndexCanChangeMap();
-        if (LessOrEqual(std::abs(velocity), NEW_MIN_TURN_PAGE_VELOCITY) &&
+        if (LessOrEqual(std::abs(velocity), pattern->newMinTurnPageVelocity_) &&
             std::abs(velocity) > MIN_DUMP_VELOCITY_THRESHOLD) {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
@@ -3476,7 +3475,7 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
         nextIndex = dragForward ? currentIndex_ - displayCount : currentIndex_ + displayCount;
     }
 
-    if (!onlyDistance && std::abs(velocity) > NEW_MIN_TURN_PAGE_VELOCITY && velocity != 0.0f) {
+    if (!onlyDistance && std::abs(velocity) > newMinTurnPageVelocity_ && velocity != 0.0f) {
         auto direction = GreatNotEqual(velocity, 0.0f);
         if (dragForward != direction || !dragThresholdFlag) {
             nextIndex = velocity > 0.0f ? nextIndex - displayCount : nextIndex + displayCount;
@@ -3513,9 +3512,10 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
     }
     // if direction is true, expected index to decrease by 1
     bool direction = Positive(velocity);
+
     bool overTurnPageVelocity =
         !onlyDistance && (std::abs(velocity) > (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
-                                                       ? NEW_MIN_TURN_PAGE_VELOCITY
+                                                       ? newMinTurnPageVelocity_
                                                        : MIN_TURN_PAGE_VELOCITY));
 
     auto firstIndex = firstItemInfo.first;
@@ -3554,7 +3554,7 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     auto dragThresholdFlag =
         direction ? dragDistance > firstItemLength / swiperProportion_ :
         firstItemInfoInVisibleArea.second.endPos < firstItemLength / swiperProportion_;
-    auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_MIN_TURN_PAGE_VELOCITY
+    auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? newMinTurnPageVelocity_
                                                                                            : MIN_TURN_PAGE_VELOCITY;
     if ((!onlyDistance && std::abs(velocity) > turnVelocity) || dragThresholdFlag) {
         nextIndex = direction ? firstIndex : firstItemInfoInVisibleArea.first + 1;

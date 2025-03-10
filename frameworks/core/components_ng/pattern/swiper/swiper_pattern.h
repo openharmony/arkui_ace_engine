@@ -63,6 +63,7 @@ constexpr SwiperHoverFlag HOVER_NONE = 0;
 constexpr SwiperHoverFlag HOVER_SWIPER = 1;
 constexpr SwiperHoverFlag HOVER_INDICATOR = 1 << 1;
 constexpr SwiperHoverFlag HOVER_ARROW = 1 << 2;
+constexpr int32_t NEW_STYLE_MIN_TURN_PAGE_VELOCITY = 780;
 
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
@@ -817,6 +818,7 @@ protected:
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
     std::optional<int32_t> targetIndex_;
     float swiperProportion_ = 2.0f;
+    int32_t newMinTurnPageVelocity_ = NEW_STYLE_MIN_TURN_PAGE_VELOCITY;
     int32_t propertyAnimationIndex_ = -1;
 
     bool hasTabsAncestor_ = false;
