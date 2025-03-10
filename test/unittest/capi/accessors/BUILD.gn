@@ -71,6 +71,7 @@ ace_unittest("capi_all_accessors_test") {
     "length_metrics_accessor_test.cpp",
     "linear_gradient_accessor_test.cpp",
     "list_scroller_accessor_test.cpp",
+    "long_press_gesture_event_accessor_test.cpp",
     "matrix2d_accessor_test.cpp",
     "mouse_event_accessor_test.cpp",
     "mutable_styled_string_accessor_test.cpp",
