@@ -775,6 +775,14 @@ DimensionOffset Convert(const Ark_Offset& src)
 }
 
 template<>
+DimensionOffset Convert(const Ark_Position& src)
+{
+    auto x = Converter::OptConvert<Dimension>(src.x);
+    auto y = Converter::OptConvert<Dimension>(src.y);
+    return DimensionOffset(x.has_value() ? x.value() : Dimension(), y.has_value() ? y.value() : Dimension());
+}
+
+template<>
 FontMetaData Convert(const Ark_Font& src)
 {
     return { OptConvert<Dimension>(src.size), OptConvert<FontWeight>(src.weight) };
@@ -2105,5 +2113,13 @@ std::vector<uint32_t> Convert(const Ark_Buffer& src)
         }
     }
     return dataArray;
+}
+
+template<>
+PathShapeOptions Convert(const Ark_PathShapeOptions& value)
+{
+    return {
+        .commands = Converter::OptConvert<std::string>(value.commands),
+    };
 }
 } // namespace OHOS::Ace::NG::Converter
