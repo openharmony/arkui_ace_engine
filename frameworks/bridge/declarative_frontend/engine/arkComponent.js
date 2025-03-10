@@ -34195,6 +34195,85 @@ if (globalThis.ContainerSpan !== undefined) {
     });
   };
 }
+/// <reference path='./import.ts' />
+class ArkLazyGridLayout extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  columnsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridColumnsGapModifier.identity, LazyGridColumnsGapModifier, value);
+    return this;
+  }
+  rowsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridRowsGapModifier.identity, LazyGridRowsGapModifier, value);
+    return this;
+  }
+}
+class ArkLazyVGridLayoutComponent extends ArkLazyGridLayout {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  columnsTemplate(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridColumnsTemplateModifier.identity, LazyGridColumnsTemplateModifier, value);
+    return this;
+  }
+}
+class LazyGridColumnsTemplateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().lazyVGridLayout.resetColumnsTemplate(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setColumnsTemplate(node, this.value);
+    }
+  }
+}
+LazyGridColumnsTemplateModifier.identity = Symbol('lazyGridColumnsTemplate');
+class LazyGridColumnsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().lazyGridLayout.resetColumnsGap(node);
+    }
+    else {
+      getUINativeModule().lazyGridLayout.setColumnsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LazyGridColumnsGapModifier.identity = Symbol('lazyGridColumnsGap');
+class LazyGridRowsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isObject(this.value)) {
+      getUINativeModule().lazyGridLayout.resetRowsGap(node);
+    }
+    else {
+      getUINativeModule().lazyGridLayout.setRowsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LazyGridRowsGapModifier.identity = Symbol('lazyGridRowsGap');
+// @ts-ignore
+globalThis.LazyVGridLayout.attributeModifier = function (modifier) {
+  attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    return new ArkLazyVGridLayoutComponent(nativePtr);
+  }, (nativePtr, classType, modifierJS) => {
+    return new modifierJS.LazyVGridLayoutModifier(nativePtr, classType);
+  });
+};
 
 function getArkUINodeFromNapi() {
   if(globalThis.__XNode__ === undefined) {

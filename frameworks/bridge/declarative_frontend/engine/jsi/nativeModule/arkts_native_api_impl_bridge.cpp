@@ -115,6 +115,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_relative_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_lazy_grid_layout_bridge.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollbar_bridge.h"
@@ -2966,6 +2967,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #ifdef WEB_SUPPORTED
     RegisterWebAttributes(object, vm);
 #endif
+    RegisterLazyVGridLayoutAttributes(object, vm);
     return object;
 }
 
@@ -6064,5 +6066,26 @@ void ArkUINativeModule::RegisterImageAnimatorAttributes(Local<panda::ObjectRef> 
     imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageAnimatorOnFinish"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImageAnimatorOnFinish));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageAnimator"), imageAnimator);
+}
+
+void ArkUINativeModule::RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto lazyGridLayout = panda::ObjectRef::New(vm);
+    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColumnsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetColumnsGap));
+    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetColumnsGap));
+    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRowsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetRowsGap));
+    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRowsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetRowsGap));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "lazyGridLayout"), lazyGridLayout);
+
+    auto lazyVGridLayout = panda::ObjectRef::New(vm);
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColumnsTemplate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::SetColumnsTemplate));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsTemplate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::ResetColumnsTemplate));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "lazyVGridLayout"), lazyVGridLayout);
 }
 } // namespace OHOS::Ace::NG

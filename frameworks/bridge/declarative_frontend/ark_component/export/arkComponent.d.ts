@@ -2068,3 +2068,10 @@ declare class ArkContainerSpanComponent extends ArkComponent implements Containe
     constructor(nativePtr: KNode, classType?: ModifierType);
     textBackgroundStyle(value: TextBackgroundStyle): ContainerSpanAttribute;
 }
+
+declare class ArkLazyVGridLayoutComponent extends ArkComponent implements LazyVGridLayoutAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    columnsTemplate(value: string): this;
+    columnsGap(value: LengthMetrics): this;
+    rowsGap(value: LengthMetrics): this;
+}
