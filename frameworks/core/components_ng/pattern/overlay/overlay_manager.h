@@ -100,6 +100,7 @@ struct CustomKeyboardOffsetInfo {
 
 struct OverlayManagerInfo {
     bool renderRootOverlay = true;
+    bool enableBackPressedEvent = false;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -893,6 +894,7 @@ private:
     void SetDragNodeNeedClean();
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
+    int32_t RemoveOverlayManagerNode();
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;

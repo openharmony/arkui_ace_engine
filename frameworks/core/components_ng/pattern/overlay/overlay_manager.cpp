@@ -3600,9 +3600,11 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         }
     }
     CHECK_EQUAL_RETURN(overlay->GetTag(), V2::STAGE_ETS_TAG, OVERLAY_EXISTS);
-    CHECK_EQUAL_RETURN(overlay->GetTag(), V2::OVERLAY_ETS_TAG, OVERLAY_EXISTS);
     CHECK_EQUAL_RETURN(overlay->GetTag(), V2::ORDER_OVERLAY_ETS_TAG, OVERLAY_EXISTS);
     CHECK_EQUAL_RETURN(overlay->GetTag(), V2::ATOMIC_SERVICE_ETS_TAG, OVERLAY_EXISTS);
+    if (overlay->GetTag() == V2::OVERLAY_ETS_TAG) {
+        return RemoveOverlayManagerNode();
+    }
     // close dialog with animation
     if (InstanceOf<DialogPattern>(pattern)) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
@@ -8055,5 +8057,17 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode)
         isCrossWindow, rect.ToString().c_str());
 
     return rect;
+}
+
+int32_t OverlayManager::RemoveOverlayManagerNode()
+{
+    if (overlayInfo_.has_value() && overlayInfo_.value().enableBackPressedEvent && overlayNode_) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove overlay node last component when back pressed");
+        auto componentNode = GetLastChildNotRemoving(overlayNode_);
+        CHECK_NULL_RETURN(componentNode, OVERLAY_EXISTS);
+        RemoveFrameNodeOnOverlay(componentNode);
+        return OVERLAY_REMOVE;
+    }
+    return OVERLAY_EXISTS;
 }
 } // namespace OHOS::Ace::NG
