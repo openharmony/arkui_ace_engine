@@ -344,6 +344,7 @@ constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 constexpr double ZOOMIN_PUBLIC_ERRAND = 0.4444;
 constexpr int32_t ZOOM_CONVERT_NUM = 10;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
+constexpr int32_t MIN_ACCESSIBILITY_FOCUS_SIZE = 2;
 
 constexpr int32_t PINCH_START_TYPE = 1;
 constexpr int32_t PINCH_UPDATE_TYPE = 3;
@@ -6216,7 +6217,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         return;
     }
     if (GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
-        if (rect.Width() <= 1 || rect.Height() <= 1) {
+        if (rect.Width() <= MIN_ACCESSIBILITY_FOCUS_SIZE || rect.Height() <= MIN_ACCESSIBILITY_FOCUS_SIZE) {
             renderContext->ResetAccessibilityFocusRect();
             renderContext->UpdateAccessibilityFocus(false);
         } else {
