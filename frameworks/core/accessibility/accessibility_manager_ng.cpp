@@ -101,7 +101,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
-        !IsTouchExplorationEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         event.sourceType != SourceType::MOUSE) {
         return;
     }
@@ -127,7 +127,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
-        !IsTouchExplorationEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         event.sourceType == SourceType::MOUSE) {
         return;
     }
@@ -160,7 +160,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
-        !IsTouchExplorationEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         eventType < 0 || eventType >= static_cast<int32_t>(AccessibilityHoverEventType::Count)) {
         return;
     }
