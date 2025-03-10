@@ -228,10 +228,11 @@ bool ArcSwiperPattern::IsDisableTransitionAnimation() const
 void ArcSwiperPattern::PlayHorizontalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode,
     bool rollBack)
 {
-    if (IsPreItem(index, offset.GetX(), rollBack)) {
-        PlayHorizontalExitAnimation(offset, frameNode, rollBack);
+    auto isHorizontalAndRightToLeft = IsHorizontalAndRightToLeft();
+    if (IsPreItem(index, offset.GetX(), rollBack) && !isHorizontalAndRightToLeft) {
+        PlayHorizontalExitAnimation(offset, frameNode, rollBack && !isHorizontalAndRightToLeft);
     } else {
-        PlayHorizontalEntryAnimation(offset, frameNode, rollBack);
+        PlayHorizontalEntryAnimation(offset, frameNode, rollBack && !isHorizontalAndRightToLeft);
     }
 }
 
@@ -247,6 +248,9 @@ void ArcSwiperPattern::PlayVerticalAnimation(const OffsetF& offset, int32_t inde
 
 bool ArcSwiperPattern::IsPreItem(int32_t index, float translate, bool rollback)
 {
+    if (IsHorizontalAndRightToLeft()) {
+        translate = -translate;
+    }
     if (translate < 0) {
         if (index < static_cast<int32_t>(itemPosition_.size() / HALF)) {
             return !rollback;
@@ -1273,6 +1277,12 @@ void ArcSwiperPattern::ResetBackgroundColor(const RefPtr<FrameNode>& frameNode)
     auto parentColorPtr = GetBackgroundColorValue(parentFrameNode);
     if (axis_ == Axis::HORIZONTAL) {
         CHECK_NULL_VOID(parentColorPtr);
+        auto backColor = GetBackgroundColorValue(frameNode);
+        if (backColor) {
+            frameNode->GetRenderContext()->OnBackgroundColorUpdate(*backColor);
+        } else {
+            frameNode->GetRenderContext()->OnBackgroundColorUpdate(Color::TRANSPARENT);
+        }
         parentContext->OnBackgroundColorUpdate(*parentColorPtr);
     } else {
         parentNodeBackgroundColor_ = GetBackgroundColorValue(parentFrameNode);
