@@ -1164,7 +1164,8 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<RenderContext>& renderContext, Re
     UpdateTexOverflow(true);
 }
 
-void ButtonPattern::SetButtonScale(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme) {
+void ButtonPattern::SetButtonScale(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme)
+{
     if (renderContext->GetOrCreateTransform()) {
         float scaleHoverOrFocus = buttonTheme->GetScaleHoverOrFocus();
         VectorF scale(scaleHoverOrFocus, scaleHoverOrFocus);
