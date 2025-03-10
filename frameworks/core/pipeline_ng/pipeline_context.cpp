@@ -233,12 +233,12 @@ void PipelineContext::RemoveCanvasNode()
 {
     if (canvasNode_) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveCanvasNode.");
-        canvasNode_->RemoveFromeTree();
+        canvasNode_->RemoveFromTree();
         canvasNode_ = nullptr;
     }
 }
 
-bool PipelineContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false)
+bool PipelineContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd)
 {
     static bool animationFlag = false;
     if (animationFlag) {

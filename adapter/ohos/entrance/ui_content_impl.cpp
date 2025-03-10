@@ -2913,7 +2913,7 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         TAG_LOGD(AceLogTag::ACE_WINDOW, "canvasNode already exist.");
         return;
     }
-    if (auto transactionController =  Rosen::RSTransactionController::GetInstance()) {
+    if (auto transactionController =  Rosen::RSSyncTransactionController::GetInstance()) {
         transactionController->OpenSyncTransaction();
         auto rsTransaction = transactionController->GetRSTransaction();
         canvasNode_ = context->GetCanvasNode();
@@ -2932,7 +2932,7 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
     }
 }
 
-bool KeyFrameActionPolicy(const ViewportConfig& config,
+bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
