@@ -57,6 +57,23 @@ HWTEST_F(SubmitEventAccessorTest, SetTextTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTextTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubmitEventAccessorTest, GetTextTest, TestSize.Level1)
+{
+    auto info = peer_->GetEventInfo();
+    ASSERT_NE(info, nullptr);
+    const std::u16string TEST_VALUE(u"string text");
+    info->SetText(TEST_VALUE);
+    auto arkText = accessor_->getText(peer_);
+    auto text = Converter::Convert<std::u16string>(arkText);
+    EXPECT_FALSE(text.empty());
+    EXPECT_EQ(text, TEST_VALUE);
+}
+
+/**
  * @tc.name: KeepEditableStateTest
  * @tc.desc:
  * @tc.type: FUNC
