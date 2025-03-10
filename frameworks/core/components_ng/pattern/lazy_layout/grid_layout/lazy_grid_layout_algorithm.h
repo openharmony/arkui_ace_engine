@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_VIEW_GRID_LAZY_LAYOUT_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_VIEW_GRID_LAZY_LAYOUT_ALGORITHM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_ALGORITHM_H
 
 #include <optional>
 #include "base/geometry/axis.h"
@@ -62,6 +62,9 @@ public:
         forwardLayout_ = forwardLayout;
         needAllLayout_ = false;
     }
+
+    int32_t LanesFloor(int32_t index) const;
+    int32_t LanesCeil(int32_t index) const;
 
 private:
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize, const PaddingPropertyF& padding);
@@ -126,4 +129,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_VIEW_GRID_LAZY_LAYOUT_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_ALGORITHM_H

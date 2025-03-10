@@ -387,6 +387,11 @@ public:
         needLazyLayout_ = true;
     }
 
+    bool GetNeedLazyLayout() const
+    {
+        return needLazyLayout_;
+    }
+
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
     void CheckMarkAnchorPosition(TextDirection layoutDirection);
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
