@@ -4676,6 +4676,9 @@ void PipelineContext::NotifyMemoryLevel(int32_t level)
             ++iter;
         }
     }
+    if (window_) {
+        window_->FlushTasks();
+    }
 }
 void PipelineContext::AddPredictTask(PredictTask&& task)
 {
