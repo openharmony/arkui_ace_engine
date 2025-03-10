@@ -13,8 +13,33 @@
 
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
+action("run_arkoala_build") {
+  script = "./build.py"
+
+  # TODO: generate real inputs later
+  inputs = [ "../koala_projects/arkoala-arkts/arkui/src/ArkUIEntry.ts" ]
+  outputs = [ "$target_out_dir/arkoala.abc" ]
+  node_version = "v16.20.2"
+  host_arch = "${host_os}-${host_cpu}"
+  args = [
+    # Paths: 1 koala root folder.
+    rebase_path("../koala_projects"),
+
+    # Paths: 2 build folder.
+    rebase_path("."),
+
+    # Paths: 3 npm ver.
+    rebase_path(
+        "//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+
+    # Paths: 4 output dir.
+    rebase_path("$target_out_dir"),
+  ]
+}
+
 ohos_prebuilt_etc("arkoala_prebuild") {
-  source = "arkoala.abc"
+  source = "$target_out_dir/arkoala.abc"
+  deps = [ ":run_arkoala_build" ]
   module_install_dir = "framework"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
