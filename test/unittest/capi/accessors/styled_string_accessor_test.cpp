@@ -18,12 +18,24 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/background_color_style_peer.h"
+#include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
+#include "core/interfaces/native/implementation/decoration_style_peer.h"
+#include "core/interfaces/native/implementation/gesture_style_peer.h"
+#include "core/interfaces/native/implementation/length_metrics_peer.h"
+#include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
+#include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/paragraph_style_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/text_shadow_style_peer.h"
+#include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
+#include "core/interfaces/native/implementation/url_style_peer.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/common/ace_engine.h"
+
 #include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {
@@ -71,17 +83,15 @@ const Ark_ImageAttachmentLayoutStyle TEST_IMAGELAYOUTSTYLE {
     .borderRadius = Converter::ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_LengthMetrics>(TEST_LENGTHMETRICS)
 };
 
-const Ark_ImageAttachment IMAGEATTACHMENT_TEST_VALUE {
-#ifdef WRONG_TYPE
+const Ark_ImageAttachmentInterface IMAGEATTACHMENT_TEST_VALUE {
     .value = TEST_PIXELMAP,
     .size = Converter::ArkValue<Opt_SizeOptions>(TEST_ARK_SIZEOPTIONS),
     .verticalAlign = Converter::ArkValue<Opt_ImageSpanAlignment>(std::get<1>(TEST_VERTICALALIGN)),
     .objectFit = Converter::ArkValue<Opt_ImageFit>(std::get<1>(TEST_IMAGEFIT)),
     .layoutStyle = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>(TEST_IMAGELAYOUTSTYLE)
-#endif
 };
 
-const std::tuple<std::string, int32_t> TEST_FONT_SIZE = { "16.00vp", 16 };
+const std::tuple<std::string, Dimension> TEST_FONT_SIZE = { "16.00vp", 16.0_vp };
 const std::tuple<Ace::FontWeight, int32_t> TEST_FONT_WEIGHT = { FontWeight::W900, 900 };
 const std::vector<std::string> TEST_FONT_FAMILIES = { "Arial" };
 const std::tuple<std::string, Ark_Color> TEST_FONT_COLOR = {
@@ -91,9 +101,9 @@ const std::tuple<std::string, Ark_Color> TEST_DCRN_COLOR = {
     "#FFFFFF00", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW) };
 const Ace::TextDecoration TEST_DCRN_TYPE = Ace::TextDecoration::UNDERLINE;
 const Ace::TextDecorationStyle TEST_DCRN_STYLE = TextDecorationStyle::SOLID;
-const std::tuple<std::string, int> TEST_BASELINE_OFFSET = { "10.00vp", 10 };
-const std::tuple<std::string, int> TEST_LETTER_SPACING = { "12.00vp", 12 };
-const std::tuple<std::string, int> TEST_LINE_HEIGHT = { "14.00vp", 14 };
+const std::tuple<std::string, Dimension> TEST_BASELINE_OFFSET = { "10.00vp", 10.0_vp };
+const std::tuple<std::string, Dimension> TEST_LETTER_SPACING = { "12.00vp", 12.0_vp };
+const std::tuple<std::string, Dimension> TEST_LINE_HEIGHT = { "14.00vp", 14.0_vp };
 const int TEST_TEXT_SHADOW_RADIUS = 5;
 const int TEST_TEXT_SHADOW_OFFSET = 3;
 const std::tuple<ShadowType, Ark_ShadowType> TEST_TEXT_SHADOW_TYPE = {
@@ -106,15 +116,13 @@ const std::tuple<std::string, float> TEST_BGCL_RADIUS = { "10.00vp", 10.f };
 const std::string TEST_URL = "https://www.test.test";
 const std::tuple<Ace::TextAlign, Ark_TextAlign> TEST_PSST_TEXT_ALIGN = {
     Ace::TextAlign::CENTER, ARK_TEXT_ALIGN_CENTER};
-#ifdef WRONG_TYPE
-const int TEST_PSST_TEXT_INDEN = 5;
-#endif
+const std::tuple<std::string, Dimension> TEST_PSST_TEXT_INDEN = { "5.00vp", 5.0_vp };
 const int TEST_PSST_MAX_LINES = 8;
 const std::tuple<Ace::TextOverflow, Ark_TextOverflow> TEST_PSST_OVERFLOW = {
     Ace::TextOverflow::ELLIPSIS, ARK_TEXT_OVERFLOW_ELLIPSIS };
 const std::tuple<Ace::WordBreak, Ark_WordBreak> TEST_PSST_WORD_BREAK = {
     Ace::WordBreak::BREAK_ALL, ARK_WORD_BREAK_BREAK_ALL };
-const std::tuple<std::string, int> TEST_PSST_LEADING_MARGIN = { "width: 2.00vp height: 2.00vp", 2 };
+const std::tuple<std::string, Dimension> TEST_PSST_LEADING_MARGIN = { "width: 2.00vp height: 2.00vp", 2.0_vp };
 const std::tuple<std::string, Ark_Tuple_Dimension_Dimension> TEST_TUPLE_DIMENSION_DIMENSION = {
     "width: 0.10fp height: 10.00vp",
     Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> {
@@ -127,178 +135,241 @@ const Ark_LeadingMarginPlaceholder TEST_PSPM_LEADING_MARGIN {
 const int EXPECTED_NODE_ID = 777;
 const int TEST_CONTAINER_ID = 888;
 
-const std::vector<Ace::SpanType> SPAN_TYPE_TEST_VALUES = {
-    Ace::SpanType::Font,
-    Ace::SpanType::Decoration,
-    Ace::SpanType::BaselineOffset,
-    Ace::SpanType::LetterSpacing,
-    Ace::SpanType::TextShadow,
-    Ace::SpanType::LineHeight,
-    Ace::SpanType::BackgroundColor,
-    Ace::SpanType::Url,
-    Ace::SpanType::ParagraphStyle,
-    Ace::SpanType::ExtSpan, // not implement
-    Ace::SpanType::Gesture // not implement
+const std::vector<std::pair<int, Ace::SpanType>> SPAN_TYPE_TEST_VALUES = {
+    { TEST_START_STR, Ace::SpanType::Font },
+    { TEST_START_DCRN, Ace::SpanType::Decoration },
+    { TEST_START_BSL, Ace::SpanType::BaselineOffset },
+    { TEST_START_LSP, Ace::SpanType::LetterSpacing },
+    { TEST_START_TSH, Ace::SpanType::TextShadow },
+    { TEST_START_LNHT, Ace::SpanType::LineHeight },
+    { TEST_START_BGCL, Ace::SpanType::BackgroundColor },
+    { TEST_START_URL, Ace::SpanType::Url },
+    { TEST_START_PSST, Ace::SpanType::ParagraphStyle },
+    { TEST_START_PSPM, Ace::SpanType::ParagraphStyle },
     };
 
-namespace {
-#ifdef WRONG_TYPE
-    const Ark_TextStyle_styled_string textStyle {
-        .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_FONT_COLOR)),
-        .fontFamily = Converter::ArkValue<Opt_String>(TEST_FONT_FAMILIES[0]),
-        .fontSize = Converter::ArkValue<Opt_Number>(std::get<1>(TEST_FONT_SIZE)),
-        .fontWeight = Converter::ArkValue<Opt_Number>(std::get<1>(TEST_FONT_WEIGHT)),
-        .fontStyle = Converter::ArkValue<Opt_FontStyle>(TEST_FONT_STYLE),
-    };
-    const Ark_DecorationStyle decorationStyle {
-        .type = Converter::ArkValue<Ark_TextDecorationType>(TEST_DCRN_TYPE),
-        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_DCRN_COLOR)),
-        .style = Converter::ArkValue<Opt_TextDecorationStyle>(TEST_DCRN_STYLE),
-    };
-    const Ark_BaselineOffsetStyle baselineOffsetStyle {
-        .baselineOffset = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_BASELINE_OFFSET))
-    };
-    const Ark_LetterSpacingStyle letterSpacingStyle {
-        .letterSpacing = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_LETTER_SPACING))
-    };
-    const Ark_TextShadowStyle textShadowStyle {
-        .textShadow = {
-            .array = new Ark_ShadowOptions[1] {
-                {
-                    .radius = Converter::ArkUnion<
-                        Ark_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_RADIUS),
-                    .type = Converter::ArkValue<Opt_ShadowType>(std::get<1>(TEST_TEXT_SHADOW_TYPE)),
-                    .color= Converter::ArkUnion<
-                        Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
-                        std::get<1>(TEST_TEXT_SHADOW_COLOR)),
-                    .offsetX = Converter::ArkUnion<
-                        Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
-                    .offsetY = Converter::ArkUnion<
-                        Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
-                    .fill = Converter::ArkValue<Opt_Boolean>(true)
-                }
-            },
-            .length = 1
+namespace GeneratedModifier {
+    const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
+    const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
+    const GENERATED_ArkUITextStyle_styled_stringAccessor* GetTextStyle_styled_stringAccessor();
+    const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
+    const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor();
+    const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
+    const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor();
+    const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor();
+    const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor();
+    const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor();
+    const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor();
+}
+struct StyleOptionsKeeper {
+    std::vector<Ark_StyleOptions> testArrayStyles = {};
+
+    const std::vector<Ark_StyleOptions> GetOptions()
+    {
+        testArrayStyles.clear();
+        for (const auto& span : SPAN_TYPE_TEST_VALUES) {
+            auto& item = testArrayStyles.emplace_back(
+                Ark_StyleOptions {
+                    .start = Converter::ArkValue<Opt_Number>(span.first),
+                    .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
+                    .styledKey = Converter::ArkValue<Ark_StyledStringKey>(span.second)
+            });
+
+            if (span.second == Ace::SpanType::Font) {
+                FillTextStyle(item.styledValue);
+            } else if (span.second == Ace::SpanType::Decoration) {
+                FillDecorationStyle(item.styledValue);
+            } else if (span.second == Ace::SpanType::BaselineOffset) {
+                FillBaselineOffsetStyle(item.styledValue);
+            } else if (span.second == Ace::SpanType::LetterSpacing) {
+                FillLetterSpacing(item.styledValue);
+            } else if (span.second == Ace::SpanType::TextShadow) {
+                FillTextShadow(item.styledValue);
+            } else if (span.second == Ace::SpanType::LineHeight) {
+                FillLineHeight(item.styledValue);
+            } else if (span.second == Ace::SpanType::BackgroundColor) {
+                FillBackgroundColor(item.styledValue);
+            } else if (span.second == Ace::SpanType::Url) {
+                FillUrl(item.styledValue);
+            } else if (span.second == Ace::SpanType::ParagraphStyle && span.first == TEST_START_PSST) {
+                FillParagraphStyle(item.styledValue);
+            } else if (span.second == Ace::SpanType::ParagraphStyle && span.first == TEST_START_PSPM) {
+                FillParagraphStylePM(item.styledValue);
+            }
         }
+
+        return testArrayStyles;
+    }
+
+    void TearDown()
+    {
+        GeneratedModifier::GetTextStyle_styled_stringAccessor()->destroyPeer(peerTextStyle);
+        GeneratedModifier::GetDecorationStyleAccessor()->destroyPeer(decorationStylePeer);
+        GeneratedModifier::GetBaselineOffsetStyleAccessor()->destroyPeer(peerBaselineOffsetStyle);
+        GeneratedModifier::GetLetterSpacingStyleAccessor()->destroyPeer(peerLetterSpacingStyle);
+        GeneratedModifier::GetTextShadowStyleAccessor()->destroyPeer(peerTextShadowStyle);
+        GeneratedModifier::GetLineHeightStyleAccessor()->destroyPeer(peerLineHeightStyle);
+        GeneratedModifier::GetBackgroundColorStyleAccessor()->destroyPeer(peerBackgroundColorStyle);
+        GeneratedModifier::GetUrlStyleAccessor()->destroyPeer(peerUrlStyle);
+        GeneratedModifier::GetParagraphStyleAccessor()->destroyPeer(peerParagraphStyle);
+        GeneratedModifier::GetParagraphStyleAccessor()->destroyPeer(peerParagraphStylePM);
+        while (!lengthMetrics.empty()) {
+            auto item = lengthMetrics.back();
+            lengthMetrics.pop_back();
+            LengthMetricsPeer::Destroy(item);
+        }
+    }
+
+private:
+    std::vector<LengthMetricsPeer*> lengthMetrics = {};
+    LengthMetricsPeer* CreateLengthMetricsPeer(const Dimension& dimension)
+    {
+        auto lengthMetricsPeer = LengthMetricsPeer::Create(dimension);
+        lengthMetrics.push_back(lengthMetricsPeer);
+        return lengthMetricsPeer;
+    }
+
+    // TextStyle_styled_string
+    Ark_TextStyle_styled_string peerTextStyle = {};
+    void FillTextStyle(Ark_StyledStringValue& styledValue)
+    {
+        auto fontSizePeer = CreateLengthMetricsPeer(std::get<1>(TEST_FONT_SIZE));
+        const Ark_TextStyleInterface textStyle = {
+            .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_FONT_COLOR)),
+            .fontFamily =  Converter::ArkUnion<Opt_ResourceStr, Ark_String>(TEST_FONT_FAMILIES[0]),
+            .fontSize = Converter::ArkValue<Opt_LengthMetrics>(fontSizePeer),
+            .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(
+                std::get<1>(TEST_FONT_WEIGHT)),
+            .fontStyle = Converter::ArkValue<Opt_FontStyle>(TEST_FONT_STYLE),
+        };
+        auto optTextStyle = Converter::ArkValue<Opt_TextStyleInterface>(textStyle);
+        peerTextStyle = GeneratedModifier::GetTextStyle_styled_stringAccessor()->ctor(&optTextStyle);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextStyle_styled_string>(peerTextStyle);
     };
-    const Ark_LineHeightStyle lineHeightStyle {
-        .lineHeight = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_LINE_HEIGHT))
-    };
-    const Ark_BackgroundColorStyle backgroundColorStyle {
-        .textBackgroundStyle = {
+
+    // DecorationStyle
+    Ark_DecorationStyle decorationStylePeer = {};
+    void FillDecorationStyle(Ark_StyledStringValue& styledValue)
+    {
+        const Ark_DecorationStyleInterface decorationStyle = {
+            .type = Converter::ArkValue<Ark_TextDecorationType>(TEST_DCRN_TYPE),
+            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_DCRN_COLOR)),
+            .style = Converter::ArkValue<Opt_TextDecorationStyle>(TEST_DCRN_STYLE),
+        };
+        decorationStylePeer = GeneratedModifier::GetDecorationStyleAccessor()->ctor(&decorationStyle);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_DecorationStyle>(decorationStylePeer);
+    }
+
+    // BaselineOffsetStyle
+    Ark_BaselineOffsetStyle peerBaselineOffsetStyle = {};
+    void FillBaselineOffsetStyle(Ark_StyledStringValue& styledValue)
+    {
+        auto baselineOffsetOffset = CreateLengthMetricsPeer(std::get<1>(TEST_BASELINE_OFFSET));
+        peerBaselineOffsetStyle = GeneratedModifier::GetBaselineOffsetStyleAccessor()->ctor(baselineOffsetOffset);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_BaselineOffsetStyle>(peerBaselineOffsetStyle);
+    }
+
+    // LetterSpacing
+    Ark_LetterSpacingStyle peerLetterSpacingStyle = {};
+    void FillLetterSpacing(Ark_StyledStringValue& styledValue)
+    {
+        auto letterSpacingPeer = CreateLengthMetricsPeer(std::get<1>(TEST_LETTER_SPACING));
+        peerLetterSpacingStyle = GeneratedModifier::GetLetterSpacingStyleAccessor()->ctor(letterSpacingPeer);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_LetterSpacingStyle>(peerLetterSpacingStyle);
+    }
+
+    // TextShadow
+    Ark_TextShadowStyle peerTextShadowStyle = {};
+    void FillTextShadow(Ark_StyledStringValue& styledValue)
+    {
+        const Ark_ShadowOptions shadowOptions = {
+            .radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_RADIUS),
+            .type = Converter::ArkValue<Opt_ShadowType>(std::get<1>(TEST_TEXT_SHADOW_TYPE)),
+            .color= Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+                std::get<1>(TEST_TEXT_SHADOW_COLOR)),
+            .offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
+            .offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
+            .fill = Converter::ArkValue<Opt_Boolean>(true)
+        };
+        auto textShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_Array_ShadowOptions,
+            Ark_ShadowOptions>(shadowOptions);
+        peerTextShadowStyle = GeneratedModifier::GetTextShadowStyleAccessor()->ctor(&textShadow);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextShadowStyle>(peerTextShadowStyle);
+    }
+
+    // LineHeightStyle
+    Ark_LineHeightStyle peerLineHeightStyle = {};
+    void FillLineHeight(Ark_StyledStringValue& styledValue)
+    {
+        auto lineHeightPeer = CreateLengthMetricsPeer(std::get<1>(TEST_LINE_HEIGHT));
+        peerLineHeightStyle = GeneratedModifier::GetLineHeightStyleAccessor()->ctor(lineHeightPeer);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_LineHeightStyle>(peerLineHeightStyle);
+    }
+
+    // BackgroundColor
+    Ark_BackgroundColorStyle peerBackgroundColorStyle = {};
+    void FillBackgroundColor(Ark_StyledStringValue& styledValue)
+    {
+        Ark_TextBackgroundStyle textBackgroundStyle = {
             .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_BGCL_COLOR)),
             .radius = Converter::ArkUnion<
                 Opt_Union_Dimension_BorderRadiuses, Ark_Length>(std::get<1>(TEST_BGCL_RADIUS))
-        }
-    };
-    const Ark_UrlStyle urlStyle {
-        .url= Converter::ArkValue<Ark_String>(TEST_URL)
-    };
-    const Ark_ParagraphStyle paragraphStyle {
-        .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
-        .textIndent = Converter::ArkValue<Opt_Number>(TEST_PSST_TEXT_INDEN),
-        .maxLines = Converter::ArkValue<Opt_Number>(TEST_PSST_MAX_LINES),
-        .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
-        .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
-        .leadingMargin = Converter::ArkUnion<
-            Opt_Union_Number_LeadingMarginPlaceholder, Ark_Number>(std::get<1>(TEST_PSST_LEADING_MARGIN)),
-    };
-    const Ark_ParagraphStyle paragraphStylePM {
-        .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
-        .textIndent = Converter::ArkValue<Opt_Number>(TEST_PSST_TEXT_INDEN),
-        .maxLines = Converter::ArkValue<Opt_Number>(TEST_PSST_MAX_LINES),
-        .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
-        .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
-        .leadingMargin = Converter::ArkUnion<
-            Opt_Union_Number_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(TEST_PSPM_LEADING_MARGIN),
-    };
-#endif
-    const std::vector<Ark_StyleOptions> testArrayStyles = std::vector {
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_STR),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[0]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextStyle_styled_string>(textStyle)
-#endif
-        },
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_DCRN),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[1]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_DecorationStyle>(decorationStyle)
-#endif
-        },
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_BSL),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[2]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_BaselineOffsetStyle>(baselineOffsetStyle)
-#endif
-        },
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_LSP),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[3]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_LetterSpacingStyle>(letterSpacingStyle)
-#endif
-        },
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_TSH),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[4]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextShadowStyle>(textShadowStyle)
-#endif
-        },
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_LNHT),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[5]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_LineHeightStyle>(lineHeightStyle)
-#endif
-        },
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_BGCL),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[6]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_BackgroundColorStyle>(backgroundColorStyle)
-#endif
-        },
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_URL),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[7]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_UrlStyle>(urlStyle)
-#endif
-        },
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_PSST),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[8]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_ParagraphStyle>(paragraphStyle)
-#endif
-        },
-        Ark_StyleOptions {
-            .start = Converter::ArkValue<Opt_Number>(TEST_START_PSPM),
-            .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
-            .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[8]),
-#ifdef WRONG_TYPE
-            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_ParagraphStyle>(paragraphStylePM)
-#endif
-        }
-    };
-    Converter::ArkArrayHolder<Array_StyleOptions> holderStyles(testArrayStyles);
-}
-namespace GeneratedModifier {
-    const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
+        };
+        peerBackgroundColorStyle = GeneratedModifier::GetBackgroundColorStyleAccessor()->ctor(&textBackgroundStyle);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_BackgroundColorStyle>(peerBackgroundColorStyle);
+    }
+
+    // Url
+    Ark_UrlStyle peerUrlStyle = {};
+    void FillUrl(Ark_StyledStringValue& styledValue)
+    {
+        auto url = Converter::ArkValue<Ark_String>(TEST_URL);
+        peerUrlStyle = GeneratedModifier::GetUrlStyleAccessor()->ctor(&url);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_UrlStyle>(peerUrlStyle);
+    }
+
+    // ParagraphStyle
+    Ark_ParagraphStyle peerParagraphStyle = {};
+    void FillParagraphStyle(Ark_StyledStringValue& styledValue)
+    {
+        auto textIndentPeer = CreateLengthMetricsPeer(std::get<1>(TEST_PSST_TEXT_INDEN));
+        auto leadingMarginPeer = CreateLengthMetricsPeer(std::get<1>(TEST_PSST_LEADING_MARGIN));
+        Ark_ParagraphStyleInterface paragraphStyle = {
+            .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
+            .textIndent = Converter::ArkValue<Opt_LengthMetrics>(textIndentPeer),
+            .maxLines = Converter::ArkValue<Opt_Number>(TEST_PSST_MAX_LINES),
+            .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
+            .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
+            .leadingMargin = Converter::ArkUnion<
+                Opt_Union_LengthMetrics_LeadingMarginPlaceholder, Ark_LengthMetrics>(leadingMarginPeer),
+        };
+        auto optParagraphStyle = Converter::ArkValue<Opt_ParagraphStyleInterface>(paragraphStyle);
+        peerParagraphStyle = GeneratedModifier::GetParagraphStyleAccessor()->ctor(&optParagraphStyle);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_ParagraphStyle>(peerParagraphStyle);
+    }
+
+    // ParagraphStylePM
+    Ark_ParagraphStyle peerParagraphStylePM = {};
+    void FillParagraphStylePM(Ark_StyledStringValue& styledValue)
+    {
+        auto textIndentPMPeer = CreateLengthMetricsPeer(std::get<1>(TEST_PSST_TEXT_INDEN));
+        auto leadingMargin = Converter::ArkUnion<
+            Opt_Union_LengthMetrics_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(TEST_PSPM_LEADING_MARGIN);
+        Ark_ParagraphStyleInterface paragraphStyle = {
+            .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
+            .textIndent = Converter::ArkValue<Opt_LengthMetrics>(textIndentPMPeer),
+            .maxLines = Converter::ArkValue<Opt_Number>(TEST_PSST_MAX_LINES),
+            .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
+            .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
+            .leadingMargin = leadingMargin,
+        };
+        auto optParagraphStyle = Converter::ArkValue<Opt_ParagraphStyleInterface>(paragraphStyle);
+        peerParagraphStylePM = GeneratedModifier::GetParagraphStyleAccessor()->ctor(&optParagraphStyle);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_ParagraphStyle>(peerParagraphStylePM);
+    }
+};
+namespace {
+    static StyleOptionsKeeper g_styleOptions;
 }
 
 using namespace testing;
@@ -307,11 +378,13 @@ using namespace testing::ext;
 struct StyledStringUnionNull {
     Ark_Union_String_ImageAttachment_CustomSpan* Union() { return nullptr; }
     Opt_Array_StyleOptions* Styles() { return nullptr; }
+    void TearDown() {}
 };
 struct StyledStringUnionString {
     Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
             Ark_Union_String_ImageAttachment_CustomSpan, Ark_String>(STRING_TEST_VALUE);
-    Opt_Array_StyleOptions stylesOpt = holderStyles.OptValue<Opt_Array_StyleOptions>();
+    Opt_Array_StyleOptions stylesOpt;
+    std::unique_ptr<Converter::ArkArrayHolder<Array_StyleOptions>> holderStyles;
 
     Ark_Union_String_ImageAttachment_CustomSpan* Union()
     {
@@ -319,24 +392,43 @@ struct StyledStringUnionString {
     }
     Opt_Array_StyleOptions* Styles()
     {
+        holderStyles = std::make_unique<Converter::ArkArrayHolder<Array_StyleOptions>>(g_styleOptions.GetOptions());
+        stylesOpt = holderStyles->OptValue<Opt_Array_StyleOptions>();
         return &stylesOpt;
+    }
+    void TearDown()
+    {
+        g_styleOptions.TearDown();
     }
 };
 
 struct StyledStringUnionImageAttachment {
-    Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
-            Ark_Union_String_ImageAttachment_CustomSpan, Ark_ImageAttachment>(IMAGEATTACHMENT_TEST_VALUE);
     Ark_Union_String_ImageAttachment_CustomSpan* Union()
     {
+        peer = GeneratedModifier::GetImageAttachmentAccessor()->ctor(&IMAGEATTACHMENT_TEST_VALUE);
+        static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
+            Ark_Union_String_ImageAttachment_CustomSpan, Ark_ImageAttachment>(peer);
         return &value;
     }
     Opt_Array_StyleOptions* Styles() { return nullptr; }
+    void TearDown()
+    {
+        GeneratedModifier::GetImageAttachmentAccessor()->destroyPeer(peer);
+    }
+private:
+    ImageAttachmentPeer* peer = nullptr;
 };
 
 template <typename V1>
 class StyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIStyledStringAccessor,
     &GENERATED_ArkUIAccessors::getStyledStringAccessor, StyledStringPeer> {
 public:
+    static void SetUpTestCase()
+    {
+        AccessorTestCtorBase::SetUpTestCase();
+        SetupTheme<TextTheme>();
+    }
+
     void SetUp(void) override
     {
         AccessorTestCtorBase::SetUp();
@@ -370,6 +462,12 @@ public:
         auto value = settings.Union();
         auto styles = settings.Styles();
         return accessor_->ctor(value, styles);
+    }
+
+    void TearDown() override
+    {
+        AccessorTestCtorBase::TearDown();
+        settings.TearDown();
     }
 
     bool IsSpanItemSame(const std::list<RefPtr<NG::SpanItem>>& src, const std::list<RefPtr<NG::SpanItem>>& other)
@@ -417,7 +515,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorText, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorSpansOn, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansOn, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
     auto spansStr = peer_->spanString->GetSpans(TEST_START_STR, TEST_LENGTH);
@@ -447,7 +545,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorSpansOn, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorSpansFont, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorSpansFont, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
 
@@ -478,7 +576,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorSpansFont
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorDecorationSpan, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorDecorationSpan, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
 
@@ -502,7 +600,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorDecoratio
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorBaselineOffsetSpan, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBaselineOffsetSpan, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
 
@@ -518,7 +616,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorBaselineO
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorLetterSpacing, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLetterSpacing, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
 
@@ -534,7 +632,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorLetterSpa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorTextShadow, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorTextShadow, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
 
@@ -557,7 +655,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorTextShado
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorLineHeight, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorLineHeight, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
 
@@ -573,7 +671,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorLineHeigh
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorBackgroundColor, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorBackgroundColor, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
 
@@ -612,7 +710,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorBackgroun
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorUrl, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorUrl, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
 
@@ -638,7 +736,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorGesture, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorParagraphStyle, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStyle, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
 
@@ -675,7 +773,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorParagraph
  * @tc.desc: PixelMap check in the ParagraphStyle
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringCtorParagraphStylePixelMap, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStylePixelMap, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
     auto spans = peer_->spanString->GetSpans(TEST_START_PSPM, TEST_LENGTH);
@@ -881,11 +979,11 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringUnmarshalling1Test, Te
 }
 
 /**
- * @tc.name:styledStringCtorImageAttachment
+ * @tc.name: ctorImageAttachmentTest
  * @tc.desc: ImageAttachment check
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, DISABLED_styledStringCtorImageAttachment, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, ctorImageAttachmentTest, TestSize.Level1)
 {
     ASSERT_NE(peer_->spanString, nullptr);
     auto spans = peer_->spanString->GetSpans(0, 1);
