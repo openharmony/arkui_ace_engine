@@ -150,6 +150,45 @@ const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegative
     { "-20.65", ArkValue<Ark_Number>(-20.65), "-20.65px" },
 };
 
+// Fixture 'ImageSpanVerticalAlign' for type 'Ark_ImageSpanAlignment'
+const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, VerticalAlign>>
+    testFixtureVerticalAlignValidValues = {
+        { "ARK_IMAGE_SPAN_ALIGNMENT_TOP", ARK_IMAGE_SPAN_ALIGNMENT_TOP, VerticalAlign::TOP },
+        { "ARK_IMAGE_SPAN_ALIGNMENT_CENTER", ARK_IMAGE_SPAN_ALIGNMENT_CENTER, VerticalAlign::CENTER },
+        { "ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM", ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM, VerticalAlign::BOTTOM },
+        { "ARK_IMAGE_SPAN_ALIGNMENT_BASELINE", ARK_IMAGE_SPAN_ALIGNMENT_BASELINE, VerticalAlign::BASELINE },
+    };
+
+const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, std::optional<VerticalAlign>>>
+    testFixtureVerticalAlignInvalidValues = {
+        { "ARK_IMAGE_SPAN_ALIGNMENT_INVALID", INVALID_ENUM_VAL<Ark_ImageSpanAlignment>, std::nullopt }
+};
+
+// Valid values for attribute 'objectFit' of method 'objectFit'
+const std::vector<std::tuple<std::string, Ark_ImageFit, ImageFit>> testFixtureObjectFitValidValues = {
+    { "ARK_IMAGE_FIT_CONTAIN", ARK_IMAGE_FIT_CONTAIN, ImageFit::CONTAIN },
+    { "ARK_IMAGE_FIT_COVER", ARK_IMAGE_FIT_COVER, ImageFit::COVER },
+    { "ARK_IMAGE_FIT_AUTO", ARK_IMAGE_FIT_AUTO, ImageFit::FITWIDTH },
+    { "ARK_IMAGE_FIT_FILL", ARK_IMAGE_FIT_FILL, ImageFit::FILL },
+    { "ARK_IMAGE_FIT_SCALE_DOWN", ARK_IMAGE_FIT_SCALE_DOWN, ImageFit::SCALE_DOWN },
+    { "ARK_IMAGE_FIT_NONE", ARK_IMAGE_FIT_NONE, ImageFit::NONE },
+    { "ARK_IMAGE_FIT_TOP_START", ARK_IMAGE_FIT_TOP_START, ImageFit::TOP_LEFT },
+    { "ARK_IMAGE_FIT_TOP", ARK_IMAGE_FIT_TOP, ImageFit::TOP },
+    { "ARK_IMAGE_FIT_TOP_END", ARK_IMAGE_FIT_TOP_END, ImageFit::TOP_END },
+    { "ARK_IMAGE_FIT_START", ARK_IMAGE_FIT_START, ImageFit::START },
+    { "ARK_IMAGE_FIT_CENTER", ARK_IMAGE_FIT_CENTER, ImageFit::CENTER },
+    { "ARK_IMAGE_FIT_END", ARK_IMAGE_FIT_END, ImageFit::END },
+    { "ARK_IMAGE_FIT_BOTTOM_START", ARK_IMAGE_FIT_BOTTOM_START,
+        ImageFit::BOTTOM_START },
+    { "ARK_IMAGE_FIT_BOTTOM", ARK_IMAGE_FIT_BOTTOM, ImageFit::BOTTOM },
+    { "ARK_IMAGE_FIT_BOTTOM_END", ARK_IMAGE_FIT_BOTTOM_END, ImageFit::BOTTOM_END },
+};
+
+// Invalid values for attribute 'objectFit' of method 'objectFit'
+const std::vector<std::tuple<std::string, Ark_ImageFit, std::optional<ImageFit>>> testFixtureObjectFitInvalidValues = {
+    {"static_cast<Ark_ImageFit>(-1)", INVALID_ENUM_VAL<Ark_ImageFit>, std::nullopt },
+};
+
 const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceInitTable = {
     { DIMENSIONS_RES_NON_NEG_0_ID, DIMENSIONS_RES_NON_NEG_0_STR, 123._vp },
     { DIMENSIONS_RES_NON_NEG_1_ID, DIMENSIONS_RES_NON_NEG_1_STR, 0._vp },
@@ -211,5 +250,23 @@ const std::vector<std::tuple<std::string, Dimension, Ark_Length>> testFixtureLen
     { "0.5_pct", 0.5_pct, Converter::ArkValue<Ark_Length>(0.5_pct) },
     { "0.0_pct", 0.0_pct, Converter::ArkValue<Ark_Length>(0.0_pct) },
     { "-0.8_pct", -0.8_pct, Converter::ArkValue<Ark_Length>(-0.8_pct) },
+};
+
+const std::vector<std::tuple<std::string, Ark_Length, Dimension>> testFixtureDimensionAnyValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), 123.0_vp },
+    { "0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp), 0.0_vp },
+    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), 1.23_vp },
+    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), 123.0_fp },
+    { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp), 0.0_fp },
+    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), 1.23_fp },
+    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), 123.0_px },
+    { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px), 0.0_px },
+    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), 1.23_px },
+    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp), -2.3_vp },
+    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5_fp },
+    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px), -5.6_px },
+    { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct), 0.5_pct },
+    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct), 0.0_pct },
+    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct), -0.8_pct }
 };
 } // namespace OHOS::Ace::NG::AccessorTestFixtures

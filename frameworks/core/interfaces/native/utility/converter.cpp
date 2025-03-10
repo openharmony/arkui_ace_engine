@@ -2152,4 +2152,17 @@ std::vector<uint32_t> Convert(const Ark_Buffer& src)
     }
     return dataArray;
 }
+
+template<>
+ImageSpanSize Convert(const Ark_SizeOptions& value)
+{
+    auto width = OptConvert<CalcDimension>(value.width);
+    auto height = OptConvert<CalcDimension>(value.height);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonNegative(height);
+    return {
+        .width = width,
+        .height = height,
+    };
+}
 } // namespace OHOS::Ace::NG::Converter

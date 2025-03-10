@@ -67,6 +67,8 @@
 using Ark_Empty = InteropEmpty;
 
 namespace OHOS::Ace::NG::Converter {
+    template<typename Enum>
+    constexpr auto INVALID_ENUM_VAL = static_cast<Enum>(-1);
     // Optional trait
     template<typename T, typename = void>
     struct IsOptional : std::false_type {};
@@ -179,7 +181,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
+    void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
+    void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
     void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx);
     void AssignArkValue(Ark_KeyEvent& dst, const OHOS::Ace::KeyEventInfo& src);
