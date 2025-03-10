@@ -1136,6 +1136,32 @@ ListItemIndex Convert(const Ark_VisibleListContentInfo& src)
 }
 
 template<>
+ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src)
+{
+    auto itemIndex = ListItemGroupIndex{.index = Convert<int32_t>(src.index)}; // a struct is initialized by default
+    auto itemGroupArea = OptConvert<ListItemGroupArea>(src.itemGroupArea);
+    if (itemGroupArea.has_value()) {
+        itemIndex.area = static_cast<int32_t>(itemGroupArea.value());
+    }
+    auto indexInGroup = OptConvert<int32_t>(src.itemIndexInGroup);
+    if (indexInGroup.has_value()) {
+        itemIndex.indexInGroup = indexInGroup.value();
+    }
+    return itemIndex;
+}
+
+template<>
+Rect Convert(const Ark_RectResult& src)
+{
+    return Rect(
+        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.width),
+        Converter::Convert<float>(src.height)
+    );
+}
+
+template<>
 NestedScrollOptions Convert(const Ark_NestedScrollOptions& src)
 {
     NestedScrollOptions nestedScrollOptions = {
