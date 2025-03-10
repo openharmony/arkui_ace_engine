@@ -23,6 +23,7 @@ import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
 import { Context } from '@ohos.arkui.UIContext';
 import { SymbolGlyphModifier } from '@kit.ArkUI';
+import { EnvironmentCallback } from '@kit.AbilityKit';
 
 export enum EditableLeftIconType {
   Back,
@@ -383,7 +384,6 @@ struct EditableTitleBarMenuSection {
               ImageMenuItem({
                 item: item,
                 attribute: ItemType.Icon,
-                fontSize: this.fontSize,
                 imageMenuItemId: `ImageMenuItem_${this.parentUniqueId}_${index}`
               })
             })
@@ -422,7 +422,10 @@ struct ImageMenuItem {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   longPressTime: number = 500;
-  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
+  systemFontScale?: number = 1;
+  isFollowingSystemFontScale: boolean = this.getUIContext().isFollowingSystemFontScale();;
+  maxFontScale: number = this.getUIContext().getMaxFontScale();
+  @State fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
@@ -456,8 +459,54 @@ struct ImageMenuItem {
     }
   }
 
-  onFontSizeUpdated(): void {
+  aboutToAppear() {
+    try {
+      this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
+    } catch (paramError) {
+      let code = (paramError as BusinessError).code;
+      let message = (paramError as BusinessError).message;
+      hilog.error(0x3900, 'Ace',
+        `EditableTitleBar Faild to get environment param error: ${code}, ${message}`);
+    }
+    this.fontSize = this.decideFontScale();
     this.buttonGestureModifier.fontSize = this.fontSize;
+  }
+
+  private envCallback: EnvironmentCallback = {
+    onConfigurationUpdated: (config) => {
+      if (config === undefined || !this.isFollowingSystemFontScale) {
+        this.fontSize = 1;
+        return;
+      }
+      try {
+        this.fontSize = Math.min(
+          this.maxFontScale, config.fontSizeScale ?? 1);
+        this.buttonGestureModifier.fontSize = this.fontSize;
+      } catch (paramError) {
+        let code = (paramError as BusinessError).code;
+        let message = (paramError as BusinessError).message;
+        hilog.error(0x3900, 'Ace',
+          `EditableTitleBar environmentCallback error: ${code}, ${message}`);
+      }
+    },
+    onMemoryLevel: (level) => {
+    }
+  }
+
+  decideFontScale(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+      return Math.min(this.systemFontScale, this.maxFontScale);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'EditableTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
   }
 
   @Styles
@@ -580,11 +629,15 @@ struct ImageMenuItem {
     } else {
       let resourceString: string = '';
       try {
-        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+        if (resource.id === -1 ) {
+          resourceString = getContext()?.resourceManager?.getStringByNameSync(resource.params?.[0]?.split('.').pop()  ?? '');
+        } else {
+          resourceString = getContext()?.resourceManager?.getStringSync(resource);
+        }
       } catch (err) {
         let code: number = (err as BusinessError)?.code;
         let message: string = (err as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
+        hilog.error(0x3900, 'Ace', `Faild to EditableTitleBar toStringFormat, code: ${code}, message: ${message}`)
       }
       return resourceString;
     }
