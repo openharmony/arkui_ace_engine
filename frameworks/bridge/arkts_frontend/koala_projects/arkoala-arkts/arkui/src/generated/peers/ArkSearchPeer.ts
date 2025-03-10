@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -47,7 +47,7 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchSubmitCallback, SearchType, SearchButtonOptions, SearchAttribute, SearchOptions } from "./../ArkSearchInterfaces"
@@ -55,10 +55,17 @@ import { CaretStyle, EditableTextOnChangeCallback, InsertValue, DeleteValue } fr
 import { EnterKeyType, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./../ArkTextInputInterfaces"
 import { EditMenuOptions } from "./../ArkEditMenuOptionsMaterialized"
 import { KeyboardOptions } from "./../ArkRichEditorInterfaces"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -93,7 +100,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -163,7 +170,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -196,7 +203,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -241,7 +248,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     enterKeyTypeAttribute(value: EnterKeyType): void {
-        ArkUIGeneratedNativeModule._SearchAttribute_enterKeyType(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._SearchAttribute_enterKeyType(this.peer.ptr, ((value as EnterKeyType) as int32))
     }
     onSubmit0Attribute(value: ((breakpoints: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -292,13 +299,13 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     copyOptionAttribute(value: CopyOptions): void {
-        ArkUIGeneratedNativeModule._SearchAttribute_copyOption(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._SearchAttribute_copyOption(this.peer.ptr, ((value as CopyOptions) as int32))
     }
     maxLengthAttribute(value: number): void {
         ArkUIGeneratedNativeModule._SearchAttribute_maxLength(this.peer.ptr, value)
     }
     textAlignAttribute(value: TextAlign): void {
-        ArkUIGeneratedNativeModule._SearchAttribute_textAlign(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._SearchAttribute_textAlign(this.peer.ptr, ((value as TextAlign) as int32))
     }
     enableKeyboardOnFocusAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._SearchAttribute_enableKeyboardOnFocus(this.peer.ptr, value ? 1 : 0)
@@ -401,7 +408,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     typeAttribute(value: SearchType): void {
-        ArkUIGeneratedNativeModule._SearchAttribute_type(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._SearchAttribute_type(this.peer.ptr, ((value as SearchType) as int32))
     }
     fontFeatureAttribute(value: string): void {
         ArkUIGeneratedNativeModule._SearchAttribute_fontFeature(this.peer.ptr, value)
@@ -431,10 +438,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     editMenuOptionsAttribute(value: EditMenuOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeEditMenuOptions(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_editMenuOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._SearchAttribute_editMenuOptions(this.peer.ptr, toPeerPtr(value))
     }
     enablePreviewTextAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._SearchAttribute_enablePreviewText(this.peer.ptr, value ? 1 : 0)

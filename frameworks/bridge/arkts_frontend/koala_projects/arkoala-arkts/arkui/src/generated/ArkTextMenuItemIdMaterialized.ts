@@ -19,7 +19,7 @@
 import { ResourceStr } from "./ArkUnitsInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,30 +33,30 @@ export class TextMenuItemIdInternal {
     }
 }
 export class TextMenuItemId implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     static get CUT(): TextMenuItemId {
-        throw new Error("Not implemented")
+        return TextMenuItemId.getCUT()
     }
     static get COPY(): TextMenuItemId {
-        throw new Error("Not implemented")
+        return TextMenuItemId.getCOPY()
     }
     static get PASTE(): TextMenuItemId {
-        throw new Error("Not implemented")
+        return TextMenuItemId.getPASTE()
     }
     static get SELECT_ALL(): TextMenuItemId {
-        throw new Error("Not implemented")
+        return TextMenuItemId.getSELECT_ALL()
     }
     static get COLLABORATION_SERVICE(): TextMenuItemId {
-        throw new Error("Not implemented")
+        return TextMenuItemId.getCOLLABORATION_SERVICE()
     }
     static get CAMERA_INPUT(): TextMenuItemId {
-        throw new Error("Not implemented")
+        return TextMenuItemId.getCAMERA_INPUT()
     }
     static get AI_WRITER(): TextMenuItemId {
-        throw new Error("Not implemented")
+        return TextMenuItemId.getAI_WRITER()
     }
     static ctor_textmenuitemid(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_ctor()
@@ -80,6 +80,27 @@ export class TextMenuItemId implements MaterializedBase {
         const id_casted = id as (TextMenuItemId)
         return this.equals_serialize(id_casted)
     }
+    private static getCUT(): TextMenuItemId {
+        return TextMenuItemId.getCUT_serialize()
+    }
+    private static getCOPY(): TextMenuItemId {
+        return TextMenuItemId.getCOPY_serialize()
+    }
+    private static getPASTE(): TextMenuItemId {
+        return TextMenuItemId.getPASTE_serialize()
+    }
+    private static getSELECT_ALL(): TextMenuItemId {
+        return TextMenuItemId.getSELECT_ALL_serialize()
+    }
+    private static getCOLLABORATION_SERVICE(): TextMenuItemId {
+        return TextMenuItemId.getCOLLABORATION_SERVICE_serialize()
+    }
+    private static getCAMERA_INPUT(): TextMenuItemId {
+        return TextMenuItemId.getCAMERA_INPUT_serialize()
+    }
+    private static getAI_WRITER(): TextMenuItemId {
+        return TextMenuItemId.getAI_WRITER_serialize()
+    }
     private static of_serialize(id: ResourceStr): TextMenuItemId {
         const thisSerializer : Serializer = Serializer.hold()
         let id_type : int32 = RuntimeType.UNDEFINED
@@ -100,10 +121,42 @@ export class TextMenuItemId implements MaterializedBase {
         return obj
     }
     private equals_serialize(id: TextMenuItemId): boolean {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeTextMenuItemId(id)
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_equals(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_equals(this.peer!.ptr, toPeerPtr(id))
         return retval
+    }
+    private static getCUT_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getCUT()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getCOPY_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getCOPY()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getPASTE_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getPASTE()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getSELECT_ALL_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getSELECT_ALL()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getCOLLABORATION_SERVICE_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getCOLLABORATION_SERVICE()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getCAMERA_INPUT_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getCAMERA_INPUT()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getAI_WRITER_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getAI_WRITER()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
     }
 }

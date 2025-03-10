@@ -30,8 +30,9 @@ es2panda_Impl *GetImpl() {
 }
 
 static const char* source =
-""
+"export class XXX {}"
 ;
+static es2panda_AstNode* newStatements[1];
 
 int main() {
     impl = GetImpl();
@@ -59,6 +60,38 @@ int main() {
     else {
         std::cout << "PROCEED TO PARSE SUCCESS" << std::endl;
     }
+
+    auto ast = GetImpl()->ProgramAst(context, GetImpl()->ContextProgram(context));
+
+    std::cout << GetImpl()->AstNodeDumpEtsSrcConst(context, ast) << std::endl;
+
+    std::size_t count = 0;
+    auto statements = impl->BlockStatementStatements(context, ast, &count);
+    auto oldClass = statements[0];
+    auto oldDef = GetImpl()->ClassDeclarationDefinition(context, oldClass);
+
+    std::cout << "statement count: " << count << std::endl;
+
+    auto *identifier = impl->CreateIdentifier1(context, (char *)"XXX");
+    auto *newDef = impl->CreateClassDefinition1(
+        context,
+       // oldDef,
+        identifier, nullptr, 0, Es2pandaClassDefinitionModifiers::CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
+        Es2pandaModifierFlags::MODIFIER_FLAGS_DECLARE
+    );
+    auto *newClazz = impl->CreateClassDeclaration(context, newDef);
+    newStatements[0] = newClazz;
+
+    impl->BlockStatementSetStatements(context, ast, newStatements, 1);
+    impl->AstNodeSetParent(context, newDef, newClazz);
+    impl->AstNodeSetParent(context, identifier, newDef);
+
+    impl->BlockStatementSetStatements(context, ast, newStatements, 1);
+
+    (void)impl->BlockStatementStatements(context, ast, &count);
+    std::cout << "new statement count: " << count << std::endl;
+
+    std::cout << GetImpl()->AstNodeDumpEtsSrcConst(context, ast) << std::endl;
 
     GetImpl()->ProceedToState(context, ES2PANDA_STATE_BOUND);
     if(GetImpl()->ContextState(context) == ES2PANDA_STATE_ERROR)

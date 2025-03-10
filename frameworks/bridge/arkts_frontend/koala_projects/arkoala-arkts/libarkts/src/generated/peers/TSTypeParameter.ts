@@ -58,11 +58,26 @@ export class TSTypeParameter extends Expression {
     get constraint(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSTypeParameterConstraintConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setConstraint(constraint: TypeNode): this {
+        global.generatedEs2panda._TSTypeParameterSetConstraint(global.context, this.peer, passNode(constraint))
+        return this
+    }
     get defaultType(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSTypeParameterDefaultTypeConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setDefaultType(defaultType: TypeNode): this {
+        global.generatedEs2panda._TSTypeParameterSetDefaultType(global.context, this.peer, passNode(defaultType))
+        return this
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._TSTypeParameterAnnotationsConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._TSTypeParameterSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
     }
 }
 export function isTSTypeParameter(node: AstNode): node is TSTypeParameter {

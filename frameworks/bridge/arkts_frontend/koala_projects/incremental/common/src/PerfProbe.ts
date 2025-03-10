@@ -58,7 +58,7 @@ export interface PerfProbe {
     /**
      * Cancels measuring the probe and its children probes.
      */
-    cancel(cancelChildren: boolean): void
+    cancel(): void
 
     /**
      * User-defined data associated with the probe.
@@ -154,7 +154,7 @@ class DummyPerfProbe implements MainPerfProbe {
     get name(): string { return "dummy" }
     get dummy(): boolean { return true }
     exit(log: boolean|undefined): void {}
-    cancel (cancelChildren: boolean) {}
+    cancel () {}
     get canceled(): boolean { return false }
     enterProbe(name: string): PerfProbe { return PerfProbeImpl.DUMMY }
     exitProbe (name: string): PerfProbe { return PerfProbeImpl.DUMMY }
@@ -237,14 +237,18 @@ class PerfProbeImpl implements PerfProbe {
         if (log) this.log()
     }
 
-    cancel(cancelChildren: boolean) {
+    cancelWithChildren() {
+        this.cancel()
+        this.maybeCancelChildren()
+    }
+
+    cancel() {
         this._canceled = true
-        if (cancelChildren) this.maybeCancelChildren()
     }
 
     private maybeCancelChildren() {
         MainPerfProbeImpl.visit(this, false, (probe: PerfProbeImpl, depth: int32) => {
-            if (probe.performing) probe.cancel(false)
+            if (probe.performing) probe.cancel()
         })
     }
 
@@ -262,7 +266,7 @@ class PerfProbeImpl implements PerfProbe {
         const mainProbe = this.main.probes.get(this.main.name)!
         const percentage = mainProbe.totalTime > 0 ? Math.round((100 / mainProbe.totalTime) * this.totalTime) : 0
 
-        let result = `[${this.name}] call count: ${this.callCount}` 
+        let result = `[${this.name}] call count: ${this.callCount}`
             +  ` | recursive call count: ${this.recursiveCallCount}`
             +  ` | time: ${this.totalTime}ms ${percentage}%`
 
@@ -286,7 +290,7 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
     ) {
         super(name)
         const prev = MainPerfProbeImpl.mainProbes.get(name)
-        if (prev) prev.cancel(true)
+        if (prev) prev.cancel()
         MainPerfProbeImpl.mainProbes.set(name, this)
         this.currentProbe = this.enterProbe(name)
     }
@@ -365,10 +369,10 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
     exit(log?: boolean) {
         super.exit()
         if (log) this.log()
-        this.cancel(true)
+        this.cancel()
     }
 
-    cancel(cancelChildren: boolean) {
+    cancel() {
         MainPerfProbeImpl.mainProbes.delete(this.name)
     }
 

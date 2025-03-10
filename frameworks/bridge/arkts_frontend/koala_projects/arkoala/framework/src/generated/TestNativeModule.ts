@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KInt, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, loadNativeModuleLibrary } from "@koalaui/interop"
+import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, loadNativeModuleLibrary } from "@koalaui/interop"
 import { int32, float32 } from "@koalaui/common"
 
 export class TestNativeModule {
@@ -62,52 +62,10 @@ export class TestNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _Test_SetEventsApi(): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._Test_SetEventsApi()
-        }
-        throw new Error("Not implemented")
-    }
-    static _Test_Common_OnChildTouchTest(arr: Uint8Array, arg: int32): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._Test_Common_OnChildTouchTest(arr, arg)
-        }
-        throw new Error("Not implemented")
-    }
-    static _Test_List_OnScrollVisibleContentChange(arr: Uint8Array, arg: int32): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._Test_List_OnScrollVisibleContentChange(arr, arg)
-        }
-        throw new Error("Not implemented")
-    }
-    static _Test_TextPicker_OnAccept(arr: Uint8Array, arg: int32): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._Test_TextPicker_OnAccept(arr, arg)
-        }
-        throw new Error("Not implemented")
-    }
     static _TestWithBuffer(buffer: ArrayBuffer): void {
         if ((this._LoadOnce()) == (true))
         {
             return this._TestWithBuffer(buffer)
-        }
-        throw new Error("Not implemented")
-    }
-    static _TestSetArkoalaCallbackCaller(): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._TestSetArkoalaCallbackCaller()
-        }
-        throw new Error("Not implemented")
-    }
-    static _TestSetArkoalaCallbackCallerSync(): void {
-        if ((this._LoadOnce()) == (true))
-        {
-            return this._TestSetArkoalaCallbackCallerSync()
         }
         throw new Error("Not implemented")
     }

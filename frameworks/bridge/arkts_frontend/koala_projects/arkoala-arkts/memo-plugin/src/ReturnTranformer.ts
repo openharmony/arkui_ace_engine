@@ -32,11 +32,11 @@ export class ReturnTransformer extends AbstractVisitor {
         if (/* beforeChildren === this.skipNode */ isSyntheticReturnStatement(beforeChildren)) {
             return beforeChildren
         }
-        if (beforeChildren instanceof arkts.ScriptFunction) {
+        if (arkts.isScriptFunction(beforeChildren)) {
             return beforeChildren
         }
         const node = this.visitEachChild(beforeChildren)
-        if (node instanceof arkts.ReturnStatement) {
+        if (arkts.isReturnStatement(node)) {
             return arkts.factory.updateReturnStatement(node, factory.createRecacheCall(node.argument))
         }
         return node

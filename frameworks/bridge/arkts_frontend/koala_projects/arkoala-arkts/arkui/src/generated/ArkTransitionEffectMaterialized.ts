@@ -18,7 +18,7 @@
 
 import { TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam } from "./ArkCommonInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,21 +32,21 @@ export class TransitionEffectInternal {
     }
 }
 export class TransitionEffect implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     static get IDENTITY(): TransitionEffect {
-        throw new Error("Not implemented")
+        return TransitionEffect.getIDENTITY()
     }
     static get OPACITY(): TransitionEffect {
-        throw new Error("Not implemented")
+        return TransitionEffect.getOPACITY()
     }
     static get SLIDE(): TransitionEffect {
-        throw new Error("Not implemented")
+        return TransitionEffect.getSLIDE()
     }
     static get SLIDE_SWITCH(): TransitionEffect {
-        throw new Error("Not implemented")
+        return TransitionEffect.getSLIDE_SWITCH()
     }
     static ctor_transitioneffect(type: string, effect: TransitionEffects): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
@@ -55,7 +55,7 @@ export class TransitionEffect implements MaterializedBase {
         thisSerializer.writeNumber(effect_opacity)
         const effect_slideSwitch  = effect.slideSwitch
         const effect_move  = effect.move
-        thisSerializer.writeInt32((effect_move.valueOf() as int32))
+        thisSerializer.writeInt32(((effect_move as TransitionEdge) as int32))
         const effect_translate  = effect.translate
         thisSerializer.writeTranslateOptions(effect_translate)
         const effect_rotate  = effect.rotate
@@ -72,9 +72,9 @@ export class TransitionEffect implements MaterializedBase {
         return retval
     }
      constructor(type?: string, effect?: TransitionEffects) {
-        if (((type) !== (undefined)) && ((effect) !== (undefined)))
+        if (((type) !== (undefined)) || ((effect) !== (undefined)))
         {
-            const ctorPtr : KPointer = TransitionEffect.ctor_transitioneffect(type, effect)
+            const ctorPtr : KPointer = TransitionEffect.ctor_transitioneffect((type)!, (effect)!)
             this.peer = new Finalizable(ctorPtr, TransitionEffect.getFinalizer())
         }
     }
@@ -114,6 +114,18 @@ export class TransitionEffect implements MaterializedBase {
         const transitionEffect_casted = transitionEffect as (TransitionEffect)
         return this.combine_serialize(transitionEffect_casted)
     }
+    private static getIDENTITY(): TransitionEffect {
+        return TransitionEffect.getIDENTITY_serialize()
+    }
+    private static getOPACITY(): TransitionEffect {
+        return TransitionEffect.getOPACITY_serialize()
+    }
+    private static getSLIDE(): TransitionEffect {
+        return TransitionEffect.getSLIDE_serialize()
+    }
+    private static getSLIDE_SWITCH(): TransitionEffect {
+        return TransitionEffect.getSLIDE_SWITCH_serialize()
+    }
     private static translate_serialize(options: TranslateOptions): TransitionEffect {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTranslateOptions(options)
@@ -144,16 +156,12 @@ export class TransitionEffect implements MaterializedBase {
         return obj
     }
     private static move_serialize(edge: TransitionEdge): TransitionEffect {
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_move((edge.valueOf() as int32))
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_move(((edge as TransitionEdge) as int32))
         const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
         return obj
     }
     private static asymmetric_serialize(appear: TransitionEffect, disappear: TransitionEffect): TransitionEffect {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeTransitionEffect(appear)
-        thisSerializer.writeTransitionEffect(disappear)
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_asymmetric(thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_asymmetric(toPeerPtr(appear), toPeerPtr(disappear))
         const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
         return obj
     }
@@ -166,10 +174,27 @@ export class TransitionEffect implements MaterializedBase {
         return obj
     }
     private combine_serialize(transitionEffect: TransitionEffect): TransitionEffect {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeTransitionEffect(transitionEffect)
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_combine(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_combine(this.peer!.ptr, toPeerPtr(transitionEffect))
+        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private static getIDENTITY_serialize(): TransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getIDENTITY()
+        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private static getOPACITY_serialize(): TransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getOPACITY()
+        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private static getSLIDE_serialize(): TransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getSLIDE()
+        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private static getSLIDE_SWITCH_serialize(): TransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getSLIDE_SWITCH()
         const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
         return obj
     }

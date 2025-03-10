@@ -26,7 +26,7 @@ import { Path2D, Path2DInternal } from "./ArkPath2DMaterialized"
 import { ImageData, ImageDataInternal } from "./ArkImageDataMaterialized"
 import { Matrix2D, Matrix2DInternal } from "./ArkMatrix2DMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -40,10 +40,6 @@ export class CanvasRendererInternal {
     }
 }
 export class CanvasRenderer extends CanvasPath implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     get globalAlpha(): number {
         return this.getGlobalAlpha()
     }
@@ -186,14 +182,14 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const dy_type = runtimeType(dy)
         const dw_type = runtimeType(dw)
         const dh_type = runtimeType(dh)
-        if (((((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isImageBitmap(image, false, false))) || (((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isPixelMap(image, false, false)))) && (RuntimeType.UNDEFINED == sw_type) && (RuntimeType.UNDEFINED == sh_type) && (RuntimeType.UNDEFINED == dx_type) && (RuntimeType.UNDEFINED == dy_type) && (RuntimeType.UNDEFINED == dw_type) && (RuntimeType.UNDEFINED == dh_type)) {
+        if (((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) && (RuntimeType.UNDEFINED == sw_type) && (RuntimeType.UNDEFINED == sh_type) && (RuntimeType.UNDEFINED == dx_type) && (RuntimeType.UNDEFINED == dy_type) && (RuntimeType.UNDEFINED == dw_type) && (RuntimeType.UNDEFINED == dh_type)) {
             const image_casted = image as (ImageBitmap | PixelMap)
             const dx_casted = sx as (number)
             const dy_casted = sy as (number)
             this.drawImage0_serialize(image_casted, dx_casted, dy_casted)
             return
         }
-        if (((((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isImageBitmap(image, false, false))) || (((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isPixelMap(image, false, false)))) && (RuntimeType.NUMBER == sw_type) && (RuntimeType.NUMBER == sh_type) && (RuntimeType.UNDEFINED == dx_type) && (RuntimeType.UNDEFINED == dy_type) && (RuntimeType.UNDEFINED == dw_type) && (RuntimeType.UNDEFINED == dh_type)) {
+        if (((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) && (RuntimeType.NUMBER == sw_type) && (RuntimeType.NUMBER == sh_type) && (RuntimeType.UNDEFINED == dx_type) && (RuntimeType.UNDEFINED == dy_type) && (RuntimeType.UNDEFINED == dw_type) && (RuntimeType.UNDEFINED == dh_type)) {
             const image_casted = image as (ImageBitmap | PixelMap)
             const dx_casted = sx as (number)
             const dy_casted = sy as (number)
@@ -202,7 +198,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             this.drawImage1_serialize(image_casted, dx_casted, dy_casted, dw_casted, dh_casted)
             return
         }
-        if (((((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isImageBitmap(image, false, false))) || (((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isPixelMap(image, false, false)))) && (RuntimeType.NUMBER == sw_type) && (RuntimeType.NUMBER == sh_type) && (RuntimeType.NUMBER == dx_type) && (RuntimeType.NUMBER == dy_type) && (RuntimeType.NUMBER == dw_type) && (RuntimeType.NUMBER == dh_type)) {
+        if (((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) && (RuntimeType.NUMBER == sw_type) && (RuntimeType.NUMBER == sh_type) && (RuntimeType.NUMBER == dx_type) && (RuntimeType.NUMBER == dy_type) && (RuntimeType.NUMBER == dw_type) && (RuntimeType.NUMBER == dh_type)) {
             const image_casted = image as (ImageBitmap | PixelMap)
             const sx_casted = sx as (number)
             const sy_casted = sy as (number)
@@ -647,12 +643,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const thisSerializer : Serializer = Serializer.hold()
         let image_type : int32 = RuntimeType.UNDEFINED
         image_type = runtimeType(image)
-        if (((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isImageBitmap(image, false, false))) {
+        if (TypeChecker.isImageBitmap(image, false, false)) {
             thisSerializer.writeInt8(0 as int32)
             const image_0  = image as ImageBitmap
             thisSerializer.writeImageBitmap(image_0)
         }
-        else if (((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isPixelMap(image, false, false))) {
+        else if (TypeChecker.isPixelMap(image, false, false)) {
             thisSerializer.writeInt8(1 as int32)
             const image_1  = image as PixelMap
             thisSerializer.writePixelMap(image_1)
@@ -664,12 +660,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const thisSerializer : Serializer = Serializer.hold()
         let image_type : int32 = RuntimeType.UNDEFINED
         image_type = runtimeType(image)
-        if (((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isImageBitmap(image, false, false))) {
+        if (TypeChecker.isImageBitmap(image, false, false)) {
             thisSerializer.writeInt8(0 as int32)
             const image_0  = image as ImageBitmap
             thisSerializer.writeImageBitmap(image_0)
         }
-        else if (((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isPixelMap(image, false, false))) {
+        else if (TypeChecker.isPixelMap(image, false, false)) {
             thisSerializer.writeInt8(1 as int32)
             const image_1  = image as PixelMap
             thisSerializer.writePixelMap(image_1)
@@ -681,12 +677,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const thisSerializer : Serializer = Serializer.hold()
         let image_type : int32 = RuntimeType.UNDEFINED
         image_type = runtimeType(image)
-        if (((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isImageBitmap(image, false, false))) {
+        if (TypeChecker.isImageBitmap(image, false, false)) {
             thisSerializer.writeInt8(0 as int32)
             const image_0  = image as ImageBitmap
             thisSerializer.writeImageBitmap(image_0)
         }
-        else if (((RuntimeType.OBJECT) == (image_type)) && (TypeChecker.isPixelMap(image, false, false))) {
+        else if (TypeChecker.isPixelMap(image, false, false)) {
             thisSerializer.writeInt8(1 as int32)
             const image_1  = image as PixelMap
             thisSerializer.writePixelMap(image_1)
@@ -711,7 +707,6 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private clip1_serialize(path: Path2D, fillRule?: CanvasFillRule): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writePath2D(path)
         let fillRule_type : int32 = RuntimeType.UNDEFINED
         fillRule_type = runtimeType(fillRule)
         thisSerializer.writeInt8(fillRule_type as int32)
@@ -719,7 +714,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_clip1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_clip1(this.peer!.ptr, toPeerPtr(path), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private fill0_serialize(fillRule?: CanvasFillRule): void {
@@ -736,7 +731,6 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private fill1_serialize(path: Path2D, fillRule?: CanvasFillRule): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writePath2D(path)
         let fillRule_type : int32 = RuntimeType.UNDEFINED
         fillRule_type = runtimeType(fillRule)
         thisSerializer.writeInt8(fillRule_type as int32)
@@ -744,25 +738,22 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_fill1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_fill1(this.peer!.ptr, toPeerPtr(path), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private stroke0_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_stroke0(this.peer!.ptr)
     }
     private stroke1_serialize(path: Path2D): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writePath2D(path)
-        ArkUIGeneratedNativeModule._CanvasRenderer_stroke1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._CanvasRenderer_stroke1(this.peer!.ptr, toPeerPtr(path))
     }
     private createLinearGradient_serialize(x0: number, y0: number, x1: number, y1: number): CanvasGradient {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createLinearGradient(this.peer!.ptr, x0, y0, x1, y1)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
+        return obj
     }
     private createPattern_serialize(image: ImageBitmap, repetition?: string): CanvasPattern | undefined {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeImageBitmap(image)
         let repetition_type : int32 = RuntimeType.UNDEFINED
         repetition_type = runtimeType(repetition)
         thisSerializer.writeInt8(repetition_type as int32)
@@ -770,40 +761,42 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const repetition_value  = repetition!
             thisSerializer.writeString(repetition_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createPattern(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createPattern(this.peer!.ptr, toPeerPtr(image), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
         throw new Error("Object deserialization is not implemented.")
     }
     private createRadialGradient_serialize(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createRadialGradient(this.peer!.ptr, x0, y0, r0, x1, y1, r1)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
+        return obj
     }
     private createConicGradient_serialize(startAngle: number, x: number, y: number): CanvasGradient {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createConicGradient(this.peer!.ptr, startAngle, x, y)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
+        return obj
     }
     private createImageData0_serialize(sw: number, sh: number): ImageData {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createImageData0(this.peer!.ptr, sw, sh)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : ImageData = ImageDataInternal.fromPtr(retval)
+        return obj
     }
     private createImageData1_serialize(imagedata: ImageData): ImageData {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeImageData(imagedata)
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createImageData1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createImageData1(this.peer!.ptr, toPeerPtr(imagedata))
+        const obj : ImageData = ImageDataInternal.fromPtr(retval)
+        return obj
     }
     private getImageData_serialize(sx: number, sy: number, sw: number, sh: number): ImageData {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getImageData(this.peer!.ptr, sx, sy, sw, sh)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : ImageData = ImageDataInternal.fromPtr(retval)
+        return obj
     }
     private getPixelMap_serialize(sx: number, sy: number, sw: number, sh: number): PixelMap {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getPixelMap(this.peer!.ptr, sx, sy, sw, sh)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : PixelMap = PixelMapInternal.fromPtr(retval)
+        return obj
     }
     private putImageData0_serialize(imagedata: ImageData, dx: number | string, dy: number | string): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeImageData(imagedata)
         let dx_type : int32 = RuntimeType.UNDEFINED
         dx_type = runtimeType(dx)
         if (RuntimeType.NUMBER == dx_type) {
@@ -828,12 +821,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const dy_1  = dy as string
             thisSerializer.writeString(dy_1)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData0(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private putImageData1_serialize(imagedata: ImageData, dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeImageData(imagedata)
         let dx_type : int32 = RuntimeType.UNDEFINED
         dx_type = runtimeType(dx)
         if (RuntimeType.NUMBER == dx_type) {
@@ -906,12 +898,19 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const dirtyHeight_1  = dirtyHeight as string
             thisSerializer.writeString(dirtyHeight_1)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData1(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private getLineDash_serialize(): Array<number> {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDash(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<number> = new Array<number>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readNumber() as number)
+        }
+        const returnResult : Array<number> = buffer
+        return returnResult
     }
     private setLineDash_serialize(segments: Array<number>): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -952,7 +951,9 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private measureText_serialize(text: string): TextMetrics {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_measureText(this.peer!.ptr, text)
-        return new Deserializer(retval, retval.length).readTextMetrics()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : TextMetrics = retvalDeserializer.readTextMetrics()
+        return returnResult
     }
     private strokeText_serialize(text: string, x: number, y: number, maxWidth?: number): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -968,7 +969,8 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private getTransform_serialize(): Matrix2D {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getTransform(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
+        return obj
     }
     private resetTransform_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_resetTransform(this.peer!.ptr)
@@ -1013,10 +1015,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         thisSerializer.release()
     }
     private transferFromImageBitmap_serialize(bitmap: ImageBitmap): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeImageBitmap(bitmap)
-        ArkUIGeneratedNativeModule._CanvasRenderer_transferFromImageBitmap(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._CanvasRenderer_transferFromImageBitmap(this.peer!.ptr, toPeerPtr(bitmap))
     }
     private saveLayer_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_saveLayer(this.peer!.ptr)
@@ -1055,12 +1054,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const fillStyle_1  = fillStyle as number
             thisSerializer.writeNumber(fillStyle_1)
         }
-        else if (((RuntimeType.OBJECT) == (fillStyle_type)) && (TypeChecker.isCanvasGradient(fillStyle))) {
+        else if (TypeChecker.isCanvasGradient(fillStyle)) {
             thisSerializer.writeInt8(2 as int32)
             const fillStyle_2  = fillStyle as CanvasGradient
             thisSerializer.writeCanvasGradient(fillStyle_2)
         }
-        else if (RuntimeType.OBJECT == fillStyle_type) {
+        else if (TypeChecker.isCanvasPattern(fillStyle)) {
             thisSerializer.writeInt8(3 as int32)
             const fillStyle_3  = fillStyle as CanvasPattern
             thisSerializer.writeCanvasPattern(fillStyle_3)
@@ -1082,12 +1081,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const strokeStyle_1  = strokeStyle as number
             thisSerializer.writeNumber(strokeStyle_1)
         }
-        else if (((RuntimeType.OBJECT) == (strokeStyle_type)) && (TypeChecker.isCanvasGradient(strokeStyle))) {
+        else if (TypeChecker.isCanvasGradient(strokeStyle)) {
             thisSerializer.writeInt8(2 as int32)
             const strokeStyle_2  = strokeStyle as CanvasGradient
             thisSerializer.writeCanvasGradient(strokeStyle_2)
         }
-        else if (RuntimeType.OBJECT == strokeStyle_type) {
+        else if (TypeChecker.isCanvasPattern(strokeStyle)) {
             thisSerializer.writeInt8(3 as int32)
             const strokeStyle_3  = strokeStyle as CanvasPattern
             thisSerializer.writeCanvasPattern(strokeStyle_3)

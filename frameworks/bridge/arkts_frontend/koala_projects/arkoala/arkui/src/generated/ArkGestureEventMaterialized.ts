@@ -21,10 +21,11 @@ import { EventTarget, SourceType, SourceTool } from "./ArkCommonInterfaces"
 import { FingerInfo } from "./ArkGestureInterfaces"
 import { Area, Length, Position } from "./ArkUnitsInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -43,10 +44,6 @@ export interface GestureEvent {
     velocity: number
 }
 export class GestureEventInternal extends BaseEventInternal implements MaterializedBase,GestureEvent {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     get repeat(): boolean {
         return this.getRepeat()
     }
@@ -236,7 +233,14 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
     }
     private getFingerList_serialize(): Array<FingerInfo> {
         const retval = ArkUIGeneratedNativeModule._GestureEvent_getFingerList(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<FingerInfo> = new Array<FingerInfo>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readFingerInfo()
+        }
+        const returnResult: Array<FingerInfo> = buffer
+        return returnResult
     }
     private setFingerList_serialize(fingerList: Array<FingerInfo>): void {
         const thisSerializer: Serializer = Serializer.hold()

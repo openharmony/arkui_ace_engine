@@ -21,11 +21,11 @@ import {
     Layoutable,
     Measurable,
     SizeResult,
-    UIContext,
     NavigationInfo,
     NavDestinationInfo,
     RouterPageInfo
 } from "./generated"
+import { UIContext } from "./ohos.arkui.UIContext"
 
 /**
  * This is basically the CustomComponent, which doesn't extend CommonAttribute
@@ -105,7 +105,7 @@ export class ArkCustomComponentImpl implements ArkCustomComponent {
     pageTransition(): void {
     }
     getUIContext(): UIContext {
-        throw new Error("Unexpected use of base class method")
+        return new UIContext(10001);
     }
     getUniqueId(): number {
         throw new Error("Unexpected use of base class method")

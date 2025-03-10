@@ -4,6 +4,7 @@ import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
 let varA = AppStorage.Link('varA');
 let envLang = AppStorage.Prop('languageCode');
+/** @memo:stable */
 class ArkMyComponentComponent extends ArkStructBase<ArkMyComponentComponent, MyComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

@@ -17,9 +17,17 @@
                 "arkui": "@koalaui/arkts-arkui",
                 "applicationInfo": {
                     "bundleName": "com.example.trivial.application",
-                    "moduleName": "entry" 
+                    "moduleName": "entry"
                  }
             }
-        ]
+        ],
+        "paths": {
+            "@ohos.*": [
+                "../../../../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/api/@ohos.*"
+            ],
+            "@system.*": [
+                "../../../../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/api/@system.*"
+            ]
+        }
     }
 }

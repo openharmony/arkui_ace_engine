@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -47,7 +47,7 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { EnterKeyType } from "./../ArkTextInputInterfaces"
@@ -55,10 +55,17 @@ import { CaretStyle, EditableTextOnChangeCallback, InsertValue, DeleteValue } fr
 import { TextAreaSubmitCallback, TextAreaType, ContentType, TextAreaAttribute, TextAreaOptions } from "./../ArkTextAreaInterfaces"
 import { PasteEvent, KeyboardOptions } from "./../ArkRichEditorInterfaces"
 import { EditMenuOptions } from "./../ArkEditMenuOptionsMaterialized"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -93,7 +100,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -120,10 +127,10 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     enterKeyTypeAttribute(value: EnterKeyType): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_enterKeyType(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_enterKeyType(this.peer.ptr, ((value as EnterKeyType) as int32))
     }
     textAlignAttribute(value: TextAlign): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_textAlign(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_textAlign(this.peer.ptr, ((value as TextAlign) as int32))
     }
     caretColorAttribute(value: ResourceColor): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -132,7 +139,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -159,7 +166,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -183,7 +190,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_fontSize(this.peer.ptr, value)
     }
     fontStyleAttribute(value: FontStyle): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_fontStyle(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_fontStyle(this.peer.ptr, ((value as FontStyle) as int32))
     }
     fontWeightAttribute(value: number | FontWeight | string): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -197,7 +204,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         else if (TypeChecker.isFontWeight(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as FontWeight
-            thisSerializer.writeInt32((value_1.valueOf() as int32))
+            thisSerializer.writeInt32(((value_1 as FontWeight) as int32))
         }
         else if (RuntimeType.STRING == value_type) {
             thisSerializer.writeInt8(2 as int32)
@@ -225,7 +232,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     textOverflowAttribute(value: TextOverflow): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_textOverflow(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_textOverflow(this.peer.ptr, ((value as TextOverflow) as int32))
     }
     textIndentAttribute(value: Dimension): void {
         ArkUIGeneratedNativeModule._TextAreaAttribute_textIndent(this.peer.ptr, value)
@@ -243,7 +250,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -318,7 +325,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     copyOptionAttribute(value: CopyOptions): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_copyOption(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_copyOption(this.peer.ptr, ((value as CopyOptions) as int32))
     }
     enableKeyboardOnFocusAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._TextAreaAttribute_enableKeyboardOnFocus(this.peer.ptr, value ? 1 : 0)
@@ -327,10 +334,10 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_maxLength(this.peer.ptr, value)
     }
     styleAttribute(value: TextContentStyle): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_style(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_style(this.peer.ptr, ((value as TextContentStyle) as int32))
     }
     barStateAttribute(value: BarState): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_barState(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_barState(this.peer.ptr, ((value as BarState) as int32))
     }
     selectionMenuHiddenAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._TextAreaAttribute_selectionMenuHidden(this.peer.ptr, value ? 1 : 0)
@@ -380,16 +387,16 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     heightAdaptivePolicyAttribute(value: TextHeightAdaptivePolicy): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_heightAdaptivePolicy(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_heightAdaptivePolicy(this.peer.ptr, ((value as TextHeightAdaptivePolicy) as int32))
     }
     maxLinesAttribute(value: number): void {
         ArkUIGeneratedNativeModule._TextAreaAttribute_maxLines(this.peer.ptr, value)
     }
     wordBreakAttribute(value: WordBreak): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_wordBreak(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_wordBreak(this.peer.ptr, ((value as WordBreak) as int32))
     }
     lineBreakStrategyAttribute(value: LineBreakStrategy): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_lineBreakStrategy(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_lineBreakStrategy(this.peer.ptr, ((value as LineBreakStrategy) as int32))
     }
     decorationAttribute(value: TextDecorationOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -420,10 +427,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     lineSpacingAttribute(value: LengthMetrics): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeLengthMetrics(value)
-        ArkUIGeneratedNativeModule._TextAreaAttribute_lineSpacing(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._TextAreaAttribute_lineSpacing(this.peer.ptr, toPeerPtr(value))
     }
     lineHeightAttribute(value: number | string | Resource): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -448,13 +452,13 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     typeAttribute(value: TextAreaType): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_type(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_type(this.peer.ptr, ((value as TextAreaType) as int32))
     }
     enableAutoFillAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._TextAreaAttribute_enableAutoFill(this.peer.ptr, value ? 1 : 0)
     }
     contentTypeAttribute(value: ContentType): void {
-        ArkUIGeneratedNativeModule._TextAreaAttribute_contentType(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._TextAreaAttribute_contentType(this.peer.ptr, ((value as ContentType) as int32))
     }
     fontFeatureAttribute(value: string): void {
         ArkUIGeneratedNativeModule._TextAreaAttribute_fontFeature(this.peer.ptr, value)
@@ -484,10 +488,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     editMenuOptionsAttribute(value: EditMenuOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeEditMenuOptions(value)
-        ArkUIGeneratedNativeModule._TextAreaAttribute_editMenuOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._TextAreaAttribute_editMenuOptions(this.peer.ptr, toPeerPtr(value))
     }
     enablePreviewTextAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._TextAreaAttribute_enablePreviewText(this.peer.ptr, value ? 1 : 0)

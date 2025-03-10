@@ -58,20 +58,27 @@ async function download(url, filePath, headers) {
 }
 
 export async function extractArchive(inPath, outPath, stripPrefix) {
+    console.log(chalk.green(`Extracting ${inPath} to ${outPath}...`))
+
     const ext = path.parse(inPath).ext
+    let result
     switch(ext) {
         case ".zip":
-            await extractZip(inPath, outPath, stripPrefix)
+            result = extractZip(inPath, outPath, stripPrefix)
             break
         case ".tar":
-            await extractTar(inPath, outPath, stripPrefix)
+            result = extractTar(inPath, outPath, stripPrefix)
             break
         case ".gz":
-            await extractTar(inPath, outPath, stripPrefix)
+            result = extractTar(inPath, outPath, stripPrefix)
             break
         default:
-
+            result = Promise.resolve()
     }
+    return result.catch(error => {
+        console.log(chalk.red(error.message ?? error))
+        throw error
+    })
 }
 
 async function extractZip(inPath, outPath, stripPrefix) {
@@ -95,8 +102,7 @@ async function extractTar(inPath, outPath, stripPrefix) {
         if (!stripPrefix.endsWith("/")) stripPrefix += "/"
         strip = stripPrefix.split("/").length - 1
     }
-
-    await tar.x({
+    return tar.x({
         file: inPath,
         strip: strip,
         C: outPath
@@ -181,14 +187,24 @@ export async function http_archive(httpUrl, outDir, stripPrefix = null, headers 
             }
         }
     } else {
-        console.log(chalk.green(`Downloading ${httpUrl} to ${outDir}`))
-
         /* download in tmp */
         let tmp = (!process.env.BUILD_DIR) ?
             path.resolve(path.join(os.tmpdir(), fileName)) :
             path.resolve(path.join(process.env.BUILD_DIR, fileName))
 
-        await download(httpUrl, tmp, headers)
-        await extractArchive(tmp, outDir, stripPrefix)
+        console.log(chalk.green(`Downloading ${httpUrl} to ${outDir} (${tmp})`))
+
+        if (fs.existsSync(tmp)) {
+            console.log(`Already downloaded, reuse ${tmp}`)
+        } else {
+            await download(httpUrl, tmp, headers)
+        }
+        await extractArchive(tmp, outDir, stripPrefix).catch(async () => {
+            console.log(chalk.green(`Downloading ${httpUrl} anew...`))
+            // update the cached archive
+            await download(httpUrl, tmp, headers)
+            // and make another attempt
+            await extractArchive(tmp, outDir, stripPrefix).catch(() => process.exit(1))
+        })
     }
 }

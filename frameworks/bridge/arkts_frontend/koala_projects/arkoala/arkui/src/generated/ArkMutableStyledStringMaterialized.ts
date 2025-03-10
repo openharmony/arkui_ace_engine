@@ -27,10 +27,11 @@ import { DrawContext } from "./ArkCommonInterfaces"
 import { LengthMetrics, LengthMetricsInternal } from "./ArkLengthMetricsMaterialized"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -42,10 +43,6 @@ export class MutableStyledStringInternal {
     }
 }
 export class MutableStyledString extends StyledString implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_mutablestyledstring(): KPointer {
         const retval = ArkUIGeneratedNativeModule._MutableStyledString_ctor()
         return retval
@@ -153,21 +150,12 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         ArkUIGeneratedNativeModule._MutableStyledString_clearStyles(this.peer!.ptr)
     }
     private replaceStyledString_serialize(start: number, length: number, other: StyledString): void {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(other)
-        ArkUIGeneratedNativeModule._MutableStyledString_replaceStyledString(this.peer!.ptr, start, length, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._MutableStyledString_replaceStyledString(this.peer!.ptr, start, length, toPeerPtr(other))
     }
     private insertStyledString_serialize(start: number, other: StyledString): void {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(other)
-        ArkUIGeneratedNativeModule._MutableStyledString_insertStyledString(this.peer!.ptr, start, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._MutableStyledString_insertStyledString(this.peer!.ptr, start, toPeerPtr(other))
     }
     private appendStyledString_serialize(other: StyledString): void {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(other)
-        ArkUIGeneratedNativeModule._MutableStyledString_appendStyledString(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._MutableStyledString_appendStyledString(this.peer!.ptr, toPeerPtr(other))
     }
 }

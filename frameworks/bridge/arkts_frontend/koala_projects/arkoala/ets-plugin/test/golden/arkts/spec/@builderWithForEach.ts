@@ -10,6 +10,7 @@ function ComB(param: string[]) {
         }, undefined);
     });
 }
+/** @memo:stable */
 class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -35,6 +36,7 @@ class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkComAComponent extends ArkStructBase<ArkComAComponent, ComAOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

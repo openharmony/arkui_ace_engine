@@ -20,9 +20,10 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
-import { ColorMetrics } from "./ArkUnitsInterfaces"
+import { ColorMetrics } from "./ArkColorMetricsMaterialized"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
+import { ResourceColor } from "./ArkUnitsInterfaces"
 export interface FocusBoxStyle {
     margin?: LengthMetrics;
     strokeColor?: ColorMetrics;

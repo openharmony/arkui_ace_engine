@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
 import { TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonShapeMethodPeer, ArkCommonPeer, ArkScrollableCommonMethodPeer } from "./peers/ArkCommonPeer"
-import { UseEventsProperties } from "./use_properties"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, CommonMethod, CommonAttribute, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions } from "./ArkCommonInterfaces"
@@ -575,12 +574,12 @@ export class ArkCommonMethodComponent extends ComponentBase {
         if (this.checkPriority("transition")) {
             const effect_type = runtimeType(effect)
             const onFinish_type = runtimeType(onFinish)
-            if (((TypeChecker.isTransitionOptions(effect, false, false, false, false, false)) || (((RuntimeType.OBJECT) == (effect_type)) && (TypeChecker.isTransitionEffect(effect)))) && (RuntimeType.UNDEFINED == onFinish_type)) {
+            if (((TypeChecker.isTransitionOptions(effect, false, false, false, false, false)) || (TypeChecker.isTransitionEffect(effect))) && (RuntimeType.UNDEFINED == onFinish_type)) {
                 const value_casted = effect as (TransitionOptions | TransitionEffect)
                 this.getPeer()?.transition0Attribute(value_casted)
                 return this
             }
-            if ((((RuntimeType.OBJECT) == (effect_type)) && (TypeChecker.isTransitionEffect(effect))) && ((RuntimeType.FUNCTION == onFinish_type) || (RuntimeType.UNDEFINED == onFinish_type))) {
+            if ((TypeChecker.isTransitionEffect(effect)) && ((RuntimeType.FUNCTION == onFinish_type) || (RuntimeType.UNDEFINED == onFinish_type))) {
                 const effect_casted = effect as (TransitionEffect)
                 const onFinish_casted = onFinish as (TransitionFinishCallback | undefined)
                 this.getPeer()?.transition1Attribute(effect_casted, onFinish_casted)

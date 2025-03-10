@@ -1,10 +1,9 @@
-import { ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase } from "@koalaui/arkoala-arkui";
+import { ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, LocalStorage } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 let route = 'pages/Index';
+/** @memo:stable */
 class ArkLocalStorageComponentComponent extends ArkStructBase<ArkLocalStorageComponentComponent, LocalStorageComponentOptions> {
-    private _entry_local_storage_ = {
-        routeName: route
-    };
+    private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
     /** @memo */
     content?: () => void, initializers?: LocalStorageComponentOptions): void {

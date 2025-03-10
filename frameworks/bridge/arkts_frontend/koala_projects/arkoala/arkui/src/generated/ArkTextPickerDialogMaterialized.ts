@@ -23,39 +23,15 @@ import { DialogAlignment } from "./ArkAlertDialogInterfaces"
 import { Offset, ResourceColor, Font, Length, BorderRadiuses } from "./ArkUnitsInterfaces"
 import { FontWeight, FontStyle, Color, ColoringStrategy } from "./ArkEnumsInterfaces"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./ArkButtonInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
-export class TextPickerDialogInternal {
-    public static fromPtr(ptr: KPointer): TextPickerDialog {
-        const obj: TextPickerDialog = new TextPickerDialog()
-        obj.peer = new Finalizable(ptr, TextPickerDialog.getFinalizer())
-        return obj
-    }
-}
-export class TextPickerDialog implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_textpickerdialog(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._TextPickerDialog_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = TextPickerDialog.ctor_textpickerdialog()
-        this.peer = new Finalizable(ctorPtr, TextPickerDialog.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._TextPickerDialog_getFinalizer()
-    }
+export class TextPickerDialog {
     public static show(options?: TextPickerDialogOptions): undefined {
         const options_casted = options as (TextPickerDialogOptions | undefined)
         return TextPickerDialog.show_serialize(options_casted)

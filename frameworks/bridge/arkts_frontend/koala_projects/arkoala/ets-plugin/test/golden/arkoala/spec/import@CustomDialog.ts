@@ -1,6 +1,7 @@
 import { ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, CustomDialogController, DialogAlignment, LocalStorage, MutableState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 import { CustomDialogExample1 as CustomDialogExample, CustomDialogExampleOptions } from './test/pages/import@CustomDialog';
+/** @memo:stable */
 class ArkCustomDialogUserComponent extends ArkStructBase<ArkCustomDialogUserComponent, CustomDialogUserOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

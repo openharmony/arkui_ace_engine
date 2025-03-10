@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
-import { int32, int64 } from "@koalaui/common"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, scheduleCallback } from "@koalaui/runtime"
+import { int32, int64, scheduleCoroutine } from "@koalaui/common"
 import { pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
@@ -25,13 +25,17 @@ import { checkEvents, setCustomEventsChecker } from "./generated/Events"
 import { checkArkoalaCallbacks } from "./generated/peers/CallbacksChecker"
 import { setUIDetachedRootCreator } from "./generated/peers/CallbackTransformer"
 import { enterForeignContext, leaveForeignContext } from "./handwritten"
+import { Routed } from "./handwritten"
+import { wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/interop"
+import { deserializeAndCallCallback } from "./generated/peers/CallbackDeserializeCall"
+import { Deserializer } from "./generated/peers/Deserializer"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
 enum EventType {
-    Click,
-    Text,
-    ExitApp
+    Click = 0,
+    Text = 1,
+    ExitApp = 2
 }
 
 class PartialUpdateRecord {
@@ -71,6 +75,7 @@ export function currentPartialUpdateContext<T>(): T | undefined {
 // TODO: move to Application class.
 let detachedRoots: Map<KPointer, ComputableState<PeerNode>> = new Map<KPointer, ComputableState<PeerNode>>()
 
+
 export function createUiDetachedRoot(
     peerFactory: () => PeerNode,
     /** @memo */
@@ -80,7 +85,7 @@ export function createUiDetachedRoot(
     const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
         const frozen = manager.frozen
         manager.frozen = true
-        memoEntry<void>(context, 0, builder)
+        memoEntry<void>(context, 0, () => { Routed(builder) } )
         manager.frozen = frozen
     })
     detachedRoots.set(node.value.peer.ptr, node)
@@ -130,6 +135,13 @@ function drawCurrentCrash(crash: Object) {
     ArkUINativeModule._ShowCrash(msg ?? "unknown error message")
 }
 
+function registerSyncCallbackProcessor() {
+    wrapSystemCallback(1, (buff:KUint8ArrayPtr, len:int32) => {
+        deserializeAndCallCallback(new Deserializer(buff, len))
+        return 0
+    })
+}
+
 export class Application {
     private manager: StateManager | undefined = undefined
     private rootState: ComputableState<PeerNode> | undefined = undefined
@@ -155,7 +167,7 @@ export class Application {
         return manager.updatableNode<PeerNode>(peer, (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
-            memoEntry<void>(context, 0, builder)
+            memoEntry<void>(context, 0, () => { Routed(builder) } )
             manager.frozen = frozen
         })
     }
@@ -171,22 +183,29 @@ export class Application {
         return result
     }
 
-    start(): pointer {
+    start(foreignContext: pointer): pointer {
+        enterForeignContext(foreignContext)
         if (this.withLog) UserView.startNativeLog(1)
         let root: PeerNode | undefined = undefined
         try {
             this.manager = GlobalStateManager.instance
+            console.warn("Application start 111")
             this.timer = createAnimationTimer(this.manager!)
+            console.warn("Application start 222")
             /** @memo */
             let builder = this.userView!.getBuilder()
+            console.warn("Application start 333")
             this.rootState = Application.createMemoRootState(this.manager!, builder)
+            console.warn("Application start 444")
             root = this.computeRoot()
         } catch (e) {
+            InteropNativeModule._NativeLog(`Application.start() error: ${e?.toString()}`)
             if (e instanceof Error) {
                 const stack = e.stack
                 if (stack) {
-                    InteropNativeModule._NativeLog("ArkTS Application.start stack trace: " + stack)
+                    InteropNativeModule._NativeLog("Application.start() stack trace: " + stack)
                 }
+                leaveForeignContext()
                 return nullptr
             }
         }
@@ -201,6 +220,7 @@ export class Application {
                 }
             }
         }
+        leaveForeignContext()
         return root!.peer.ptr
     }
 
@@ -224,8 +244,9 @@ export class Application {
         manager.syncChanges()
         manager.updateSnapshot()
         this.computeRoot()
-        for (const detachedRoot of detachedRoots.values())
+        for (const detachedRoot of detachedRoots.values()) {
             detachedRoot.value
+        }
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {
@@ -241,8 +262,9 @@ export class Application {
                 // Compute new tree state
                 try {
                     root.value
-                    for (const detachedRoot of detachedRoots.values())
+                    for (const detachedRoot of detachedRoots.values()) {
                         detachedRoot.value
+                    }
                 } catch (error) {
                     InteropNativeModule._NativeLog('has error in partialUpdates')
                 }
@@ -261,8 +283,8 @@ export class Application {
         if (this.withLog) InteropNativeModule._NativeLog("ARKTS: render")
     }
     enter(arg0: int32, arg1: int32, foreignContext: pointer): boolean {
-        // TODO: maybe
         enterForeignContext(foreignContext)
+        try {
         if (this.withLog) UserView.startNativeLog(1)
 
         if (this.currentCrash) {
@@ -273,10 +295,12 @@ export class Application {
                 this.loopIteration(arg0, arg1)
                 if (this.enableDumpTree) dumpTree(this.rootState!.value)
             } catch (error) {
+                InteropNativeModule._NativeLog(`Application.enter() error: ${error}`)
                 if (error instanceof Error) {
-                    if (error.stack) {
+                    const stack = error.stack
+                    if (stack) {
                         leaveForeignContext()
-                        InteropNativeModule._NativeLog(error.stack!.toString())
+                        InteropNativeModule._NativeLog("Application.enter: " + stack)
                         return true
                     }
                 }
@@ -294,6 +318,16 @@ export class Application {
                 }
             }
         }
+        } catch (e) {
+            if (e instanceof Error) {
+                const stack = e.stack
+                if (stack) {
+                    console.log("Application.enter stack trace: " + stack)
+                }
+                this.exitApp = true
+            }
+        }
+        scheduleCoroutine()
         leaveForeignContext()
         return this.exitApp
     }
@@ -338,12 +372,16 @@ export class Application {
         return "0"
     }
 
-    static createApplication(appUrl: string, params: string, useNativeLog: boolean, userView: UserView): Application {
-        registerNativeModuleLibraryName("InteropNativeModule", "ArkoalaNative_ark")
-        registerNativeModuleLibraryName("ArkUINativeModule", "ArkoalaNative_ark")
-        registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark")
-        registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark")
-        return new Application(userView, useNativeLog)
+    static createApplication(appUrl: string, params: string, useNativeLog: boolean, vmKind: int32): Application {
+        let suffix = vmKind == 4 ? "_ani" : "_ark"
+        registerNativeModuleLibraryName("InteropNativeModule", `ArkoalaNative${suffix}`)
+        registerNativeModuleLibraryName("ArkUINativeModule", `ArkoalaNative${suffix}`)
+        registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", `ArkoalaNative${suffix}`)
+        registerNativeModuleLibraryName("TestNativeModule", `ArkoalaNative${suffix}`)
+        registerSyncCallbackProcessor()
+        const userView = ArkUINativeModule._LoadUserView(appUrl, params)
+        if (userView == undefined) throw new Error("Cannot load user view");
+        return new Application(userView as UserView, useNativeLog)
     }
 }
 

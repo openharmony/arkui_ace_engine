@@ -31,10 +31,11 @@ import { RenderingContextSettings, RenderingContextSettingsInternal } from "./Ar
 import { LengthMetricsUnit, Position, Length } from "./ArkUnitsInterfaces"
 import { ImageAnalyzerConfig, ImageAnalyzerType } from "./ArkImageCommonInterfaces"
 import { UIContext } from "./ArkCommonInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -46,10 +47,6 @@ export class CanvasRenderingContext2DInternal {
     }
 }
 export class CanvasRenderingContext2D extends CanvasRenderer implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     get height(): number {
         return this.getHeight()
     }
@@ -57,7 +54,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         return this.getWidth()
     }
     get canvas(): FrameNode {
-        throw new Error("Not implemented")
+        return this.getCanvas()
     }
     static ctor_canvasrenderingcontext2d(settings?: RenderingContextSettings): KPointer {
         const thisSerializer: Serializer = Serializer.hold()
@@ -74,7 +71,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     }
      constructor(settings?: RenderingContextSettings) {
         super()
-        const ctorPtr: KPointer = CanvasRenderingContext2D.ctor_canvasrenderingcontext2d(settings)
+        const ctorPtr: KPointer = CanvasRenderingContext2D.ctor_canvasrenderingcontext2d((settings)!)
         this.peer = new Finalizable(ctorPtr, CanvasRenderingContext2D.getFinalizer())
     }
     static getFinalizer(): KPointer {
@@ -118,6 +115,9 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     }
     private getWidth(): number {
         return this.getWidth_serialize()
+    }
+    private getCanvas(): FrameNode {
+        return this.getCanvas_serialize()
     }
     on(type: string, callback_: (() => void)): void {
         throw new Error("TBD")
@@ -199,5 +199,10 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     private getWidth_serialize(): number {
         const retval = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getWidth(this.peer!.ptr)
         return retval
+    }
+    private getCanvas_serialize(): FrameNode {
+        const retval = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getCanvas(this.peer!.ptr)
+        const obj: FrameNode = FrameNodeInternal.fromPtr(retval)
+        return obj
     }
 }

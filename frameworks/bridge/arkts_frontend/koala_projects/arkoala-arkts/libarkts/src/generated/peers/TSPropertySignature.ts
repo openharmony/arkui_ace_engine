@@ -59,6 +59,11 @@ export class TSPropertySignature extends AnnotatedAstNode {
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSPropertySignatureTypeAnnotationConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setTsTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._TSPropertySignatureSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
+    }
 }
 export function isTSPropertySignature(node: AstNode): node is TSPropertySignature {
     return node instanceof TSPropertySignature

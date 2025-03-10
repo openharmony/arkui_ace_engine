@@ -54,8 +54,18 @@ export class TSEnumDeclaration extends TypedStatement {
     get internalName(): string {
         return unpackString(global.generatedEs2panda._TSEnumDeclarationInternalNameConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setInternalName(internalName: string): this {
+        global.generatedEs2panda._TSEnumDeclarationSetInternalName(global.context, this.peer, internalName)
+        return this
+    }
     get boxedClass(): ClassDefinition | undefined {
         return unpackNode(global.generatedEs2panda._TSEnumDeclarationBoxedClassConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setBoxedClass(wrapperClass: ClassDefinition): this {
+        global.generatedEs2panda._TSEnumDeclarationSetBoxedClass(global.context, this.peer, passNode(wrapperClass))
+        return this
     }
     get isConst(): boolean {
         return global.generatedEs2panda._TSEnumDeclarationIsConstConst(global.context, this.peer)

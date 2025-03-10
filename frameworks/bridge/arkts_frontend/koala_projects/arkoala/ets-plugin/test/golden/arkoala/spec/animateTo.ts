@@ -1,5 +1,6 @@
 import { ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, Color, Curve, FlexDirection, ItemAlign, LocalStorage, MutableState, PlayMode, TransitionType, animateTo, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkTransitionExampleComponent extends ArkStructBase<ArkTransitionExampleComponent, TransitionExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

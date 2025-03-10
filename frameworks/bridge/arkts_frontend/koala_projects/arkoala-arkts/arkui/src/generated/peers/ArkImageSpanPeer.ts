@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -48,15 +48,22 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { ColorFilter } from "./../ArkColorFilterMaterialized"
 import { ImageCompleteCallback, ImageSpanAttribute } from "./../ArkImageSpanInterfaces"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -92,7 +99,7 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
                 thisSerializer.writeResource(value_0_1)
             }
         }
-        else if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isPixelMap(value, false, false))) {
+        else if (TypeChecker.isPixelMap(value, false, false)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as PixelMap
             thisSerializer.writePixelMap(value_1)
@@ -101,13 +108,13 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         thisSerializer.release()
     }
     verticalAlignAttribute(value: ImageSpanAlignment): void {
-        ArkUIGeneratedNativeModule._ImageSpanAttribute_verticalAlign(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_verticalAlign(this.peer.ptr, ((value as ImageSpanAlignment) as int32))
     }
     colorFilterAttribute(value: ColorFilter | DrawingColorFilter): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
-        if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isColorFilter(value))) {
+        if (TypeChecker.isColorFilter(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as ColorFilter
             thisSerializer.writeColorFilter(value_0)
@@ -121,7 +128,7 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         thisSerializer.release()
     }
     objectFitAttribute(value: ImageFit): void {
-        ArkUIGeneratedNativeModule._ImageSpanAttribute_objectFit(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_objectFit(this.peer.ptr, ((value as ImageFit) as int32))
     }
     onCompleteAttribute(value: ImageCompleteCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -136,10 +143,7 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         thisSerializer.release()
     }
     altAttribute(value: PixelMap): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writePixelMap(value)
-        ArkUIGeneratedNativeModule._ImageSpanAttribute_alt(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_alt(this.peer.ptr, toPeerPtr(value))
     }
 }
 export interface ArkImageSpanAttributes extends ArkBaseSpanAttributes {

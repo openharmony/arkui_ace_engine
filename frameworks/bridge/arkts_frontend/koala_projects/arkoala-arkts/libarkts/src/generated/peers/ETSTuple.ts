@@ -60,8 +60,10 @@ export class ETSTuple extends TypeNode {
     get getTupleTypeAnnotationsList(): readonly TypeNode[] {
         return unpackNodeArray(global.generatedEs2panda._ETSTupleGetTupleTypeAnnotationsListConst(global.context, this.peer))
     }
-    get hasSpreadType(): boolean {
-        return global.generatedEs2panda._ETSTupleHasSpreadTypeConst(global.context, this.peer)
+    /** @deprecated */
+    setTypeAnnotationsList(typeNodeList: readonly TypeNode[]): this {
+        global.generatedEs2panda._ETSTupleSetTypeAnnotationsList(global.context, this.peer, passNodeArray(typeNodeList), typeNodeList.length)
+        return this
     }
 }
 export function isETSTuple(node: AstNode): node is ETSTuple {

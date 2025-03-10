@@ -123,7 +123,10 @@ struct Index {
       }
       .mode(NavigationMode.Stack)
       .hideTitleBar(true)
-      .navDestination(this.shoppingRouter)
+      // Ugly due to issue 23329 in Panda.
+      .navDestination((user: string, data: object) => {
+          this.shoppingRouter(user, data)
+      })
     }
     .margin({top:50, bottom: 50} as Padding)
   }

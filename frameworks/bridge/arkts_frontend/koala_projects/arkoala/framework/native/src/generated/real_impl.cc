@@ -20,13 +20,13 @@
 #include <future>
 #include <thread>
 
-#include "arkoala_api_generated.h"
 #include "Serializers.h"
 #include "interop-logging.h"
 #include "arkoala-macros.h"
 #include "tree.h"
 #include "logging.h"
 #include "dynamic-loader.h"
+#include "arkoala_api_generated.h"
 
 #undef max
 
@@ -129,6 +129,23 @@ inline Ark_NodeHandle AsNodeHandle(TreeNode* node) {
 template<typename From>
 constexpr TreeNode *AsNode(From ptr) {
     return reinterpret_cast<TreeNode *>(ptr);
+}
+
+void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event) {
+    LOGE("EmitOnclick %p", node);
+    auto frameNode = AsNode(node);
+    frameNode->callClickEvent(event);
+}
+void RegisterOnClick(Ark_NativePointer node, const Callback_ClickEvent_Void* event) {
+    auto frameNode = AsNode(node);
+    auto callback = *event;
+    callback.resource.hold(callback.resource.resourceId);
+    auto onEvent = [callback](Ark_ClickEvent event) {
+        if (callback.call) {
+            callback.call(callback.resource.resourceId, event);
+        }
+    };
+    frameNode->setClickEvent(std::move(onEvent));
 }
 
 void DumpTree(TreeNode *node, Ark_Int32 indent) {
@@ -697,11 +714,6 @@ Ark_Float32 ConvertLengthMetricsUnit(Ark_Float32 value, Ark_Int32 originUnit, Ar
     return result;
 }
 
-void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event) {
-    auto frameNode = AsNode(node);
-    frameNode->callClickEvent(event);
-}
-
 void SetCustomMethodFlag(Ark_NodeHandle node, Ark_Int32 flag) {}
 Ark_Int32 GetCustomMethodFlag(Ark_NodeHandle node) {
     return 0;
@@ -819,46 +831,11 @@ void SetCurrentIndex(Ark_NativePointer nodePtr,
         data->updater.call(data->updater.resource.resourceId, index, mark, 1000);
     }
 }
-
-
-namespace GeneratedEvents {
-    const GENERATED_ArkUIEventsAPI* g_OverriddenEventsImpl = nullptr;
-    const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI() { return g_OverriddenEventsImpl; }
-    void GENERATED_SetArkUiEventsAPI(const GENERATED_ArkUIEventsAPI* api) { g_OverriddenEventsImpl = api; }
-}
 }
 
 // handWritten implementations
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace LazyForEachOpsAccessor {
-    void DestroyPeerImpl(LazyForEachOpsPeer* peer)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_LazyForEachOps CtorImpl()
-    {
-        if (!needGroupedLog(1))
-            return (LazyForEachOpsPeer*) 100;
-        string out("new LazyForEachOps(");
-        out.append(") \n");
-        out.append("[return (LazyForEachOpsPeer*) 100] \n");
-        appendGroupedLog(1, out);
-        return (LazyForEachOpsPeer*) 100;
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
     Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node,
                                            Ark_NativePointer mark,
                                            Ark_Int32 direction)
@@ -912,11 +889,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void NotifyChangeImpl(Ark_NativePointer node, Ark_Int32 startIdx, Ark_Int32 endIdx, Ark_Int32 count)
+    void NotifyChangeImpl(Ark_NativePointer node, Ark_Int32 startIndex, Ark_Int32 endIndex, Ark_Int32 count)
     {
         if (!needGroupedLog(1))
             return;
-        string out("NotifyChange(");
+        string out("NotifyChangeImpl(");
         WriteToString(&out, node);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -927,6 +904,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         void OnClick0Impl(Ark_NativePointer node,
                       const Callback_ClickEvent_Void* value)
     {
+        RegisterOnClick(node, value);
         if (!needGroupedLog(1))
             return;
         string out("onClick(");
@@ -938,6 +916,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Callback_ClickEvent_Void* event,
                       const Ark_Number* distanceThreshold)
     {
+        RegisterOnClick(node, event);
         if (!needGroupedLog(1))
             return;
         string out("onClick(");
@@ -948,6 +927,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // CommonMethodModifier
+
+    namespace EventEmulatorAccessor {
+    void EmitClickEventImpl(Ark_NativePointer node,
+                            Ark_ClickEvent event)
+    {
+        auto frameNode = AsNode(node);
+        frameNode->callClickEvent(event);
+    }
+    } // EventEmulatorAccessor
 }
 
 // end of handWritten implementations
@@ -3035,7 +3023,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void OnItemDragStartImpl(Ark_NativePointer node,
-                             const Callback_ItemDragInfo_Number_CustomBuilder* value)
+                             const onItemDragStart_event_type* value)
     {
     }
     void OnItemDragEnterImpl(Ark_NativePointer node,
@@ -3614,7 +3602,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void OnItemDragStartImpl(Ark_NativePointer node,
-                             const Callback_ItemDragInfo_Number_CustomBuilder* value)
+                             const onItemDragStart_event_type* value)
     {
     }
     void OnItemDragEnterImpl(Ark_NativePointer node,
@@ -10394,21 +10382,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &modifiersImpl;
     }
     namespace AnimationExtenderAccessor {
-    void DestroyPeerImpl(Ark_AnimationExtender peer)
-    {
-        auto peerImpl = reinterpret_cast<AnimationExtenderPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_AnimationExtender CtorImpl()
-    {
-        return new AnimationExtenderPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void SetClipRectImpl(Ark_NativePointer node,
                          Ark_Float32 x,
                          Ark_Float32 y,
@@ -10475,21 +10448,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace LazyForEachOpsAccessor {
     } // LazyForEachOpsAccessor
     namespace SystemOpsAccessor {
-    void DestroyPeerImpl(Ark_SystemOps peer)
-    {
-        auto peerImpl = reinterpret_cast<SystemOpsPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_SystemOps CtorImpl()
-    {
-        return new SystemOpsPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     Ark_NativePointer StartFrameImpl()
     {
         return {};
@@ -10501,6 +10459,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //auto convValue = Converter::Convert<type>(root);
         //auto convValue = Converter::OptConvert<type>(root); // for enums
         //undefinedModelNG::SetEndFrame(frameNode, convValue);
+    }
+    void SyncInstanceIdImpl(Ark_Int32 instanceId)
+    {
+    }
+    void RestoreInstanceIdImpl()
+    {
     }
     } // SystemOpsAccessor
     namespace DrawingCanvasAccessor {
@@ -10547,6 +10511,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_LengthMetrics VpImpl(const Ark_Number* value)
+    {
+        return {};
+    }
+    Ark_LengthMetrics FpImpl(const Ark_Number* value)
+    {
+        return {};
+    }
+    Ark_LengthMetrics PercentImpl(const Ark_Number* value)
+    {
+        return {};
+    }
+    Ark_LengthMetrics LpxImpl(const Ark_Number* value)
+    {
+        return {};
+    }
     Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
     {
         return {};
@@ -10559,7 +10539,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      Ark_LengthUnit unit)
     {
     }
-    Ark_Int32 GetValueImpl(Ark_LengthMetrics peer)
+    Ark_Number GetValueImpl(Ark_LengthMetrics peer)
     {
         return {};
     }
@@ -10568,6 +10548,63 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // LengthMetricsAccessor
+    namespace ColorMetricsAccessor {
+    void DestroyPeerImpl(Ark_ColorMetrics peer)
+    {
+        auto peerImpl = reinterpret_cast<ColorMetricsPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_ColorMetrics CtorImpl()
+    {
+        return new ColorMetricsPeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_ColorMetrics NumericImpl(const Ark_Number* value)
+    {
+        return {};
+    }
+    Ark_ColorMetrics RgbaImpl(const Ark_Number* red,
+                              const Ark_Number* green,
+                              const Ark_Number* blue,
+                              const Opt_Number* alpha)
+    {
+        return {};
+    }
+    Ark_ColorMetrics ResourceColorImpl(const Ark_ResourceColor* color)
+    {
+        return {};
+    }
+    Ark_ColorMetrics BlendColorImpl(Ark_ColorMetrics peer,
+                                    Ark_ColorMetrics overlayColor)
+    {
+        return {};
+    }
+    Ark_String GetColorImpl(Ark_ColorMetrics peer)
+    {
+        return {};
+    }
+    Ark_Number GetRedImpl(Ark_ColorMetrics peer)
+    {
+        return {};
+    }
+    Ark_Number GetGreenImpl(Ark_ColorMetrics peer)
+    {
+        return {};
+    }
+    Ark_Number GetBlueImpl(Ark_ColorMetrics peer)
+    {
+        return {};
+    }
+    Ark_Number GetAlphaImpl(Ark_ColorMetrics peer)
+    {
+        return {};
+    }
+    } // ColorMetricsAccessor
     namespace WebviewControllerAccessor {
     void DestroyPeerImpl(Ark_WebviewController peer)
     {
@@ -10594,21 +10631,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // WebviewControllerAccessor
     namespace GlobalScope_ohos_arkui_componentSnapshotAccessor {
-    void DestroyPeerImpl(Ark_GlobalScope_ohos_arkui_componentSnapshot peer)
-    {
-        auto peerImpl = reinterpret_cast<GlobalScope_ohos_arkui_componentSnapshotPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_GlobalScope_ohos_arkui_componentSnapshot CtorImpl()
-    {
-        return new GlobalScope_ohos_arkui_componentSnapshotPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void GetImpl(const Ark_String* id,
                  const AsyncCallback_image_PixelMap_Void* callback,
                  const Opt_SnapshotOptions* options)
@@ -10616,21 +10638,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // GlobalScope_ohos_arkui_componentSnapshotAccessor
     namespace GlobalScope_ohos_arkui_performanceMonitorAccessor {
-    void DestroyPeerImpl(Ark_GlobalScope_ohos_arkui_performanceMonitor peer)
-    {
-        auto peerImpl = reinterpret_cast<GlobalScope_ohos_arkui_performanceMonitorPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_GlobalScope_ohos_arkui_performanceMonitor CtorImpl()
-    {
-        return new GlobalScope_ohos_arkui_performanceMonitorPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void BeginImpl(const Ark_String* scene,
                    Ark_PerfMonitorActionType startInputType,
                    const Opt_String* note)
@@ -10903,21 +10910,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // PathShapeAccessor
     namespace GlobalScope_ohos_fontAccessor {
-    void DestroyPeerImpl(Ark_GlobalScope_ohos_font peer)
-    {
-        auto peerImpl = reinterpret_cast<GlobalScope_ohos_fontPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_GlobalScope_ohos_font CtorImpl()
-    {
-        return new GlobalScope_ohos_fontPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void RegisterFontImpl(const Ark_FontOptions* options)
     {
     }
@@ -11049,11 +11041,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void DisposeImpl(Ark_FrameNode peer)
     {
     }
-    Ark_Int32 GetOpacityImpl(Ark_FrameNode peer)
+    Ark_Number GetOpacityImpl(Ark_FrameNode peer)
     {
         return {};
     }
     Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
     {
         return {};
     }
@@ -11092,51 +11088,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // PixelMapAccessor
     namespace NavExtenderAccessor {
-    void DestroyPeerImpl(Ark_NavExtender peer)
-    {
-        auto peerImpl = reinterpret_cast<NavExtenderPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_NavExtender CtorImpl()
-    {
-        return new NavExtenderPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                     const NavExtender_OnUpdateStack* callback)
     {
     }
     } // NavExtenderAccessor
     namespace EventEmulatorAccessor {
-    void DestroyPeerImpl(Ark_EventEmulator peer)
-    {
-        auto peerImpl = reinterpret_cast<EventEmulatorPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_EventEmulator CtorImpl()
-    {
-        return new EventEmulatorPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
-    void EmitClickEventImpl(Ark_NativePointer node,
-                            Ark_ClickEvent event)
-    {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        //auto convValue = Converter::Convert<type>(node);
-        //auto convValue = Converter::OptConvert<type>(node); // for enums
-        //undefinedModelNG::SetEmitClickEvent(frameNode, convValue);
-    }
     void EmitTextInputEventImpl(Ark_NativePointer node,
                                 const Ark_String* text)
     {
@@ -11148,41 +11105,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // EventEmulatorAccessor
     namespace ActionSheetAccessor {
-    void DestroyPeerImpl(Ark_ActionSheet peer)
-    {
-        auto peerImpl = reinterpret_cast<ActionSheetPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_ActionSheet CtorImpl()
-    {
-        return new ActionSheetPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void ShowImpl(const Ark_ActionSheetOptions* value)
     {
     }
     } // ActionSheetAccessor
     namespace AlertDialogAccessor {
-    void DestroyPeerImpl(Ark_AlertDialog peer)
-    {
-        auto peerImpl = reinterpret_cast<AlertDialogPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_AlertDialog CtorImpl()
-    {
-        return new AlertDialogPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void ShowImpl(const Ark_Type_AlertDialog_show_value* value)
     {
     }
@@ -11291,21 +11218,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // CalendarControllerAccessor
     namespace CalendarPickerDialogAccessor {
-    void DestroyPeerImpl(Ark_CalendarPickerDialog peer)
-    {
-        auto peerImpl = reinterpret_cast<CalendarPickerDialogPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_CalendarPickerDialog CtorImpl()
-    {
-        return new CalendarPickerDialogPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void ShowImpl(const Opt_CalendarDialogOptions* options)
     {
     }
@@ -11475,11 +11387,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void CloseImpl(Ark_ImageBitmap peer)
     {
     }
-    Ark_Int32 GetHeightImpl(Ark_ImageBitmap peer)
+    Ark_Number GetHeightImpl(Ark_ImageBitmap peer)
     {
         return {};
     }
-    Ark_Int32 GetWidthImpl(Ark_ImageBitmap peer)
+    Ark_Number GetWidthImpl(Ark_ImageBitmap peer)
     {
         return {};
     }
@@ -11502,11 +11414,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetHeightImpl(Ark_ImageData peer)
+    Ark_Number GetHeightImpl(Ark_ImageData peer)
     {
         return {};
     }
-    Ark_Int32 GetWidthImpl(Ark_ImageData peer)
+    Ark_Number GetWidthImpl(Ark_ImageData peer)
     {
         return {};
     }
@@ -11794,7 +11706,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void ResetImpl(Ark_CanvasRenderer peer)
     {
     }
-    Ark_Int32 GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
+    Ark_Number GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
     {
         return {};
     }
@@ -11850,7 +11762,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_String* lineCap)
     {
     }
-    Ark_Int32 GetLineDashOffsetImpl(Ark_CanvasRenderer peer)
+    Ark_Number GetLineDashOffsetImpl(Ark_CanvasRenderer peer)
     {
         return {};
     }
@@ -11866,7 +11778,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_String* lineJoin)
     {
     }
-    Ark_Int32 GetLineWidthImpl(Ark_CanvasRenderer peer)
+    Ark_Number GetLineWidthImpl(Ark_CanvasRenderer peer)
     {
         return {};
     }
@@ -11874,7 +11786,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Ark_Number* lineWidth)
     {
     }
-    Ark_Int32 GetMiterLimitImpl(Ark_CanvasRenderer peer)
+    Ark_Number GetMiterLimitImpl(Ark_CanvasRenderer peer)
     {
         return {};
     }
@@ -11882,7 +11794,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Ark_Number* miterLimit)
     {
     }
-    Ark_Int32 GetShadowBlurImpl(Ark_CanvasRenderer peer)
+    Ark_Number GetShadowBlurImpl(Ark_CanvasRenderer peer)
     {
         return {};
     }
@@ -11898,7 +11810,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Ark_String* shadowColor)
     {
     }
-    Ark_Int32 GetShadowOffsetXImpl(Ark_CanvasRenderer peer)
+    Ark_Number GetShadowOffsetXImpl(Ark_CanvasRenderer peer)
     {
         return {};
     }
@@ -11906,7 +11818,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Ark_Number* shadowOffsetX)
     {
     }
-    Ark_Int32 GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
+    Ark_Number GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
     {
         return {};
     }
@@ -11970,6 +11882,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void StartImageAnalyzerImpl(Ark_VMContext vmContext,
+                                Ark_AsyncWorkerPtr asyncWorker,
                                 Ark_CanvasRenderingContext2D peer,
                                 const Ark_ImageAnalyzerConfig* config,
                                 const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
@@ -11998,11 +11911,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Callback_Void* callback_)
     {
     }
-    Ark_Int32 GetHeightImpl(Ark_CanvasRenderingContext2D peer)
+    Ark_Number GetHeightImpl(Ark_CanvasRenderingContext2D peer)
     {
         return {};
     }
-    Ark_Int32 GetWidthImpl(Ark_CanvasRenderingContext2D peer)
+    Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
+    {
+        return {};
+    }
+    Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
     {
         return {};
     }
@@ -12062,7 +11979,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetHeightImpl(Ark_OffscreenCanvas peer)
+    Ark_Number GetHeightImpl(Ark_OffscreenCanvas peer)
     {
         return {};
     }
@@ -12070,7 +11987,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Ark_Number* height)
     {
     }
-    Ark_Int32 GetWidthImpl(Ark_OffscreenCanvas peer)
+    Ark_Number GetWidthImpl(Ark_OffscreenCanvas peer)
     {
         return {};
     }
@@ -12098,6 +12015,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void InvalidateImpl(Ark_DrawingRenderingContext peer)
     {
     }
+    Ark_DrawingCanvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
+    {
+        return {};
+    }
     } // DrawingRenderingContextAccessor
     namespace ICurveAccessor {
     void DestroyPeerImpl(Ark_ICurve peer)
@@ -12115,8 +12036,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 InterpolateImpl(Ark_ICurve peer,
-                              const Ark_Number* fraction)
+    Ark_Number InterpolateImpl(Ark_ICurve peer,
+                               const Ark_Number* fraction)
     {
         return {};
     }
@@ -12205,35 +12126,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    } // TransitionEffectAccessor
-    namespace GlobalScope_focusControl_commonAccessor {
-    void DestroyPeerImpl(Ark_GlobalScope_focusControl_common peer)
-    {
-        auto peerImpl = reinterpret_cast<GlobalScope_focusControl_commonPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_Boolean RequestFocusImpl(const Ark_String* value)
+    Ark_TransitionEffect GetIDENTITYImpl()
     {
         return {};
     }
-    } // GlobalScope_focusControl_commonAccessor
-    namespace GlobalScope_cursorControl_commonAccessor {
-    void DestroyPeerImpl(Ark_GlobalScope_cursorControl_common peer)
+    Ark_TransitionEffect GetOPACITYImpl()
     {
-        auto peerImpl = reinterpret_cast<GlobalScope_cursorControl_commonPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
+        return {};
     }
-    void SetCursorImpl(Ark_PointerStyle value)
+    Ark_TransitionEffect GetSLIDEImpl()
     {
+        return {};
     }
-    void RestoreDefaultImpl()
+    Ark_TransitionEffect GetSLIDE_SWITCHImpl()
     {
+        return {};
     }
-    } // GlobalScope_cursorControl_commonAccessor
+    } // TransitionEffectAccessor
     namespace BaseEventAccessor {
     void DestroyPeerImpl(Ark_BaseEvent peer)
     {
@@ -12260,7 +12169,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Ark_EventTarget* target)
     {
     }
-    Ark_Int32 GetTimestampImpl(Ark_BaseEvent peer)
+    Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
     {
         return {};
     }
@@ -12276,7 +12185,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        Ark_SourceType source)
     {
     }
-    Ark_Int32 GetAxisHorizontalImpl(Ark_BaseEvent peer)
+    Ark_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
     {
         return {};
     }
@@ -12284,7 +12193,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Ark_Number* axisHorizontal)
     {
     }
-    Ark_Int32 GetAxisVerticalImpl(Ark_BaseEvent peer)
+    Ark_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
     {
         return {};
     }
@@ -12292,7 +12201,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Ark_Number* axisVertical)
     {
     }
-    Ark_Int32 GetPressureImpl(Ark_BaseEvent peer)
+    Ark_Number GetPressureImpl(Ark_BaseEvent peer)
     {
         return {};
     }
@@ -12300,7 +12209,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_Number* pressure)
     {
     }
-    Ark_Int32 GetTiltXImpl(Ark_BaseEvent peer)
+    Ark_Number GetTiltXImpl(Ark_BaseEvent peer)
     {
         return {};
     }
@@ -12308,7 +12217,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Ark_Number* tiltX)
     {
     }
-    Ark_Int32 GetTiltYImpl(Ark_BaseEvent peer)
+    Ark_Number GetTiltYImpl(Ark_BaseEvent peer)
     {
         return {};
     }
@@ -12324,7 +12233,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            Ark_SourceTool sourceTool)
     {
     }
-    Ark_Int32 GetDeviceIdImpl(Ark_BaseEvent peer)
+    Ark_Number GetDeviceIdImpl(Ark_BaseEvent peer)
     {
         return {};
     }
@@ -12349,7 +12258,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetDisplayXImpl(Ark_ClickEvent peer)
+    Ark_Number GetDisplayXImpl(Ark_ClickEvent peer)
     {
         return {};
     }
@@ -12357,7 +12266,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_Number* displayX)
     {
     }
-    Ark_Int32 GetDisplayYImpl(Ark_ClickEvent peer)
+    Ark_Number GetDisplayYImpl(Ark_ClickEvent peer)
     {
         return {};
     }
@@ -12365,7 +12274,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_Number* displayY)
     {
     }
-    Ark_Int32 GetWindowXImpl(Ark_ClickEvent peer)
+    Ark_Number GetWindowXImpl(Ark_ClickEvent peer)
     {
         return {};
     }
@@ -12373,7 +12282,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* windowX)
     {
     }
-    Ark_Int32 GetWindowYImpl(Ark_ClickEvent peer)
+    Ark_Number GetWindowYImpl(Ark_ClickEvent peer)
     {
         return {};
     }
@@ -12381,7 +12290,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* windowY)
     {
     }
-    Ark_Int32 GetScreenXImpl(Ark_ClickEvent peer)
+    Ark_Number GetScreenXImpl(Ark_ClickEvent peer)
     {
         return {};
     }
@@ -12389,7 +12298,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* screenX)
     {
     }
-    Ark_Int32 GetScreenYImpl(Ark_ClickEvent peer)
+    Ark_Number GetScreenYImpl(Ark_ClickEvent peer)
     {
         return {};
     }
@@ -12397,7 +12306,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* screenY)
     {
     }
-    Ark_Int32 GetXImpl(Ark_ClickEvent peer)
+    Ark_Number GetXImpl(Ark_ClickEvent peer)
     {
         return {};
     }
@@ -12405,7 +12314,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                   const Ark_Number* x)
     {
     }
-    Ark_Int32 GetYImpl(Ark_ClickEvent peer)
+    Ark_Number GetYImpl(Ark_ClickEvent peer)
     {
         return {};
     }
@@ -12479,7 +12388,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        Ark_MouseAction action)
     {
     }
-    Ark_Int32 GetDisplayXImpl(Ark_MouseEvent peer)
+    Ark_Number GetDisplayXImpl(Ark_MouseEvent peer)
     {
         return {};
     }
@@ -12487,7 +12396,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_Number* displayX)
     {
     }
-    Ark_Int32 GetDisplayYImpl(Ark_MouseEvent peer)
+    Ark_Number GetDisplayYImpl(Ark_MouseEvent peer)
     {
         return {};
     }
@@ -12495,7 +12404,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_Number* displayY)
     {
     }
-    Ark_Int32 GetWindowXImpl(Ark_MouseEvent peer)
+    Ark_Number GetWindowXImpl(Ark_MouseEvent peer)
     {
         return {};
     }
@@ -12503,7 +12412,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* windowX)
     {
     }
-    Ark_Int32 GetWindowYImpl(Ark_MouseEvent peer)
+    Ark_Number GetWindowYImpl(Ark_MouseEvent peer)
     {
         return {};
     }
@@ -12511,7 +12420,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* windowY)
     {
     }
-    Ark_Int32 GetScreenXImpl(Ark_MouseEvent peer)
+    Ark_Number GetScreenXImpl(Ark_MouseEvent peer)
     {
         return {};
     }
@@ -12519,7 +12428,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* screenX)
     {
     }
-    Ark_Int32 GetScreenYImpl(Ark_MouseEvent peer)
+    Ark_Number GetScreenYImpl(Ark_MouseEvent peer)
     {
         return {};
     }
@@ -12527,7 +12436,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* screenY)
     {
     }
-    Ark_Int32 GetXImpl(Ark_MouseEvent peer)
+    Ark_Number GetXImpl(Ark_MouseEvent peer)
     {
         return {};
     }
@@ -12535,7 +12444,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                   const Ark_Number* x)
     {
     }
-    Ark_Int32 GetYImpl(Ark_MouseEvent peer)
+    Ark_Number GetYImpl(Ark_MouseEvent peer)
     {
         return {};
     }
@@ -12576,7 +12485,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      Ark_AccessibilityHoverType type)
     {
     }
-    Ark_Int32 GetXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Number GetXImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
@@ -12584,7 +12493,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                   const Ark_Number* x)
     {
     }
-    Ark_Int32 GetYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Number GetYImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
@@ -12592,7 +12501,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                   const Ark_Number* y)
     {
     }
-    Ark_Int32 GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Number GetDisplayXImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
@@ -12600,7 +12509,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_Number* displayX)
     {
     }
-    Ark_Int32 GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Number GetDisplayYImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
@@ -12608,7 +12517,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_Number* displayY)
     {
     }
-    Ark_Int32 GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Number GetWindowXImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
@@ -12616,7 +12525,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* windowX)
     {
     }
-    Ark_Int32 GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
+    Ark_Number GetWindowYImpl(Ark_AccessibilityHoverEvent peer)
     {
         return {};
     }
@@ -12722,27 +12631,27 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetDisplayXImpl(Ark_DragEvent peer)
+    Ark_Number GetDisplayXImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Int32 GetDisplayYImpl(Ark_DragEvent peer)
+    Ark_Number GetDisplayYImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Int32 GetWindowXImpl(Ark_DragEvent peer)
+    Ark_Number GetWindowXImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Int32 GetWindowYImpl(Ark_DragEvent peer)
+    Ark_Number GetWindowYImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Int32 GetXImpl(Ark_DragEvent peer)
+    Ark_Number GetXImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Int32 GetYImpl(Ark_DragEvent peer)
+    Ark_Number GetYImpl(Ark_DragEvent peer)
     {
         return {};
     }
@@ -12771,15 +12680,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetVelocityXImpl(Ark_DragEvent peer)
+    Ark_Number GetVelocityXImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Int32 GetVelocityYImpl(Ark_DragEvent peer)
+    Ark_Number GetVelocityYImpl(Ark_DragEvent peer)
     {
         return {};
     }
-    Ark_Int32 GetVelocityImpl(Ark_DragEvent peer)
+    Ark_Number GetVelocityImpl(Ark_DragEvent peer)
     {
         return {};
     }
@@ -12836,7 +12745,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      Ark_KeyType type)
     {
     }
-    Ark_Int32 GetKeyCodeImpl(Ark_KeyEvent peer)
+    Ark_Number GetKeyCodeImpl(Ark_KeyEvent peer)
     {
         return {};
     }
@@ -12860,7 +12769,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           Ark_KeySource keySource)
     {
     }
-    Ark_Int32 GetDeviceIdImpl(Ark_KeyEvent peer)
+    Ark_Number GetDeviceIdImpl(Ark_KeyEvent peer)
     {
         return {};
     }
@@ -12868,7 +12777,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_Number* deviceId)
     {
     }
-    Ark_Int32 GetMetaKeyImpl(Ark_KeyEvent peer)
+    Ark_Number GetMetaKeyImpl(Ark_KeyEvent peer)
     {
         return {};
     }
@@ -12876,7 +12785,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* metaKey)
     {
     }
-    Ark_Int32 GetTimestampImpl(Ark_KeyEvent peer)
+    Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
     {
         return {};
     }
@@ -12896,7 +12805,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Ark_IntentionCode* intentionCode)
     {
     }
-    Ark_Int32 GetUnicodeImpl(Ark_KeyEvent peer)
+    Ark_Number GetUnicodeImpl(Ark_KeyEvent peer)
     {
         return {};
     }
@@ -13016,33 +12925,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
+    Ark_Number GetTextContentLineCountImpl(Ark_TextContentControllerBase peer)
     {
         return {};
     }
     } // TextContentControllerBaseAccessor
-    namespace DynamicNodeAccessor {
-    void DestroyPeerImpl(Ark_DynamicNode peer)
-    {
-        auto peerImpl = reinterpret_cast<DynamicNodePeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_DynamicNode CtorImpl()
-    {
-        return new DynamicNodePeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
-    Ark_CustomObject OnMoveImpl(Ark_DynamicNode peer,
-                                const Opt_OnMoveHandler* handler)
-    {
-        return {};
-    }
-    } // DynamicNodeAccessor
     namespace ChildrenMainSizeAccessor {
     void DestroyPeerImpl(Ark_ChildrenMainSize peer)
     {
@@ -13072,7 +12959,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                     const Ark_Number* childSize)
     {
     }
-    Ark_Int32 GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
+    Ark_Number GetChildDefaultSizeImpl(Ark_ChildrenMainSize peer)
     {
         return {};
     }
@@ -13164,80 +13051,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // GestureModifierAccessor
-    namespace GlobalScope_commonAccessor {
-    void DestroyPeerImpl(Ark_GlobalScope_common peer)
-    {
-        auto peerImpl = reinterpret_cast<GlobalScope_commonPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_Context GetContextImpl(const Opt_CustomObject* component)
-    {
-        return {};
-    }
-    void PostCardActionImpl(const Ark_CustomObject* component,
-                            const Ark_CustomObject* action)
-    {
-    }
-    Ark_Resource Dollar_rImpl(const Ark_String* value,
-                              const Array_CustomObject* params)
-    {
-        return {};
-    }
-    Ark_Resource Dollar_rawfileImpl(const Ark_String* value)
-    {
-        return {};
-    }
-    void AnimateToImpl(const Ark_AnimateParam* value,
-                       const Callback_Void* event)
-    {
-    }
-    void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
-                                  const Callback_Void* event)
-    {
-    }
-    Ark_Int32 Vp2pxImpl(const Ark_Number* value)
-    {
-        return {};
-    }
-    Ark_Int32 Px2vpImpl(const Ark_Number* value)
-    {
-        return {};
-    }
-    Ark_Int32 Fp2pxImpl(const Ark_Number* value)
-    {
-        return {};
-    }
-    Ark_Int32 Px2fpImpl(const Ark_Number* value)
-    {
-        return {};
-    }
-    Ark_Int32 Lpx2pxImpl(const Ark_Number* value)
-    {
-        return {};
-    }
-    Ark_Int32 Px2lpxImpl(const Ark_Number* value)
-    {
-        return {};
-    }
-    } // GlobalScope_commonAccessor
     namespace ContextMenuAccessor {
-    void DestroyPeerImpl(Ark_ContextMenu peer)
-    {
-        auto peerImpl = reinterpret_cast<ContextMenuPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_ContextMenu CtorImpl()
-    {
-        return new ContextMenuPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void CloseImpl()
     {
     }
@@ -13283,21 +13097,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // LinearGradientAccessor
     namespace DatePickerDialogAccessor {
-    void DestroyPeerImpl(Ark_DatePickerDialog peer)
-    {
-        auto peerImpl = reinterpret_cast<DatePickerDialogPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_DatePickerDialog CtorImpl()
-    {
-        return new DatePickerDialogPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void ShowImpl(const Opt_DatePickerDialogOptions* options)
     {
     }
@@ -13385,7 +13184,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetOffsetXImpl(Ark_PanGestureEvent peer)
+    Ark_Number GetOffsetXImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
@@ -13393,7 +13192,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* offsetX)
     {
     }
-    Ark_Int32 GetOffsetYImpl(Ark_PanGestureEvent peer)
+    Ark_Number GetOffsetYImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
@@ -13401,7 +13200,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* offsetY)
     {
     }
-    Ark_Int32 GetVelocityXImpl(Ark_PanGestureEvent peer)
+    Ark_Number GetVelocityXImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
@@ -13409,7 +13208,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Ark_Number* velocityX)
     {
     }
-    Ark_Int32 GetVelocityYImpl(Ark_PanGestureEvent peer)
+    Ark_Number GetVelocityYImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
@@ -13417,7 +13216,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Ark_Number* velocityY)
     {
     }
-    Ark_Int32 GetVelocityImpl(Ark_PanGestureEvent peer)
+    Ark_Number GetVelocityImpl(Ark_PanGestureEvent peer)
     {
         return {};
     }
@@ -13442,7 +13241,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetScaleImpl(Ark_PinchGestureEvent peer)
+    Ark_Number GetScaleImpl(Ark_PinchGestureEvent peer)
     {
         return {};
     }
@@ -13450,7 +13249,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Ark_Number* scale)
     {
     }
-    Ark_Int32 GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
+    Ark_Number GetPinchCenterXImpl(Ark_PinchGestureEvent peer)
     {
         return {};
     }
@@ -13458,7 +13257,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Ark_Number* pinchCenterX)
     {
     }
-    Ark_Int32 GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
+    Ark_Number GetPinchCenterYImpl(Ark_PinchGestureEvent peer)
     {
         return {};
     }
@@ -13483,7 +13282,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetAngleImpl(Ark_RotationGestureEvent peer)
+    Ark_Number GetAngleImpl(Ark_RotationGestureEvent peer)
     {
         return {};
     }
@@ -13508,7 +13307,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetAngleImpl(Ark_SwipeGestureEvent peer)
+    Ark_Number GetAngleImpl(Ark_SwipeGestureEvent peer)
     {
         return {};
     }
@@ -13516,7 +13315,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Ark_Number* angle)
     {
     }
-    Ark_Int32 GetSpeedImpl(Ark_SwipeGestureEvent peer)
+    Ark_Number GetSpeedImpl(Ark_SwipeGestureEvent peer)
     {
         return {};
     }
@@ -13557,7 +13356,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Array_FingerInfo* fingerList)
     {
     }
-    Ark_Int32 GetOffsetXImpl(Ark_GestureEvent peer)
+    Ark_Number GetOffsetXImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13565,7 +13364,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* offsetX)
     {
     }
-    Ark_Int32 GetOffsetYImpl(Ark_GestureEvent peer)
+    Ark_Number GetOffsetYImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13573,7 +13372,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* offsetY)
     {
     }
-    Ark_Int32 GetAngleImpl(Ark_GestureEvent peer)
+    Ark_Number GetAngleImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13581,7 +13380,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Ark_Number* angle)
     {
     }
-    Ark_Int32 GetSpeedImpl(Ark_GestureEvent peer)
+    Ark_Number GetSpeedImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13589,7 +13388,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Ark_Number* speed)
     {
     }
-    Ark_Int32 GetScaleImpl(Ark_GestureEvent peer)
+    Ark_Number GetScaleImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13597,7 +13396,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Ark_Number* scale)
     {
     }
-    Ark_Int32 GetPinchCenterXImpl(Ark_GestureEvent peer)
+    Ark_Number GetPinchCenterXImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13605,7 +13404,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Ark_Number* pinchCenterX)
     {
     }
-    Ark_Int32 GetPinchCenterYImpl(Ark_GestureEvent peer)
+    Ark_Number GetPinchCenterYImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13613,7 +13412,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Ark_Number* pinchCenterY)
     {
     }
-    Ark_Int32 GetVelocityXImpl(Ark_GestureEvent peer)
+    Ark_Number GetVelocityXImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13621,7 +13420,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Ark_Number* velocityX)
     {
     }
-    Ark_Int32 GetVelocityYImpl(Ark_GestureEvent peer)
+    Ark_Number GetVelocityYImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13629,7 +13428,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           const Ark_Number* velocityY)
     {
     }
-    Ark_Int32 GetVelocityImpl(Ark_GestureEvent peer)
+    Ark_Number GetVelocityImpl(Ark_GestureEvent peer)
     {
         return {};
     }
@@ -13638,6 +13437,60 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // GestureEventAccessor
+    namespace TapGestureInterfaceAccessor {
+    void DestroyPeerImpl(Ark_TapGestureInterface peer)
+    {
+        auto peerImpl = reinterpret_cast<TapGestureInterfacePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_TapGestureInterface CtorImpl()
+    {
+        return new TapGestureInterfacePeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_TapGestureInterface OnActionImpl(Ark_TapGestureInterface peer,
+                                         const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    } // TapGestureInterfaceAccessor
+    namespace LongPressGestureInterfaceAccessor {
+    void DestroyPeerImpl(Ark_LongPressGestureInterface peer)
+    {
+        auto peerImpl = reinterpret_cast<LongPressGestureInterfacePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_LongPressGestureInterface CtorImpl()
+    {
+        return new LongPressGestureInterfacePeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_LongPressGestureInterface OnActionImpl(Ark_LongPressGestureInterface peer,
+                                               const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_LongPressGestureInterface OnActionEndImpl(Ark_LongPressGestureInterface peer,
+                                                  const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_LongPressGestureInterface OnActionCancelImpl(Ark_LongPressGestureInterface peer,
+                                                     const Callback_Void* event)
+    {
+        return {};
+    }
+    } // LongPressGestureInterfaceAccessor
     namespace PanGestureOptionsAccessor {
     void DestroyPeerImpl(Ark_PanGestureOptions peer)
     {
@@ -13671,6 +13524,161 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // PanGestureOptionsAccessor
+    namespace PanGestureInterfaceAccessor {
+    void DestroyPeerImpl(Ark_PanGestureInterface peer)
+    {
+        auto peerImpl = reinterpret_cast<PanGestureInterfacePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_PanGestureInterface CtorImpl()
+    {
+        return new PanGestureInterfacePeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_PanGestureInterface OnActionStartImpl(Ark_PanGestureInterface peer,
+                                              const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_PanGestureInterface OnActionUpdateImpl(Ark_PanGestureInterface peer,
+                                               const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_PanGestureInterface OnActionEndImpl(Ark_PanGestureInterface peer,
+                                            const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_PanGestureInterface OnActionCancelImpl(Ark_PanGestureInterface peer,
+                                               const Callback_Void* event)
+    {
+        return {};
+    }
+    } // PanGestureInterfaceAccessor
+    namespace SwipeGestureInterfaceAccessor {
+    void DestroyPeerImpl(Ark_SwipeGestureInterface peer)
+    {
+        auto peerImpl = reinterpret_cast<SwipeGestureInterfacePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_SwipeGestureInterface CtorImpl()
+    {
+        return new SwipeGestureInterfacePeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_SwipeGestureInterface OnActionImpl(Ark_SwipeGestureInterface peer,
+                                           const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    } // SwipeGestureInterfaceAccessor
+    namespace PinchGestureInterfaceAccessor {
+    void DestroyPeerImpl(Ark_PinchGestureInterface peer)
+    {
+        auto peerImpl = reinterpret_cast<PinchGestureInterfacePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_PinchGestureInterface CtorImpl()
+    {
+        return new PinchGestureInterfacePeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_PinchGestureInterface OnActionStartImpl(Ark_PinchGestureInterface peer,
+                                                const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_PinchGestureInterface OnActionUpdateImpl(Ark_PinchGestureInterface peer,
+                                                 const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_PinchGestureInterface OnActionEndImpl(Ark_PinchGestureInterface peer,
+                                              const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_PinchGestureInterface OnActionCancelImpl(Ark_PinchGestureInterface peer,
+                                                 const Callback_Void* event)
+    {
+        return {};
+    }
+    } // PinchGestureInterfaceAccessor
+    namespace RotationGestureInterfaceAccessor {
+    void DestroyPeerImpl(Ark_RotationGestureInterface peer)
+    {
+        auto peerImpl = reinterpret_cast<RotationGestureInterfacePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_RotationGestureInterface CtorImpl()
+    {
+        return new RotationGestureInterfacePeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_RotationGestureInterface OnActionStartImpl(Ark_RotationGestureInterface peer,
+                                                   const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_RotationGestureInterface OnActionUpdateImpl(Ark_RotationGestureInterface peer,
+                                                    const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_RotationGestureInterface OnActionEndImpl(Ark_RotationGestureInterface peer,
+                                                 const Callback_GestureEvent_Void* event)
+    {
+        return {};
+    }
+    Ark_RotationGestureInterface OnActionCancelImpl(Ark_RotationGestureInterface peer,
+                                                    const Callback_Void* event)
+    {
+        return {};
+    }
+    } // RotationGestureInterfaceAccessor
+    namespace GestureGroupInterfaceAccessor {
+    void DestroyPeerImpl(Ark_GestureGroupInterface peer)
+    {
+        auto peerImpl = reinterpret_cast<GestureGroupInterfacePeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_GestureGroupInterface CtorImpl()
+    {
+        return new GestureGroupInterfacePeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_GestureGroupInterface OnCancelImpl(Ark_GestureGroupInterface peer,
+                                           const Callback_Void* event)
+    {
+        return {};
+    }
+    } // GestureGroupInterfaceAccessor
     namespace ScrollableTargetInfoAccessor {
     void DestroyPeerImpl(Ark_ScrollableTargetInfo peer)
     {
@@ -13906,7 +13914,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetScaleXImpl(Ark_Matrix2D peer)
+    Ark_Number GetScaleXImpl(Ark_Matrix2D peer)
     {
         return {};
     }
@@ -13914,7 +13922,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Ark_Number* scaleX)
     {
     }
-    Ark_Int32 GetRotateYImpl(Ark_Matrix2D peer)
+    Ark_Number GetRotateYImpl(Ark_Matrix2D peer)
     {
         return {};
     }
@@ -13922,7 +13930,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* rotateY)
     {
     }
-    Ark_Int32 GetRotateXImpl(Ark_Matrix2D peer)
+    Ark_Number GetRotateXImpl(Ark_Matrix2D peer)
     {
         return {};
     }
@@ -13930,7 +13938,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Ark_Number* rotateX)
     {
     }
-    Ark_Int32 GetScaleYImpl(Ark_Matrix2D peer)
+    Ark_Number GetScaleYImpl(Ark_Matrix2D peer)
     {
         return {};
     }
@@ -13938,7 +13946,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                        const Ark_Number* scaleY)
     {
     }
-    Ark_Int32 GetTranslateXImpl(Ark_Matrix2D peer)
+    Ark_Number GetTranslateXImpl(Ark_Matrix2D peer)
     {
         return {};
     }
@@ -13946,7 +13954,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Ark_Number* translateX)
     {
     }
-    Ark_Int32 GetTranslateYImpl(Ark_Matrix2D peer)
+    Ark_Number GetTranslateYImpl(Ark_Matrix2D peer)
     {
         return {};
     }
@@ -13975,9 +13983,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_NavPathInfo GetPathInfoImpl(Ark_NavDestinationContext peer)
+    {
+        return {};
+    }
     void SetPathInfoImpl(Ark_NavDestinationContext peer,
                          Ark_NavPathInfo pathInfo)
     {
+    }
+    Ark_NavPathStack GetPathStackImpl(Ark_NavDestinationContext peer)
+    {
+        return {};
     }
     void SetPathStackImpl(Ark_NavDestinationContext peer,
                           Ark_NavPathStack pathStack)
@@ -14067,6 +14083,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void PushDestination0Impl(Ark_VMContext vmContext,
+                              Ark_AsyncWorkerPtr asyncWorker,
                               Ark_NavPathStack peer,
                               Ark_NavPathInfo info,
                               const Opt_Boolean* animated,
@@ -14074,6 +14091,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void PushDestination1Impl(Ark_VMContext vmContext,
+                              Ark_AsyncWorkerPtr asyncWorker,
                               Ark_NavPathStack peer,
                               Ark_NavPathInfo info,
                               const Opt_NavigationOptions* options,
@@ -14094,6 +14112,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void PushDestinationByName0Impl(Ark_VMContext vmContext,
+                                    Ark_AsyncWorkerPtr asyncWorker,
                                     Ark_NavPathStack peer,
                                     const Ark_String* name,
                                     const Ark_CustomObject* param,
@@ -14102,6 +14121,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void PushDestinationByName1Impl(Ark_VMContext vmContext,
+                                    Ark_AsyncWorkerPtr asyncWorker,
                                     Ark_NavPathStack peer,
                                     const Ark_String* name,
                                     const Ark_CustomObject* param,
@@ -14121,6 +14141,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void ReplaceDestinationImpl(Ark_VMContext vmContext,
+                                Ark_AsyncWorkerPtr asyncWorker,
                                 Ark_NavPathStack peer,
                                 Ark_NavPathInfo info,
                                 const Opt_NavigationOptions* options,
@@ -14133,13 +14154,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                const Opt_Boolean* animated)
     {
     }
-    Ark_Int32 RemoveByIndexesImpl(Ark_NavPathStack peer,
-                                  const Array_Number* indexes)
+    Ark_Number RemoveByIndexesImpl(Ark_NavPathStack peer,
+                                   const Array_Number* indexes)
     {
         return {};
     }
-    Ark_Int32 RemoveByNameImpl(Ark_NavPathStack peer,
-                               const Ark_String* name)
+    Ark_Number RemoveByNameImpl(Ark_NavPathStack peer,
+                                const Ark_String* name)
     {
         return {};
     }
@@ -14159,16 +14180,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 PopToName0Impl(Ark_NavPathStack peer,
-                             const Ark_String* name,
-                             const Opt_Boolean* animated)
+    Ark_Number PopToName0Impl(Ark_NavPathStack peer,
+                              const Ark_String* name,
+                              const Opt_Boolean* animated)
     {
         return {};
     }
-    Ark_Int32 PopToName1Impl(Ark_NavPathStack peer,
-                             const Ark_String* name,
-                             const Ark_CustomObject* result,
-                             const Opt_Boolean* animated)
+    Ark_Number PopToName1Impl(Ark_NavPathStack peer,
+                              const Ark_String* name,
+                              const Ark_CustomObject* result,
+                              const Opt_Boolean* animated)
     {
         return {};
     }
@@ -14183,9 +14204,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Boolean* animated)
     {
     }
-    Ark_Int32 MoveToTopImpl(Ark_NavPathStack peer,
-                            const Ark_String* name,
-                            const Opt_Boolean* animated)
+    Ark_Number MoveToTopImpl(Ark_NavPathStack peer,
+                             const Ark_String* name,
+                             const Opt_Boolean* animated)
     {
         return {};
     }
@@ -14221,7 +14242,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 SizeImpl(Ark_NavPathStack peer)
+    Ark_Number SizeImpl(Ark_NavPathStack peer)
     {
         return {};
     }
@@ -14317,7 +14338,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
+    Ark_Number GetCaretOffsetImpl(Ark_RichEditorBaseController peer)
     {
         return {};
     }
@@ -14375,27 +14396,27 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 AddTextSpanImpl(Ark_RichEditorController peer,
-                              const Ark_String* value,
-                              const Opt_RichEditorTextSpanOptions* options)
+    Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
+                               const Ark_String* value,
+                               const Opt_RichEditorTextSpanOptions* options)
     {
         return {};
     }
-    Ark_Int32 AddImageSpanImpl(Ark_RichEditorController peer,
-                               const Ark_Union_PixelMap_ResourceStr* value,
-                               const Opt_RichEditorImageSpanOptions* options)
+    Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
+                                const Ark_Union_PixelMap_ResourceStr* value,
+                                const Opt_RichEditorImageSpanOptions* options)
     {
         return {};
     }
-    Ark_Int32 AddBuilderSpanImpl(Ark_RichEditorController peer,
-                                 const CustomNodeBuilder* value,
-                                 const Opt_RichEditorBuilderSpanOptions* options)
+    Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
+                                  const CustomNodeBuilder* value,
+                                  const Opt_RichEditorBuilderSpanOptions* options)
     {
         return {};
     }
-    Ark_Int32 AddSymbolSpanImpl(Ark_RichEditorController peer,
-                                const Ark_Resource* value,
-                                const Opt_RichEditorSymbolSpanOptions* options)
+    Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
+                                 const Ark_Resource* value,
+                                 const Opt_RichEditorSymbolSpanOptions* options)
     {
         return {};
     }
@@ -14535,10 +14556,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetItemIndexImpl(Ark_VMContext vmContext,
-                               Ark_Scroller peer,
-                               const Ark_Number* x,
-                               const Ark_Number* y)
+    Ark_Number GetItemIndexImpl(Ark_VMContext vmContext,
+                                Ark_Scroller peer,
+                                const Ark_Number* x,
+                                const Ark_Number* y)
     {
         return {};
     }
@@ -14624,7 +14645,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void FinishTransitionImpl(Ark_SwiperContentTransitionProxy peer)
     {
     }
-    Ark_Int32 GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Number GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
@@ -14632,7 +14653,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Ark_Number* selectedIndex)
     {
     }
-    Ark_Int32 GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Number GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
@@ -14640,7 +14661,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Ark_Number* index)
     {
     }
-    Ark_Int32 GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Number GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
@@ -14648,7 +14669,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Ark_Number* position)
     {
     }
-    Ark_Int32 GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
+    Ark_Number GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
     {
         return {};
     }
@@ -14815,6 +14836,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void PreloadItemsImpl(Ark_VMContext vmContext,
+                          Ark_AsyncWorkerPtr asyncWorker,
                           Ark_TabsController peer,
                           const Opt_Array_Number* indices,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
@@ -14848,7 +14870,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void FinishTransitionImpl(Ark_TabContentTransitionProxy peer)
     {
     }
-    Ark_Int32 GetFromImpl(Ark_TabContentTransitionProxy peer)
+    Ark_Number GetFromImpl(Ark_TabContentTransitionProxy peer)
     {
         return {};
     }
@@ -14856,7 +14878,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      const Ark_Number* from)
     {
     }
-    Ark_Int32 GetToImpl(Ark_TabContentTransitionProxy peer)
+    Ark_Number GetToImpl(Ark_TabContentTransitionProxy peer)
     {
         return {};
     }
@@ -15004,7 +15026,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
+    Ark_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
     {
         return {};
     }
@@ -15054,7 +15076,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetLineCountImpl(Ark_LayoutManager peer)
+    Ark_Number GetLineCountImpl(Ark_LayoutManager peer)
     {
         return {};
     }
@@ -15099,6 +15121,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_Boolean EqualsImpl(Ark_TextMenuItemId peer,
                            Ark_TextMenuItemId id)
+    {
+        return {};
+    }
+    Ark_TextMenuItemId GetCUTImpl()
+    {
+        return {};
+    }
+    Ark_TextMenuItemId GetCOPYImpl()
+    {
+        return {};
+    }
+    Ark_TextMenuItemId GetPASTEImpl()
+    {
+        return {};
+    }
+    Ark_TextMenuItemId GetSELECT_ALLImpl()
+    {
+        return {};
+    }
+    Ark_TextMenuItemId GetCOLLABORATION_SERVICEImpl()
+    {
+        return {};
+    }
+    Ark_TextMenuItemId GetCAMERA_INPUTImpl()
+    {
+        return {};
+    }
+    Ark_TextMenuItemId GetAI_WRITERImpl()
     {
         return {};
     }
@@ -15190,21 +15240,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TextInputControllerAccessor
     namespace TextPickerDialogAccessor {
-    void DestroyPeerImpl(Ark_TextPickerDialog peer)
-    {
-        auto peerImpl = reinterpret_cast<TextPickerDialogPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_TextPickerDialog CtorImpl()
-    {
-        return new TextPickerDialogPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void ShowImpl(const Opt_TextPickerDialogOptions* options)
     {
     }
@@ -15236,21 +15271,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // TextTimerControllerAccessor
     namespace TimePickerDialogAccessor {
-    void DestroyPeerImpl(Ark_TimePickerDialog peer)
-    {
-        auto peerImpl = reinterpret_cast<TimePickerDialogPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_TimePickerDialog CtorImpl()
-    {
-        return new TimePickerDialogPeer();
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
     void ShowImpl(const Opt_TimePickerDialogOptions* options)
     {
     }
@@ -15659,11 +15679,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 XImpl(Ark_WebContextMenuParam peer)
+    Ark_Number XImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
-    Ark_Int32 YImpl(Ark_WebContextMenuParam peer)
+    Ark_Number YImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
@@ -15703,15 +15723,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
+    Ark_Number GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
-    Ark_Int32 GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
+    Ark_Number GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
-    Ark_Int32 GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
+    Ark_Number GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
     {
         return {};
     }
@@ -15778,7 +15798,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetLineNumberImpl(Ark_ConsoleMessage peer)
+    Ark_Number GetLineNumberImpl(Ark_ConsoleMessage peer)
     {
         return {};
     }
@@ -15868,7 +15888,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetResponseCodeImpl(Ark_WebResourceResponse peer)
+    Ark_Number GetResponseCodeImpl(Ark_WebResourceResponse peer)
     {
         return {};
     }
@@ -15925,7 +15945,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetErrorCodeImpl(Ark_WebResourceError peer)
+    Ark_Number GetErrorCodeImpl(Ark_WebResourceError peer)
     {
         return {};
     }
@@ -16141,6 +16161,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void StartImageAnalyzerImpl(Ark_VMContext vmContext,
+                                Ark_AsyncWorkerPtr asyncWorker,
                                 Ark_XComponentController peer,
                                 const Ark_ImageAnalyzerConfig* config,
                                 const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
@@ -16188,7 +16209,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 LengthImpl(Ark_WaterFlowSections peer)
+    Ark_Number LengthImpl(Ark_WaterFlowSections peer)
     {
         return {};
     }
@@ -16278,6 +16299,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void FromHtmlImpl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
                       const Ark_String* html,
                       const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
@@ -16292,11 +16314,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void UnmarshallingImpl(Ark_VMContext vmContext,
+                           Ark_AsyncWorkerPtr asyncWorker,
                            const Ark_Buffer* buffer,
                            const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
     }
-    Ark_Int32 GetLengthImpl(Ark_StyledString peer)
+    Ark_Number GetLengthImpl(Ark_StyledString peer)
     {
         return {};
     }
@@ -16321,11 +16344,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetFontSizeImpl(Ark_TextStyle_styled_string peer)
+    Ark_Number GetFontSizeImpl(Ark_TextStyle_styled_string peer)
     {
         return {};
     }
-    Ark_Int32 GetFontWeightImpl(Ark_TextStyle_styled_string peer)
+    Ark_Number GetFontWeightImpl(Ark_TextStyle_styled_string peer)
     {
         return {};
     }
@@ -16375,7 +16398,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
+    Ark_Number GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
     {
         return {};
     }
@@ -16396,7 +16419,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
+    Ark_Number GetLetterSpacingImpl(Ark_LetterSpacingStyle peer)
     {
         return {};
     }
@@ -16476,11 +16499,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Int32 GetTextIndentImpl(Ark_ParagraphStyle peer)
+    Ark_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
     {
         return {};
     }
-    Ark_Int32 GetMaxLinesImpl(Ark_ParagraphStyle peer)
+    Ark_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
     {
         return {};
     }
@@ -16509,7 +16532,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
-    Ark_Int32 GetLineHeightImpl(Ark_LineHeightStyle peer)
+    Ark_Number GetLineHeightImpl(Ark_LineHeightStyle peer)
     {
         return {};
     }
@@ -16630,6 +16653,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
+    Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
+    {
+        return {};
+    }
     Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
     {
         return {};
@@ -16701,28 +16728,55 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // LinearIndicatorControllerAccessor
-    namespace GlobalScope_Profiler_inspectorAccessor {
-    void DestroyPeerImpl(Ark_GlobalScope_Profiler_inspector peer)
+    namespace GlobalScopeAccessor {
+    Ark_Context GetContextImpl(const Opt_CustomObject* component)
     {
-        auto peerImpl = reinterpret_cast<GlobalScope_Profiler_inspectorPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
+        return {};
     }
-    void RegisterVsyncCallbackImpl(const Callback_String_Void* callback_)
+    void PostCardActionImpl(const Ark_CustomObject* component,
+                            const Ark_CustomObject* action)
     {
     }
-    void UnregisterVsyncCallbackImpl()
+    Ark_Resource Dollar_rImpl(const Ark_String* value,
+                              const Array_CustomObject* params)
+    {
+        return {};
+    }
+    Ark_Resource Dollar_rawfileImpl(const Ark_String* value)
+    {
+        return {};
+    }
+    void AnimateToImpl(const Ark_AnimateParam* value,
+                       const Callback_Void* event)
     {
     }
-    } // GlobalScope_Profiler_inspectorAccessor
-    namespace GlobalScope_inspectorAccessor {
-    void DestroyPeerImpl(Ark_GlobalScope_inspector peer)
+    void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
+                                  const Callback_Void* event)
     {
-        auto peerImpl = reinterpret_cast<GlobalScope_inspectorPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
+    }
+    Ark_Number Vp2pxImpl(const Ark_Number* value)
+    {
+        return {};
+    }
+    Ark_Number Px2vpImpl(const Ark_Number* value)
+    {
+        return {};
+    }
+    Ark_Number Fp2pxImpl(const Ark_Number* value)
+    {
+        return {};
+    }
+    Ark_Number Px2fpImpl(const Ark_Number* value)
+    {
+        return {};
+    }
+    Ark_Number Lpx2pxImpl(const Ark_Number* value)
+    {
+        return {};
+    }
+    Ark_Number Px2lpxImpl(const Ark_Number* value)
+    {
+        return {};
     }
     Ark_CustomObject GetInspectorNodesImpl()
     {
@@ -16735,13 +16789,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetAppBgColorImpl(const Ark_String* value)
     {
     }
-    } // GlobalScope_inspectorAccessor
+    void Profiler_registerVsyncCallbackImpl(const Callback_String_Void* callback_)
+    {
+    }
+    void Profiler_unregisterVsyncCallbackImpl()
+    {
+    }
+    void CursorControl_setCursorImpl(Ark_PointerStyle value)
+    {
+    }
+    void CursorControl_restoreDefaultImpl()
+    {
+    }
+    Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
+    {
+        return {};
+    }
+    } // GlobalScopeAccessor
     const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
     {
         static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
-            AnimationExtenderAccessor::DestroyPeerImpl,
-            AnimationExtenderAccessor::CtorImpl,
-            AnimationExtenderAccessor::GetFinalizerImpl,
             AnimationExtenderAccessor::SetClipRectImpl,
             AnimationExtenderAccessor::OpenImplicitAnimationImpl,
             AnimationExtenderAccessor::CloseImplicitAnimationImpl,
@@ -16751,9 +16818,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &AnimationExtenderAccessorImpl;
     }
 
-    struct AnimationExtenderPeer {
-        virtual ~AnimationExtenderPeer() = default;
-    };
     const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor()
     {
         static const GENERATED_ArkUIUnifiedDataAccessor UnifiedDataAccessorImpl {
@@ -16772,9 +16836,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
     {
         static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
-            LazyForEachOpsAccessor::DestroyPeerImpl,
-            LazyForEachOpsAccessor::CtorImpl,
-            LazyForEachOpsAccessor::GetFinalizerImpl,
             LazyForEachOpsAccessor::NeedMoreElementsImpl,
             LazyForEachOpsAccessor::OnRangeUpdateImpl,
             LazyForEachOpsAccessor::SetCurrentIndexImpl,
@@ -16784,24 +16845,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &LazyForEachOpsAccessorImpl;
     }
 
-    struct LazyForEachOpsPeer {
-        virtual ~LazyForEachOpsPeer() = default;
-    };
     const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
     {
         static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
-            SystemOpsAccessor::DestroyPeerImpl,
-            SystemOpsAccessor::CtorImpl,
-            SystemOpsAccessor::GetFinalizerImpl,
             SystemOpsAccessor::StartFrameImpl,
             SystemOpsAccessor::EndFrameImpl,
+            SystemOpsAccessor::SyncInstanceIdImpl,
+            SystemOpsAccessor::RestoreInstanceIdImpl,
         };
         return &SystemOpsAccessorImpl;
     }
 
-    struct SystemOpsPeer {
-        virtual ~SystemOpsPeer() = default;
-    };
     const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor()
     {
         static const GENERATED_ArkUIDrawingCanvasAccessor DrawingCanvasAccessorImpl {
@@ -16823,6 +16877,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             LengthMetricsAccessor::CtorImpl,
             LengthMetricsAccessor::GetFinalizerImpl,
             LengthMetricsAccessor::PxImpl,
+            LengthMetricsAccessor::VpImpl,
+            LengthMetricsAccessor::FpImpl,
+            LengthMetricsAccessor::PercentImpl,
+            LengthMetricsAccessor::LpxImpl,
             LengthMetricsAccessor::ResourceImpl,
             LengthMetricsAccessor::GetUnitImpl,
             LengthMetricsAccessor::SetUnitImpl,
@@ -16834,6 +16892,28 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct LengthMetricsPeer {
         virtual ~LengthMetricsPeer() = default;
+    };
+    const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor()
+    {
+        static const GENERATED_ArkUIColorMetricsAccessor ColorMetricsAccessorImpl {
+            ColorMetricsAccessor::DestroyPeerImpl,
+            ColorMetricsAccessor::CtorImpl,
+            ColorMetricsAccessor::GetFinalizerImpl,
+            ColorMetricsAccessor::NumericImpl,
+            ColorMetricsAccessor::RgbaImpl,
+            ColorMetricsAccessor::ResourceColorImpl,
+            ColorMetricsAccessor::BlendColorImpl,
+            ColorMetricsAccessor::GetColorImpl,
+            ColorMetricsAccessor::GetRedImpl,
+            ColorMetricsAccessor::GetGreenImpl,
+            ColorMetricsAccessor::GetBlueImpl,
+            ColorMetricsAccessor::GetAlphaImpl,
+        };
+        return &ColorMetricsAccessorImpl;
+    }
+
+    struct ColorMetricsPeer {
+        virtual ~ColorMetricsPeer() = default;
     };
     const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor()
     {
@@ -16853,23 +16933,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor()
     {
         static const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor GlobalScope_ohos_arkui_componentSnapshotAccessorImpl {
-            GlobalScope_ohos_arkui_componentSnapshotAccessor::DestroyPeerImpl,
-            GlobalScope_ohos_arkui_componentSnapshotAccessor::CtorImpl,
-            GlobalScope_ohos_arkui_componentSnapshotAccessor::GetFinalizerImpl,
             GlobalScope_ohos_arkui_componentSnapshotAccessor::GetImpl,
         };
         return &GlobalScope_ohos_arkui_componentSnapshotAccessorImpl;
     }
 
-    struct GlobalScope_ohos_arkui_componentSnapshotPeer {
-        virtual ~GlobalScope_ohos_arkui_componentSnapshotPeer() = default;
-    };
     const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor()
     {
         static const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor GlobalScope_ohos_arkui_performanceMonitorAccessorImpl {
-            GlobalScope_ohos_arkui_performanceMonitorAccessor::DestroyPeerImpl,
-            GlobalScope_ohos_arkui_performanceMonitorAccessor::CtorImpl,
-            GlobalScope_ohos_arkui_performanceMonitorAccessor::GetFinalizerImpl,
             GlobalScope_ohos_arkui_performanceMonitorAccessor::BeginImpl,
             GlobalScope_ohos_arkui_performanceMonitorAccessor::EndImpl,
             GlobalScope_ohos_arkui_performanceMonitorAccessor::RecordInputEventTimeImpl,
@@ -16877,9 +16948,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &GlobalScope_ohos_arkui_performanceMonitorAccessorImpl;
     }
 
-    struct GlobalScope_ohos_arkui_performanceMonitorPeer {
-        virtual ~GlobalScope_ohos_arkui_performanceMonitorPeer() = default;
-    };
     const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor()
     {
         static const GENERATED_ArkUICommonShapeAccessor CommonShapeAccessorImpl {
@@ -16992,18 +17060,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
     {
         static const GENERATED_ArkUIGlobalScope_ohos_fontAccessor GlobalScope_ohos_fontAccessorImpl {
-            GlobalScope_ohos_fontAccessor::DestroyPeerImpl,
-            GlobalScope_ohos_fontAccessor::CtorImpl,
-            GlobalScope_ohos_fontAccessor::GetFinalizerImpl,
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
 
-    struct GlobalScope_ohos_fontPeer {
-        virtual ~GlobalScope_ohos_fontPeer() = default;
-    };
     const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIScaleSymbolEffectAccessor ScaleSymbolEffectAccessorImpl {
@@ -17056,6 +17118,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeAccessor::DisposeImpl,
             FrameNodeAccessor::GetOpacityImpl,
             FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
+            FrameNodeAccessor::GetFrameNodeByKeyImpl,
         };
         return &FrameNodeAccessorImpl;
     }
@@ -17083,60 +17146,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
     {
         static const GENERATED_ArkUINavExtenderAccessor NavExtenderAccessorImpl {
-            NavExtenderAccessor::DestroyPeerImpl,
-            NavExtenderAccessor::CtorImpl,
-            NavExtenderAccessor::GetFinalizerImpl,
             NavExtenderAccessor::SetUpdateStackCallbackImpl,
         };
         return &NavExtenderAccessorImpl;
     }
 
-    struct NavExtenderPeer {
-        virtual ~NavExtenderPeer() = default;
-    };
     const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()
     {
         static const GENERATED_ArkUIEventEmulatorAccessor EventEmulatorAccessorImpl {
-            EventEmulatorAccessor::DestroyPeerImpl,
-            EventEmulatorAccessor::CtorImpl,
-            EventEmulatorAccessor::GetFinalizerImpl,
             EventEmulatorAccessor::EmitClickEventImpl,
             EventEmulatorAccessor::EmitTextInputEventImpl,
         };
         return &EventEmulatorAccessorImpl;
     }
 
-    struct EventEmulatorPeer {
-        virtual ~EventEmulatorPeer() = default;
-    };
     const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
     {
         static const GENERATED_ArkUIActionSheetAccessor ActionSheetAccessorImpl {
-            ActionSheetAccessor::DestroyPeerImpl,
-            ActionSheetAccessor::CtorImpl,
-            ActionSheetAccessor::GetFinalizerImpl,
             ActionSheetAccessor::ShowImpl,
         };
         return &ActionSheetAccessorImpl;
     }
 
-    struct ActionSheetPeer {
-        virtual ~ActionSheetPeer() = default;
-    };
     const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor()
     {
         static const GENERATED_ArkUIAlertDialogAccessor AlertDialogAccessorImpl {
-            AlertDialogAccessor::DestroyPeerImpl,
-            AlertDialogAccessor::CtorImpl,
-            AlertDialogAccessor::GetFinalizerImpl,
             AlertDialogAccessor::ShowImpl,
         };
         return &AlertDialogAccessorImpl;
     }
 
-    struct AlertDialogPeer {
-        virtual ~AlertDialogPeer() = default;
-    };
     const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor()
     {
         static const GENERATED_ArkUISpringPropAccessor SpringPropAccessorImpl {
@@ -17207,17 +17246,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
     {
         static const GENERATED_ArkUICalendarPickerDialogAccessor CalendarPickerDialogAccessorImpl {
-            CalendarPickerDialogAccessor::DestroyPeerImpl,
-            CalendarPickerDialogAccessor::CtorImpl,
-            CalendarPickerDialogAccessor::GetFinalizerImpl,
             CalendarPickerDialogAccessor::ShowImpl,
         };
         return &CalendarPickerDialogAccessorImpl;
     }
 
-    struct CalendarPickerDialogPeer {
-        virtual ~CalendarPickerDialogPeer() = default;
-    };
     const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
     {
         static const GENERATED_ArkUICanvasGradientAccessor CanvasGradientAccessorImpl {
@@ -17437,6 +17470,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasRenderingContext2DAccessor::OffOnDetachImpl,
             CanvasRenderingContext2DAccessor::GetHeightImpl,
             CanvasRenderingContext2DAccessor::GetWidthImpl,
+            CanvasRenderingContext2DAccessor::GetCanvasImpl,
         };
         return &CanvasRenderingContext2DAccessorImpl;
     }
@@ -17485,6 +17519,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DrawingRenderingContextAccessor::CtorImpl,
             DrawingRenderingContextAccessor::GetFinalizerImpl,
             DrawingRenderingContextAccessor::InvalidateImpl,
+            DrawingRenderingContextAccessor::GetCanvasImpl,
         };
         return &DrawingRenderingContextAccessorImpl;
     }
@@ -17537,37 +17572,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TransitionEffectAccessor::AsymmetricImpl,
             TransitionEffectAccessor::AnimationImpl,
             TransitionEffectAccessor::CombineImpl,
+            TransitionEffectAccessor::GetIDENTITYImpl,
+            TransitionEffectAccessor::GetOPACITYImpl,
+            TransitionEffectAccessor::GetSLIDEImpl,
+            TransitionEffectAccessor::GetSLIDE_SWITCHImpl,
         };
         return &TransitionEffectAccessorImpl;
     }
 
     struct TransitionEffectPeer {
         virtual ~TransitionEffectPeer() = default;
-    };
-    const GENERATED_ArkUIGlobalScope_focusControl_commonAccessor* GetGlobalScope_focusControl_commonAccessor()
-    {
-        static const GENERATED_ArkUIGlobalScope_focusControl_commonAccessor GlobalScope_focusControl_commonAccessorImpl {
-            GlobalScope_focusControl_commonAccessor::DestroyPeerImpl,
-            GlobalScope_focusControl_commonAccessor::RequestFocusImpl,
-        };
-        return &GlobalScope_focusControl_commonAccessorImpl;
-    }
-
-    struct GlobalScope_focusControl_commonPeer {
-        virtual ~GlobalScope_focusControl_commonPeer() = default;
-    };
-    const GENERATED_ArkUIGlobalScope_cursorControl_commonAccessor* GetGlobalScope_cursorControl_commonAccessor()
-    {
-        static const GENERATED_ArkUIGlobalScope_cursorControl_commonAccessor GlobalScope_cursorControl_commonAccessorImpl {
-            GlobalScope_cursorControl_commonAccessor::DestroyPeerImpl,
-            GlobalScope_cursorControl_commonAccessor::SetCursorImpl,
-            GlobalScope_cursorControl_commonAccessor::RestoreDefaultImpl,
-        };
-        return &GlobalScope_cursorControl_commonAccessorImpl;
-    }
-
-    struct GlobalScope_cursorControl_commonPeer {
-        virtual ~GlobalScope_cursorControl_commonPeer() = default;
     };
     const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
     {
@@ -17877,20 +17891,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TextContentControllerBasePeer {
         virtual ~TextContentControllerBasePeer() = default;
     };
-    const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor()
-    {
-        static const GENERATED_ArkUIDynamicNodeAccessor DynamicNodeAccessorImpl {
-            DynamicNodeAccessor::DestroyPeerImpl,
-            DynamicNodeAccessor::CtorImpl,
-            DynamicNodeAccessor::GetFinalizerImpl,
-            DynamicNodeAccessor::OnMoveImpl,
-        };
-        return &DynamicNodeAccessorImpl;
-    }
-
-    struct DynamicNodePeer {
-        virtual ~DynamicNodePeer() = default;
-    };
     const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
     {
         static const GENERATED_ArkUIChildrenMainSizeAccessor ChildrenMainSizeAccessorImpl {
@@ -17946,43 +17946,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct GestureModifierPeer {
         virtual ~GestureModifierPeer() = default;
     };
-    const GENERATED_ArkUIGlobalScope_commonAccessor* GetGlobalScope_commonAccessor()
-    {
-        static const GENERATED_ArkUIGlobalScope_commonAccessor GlobalScope_commonAccessorImpl {
-            GlobalScope_commonAccessor::DestroyPeerImpl,
-            GlobalScope_commonAccessor::GetContextImpl,
-            GlobalScope_commonAccessor::PostCardActionImpl,
-            GlobalScope_commonAccessor::Dollar_rImpl,
-            GlobalScope_commonAccessor::Dollar_rawfileImpl,
-            GlobalScope_commonAccessor::AnimateToImpl,
-            GlobalScope_commonAccessor::AnimateToImmediatelyImpl,
-            GlobalScope_commonAccessor::Vp2pxImpl,
-            GlobalScope_commonAccessor::Px2vpImpl,
-            GlobalScope_commonAccessor::Fp2pxImpl,
-            GlobalScope_commonAccessor::Px2fpImpl,
-            GlobalScope_commonAccessor::Lpx2pxImpl,
-            GlobalScope_commonAccessor::Px2lpxImpl,
-        };
-        return &GlobalScope_commonAccessorImpl;
-    }
-
-    struct GlobalScope_commonPeer {
-        virtual ~GlobalScope_commonPeer() = default;
-    };
     const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()
     {
         static const GENERATED_ArkUIContextMenuAccessor ContextMenuAccessorImpl {
-            ContextMenuAccessor::DestroyPeerImpl,
-            ContextMenuAccessor::CtorImpl,
-            ContextMenuAccessor::GetFinalizerImpl,
             ContextMenuAccessor::CloseImpl,
         };
         return &ContextMenuAccessorImpl;
     }
 
-    struct ContextMenuPeer {
-        virtual ~ContextMenuPeer() = default;
-    };
     const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
     {
         static const GENERATED_ArkUICustomDialogControllerAccessor CustomDialogControllerAccessorImpl {
@@ -18014,17 +17985,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
     {
         static const GENERATED_ArkUIDatePickerDialogAccessor DatePickerDialogAccessorImpl {
-            DatePickerDialogAccessor::DestroyPeerImpl,
-            DatePickerDialogAccessor::CtorImpl,
-            DatePickerDialogAccessor::GetFinalizerImpl,
             DatePickerDialogAccessor::ShowImpl,
         };
         return &DatePickerDialogAccessorImpl;
     }
 
-    struct DatePickerDialogPeer {
-        virtual ~DatePickerDialogPeer() = default;
-    };
     const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
     {
         static const GENERATED_ArkUIBaseGestureEventAccessor BaseGestureEventAccessorImpl {
@@ -18179,6 +18144,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct GestureEventPeer {
         virtual ~GestureEventPeer() = default;
     };
+    const GENERATED_ArkUITapGestureInterfaceAccessor* GetTapGestureInterfaceAccessor()
+    {
+        static const GENERATED_ArkUITapGestureInterfaceAccessor TapGestureInterfaceAccessorImpl {
+            TapGestureInterfaceAccessor::DestroyPeerImpl,
+            TapGestureInterfaceAccessor::CtorImpl,
+            TapGestureInterfaceAccessor::GetFinalizerImpl,
+            TapGestureInterfaceAccessor::OnActionImpl,
+        };
+        return &TapGestureInterfaceAccessorImpl;
+    }
+
+    struct TapGestureInterfacePeer {
+        virtual ~TapGestureInterfacePeer() = default;
+    };
+    const GENERATED_ArkUILongPressGestureInterfaceAccessor* GetLongPressGestureInterfaceAccessor()
+    {
+        static const GENERATED_ArkUILongPressGestureInterfaceAccessor LongPressGestureInterfaceAccessorImpl {
+            LongPressGestureInterfaceAccessor::DestroyPeerImpl,
+            LongPressGestureInterfaceAccessor::CtorImpl,
+            LongPressGestureInterfaceAccessor::GetFinalizerImpl,
+            LongPressGestureInterfaceAccessor::OnActionImpl,
+            LongPressGestureInterfaceAccessor::OnActionEndImpl,
+            LongPressGestureInterfaceAccessor::OnActionCancelImpl,
+        };
+        return &LongPressGestureInterfaceAccessorImpl;
+    }
+
+    struct LongPressGestureInterfacePeer {
+        virtual ~LongPressGestureInterfacePeer() = default;
+    };
     const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
     {
         static const GENERATED_ArkUIPanGestureOptionsAccessor PanGestureOptionsAccessorImpl {
@@ -18195,6 +18190,85 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct PanGestureOptionsPeer {
         virtual ~PanGestureOptionsPeer() = default;
+    };
+    const GENERATED_ArkUIPanGestureInterfaceAccessor* GetPanGestureInterfaceAccessor()
+    {
+        static const GENERATED_ArkUIPanGestureInterfaceAccessor PanGestureInterfaceAccessorImpl {
+            PanGestureInterfaceAccessor::DestroyPeerImpl,
+            PanGestureInterfaceAccessor::CtorImpl,
+            PanGestureInterfaceAccessor::GetFinalizerImpl,
+            PanGestureInterfaceAccessor::OnActionStartImpl,
+            PanGestureInterfaceAccessor::OnActionUpdateImpl,
+            PanGestureInterfaceAccessor::OnActionEndImpl,
+            PanGestureInterfaceAccessor::OnActionCancelImpl,
+        };
+        return &PanGestureInterfaceAccessorImpl;
+    }
+
+    struct PanGestureInterfacePeer {
+        virtual ~PanGestureInterfacePeer() = default;
+    };
+    const GENERATED_ArkUISwipeGestureInterfaceAccessor* GetSwipeGestureInterfaceAccessor()
+    {
+        static const GENERATED_ArkUISwipeGestureInterfaceAccessor SwipeGestureInterfaceAccessorImpl {
+            SwipeGestureInterfaceAccessor::DestroyPeerImpl,
+            SwipeGestureInterfaceAccessor::CtorImpl,
+            SwipeGestureInterfaceAccessor::GetFinalizerImpl,
+            SwipeGestureInterfaceAccessor::OnActionImpl,
+        };
+        return &SwipeGestureInterfaceAccessorImpl;
+    }
+
+    struct SwipeGestureInterfacePeer {
+        virtual ~SwipeGestureInterfacePeer() = default;
+    };
+    const GENERATED_ArkUIPinchGestureInterfaceAccessor* GetPinchGestureInterfaceAccessor()
+    {
+        static const GENERATED_ArkUIPinchGestureInterfaceAccessor PinchGestureInterfaceAccessorImpl {
+            PinchGestureInterfaceAccessor::DestroyPeerImpl,
+            PinchGestureInterfaceAccessor::CtorImpl,
+            PinchGestureInterfaceAccessor::GetFinalizerImpl,
+            PinchGestureInterfaceAccessor::OnActionStartImpl,
+            PinchGestureInterfaceAccessor::OnActionUpdateImpl,
+            PinchGestureInterfaceAccessor::OnActionEndImpl,
+            PinchGestureInterfaceAccessor::OnActionCancelImpl,
+        };
+        return &PinchGestureInterfaceAccessorImpl;
+    }
+
+    struct PinchGestureInterfacePeer {
+        virtual ~PinchGestureInterfacePeer() = default;
+    };
+    const GENERATED_ArkUIRotationGestureInterfaceAccessor* GetRotationGestureInterfaceAccessor()
+    {
+        static const GENERATED_ArkUIRotationGestureInterfaceAccessor RotationGestureInterfaceAccessorImpl {
+            RotationGestureInterfaceAccessor::DestroyPeerImpl,
+            RotationGestureInterfaceAccessor::CtorImpl,
+            RotationGestureInterfaceAccessor::GetFinalizerImpl,
+            RotationGestureInterfaceAccessor::OnActionStartImpl,
+            RotationGestureInterfaceAccessor::OnActionUpdateImpl,
+            RotationGestureInterfaceAccessor::OnActionEndImpl,
+            RotationGestureInterfaceAccessor::OnActionCancelImpl,
+        };
+        return &RotationGestureInterfaceAccessorImpl;
+    }
+
+    struct RotationGestureInterfacePeer {
+        virtual ~RotationGestureInterfacePeer() = default;
+    };
+    const GENERATED_ArkUIGestureGroupInterfaceAccessor* GetGestureGroupInterfaceAccessor()
+    {
+        static const GENERATED_ArkUIGestureGroupInterfaceAccessor GestureGroupInterfaceAccessorImpl {
+            GestureGroupInterfaceAccessor::DestroyPeerImpl,
+            GestureGroupInterfaceAccessor::CtorImpl,
+            GestureGroupInterfaceAccessor::GetFinalizerImpl,
+            GestureGroupInterfaceAccessor::OnCancelImpl,
+        };
+        return &GestureGroupInterfaceAccessorImpl;
+    }
+
+    struct GestureGroupInterfacePeer {
+        virtual ~GestureGroupInterfacePeer() = default;
     };
     const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccessor()
     {
@@ -18330,7 +18404,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavDestinationContextAccessor::CtorImpl,
             NavDestinationContextAccessor::GetFinalizerImpl,
             NavDestinationContextAccessor::GetConfigInRouteMapImpl,
+            NavDestinationContextAccessor::GetPathInfoImpl,
             NavDestinationContextAccessor::SetPathInfoImpl,
+            NavDestinationContextAccessor::GetPathStackImpl,
             NavDestinationContextAccessor::SetPathStackImpl,
             NavDestinationContextAccessor::GetNavDestinationIdImpl,
             NavDestinationContextAccessor::SetNavDestinationIdImpl,
@@ -18819,6 +18895,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextMenuItemIdAccessor::GetFinalizerImpl,
             TextMenuItemIdAccessor::OfImpl,
             TextMenuItemIdAccessor::EqualsImpl,
+            TextMenuItemIdAccessor::GetCUTImpl,
+            TextMenuItemIdAccessor::GetCOPYImpl,
+            TextMenuItemIdAccessor::GetPASTEImpl,
+            TextMenuItemIdAccessor::GetSELECT_ALLImpl,
+            TextMenuItemIdAccessor::GetCOLLABORATION_SERVICEImpl,
+            TextMenuItemIdAccessor::GetCAMERA_INPUTImpl,
+            TextMenuItemIdAccessor::GetAI_WRITERImpl,
         };
         return &TextMenuItemIdAccessorImpl;
     }
@@ -18876,17 +18959,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
     {
         static const GENERATED_ArkUITextPickerDialogAccessor TextPickerDialogAccessorImpl {
-            TextPickerDialogAccessor::DestroyPeerImpl,
-            TextPickerDialogAccessor::CtorImpl,
-            TextPickerDialogAccessor::GetFinalizerImpl,
             TextPickerDialogAccessor::ShowImpl,
         };
         return &TextPickerDialogAccessorImpl;
     }
 
-    struct TextPickerDialogPeer {
-        virtual ~TextPickerDialogPeer() = default;
-    };
     const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor()
     {
         static const GENERATED_ArkUITextTimerControllerAccessor TextTimerControllerAccessorImpl {
@@ -18906,17 +18983,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
     {
         static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
-            TimePickerDialogAccessor::DestroyPeerImpl,
-            TimePickerDialogAccessor::CtorImpl,
-            TimePickerDialogAccessor::GetFinalizerImpl,
             TimePickerDialogAccessor::ShowImpl,
         };
         return &TimePickerDialogAccessorImpl;
     }
 
-    struct TimePickerDialogPeer {
-        virtual ~TimePickerDialogPeer() = default;
-    };
     const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor()
     {
         static const GENERATED_ArkUIColorFilterAccessor ColorFilterAccessorImpl {
@@ -19600,6 +19671,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttachmentAccessor::DestroyPeerImpl,
             ImageAttachmentAccessor::CtorImpl,
             ImageAttachmentAccessor::GetFinalizerImpl,
+            ImageAttachmentAccessor::GetValueImpl,
             ImageAttachmentAccessor::GetVerticalAlignImpl,
             ImageAttachmentAccessor::GetObjectFitImpl,
         };
@@ -19642,32 +19714,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct LinearIndicatorControllerPeer {
         virtual ~LinearIndicatorControllerPeer() = default;
     };
-    const GENERATED_ArkUIGlobalScope_Profiler_inspectorAccessor* GetGlobalScope_Profiler_inspectorAccessor()
+    const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
     {
-        static const GENERATED_ArkUIGlobalScope_Profiler_inspectorAccessor GlobalScope_Profiler_inspectorAccessorImpl {
-            GlobalScope_Profiler_inspectorAccessor::DestroyPeerImpl,
-            GlobalScope_Profiler_inspectorAccessor::RegisterVsyncCallbackImpl,
-            GlobalScope_Profiler_inspectorAccessor::UnregisterVsyncCallbackImpl,
+        static const GENERATED_ArkUIGlobalScopeAccessor GlobalScopeAccessorImpl {
+            GlobalScopeAccessor::GetContextImpl,
+            GlobalScopeAccessor::PostCardActionImpl,
+            GlobalScopeAccessor::Dollar_rImpl,
+            GlobalScopeAccessor::Dollar_rawfileImpl,
+            GlobalScopeAccessor::AnimateToImpl,
+            GlobalScopeAccessor::AnimateToImmediatelyImpl,
+            GlobalScopeAccessor::Vp2pxImpl,
+            GlobalScopeAccessor::Px2vpImpl,
+            GlobalScopeAccessor::Fp2pxImpl,
+            GlobalScopeAccessor::Px2fpImpl,
+            GlobalScopeAccessor::Lpx2pxImpl,
+            GlobalScopeAccessor::Px2lpxImpl,
+            GlobalScopeAccessor::GetInspectorNodesImpl,
+            GlobalScopeAccessor::GetInspectorNodeByIdImpl,
+            GlobalScopeAccessor::SetAppBgColorImpl,
+            GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,
+            GlobalScopeAccessor::Profiler_unregisterVsyncCallbackImpl,
+            GlobalScopeAccessor::CursorControl_setCursorImpl,
+            GlobalScopeAccessor::CursorControl_restoreDefaultImpl,
+            GlobalScopeAccessor::FocusControl_requestFocusImpl,
         };
-        return &GlobalScope_Profiler_inspectorAccessorImpl;
+        return &GlobalScopeAccessorImpl;
     }
 
-    struct GlobalScope_Profiler_inspectorPeer {
-        virtual ~GlobalScope_Profiler_inspectorPeer() = default;
-    };
-    const GENERATED_ArkUIGlobalScope_inspectorAccessor* GetGlobalScope_inspectorAccessor()
-    {
-        static const GENERATED_ArkUIGlobalScope_inspectorAccessor GlobalScope_inspectorAccessorImpl {
-            GlobalScope_inspectorAccessor::DestroyPeerImpl,
-            GlobalScope_inspectorAccessor::GetInspectorNodesImpl,
-            GlobalScope_inspectorAccessor::GetInspectorNodeByIdImpl,
-            GlobalScope_inspectorAccessor::SetAppBgColorImpl,
-        };
-        return &GlobalScope_inspectorAccessorImpl;
-    }
-
-    struct GlobalScope_inspectorPeer {
-        virtual ~GlobalScope_inspectorPeer() = default;
+    struct GlobalScopePeer {
+        virtual ~GlobalScopePeer() = default;
     };
     const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
     {
@@ -19678,6 +19753,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetSystemOpsAccessor,
             GetDrawingCanvasAccessor,
             GetLengthMetricsAccessor,
+            GetColorMetricsAccessor,
             GetWebviewControllerAccessor,
             GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
             GetGlobalScope_ohos_arkui_performanceMonitorAccessor,
@@ -19717,8 +19793,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetICurveAccessor,
             GetDrawModifierAccessor,
             GetTransitionEffectAccessor,
-            GetGlobalScope_focusControl_commonAccessor,
-            GetGlobalScope_cursorControl_commonAccessor,
             GetBaseEventAccessor,
             GetClickEventAccessor,
             GetHoverEventAccessor,
@@ -19732,11 +19806,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetMeasurableAccessor,
             GetViewAccessor,
             GetTextContentControllerBaseAccessor,
-            GetDynamicNodeAccessor,
             GetChildrenMainSizeAccessor,
             GetUICommonEventAccessor,
             GetGestureModifierAccessor,
-            GetGlobalScope_commonAccessor,
             GetContextMenuAccessor,
             GetCustomDialogControllerAccessor,
             GetLinearGradientAccessor,
@@ -19749,7 +19821,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetRotationGestureEventAccessor,
             GetSwipeGestureEventAccessor,
             GetGestureEventAccessor,
+            GetTapGestureInterfaceAccessor,
+            GetLongPressGestureInterfaceAccessor,
             GetPanGestureOptionsAccessor,
+            GetPanGestureInterfaceAccessor,
+            GetSwipeGestureInterfaceAccessor,
+            GetPinchGestureInterfaceAccessor,
+            GetRotationGestureInterfaceAccessor,
+            GetGestureGroupInterfaceAccessor,
             GetScrollableTargetInfoAccessor,
             GetEventTargetInfoAccessor,
             GetGestureRecognizerAccessor,
@@ -19832,8 +19911,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetImageAttachmentAccessor,
             GetCustomSpanAccessor,
             GetLinearIndicatorControllerAccessor,
-            GetGlobalScope_Profiler_inspectorAccessor,
-            GetGlobalScope_inspectorAccessor,
+            GetGlobalScopeAccessor,
         };
         return &accessorsImpl;
     }
@@ -19905,9 +19983,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GENERATED_ARKUI_FULL_API_VERSION, // version
             GENERATED_GetArkUINodeModifiers,
             GENERATED_GetArkUIAccessors,
-            nullptr,
-            OHOS::Ace::NG::GeneratedEvents::GENERATED_GetArkUiEventsAPI,
-            OHOS::Ace::NG::GeneratedEvents::GENERATED_SetArkUiEventsAPI
         };
         return &fullAPIImpl;
     }

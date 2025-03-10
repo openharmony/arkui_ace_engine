@@ -2,6 +2,7 @@ import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, A
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkIFViewComponent extends ArkStructBase<ArkIFViewComponent, IFViewOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

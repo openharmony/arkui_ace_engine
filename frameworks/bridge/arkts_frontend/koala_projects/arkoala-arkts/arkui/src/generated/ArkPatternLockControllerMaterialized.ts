@@ -18,7 +18,7 @@
 
 import { PatternLockChallengeResult } from "./ArkPatternLockInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,7 +32,7 @@ export class PatternLockControllerInternal {
     }
 }
 export class PatternLockController implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -60,6 +60,6 @@ export class PatternLockController implements MaterializedBase {
         return retval
     }
     private setChallengeResult_serialize(result: PatternLockChallengeResult): void {
-        ArkUIGeneratedNativeModule._PatternLockController_setChallengeResult(this.peer!.ptr, (result.valueOf() as int32))
+        ArkUIGeneratedNativeModule._PatternLockController_setChallengeResult(this.peer!.ptr, ((result as PatternLockChallengeResult) as int32))
     }
 }

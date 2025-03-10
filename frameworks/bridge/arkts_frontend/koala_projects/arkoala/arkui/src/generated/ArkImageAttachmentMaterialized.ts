@@ -23,10 +23,11 @@ import { ImageAttachmentLayoutStyle, ImageAttachmentInterface } from "./ArkStyle
 import { LengthMetrics, LengthMetricsInternal } from "./ArkLengthMetricsMaterialized"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -38,12 +39,12 @@ export class ImageAttachmentInternal {
     }
 }
 export class ImageAttachment implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     get value(): PixelMap {
-        throw new Error("Not implemented")
+        return this.getValue()
     }
     get size(): SizeOptions {
         throw new Error("Not implemented")
@@ -67,18 +68,26 @@ export class ImageAttachment implements MaterializedBase {
      constructor(value?: ImageAttachmentInterface) {
         if ((value) !== (undefined))
         {
-            const ctorPtr: KPointer = ImageAttachment.ctor_imageattachment(value)
+            const ctorPtr: KPointer = ImageAttachment.ctor_imageattachment((value)!)
             this.peer = new Finalizable(ctorPtr, ImageAttachment.getFinalizer())
         }
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ImageAttachment_getFinalizer()
     }
+    private getValue(): PixelMap {
+        return this.getValue_serialize()
+    }
     private getVerticalAlign(): ImageSpanAlignment {
         return this.getVerticalAlign_serialize()
     }
     private getObjectFit(): ImageFit {
         return this.getObjectFit_serialize()
+    }
+    private getValue_serialize(): PixelMap {
+        const retval = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
+        const obj: PixelMap = PixelMapInternal.fromPtr(retval)
+        return obj
     }
     private getVerticalAlign_serialize(): ImageSpanAlignment {
         const retval = ArkUIGeneratedNativeModule._ImageAttachment_getVerticalAlign(this.peer!.ptr)

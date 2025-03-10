@@ -31,13 +31,13 @@ export class ComponentBase {
         ArkUINativeModule._ApplyModifierFinish(this.peer!.peer.ptr)
     }
     public animationStart(param: AnimateParam): this {
-        _animationStart(param, this.isFirstBuild);
+        _animationStart(param, this.isFirstBuild)
         return this
     }
 
     public animationEnd(): this {
         _animationEnd(this.isFirstBuild, () => {
-            this.isFirstBuild = false;
+            this.isFirstBuild = false
         })
         return this;
     }

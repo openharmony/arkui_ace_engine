@@ -1,22 +1,50 @@
 import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkStructBase, ArkText, SyncedProperty, objectLinkState, stateOf } from "@koalaui/arkts-arkui";
-import { LocalStorage } from "@koalaui/arkui-common";
-import { observableProxy } from "@koalaui/common";
 import { MutableState } from "@koalaui/runtime";
+import { observableProxy } from "@koalaui/common";
+import { LocalStorage } from "@koalaui/arkui-common";
 let NextID: number = 0;
 class ClassA {
-    public id: number;
-    public c: number;
+    private __backing_id?: MutableState<number>;
+    public get id(): number {
+        return this.__backing_id!.value;
+    }
+    public set id(value: number) {
+        if (this.__backing_id)
+            this.__backing_id!.value = observableProxy(value);
+        else
+            this.__backing_id = stateOf<number>(value);
+    }
+    private __backing_c?: MutableState<number>;
+    public get c(): number {
+        return this.__backing_c!.value;
+    }
+    public set c(value: number) {
+        if (this.__backing_c)
+            this.__backing_c!.value = observableProxy(value);
+        else
+            this.__backing_c = stateOf<number>(value);
+    }
     constructor(c: number) {
         this.id = NextID++;
         this.c = c;
     }
 }
 class ClassB {
-    public a: ClassA;
+    private __backing_a?: MutableState<ClassA>;
+    public get a(): ClassA {
+        return this.__backing_a!.value;
+    }
+    public set a(value: ClassA) {
+        if (this.__backing_a)
+            this.__backing_a!.value = observableProxy(value);
+        else
+            this.__backing_a = stateOf<ClassA>(value);
+    }
     constructor(a: ClassA) {
         this.a = a;
     }
 }
+/** @memo:stable */
 class ArkViewAComponent extends ArkStructBase<ArkViewAComponent, ViewAOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -46,6 +74,7 @@ class ArkViewAComponent extends ArkStructBase<ArkViewAComponent, ViewAOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkViewBComponent extends ArkStructBase<ArkViewBComponent, ViewBOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

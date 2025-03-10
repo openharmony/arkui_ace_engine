@@ -1,22 +1,22 @@
 {
     "compilerOptions": {
-        "package": "@koalaui/runtime",
+        "package": "@stub",
         "outDir": "build/abc",
-        "baseUrl": "build/unmemoized",
+        "baseUrl": "build/unmemoized/stub/ts",
         "paths": {
             "@koalaui/compat": [
-                "../../../../../incremental/compat/src/arkts"
+                "../../../../../../../incremental/compat/src/arkts"
             ],
             "@koalaui/common": [
-                "../../../../../incremental/common/src"
+                "../../../../../../../incremental/common/src"
             ],
             "@koalaui/runtime": [
-                "../../../../../incremental/runtime/build/unmemoized/src"
+                "../../../../../../../incremental/runtime/build/unmemoized/src"
             ],
             "@koalaui/interop": [
-                "../../../../../interop/src/arkts"
+                "../../../../../../../interop/src/arkts"
             ]
         }
     },
-    "include": ["./build/unmemoized/stub.ts"]
+    "include": ["./build/unmemoized/stub/ts/stub.ts"]
 }

@@ -1,17 +1,29 @@
 import { $r, $rawfile, AppStorage, ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkStructBase, ArkText, CanvasRenderingContext2D, CustomDialogController, DataChangeListener, Environment, ForEach, GestureGroup, IDataSource, LocalStorage, LongPressGesture, PanGesture, PanGestureOptions, PersistentStorage, PinchGesture, RenderingContextSettings, RotationGesture, Scroller, SubscribedAbstractProperty, SwipeGesture, SwiperController, SyncedProperty, TabsController, TapGesture, TextAreaController, VideoController, animateTo, fp2px, getContext, getInspectorByKey, lpx2px, objectLinkState, px2fp, px2lpx, px2vp, stateOf, vp2px } from "@koalaui/arkui";
-import { Observed, observableProxy } from "@koalaui/common";
 import { MutableState } from "@koalaui/runtime";
+import { observableProxy } from "@koalaui/common";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
 var nextID: number = 0;
-@Observed
 class Model {
-    text: string = '';
-    color: string = '#00ff00';
+    private __backing_text: MutableState<string> = stateOf<string>('');
+    get text(): string {
+        return this.__backing_text.value;
+    }
+    set text(value: string) {
+        this.__backing_text.value = observableProxy(value);
+    }
+    private __backing_color: MutableState<string> = stateOf<string>('#00ff00');
+    get color(): string {
+        return this.__backing_color.value;
+    }
+    set color(value: string) {
+        this.__backing_color.value = observableProxy(value);
+    }
     constructor(t: string, c: string) {
         this.text = t;
         this.color = c;
     }
 }
+/** @memo:stable */
 class ArkCustomTextComponent extends ArkStructBase<ArkCustomTextComponent, CustomTextOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -41,6 +53,7 @@ class ArkCustomTextComponent extends ArkStructBase<ArkCustomTextComponent, Custo
         });
     }
 }
+/** @memo:stable */
 class ArkParentComponent extends ArkStructBase<ArkParentComponent, ParentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

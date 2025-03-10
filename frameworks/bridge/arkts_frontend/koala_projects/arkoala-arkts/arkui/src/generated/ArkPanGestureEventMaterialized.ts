@@ -21,7 +21,7 @@ import { BaseEvent, BaseEventInternal } from "./ArkBaseEventMaterialized"
 import { EventTarget, SourceType, SourceTool } from "./ArkCommonInterfaces"
 import { FingerInfo } from "./ArkGestureInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -35,10 +35,6 @@ export interface PanGestureEvent {
     velocity: number
 }
 export class PanGestureEventInternal extends BaseGestureEventInternal implements MaterializedBase,PanGestureEvent {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     get offsetX(): number {
         return this.getOffsetX()
     }

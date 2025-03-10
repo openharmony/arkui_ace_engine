@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/arkoala-arkui",
-    "version": "1.5.7+devel",
+    "version": "1.5.8+devel",
     "description": "",
     "main": "build/lib/src/index.js",
     "exports": {
@@ -45,10 +45,10 @@
     },
     "keywords": [],
     "dependencies": {
-        "@koalaui/common": "1.5.7+devel",
-        "@koalaui/runtime": "1.5.7+devel",
+        "@koalaui/common": "1.5.8+devel",
+        "@koalaui/runtime": "1.5.8+devel",
         "@koalaui/arkoala": "1.4.1+devel",
-        "@koalaui/arkui-common": "1.5.7+devel",
+        "@koalaui/arkui-common": "1.5.8+devel",
         "@koalaui/ets-tsc": "4.9.5-r4",
         "media-query-parser": "^2.0.2",
         "commander": "10.0.1"

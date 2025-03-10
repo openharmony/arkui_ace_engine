@@ -1,26 +1,21 @@
 import {
     ArrowFunctionExpression,
     CallExpression,
-    ClassDeclaration,
-    ClassDefinition,
-    ClassProperty,
+    EtsImportDeclaration,
     ETSParameterExpression,
     EtsScript,
     ExpressionStatement,
     FunctionDeclaration,
     FunctionExpression,
-    Identifier,
+    IfStatement,
     MethodDefinition,
     ScriptFunction,
     StructDeclaration,
-    VariableDeclaration
+    VariableDeclaration,
+    VariableDeclarator,
 } from "../types"
 import { MemberExpression } from "../to-be-generated/MemberExpression"
 import { AstNode } from "../peers/AstNode"
-
-export function isIdentifier(node: AstNode): node is Identifier {
-    return node instanceof Identifier
-}
 
 export function isCallExpression(node: AstNode): node is CallExpression {
     return node instanceof CallExpression
@@ -50,10 +45,6 @@ export function isArrowFunctionExpression(node: AstNode): node is ArrowFunctionE
     return node instanceof ArrowFunctionExpression
 }
 
-export function isClassDeclaration(node: AstNode): node is ClassDeclaration {
-    return node instanceof ClassDeclaration
-}
-
 export function isStructDeclaration(node: AstNode): node is StructDeclaration {
     return node instanceof StructDeclaration
 }
@@ -74,10 +65,14 @@ export function isScriptFunction(node: AstNode): node is ScriptFunction {
     return node instanceof ScriptFunction
 }
 
-export function isClassDefinition(node: AstNode): node is ClassDefinition {
-    return node instanceof ClassDefinition
+export function isEtsImportDeclaration(node: AstNode): node is EtsImportDeclaration {
+    return node instanceof EtsImportDeclaration
 }
 
-export function isClassProperty(node: AstNode): node is ClassProperty {
-    return node instanceof ClassProperty
+export function isIfStatement(node: AstNode): node is IfStatement {
+    return node instanceof IfStatement
+}
+
+export function isVariableDeclarator(node: AstNode): node is VariableDeclarator {
+    return node instanceof VariableDeclarator
 }

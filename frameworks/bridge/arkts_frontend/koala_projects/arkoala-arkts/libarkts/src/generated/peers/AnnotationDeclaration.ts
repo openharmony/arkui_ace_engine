@@ -32,6 +32,7 @@ import {
 import { Statement } from "./Statement"
 import { Expression } from "./Expression"
 import { Identifier } from "./Identifier"
+import { AnnotationUsage } from "./AnnotationUsage"
 export class AnnotationDeclaration extends Statement {
      constructor(pointer: KNativePointer) {
         assertValidPeer(pointer, 1)
@@ -53,6 +54,11 @@ export class AnnotationDeclaration extends Statement {
     get internalName(): string {
         return unpackString(global.generatedEs2panda._AnnotationDeclarationInternalNameConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setInternalName(internalName: string): this {
+        global.generatedEs2panda._AnnotationDeclarationSetInternalName(global.context, this.peer, internalName)
+        return this
+    }
     get expr(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._AnnotationDeclarationExprConst(global.context, this.peer))
     }
@@ -61,6 +67,43 @@ export class AnnotationDeclaration extends Statement {
     }
     get propertiesPtr(): readonly AstNode[] {
         return unpackNodeArray(global.generatedEs2panda._AnnotationDeclarationPropertiesPtrConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    addProperties(properties: readonly AstNode[]): this {
+        global.generatedEs2panda._AnnotationDeclarationAddProperties(global.context, this.peer, passNodeArray(properties), properties.length)
+        return this
+    }
+    get isSourceRetention(): boolean {
+        return global.generatedEs2panda._AnnotationDeclarationIsSourceRetentionConst(global.context, this.peer)
+    }
+    get isBytecodeRetention(): boolean {
+        return global.generatedEs2panda._AnnotationDeclarationIsBytecodeRetentionConst(global.context, this.peer)
+    }
+    get isRuntimeRetention(): boolean {
+        return global.generatedEs2panda._AnnotationDeclarationIsRuntimeRetentionConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    setSourceRetention(): this {
+        global.generatedEs2panda._AnnotationDeclarationSetSourceRetention(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setBytecodeRetention(): this {
+        global.generatedEs2panda._AnnotationDeclarationSetBytecodeRetention(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setRuntimeRetention(): this {
+        global.generatedEs2panda._AnnotationDeclarationSetRuntimeRetention(global.context, this.peer)
+        return this
+    }
+    get annotations(): readonly AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._AnnotationDeclarationAnnotationsConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._AnnotationDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
     }
 }
 export function isAnnotationDeclaration(node: AstNode): node is AnnotationDeclaration {

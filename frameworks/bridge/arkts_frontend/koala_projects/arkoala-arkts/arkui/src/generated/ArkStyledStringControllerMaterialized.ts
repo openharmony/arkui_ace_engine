@@ -19,18 +19,18 @@
 import { StyledString, StyledStringInternal } from "./ArkStyledStringMaterialized"
 import { MutableStyledString, MutableStyledStringInternal } from "./ArkMutableStyledStringMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface StyledStringController {
-    setStyledString(styledString: StyledString): void 
-    getStyledString(): MutableStyledString 
+    setStyledString(styledString: StyledString): void
+    getStyledString(): MutableStyledString
 }
 export class StyledStringControllerInternal implements MaterializedBase,StyledStringController {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -54,14 +54,12 @@ export class StyledStringControllerInternal implements MaterializedBase,StyledSt
         return this.getStyledString_serialize()
     }
     private setStyledString_serialize(styledString: StyledString): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(styledString)
-        ArkUIGeneratedNativeModule._StyledStringController_setStyledString(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._StyledStringController_setStyledString(this.peer!.ptr, toPeerPtr(styledString))
     }
     private getStyledString_serialize(): MutableStyledString {
         const retval  = ArkUIGeneratedNativeModule._StyledStringController_getStyledString(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : MutableStyledString = MutableStyledStringInternal.fromPtr(retval)
+        return obj
     }
     public static fromPtr(ptr: KPointer): StyledStringControllerInternal {
         const obj : StyledStringControllerInternal = new StyledStringControllerInternal()

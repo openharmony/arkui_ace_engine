@@ -1,5 +1,6 @@
 import { ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkListItem, ArkListItemComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkTabContent, ArkTabContentComponent, ArkTabs, ArkTabsComponent, ArkText, ArkTextComponent, BarPosition, Color, LocalStorage, MutableState, SyncedProperty, TabsController, observableProxy, propState, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent, HomeComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -46,6 +47,7 @@ class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent,
         });
     }
 }
+/** @memo:stable */
 class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -193,6 +195,7 @@ class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkNormalComponentComponent extends ArkStructBase<ArkNormalComponentComponent, NormalComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -221,6 +224,7 @@ class ArkNormalComponentComponent extends ArkStructBase<ArkNormalComponentCompon
         });
     }
 }
+/** @memo:stable */
 class ArkAnimationTestComponent extends ArkStructBase<ArkAnimationTestComponent, AnimationTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

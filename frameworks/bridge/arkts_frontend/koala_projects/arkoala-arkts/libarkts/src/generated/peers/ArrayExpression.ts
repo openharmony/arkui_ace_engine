@@ -42,17 +42,37 @@ export class ArrayExpression extends AnnotatedExpression {
     get elements(): readonly Expression[] {
         return unpackNodeArray(global.generatedEs2panda._ArrayExpressionElementsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setElements(elements: readonly Expression[]): this {
+        global.generatedEs2panda._ArrayExpressionSetElements(global.context, this.peer, passNodeArray(elements), elements.length)
+        return this
+    }
     get isDeclaration(): boolean {
         return global.generatedEs2panda._ArrayExpressionIsDeclarationConst(global.context, this.peer)
     }
     get isOptional(): boolean {
         return global.generatedEs2panda._ArrayExpressionIsOptionalConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setDeclaration(): this {
+        global.generatedEs2panda._ArrayExpressionSetDeclaration(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setOptional(optional_arg: boolean): this {
+        global.generatedEs2panda._ArrayExpressionSetOptional(global.context, this.peer, optional_arg)
+        return this
+    }
     get decorators(): readonly Decorator[] {
         return unpackNodeArray(global.generatedEs2panda._ArrayExpressionDecoratorsConst(global.context, this.peer))
     }
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._ArrayExpressionTypeAnnotationConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setTsTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._ArrayExpressionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
     }
 }
 export function isArrayExpression(node: AstNode): node is ArrayExpression {

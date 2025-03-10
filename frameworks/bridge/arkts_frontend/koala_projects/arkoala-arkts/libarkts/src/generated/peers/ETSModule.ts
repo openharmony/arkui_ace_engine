@@ -50,8 +50,18 @@ export class ETSModule extends BlockStatement {
     get isNamespaceChainLastNode(): boolean {
         return global.generatedEs2panda._ETSModuleIsNamespaceChainLastNodeConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setNamespaceChainLastNode(): this {
+        global.generatedEs2panda._ETSModuleSetNamespaceChainLastNode(global.context, this.peer)
+        return this
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ETSModuleAnnotationsConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ETSModuleSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
     }
 }
 export function isETSModule(node: AstNode): node is ETSModule {

@@ -16,40 +16,14 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
-import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Serializer } from "./peers/Serializer"
-import { CallbackKind } from "./peers/CallbackKind"
-import { Deserializer } from "./peers/Deserializer"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { GlobalScope } from "./peers/GlobalScope"
 export namespace Profiler {
-    export class GlobalScope_Profiler_inspector {
-        public static registerVsyncCallback(callback_: ((info: string) => void)): void {
-            const callback__casted = callback_ as (((info: string) => void))
-            GlobalScope_Profiler_inspector.registerVsyncCallback_serialize(callback__casted)
-            return
-        }
-        public static unregisterVsyncCallback(): void {
-            GlobalScope_Profiler_inspector.unregisterVsyncCallback_serialize()
-            return
-        }
-        private static registerVsyncCallback_serialize(callback_: ((info: string) => void)): void {
-            const thisSerializer : Serializer = Serializer.hold()
-            thisSerializer.holdAndWriteCallback(callback_)
-            ArkUIGeneratedNativeModule._GlobalScope_Profiler_inspector_registerVsyncCallback(thisSerializer.asArray(), thisSerializer.length())
-            thisSerializer.release()
-        }
-        private static unregisterVsyncCallback_serialize(): void {
-            ArkUIGeneratedNativeModule._GlobalScope_Profiler_inspector_unregisterVsyncCallback()
-        }
+    export function registerVsyncCallback(callback_: ((info: string) => void)): void {
+        GlobalScope.Profiler_registerVsyncCallback(callback_)
     }
 }
 export namespace Profiler {
-    export function registerVsyncCallback(callback_: ((info: string) => void)): void {
-        GlobalScope_Profiler_inspector.registerVsyncCallback(callback_)
-    }
     export function unregisterVsyncCallback(): void {
-        GlobalScope_Profiler_inspector.unregisterVsyncCallback()
+        GlobalScope.Profiler_unregisterVsyncCallback()
     }
 }

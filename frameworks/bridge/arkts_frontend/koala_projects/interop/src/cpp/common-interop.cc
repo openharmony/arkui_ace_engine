@@ -25,6 +25,15 @@
 #include "interop-logging.h"
 #include "dynamic-loader.h"
 
+#ifdef KOALA_FOREIGN_NAPI
+#ifndef KOALA_FOREIGN_NAPI_OHOS
+#include <node_api.h>
+#else
+#include <native_api.h>
+#include <native_node_api.h>
+#endif
+#endif
+
 #if KOALA_INTEROP_PROFILER
 #include "profiler.h"
 
@@ -87,6 +96,8 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method) {
 }
 #endif
 
+
+// TODO: move callback dispetchers to convertors-<flavour>.cc.
 #ifdef KOALA_JNI
 #include "jni.h"
 static struct {
@@ -246,6 +257,7 @@ KOALA_INTEROP_V1(PrintGroupedLog, KInt)
 int32_t callCallback(KVMContext context, int32_t methodId, uint8_t* argsData, int32_t argsLength) {
 #if KOALA_USE_NODE_VM || KOALA_USE_HZ_VM || KOALA_USE_PANDA_VM || KOALA_USE_JAVA_VM || KOALA_CJ
     KOALA_INTEROP_CALL_INT(context, methodId, argsLength, argsData);
+    return 0;
 #else
     return 0;
 #endif
@@ -326,6 +338,20 @@ void impl_RestartWith(const KStringPtr& page) {
 }
 KOALA_INTEROP_V1(RestartWith, KStringPtr)
 
+KInt impl_ReadByte(const KNativePointer data, KInt index, KLong length) {
+    if (index >= length) INTEROP_FATAL("impl_ReadByte: index %d is equal or greater than length %lld", index, (long long) length);
+    KByte* ptr = reinterpret_cast<KByte*>(data);
+    return ptr[index];
+}
+KOALA_INTEROP_3(ReadByte, KInt, KNativePointer, KInt, KLong)
+
+void impl_WriteByte(const KNativePointer data, KInt index, KLong length, KInt value) {
+    if (index >= length) INTEROP_FATAL("impl_WriteByte: index %d is equal or greater than length %lld", index, (long long) length);
+    KByte* ptr = reinterpret_cast<KByte*>(data);
+    ptr[index] = value;
+}
+KOALA_INTEROP_V4(WriteByte, KNativePointer, KInt, KLong, KInt)
+
 static Callback_Caller_t g_callbackCaller = nullptr;
 void setCallbackCaller(Callback_Caller_t callbackCaller) {
     g_callbackCaller = callbackCaller;
@@ -371,6 +397,23 @@ KInt impl_CallForeignVM(KNativePointer foreignContextRaw, KInt function, KByte* 
 }
 KOALA_INTEROP_4(CallForeignVM, KInt, KNativePointer, KInt, KByte*, KInt)
 
+#ifdef KOALA_FOREIGN_NAPI
+KVMContext g_foreignVMContext = nullptr;
+#endif
+void impl_SetForeignVMContext(KNativePointer foreignVMContextRaw) {
+#ifdef KOALA_FOREIGN_NAPI
+    if (foreignVMContextRaw == nullptr) {
+        g_foreignVMContext = nullptr;
+    } else {
+        auto foreignContext = (const ForeignVMContext*)foreignVMContextRaw;
+        g_foreignVMContext = foreignContext->vmContext;
+    }
+#endif
+
+    /* supress unused private fields */
+    (void)foreignVMContextRaw;
+}
+KOALA_INTEROP_V1(SetForeignVMContext, KNativePointer)
 
 #define __QUOTE(x) #x
 #define QUOTE(x) __QUOTE(x)
@@ -440,9 +483,12 @@ KVMDeferred* CreateDeferred(KVMContext vmContext, KVMObjectHandle* promiseHandle
 }
 
 class KoalaWork {
-private:
-    [[maybe_unused]] InteropVMContext vmContext;
-    [[maybe_unused]] void* vmWork;
+protected:
+    InteropVMContext vmContext;
+#ifdef KOALA_FOREIGN_NAPI
+    KVMContext foreignVMContext;
+#endif
+    void* vmWork;
     void* handle;
     void (*execute)(void* handle);
     void (*complete)(void* handle);
@@ -499,6 +545,9 @@ KoalaWork::KoalaWork(InteropVMContext vmContext,
     napi_value resourceName = nullptr;
     napi_create_string_utf8(env, "KoalaAsyncOperation", NAPI_AUTO_LENGTH, &resourceName);
     napi_create_async_work(env, nullptr, resourceName, DoExecute, DoComplete, this, (napi_async_work*)&vmWork);
+    /* supress unused private fields */
+    (void)vmContext;
+    (void)vmWork;
 }
 void KoalaWork::Queue() {
     napi_env env = (napi_env)vmContext;
@@ -516,20 +565,51 @@ void KoalaWork::Complete() {
     delete this;
 }
 #else
+#ifdef KOALA_FOREIGN_NAPI
+static void DoExecute(napi_env env, void* handle) {
+    ((KoalaWork*)handle)->Execute();
+}
+static void DoComplete(napi_env env, napi_status status, void* handle) {
+    ((KoalaWork*)handle)->Complete();
+}
+#endif
 KoalaWork::KoalaWork(InteropVMContext vmContext,
     InteropNativePointer handle,
     void (*execute)(InteropNativePointer handle),
     void (*complete)(InteropNativePointer handle)
-): vmContext(vmContext), handle(handle), execute(execute), complete(complete) {}
+): vmContext(vmContext), handle(handle), execute(execute), complete(complete) {
+#ifdef KOALA_FOREIGN_NAPI
+    if (g_foreignVMContext == nullptr)
+        INTEROP_FATAL("Can not launch async work while foreign VM context is not available. Please ensure you have called SetForeignVMContext");
+    foreignVMContext = g_foreignVMContext;
+    napi_env env = (napi_env)foreignVMContext;
+    napi_value resourceName = nullptr;
+    napi_create_string_utf8(env, "KoalaAsyncOperation", NAPI_AUTO_LENGTH, &resourceName);
+    napi_create_async_work(env, nullptr, resourceName, DoExecute, DoComplete, this, (napi_async_work*)&vmWork);
+#endif
+    /* supress unused private fields */
+    (void)vmContext;
+    (void)vmWork;
+}
 void KoalaWork::Queue() {
+#ifdef KOALA_FOREIGN_NAPI
+    napi_env env = (napi_env)foreignVMContext;
+    napi_queue_async_work(env, (napi_async_work)vmWork);
+#else
     Execute();
     Complete();
+#endif
 }
 void KoalaWork::Execute() {
     execute(handle);
 }
 void KoalaWork::Cancel() {
+#ifdef KOALA_FOREIGN_NAPI
+    napi_env env = (napi_env)foreignVMContext;
+    napi_cancel_async_work(env, (napi_async_work)vmWork);
+#else
     INTEROP_FATAL("Cancelling async work is disabled for any VM except of Node");
+#endif
 }
 void KoalaWork::Complete() {
     complete(handle);

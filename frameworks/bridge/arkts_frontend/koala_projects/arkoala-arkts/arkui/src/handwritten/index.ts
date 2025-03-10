@@ -18,6 +18,3 @@ export interface ISinglePropertyChangeSubscriber {}
 export interface NavigationAttribute {}
 export interface PageTransitionEnterInterface {}
 export interface PageTransitionExitInterface {}
-
-export { ArkPageTransitionEnter as PageTransitionEnter }  from "./ArkPageTransition"
-export { ArkPageTransitionExit as PageTransitionExit }  from "./ArkPageTransition"

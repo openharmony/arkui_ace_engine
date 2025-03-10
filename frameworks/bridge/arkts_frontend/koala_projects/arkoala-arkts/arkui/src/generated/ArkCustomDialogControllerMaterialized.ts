@@ -18,7 +18,7 @@
 
 import { CustomDialogControllerOptions } from "./ArkCustomDialogControllerInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,7 +32,7 @@ export class CustomDialogControllerInternal {
     }
 }
 export class CustomDialogController implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -46,9 +46,10 @@ export class CustomDialogController implements MaterializedBase {
      constructor(value?: CustomDialogControllerOptions) {
         if ((value) !== (undefined))
         {
-            const ctorPtr : KPointer = CustomDialogController.ctor_customdialogcontroller(value)
+            const ctorPtr : KPointer = CustomDialogController.ctor_customdialogcontroller((value)!)
             this.peer = new Finalizable(ctorPtr, CustomDialogController.getFinalizer())
         }
+        // /*TODO: API required*/ if (value) value.builder.buildOptions.controller = this
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CustomDialogController_getFinalizer()

@@ -17,26 +17,17 @@ import { updateNodeByNode } from "../utilities/private"
 import {
     ArrowFunctionExpression,
     CallExpression,
-    ClassDeclaration,
-    ClassDefinition,
-    ClassProperty,
     EtsImportDeclaration,
     ETSParameterExpression,
     EtsScript,
-    ETSTypeReference,
-    ETSTypeReferencePart,
     ExpressionStatement,
     FunctionDeclaration,
     FunctionExpression,
-    Identifier,
     IfStatement,
-    ImportSpecifier,
     MethodDefinition,
     NumberLiteral,
-    ReturnStatement,
     ScriptFunction,
     StructDeclaration,
-    TSTypeParameter,
     VariableDeclaration,
     VariableDeclarator
 } from "../types"
@@ -46,21 +37,30 @@ import {
     AnnotationUsage,
     BinaryExpression,
     BlockStatement,
+    ClassDeclaration,
+    ClassDefinition,
+    ClassProperty,
     ConditionalExpression,
     ETSFunctionType,
     ETSPrimitiveType,
+    ETSTypeReference,
+    ETSTypeReferencePart,
     ETSUndefinedType,
     ETSUnionType,
     FunctionSignature,
+    Identifier,
+    ImportSpecifier,
+    ReturnStatement,
     StringLiteral,
     SuperExpression,
     TSInterfaceBody,
     TSInterfaceDeclaration,
+    TSTypeParameter,
     TSTypeParameterDeclaration,
     TSTypeParameterInstantiation,
+    TypeNode,
     UndefinedLiteral
 } from "../../generated"
-
 
 function compose<T extends AstNode, ARGS extends any[]>(
     create: (...args: ARGS) => T,
@@ -71,10 +71,10 @@ function compose<T extends AstNode, ARGS extends any[]>(
 
 export const factory = {
     get createIdentifier() {
-        return Identifier.create
+        return Identifier.create2Identifier
     },
     get updateIdentifier() {
-        return compose(Identifier.create)
+        return compose(Identifier.create2Identifier)
     },
     get createCallExpression() {
         return CallExpression.create
@@ -149,10 +149,10 @@ export const factory = {
         return compose(ETSParameterExpression.create)
     },
     get createTypeParameter() {
-        return TSTypeParameter.create
+        return TSTypeParameter.createTSTypeParameter
     },
     get updateTypeParameter() {
-        return compose(TSTypeParameter.create)
+        return compose(TSTypeParameter.createTSTypeParameter)
     },
     get createTypeParameterDeclaration() {
         return TSTypeParameterDeclaration.createTSTypeParameterDeclaration
@@ -167,22 +167,16 @@ export const factory = {
         return compose(ETSPrimitiveType.createETSPrimitiveType)
     },
     get createTypeReference() {
-        return ETSTypeReference.create
+        return ETSTypeReference.createETSTypeReference
     },
     get updateTypeReference() {
-        return compose(ETSTypeReference.create)
-    },
-    get createTypeReferenceFromId() {
-        return ETSTypeReference.createFromId
-    },
-    get updateTypeReferenceFromId() {
-        return compose(ETSTypeReference.createFromId)
+        return compose(ETSTypeReference.createETSTypeReference)
     },
     get createTypeReferencePart() {
-        return ETSTypeReferencePart.create
+        return ETSTypeReferencePart.createETSTypeReferencePart
     },
     get updateTypeReferencePart() {
-        return compose(ETSTypeReferencePart.create)
+        return compose(ETSTypeReferencePart.createETSTypeReferencePart)
     },
     get createImportDeclaration() {
         return EtsImportDeclaration.create
@@ -191,10 +185,10 @@ export const factory = {
         return compose(EtsImportDeclaration.create)
     },
     get createImportSpecifier() {
-        return ImportSpecifier.create
+        return ImportSpecifier.createImportSpecifier
     },
     get updateImportSpecifier() {
-        return compose(ImportSpecifier.create)
+        return compose(ImportSpecifier.createImportSpecifier)
     },
 
 // create ImportSource: ImportSource.create,
@@ -219,10 +213,10 @@ export const factory = {
         return compose(ETSUnionType.createETSUnionType)
     },
     get createReturnStatement() {
-        return ReturnStatement.create
+        return ReturnStatement.create1ReturnStatement
     },
     get updateReturnStatement() {
-        return compose(ReturnStatement.create)
+        return compose(ReturnStatement.create1ReturnStatement)
     },
     get createIfStatement() {
         return IfStatement.create
@@ -237,10 +231,10 @@ export const factory = {
         return compose(BinaryExpression.createBinaryExpression)
     },
     get createClassDeclaration() {
-        return ClassDeclaration.create
+        return ClassDeclaration.createClassDeclaration
     },
     get updateClassDeclaration() {
-        return compose(ClassDeclaration.create)
+        return compose(ClassDeclaration.createClassDeclaration)
     },
     get createStructDeclaration() {
         return StructDeclaration.create
@@ -249,16 +243,16 @@ export const factory = {
         return compose(StructDeclaration.create)
     },
     get createClassDefinition() {
-        return ClassDefinition.create
+        return ClassDefinition.createClassDefinition
     },
     get updateClassDefinition() {
-        return compose(ClassDefinition.create)
+        return compose(ClassDefinition.createClassDefinition)
     },
     get createClassProperty() {
-        return ClassProperty.create
+        return ClassProperty.createClassProperty
     },
     get updateClassProperty() {
-        return compose(ClassProperty.create)
+        return compose(ClassProperty.createClassProperty)
     },
     get createFunctionType() {
         return ETSFunctionType.createETSFunctionType
@@ -328,5 +322,9 @@ export const factory = {
     },
     get updateConditionalExpression() {
         return compose(ConditionalExpression.createConditionalExpression)
+    },
+    /** @deprecated */
+    createTypeParameter1_(name: Identifier, constraint?: TypeNode, defaultType?: TypeNode) {
+        return TSTypeParameter.createTSTypeParameter(Identifier.create1Identifier(name.name), constraint, defaultType)
     },
 }

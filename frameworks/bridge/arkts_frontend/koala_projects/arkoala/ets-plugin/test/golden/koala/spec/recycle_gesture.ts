@@ -1,6 +1,7 @@
 import { $r, $rawfile, AppStorage, ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, CanvasRenderingContext2D, CustomDialogController, DataChangeListener, Environment, FlexAlign, FlexDirection, ForEach, GestureEvent, GestureGroup, IDataSource, ItemAlign, LocalStorage, LongPressGesture, PanGesture, PanGestureOptions, PersistentStorage, PinchGesture, RenderingContextSettings, RotationGesture, Scroller, SubscribedAbstractProperty, SwipeGesture, SwiperController, TabsController, TapGesture, TextAreaController, VideoController, animateTo, fp2px, getContext, getInspectorByKey, lpx2px, px2fp, px2lpx, px2vp, stateOf, vp2px } from "@koalaui/arkui";
 import { MutableState } from "@koalaui/runtime";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkGestureTestComponent extends ArkStructBase<ArkGestureTestComponent, GestureTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

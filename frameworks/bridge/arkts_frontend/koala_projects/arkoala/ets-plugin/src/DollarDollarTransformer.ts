@@ -32,7 +32,7 @@ export class DollarDollarTransformer extends AbstractVisitor {
         return ts.idText(node.expression)
     }
 
-    private static isDollarDollar(node: ts.CallExpression): boolean {
+    static isDollarDollar(node: ts.CallExpression): boolean {
         if (!ts.isIdentifier(node.expression)) {
             return false
         }
@@ -48,9 +48,9 @@ export class DollarDollarTransformer extends AbstractVisitor {
     visitor(beforeChildren: ts.Node): ts.Node {
         const node = this.visitEachChild(beforeChildren)
         if (ts.isCallExpression(node)) {
-            const initializations = DollarDollarTransformer.componentMethodCallInitializations(node)
-            // TODO
+            // TODO componentMethodCallInitializations
         }
+
         if (ts.isEtsComponentExpression(node)) {
             return DollarDollarTransformer.componentCallInitializations(node)
                 .map(it =>
@@ -69,7 +69,7 @@ export class DollarDollarTransformer extends AbstractVisitor {
         return ts.factory.createCallExpression(
             ts.factory.createPropertyAccessExpression(
                 node,
-                `__OnChanged_${initialization.parameter}`,
+                `_onChangeEvent_${initialization.parameter}`,
             ),
             undefined,
             [
@@ -190,5 +190,15 @@ export class DollarDollarTransformer extends AbstractVisitor {
                 type: it.type,
                 initializer: firstArgument.arguments[0]
             }))
+    }
+
+    static argumentIfDollarDollarCall(node: ts.Expression): ts.Expression {
+        if (!ts.isCallExpression(node)) {
+            return node
+        }
+        if (!DollarDollarTransformer.isDollarDollar(node)) {
+            return node
+        }
+        return node.arguments[0]
     }
 }

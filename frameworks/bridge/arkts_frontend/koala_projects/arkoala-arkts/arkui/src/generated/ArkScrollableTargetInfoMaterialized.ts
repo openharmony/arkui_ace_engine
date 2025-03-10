@@ -18,7 +18,7 @@
 
 import { EventTargetInfo, EventTargetInfoInternal } from "./ArkEventTargetInfoMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -32,10 +32,6 @@ export class ScrollableTargetInfoInternal {
     }
 }
 export class ScrollableTargetInfo extends EventTargetInfo implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_scrollabletargetinfo(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ScrollableTargetInfo_ctor()
         return retval

@@ -53,8 +53,33 @@ export class ETSParameterExpression extends Expression {
     static update1ETSParameterExpression(original?: ETSParameterExpression, identOrSpread?: AnnotatedExpression, initializer?: Expression): ETSParameterExpression {
         return new ETSParameterExpression(global.generatedEs2panda._UpdateETSParameterExpression1(global.context, passNode(original), passNode(identOrSpread), passNode(initializer)))
     }
+    /** @deprecated */
+    setIdent(ident: Identifier): this {
+        global.generatedEs2panda._ETSParameterExpressionSetIdent(global.context, this.peer, passNode(ident))
+        return this
+    }
+    /** @deprecated */
+    setLexerSaved(s: string): this {
+        global.generatedEs2panda._ETSParameterExpressionSetLexerSaved(global.context, this.peer, s)
+        return this
+    }
+    /** @deprecated */
+    setTypeAnnotation(typeNode: TypeNode): this {
+        global.generatedEs2panda._ETSParameterExpressionSetTypeAnnotation(global.context, this.peer, passNode(typeNode))
+        return this
+    }
     get isOptional(): boolean {
         return global.generatedEs2panda._ETSParameterExpressionIsOptionalConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    setOptional(value: boolean): this {
+        global.generatedEs2panda._ETSParameterExpressionSetOptional(global.context, this.peer, value)
+        return this
+    }
+    /** @deprecated */
+    setInitializer(initExpr: Expression): this {
+        global.generatedEs2panda._ETSParameterExpressionSetInitializer(global.context, this.peer, passNode(initExpr))
+        return this
     }
     get isRestParameter(): boolean {
         return global.generatedEs2panda._ETSParameterExpressionIsRestParameterConst(global.context, this.peer)
@@ -62,8 +87,18 @@ export class ETSParameterExpression extends Expression {
     get getRequiredParams(): number {
         return global.generatedEs2panda._ETSParameterExpressionGetRequiredParamsConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setRequiredParams(value: number): this {
+        global.generatedEs2panda._ETSParameterExpressionSetRequiredParams(global.context, this.peer, value)
+        return this
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ETSParameterExpressionAnnotationsConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ETSParameterExpressionSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
     }
 }
 export function isETSParameterExpression(node: AstNode): node is ETSParameterExpression {

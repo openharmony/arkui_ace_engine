@@ -5,7 +5,8 @@
   "description": "",
   "scripts": {
     "clean": "rimraf build",
-    "build:loader:node": "WEBPACK_NO_MINIMIZE=true webpack --config webpack.config.node.js"
+    "build:loader:node": "WEBPACK_NO_MINIMIZE=true webpack --config webpack.config.node.js",
+    "build:loader:node-ani": "WEBPACK_NO_MINIMIZE=true webpack --config webpack.config.node.js --env isAni=true"
   },
   "keywords": []
 }

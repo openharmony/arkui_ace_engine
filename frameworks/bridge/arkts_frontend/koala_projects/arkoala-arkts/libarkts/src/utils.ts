@@ -18,7 +18,7 @@ export function throwError(error: string): never {
 }
 
 export function withWarning<T>(value: T, message: string): T {
-    console.warn(message)
+    // console.warn(message)
     return value
 }
 
@@ -32,9 +32,10 @@ export function isNumber(value: any): value is number {
      Until we keep feeding ast dumps back to the parser this function is needed.
  */
 export function filterSource(text: string): string {
-    return text
+    const filtered =  text
         .replaceAll(/%/g, "_")
         .replaceAll(/#/g, "_")
         .replaceAll("<cctor>", "_cctor_")
-}
 
+    return filtered
+}

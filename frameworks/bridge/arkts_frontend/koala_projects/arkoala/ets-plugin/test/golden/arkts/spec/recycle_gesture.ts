@@ -2,6 +2,7 @@ import { ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionE
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkGestureTestComponent extends ArkStructBase<ArkGestureTestComponent, GestureTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

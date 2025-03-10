@@ -17,13 +17,14 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkRootPeer, ArkComponentRootPeer } from "./peers/ArkStaticComponentsPeer"
 /** @memo:stable */
 export class ArkRootComponent extends ComponentBase {
-    getPeer(): ArkRootPeer {
+    protected getPeer(): ArkRootPeer {
         return (this.peer as ArkRootPeer)
     }
     public applyAttributesFinish(): void {
@@ -33,7 +34,7 @@ export class ArkRootComponent extends ComponentBase {
 }
 /** @memo:stable */
 export class ArkComponentRootComponent extends ComponentBase {
-    getPeer(): ArkComponentRootPeer {
+    protected getPeer(): ArkComponentRootPeer {
         return (this.peer as ArkComponentRootPeer)
     }
     public applyAttributesFinish(): void {

@@ -1,5 +1,6 @@
 import { ArkCommonMethodComponent, ArkList, ArkListItem, ArkListItemComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent } from "@koalaui/arkts-arkui";
 import { LocalStorage } from "@koalaui/arkui-common";
+/** @memo:stable */
 class ArkParentViewComponent extends ArkStructBase<ArkParentViewComponent, ParentViewOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

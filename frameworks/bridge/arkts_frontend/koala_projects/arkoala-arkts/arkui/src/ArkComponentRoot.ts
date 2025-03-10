@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-import { NodeAttach, rememberDisposable, rememberMutableState, scheduleCallback } from "@koalaui/runtime"
+import { mutableState, MutableState, NodeAttach, rememberDisposable, rememberMutableState, RunEffect, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode } from "./PeerNode";
 import { ArkComponentRootPeer } from "./generated/peers/ArkStaticComponentsPeer";
 import { ArkCustomComponent } from "./ArkCustomComponent"
+import { int32 } from "@koalaui/common"
+import { CurrentRouterTransitionState, VisibilityHiding, VisibilityShowing, WithRouterTransitionState } from "./handwritten/Router";
 
 /** @memo */
 export function ArkComponentRoot(
@@ -24,38 +26,42 @@ export function ArkComponentRoot(
     /** @memo */
     content: () => void
 ) {
-    // emulate lifecycle of ArkUI component
-    const appear = rememberMutableState<boolean>(true)
-    /* <string> to workaround compiler bug №21318, since `void | undefined` is not allowed */
-    rememberDisposable<string>(
-        () => {
-            scheduleCallback(() => {
-                appear.value = false
-                component.aboutToAppear()
-                component.onPageShow()
-            })
-            return ""
-        },
-        (_: string | undefined)=> {
-            scheduleCallback((): void => {
-                component.onPageHide()
-                component.aboutToDisappear()
-            })
-        }
-    )
     NodeAttach<PeerNode>(
         () => ArkComponentRootPeer.create(),
         (node: PeerNode) => {
-            content()
-            // const state = CurrentRouterTransitionState()
-            // if (state) {
-            //     RunEffect(state.visibility, visibility => {
-            //         if (visibility == RouterTransitionVisibility.Showing) component.onPageShow?.()
-            //         else if (visibility == RouterTransitionVisibility.Hiding) component.onPageHide?.()
-            //     })
-            //     component.pageTransition?.()
-            // }
-            // if (!appear.value) WithRouterTransitionState(undefined, content) // skip first frame and hide router state
+            let state = CurrentRouterTransitionState()
+            if (state) {
+                RunEffect<int32>(state.visibility, (visibility: int32) => {
+                    switch (visibility) {
+                        case VisibilityShowing:
+                            component.onPageShow()
+                            break
+                        case VisibilityHiding:
+                            component.onPageHide()
+                            break
+                        default: break
+                    }
+                })
+            }
+            let shown = rememberDisposable(() => {
+                let state = mutableState(false)
+                scheduleCallback(() => {
+                    component.aboutToAppear()
+                    // TODO: page visibility doesn't belong here, remove when router transition state properly maintained.
+                    // component.onPageShow()
+                    state.value = true
+                })
+                return state
+            }, (_: MutableState<boolean> | undefined) =>
+                scheduleCallback(() => {
+                    component.aboutToDisappear()
+                    // TODO: page visibility doesn't belong here, remove when router transition state properly maintained.
+                    // component.onPageHide()
+                })
+            )
+            // Do we need it here?
+            component.pageTransition()
+            if (shown.value) content() // skip first frame and hide router state
         }
     )
 }

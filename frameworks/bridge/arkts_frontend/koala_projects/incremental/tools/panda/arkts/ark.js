@@ -80,6 +80,7 @@ let cmd = [
 if (args.flag('--driver-log') === 'info') {
     console.log(formatCommand(cmd.join(' '), process.cwd()))
 }
+console.log(`start ${cmd.join(' ')}`)
 const child = child_process.spawn(cmd[0], [...cmd.slice(1)])
 child.stdout.on('data', (data) => {
     process.stdout.write(data);

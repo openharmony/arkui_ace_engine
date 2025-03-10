@@ -5,6 +5,7 @@ function textExtend(fontsize: number) {
         __instance.fontSize(fontsize);
     }, undefined, 'Builder');
 }
+/** @memo:stable */
 class ArkBaseComponentComponent extends ArkStructBase<ArkBaseComponentComponent, BaseComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

@@ -49,7 +49,7 @@ public enum RuntimeType {
     }
 }
 
-public class PromiseAndResourceId {
+public class PromiseAndResourceId<T> {
     public var promise: Any
     public var resourceId: ResourceId
     init (promise: Any, resourceId: ResourceId) {
@@ -137,21 +137,21 @@ public open class SerializerBase {
         this.writePointer(callSync)
         return resourceId
     }
-    public func holdAndWriteCallbackForPromiseVoid(): PromiseAndResourceId {
+    public func holdAndWriteCallbackForPromiseVoid(): PromiseAndResourceId<Unit> {
         return holdAndWriteCallbackForPromiseVoid(0, 0, 0, 0)
     }
-    public func holdAndWriteCallbackForPromiseVoid(hold: KPointer, release: KPointer, call: KPointer, callSync: KPointer): PromiseAndResourceId {
-        let resourceId: ResourceId
-        resourceId = this.holdAndWriteCallback({ => }, hold, release, call, callSync)
-        return PromiseAndResourceId({ => }, resourceId)
+    public func holdAndWriteCallbackForPromiseVoid(hold: KPointer, release: KPointer, call: KPointer, callSync: KPointer): PromiseAndResourceId<Unit> {
+        var resourceId: ResourceId = 0
+        let promise = { => }
+        return PromiseAndResourceId<Unit>(promise, resourceId)
     }
-    public func holdAndWriteCallbackForPromise<T>(): PromiseAndResourceId {
+    public func holdAndWriteCallbackForPromise<T>(): PromiseAndResourceId<T> {
         return holdAndWriteCallbackForPromise<T>(0, 0, 0)
     }
-    public func holdAndWriteCallbackForPromise<T>(hold: KPointer, release: KPointer, call: KPointer): PromiseAndResourceId {
-        let resourceId: ResourceId
-        resourceId = this.holdAndWriteCallback({ => }, hold, release, call, 0)
-        return PromiseAndResourceId({ => }, resourceId)
+    public func holdAndWriteCallbackForPromise<T>(hold: KPointer, release: KPointer, call: KPointer): PromiseAndResourceId<T> {
+        var resourceId: ResourceId = 0
+        let promise = { => }
+        return PromiseAndResourceId<T>(promise, resourceId)
     }
     public func writeFunction(value: Any): Unit {
         // TODO

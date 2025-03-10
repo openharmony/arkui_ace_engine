@@ -20,7 +20,7 @@ import { Literal_Number_surfaceHeight_surfaceWidth } from "./SyntheticDeclaratio
 import { SurfaceRect, SurfaceRotationOptions } from "./ArkXcomponentInterfaces"
 import { ImageAnalyzerConfig } from "./ArkImageCommonInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -34,7 +34,7 @@ export class XComponentControllerInternal {
     }
 }
 export class XComponentController implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -125,7 +125,9 @@ export class XComponentController implements MaterializedBase {
     }
     private getXComponentSurfaceRect_serialize(): SurfaceRect {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceRect(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readSurfaceRect()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : SurfaceRect = retvalDeserializer.readSurfaceRect()
+        return returnResult
     }
     private setXComponentSurfaceRotation_serialize(rotationOptions: SurfaceRotationOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -135,7 +137,9 @@ export class XComponentController implements MaterializedBase {
     }
     private getXComponentSurfaceRotation_serialize(): SurfaceRotationOptions {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceRotation(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readSurfaceRotationOptions()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : SurfaceRotationOptions = retvalDeserializer.readSurfaceRotationOptions()
+        return returnResult
     }
     private onSurfaceCreated_serialize(surfaceId: string): void {
         ArkUIGeneratedNativeModule._XComponentController_onSurfaceCreated(this.peer!.ptr, surfaceId)

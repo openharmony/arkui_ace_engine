@@ -19,20 +19,20 @@
 import { ConstraintSizeOptions, DirectionalEdgesT } from "./ArkUnitsInterfaces"
 import { MeasureResult } from "./ArkCommonInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface Measurable {
-    measure(constraint: ConstraintSizeOptions): MeasureResult 
-    getMargin(): DirectionalEdgesT 
-    getPadding(): DirectionalEdgesT 
-    getBorderWidth(): DirectionalEdgesT 
+    measure(constraint: ConstraintSizeOptions): MeasureResult
+    getMargin(): DirectionalEdgesT
+    getPadding(): DirectionalEdgesT
+    getBorderWidth(): DirectionalEdgesT
 }
 export class MeasurableInternal implements MaterializedBase,Measurable {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -65,19 +65,27 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         thisSerializer.writeConstraintSizeOptions(constraint)
         const retval  = ArkUIGeneratedNativeModule._Measurable_measure(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        return new Deserializer(retval, retval.length).readMeasureResult()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : MeasureResult = retvalDeserializer.readMeasureResult()
+        return returnResult
     }
     private getMargin_serialize(): DirectionalEdgesT {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getMargin(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readDirectionalEdgesT()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        return returnResult
     }
     private getPadding_serialize(): DirectionalEdgesT {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getPadding(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readDirectionalEdgesT()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        return returnResult
     }
     private getBorderWidth_serialize(): DirectionalEdgesT {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getBorderWidth(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readDirectionalEdgesT()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        return returnResult
     }
     public static fromPtr(ptr: KPointer): MeasurableInternal {
         const obj : MeasurableInternal = new MeasurableInternal()

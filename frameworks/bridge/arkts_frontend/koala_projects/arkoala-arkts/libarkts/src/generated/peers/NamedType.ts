@@ -53,6 +53,21 @@ export class NamedType extends TypeNode {
     get isNullable(): boolean {
         return global.generatedEs2panda._NamedTypeIsNullableConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setNullable(nullable: boolean): this {
+        global.generatedEs2panda._NamedTypeSetNullable(global.context, this.peer, nullable)
+        return this
+    }
+    /** @deprecated */
+    setNext(next: NamedType): this {
+        global.generatedEs2panda._NamedTypeSetNext(global.context, this.peer, passNode(next))
+        return this
+    }
+    /** @deprecated */
+    setTypeParams(typeParams: TSTypeParameterInstantiation): this {
+        global.generatedEs2panda._NamedTypeSetTypeParams(global.context, this.peer, passNode(typeParams))
+        return this
+    }
 }
 export function isNamedType(node: AstNode): node is NamedType {
     return node instanceof NamedType

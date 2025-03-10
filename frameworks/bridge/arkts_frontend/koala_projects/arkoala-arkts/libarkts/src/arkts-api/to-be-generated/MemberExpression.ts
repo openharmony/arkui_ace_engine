@@ -14,6 +14,7 @@
  */
 
 
+import { Expression } from "../../generated"
 import {
     assertValidPeer,
     AstNode,
@@ -25,7 +26,7 @@ import {
     global
 } from "../../reexport-for-generated"
 
-export class MemberExpression extends AstNode {
+export class MemberExpression extends Expression {
     constructor(peer: KNativePointer) {
         assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_MEMBER_EXPRESSION)
         super(peer)

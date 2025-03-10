@@ -19,7 +19,7 @@
 import { LengthMetricsUnit } from "./ArkUnitsInterfaces"
 import { PixelMap, PixelMapInternal } from "./ArkPixelMapMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,7 +33,7 @@ export class ImageBitmapInternal {
     }
 }
 export class ImageBitmap implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -50,7 +50,7 @@ export class ImageBitmap implements MaterializedBase {
      constructor(src?: string) {
         if ((src) !== (undefined))
         {
-            const ctorPtr : KPointer = ImageBitmap.ctor_imagebitmap(src)
+            const ctorPtr : KPointer = ImageBitmap.ctor_imagebitmap((src)!)
             this.peer = new Finalizable(ctorPtr, ImageBitmap.getFinalizer())
         }
     }

@@ -17,14 +17,14 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkCommonMethodComponent } from "./ArkCommon"
 import { ArkWebPeer } from "./peers/ArkWebPeer"
-import { UseEventsProperties } from "./use_properties"
 import { CommonMethod, Rectangle, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, UniformDataType, CustomBuilder, DragItemInfo, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DrawContext, TouchTestInfo, TouchResult, AdaptiveColor, BlurStyleActivePolicy, RepeatMode, LinearGradient_common, FinishCallbackType, ExpectedFrameRateRange, TransitionEffects, TransitionEdge, MotionBlurAnchor, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, PreDragStatus, ShadowType, UIGestureEvent, BlurStyleOptions, ThemeColorMode, FractionStop, DragPreviewMode, ImageModifier, OverlayOffset, TransitionHierarchyStrategy, PopupMessageOptions, SymbolGlyphModifier, MenuPreviewMode, ContextMenuAnimationOptions, BindOptions, SheetSize, SheetType, SheetTitleOptions, SheetMode, ScrollSizeMode, UIContext, SheetKeyboardAvoidMode, SourceTool, RectResult, TouchTestStrategy, EventTarget, SourceType, TouchObject, HistoricalPoint, IntentionCode, DragBehavior, Summary, DragResult, DismissPopupAction, DismissContentCoverAction, SheetDismiss, DismissSheetAction, SpringBackAction, DismissReason, NestedScrollOptions } from "./ArkCommonInterfaces"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, ColorMetrics, Area, Bias, Font } from "./ArkUnitsInterfaces"
+import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Area, Bias, Font } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, PixelRoundCalcPolicy, Curve, PlayMode, TransitionType, HorizontalAlign, VerticalAlign, ClickEffectLevel, SharedTransitionEffectType, Placement, ArrowPointPosition, MouseButton, MouseAction, TouchType, KeyType, KeySource, FontWeight, FontStyle, CopyOptions, NestedScrollMode } from "./ArkEnumsInterfaces"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
@@ -40,13 +40,21 @@ import { ProgressMask } from "./ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../handwritten"
 import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { GestureType, GestureMask, GestureInfo, GestureJudgeResult, GestureInterface, TapGestureParameters, PanDirection, SwipeDirection, GestureMode, GestureHandler, GesturePriority, FingerInfo } from "./ArkGestureInterfaces"
+import { TapGestureInterface } from "./ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./ArkGestureGroupInterfaceMaterialized"
 import { LengthUnit, ShapeSize, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions, WebHeader } from "./ArkArkuiExternalInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { HoverEvent } from "./ArkHoverEventMaterialized"
 import { MouseEvent } from "./ArkMouseEventMaterialized"
 import { TouchEvent } from "./ArkTouchEventMaterialized"
 import { KeyEvent } from "./ArkKeyEventMaterialized"
+import { ColorMetrics } from "./ArkColorMetricsMaterialized"
 import { ICurve } from "./ArkICurveMaterialized"
 import { DragEvent } from "./ArkDragEventMaterialized"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
@@ -82,7 +90,7 @@ import { EventResult } from "./ArkEventResultMaterialized"
 import { TextMenuItemId } from "./ArkTextMenuItemIdMaterialized"
 /** @memo:stable */
 export class ArkWebComponent extends ArkCommonMethodComponent {
-    getPeer(): ArkWebPeer {
+    protected getPeer(): ArkWebPeer {
         return (this.peer as ArkWebPeer)
     }
     /** @memo */
@@ -314,7 +322,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onPageEnd(value: ((parameter: OnPageEndEvent) => void)): this {
         if (this.checkPriority("onPageEnd")) {
             const value_casted = value as (((parameter: OnPageEndEvent) => void))
-            UseEventsProperties({Web_onPageEnd: value_casted})
             this.getPeer()?.onPageEndAttribute(value_casted)
             return this
         }
@@ -324,7 +331,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onPageBegin(value: ((parameter: OnPageBeginEvent) => void)): this {
         if (this.checkPriority("onPageBegin")) {
             const value_casted = value as (((parameter: OnPageBeginEvent) => void))
-            UseEventsProperties({Web_onPageBegin: value_casted})
             this.getPeer()?.onPageBeginAttribute(value_casted)
             return this
         }
@@ -334,7 +340,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onProgressChange(value: ((parameter: OnProgressChangeEvent) => void)): this {
         if (this.checkPriority("onProgressChange")) {
             const value_casted = value as (((parameter: OnProgressChangeEvent) => void))
-            UseEventsProperties({Web_onProgressChange: value_casted})
             this.getPeer()?.onProgressChangeAttribute(value_casted)
             return this
         }
@@ -344,7 +349,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onTitleReceive(value: ((parameter: OnTitleReceiveEvent) => void)): this {
         if (this.checkPriority("onTitleReceive")) {
             const value_casted = value as (((parameter: OnTitleReceiveEvent) => void))
-            UseEventsProperties({Web_onTitleReceive: value_casted})
             this.getPeer()?.onTitleReceiveAttribute(value_casted)
             return this
         }
@@ -354,7 +358,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onGeolocationHide(value: (() => void)): this {
         if (this.checkPriority("onGeolocationHide")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({Web_onGeolocationHide: value_casted})
             this.getPeer()?.onGeolocationHideAttribute(value_casted)
             return this
         }
@@ -364,7 +367,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onGeolocationShow(value: ((parameter: OnGeolocationShowEvent) => void)): this {
         if (this.checkPriority("onGeolocationShow")) {
             const value_casted = value as (((parameter: OnGeolocationShowEvent) => void))
-            UseEventsProperties({Web_onGeolocationShow: value_casted})
             this.getPeer()?.onGeolocationShowAttribute(value_casted)
             return this
         }
@@ -374,7 +376,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onRequestSelected(value: (() => void)): this {
         if (this.checkPriority("onRequestSelected")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({Web_onRequestSelected: value_casted})
             this.getPeer()?.onRequestSelectedAttribute(value_casted)
             return this
         }
@@ -384,7 +385,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onAlert(value: ((parameter: OnAlertEvent) => boolean)): this {
         if (this.checkPriority("onAlert")) {
             const value_casted = value as (((parameter: OnAlertEvent) => boolean))
-            UseEventsProperties({Web_onAlert: value_casted})
             this.getPeer()?.onAlertAttribute(value_casted)
             return this
         }
@@ -394,7 +394,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onBeforeUnload(value: ((parameter: OnBeforeUnloadEvent) => boolean)): this {
         if (this.checkPriority("onBeforeUnload")) {
             const value_casted = value as (((parameter: OnBeforeUnloadEvent) => boolean))
-            UseEventsProperties({Web_onBeforeUnload: value_casted})
             this.getPeer()?.onBeforeUnloadAttribute(value_casted)
             return this
         }
@@ -404,7 +403,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onConfirm(value: ((parameter: OnConfirmEvent) => boolean)): this {
         if (this.checkPriority("onConfirm")) {
             const value_casted = value as (((parameter: OnConfirmEvent) => boolean))
-            UseEventsProperties({Web_onConfirm: value_casted})
             this.getPeer()?.onConfirmAttribute(value_casted)
             return this
         }
@@ -414,7 +412,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onPrompt(value: ((parameter: OnPromptEvent) => boolean)): this {
         if (this.checkPriority("onPrompt")) {
             const value_casted = value as (((parameter: OnPromptEvent) => boolean))
-            UseEventsProperties({Web_onPrompt: value_casted})
             this.getPeer()?.onPromptAttribute(value_casted)
             return this
         }
@@ -424,7 +421,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onConsole(value: ((parameter: OnConsoleEvent) => boolean)): this {
         if (this.checkPriority("onConsole")) {
             const value_casted = value as (((parameter: OnConsoleEvent) => boolean))
-            UseEventsProperties({Web_onConsole: value_casted})
             this.getPeer()?.onConsoleAttribute(value_casted)
             return this
         }
@@ -434,7 +430,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onErrorReceive(value: ((parameter: OnErrorReceiveEvent) => void)): this {
         if (this.checkPriority("onErrorReceive")) {
             const value_casted = value as (((parameter: OnErrorReceiveEvent) => void))
-            UseEventsProperties({Web_onErrorReceive: value_casted})
             this.getPeer()?.onErrorReceiveAttribute(value_casted)
             return this
         }
@@ -444,7 +439,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onHttpErrorReceive(value: ((parameter: OnHttpErrorReceiveEvent) => void)): this {
         if (this.checkPriority("onHttpErrorReceive")) {
             const value_casted = value as (((parameter: OnHttpErrorReceiveEvent) => void))
-            UseEventsProperties({Web_onHttpErrorReceive: value_casted})
             this.getPeer()?.onHttpErrorReceiveAttribute(value_casted)
             return this
         }
@@ -454,7 +448,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onDownloadStart(value: ((parameter: OnDownloadStartEvent) => void)): this {
         if (this.checkPriority("onDownloadStart")) {
             const value_casted = value as (((parameter: OnDownloadStartEvent) => void))
-            UseEventsProperties({Web_onDownloadStart: value_casted})
             this.getPeer()?.onDownloadStartAttribute(value_casted)
             return this
         }
@@ -464,7 +457,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onRefreshAccessedHistory(value: ((parameter: OnRefreshAccessedHistoryEvent) => void)): this {
         if (this.checkPriority("onRefreshAccessedHistory")) {
             const value_casted = value as (((parameter: OnRefreshAccessedHistoryEvent) => void))
-            UseEventsProperties({Web_onRefreshAccessedHistory: value_casted})
             this.getPeer()?.onRefreshAccessedHistoryAttribute(value_casted)
             return this
         }
@@ -474,7 +466,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onUrlLoadIntercept(value: ((event?: { data: string | WebResourceRequest }) => boolean)): this {
         if (this.checkPriority("onUrlLoadIntercept")) {
             const value_casted = value as (((event?: { data: string | WebResourceRequest }) => boolean))
-            UseEventsProperties({Web_onUrlLoadIntercept: value_casted})
             this.getPeer()?.onUrlLoadInterceptAttribute(value_casted)
             return this
         }
@@ -484,7 +475,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onSslErrorReceive(value: ((event?: { handler: Function, error: Object }) => void)): this {
         if (this.checkPriority("onSslErrorReceive")) {
             const value_casted = value as (((event?: { handler: Function, error: Object }) => void))
-            UseEventsProperties({Web_onSslErrorReceive: value_casted})
             this.getPeer()?.onSslErrorReceiveAttribute(value_casted)
             return this
         }
@@ -496,13 +486,11 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
             const value_type = runtimeType(value)
             if (RuntimeType.FUNCTION == value_type) {
                 const value_casted = value as (((parameter: OnRenderExitedEvent) => void))
-                UseEventsProperties({Web_onRenderExited0: value_casted})
                 this.getPeer()?.onRenderExited0Attribute(value_casted)
                 return this
             }
             if (RuntimeType.FUNCTION == value_type) {
                 const value_casted = value as (((event?: { detail: Object }) => boolean))
-                UseEventsProperties({Web_onRenderExited1: value_casted})
                 this.getPeer()?.onRenderExited1Attribute(value_casted)
                 return this
             }
@@ -514,7 +502,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onShowFileSelector(value: ((parameter: OnShowFileSelectorEvent) => boolean)): this {
         if (this.checkPriority("onShowFileSelector")) {
             const value_casted = value as (((parameter: OnShowFileSelectorEvent) => boolean))
-            UseEventsProperties({Web_onShowFileSelector: value_casted})
             this.getPeer()?.onShowFileSelectorAttribute(value_casted)
             return this
         }
@@ -524,7 +511,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onFileSelectorShow(value: ((event?: { callback_: Function, fileSelector: Object }) => void)): this {
         if (this.checkPriority("onFileSelectorShow")) {
             const value_casted = value as (((event?: { callback_: Function, fileSelector: Object }) => void))
-            UseEventsProperties({Web_onFileSelectorShow: value_casted})
             this.getPeer()?.onFileSelectorShowAttribute(value_casted)
             return this
         }
@@ -534,7 +520,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onResourceLoad(value: ((parameter: OnResourceLoadEvent) => void)): this {
         if (this.checkPriority("onResourceLoad")) {
             const value_casted = value as (((parameter: OnResourceLoadEvent) => void))
-            UseEventsProperties({Web_onResourceLoad: value_casted})
             this.getPeer()?.onResourceLoadAttribute(value_casted)
             return this
         }
@@ -544,7 +529,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onFullScreenExit(value: (() => void)): this {
         if (this.checkPriority("onFullScreenExit")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({Web_onFullScreenExit: value_casted})
             this.getPeer()?.onFullScreenExitAttribute(value_casted)
             return this
         }
@@ -554,7 +538,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onFullScreenEnter(value: OnFullScreenEnterCallback): this {
         if (this.checkPriority("onFullScreenEnter")) {
             const value_casted = value as (OnFullScreenEnterCallback)
-            UseEventsProperties({Web_onFullScreenEnter: value_casted})
             this.getPeer()?.onFullScreenEnterAttribute(value_casted)
             return this
         }
@@ -564,7 +547,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onScaleChange(value: ((parameter: OnScaleChangeEvent) => void)): this {
         if (this.checkPriority("onScaleChange")) {
             const value_casted = value as (((parameter: OnScaleChangeEvent) => void))
-            UseEventsProperties({Web_onScaleChange: value_casted})
             this.getPeer()?.onScaleChangeAttribute(value_casted)
             return this
         }
@@ -574,7 +556,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onHttpAuthRequest(value: ((parameter: OnHttpAuthRequestEvent) => boolean)): this {
         if (this.checkPriority("onHttpAuthRequest")) {
             const value_casted = value as (((parameter: OnHttpAuthRequestEvent) => boolean))
-            UseEventsProperties({Web_onHttpAuthRequest: value_casted})
             this.getPeer()?.onHttpAuthRequestAttribute(value_casted)
             return this
         }
@@ -584,7 +565,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onInterceptRequest(value: ((parameter: OnInterceptRequestEvent) => WebResourceResponse)): this {
         if (this.checkPriority("onInterceptRequest")) {
             const value_casted = value as (((parameter: OnInterceptRequestEvent) => WebResourceResponse))
-            UseEventsProperties({Web_onInterceptRequest: value_casted})
             this.getPeer()?.onInterceptRequestAttribute(value_casted)
             return this
         }
@@ -594,7 +574,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onPermissionRequest(value: ((parameter: OnPermissionRequestEvent) => void)): this {
         if (this.checkPriority("onPermissionRequest")) {
             const value_casted = value as (((parameter: OnPermissionRequestEvent) => void))
-            UseEventsProperties({Web_onPermissionRequest: value_casted})
             this.getPeer()?.onPermissionRequestAttribute(value_casted)
             return this
         }
@@ -604,7 +583,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onScreenCaptureRequest(value: ((parameter: OnScreenCaptureRequestEvent) => void)): this {
         if (this.checkPriority("onScreenCaptureRequest")) {
             const value_casted = value as (((parameter: OnScreenCaptureRequestEvent) => void))
-            UseEventsProperties({Web_onScreenCaptureRequest: value_casted})
             this.getPeer()?.onScreenCaptureRequestAttribute(value_casted)
             return this
         }
@@ -614,7 +592,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onContextMenuShow(value: ((parameter: OnContextMenuShowEvent) => boolean)): this {
         if (this.checkPriority("onContextMenuShow")) {
             const value_casted = value as (((parameter: OnContextMenuShowEvent) => boolean))
-            UseEventsProperties({Web_onContextMenuShow: value_casted})
             this.getPeer()?.onContextMenuShowAttribute(value_casted)
             return this
         }
@@ -624,7 +601,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onContextMenuHide(value: OnContextMenuHideCallback): this {
         if (this.checkPriority("onContextMenuHide")) {
             const value_casted = value as (OnContextMenuHideCallback)
-            UseEventsProperties({Web_onContextMenuHide: value_casted})
             this.getPeer()?.onContextMenuHideAttribute(value_casted)
             return this
         }
@@ -643,7 +619,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onSearchResultReceive(value: ((parameter: OnSearchResultReceiveEvent) => void)): this {
         if (this.checkPriority("onSearchResultReceive")) {
             const value_casted = value as (((parameter: OnSearchResultReceiveEvent) => void))
-            UseEventsProperties({Web_onSearchResultReceive: value_casted})
             this.getPeer()?.onSearchResultReceiveAttribute(value_casted)
             return this
         }
@@ -653,7 +628,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onScroll(value: ((parameter: OnScrollEvent) => void)): this {
         if (this.checkPriority("onScroll")) {
             const value_casted = value as (((parameter: OnScrollEvent) => void))
-            UseEventsProperties({Web_onScroll: value_casted})
             this.getPeer()?.onScrollAttribute(value_casted)
             return this
         }
@@ -663,7 +637,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onSslErrorEventReceive(value: ((parameter: OnSslErrorEventReceiveEvent) => void)): this {
         if (this.checkPriority("onSslErrorEventReceive")) {
             const value_casted = value as (((parameter: OnSslErrorEventReceiveEvent) => void))
-            UseEventsProperties({Web_onSslErrorEventReceive: value_casted})
             this.getPeer()?.onSslErrorEventReceiveAttribute(value_casted)
             return this
         }
@@ -673,7 +646,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onSslErrorEvent(value: OnSslErrorEventCallback): this {
         if (this.checkPriority("onSslErrorEvent")) {
             const value_casted = value as (OnSslErrorEventCallback)
-            UseEventsProperties({Web_onSslErrorEvent: value_casted})
             this.getPeer()?.onSslErrorEventAttribute(value_casted)
             return this
         }
@@ -683,7 +655,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onClientAuthenticationRequest(value: ((parameter: OnClientAuthenticationEvent) => void)): this {
         if (this.checkPriority("onClientAuthenticationRequest")) {
             const value_casted = value as (((parameter: OnClientAuthenticationEvent) => void))
-            UseEventsProperties({Web_onClientAuthenticationRequest: value_casted})
             this.getPeer()?.onClientAuthenticationRequestAttribute(value_casted)
             return this
         }
@@ -693,7 +664,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onWindowNew(value: ((parameter: OnWindowNewEvent) => void)): this {
         if (this.checkPriority("onWindowNew")) {
             const value_casted = value as (((parameter: OnWindowNewEvent) => void))
-            UseEventsProperties({Web_onWindowNew: value_casted})
             this.getPeer()?.onWindowNewAttribute(value_casted)
             return this
         }
@@ -703,7 +673,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onWindowExit(value: (() => void)): this {
         if (this.checkPriority("onWindowExit")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({Web_onWindowExit: value_casted})
             this.getPeer()?.onWindowExitAttribute(value_casted)
             return this
         }
@@ -722,7 +691,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onInterceptKeyEvent(value: ((parameter: KeyEvent) => boolean)): this {
         if (this.checkPriority("onInterceptKeyEvent")) {
             const value_casted = value as (((parameter: KeyEvent) => boolean))
-            UseEventsProperties({Web_onInterceptKeyEvent: value_casted})
             this.getPeer()?.onInterceptKeyEventAttribute(value_casted)
             return this
         }
@@ -867,7 +835,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onTouchIconUrlReceived(value: ((parameter: OnTouchIconUrlReceivedEvent) => void)): this {
         if (this.checkPriority("onTouchIconUrlReceived")) {
             const value_casted = value as (((parameter: OnTouchIconUrlReceivedEvent) => void))
-            UseEventsProperties({Web_onTouchIconUrlReceived: value_casted})
             this.getPeer()?.onTouchIconUrlReceivedAttribute(value_casted)
             return this
         }
@@ -877,7 +844,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onFaviconReceived(value: ((parameter: OnFaviconReceivedEvent) => void)): this {
         if (this.checkPriority("onFaviconReceived")) {
             const value_casted = value as (((parameter: OnFaviconReceivedEvent) => void))
-            UseEventsProperties({Web_onFaviconReceived: value_casted})
             this.getPeer()?.onFaviconReceivedAttribute(value_casted)
             return this
         }
@@ -887,7 +853,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onPageVisible(value: ((parameter: OnPageVisibleEvent) => void)): this {
         if (this.checkPriority("onPageVisible")) {
             const value_casted = value as (((parameter: OnPageVisibleEvent) => void))
-            UseEventsProperties({Web_onPageVisible: value_casted})
             this.getPeer()?.onPageVisibleAttribute(value_casted)
             return this
         }
@@ -897,7 +862,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onDataResubmitted(value: ((parameter: OnDataResubmittedEvent) => void)): this {
         if (this.checkPriority("onDataResubmitted")) {
             const value_casted = value as (((parameter: OnDataResubmittedEvent) => void))
-            UseEventsProperties({Web_onDataResubmitted: value_casted})
             this.getPeer()?.onDataResubmittedAttribute(value_casted)
             return this
         }
@@ -925,7 +889,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onAudioStateChanged(value: ((parameter: OnAudioStateChangedEvent) => void)): this {
         if (this.checkPriority("onAudioStateChanged")) {
             const value_casted = value as (((parameter: OnAudioStateChangedEvent) => void))
-            UseEventsProperties({Web_onAudioStateChanged: value_casted})
             this.getPeer()?.onAudioStateChangedAttribute(value_casted)
             return this
         }
@@ -935,7 +898,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onFirstContentfulPaint(value: ((parameter: OnFirstContentfulPaintEvent) => void)): this {
         if (this.checkPriority("onFirstContentfulPaint")) {
             const value_casted = value as (((parameter: OnFirstContentfulPaintEvent) => void))
-            UseEventsProperties({Web_onFirstContentfulPaint: value_casted})
             this.getPeer()?.onFirstContentfulPaintAttribute(value_casted)
             return this
         }
@@ -945,7 +907,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback): this {
         if (this.checkPriority("onFirstMeaningfulPaint")) {
             const value_casted = value as (OnFirstMeaningfulPaintCallback)
-            UseEventsProperties({Web_onFirstMeaningfulPaint: value_casted})
             this.getPeer()?.onFirstMeaningfulPaintAttribute(value_casted)
             return this
         }
@@ -955,7 +916,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onLargestContentfulPaint(value: OnLargestContentfulPaintCallback): this {
         if (this.checkPriority("onLargestContentfulPaint")) {
             const value_casted = value as (OnLargestContentfulPaintCallback)
-            UseEventsProperties({Web_onLargestContentfulPaint: value_casted})
             this.getPeer()?.onLargestContentfulPaintAttribute(value_casted)
             return this
         }
@@ -965,7 +925,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onLoadIntercept(value: ((parameter: OnLoadInterceptEvent) => boolean)): this {
         if (this.checkPriority("onLoadIntercept")) {
             const value_casted = value as (((parameter: OnLoadInterceptEvent) => boolean))
-            UseEventsProperties({Web_onLoadIntercept: value_casted})
             this.getPeer()?.onLoadInterceptAttribute(value_casted)
             return this
         }
@@ -975,7 +934,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onControllerAttached(value: (() => void)): this {
         if (this.checkPriority("onControllerAttached")) {
             const value_casted = value as ((() => void))
-            UseEventsProperties({Web_onControllerAttached: value_casted})
             this.getPeer()?.onControllerAttachedAttribute(value_casted)
             return this
         }
@@ -985,7 +943,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onOverScroll(value: ((parameter: OnOverScrollEvent) => void)): this {
         if (this.checkPriority("onOverScroll")) {
             const value_casted = value as (((parameter: OnOverScrollEvent) => void))
-            UseEventsProperties({Web_onOverScroll: value_casted})
             this.getPeer()?.onOverScrollAttribute(value_casted)
             return this
         }
@@ -995,7 +952,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback): this {
         if (this.checkPriority("onSafeBrowsingCheckResult")) {
             const value_casted = value as (OnSafeBrowsingCheckResultCallback)
-            UseEventsProperties({Web_onSafeBrowsingCheckResult: value_casted})
             this.getPeer()?.onSafeBrowsingCheckResultAttribute(value_casted)
             return this
         }
@@ -1005,7 +961,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback): this {
         if (this.checkPriority("onNavigationEntryCommitted")) {
             const value_casted = value as (OnNavigationEntryCommittedCallback)
-            UseEventsProperties({Web_onNavigationEntryCommitted: value_casted})
             this.getPeer()?.onNavigationEntryCommittedAttribute(value_casted)
             return this
         }
@@ -1015,7 +970,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback): this {
         if (this.checkPriority("onIntelligentTrackingPreventionResult")) {
             const value_casted = value as (OnIntelligentTrackingPreventionCallback)
-            UseEventsProperties({Web_onIntelligentTrackingPreventionResult: value_casted})
             this.getPeer()?.onIntelligentTrackingPreventionResultAttribute(value_casted)
             return this
         }
@@ -1070,7 +1024,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void)): this {
         if (this.checkPriority("onNativeEmbedLifecycleChange")) {
             const value_casted = value as (((event: NativeEmbedDataInfo) => void))
-            UseEventsProperties({Web_onNativeEmbedLifecycleChange: value_casted})
             this.getPeer()?.onNativeEmbedLifecycleChangeAttribute(value_casted)
             return this
         }
@@ -1080,7 +1033,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback): this {
         if (this.checkPriority("onNativeEmbedVisibilityChange")) {
             const value_casted = value as (OnNativeEmbedVisibilityChangeCallback)
-            UseEventsProperties({Web_onNativeEmbedVisibilityChange: value_casted})
             this.getPeer()?.onNativeEmbedVisibilityChangeAttribute(value_casted)
             return this
         }
@@ -1090,7 +1042,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void)): this {
         if (this.checkPriority("onNativeEmbedGestureEvent")) {
             const value_casted = value as (((event: NativeEmbedTouchInfo) => void))
-            UseEventsProperties({Web_onNativeEmbedGestureEvent: value_casted})
             this.getPeer()?.onNativeEmbedGestureEventAttribute(value_casted)
             return this
         }
@@ -1109,7 +1060,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback): this {
         if (this.checkPriority("onOverrideUrlLoading")) {
             const value_casted = value as (OnOverrideUrlLoadingCallback)
-            UseEventsProperties({Web_onOverrideUrlLoading: value_casted})
             this.getPeer()?.onOverrideUrlLoadingAttribute(value_casted)
             return this
         }
@@ -1146,7 +1096,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback): this {
         if (this.checkPriority("onRenderProcessNotResponding")) {
             const value_casted = value as (OnRenderProcessNotRespondingCallback)
-            UseEventsProperties({Web_onRenderProcessNotResponding: value_casted})
             this.getPeer()?.onRenderProcessNotRespondingAttribute(value_casted)
             return this
         }
@@ -1156,7 +1105,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onRenderProcessResponding(value: OnRenderProcessRespondingCallback): this {
         if (this.checkPriority("onRenderProcessResponding")) {
             const value_casted = value as (OnRenderProcessRespondingCallback)
-            UseEventsProperties({Web_onRenderProcessResponding: value_casted})
             this.getPeer()?.onRenderProcessRespondingAttribute(value_casted)
             return this
         }
@@ -1175,7 +1123,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onViewportFitChanged(value: OnViewportFitChangedCallback): this {
         if (this.checkPriority("onViewportFitChanged")) {
             const value_casted = value as (OnViewportFitChangedCallback)
-            UseEventsProperties({Web_onViewportFitChanged: value_casted})
             this.getPeer()?.onViewportFitChangedAttribute(value_casted)
             return this
         }
@@ -1185,7 +1132,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onInterceptKeyboardAttach(value: WebKeyboardCallback): this {
         if (this.checkPriority("onInterceptKeyboardAttach")) {
             const value_casted = value as (WebKeyboardCallback)
-            UseEventsProperties({Web_onInterceptKeyboardAttach: value_casted})
             this.getPeer()?.onInterceptKeyboardAttachAttribute(value_casted)
             return this
         }
@@ -1195,7 +1141,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
     public onAdsBlocked(value: OnAdsBlockedCallback): this {
         if (this.checkPriority("onAdsBlocked")) {
             const value_casted = value as (OnAdsBlockedCallback)
-            UseEventsProperties({Web_onAdsBlocked: value_casted})
             this.getPeer()?.onAdsBlockedAttribute(value_casted)
             return this
         }
@@ -1245,7 +1190,6 @@ export class ArkWebComponent extends ArkCommonMethodComponent {
             const content_casted = content as (CustomBuilder)
             const responseType_casted = responseType as (WebResponseType)
             const options_casted = options as (SelectionMenuOptionsExt | undefined)
-            UseEventsProperties({Web_bindSelectionMenu: content_casted})
             this.getPeer()?.bindSelectionMenuAttribute(elementType_casted, content_casted, responseType_casted, options_casted)
             return this
         }

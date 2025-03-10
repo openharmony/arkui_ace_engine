@@ -18,39 +18,15 @@
 
 import { FontOptions } from "./ArkArkuiExternalInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
-export class GlobalScope_ohos_fontInternal {
-    public static fromPtr(ptr: KPointer): GlobalScope_ohos_font {
-        const obj: GlobalScope_ohos_font = new GlobalScope_ohos_font()
-        obj.peer = new Finalizable(ptr, GlobalScope_ohos_font.getFinalizer())
-        return obj
-    }
-}
-export class GlobalScope_ohos_font implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_globalscope_ohos_font(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = GlobalScope_ohos_font.ctor_globalscope_ohos_font()
-        this.peer = new Finalizable(ctorPtr, GlobalScope_ohos_font.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getFinalizer()
-    }
+export class GlobalScope_ohos_font {
     public static registerFont(options: FontOptions): void {
         const options_casted = options as (FontOptions)
         GlobalScope_ohos_font.registerFont_serialize(options_casted)
@@ -67,6 +43,13 @@ export class GlobalScope_ohos_font implements MaterializedBase {
     }
     private static getSystemFontList_serialize(): Array<string> {
         const retval = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getSystemFontList()
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<string> = new Array<string>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult: Array<string> = buffer
+        return returnResult
     }
 }

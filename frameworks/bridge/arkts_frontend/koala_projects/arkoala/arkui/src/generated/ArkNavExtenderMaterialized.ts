@@ -20,39 +20,15 @@ import { NavPathStack, NavPathStackInternal } from "./ArkNavPathStackMaterialize
 import { NavExtender_OnUpdateStack } from "./ArkNavigationExtenderInterfaces"
 import { NavPathInfo, NavPathInfoInternal } from "./ArkNavPathInfoMaterialized"
 import { NavigationOptions, NavigationInterception, LaunchMode, PopInfo, InterceptionShowCallback, InterceptionModeCallback } from "./ArkNavigationInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
-export class NavExtenderInternal {
-    public static fromPtr(ptr: KPointer): NavExtender {
-        const obj: NavExtender = new NavExtender()
-        obj.peer = new Finalizable(ptr, NavExtender.getFinalizer())
-        return obj
-    }
-}
-export class NavExtender implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_navextender(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._NavExtender_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = NavExtender.ctor_navextender()
-        this.peer = new Finalizable(ctorPtr, NavExtender.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._NavExtender_getFinalizer()
-    }
+export class NavExtender {
     public static setUpdateStackCallback(peer: NavPathStack, callback: NavExtender_OnUpdateStack): void {
         const peer_casted = peer as (NavPathStack)
         const callback_casted = callback as (NavExtender_OnUpdateStack)
@@ -61,9 +37,8 @@ export class NavExtender implements MaterializedBase {
     }
     private static setUpdateStackCallback_serialize(peer: NavPathStack, callback: NavExtender_OnUpdateStack): void {
         const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeNavPathStack(peer)
         thisSerializer.holdAndWriteCallback(callback)
-        ArkUIGeneratedNativeModule._NavExtender_setUpdateStackCallback(thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavExtender_setUpdateStackCallback(toPeerPtr(peer), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
 }

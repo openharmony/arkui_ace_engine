@@ -1,4 +1,5 @@
 import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, LocalStorage, MutableState, observableProxy } from "@koalaui/arkoala-arkui";
+/** @memo:stable */
 class ArkAMDComponentComponent extends ArkStructBase<ArkAMDComponentComponent, AMDComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

@@ -24,10 +24,11 @@ import { Resource } from "./ArkResourceInterfaces"
 import { ICurve, ICurveInternal } from "./ArkICurveMaterialized"
 import { LengthMetrics, LengthMetricsInternal } from "./ArkLengthMetricsMaterialized"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -39,7 +40,7 @@ export class ScrollerInternal {
     }
 }
 export class Scroller implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -155,7 +156,9 @@ export class Scroller implements MaterializedBase {
     }
     private currentOffset_serialize(): OffsetResult {
         const retval = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr)
-        return new Deserializer(retval.buffer, retval.byteLength).readOffsetResult()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: OffsetResult = retvalDeserializer.readOffsetResult()
+        return returnResult
     }
     private scrollToIndex_serialize(value: number, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): undefined {
         const thisSerializer: Serializer = Serializer.hold()
@@ -194,7 +197,9 @@ export class Scroller implements MaterializedBase {
     }
     private getItemRect_serialize(index: number): RectResult {
         const retval = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
-        return new Deserializer(retval.buffer, retval.byteLength).readRectResult()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: RectResult = retvalDeserializer.readRectResult()
+        return returnResult
     }
     private getItemIndex_serialize(x: number, y: number): number {
         const retval = ArkUIGeneratedNativeModule._Scroller_getItemIndex(this.peer!.ptr, x, y)

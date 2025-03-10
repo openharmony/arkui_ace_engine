@@ -1,6 +1,7 @@
 import { ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkRowComponent, ArkStructBase, ForEach, LocalStorage, MutableState, SyncedProperty, objectLinkState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 import { ClassB as ClassA } from './test/pages/import@Observed';
+/** @memo:stable */
 class ArkViewAComponent extends ArkStructBase<ArkViewAComponent, ViewAOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -47,6 +48,7 @@ class ArkViewAComponent extends ArkStructBase<ArkViewAComponent, ViewAOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkViewBComponent extends ArkStructBase<ArkViewBComponent, ViewBOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

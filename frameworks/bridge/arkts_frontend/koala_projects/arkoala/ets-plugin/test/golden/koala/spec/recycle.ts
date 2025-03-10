@@ -2,6 +2,7 @@ import { $r, $rawfile, AppStorage, ArkButton, ArkButtonComponent, ArkColumn, Ark
 import { MutableState } from "@koalaui/runtime";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent, HomeComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -48,6 +49,7 @@ class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent,
         });
     }
 }
+/** @memo:stable */
 class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -195,6 +197,7 @@ class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkNormalComponentComponent extends ArkStructBase<ArkNormalComponentComponent, NormalComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -223,6 +226,7 @@ class ArkNormalComponentComponent extends ArkStructBase<ArkNormalComponentCompon
         });
     }
 }
+/** @memo:stable */
 class ArkAnimationTestComponent extends ArkStructBase<ArkAnimationTestComponent, AnimationTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

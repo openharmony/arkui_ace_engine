@@ -18,10 +18,12 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
+import { isInstanceOf } from "@koalaui/interop"
+import { isResource, isPadding } from "../../utils"
 import { ArkUIGeneratedNativeModule } from "../ArkUIGeneratedNativeModule"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
 import { SecurityComponentLayoutDirection } from "./../ArkSecurityComponentInterfaces"
@@ -33,8 +35,8 @@ import { GestureName, GestureComponent } from "./../shared/generated-utils"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { unsafeCast } from "@koalaui/common"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
 import { Deserializer, createDeserializer } from "./Deserializer"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -256,7 +258,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         const thisSerializer: Serializer = Serializer.hold()
         let value_type: int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
-        if (((RuntimeType.OBJECT) == (value_type)) && (((value!.hasOwnProperty("top")) || (value!.hasOwnProperty("right")) || (value!.hasOwnProperty("bottom")) || (value!.hasOwnProperty("left"))))) {
+        if (isPadding(value)) {
             thisSerializer.writeInt8(0)
             const value_0 = unsafeCast<Padding>(value)
             const value_0_top = value_0.top

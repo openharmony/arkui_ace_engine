@@ -2,6 +2,7 @@ import { ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkNavigator, 
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkPageTransitionExample1Component extends ArkStructBase<ArkPageTransitionExample1Component, PageTransitionExample1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

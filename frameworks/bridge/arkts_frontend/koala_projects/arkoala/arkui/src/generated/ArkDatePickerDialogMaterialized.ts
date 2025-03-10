@@ -24,39 +24,15 @@ import { DateTimeOptions } from "./ArkTimePickerInterfaces"
 import { FontWeight, FontStyle, Color, ColoringStrategy } from "./ArkEnumsInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./ArkButtonInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
-export class DatePickerDialogInternal {
-    public static fromPtr(ptr: KPointer): DatePickerDialog {
-        const obj: DatePickerDialog = new DatePickerDialog()
-        obj.peer = new Finalizable(ptr, DatePickerDialog.getFinalizer())
-        return obj
-    }
-}
-export class DatePickerDialog implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_datepickerdialog(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._DatePickerDialog_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = DatePickerDialog.ctor_datepickerdialog()
-        this.peer = new Finalizable(ctorPtr, DatePickerDialog.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._DatePickerDialog_getFinalizer()
-    }
+export class DatePickerDialog {
     public static show(options?: DatePickerDialogOptions): undefined {
         const options_casted = options as (DatePickerDialogOptions | undefined)
         return DatePickerDialog.show_serialize(options_casted)

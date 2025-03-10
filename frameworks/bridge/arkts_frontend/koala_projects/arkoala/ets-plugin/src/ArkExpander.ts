@@ -33,7 +33,9 @@ import { CallTransformer } from './CallTransformer'
 import { DebugVisitor } from './AbstractVisitor'
 import { LegacyCallTransformer } from './LegacyCallTransformer'
 import { AbilityTransformer } from './AbilityTransformer'
+import { AnimationTransformer } from "./AnimationTransformer"
 import { DollarDollarTransformer } from "./DollarDollarTransformer"
+import { DollarDollarRemoveTransformer } from "./DollarDollarRemoveTransformer"
 import { ObservedResolver } from "./ObservedResolver"
 
 interface ArkToKoOptions {
@@ -126,6 +128,7 @@ export function arkExpandFile(
         .visitor(sourceFile)
 
     const dollarDollarTransformer = new DollarDollarTransformer(sourceFile, ctx)
+    const dollarDollarRemoveTransformer = new DollarDollarRemoveTransformer(sourceFile, ctx)
     const callTransformer = new CallTransformer(sourceFile, ctx, typeChecker, callTable, importer)
     const lazyTransformer = new LazyTransformer(sourceFile, ctx, importer, callTable)
     const newTransformer = new NewTransformer(sourceFile, ctx, importer, issueTable)
@@ -134,6 +137,7 @@ export function arkExpandFile(
     const extensionStylesTransformer = new ExtensionStylesTransformer(sourceFile, ctx, typeChecker, importer)
     const preprocessorTransformer = new EtsFirstArgTransformer(sourceFile, ctx, importer, callTable)
     const styleTransformer = new StyleTransformer(sourceFile, ctx, typeChecker, importer, extensionStylesTransformer, callTable)
+    const animationTransformer = new AnimationTransformer(sourceFile, ctx, !importer.isArkts())
     const structTransformer = new StructTransformer(sourceFile, ctx, typeChecker, importer, nameTable, entryTracker, callTable, extras)
     const nameCollector = new NameCollector(sourceFile, ctx, nameTable, issueTable)
     const dollarTransformer = new DollarTransformer(sourceFile, ctx, nameTable, importer, applicationInfo)
@@ -143,13 +147,15 @@ export function arkExpandFile(
     nameCollector.visitor(sourceFile)
 
     const translatedDollarDollar = dollarDollarTransformer.visitor(sourceFile) as ts.SourceFile
-    const translatedCalls = callTransformer.visitor(translatedDollarDollar) as ts.SourceFile
+    const removedDollarDollar = dollarDollarRemoveTransformer.visitor(translatedDollarDollar) as ts.SourceFile
+    const translatedCalls = callTransformer.visitor(removedDollarDollar) as ts.SourceFile
     const translatedDollar = dollarTransformer.visitor(translatedCalls) as ts.SourceFile
     const translatedLazy = lazyTransformer.visitor(translatedDollar) as ts.SourceFile
     const translatedNew = newTransformer.visitor(translatedLazy) as ts.SourceFile
     const translatedCustomBuilders = customBuilderTransformer.visitor(translatedNew) as ts.SourceFile
     const translatedLegacyCalls = legacyCallTransformer.visitor(translatedCustomBuilders) as ts.SourceFile
-    const translatedStyleFunctions = extensionStylesTransformer.visitor(translatedLegacyCalls) as ts.SourceFile
+    const translatedAnimations = animationTransformer.visitor(translatedLegacyCalls) as ts.SourceFile
+    const translatedStyleFunctions = extensionStylesTransformer.visitor(translatedAnimations) as ts.SourceFile
     const preprocessedEts = preprocessorTransformer.visitor(translatedStyleFunctions) as ts.SourceFile
     const translatedStyle = styleTransformer.visitor(preprocessedEts) as ts.SourceFile
     const translatedStruct = structTransformer.visitor(translatedStyle) as ts.SourceFile

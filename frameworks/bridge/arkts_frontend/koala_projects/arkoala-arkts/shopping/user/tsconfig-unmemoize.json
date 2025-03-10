@@ -28,6 +28,9 @@
             "@koalaui/arkts-arkui/ohos.router": [
                 "../../arkui/src/ohos.router.ts"
             ],
+            "@koalaui/arkts-arkui/ohos.arkui.UIContext": [
+                "../../arkui/src/ohos.arkui.UIContext.ts"
+            ],
             "app/*": [
                 "./build/generated/*"
             ]

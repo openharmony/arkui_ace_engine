@@ -20,6 +20,13 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { GestureControl } from "./ArkGestureControlNamespace"
+import { TapGestureInterface } from "./ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./ArkGestureGroupInterfaceMaterialized"
 import { SourceTool, EventTarget, SourceType } from "./ArkCommonInterfaces"
 import { PanGestureOptions } from "./ArkPanGestureOptionsMaterialized"
 import { GestureEvent } from "./ArkGestureEventMaterialized"
@@ -92,27 +99,6 @@ export interface TapGestureParameters {
     count?: number;
     fingers?: number;
     distanceThreshold?: number;
-}
-export interface TapGestureInterface extends GestureInterface<TapGestureInterface> {
-    invoke(value?: TapGestureParameters): TapGestureInterface;
-}
-export interface LongPressGestureInterface extends GestureInterface<LongPressGestureInterface> {
-    invoke(value?: { fingers?: number, repeat?: boolean, duration?: number }): LongPressGestureInterface;
-}
-export interface PanGestureInterface extends GestureInterface<PanGestureInterface> {
-    invoke(value?: { fingers?: number, direction?: PanDirection, distance?: number } | PanGestureOptions): PanGestureInterface;
-}
-export interface SwipeGestureInterface extends GestureInterface<SwipeGestureInterface> {
-    invoke(value?: { fingers?: number, direction?: SwipeDirection, speed?: number }): SwipeGestureInterface;
-}
-export interface PinchGestureInterface extends GestureInterface<PinchGestureInterface> {
-    invoke(value?: { fingers?: number, distance?: number }): PinchGestureInterface;
-}
-export interface RotationGestureInterface extends GestureInterface<RotationGestureInterface> {
-    invoke(value?: { fingers?: number, angle?: number }): RotationGestureInterface;
-}
-export interface GestureGroupInterface {
-    invoke(mode: GestureMode, gesture: Array<GestureType>): GestureGroupInterface;
 }
 export interface GestureHandler<T> {
 }

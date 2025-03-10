@@ -17,38 +17,13 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
-export class ContextMenuInternal {
-    public static fromPtr(ptr: KPointer): ContextMenu {
-        const obj : ContextMenu = new ContextMenu()
-        obj.peer = new Finalizable(ptr, ContextMenu.getFinalizer())
-        return obj
-    }
-}
-export class ContextMenu implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_contextmenu(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ContextMenu_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr : KPointer = ContextMenu.ctor_contextmenu()
-        this.peer = new Finalizable(ctorPtr, ContextMenu.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ContextMenu_getFinalizer()
-    }
+export class ContextMenu {
     public static close(): undefined {
         return ContextMenu.close_serialize()
     }

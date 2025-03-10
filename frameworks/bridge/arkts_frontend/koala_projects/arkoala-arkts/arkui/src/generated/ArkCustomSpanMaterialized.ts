@@ -19,7 +19,7 @@
 import { CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo } from "./ArkStyledStringInterfaces"
 import { DrawContext } from "./ArkCommonInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,7 +33,7 @@ export class CustomSpanInternal {
     }
 }
 export class CustomSpan implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -67,7 +67,9 @@ export class CustomSpan implements MaterializedBase {
         thisSerializer.writeCustomSpanMeasureInfo(measureInfo)
         const retval  = ArkUIGeneratedNativeModule._CustomSpan_onMeasure(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        return new Deserializer(retval, retval.length).readCustomSpanMetrics()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : CustomSpanMetrics = retvalDeserializer.readCustomSpanMetrics()
+        return returnResult
     }
     private onDraw_serialize(context: DrawContext, drawInfo: CustomSpanDrawInfo): void {
         const thisSerializer : Serializer = Serializer.hold()

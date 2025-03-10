@@ -1,4 +1,5 @@
 import { ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, ArkTextInput, ArkTextInputComponent, Color, CustomDialogController, FlexAlign, LocalStorage, MutableState, bindCustomDialog, observableProxy } from "@koalaui/arkoala-arkui";
+/** @memo:stable */
 export class ArkCustomDialogExample1Component extends ArkStructBase<ArkCustomDialogExample1Component, CustomDialogExample1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

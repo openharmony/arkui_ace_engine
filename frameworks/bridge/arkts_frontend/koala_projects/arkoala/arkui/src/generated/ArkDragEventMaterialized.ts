@@ -20,35 +20,36 @@ import { DragBehavior, Summary, DragResult, Rectangle } from "./ArkCommonInterfa
 import { UnifiedData, UnifiedDataInternal } from "./ArkUnifiedDataMaterialized"
 import { Length } from "./ArkUnitsInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
 export interface DragEvent {
     dragBehavior: DragBehavior
     useCustomDropAnimation: boolean
-    getDisplayX(): number 
-    getDisplayY(): number 
-    getWindowX(): number 
-    getWindowY(): number 
-    getX(): number 
-    getY(): number 
-    setData(unifiedData: UnifiedData): void 
-    getData(): UnifiedData 
-    getSummary(): Summary 
-    setResult(dragResult: DragResult): void 
-    getResult(): DragResult 
-    getPreviewRect(): Rectangle 
-    getVelocityX(): number 
-    getVelocityY(): number 
-    getVelocity(): number 
-    getModifierKeyState(keys: Array<string>): boolean 
+    getDisplayX(): number
+    getDisplayY(): number
+    getWindowX(): number
+    getWindowY(): number
+    getX(): number
+    getY(): number
+    setData(unifiedData: UnifiedData): void
+    getData(): UnifiedData
+    getSummary(): Summary
+    setResult(dragResult: DragResult): void
+    getResult(): DragResult
+    getPreviewRect(): Rectangle
+    getVelocityX(): number
+    getVelocityY(): number
+    getVelocity(): number
+    getModifierKeyState(keys: Array<string>): boolean
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -169,18 +170,18 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return retval
     }
     private setData_serialize(unifiedData: UnifiedData): void {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeUnifiedData(unifiedData)
-        ArkUIGeneratedNativeModule._DragEvent_setData(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._DragEvent_setData(this.peer!.ptr, toPeerPtr(unifiedData))
     }
     private getData_serialize(): UnifiedData {
         const retval = ArkUIGeneratedNativeModule._DragEvent_getData(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj: UnifiedData = UnifiedDataInternal.fromPtr(retval)
+        return obj
     }
     private getSummary_serialize(): Summary {
         const retval = ArkUIGeneratedNativeModule._DragEvent_getSummary(this.peer!.ptr)
-        return new Deserializer(retval.buffer, retval.byteLength).readSummary()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: Summary = retvalDeserializer.readSummary()
+        return returnResult
     }
     private setResult_serialize(dragResult: DragResult): void {
         ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, dragResult)
@@ -191,7 +192,9 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     private getPreviewRect_serialize(): Rectangle {
         const retval = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr)
-        return new Deserializer(retval.buffer, retval.byteLength).readRectangle()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: Rectangle = retvalDeserializer.readRectangle()
+        return returnResult
     }
     private getVelocityX_serialize(): number {
         const retval = ArkUIGeneratedNativeModule._DragEvent_getVelocityX(this.peer!.ptr)

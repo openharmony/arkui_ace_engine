@@ -18,39 +18,15 @@
 
 import { SnapshotOptions } from "./ArkArkuiExternalInterfaces"
 import { PixelMap, PixelMapInternal } from "./ArkPixelMapMaterialized"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
-export class GlobalScope_ohos_arkui_componentSnapshotInternal {
-    public static fromPtr(ptr: KPointer): GlobalScope_ohos_arkui_componentSnapshot {
-        const obj: GlobalScope_ohos_arkui_componentSnapshot = new GlobalScope_ohos_arkui_componentSnapshot()
-        obj.peer = new Finalizable(ptr, GlobalScope_ohos_arkui_componentSnapshot.getFinalizer())
-        return obj
-    }
-}
-export class GlobalScope_ohos_arkui_componentSnapshot implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_globalscope_ohos_arkui_componentsnapshot(): KPointer {
-        const retval = ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_componentSnapshot_ctor()
-        return retval
-    }
-     constructor() {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = GlobalScope_ohos_arkui_componentSnapshot.ctor_globalscope_ohos_arkui_componentsnapshot()
-        this.peer = new Finalizable(ctorPtr, GlobalScope_ohos_arkui_componentSnapshot.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_componentSnapshot_getFinalizer()
-    }
+export class GlobalScope_ohos_arkui_componentSnapshot {
     public static get(id: string, callback: ((result: PixelMap) => void), options?: SnapshotOptions): void {
         const id_casted = id as (string)
         const callback_casted = callback as (((result: PixelMap) => void))

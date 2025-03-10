@@ -19,7 +19,7 @@
 import { Callback_PopInfo_Void } from "./SyntheticDeclarations"
 import { PopInfo } from "./ArkNavigationInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -33,7 +33,7 @@ export class NavPathInfoInternal {
     }
 }
 export class NavPathInfo implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -85,10 +85,10 @@ export class NavPathInfo implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    constructor(name?: string, param?: object, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean) {
-        if (((name) !== (undefined)) && ((param) !== (undefined)))
+     constructor(name?: string, param?: object, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean) {
+        if (((name) !== (undefined)) || ((param) !== (undefined)) || ((onPop) !== (undefined)) || ((isEntry) !== (undefined)))
         {
-            const ctorPtr : KPointer = NavPathInfo.ctor_navpathinfo(name, param, onPop, isEntry)
+            const ctorPtr : KPointer = NavPathInfo.ctor_navpathinfo((name)!, (param)!, (onPop)!, (isEntry)!)
             this.peer = new Finalizable(ctorPtr, NavPathInfo.getFinalizer())
         }
     }

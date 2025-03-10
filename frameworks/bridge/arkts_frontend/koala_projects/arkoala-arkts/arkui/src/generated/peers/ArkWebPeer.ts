@@ -18,7 +18,7 @@
 
 import { int32, float32 } from "@koalaui/common"
 import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { isResource, isInstanceOf, runtimeType, RuntimeType } from "@koalaui/interop"
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
 import { ComponentBase } from "../../ComponentBase"
 import { PeerNode } from "../../PeerNode"
@@ -47,17 +47,24 @@ import { RectShape } from "./../ArkRectShapeMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, OnPageEndEvent, OnPageBeginEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, OnLargestContentfulPaintCallback, OnLoadInterceptEvent, OnOverScrollEvent, OnSafeBrowsingCheckResultCallback, OnNavigationEntryCommittedCallback, OnIntelligentTrackingPreventionCallback, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedTouchInfo, OnOverrideUrlLoadingCallback, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, ExpandedMenuItemOptions, OnViewportFitChangedCallback, WebKeyboardCallback, OnAdsBlockedCallback, WebKeyboardAvoidMode, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebOptions } from "./../ArkWebInterfaces"
 import { WebResourceRequest } from "./../ArkWebResourceRequestMaterialized"
 import { WebResourceResponse } from "./../ArkWebResourceResponseMaterialized"
 import { EditMenuOptions } from "./../ArkEditMenuOptionsMaterialized"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
-import { wrapCallback, MaterializedBase } from "@koalaui/interop"
+import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -95,7 +102,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_imageAccess(this.peer.ptr, value ? 1 : 0)
     }
     mixedModeAttribute(value: MixedMode): void {
-        ArkUIGeneratedNativeModule._WebAttribute_mixedMode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._WebAttribute_mixedMode(this.peer.ptr, ((value as MixedMode) as int32))
     }
     zoomAccessAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._WebAttribute_zoomAccess(this.peer.ptr, value ? 1 : 0)
@@ -113,10 +120,10 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_password(this.peer.ptr, value ? 1 : 0)
     }
     cacheModeAttribute(value: CacheMode): void {
-        ArkUIGeneratedNativeModule._WebAttribute_cacheMode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._WebAttribute_cacheMode(this.peer.ptr, ((value as CacheMode) as int32))
     }
     darkModeAttribute(value: WebDarkMode): void {
-        ArkUIGeneratedNativeModule._WebAttribute_darkMode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._WebAttribute_darkMode(this.peer.ptr, ((value as WebDarkMode) as int32))
     }
     forceDarkAccessAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._WebAttribute_forceDarkAccess(this.peer.ptr, value ? 1 : 0)
@@ -137,7 +144,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_overviewModeAccess(this.peer.ptr, value ? 1 : 0)
     }
     overScrollModeAttribute(value: OverScrollMode): void {
-        ArkUIGeneratedNativeModule._WebAttribute_overScrollMode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._WebAttribute_overScrollMode(this.peer.ptr, ((value as OverScrollMode) as int32))
     }
     textZoomAtioAttribute(value: number): void {
         ArkUIGeneratedNativeModule._WebAttribute_textZoomAtio(this.peer.ptr, value)
@@ -559,7 +566,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     layoutModeAttribute(value: WebLayoutMode): void {
-        ArkUIGeneratedNativeModule._WebAttribute_layoutMode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._WebAttribute_layoutMode(this.peer.ptr, ((value as WebLayoutMode) as int32))
     }
     nestedScrollAttribute(value: NestedScrollOptions | NestedScrollOptionsExt): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -600,7 +607,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     copyOptionsAttribute(value: CopyOptions): void {
-        ArkUIGeneratedNativeModule._WebAttribute_copyOptions(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._WebAttribute_copyOptions(this.peer.ptr, ((value as CopyOptions) as int32))
     }
     onOverrideUrlLoadingAttribute(value: OnOverrideUrlLoadingCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -661,13 +668,10 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
     keyboardAvoidModeAttribute(value: WebKeyboardAvoidMode): void {
-        ArkUIGeneratedNativeModule._WebAttribute_keyboardAvoidMode(this.peer.ptr, (value.valueOf() as int32))
+        ArkUIGeneratedNativeModule._WebAttribute_keyboardAvoidMode(this.peer.ptr, ((value as WebKeyboardAvoidMode) as int32))
     }
     editMenuOptionsAttribute(value: EditMenuOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeEditMenuOptions(value)
-        ArkUIGeneratedNativeModule._WebAttribute_editMenuOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._WebAttribute_editMenuOptions(this.peer.ptr, toPeerPtr(value))
     }
     enableHapticFeedbackAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._WebAttribute_enableHapticFeedback(this.peer.ptr, value ? 1 : 0)
@@ -685,7 +689,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeSelectionMenuOptionsExt(options_value)
         }
-        ArkUIGeneratedNativeModule._WebAttribute_bindSelectionMenu(this.peer.ptr, (elementType.valueOf() as int32), thisSerializer.asArray(), thisSerializer.length(), (responseType.valueOf() as int32))
+        ArkUIGeneratedNativeModule._WebAttribute_bindSelectionMenu(this.peer.ptr, ((elementType as WebElementType) as int32), thisSerializer.asArray(), thisSerializer.length(), ((responseType as WebResponseType) as int32))
         thisSerializer.release()
     }
 }

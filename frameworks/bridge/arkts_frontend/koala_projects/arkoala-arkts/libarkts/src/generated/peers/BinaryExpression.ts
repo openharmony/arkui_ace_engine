@@ -67,6 +67,26 @@ export class BinaryExpression extends Expression {
     get isArithmetic(): boolean {
         return global.generatedEs2panda._BinaryExpressionIsArithmeticConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setLeft(expr: Expression): this {
+        global.generatedEs2panda._BinaryExpressionSetLeft(global.context, this.peer, passNode(expr))
+        return this
+    }
+    /** @deprecated */
+    setRight(expr: Expression): this {
+        global.generatedEs2panda._BinaryExpressionSetRight(global.context, this.peer, passNode(expr))
+        return this
+    }
+    /** @deprecated */
+    setResult(expr: Expression): this {
+        global.generatedEs2panda._BinaryExpressionSetResult(global.context, this.peer, passNode(expr))
+        return this
+    }
+    /** @deprecated */
+    setOperator(operatorType: Es2pandaTokenType): this {
+        global.generatedEs2panda._BinaryExpressionSetOperator(global.context, this.peer, operatorType)
+        return this
+    }
 }
 export function isBinaryExpression(node: AstNode): node is BinaryExpression {
     return node instanceof BinaryExpression

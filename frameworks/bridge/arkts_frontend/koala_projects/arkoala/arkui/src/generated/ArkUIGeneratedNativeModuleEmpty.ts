@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KInt, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer } from "@koalaui/interop"
+import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer } from "@koalaui/interop"
 import { int32, float32 } from "@koalaui/common"
 import { Length } from "./ArkUnitsInterfaces"
 
@@ -158,7 +158,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _AnimatorAttribute_playMode(ptr: KPointer, value: KInt): void {
         console.log("_AnimatorAttribute_playMode")
     }
-    _AnimatorAttribute_motion(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _AnimatorAttribute_motion(ptr: KPointer, value: KPointer): void {
         console.log("_AnimatorAttribute_motion")
     }
     _AnimatorAttribute_onStart(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
@@ -602,7 +602,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _CommonMethod_transition0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CommonMethod_transition0")
     }
-    _CommonMethod_transition1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _CommonMethod_transition1(ptr: KPointer, effect: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CommonMethod_transition1")
     }
     _CommonMethod_motionBlur(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
@@ -866,7 +866,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _CommonMethod_renderFit(ptr: KPointer, value: KInt): void {
         console.log("_CommonMethod_renderFit")
     }
-    _CommonMethod_gestureModifier(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _CommonMethod_gestureModifier(ptr: KPointer, value: KPointer): void {
         console.log("_CommonMethod_gestureModifier")
     }
     _CommonMethod_backgroundBrightness(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
@@ -1709,7 +1709,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _ImageSpanAttribute_onError(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_ImageSpanAttribute_onError")
     }
-    _ImageSpanAttribute_alt(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _ImageSpanAttribute_alt(ptr: KPointer, value: KPointer): void {
         console.log("_ImageSpanAttribute_alt")
     }
     _Line_construct(id: KInt, flags: KInt): KPointer {
@@ -1783,7 +1783,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _ListAttribute_friction(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_ListAttribute_friction")
     }
-    _ListAttribute_childrenMainSize(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _ListAttribute_childrenMainSize(ptr: KPointer, value: KPointer): void {
         console.log("_ListAttribute_childrenMainSize")
     }
     _ListAttribute_maintainVisibleContentPosition(ptr: KPointer, value: KInt): void {
@@ -1881,7 +1881,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _ListItemGroupAttribute_divider(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_ListItemGroupAttribute_divider")
     }
-    _ListItemGroupAttribute_childrenMainSize(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _ListItemGroupAttribute_childrenMainSize(ptr: KPointer, value: KPointer): void {
         console.log("_ListItemGroupAttribute_childrenMainSize")
     }
     _LoadingProgress_construct(id: KInt, flags: KInt): KPointer {
@@ -2498,7 +2498,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _RichEditorAttribute_onCopy(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_RichEditorAttribute_onCopy")
     }
-    _RichEditorAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _RichEditorAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         console.log("_RichEditorAttribute_editMenuOptions")
     }
     _RichEditorAttribute_enableKeyboardOnFocus(ptr: KPointer, value: KInt): void {
@@ -2774,7 +2774,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _SearchAttribute_onDidDelete(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_SearchAttribute_onDidDelete")
     }
-    _SearchAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _SearchAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         console.log("_SearchAttribute_editMenuOptions")
     }
     _SearchAttribute_enablePreviewText(ptr: KPointer, value: KInt): void {
@@ -2948,7 +2948,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_Shape_construct")
         return -1
     }
-    _ShapeInterface_setShapeOptions0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _ShapeInterface_setShapeOptions0(ptr: KPointer, value: KPointer): void {
         console.log("_ShapeInterface_setShapeOptions0")
     }
     _ShapeInterface_setShapeOptions1(ptr: KPointer): void {
@@ -3073,7 +3073,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _BaseSpan_textBackgroundStyle(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_BaseSpan_textBackgroundStyle")
     }
-    _BaseSpan_baselineOffset(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _BaseSpan_baselineOffset(ptr: KPointer, value: KPointer): void {
         console.log("_BaseSpan_baselineOffset")
     }
     _Span_construct(id: KInt, flags: KInt): KPointer {
@@ -3189,7 +3189,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _SwiperAttribute_indicator0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_SwiperAttribute_indicator0")
     }
-    _SwiperAttribute_indicator1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _SwiperAttribute_indicator1(ptr: KPointer, value: KPointer): void {
         console.log("_SwiperAttribute_indicator1")
     }
     _SwiperAttribute_loop(ptr: KPointer, value: KInt): void {
@@ -3483,7 +3483,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _TextAttribute_fontWeight1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_TextAttribute_fontWeight1")
     }
-    _TextAttribute_lineSpacing(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _TextAttribute_lineSpacing(ptr: KPointer, value: KPointer): void {
         console.log("_TextAttribute_lineSpacing")
     }
     _TextAttribute_textAlign(ptr: KPointer, value: KInt): void {
@@ -3564,7 +3564,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _TextAttribute_textSelectable(ptr: KPointer, value: KInt): void {
         console.log("_TextAttribute_textSelectable")
     }
-    _TextAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _TextAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         console.log("_TextAttribute_editMenuOptions")
     }
     _TextAttribute_halfLeading(ptr: KPointer, value: KInt): void {
@@ -3697,7 +3697,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _TextAreaAttribute_letterSpacing(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_TextAreaAttribute_letterSpacing")
     }
-    _TextAreaAttribute_lineSpacing(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _TextAreaAttribute_lineSpacing(ptr: KPointer, value: KPointer): void {
         console.log("_TextAreaAttribute_lineSpacing")
     }
     _TextAreaAttribute_lineHeight(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
@@ -3727,7 +3727,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _TextAreaAttribute_onDidDelete(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_TextAreaAttribute_onDidDelete")
     }
-    _TextAreaAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _TextAreaAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         console.log("_TextAreaAttribute_editMenuOptions")
     }
     _TextAreaAttribute_enablePreviewText(ptr: KPointer, value: KInt): void {
@@ -3972,7 +3972,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _TextInputAttribute_onDidDelete(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_TextInputAttribute_onDidDelete")
     }
-    _TextInputAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _TextInputAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         console.log("_TextInputAttribute_editMenuOptions")
     }
     _TextInputAttribute_enablePreviewText(ptr: KPointer, value: KInt): void {
@@ -4548,7 +4548,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _WebAttribute_keyboardAvoidMode(ptr: KPointer, value: KInt): void {
         console.log("_WebAttribute_keyboardAvoidMode")
     }
-    _WebAttribute_editMenuOptions(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _WebAttribute_editMenuOptions(ptr: KPointer, value: KPointer): void {
         console.log("_WebAttribute_editMenuOptions")
     }
     _WebAttribute_enableHapticFeedback(ptr: KPointer, value: KInt): void {
@@ -4747,14 +4747,6 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _LinearIndicatorAttribute_onChange(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_LinearIndicatorAttribute_onChange")
     }
-    _AnimationExtender_ctor(): KPointer {
-        console.log("_AnimationExtender_ctor")
-        return -1
-    }
-    _AnimationExtender_getFinalizer(): KPointer {
-        console.log("_AnimationExtender_getFinalizer")
-        return -1
-    }
     _AnimationExtender_SetClipRect(node: KPointer, x: KFloat, y: KFloat, width: KFloat, height: KFloat): void {
         console.log("_AnimationExtender_SetClipRect")
     }
@@ -4782,17 +4774,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_UnifiedData_hasType")
         return false
     }
-    _UnifiedData_getTypes(ptr: KPointer): KPointer {
+    _UnifiedData_getTypes(ptr: KPointer): KInteropReturnBuffer {
         console.log("_UnifiedData_getTypes")
-        return -1
-    }
-    _LazyForEachOps_ctor(): KPointer {
-        console.log("_LazyForEachOps_ctor")
-        return -1
-    }
-    _LazyForEachOps_getFinalizer(): KPointer {
-        console.log("_LazyForEachOps_getFinalizer")
-        return -1
+        return new Uint8Array()
     }
     _LazyForEachOps_NeedMoreElements(node: KPointer, mark: KPointer, direction: KInt): KPointer {
         console.log("_LazyForEachOps_NeedMoreElements")
@@ -4807,13 +4791,8 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _LazyForEachOps_Prepare(node: KPointer, itemCount: KInt, offset: KInt): void {
         console.log("_LazyForEachOps_Prepare")
     }
-    _SystemOps_ctor(): KPointer {
-        console.log("_SystemOps_ctor")
-        return -1
-    }
-    _SystemOps_getFinalizer(): KPointer {
-        console.log("_SystemOps_getFinalizer")
-        return -1
+    _LazyForEachOps_NotifyChange(node: KPointer, startIndex: KInt, endIndex: KInt, count: KInt): void {
+        console.log("_LazyForEachOps_NotifyChange")
     }
     _SystemOps_StartFrame(): KPointer {
         console.log("_SystemOps_StartFrame")
@@ -4822,7 +4801,13 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _SystemOps_EndFrame(root: KPointer): void {
         console.log("_SystemOps_EndFrame")
     }
-    _DrawingCanvas_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
+    _SystemOps_syncInstanceId(instanceId: KInt): void {
+        console.log("_SystemOps_syncInstanceId")
+    }
+    _SystemOps_restoreInstanceId(): void {
+        console.log("_SystemOps_restoreInstanceId")
+    }
+    _DrawingCanvas_ctor(pixelmap: KPointer): KPointer {
         console.log("_DrawingCanvas_ctor")
         return -1
     }
@@ -4845,6 +4830,22 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_LengthMetrics_px")
         return -1
     }
+    _LengthMetrics_vp(value: number): KPointer {
+        console.log("_LengthMetrics_vp")
+        return -1
+    }
+    _LengthMetrics_fp(value: number): KPointer {
+        console.log("_LengthMetrics_fp")
+        return -1
+    }
+    _LengthMetrics_percent(value: number): KPointer {
+        console.log("_LengthMetrics_percent")
+        return -1
+    }
+    _LengthMetrics_lpx(value: number): KPointer {
+        console.log("_LengthMetrics_lpx")
+        return -1
+    }
     _LengthMetrics_resource(thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_LengthMetrics_resource")
         return -1
@@ -4863,6 +4864,50 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _LengthMetrics_setValue(ptr: KPointer, value: number): void {
         console.log("_LengthMetrics_setValue")
     }
+    _ColorMetrics_ctor(): KPointer {
+        console.log("_ColorMetrics_ctor")
+        return -1
+    }
+    _ColorMetrics_getFinalizer(): KPointer {
+        console.log("_ColorMetrics_getFinalizer")
+        return -1
+    }
+    _ColorMetrics_numeric(value: number): KPointer {
+        console.log("_ColorMetrics_numeric")
+        return -1
+    }
+    _ColorMetrics_rgba(red: number, green: number, blue: number, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_ColorMetrics_rgba")
+        return -1
+    }
+    _ColorMetrics_resourceColor(thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_ColorMetrics_resourceColor")
+        return -1
+    }
+    _ColorMetrics_blendColor(ptr: KPointer, overlayColor: KPointer): KPointer {
+        console.log("_ColorMetrics_blendColor")
+        return -1
+    }
+    _ColorMetrics_getColor(ptr: KPointer): string {
+        console.log("_ColorMetrics_getColor")
+        return ""
+    }
+    _ColorMetrics_getRed(ptr: KPointer): number {
+        console.log("_ColorMetrics_getRed")
+        return 1
+    }
+    _ColorMetrics_getGreen(ptr: KPointer): number {
+        console.log("_ColorMetrics_getGreen")
+        return 1
+    }
+    _ColorMetrics_getBlue(ptr: KPointer): number {
+        console.log("_ColorMetrics_getBlue")
+        return 1
+    }
+    _ColorMetrics_getAlpha(ptr: KPointer): number {
+        console.log("_ColorMetrics_getAlpha")
+        return 1
+    }
     _WebviewController_ctor(): KPointer {
         console.log("_WebviewController_ctor")
         return -1
@@ -4877,24 +4922,8 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _WebviewController_loadUrl(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_WebviewController_loadUrl")
     }
-    _GlobalScope_ohos_arkui_componentSnapshot_ctor(): KPointer {
-        console.log("_GlobalScope_ohos_arkui_componentSnapshot_ctor")
-        return -1
-    }
-    _GlobalScope_ohos_arkui_componentSnapshot_getFinalizer(): KPointer {
-        console.log("_GlobalScope_ohos_arkui_componentSnapshot_getFinalizer")
-        return -1
-    }
     _GlobalScope_ohos_arkui_componentSnapshot_get(id: KStringPtr, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_GlobalScope_ohos_arkui_componentSnapshot_get")
-    }
-    _GlobalScope_ohos_arkui_performanceMonitor_ctor(): KPointer {
-        console.log("_GlobalScope_ohos_arkui_performanceMonitor_ctor")
-        return -1
-    }
-    _GlobalScope_ohos_arkui_performanceMonitor_getFinalizer(): KPointer {
-        console.log("_GlobalScope_ohos_arkui_performanceMonitor_getFinalizer")
-        return -1
     }
     _GlobalScope_ohos_arkui_performanceMonitor_begin(scene: KStringPtr, startInputType: KInt, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_GlobalScope_ohos_arkui_performanceMonitor_begin")
@@ -5077,20 +5106,12 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_PathShape_commands")
         return -1
     }
-    _GlobalScope_ohos_font_ctor(): KPointer {
-        console.log("_GlobalScope_ohos_font_ctor")
-        return -1
-    }
-    _GlobalScope_ohos_font_getFinalizer(): KPointer {
-        console.log("_GlobalScope_ohos_font_getFinalizer")
-        return -1
-    }
     _GlobalScope_ohos_font_registerFont(thisArray: Uint8Array, thisLength: int32): void {
         console.log("_GlobalScope_ohos_font_registerFont")
     }
-    _GlobalScope_ohos_font_getSystemFontList(): KPointer {
+    _GlobalScope_ohos_font_getSystemFontList(): KInteropReturnBuffer {
         console.log("_GlobalScope_ohos_font_getSystemFontList")
-        return -1
+        return new Uint8Array()
     }
     _ScaleSymbolEffect_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_ScaleSymbolEffect_ctor")
@@ -5141,13 +5162,13 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_FrameNode_isModifiable")
         return false
     }
-    _FrameNode_appendChild(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _FrameNode_appendChild(ptr: KPointer, node: KPointer): void {
         console.log("_FrameNode_appendChild")
     }
-    _FrameNode_insertChildAfter(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _FrameNode_insertChildAfter(ptr: KPointer, child: KPointer, sibling: KPointer): void {
         console.log("_FrameNode_insertChildAfter")
     }
-    _FrameNode_removeChild(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _FrameNode_removeChild(ptr: KPointer, node: KPointer): void {
         console.log("_FrameNode_removeChild")
     }
     _FrameNode_clearChildren(ptr: KPointer): void {
@@ -5188,6 +5209,10 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_FrameNode_getPositionToWindowWithTransform")
         return new Uint8Array()
     }
+    _FrameNode_getFrameNodeByKey(name: KStringPtr): KPointer {
+        console.log("_FrameNode_getFrameNodeByKey")
+        return -1
+    }
     _PixelMap_ctor(): KPointer {
         console.log("_PixelMap_ctor")
         return -1
@@ -5210,50 +5235,18 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_PixelMap_getIsStrideAlignment")
         return false
     }
-    _NavExtender_ctor(): KPointer {
-        console.log("_NavExtender_ctor")
-        return -1
-    }
-    _NavExtender_getFinalizer(): KPointer {
-        console.log("_NavExtender_getFinalizer")
-        return -1
-    }
-    _NavExtender_setUpdateStackCallback(thisArray: Uint8Array, thisLength: int32): void {
+    _NavExtender_setUpdateStackCallback(peer: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_NavExtender_setUpdateStackCallback")
     }
-    _EventEmulator_ctor(): KPointer {
-        console.log("_EventEmulator_ctor")
-        return -1
-    }
-    _EventEmulator_getFinalizer(): KPointer {
-        console.log("_EventEmulator_getFinalizer")
-        return -1
-    }
-    _EventEmulator_emitClickEvent(node: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void {
         console.log("_EventEmulator_emitClickEvent")
     }
     _EventEmulator_emitTextInputEvent(node: KPointer, text: KStringPtr): void {
         console.log("_EventEmulator_emitTextInputEvent")
     }
-    _ActionSheet_ctor(): KPointer {
-        console.log("_ActionSheet_ctor")
-        return -1
-    }
-    _ActionSheet_getFinalizer(): KPointer {
-        console.log("_ActionSheet_getFinalizer")
-        return -1
-    }
     _ActionSheet_show(thisArray: Uint8Array, thisLength: int32): undefined {
         console.log("_ActionSheet_show")
         return undefined
-    }
-    _AlertDialog_ctor(): KPointer {
-        console.log("_AlertDialog_ctor")
-        return -1
-    }
-    _AlertDialog_getFinalizer(): KPointer {
-        console.log("_AlertDialog_getFinalizer")
-        return -1
     }
     _AlertDialog_show(thisArray: Uint8Array, thisLength: int32): undefined {
         console.log("_AlertDialog_show")
@@ -5267,7 +5260,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_SpringProp_getFinalizer")
         return -1
     }
-    _SpringMotion_ctor(start: number, end: number, velocity: number, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _SpringMotion_ctor(start: number, end: number, velocity: number, prop: KPointer): KPointer {
         console.log("_SpringMotion_ctor")
         return -1
     }
@@ -5283,7 +5276,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_FrictionMotion_getFinalizer")
         return -1
     }
-    _ScrollMotion_ctor(position: number, velocity: number, min: number, max: number, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _ScrollMotion_ctor(position: number, velocity: number, min: number, max: number, prop: KPointer): KPointer {
         console.log("_ScrollMotion_ctor")
         return -1
     }
@@ -5306,14 +5299,6 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _CalendarController_goTo(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): undefined {
         console.log("_CalendarController_goTo")
         return undefined
-    }
-    _CalendarPickerDialog_ctor(): KPointer {
-        console.log("_CalendarPickerDialog_ctor")
-        return -1
-    }
-    _CalendarPickerDialog_getFinalizer(): KPointer {
-        console.log("_CalendarPickerDialog_getFinalizer")
-        return -1
     }
     _CalendarPickerDialog_show(thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CalendarPickerDialog_show")
@@ -5372,7 +5357,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_Path2D_getFinalizer")
         return -1
     }
-    _Path2D_addPath(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _Path2D_addPath(ptr: KPointer, path: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_Path2D_addPath")
     }
     _CanvasPattern_ctor(): KPointer {
@@ -5459,26 +5444,26 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _CanvasRenderer_clip0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CanvasRenderer_clip0")
     }
-    _CanvasRenderer_clip1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _CanvasRenderer_clip1(ptr: KPointer, path: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CanvasRenderer_clip1")
     }
     _CanvasRenderer_fill0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CanvasRenderer_fill0")
     }
-    _CanvasRenderer_fill1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _CanvasRenderer_fill1(ptr: KPointer, path: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CanvasRenderer_fill1")
     }
     _CanvasRenderer_stroke0(ptr: KPointer): void {
         console.log("_CanvasRenderer_stroke0")
     }
-    _CanvasRenderer_stroke1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _CanvasRenderer_stroke1(ptr: KPointer, path: KPointer): void {
         console.log("_CanvasRenderer_stroke1")
     }
     _CanvasRenderer_createLinearGradient(ptr: KPointer, x0: number, y0: number, x1: number, y1: number): KPointer {
         console.log("_CanvasRenderer_createLinearGradient")
         return -1
     }
-    _CanvasRenderer_createPattern(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _CanvasRenderer_createPattern(ptr: KPointer, image: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_CanvasRenderer_createPattern")
         return -1
     }
@@ -5494,7 +5479,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_CanvasRenderer_createImageData0")
         return -1
     }
-    _CanvasRenderer_createImageData1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _CanvasRenderer_createImageData1(ptr: KPointer, imagedata: KPointer): KPointer {
         console.log("_CanvasRenderer_createImageData1")
         return -1
     }
@@ -5506,15 +5491,15 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_CanvasRenderer_getPixelMap")
         return -1
     }
-    _CanvasRenderer_putImageData0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _CanvasRenderer_putImageData0(ptr: KPointer, imagedata: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CanvasRenderer_putImageData0")
     }
-    _CanvasRenderer_putImageData1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _CanvasRenderer_putImageData1(ptr: KPointer, imagedata: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CanvasRenderer_putImageData1")
     }
-    _CanvasRenderer_getLineDash(ptr: KPointer): KPointer {
+    _CanvasRenderer_getLineDash(ptr: KPointer): KInteropReturnBuffer {
         console.log("_CanvasRenderer_getLineDash")
-        return -1
+        return new Uint8Array()
     }
     _CanvasRenderer_setLineDash(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CanvasRenderer_setLineDash")
@@ -5572,7 +5557,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _CanvasRenderer_setPixelMap(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_CanvasRenderer_setPixelMap")
     }
-    _CanvasRenderer_transferFromImageBitmap(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _CanvasRenderer_transferFromImageBitmap(ptr: KPointer, bitmap: KPointer): void {
         console.log("_CanvasRenderer_transferFromImageBitmap")
     }
     _CanvasRenderer_saveLayer(ptr: KPointer): void {
@@ -5755,6 +5740,10 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_CanvasRenderingContext2D_getWidth")
         return 1
     }
+    _CanvasRenderingContext2D_getCanvas(ptr: KPointer): KPointer {
+        console.log("_CanvasRenderingContext2D_getCanvas")
+        return -1
+    }
     _OffscreenCanvasRenderingContext2D_ctor(width: number, height: number, thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_OffscreenCanvasRenderingContext2D_ctor")
         return -1
@@ -5811,6 +5800,10 @@ export class ArkUIGeneratedNativeModuleEmpty {
     }
     _DrawingRenderingContext_invalidate(ptr: KPointer): void {
         console.log("_DrawingRenderingContext_invalidate")
+    }
+    _DrawingRenderingContext_getCanvas(ptr: KPointer): KPointer {
+        console.log("_DrawingRenderingContext_getCanvas")
+        return -1
     }
     _ICurve_ctor(): KPointer {
         console.log("_ICurve_ctor")
@@ -5872,7 +5865,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_TransitionEffect_move")
         return -1
     }
-    _TransitionEffect_asymmetric(thisArray: Uint8Array, thisLength: int32): KPointer {
+    _TransitionEffect_asymmetric(appear: KPointer, disappear: KPointer): KPointer {
         console.log("_TransitionEffect_asymmetric")
         return -1
     }
@@ -5880,19 +5873,25 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_TransitionEffect_animation")
         return -1
     }
-    _TransitionEffect_combine(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _TransitionEffect_combine(ptr: KPointer, transitionEffect: KPointer): KPointer {
         console.log("_TransitionEffect_combine")
         return -1
     }
-    _GlobalScope_focusControl_common_requestFocus(value: KStringPtr): boolean {
-        console.log("_GlobalScope_focusControl_common_requestFocus")
-        return false
+    _TransitionEffect_getIDENTITY(): KPointer {
+        console.log("_TransitionEffect_getIDENTITY")
+        return -1
     }
-    _GlobalScope_cursorControl_common_setCursor(value: KInt): void {
-        console.log("_GlobalScope_cursorControl_common_setCursor")
+    _TransitionEffect_getOPACITY(): KPointer {
+        console.log("_TransitionEffect_getOPACITY")
+        return -1
     }
-    _GlobalScope_cursorControl_common_restoreDefault(): void {
-        console.log("_GlobalScope_cursorControl_common_restoreDefault")
+    _TransitionEffect_getSLIDE(): KPointer {
+        console.log("_TransitionEffect_getSLIDE")
+        return -1
+    }
+    _TransitionEffect_getSLIDE_SWITCH(): KPointer {
+        console.log("_TransitionEffect_getSLIDE_SWITCH")
+        return -1
     }
     _BaseEvent_ctor(): KPointer {
         console.log("_BaseEvent_ctor")
@@ -6208,9 +6207,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_TouchEvent_getFinalizer")
         return -1
     }
-    _TouchEvent_getHistoricalPoints(ptr: KPointer): KPointer {
+    _TouchEvent_getHistoricalPoints(ptr: KPointer): KInteropReturnBuffer {
         console.log("_TouchEvent_getHistoricalPoints")
-        return -1
+        return new Uint8Array()
     }
     _TouchEvent_getType(ptr: KPointer): KPointer {
         console.log("_TouchEvent_getType")
@@ -6219,16 +6218,16 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _TouchEvent_setType(ptr: KPointer, type: KInt): void {
         console.log("_TouchEvent_setType")
     }
-    _TouchEvent_getTouches(ptr: KPointer): KPointer {
+    _TouchEvent_getTouches(ptr: KPointer): KInteropReturnBuffer {
         console.log("_TouchEvent_getTouches")
-        return -1
+        return new Uint8Array()
     }
     _TouchEvent_setTouches(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_TouchEvent_setTouches")
     }
-    _TouchEvent_getChangedTouches(ptr: KPointer): KPointer {
+    _TouchEvent_getChangedTouches(ptr: KPointer): KInteropReturnBuffer {
         console.log("_TouchEvent_getChangedTouches")
-        return -1
+        return new Uint8Array()
     }
     _TouchEvent_setChangedTouches(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_TouchEvent_setChangedTouches")
@@ -6290,7 +6289,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_DragEvent_getY")
         return 1
     }
-    _DragEvent_setData(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _DragEvent_setData(ptr: KPointer, unifiedData: KPointer): void {
         console.log("_DragEvent_setData")
     }
     _DragEvent_getData(ptr: KPointer): KPointer {
@@ -6493,18 +6492,6 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_TextContentControllerBase_getTextContentLineCount")
         return 1
     }
-    _DynamicNode_ctor(): KPointer {
-        console.log("_DynamicNode_ctor")
-        return -1
-    }
-    _DynamicNode_getFinalizer(): KPointer {
-        console.log("_DynamicNode_getFinalizer")
-        return -1
-    }
-    _DynamicNode_onMove(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
-        console.log("_DynamicNode_onMove")
-        return -1
-    }
     _ChildrenMainSize_ctor(childDefaultSize: number): KPointer {
         console.log("_ChildrenMainSize_ctor")
         return -1
@@ -6578,59 +6565,6 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _GestureModifier_applyGesture(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_GestureModifier_applyGesture")
     }
-    _GlobalScope_common_getContext(thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
-        console.log("_GlobalScope_common_getContext")
-        return new Uint8Array()
-    }
-    _GlobalScope_common_postCardAction(thisArray: Uint8Array, thisLength: int32): void {
-        console.log("_GlobalScope_common_postCardAction")
-    }
-    _GlobalScope_common_dollar_r(value: KStringPtr, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
-        console.log("_GlobalScope_common_dollar_r")
-        return new Uint8Array()
-    }
-    _GlobalScope_common_dollar_rawfile(value: KStringPtr): KInteropReturnBuffer {
-        console.log("_GlobalScope_common_dollar_rawfile")
-        return new Uint8Array()
-    }
-    _GlobalScope_common_animateTo(thisArray: Uint8Array, thisLength: int32): void {
-        console.log("_GlobalScope_common_animateTo")
-    }
-    _GlobalScope_common_animateToImmediately(thisArray: Uint8Array, thisLength: int32): void {
-        console.log("_GlobalScope_common_animateToImmediately")
-    }
-    _GlobalScope_common_vp2px(value: number): number {
-        console.log("_GlobalScope_common_vp2px")
-        return 1
-    }
-    _GlobalScope_common_px2vp(value: number): number {
-        console.log("_GlobalScope_common_px2vp")
-        return 1
-    }
-    _GlobalScope_common_fp2px(value: number): number {
-        console.log("_GlobalScope_common_fp2px")
-        return 1
-    }
-    _GlobalScope_common_px2fp(value: number): number {
-        console.log("_GlobalScope_common_px2fp")
-        return 1
-    }
-    _GlobalScope_common_lpx2px(value: number): number {
-        console.log("_GlobalScope_common_lpx2px")
-        return 1
-    }
-    _GlobalScope_common_px2lpx(value: number): number {
-        console.log("_GlobalScope_common_px2lpx")
-        return 1
-    }
-    _ContextMenu_ctor(): KPointer {
-        console.log("_ContextMenu_ctor")
-        return -1
-    }
-    _ContextMenu_getFinalizer(): KPointer {
-        console.log("_ContextMenu_getFinalizer")
-        return -1
-    }
     _ContextMenu_close(): undefined {
         console.log("_ContextMenu_close")
         return undefined
@@ -6659,14 +6593,6 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_LinearGradient_getFinalizer")
         return -1
     }
-    _DatePickerDialog_ctor(): KPointer {
-        console.log("_DatePickerDialog_ctor")
-        return -1
-    }
-    _DatePickerDialog_getFinalizer(): KPointer {
-        console.log("_DatePickerDialog_getFinalizer")
-        return -1
-    }
     _DatePickerDialog_show(thisArray: Uint8Array, thisLength: int32): undefined {
         console.log("_DatePickerDialog_show")
         return undefined
@@ -6679,9 +6605,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_BaseGestureEvent_getFinalizer")
         return -1
     }
-    _BaseGestureEvent_getFingerList(ptr: KPointer): KPointer {
+    _BaseGestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer {
         console.log("_BaseGestureEvent_getFingerList")
-        return -1
+        return new Uint8Array()
     }
     _BaseGestureEvent_setFingerList(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_BaseGestureEvent_setFingerList")
@@ -6833,9 +6759,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _GestureEvent_setRepeat(ptr: KPointer, repeat: KInt): void {
         console.log("_GestureEvent_setRepeat")
     }
-    _GestureEvent_getFingerList(ptr: KPointer): KPointer {
+    _GestureEvent_getFingerList(ptr: KPointer): KInteropReturnBuffer {
         console.log("_GestureEvent_getFingerList")
-        return -1
+        return new Uint8Array()
     }
     _GestureEvent_setFingerList(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_GestureEvent_setFingerList")
@@ -6910,6 +6836,38 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _GestureEvent_setVelocity(ptr: KPointer, velocity: number): void {
         console.log("_GestureEvent_setVelocity")
     }
+    _TapGestureInterface_ctor(): KPointer {
+        console.log("_TapGestureInterface_ctor")
+        return -1
+    }
+    _TapGestureInterface_getFinalizer(): KPointer {
+        console.log("_TapGestureInterface_getFinalizer")
+        return -1
+    }
+    _TapGestureInterface_onAction(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_TapGestureInterface_onAction")
+        return -1
+    }
+    _LongPressGestureInterface_ctor(): KPointer {
+        console.log("_LongPressGestureInterface_ctor")
+        return -1
+    }
+    _LongPressGestureInterface_getFinalizer(): KPointer {
+        console.log("_LongPressGestureInterface_getFinalizer")
+        return -1
+    }
+    _LongPressGestureInterface_onAction(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_LongPressGestureInterface_onAction")
+        return -1
+    }
+    _LongPressGestureInterface_onActionEnd(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_LongPressGestureInterface_onActionEnd")
+        return -1
+    }
+    _LongPressGestureInterface_onActionCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_LongPressGestureInterface_onActionCancel")
+        return -1
+    }
     _PanGestureOptions_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_PanGestureOptions_ctor")
         return -1
@@ -6932,6 +6890,102 @@ export class ArkUIGeneratedNativeModuleEmpty {
     }
     _PanGestureOptions_getDirection(ptr: KPointer): KPointer {
         console.log("_PanGestureOptions_getDirection")
+        return -1
+    }
+    _PanGestureInterface_ctor(): KPointer {
+        console.log("_PanGestureInterface_ctor")
+        return -1
+    }
+    _PanGestureInterface_getFinalizer(): KPointer {
+        console.log("_PanGestureInterface_getFinalizer")
+        return -1
+    }
+    _PanGestureInterface_onActionStart(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_PanGestureInterface_onActionStart")
+        return -1
+    }
+    _PanGestureInterface_onActionUpdate(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_PanGestureInterface_onActionUpdate")
+        return -1
+    }
+    _PanGestureInterface_onActionEnd(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_PanGestureInterface_onActionEnd")
+        return -1
+    }
+    _PanGestureInterface_onActionCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_PanGestureInterface_onActionCancel")
+        return -1
+    }
+    _SwipeGestureInterface_ctor(): KPointer {
+        console.log("_SwipeGestureInterface_ctor")
+        return -1
+    }
+    _SwipeGestureInterface_getFinalizer(): KPointer {
+        console.log("_SwipeGestureInterface_getFinalizer")
+        return -1
+    }
+    _SwipeGestureInterface_onAction(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_SwipeGestureInterface_onAction")
+        return -1
+    }
+    _PinchGestureInterface_ctor(): KPointer {
+        console.log("_PinchGestureInterface_ctor")
+        return -1
+    }
+    _PinchGestureInterface_getFinalizer(): KPointer {
+        console.log("_PinchGestureInterface_getFinalizer")
+        return -1
+    }
+    _PinchGestureInterface_onActionStart(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_PinchGestureInterface_onActionStart")
+        return -1
+    }
+    _PinchGestureInterface_onActionUpdate(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_PinchGestureInterface_onActionUpdate")
+        return -1
+    }
+    _PinchGestureInterface_onActionEnd(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_PinchGestureInterface_onActionEnd")
+        return -1
+    }
+    _PinchGestureInterface_onActionCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_PinchGestureInterface_onActionCancel")
+        return -1
+    }
+    _RotationGestureInterface_ctor(): KPointer {
+        console.log("_RotationGestureInterface_ctor")
+        return -1
+    }
+    _RotationGestureInterface_getFinalizer(): KPointer {
+        console.log("_RotationGestureInterface_getFinalizer")
+        return -1
+    }
+    _RotationGestureInterface_onActionStart(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_RotationGestureInterface_onActionStart")
+        return -1
+    }
+    _RotationGestureInterface_onActionUpdate(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_RotationGestureInterface_onActionUpdate")
+        return -1
+    }
+    _RotationGestureInterface_onActionEnd(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_RotationGestureInterface_onActionEnd")
+        return -1
+    }
+    _RotationGestureInterface_onActionCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_RotationGestureInterface_onActionCancel")
+        return -1
+    }
+    _GestureGroupInterface_ctor(): KPointer {
+        console.log("_GestureGroupInterface_ctor")
+        return -1
+    }
+    _GestureGroupInterface_getFinalizer(): KPointer {
+        console.log("_GestureGroupInterface_getFinalizer")
+        return -1
+    }
+    _GestureGroupInterface_onCancel(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+        console.log("_GestureGroupInterface_onCancel")
         return -1
     }
     _ScrollableTargetInfo_ctor(): KPointer {
@@ -7021,9 +7075,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_ImageAnalyzerController_getFinalizer")
         return -1
     }
-    _ImageAnalyzerController_getImageAnalyzerSupportTypes(ptr: KPointer): KPointer {
+    _ImageAnalyzerController_getImageAnalyzerSupportTypes(ptr: KPointer): KInteropReturnBuffer {
         console.log("_ImageAnalyzerController_getImageAnalyzerSupportTypes")
-        return -1
+        return new Uint8Array()
     }
     _ListScroller_ctor(): KPointer {
         console.log("_ListScroller_ctor")
@@ -7137,10 +7191,18 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_NavDestinationContext_getConfigInRouteMap")
         return -1
     }
-    _NavDestinationContext_setPathInfo(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _NavDestinationContext_getPathInfo(ptr: KPointer): KPointer {
+        console.log("_NavDestinationContext_getPathInfo")
+        return -1
+    }
+    _NavDestinationContext_setPathInfo(ptr: KPointer, pathInfo: KPointer): void {
         console.log("_NavDestinationContext_setPathInfo")
     }
-    _NavDestinationContext_setPathStack(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _NavDestinationContext_getPathStack(ptr: KPointer): KPointer {
+        console.log("_NavDestinationContext_getPathStack")
+        return -1
+    }
+    _NavDestinationContext_setPathStack(ptr: KPointer, pathStack: KPointer): void {
         console.log("_NavDestinationContext_setPathStack")
     }
     _NavDestinationContext_getNavDestinationId(ptr: KPointer): string {
@@ -7190,17 +7252,17 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_NavPathStack_getFinalizer")
         return -1
     }
-    _NavPathStack_pushPath0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _NavPathStack_pushPath0(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_NavPathStack_pushPath0")
     }
-    _NavPathStack_pushPath1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _NavPathStack_pushPath1(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_NavPathStack_pushPath1")
     }
-    _NavPathStack_pushDestination0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _NavPathStack_pushDestination0(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_NavPathStack_pushDestination0")
         return -1
     }
-    _NavPathStack_pushDestination1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _NavPathStack_pushDestination1(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_NavPathStack_pushDestination1")
         return -1
     }
@@ -7218,13 +7280,13 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_NavPathStack_pushDestinationByName1")
         return -1
     }
-    _NavPathStack_replacePath0(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _NavPathStack_replacePath0(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_NavPathStack_replacePath0")
     }
-    _NavPathStack_replacePath1(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _NavPathStack_replacePath1(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_NavPathStack_replacePath1")
     }
-    _NavPathStack_replaceDestination(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _NavPathStack_replaceDestination(ptr: KPointer, info: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_NavPathStack_replaceDestination")
         return -1
     }
@@ -7275,21 +7337,21 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _NavPathStack_clear(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_NavPathStack_clear")
     }
-    _NavPathStack_getAllPathName(ptr: KPointer): KPointer {
+    _NavPathStack_getAllPathName(ptr: KPointer): KInteropReturnBuffer {
         console.log("_NavPathStack_getAllPathName")
-        return -1
+        return new Uint8Array()
     }
     _NavPathStack_getParamByIndex(ptr: KPointer, index: number): KPointer {
         console.log("_NavPathStack_getParamByIndex")
         return -1
     }
-    _NavPathStack_getParamByName(ptr: KPointer, name: KStringPtr): KPointer {
+    _NavPathStack_getParamByName(ptr: KPointer, name: KStringPtr): KInteropReturnBuffer {
         console.log("_NavPathStack_getParamByName")
-        return -1
+        return new Uint8Array()
     }
-    _NavPathStack_getIndexByName(ptr: KPointer, name: KStringPtr): KPointer {
+    _NavPathStack_getIndexByName(ptr: KPointer, name: KStringPtr): KInteropReturnBuffer {
         console.log("_NavPathStack_getIndexByName")
-        return -1
+        return new Uint8Array()
     }
     _NavPathStack_getParent(ptr: KPointer): KPointer {
         console.log("_NavPathStack_getParent")
@@ -7427,21 +7489,21 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _RichEditorController_deleteSpans(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_RichEditorController_deleteSpans")
     }
-    _RichEditorController_getSpans(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _RichEditorController_getSpans(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         console.log("_RichEditorController_getSpans")
-        return -1
+        return new Uint8Array()
     }
-    _RichEditorController_getParagraphs(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _RichEditorController_getParagraphs(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         console.log("_RichEditorController_getParagraphs")
-        return -1
+        return new Uint8Array()
     }
     _RichEditorController_getSelection(ptr: KPointer): KInteropReturnBuffer {
         console.log("_RichEditorController_getSelection")
         return new Uint8Array()
     }
-    _RichEditorController_fromStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _RichEditorController_fromStyledString(ptr: KPointer, value: KPointer): KInteropReturnBuffer {
         console.log("_RichEditorController_fromStyledString")
-        return -1
+        return new Uint8Array()
     }
     _RichEditorController_toStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_RichEditorController_toStyledString")
@@ -7455,7 +7517,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_RichEditorStyledStringController_getFinalizer")
         return -1
     }
-    _RichEditorStyledStringController_setStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _RichEditorStyledStringController_setStyledString(ptr: KPointer, styledString: KPointer): void {
         console.log("_RichEditorStyledStringController_setStyledString")
     }
     _RichEditorStyledStringController_getStyledString(ptr: KPointer): KPointer {
@@ -7741,7 +7803,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _TextController_closeSelectionMenu(ptr: KPointer): void {
         console.log("_TextController_closeSelectionMenu")
     }
-    _TextController_setStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _TextController_setStyledString(ptr: KPointer, value: KPointer): void {
         console.log("_TextController_setStyledString")
     }
     _TextController_getLayoutManager(ptr: KPointer): KPointer {
@@ -7834,7 +7896,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_StyledStringController_getFinalizer")
         return -1
     }
-    _StyledStringController_setStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _StyledStringController_setStyledString(ptr: KPointer, styledString: KPointer): void {
         console.log("_StyledStringController_setStyledString")
     }
     _StyledStringController_getStyledString(ptr: KPointer): KPointer {
@@ -7861,9 +7923,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_LayoutManager_getLineMetrics")
         return new Uint8Array()
     }
-    _LayoutManager_getRectsForRange(ptr: KPointer, thisArray: Uint8Array, thisLength: int32, widthStyle: KInt, heightStyle: KInt): KPointer {
+    _LayoutManager_getRectsForRange(ptr: KPointer, thisArray: Uint8Array, thisLength: int32, widthStyle: KInt, heightStyle: KInt): KInteropReturnBuffer {
         console.log("_LayoutManager_getRectsForRange")
-        return -1
+        return new Uint8Array()
     }
     _TextMenuItemId_ctor(): KPointer {
         console.log("_TextMenuItemId_ctor")
@@ -7877,9 +7939,37 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_TextMenuItemId_of")
         return -1
     }
-    _TextMenuItemId_equals(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): boolean {
+    _TextMenuItemId_equals(ptr: KPointer, id: KPointer): boolean {
         console.log("_TextMenuItemId_equals")
         return false
+    }
+    _TextMenuItemId_getCUT(): KPointer {
+        console.log("_TextMenuItemId_getCUT")
+        return -1
+    }
+    _TextMenuItemId_getCOPY(): KPointer {
+        console.log("_TextMenuItemId_getCOPY")
+        return -1
+    }
+    _TextMenuItemId_getPASTE(): KPointer {
+        console.log("_TextMenuItemId_getPASTE")
+        return -1
+    }
+    _TextMenuItemId_getSELECT_ALL(): KPointer {
+        console.log("_TextMenuItemId_getSELECT_ALL")
+        return -1
+    }
+    _TextMenuItemId_getCOLLABORATION_SERVICE(): KPointer {
+        console.log("_TextMenuItemId_getCOLLABORATION_SERVICE")
+        return -1
+    }
+    _TextMenuItemId_getCAMERA_INPUT(): KPointer {
+        console.log("_TextMenuItemId_getCAMERA_INPUT")
+        return -1
+    }
+    _TextMenuItemId_getAI_WRITER(): KPointer {
+        console.log("_TextMenuItemId_getAI_WRITER")
+        return -1
     }
     _EditMenuOptions_ctor(): KPointer {
         console.log("_EditMenuOptions_ctor")
@@ -7889,9 +7979,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_EditMenuOptions_getFinalizer")
         return -1
     }
-    _EditMenuOptions_onCreateMenu(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _EditMenuOptions_onCreateMenu(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         console.log("_EditMenuOptions_onCreateMenu")
-        return -1
+        return new Uint8Array()
     }
     _EditMenuOptions_onMenuItemClick(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): boolean {
         console.log("_EditMenuOptions_onMenuItemClick")
@@ -7932,14 +8022,6 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _TextInputController_stopEditing(ptr: KPointer): void {
         console.log("_TextInputController_stopEditing")
     }
-    _TextPickerDialog_ctor(): KPointer {
-        console.log("_TextPickerDialog_ctor")
-        return -1
-    }
-    _TextPickerDialog_getFinalizer(): KPointer {
-        console.log("_TextPickerDialog_getFinalizer")
-        return -1
-    }
     _TextPickerDialog_show(thisArray: Uint8Array, thisLength: int32): undefined {
         console.log("_TextPickerDialog_show")
         return undefined
@@ -7963,14 +8045,6 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _TextTimerController_reset(ptr: KPointer): undefined {
         console.log("_TextTimerController_reset")
         return undefined
-    }
-    _TimePickerDialog_ctor(): KPointer {
-        console.log("_TimePickerDialog_ctor")
-        return -1
-    }
-    _TimePickerDialog_getFinalizer(): KPointer {
-        console.log("_TimePickerDialog_getFinalizer")
-        return -1
     }
     _TimePickerDialog_show(thisArray: Uint8Array, thisLength: int32): undefined {
         console.log("_TimePickerDialog_show")
@@ -8073,9 +8147,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_FileSelectorParam_getMode")
         return -1
     }
-    _FileSelectorParam_getAcceptType(ptr: KPointer): KPointer {
+    _FileSelectorParam_getAcceptType(ptr: KPointer): KInteropReturnBuffer {
         console.log("_FileSelectorParam_getAcceptType")
-        return -1
+        return new Uint8Array()
     }
     _FileSelectorParam_isCapture(ptr: KPointer): boolean {
         console.log("_FileSelectorParam_isCapture")
@@ -8177,9 +8251,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_PermissionRequest_getOrigin")
         return ""
     }
-    _PermissionRequest_getAccessibleResource(ptr: KPointer): KPointer {
+    _PermissionRequest_getAccessibleResource(ptr: KPointer): KInteropReturnBuffer {
         console.log("_PermissionRequest_getAccessibleResource")
-        return -1
+        return new Uint8Array()
     }
     _PermissionRequest_grant(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_PermissionRequest_grant")
@@ -8224,7 +8298,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_ControllerHandler_getFinalizer")
         return -1
     }
-    _ControllerHandler_setWebController(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _ControllerHandler_setWebController(ptr: KPointer, controller: KPointer): void {
         console.log("_ControllerHandler_setWebController")
     }
     _WebContextMenuParam_ctor(): KPointer {
@@ -8349,9 +8423,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_WebResourceRequest_getFinalizer")
         return -1
     }
-    _WebResourceRequest_getRequestHeader(ptr: KPointer): KPointer {
+    _WebResourceRequest_getRequestHeader(ptr: KPointer): KInteropReturnBuffer {
         console.log("_WebResourceRequest_getRequestHeader")
-        return -1
+        return new Uint8Array()
     }
     _WebResourceRequest_getRequestUrl(ptr: KPointer): string {
         console.log("_WebResourceRequest_getRequestUrl")
@@ -8401,9 +8475,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_WebResourceResponse_getReasonMessage")
         return ""
     }
-    _WebResourceResponse_getResponseHeader(ptr: KPointer): KPointer {
+    _WebResourceResponse_getResponseHeader(ptr: KPointer): KInteropReturnBuffer {
         console.log("_WebResourceResponse_getResponseHeader")
-        return -1
+        return new Uint8Array()
     }
     _WebResourceResponse_getResponseCode(ptr: KPointer): number {
         console.log("_WebResourceResponse_getResponseCode")
@@ -8637,9 +8711,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_WaterFlowSections_update")
         return false
     }
-    _WaterFlowSections_values(ptr: KPointer): KPointer {
+    _WaterFlowSections_values(ptr: KPointer): KInteropReturnBuffer {
         console.log("_WaterFlowSections_values")
-        return -1
+        return new Uint8Array()
     }
     _WaterFlowSections_length(ptr: KPointer): number {
         console.log("_WaterFlowSections_length")
@@ -8656,9 +8730,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _UIExtensionProxy_send(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_UIExtensionProxy_send")
     }
-    _UIExtensionProxy_sendSync(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _UIExtensionProxy_sendSync(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         console.log("_UIExtensionProxy_sendSync")
-        return -1
+        return new Uint8Array()
     }
     _UIExtensionProxy_onAsyncReceiverRegister(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_UIExtensionProxy_onAsyncReceiverRegister")
@@ -8684,11 +8758,11 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_StyledString_getString")
         return ""
     }
-    _StyledString_getStyles(ptr: KPointer, start: number, length: number, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _StyledString_getStyles(ptr: KPointer, start: number, length: number, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         console.log("_StyledString_getStyles")
-        return -1
+        return new Uint8Array()
     }
-    _StyledString_equals(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): boolean {
+    _StyledString_equals(ptr: KPointer, other: KPointer): boolean {
         console.log("_StyledString_equals")
         return false
     }
@@ -8700,13 +8774,13 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_StyledString_fromHtml")
         return -1
     }
-    _StyledString_toHtml(thisArray: Uint8Array, thisLength: int32): string {
+    _StyledString_toHtml(styledString: KPointer): string {
         console.log("_StyledString_toHtml")
         return ""
     }
-    _StyledString_marshalling(thisArray: Uint8Array, thisLength: int32): ArrayBuffer {
+    _StyledString_marshalling(styledString: KPointer): KInteropReturnBuffer {
         console.log("_StyledString_marshalling")
-        return new ArrayBuffer(8)
+        return new Uint8Array()
     }
     _StyledString_unmarshalling(thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_StyledString_unmarshalling")
@@ -8756,7 +8830,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_DecorationStyle_getStyle")
         return -1
     }
-    _BaselineOffsetStyle_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
+    _BaselineOffsetStyle_ctor(value: KPointer): KPointer {
         console.log("_BaselineOffsetStyle_ctor")
         return -1
     }
@@ -8768,7 +8842,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_BaselineOffsetStyle_getBaselineOffset")
         return 1
     }
-    _LetterSpacingStyle_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
+    _LetterSpacingStyle_ctor(value: KPointer): KPointer {
         console.log("_LetterSpacingStyle_ctor")
         return -1
     }
@@ -8788,9 +8862,9 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_TextShadowStyle_getFinalizer")
         return -1
     }
-    _TextShadowStyle_getTextShadow(ptr: KPointer): KPointer {
+    _TextShadowStyle_getTextShadow(ptr: KPointer): KInteropReturnBuffer {
         console.log("_TextShadowStyle_getTextShadow")
-        return -1
+        return new Uint8Array()
     }
     _BackgroundColorStyle_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
         console.log("_BackgroundColorStyle_ctor")
@@ -8836,7 +8910,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_ParagraphStyle_getWordBreak")
         return -1
     }
-    _LineHeightStyle_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
+    _LineHeightStyle_ctor(lineHeight: KPointer): KPointer {
         console.log("_LineHeightStyle_ctor")
         return -1
     }
@@ -8892,13 +8966,13 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _MutableStyledString_clearStyles(ptr: KPointer): void {
         console.log("_MutableStyledString_clearStyles")
     }
-    _MutableStyledString_replaceStyledString(ptr: KPointer, start: number, length: number, thisArray: Uint8Array, thisLength: int32): void {
+    _MutableStyledString_replaceStyledString(ptr: KPointer, start: number, length: number, other: KPointer): void {
         console.log("_MutableStyledString_replaceStyledString")
     }
-    _MutableStyledString_insertStyledString(ptr: KPointer, start: number, thisArray: Uint8Array, thisLength: int32): void {
+    _MutableStyledString_insertStyledString(ptr: KPointer, start: number, other: KPointer): void {
         console.log("_MutableStyledString_insertStyledString")
     }
-    _MutableStyledString_appendStyledString(ptr: KPointer, thisArray: Uint8Array, thisLength: int32): void {
+    _MutableStyledString_appendStyledString(ptr: KPointer, other: KPointer): void {
         console.log("_MutableStyledString_appendStyledString")
     }
     _ImageAttachment_ctor(thisArray: Uint8Array, thisLength: int32): KPointer {
@@ -8907,6 +8981,10 @@ export class ArkUIGeneratedNativeModuleEmpty {
     }
     _ImageAttachment_getFinalizer(): KPointer {
         console.log("_ImageAttachment_getFinalizer")
+        return -1
+    }
+    _ImageAttachment_getValue(ptr: KPointer): KPointer {
+        console.log("_ImageAttachment_getValue")
         return -1
     }
     _ImageAttachment_getVerticalAlign(ptr: KPointer): KPointer {
@@ -8955,21 +9033,76 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _LinearIndicatorController_stop(ptr: KPointer): void {
         console.log("_LinearIndicatorController_stop")
     }
-    _GlobalScope_Profiler_inspector_registerVsyncCallback(thisArray: Uint8Array, thisLength: int32): void {
-        console.log("_GlobalScope_Profiler_inspector_registerVsyncCallback")
+    _GlobalScope_getContext(thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
+        console.log("_GlobalScope_getContext")
+        return new Uint8Array()
     }
-    _GlobalScope_Profiler_inspector_unregisterVsyncCallback(): void {
-        console.log("_GlobalScope_Profiler_inspector_unregisterVsyncCallback")
+    _GlobalScope_postCardAction(thisArray: Uint8Array, thisLength: int32): void {
+        console.log("_GlobalScope_postCardAction")
     }
-    _GlobalScope_inspector_getInspectorNodes(): KPointer {
-        console.log("_GlobalScope_inspector_getInspectorNodes")
+    _GlobalScope_dollar_r(value: KStringPtr, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
+        console.log("_GlobalScope_dollar_r")
+        return new Uint8Array()
+    }
+    _GlobalScope_dollar_rawfile(value: KStringPtr): KInteropReturnBuffer {
+        console.log("_GlobalScope_dollar_rawfile")
+        return new Uint8Array()
+    }
+    _GlobalScope_animateTo(thisArray: Uint8Array, thisLength: int32): void {
+        console.log("_GlobalScope_animateTo")
+    }
+    _GlobalScope_animateToImmediately(thisArray: Uint8Array, thisLength: int32): void {
+        console.log("_GlobalScope_animateToImmediately")
+    }
+    _GlobalScope_vp2px(value: number): number {
+        console.log("_GlobalScope_vp2px")
+        return 1
+    }
+    _GlobalScope_px2vp(value: number): number {
+        console.log("_GlobalScope_px2vp")
+        return 1
+    }
+    _GlobalScope_fp2px(value: number): number {
+        console.log("_GlobalScope_fp2px")
+        return 1
+    }
+    _GlobalScope_px2fp(value: number): number {
+        console.log("_GlobalScope_px2fp")
+        return 1
+    }
+    _GlobalScope_lpx2px(value: number): number {
+        console.log("_GlobalScope_lpx2px")
+        return 1
+    }
+    _GlobalScope_px2lpx(value: number): number {
+        console.log("_GlobalScope_px2lpx")
+        return 1
+    }
+    _GlobalScope_getInspectorNodes(): KPointer {
+        console.log("_GlobalScope_getInspectorNodes")
         return -1
     }
-    _GlobalScope_inspector_getInspectorNodeById(id: number): KPointer {
-        console.log("_GlobalScope_inspector_getInspectorNodeById")
+    _GlobalScope_getInspectorNodeById(id: number): KPointer {
+        console.log("_GlobalScope_getInspectorNodeById")
         return -1
     }
-    _GlobalScope_inspector_setAppBgColor(value: KStringPtr): void {
-        console.log("_GlobalScope_inspector_setAppBgColor")
+    _GlobalScope_setAppBgColor(value: KStringPtr): void {
+        console.log("_GlobalScope_setAppBgColor")
+    }
+    _GlobalScope_Profiler_registerVsyncCallback(thisArray: Uint8Array, thisLength: int32): void {
+        console.log("_GlobalScope_Profiler_registerVsyncCallback")
+    }
+    _GlobalScope_Profiler_unregisterVsyncCallback(): void {
+        console.log("_GlobalScope_Profiler_unregisterVsyncCallback")
+    }
+    _GlobalScope_cursorControl_setCursor(value: KInt): void {
+        console.log("_GlobalScope_cursorControl_setCursor")
+    }
+    _GlobalScope_cursorControl_restoreDefault(): void {
+        console.log("_GlobalScope_cursorControl_restoreDefault")
+    }
+    _GlobalScope_focusControl_requestFocus(value: KStringPtr): boolean {
+        console.log("_GlobalScope_focusControl_requestFocus")
+        return false
     }
 }

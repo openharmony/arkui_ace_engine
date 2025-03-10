@@ -20,7 +20,7 @@ import { CanvasPath, CanvasPathInternal } from "./ArkCanvasPathMaterialized"
 import { LengthMetricsUnit } from "./ArkUnitsInterfaces"
 import { Matrix2D, Matrix2DInternal } from "./ArkMatrix2DMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -34,10 +34,6 @@ export class Path2DInternal {
     }
 }
 export class Path2D extends CanvasPath implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_path2d(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._Path2D_ctor()
         return retval
@@ -58,7 +54,6 @@ export class Path2D extends CanvasPath implements MaterializedBase {
     }
     private addPath_serialize(path: Path2D, transform?: Matrix2D): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writePath2D(path)
         let transform_type : int32 = RuntimeType.UNDEFINED
         transform_type = runtimeType(transform)
         thisSerializer.writeInt8(transform_type as int32)
@@ -66,7 +61,7 @@ export class Path2D extends CanvasPath implements MaterializedBase {
             const transform_value  = transform!
             thisSerializer.writeMatrix2D(transform_value)
         }
-        ArkUIGeneratedNativeModule._Path2D_addPath(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._Path2D_addPath(this.peer!.ptr, toPeerPtr(path), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
 }

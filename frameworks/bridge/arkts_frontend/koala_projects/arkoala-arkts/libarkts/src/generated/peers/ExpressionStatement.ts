@@ -46,6 +46,11 @@ export class ExpressionStatement extends Statement {
     get getExpression(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ExpressionStatementGetExpressionConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setExpression(expr: Expression): this {
+        global.generatedEs2panda._ExpressionStatementSetExpression(global.context, this.peer, passNode(expr))
+        return this
+    }
 }
 export function isExpressionStatement(node: AstNode): node is ExpressionStatement {
     return node instanceof ExpressionStatement

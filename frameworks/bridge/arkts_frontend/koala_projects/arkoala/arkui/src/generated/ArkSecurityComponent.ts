@@ -17,9 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkSecurityComponentMethodPeer } from "./peers/ArkSecurityComponentPeer"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions, PX, VP, FP, LPX, Percentage } from "./ArkUnitsInterfaces"
 import { SecurityComponentLayoutDirection } from "./ArkSecurityComponentInterfaces"
@@ -29,7 +30,7 @@ import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
 /** @memo:stable */
 export class ArkSecurityComponentMethodComponent extends ComponentBase {
-    getPeer(): ArkSecurityComponentMethodPeer {
+    protected getPeer(): ArkSecurityComponentMethodPeer {
         return (this.peer as ArkSecurityComponentMethodPeer)
     }
     /** @memo */

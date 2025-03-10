@@ -19,6 +19,7 @@ import chalk from "chalk"
 import os from "os"
 import { ohConfDefault } from "./ohconf.mjs"
 import { copyDirSync, isEmptyDir, moveDirSync, parseJsonSync } from "./utils.mjs"
+import { execSync } from "child_process"
 
 /**
  * Current ETS API version.
@@ -49,6 +50,77 @@ export const OH_SDK_COMPONENT = {
 const OH_UNI_PACKAGE_NAME = "oh-uni-package.json"
 
 /**
+ * Downloads command-line-tools archive from Nexus.
+ *
+ * @param {string} dstPath - Path to save the downloaded archive.
+ */
+export async function downloadCliTools(destination) {
+    const packageName = "command-line-tools"
+    const packageVersion = "5.0.3502"
+    const fileName = `${packageName}.${packageVersion}.zip`
+    const destPath = path.join(destination, packageName)
+
+    log(`> Checking if command-line-tools ${packageVersion} needs to be downloaded...`)
+
+    if (fs.existsSync(destPath)) {
+        if (!isEmptyDir(destPath)) {
+            log(`> command-line-tools directory already exists and is not empty. Skipping download.`)
+            return
+        }
+        log(`> command-line-tools directory is empty. Proceeding with download...`)
+    }
+
+    const useOpenLab = !!parseInt(process.env.KOALA_BZ ?? "0")
+
+    if (useOpenLab) {
+        log("> Using OpenLab for package download.")
+        const { generic_package_archive_openlab } = await import("./openlab.mjs")
+        await generic_package_archive_openlab(
+            packageName,
+            packageVersion,
+            fileName,
+            destPath,
+            null
+        )
+    } else {
+        log("> Using GitLab for package download.")
+        const { generic_package_archive_gitlab } = await import("./gitlab.mjs")
+        await generic_package_archive_gitlab(
+            packageName,
+            packageVersion,
+            fileName,
+            destPath,
+            null
+        )
+    }
+
+    log(`> command-line-tools ${packageVersion} downloaded to ${destPath}`)
+
+    try {
+        log("> Setting permissions for command-line-tools...")
+
+        const ohpmBinPath = path.join(destPath, "ohpm/bin");
+        const hvigorBinPath = path.join(destPath, "hvigor/bin");
+
+        if (fs.existsSync(ohpmBinPath)) {
+            log(`> Setting permissions for ${ohpmBinPath}`);
+            execSync(`chmod -R 755 ${ohpmBinPath}`, { stdio: "inherit" });
+        }
+
+        if (fs.existsSync(hvigorBinPath)) {
+            log(`> Setting permissions for ${hvigorBinPath}`);
+            execSync(`chmod -R 755 ${hvigorBinPath}`, { stdio: "inherit" });
+        }
+
+        log("> Permissions set successfully.");
+    } catch (error) {
+        log("> Error setting permissions:", error);
+    }
+
+    log("> CLI tools have been installed successfully")
+}
+
+/**
  * Downloads OpenHarmony SDK.
  *
  * @param dstPath path to download
@@ -65,24 +137,26 @@ export async function downloadOhSdk(
     const sdkName = sdkComponent ? `SDK/${sdkComponent}` : "SDK"
 
     if (fs.existsSync(dstPath)) {
-        let currentSdkVersion = ohSdkInfo(dstPath, OH_SDK_COMPONENT.ets, false).version
+        let currentSdkInfo = ohSdkInfo(dstPath, OH_SDK_COMPONENT.ets, false)
+        let currentSdkVersion = currentSdkInfo.version
         if (currentSdkVersion === sdkVersion) {
             if (logIfExists) log(`> OpenHarmony ${sdkName} ${currentSdkVersion} is found at ${dstPath}`)
             return false
         }
         let archSdk = path.normalize(path.join(dstPath, `../${path.basename(dstPath)}.${currentSdkVersion}`))
 
-        let n = 1
-        while (fs.existsSync(archSdk)) archSdk = `${archSdk}(${n++})`
-
-        log(`> Saving current OpenHarmony ${sdkName} ${currentSdkVersion} to '${archSdk}'...`)
-        if (!moveDirSync(dstPath, archSdk)) {
-            error(`> Failed to remove '${dstPath}'! Please do it manually.`)
-            return false
+        if (currentSdkVersion != undefined) {
+            let n = 1
+            while (fs.existsSync(archSdk)) archSdk = `${archSdk}(${n++})`
+                log(`> Saving current OpenHarmony ${sdkName} ${currentSdkVersion} to '${archSdk}'...`)
+                if (!moveDirSync(dstPath, archSdk)) {
+                    error(`> Failed to remove '${dstPath}'! Please do it manually.`)
+                    return false
+                }
         }
     }
 
-    log(`> Downloading OpenHarmony ${sdkName} ${sdkVersion}...`)
+    log(`> Downloading OpenHarmony ${sdkName} ${sdkVersion} to ${dstPath}...`)
     const packageVersion = ohSdkVersionToPackageVersion(sdkVersion)
     let packageName = sdkComponent ? "ohos-sdk-" + sdkComponent : "ohos-sdk"
     let fileName = sdkComponent ?
@@ -143,6 +217,7 @@ export async function downloadOhSdkEtsApi(dstPath, version) {
 
 
     try {
+        log(`Getting ZIP to ${tmp}`)
         await downloadOhSdk(tmp, version, OH_SDK_COMPONENT.ets, false)
         const sdkInfo = ohSdkInfo(tmp, OH_SDK_COMPONENT.ets)
 

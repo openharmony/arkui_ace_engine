@@ -4,6 +4,7 @@ import { LocalStorage } from "@koalaui/arkui-common";
 function global() {
     ArkText(undefined, undefined, 'Global Builder');
 }
+/** @memo:stable */
 class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

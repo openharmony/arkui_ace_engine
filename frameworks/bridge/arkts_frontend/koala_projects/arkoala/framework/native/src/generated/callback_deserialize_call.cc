@@ -910,28 +910,6 @@ void deserializeAndCallSyncCallback_IsolatedComponentAttribute_Void(Ark_VMContex
     Ark_IsolatedComponentAttribute value = thisDeserializer.readIsolatedComponentAttribute();
     _callSync(vmContext, _resourceId, value);
 }
-void deserializeAndCallCallback_ItemDragInfo_Number_CustomBuilder(uint8_t* thisArray, Ark_Int32 thisLength)
-{
-    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Callback_CustomBuilder_Void continuation)>(thisDeserializer.readPointer());
-    thisDeserializer.readPointer();
-    Ark_ItemDragInfo event = thisDeserializer.readItemDragInfo();
-    Ark_Number itemIndex = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Callback_CustomBuilder_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_CustomBuilder_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_CustomBuilder_Void))))};
-    _call(_resourceId, event, itemIndex, _continuation);
-}
-void deserializeAndCallSyncCallback_ItemDragInfo_Number_CustomBuilder(Ark_VMContext vmContext, uint8_t* thisArray, Ark_Int32 thisLength)
-{
-    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    thisDeserializer.readPointer();
-    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Callback_CustomBuilder_Void continuation)>(thisDeserializer.readPointer());
-    Ark_ItemDragInfo event = thisDeserializer.readItemDragInfo();
-    Ark_Number itemIndex = static_cast<Ark_Number>(thisDeserializer.readNumber());
-    Callback_CustomBuilder_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_CustomBuilder_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_CustomBuilder_Void))))};
-    _callSync(vmContext, _resourceId, event, itemIndex, _continuation);
-}
 void deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(uint8_t* thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -4176,6 +4154,28 @@ void deserializeAndCallSyncOnIntelligentTrackingPreventionCallback(Ark_VMContext
     Ark_IntelligentTrackingPreventionDetails details = thisDeserializer.readIntelligentTrackingPreventionDetails();
     _callSync(vmContext, _resourceId, details);
 }
+void deserializeAndCallonItemDragStart_event_type(uint8_t* thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Callback_CustomBuilder_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_ItemDragInfo event = thisDeserializer.readItemDragInfo();
+    Ark_Number itemIndex = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Callback_CustomBuilder_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_CustomBuilder_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_CustomBuilder_Void))))};
+    _call(_resourceId, event, itemIndex, _continuation);
+}
+void deserializeAndCallSynconItemDragStart_event_type(Ark_VMContext vmContext, uint8_t* thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ItemDragInfo event, const Ark_Number itemIndex, const Callback_CustomBuilder_Void continuation)>(thisDeserializer.readPointer());
+    Ark_ItemDragInfo event = thisDeserializer.readItemDragInfo();
+    Ark_Number itemIndex = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Callback_CustomBuilder_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_CustomBuilder_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const CustomNodeBuilder value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_CustomBuilder_Void))))};
+    _callSync(vmContext, _resourceId, event, itemIndex, _continuation);
+}
 void deserializeAndCallOnLargestContentfulPaintCallback(uint8_t* thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -5373,7 +5373,6 @@ void deserializeAndCallCallback(Ark_Int32 kind, uint8_t* thisArray, Ark_Int32 th
         case -383025085/*Kind_Callback_InsertValue_Boolean*/: return deserializeAndCallCallback_InsertValue_Boolean(thisArray, thisLength);
         case -1121207885/*Kind_Callback_InsertValue_Void*/: return deserializeAndCallCallback_InsertValue_Void(thisArray, thisLength);
         case 719029905/*Kind_Callback_IsolatedComponentAttribute_Void*/: return deserializeAndCallCallback_IsolatedComponentAttribute_Void(thisArray, thisLength);
-        case 2071721246/*Kind_Callback_ItemDragInfo_Number_CustomBuilder*/: return deserializeAndCallCallback_ItemDragInfo_Number_CustomBuilder(thisArray, thisLength);
         case -1627362945/*Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisArray, thisLength);
         case -918805852/*Kind_Callback_ItemDragInfo_Number_Number_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Void(thisArray, thisLength);
         case 296908152/*Kind_Callback_ItemDragInfo_Number_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Void(thisArray, thisLength);
@@ -5521,6 +5520,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, uint8_t* thisArray, Ark_Int32 th
         case 81230317/*Kind_OnFullScreenEnterCallback*/: return deserializeAndCallOnFullScreenEnterCallback(thisArray, thisLength);
         case 9040430/*Kind_OnHoverStatusChangeCallback*/: return deserializeAndCallOnHoverStatusChangeCallback(thisArray, thisLength);
         case -1377876844/*Kind_OnIntelligentTrackingPreventionCallback*/: return deserializeAndCallOnIntelligentTrackingPreventionCallback(thisArray, thisLength);
+        case 1340995650/*Kind_onItemDragStart_event_type*/: return deserializeAndCallonItemDragStart_event_type(thisArray, thisLength);
         case 1390640532/*Kind_OnLargestContentfulPaintCallback*/: return deserializeAndCallOnLargestContentfulPaintCallback(thisArray, thisLength);
         case -968773856/*Kind_OnLinearIndicatorChangeCallback*/: return deserializeAndCallOnLinearIndicatorChangeCallback(thisArray, thisLength);
         case -1200281222/*Kind_OnMoveHandler*/: return deserializeAndCallOnMoveHandler(thisArray, thisLength);
@@ -5571,6 +5571,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, uint8_t* thisArray, Ark_Int32 th
     }
     printf("Unknown callback kind\n");
 }
+KOALA_EXECUTE(deserializeAndCallCallback, setCallbackCaller(static_cast<Callback_Caller_t>(deserializeAndCallCallback)))
 void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, uint8_t* thisArray, Ark_Int32 thisLength)
 {
     switch (kind) {
@@ -5618,7 +5619,6 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, uin
         case -383025085/*Kind_Callback_InsertValue_Boolean*/: return deserializeAndCallSyncCallback_InsertValue_Boolean(vmContext, thisArray, thisLength);
         case -1121207885/*Kind_Callback_InsertValue_Void*/: return deserializeAndCallSyncCallback_InsertValue_Void(vmContext, thisArray, thisLength);
         case 719029905/*Kind_Callback_IsolatedComponentAttribute_Void*/: return deserializeAndCallSyncCallback_IsolatedComponentAttribute_Void(vmContext, thisArray, thisLength);
-        case 2071721246/*Kind_Callback_ItemDragInfo_Number_CustomBuilder*/: return deserializeAndCallSyncCallback_ItemDragInfo_Number_CustomBuilder(vmContext, thisArray, thisLength);
         case -1627362945/*Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void*/: return deserializeAndCallSyncCallback_ItemDragInfo_Number_Number_Boolean_Void(vmContext, thisArray, thisLength);
         case -918805852/*Kind_Callback_ItemDragInfo_Number_Number_Void*/: return deserializeAndCallSyncCallback_ItemDragInfo_Number_Number_Void(vmContext, thisArray, thisLength);
         case 296908152/*Kind_Callback_ItemDragInfo_Number_Void*/: return deserializeAndCallSyncCallback_ItemDragInfo_Number_Void(vmContext, thisArray, thisLength);
@@ -5766,6 +5766,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, uin
         case 81230317/*Kind_OnFullScreenEnterCallback*/: return deserializeAndCallSyncOnFullScreenEnterCallback(vmContext, thisArray, thisLength);
         case 9040430/*Kind_OnHoverStatusChangeCallback*/: return deserializeAndCallSyncOnHoverStatusChangeCallback(vmContext, thisArray, thisLength);
         case -1377876844/*Kind_OnIntelligentTrackingPreventionCallback*/: return deserializeAndCallSyncOnIntelligentTrackingPreventionCallback(vmContext, thisArray, thisLength);
+        case 1340995650/*Kind_onItemDragStart_event_type*/: return deserializeAndCallSynconItemDragStart_event_type(vmContext, thisArray, thisLength);
         case 1390640532/*Kind_OnLargestContentfulPaintCallback*/: return deserializeAndCallSyncOnLargestContentfulPaintCallback(vmContext, thisArray, thisLength);
         case -968773856/*Kind_OnLinearIndicatorChangeCallback*/: return deserializeAndCallSyncOnLinearIndicatorChangeCallback(vmContext, thisArray, thisLength);
         case -1200281222/*Kind_OnMoveHandler*/: return deserializeAndCallSyncOnMoveHandler(vmContext, thisArray, thisLength);
@@ -5816,3 +5817,4 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, uin
     }
     printf("Unknown callback kind\n");
 }
+KOALA_EXECUTE(deserializeAndCallCallbackSync, setCallbackCallerSync(static_cast<Callback_Caller_Sync_t>(deserializeAndCallCallbackSync)))

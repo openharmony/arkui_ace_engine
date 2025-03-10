@@ -16,23 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
 export interface UIExtensionProxy {
-    send(data: Map<string, Object>): void 
-    sendSync(data: Map<string, Object>): Map<string, Object> 
-    onAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void 
-    onSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void 
-    offAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void 
-    offSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void 
+    send(data: Map<string, Object>): void
+    sendSync(data: Map<string, Object>): Map<string, Object>
+    onAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
+    onSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
+    offAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
+    offSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
 }
 export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionProxy {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -101,7 +102,17 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         }
         const retval = ArkUIGeneratedNativeModule._UIExtensionProxy_sendSync(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_size: int32 = retvalDeserializer.readInt32()
+        let buffer: Map<string, Object> = new Map<string, Object>()
+        // TODO: TS map resize
+        for (let buffer_i = 0; buffer_i < buffer_size; buffer_i++) {
+            const buffer_key: string = (retvalDeserializer.readString() as string)
+            const buffer_value: Object = (retvalDeserializer.readCustomObject("Object") as Object)
+            buffer.set(buffer_key, buffer_value)
+        }
+        const returnResult: Map<string, Object> = buffer
+        return returnResult
     }
     private onAsyncReceiverRegister_serialize(callback_: ((parameter: UIExtensionProxy) => void)): void {
         const thisSerializer: Serializer = Serializer.hold()

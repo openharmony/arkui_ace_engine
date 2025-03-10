@@ -58,6 +58,11 @@ export class VariableDeclaration extends Statement {
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._VariableDeclarationAnnotationsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setAnnotations(annotations: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._VariableDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+        return this
+    }
 }
 export function isVariableDeclaration(node: AstNode): node is VariableDeclaration {
     return node instanceof VariableDeclaration

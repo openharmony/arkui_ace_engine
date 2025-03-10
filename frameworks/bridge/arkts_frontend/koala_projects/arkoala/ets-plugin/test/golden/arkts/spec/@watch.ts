@@ -2,6 +2,7 @@ import { ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, Ark
 import { MutableState, OnChange } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkCompAComponent extends ArkStructBase<ArkCompAComponent, CompAOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

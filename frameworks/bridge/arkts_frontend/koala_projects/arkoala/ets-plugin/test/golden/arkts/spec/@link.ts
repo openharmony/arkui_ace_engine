@@ -2,6 +2,7 @@ import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, A
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkLinkComponentComponent extends ArkStructBase<ArkLinkComponentComponent, LinkComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -25,6 +26,7 @@ class ArkLinkComponentComponent extends ArkStructBase<ArkLinkComponentComponent,
         ArkText(__builder, undefined, this.counter);
     }
 }
+/** @memo:stable */
 class ArkParentComponentComponent extends ArkStructBase<ArkParentComponentComponent, ParentComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

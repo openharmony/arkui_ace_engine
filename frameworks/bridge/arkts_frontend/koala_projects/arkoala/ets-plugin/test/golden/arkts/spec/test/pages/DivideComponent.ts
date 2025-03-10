@@ -8,6 +8,7 @@ function textStyles() {
         __instance.backgroundColor(Color.Red);
     }, undefined, 'Builder');
 }
+/** @memo:stable */
 class ArkDivideComponentComponent extends ArkStructBase<ArkDivideComponentComponent, DivideComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

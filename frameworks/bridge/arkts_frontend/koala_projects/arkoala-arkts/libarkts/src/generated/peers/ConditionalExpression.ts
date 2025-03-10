@@ -45,11 +45,26 @@ export class ConditionalExpression extends Expression {
     get test(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ConditionalExpressionTestConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setTest(expr: Expression): this {
+        global.generatedEs2panda._ConditionalExpressionSetTest(global.context, this.peer, passNode(expr))
+        return this
+    }
     get consequent(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ConditionalExpressionConsequentConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setConsequent(expr: Expression): this {
+        global.generatedEs2panda._ConditionalExpressionSetConsequent(global.context, this.peer, passNode(expr))
+        return this
+    }
     get alternate(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ConditionalExpressionAlternateConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setAlternate(expr: Expression): this {
+        global.generatedEs2panda._ConditionalExpressionSetAlternate(global.context, this.peer, passNode(expr))
+        return this
     }
 }
 export function isConditionalExpression(node: AstNode): node is ConditionalExpression {

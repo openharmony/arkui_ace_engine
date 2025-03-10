@@ -52,6 +52,10 @@ export function assertValidPeer(peer: KPtr, expectedKind: Es2pandaAstNodeType): 
     }
 }
 
+export function acceptNativeObjectArrayResult<T extends ArktsObject>(arrayObject: KNativePointer, factory: (instance: KNativePointer) => T): T[] {
+    return new NativePtrDecoder().decode(arrayObject).map(factory);
+}
+
 export function unpackNonNullableNode<T extends AstNode>(peer: KNativePointer): T {
     if (peer === nullptr) {
         throwError('peer is NULLPTR (maybe you should use unpackNode)')
@@ -150,9 +154,6 @@ export function updateNodeByNode<T extends AstNode>(node: T, original: AstNode):
     }
     global.generatedEs2panda._AstNodeSetOriginalNode(global.context, node.peer, original.peer)
     global.generatedEs2panda._AstNodeSetParent(global.context, node.peer, global.generatedEs2panda._AstNodeParent(global.context, original.peer))
-    global.es2panda._AstNodeUpdateChildren(global.context, node.peer)
-    global.generatedEs2panda._AstNodeClearModifier(global.context, node.peer, allFlags)
-    global.generatedEs2panda._AstNodeAddModifier(global.context, node.peer, original.modifiers)
     global.es2panda._AstNodeUpdateChildren(global.context, node.peer)
     return node
 }

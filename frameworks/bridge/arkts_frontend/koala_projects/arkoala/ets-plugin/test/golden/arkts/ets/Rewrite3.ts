@@ -15,6 +15,7 @@ import { observableProxy } from "@koalaui/common";
  * limitations under the License.
  */
 import { storage } from "./Rewrite2";
+/** @memo:stable */
 class ArkLocalStoragePropExampleComponent extends ArkStructBase<ArkLocalStoragePropExampleComponent, LocalStoragePropExampleOptions> {
     private _entry_local_storage_ = storage;
     __initializeStruct(/**/

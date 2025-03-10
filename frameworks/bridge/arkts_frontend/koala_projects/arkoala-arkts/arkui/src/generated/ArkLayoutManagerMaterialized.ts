@@ -19,20 +19,20 @@
 import { PositionWithAffinity, LineMetrics, TextRange, TextBox } from "./ArkTextCommonInterfaces"
 import { RectWidthStyle, RectHeightStyle } from "./ArkArkuiExternalInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface LayoutManager {
-    getLineCount(): number 
-    getGlyphPositionAtCoordinate(x: number, y: number): PositionWithAffinity 
-    getLineMetrics(lineNumber: number): LineMetrics 
-    getRectsForRange(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> 
+    getLineCount(): number
+    getGlyphPositionAtCoordinate(x: number, y: number): PositionWithAffinity
+    getLineMetrics(lineNumber: number): LineMetrics
+    getRectsForRange(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox>
 }
 export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -71,18 +71,29 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     }
     private getGlyphPositionAtCoordinate_serialize(x: number, y: number): PositionWithAffinity {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getGlyphPositionAtCoordinate(this.peer!.ptr, x, y)
-        return new Deserializer(retval, retval.length).readPositionWithAffinity()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : PositionWithAffinity = retvalDeserializer.readPositionWithAffinity()
+        return returnResult
     }
     private getLineMetrics_serialize(lineNumber: number): LineMetrics {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_getLineMetrics(this.peer!.ptr, lineNumber)
-        return new Deserializer(retval, retval.length).readLineMetrics()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : LineMetrics = retvalDeserializer.readLineMetrics()
+        return returnResult
     }
     private getRectsForRange_serialize(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTextRange(range)
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length(), (widthStyle.valueOf() as int32), (heightStyle.valueOf() as int32))
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length(), ((widthStyle as RectWidthStyle) as int32), ((heightStyle as RectHeightStyle) as int32))
         thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const buffer_length : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<TextBox> = new Array<TextBox>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = retvalDeserializer.readTextBox()
+        }
+        const returnResult : Array<TextBox> = buffer
+        return returnResult
     }
     public static fromPtr(ptr: KPointer): LayoutManagerInternal {
         const obj : LayoutManagerInternal = new LayoutManagerInternal()

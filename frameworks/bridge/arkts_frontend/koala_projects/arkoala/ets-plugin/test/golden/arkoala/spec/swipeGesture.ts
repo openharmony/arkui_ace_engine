@@ -1,5 +1,6 @@
 import { ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, GestureEvent, LocalStorage, MutableState, SwipeDirection, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkSwipeGestureExampleComponent extends ArkStructBase<ArkSwipeGestureExampleComponent, SwipeGestureExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

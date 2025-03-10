@@ -2,6 +2,7 @@ import { $r, $rawfile, AppStorage, ArkColumn, ArkCommonMethodComponent, ArkPageT
 import { MutableState } from "@koalaui/runtime";
 import { observableProxy } from "@koalaui/common";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
+/** @memo:stable */
 class ArkLinkComponentComponent extends ArkStructBase<ArkLinkComponentComponent, LinkComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -25,6 +26,7 @@ class ArkLinkComponentComponent extends ArkStructBase<ArkLinkComponentComponent,
         ArkText(__builder, undefined, this.counter);
     }
 }
+/** @memo:stable */
 class ArkParentComponentComponent extends ArkStructBase<ArkParentComponentComponent, ParentComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

@@ -46,6 +46,16 @@ export class BlockExpression extends Expression {
     get statements(): readonly Statement[] {
         return unpackNodeArray(global.generatedEs2panda._BlockExpressionStatementsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    addStatements(statements: readonly Statement[]): this {
+        global.generatedEs2panda._BlockExpressionAddStatements(global.context, this.peer, passNodeArray(statements), statements.length)
+        return this
+    }
+    /** @deprecated */
+    addStatement(statement: Statement): this {
+        global.generatedEs2panda._BlockExpressionAddStatement(global.context, this.peer, passNode(statement))
+        return this
+    }
 }
 export function isBlockExpression(node: AstNode): node is BlockExpression {
     return node instanceof BlockExpression

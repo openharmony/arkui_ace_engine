@@ -23,7 +23,7 @@ import { Length } from "./ArkUnitsInterfaces"
 import { RectResult } from "./ArkCommonInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -37,7 +37,7 @@ export class ScrollerInternal {
     }
 }
 export class Scroller implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -121,7 +121,7 @@ export class Scroller implements MaterializedBase {
             const options_value  = options!
             thisSerializer.writeScrollEdgeOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollEdge(this.peer!.ptr, (value.valueOf() as int32), thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollEdge(this.peer!.ptr, ((value as Edge) as int32), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -145,7 +145,7 @@ export class Scroller implements MaterializedBase {
         thisSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as Axis)
-            thisSerializer.writeInt32((value_direction_value.valueOf() as int32))
+            thisSerializer.writeInt32(((value_direction_value as Axis) as int32))
         }
         const retval  = ArkUIGeneratedNativeModule._Scroller_scrollPage1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
@@ -153,7 +153,9 @@ export class Scroller implements MaterializedBase {
     }
     private currentOffset_serialize(): OffsetResult {
         const retval  = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readOffsetResult()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : OffsetResult = retvalDeserializer.readOffsetResult()
+        return returnResult
     }
     private scrollToIndex_serialize(value: number, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): undefined {
         const thisSerializer : Serializer = Serializer.hold()
@@ -169,7 +171,7 @@ export class Scroller implements MaterializedBase {
         thisSerializer.writeInt8(align_type as int32)
         if ((RuntimeType.UNDEFINED) != (align_type)) {
             const align_value  = (align as ScrollAlign)
-            thisSerializer.writeInt32((align_value.valueOf() as int32))
+            thisSerializer.writeInt32(((align_value as ScrollAlign) as int32))
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
@@ -192,7 +194,9 @@ export class Scroller implements MaterializedBase {
     }
     private getItemRect_serialize(index: number): RectResult {
         const retval  = ArkUIGeneratedNativeModule._Scroller_getItemRect(this.peer!.ptr, index)
-        return new Deserializer(retval, retval.length).readRectResult()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : RectResult = retvalDeserializer.readRectResult()
+        return returnResult
     }
     private getItemIndex_serialize(x: number, y: number): number {
         const retval  = ArkUIGeneratedNativeModule._Scroller_getItemIndex(this.peer!.ptr, x, y)

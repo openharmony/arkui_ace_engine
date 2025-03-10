@@ -60,7 +60,7 @@ export class Finalizable {
             if (this.finalizer == nullptr) throw new Error("Managed finalizer is 0")
 
             const thunk = new NativeThunk(ptr, finalizer, handle)
-            // finalizerRegister(this, thunk)
+            finalizerRegister(this, thunk)
             this.cleaner = thunk
         }
     }

@@ -2,6 +2,7 @@ import { $r, $rawfile, AppStorage, ArkCommonMethodComponent, ArkFlex, ArkFlexCom
 import { MutableState } from "@koalaui/runtime";
 import { registerArkuiEntry } from "@koalaui/arkui/ohos.router";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkPanGestureExampleComponent extends ArkStructBase<ArkPanGestureExampleComponent, PanGestureExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

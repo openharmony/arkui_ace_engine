@@ -1,24 +1,27 @@
 import { KBoolean, KStringPtr, NativeBuffer, MaterializedBase } from "@koalaui/interop"
+import { int32 } from "@koalaui/common"
+import { BusinessError } from "./../ArkBaseInterfaces"
 import { DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish } from "./../ArkAnimationExtenderInterfaces"
 import { Curve, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, DialogButtonStyle, WordBreak, AnimationStatus, FillMode, PlayMode, FontWeight, TextOverflow, TextHeightAdaptivePolicy, FontStyle, CheckBoxShape, LineCapStyle, LineJoinStyle, HorizontalAlign, FlexAlign, TextDecorationType, TextDecorationStyle, SharedTransitionEffectType, VerticalAlign, TransitionType, MouseButton, MouseAction, AccessibilityHoverType, TouchType, KeyType, KeySource, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, BarState, EdgeEffect, IlluminatedType, EmbeddedType, ImageFit, Edge, Week, RelateType, FlexDirection, FlexWrap, TextAlign, TextCase, CopyOptions, TitleHeight, ImageSpanAlignment, TextContentStyle, XComponentType, ScrollSource, LineBreakStrategy, EllipsisMode, OptionWidthMode, FoldStatus, AppRotation, MarqueeUpdateStrategy, TextSelectableMode, WidthBreakpoint, HeightBreakpoint } from "./../ArkEnumsInterfaces"
 import { ICurve } from "./../ArkICurveMaterialized"
 import { AnimationExtender } from "./../ArkAnimationExtenderMaterialized"
-import { AnimateParam, TranslateOptions, UIContext, CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, TransitionOptions, MotionBlurOptions, InvertOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DismissReason, HoverModeAreaType, CommonConfiguration, ContentModifier, PickerTextStyle, PickerDialogButtonStyle, CommonShapeMethod, PointLightStyle, ComponentOptions, InputCounterOptions, TextDecorationOptions, ProvideOptions, AnimatableArithmetic, Context, Configuration, ExpectedFrameRateRange, FinishCallbackType, TouchTestStrategy, TransitionHierarchyStrategy, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, TransitionEdge, TransitionEffects, DrawContext, PreviewParams, ItemDragInfo, EventTarget, SourceType, SourceTool, RepeatMode, BlurStyleActivePolicy, ThemeColorMode, AdaptiveColor, BlurStyleOptions, ShadowType, MultiShadowOptions, LayoutSafeAreaType, LayoutSafeAreaEdge, SheetSize, LinearGradient_common, TouchObject, HistoricalPoint, DragBehavior, Summary, DragResult, IntentionCode, BindOptions, DismissContentCoverAction, SheetTitleOptions, SheetType, SheetMode, ScrollSizeMode, SheetKeyboardAvoidMode, SheetDismiss, DismissSheetAction, SpringBackAction, PopupMessageOptions, DismissPopupAction, MenuPreviewMode, ContextMenuAnimationOptions, RectResult, FadingEdgeOptions, NestedScrollOptions, SymbolGlyphModifier, DragPreviewMode, MenuPolicy, ImageModifier, CommonAttribute, CommonInterface, OverlayOffset, FractionStop, MotionBlurAnchor, LayoutBorderInfo, LayoutInfo, LayoutChild, GeometryInfo, SizeResult, Layoutable, MeasureResult, NavDestinationInfo, NavigationInfo, RouterPageInfo, Theme, CaretOffset, ContentClipMode, ScrollableCommonMethod, EdgeEffectOptions, ScrollResult, OnWillScrollCallback, OnMoveHandler, LightSource, KeyframeAnimateParam, KeyframeState, Callback, VisibleAreaEventOptions, HoverCallback, UIGestureEvent, SelectionOptions, KeyboardAvoidMode } from "./../ArkCommonInterfaces"
+import { AnimateParam, TranslateOptions, UIContext, CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, TransitionOptions, MotionBlurOptions, InvertOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DismissReason, HoverModeAreaType, CommonConfiguration, ContentModifier, PickerTextStyle, PickerDialogButtonStyle, CommonShapeMethod, PointLightStyle, ComponentOptions, InputCounterOptions, TextDecorationOptions, ProvideOptions, AnimatableArithmetic, Context, Configuration, ExpectedFrameRateRange, FinishCallbackType, TouchTestStrategy, TransitionHierarchyStrategy, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, TransitionEdge, TransitionEffects, DrawContext, PreviewParams, ItemDragInfo, EventTarget, SourceType, SourceTool, RepeatMode, BlurStyleActivePolicy, ThemeColorMode, AdaptiveColor, BlurStyleOptions, ShadowType, MultiShadowOptions, LayoutSafeAreaType, LayoutSafeAreaEdge, SheetSize, LinearGradient_common, TouchObject, HistoricalPoint, DragBehavior, Summary, DragResult, IntentionCode, BindOptions, DismissContentCoverAction, SheetTitleOptions, SheetType, SheetMode, ScrollSizeMode, SheetKeyboardAvoidMode, SheetDismiss, DismissSheetAction, SpringBackAction, PopupMessageOptions, DismissPopupAction, MenuPreviewMode, ContextMenuAnimationOptions, RectResult, FadingEdgeOptions, NestedScrollOptions, SymbolGlyphModifier, DragPreviewMode, MenuPolicy, ImageModifier, CommonAttribute, CommonInterface, OverlayOffset, FractionStop, MotionBlurAnchor, LayoutBorderInfo, LayoutInfo, LayoutChild, GeometryInfo, SizeResult, Layoutable, MeasureResult, NavDestinationInfo, NavigationInfo, RouterPageInfo, Theme, CaretOffset, ContentClipMode, ScrollableCommonMethod, EdgeEffectOptions, ScrollResult, OnWillScrollCallback, DynamicNode, OnMoveHandler, LightSource, KeyframeAnimateParam, KeyframeState, Callback, VisibleAreaEventOptions, HoverCallback, UIGestureEvent, SelectionOptions, KeyboardAvoidMode } from "./../ArkCommonInterfaces"
 import { PointerStyle, Callback_RangeUpdate } from "./../ArkArkuiCustomInterfaces"
 import { UnifiedData } from "./../ArkUnifiedDataMaterialized"
 import { LazyForEachOps } from "./../ArkLazyForEachOpsMaterialized"
 import { SystemOps } from "./../ArkSystemOpsMaterialized"
 import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
-import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, BusinessError, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, FontOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
+import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, FontOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
 import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
 import { Resource } from "./../ArkResourceInterfaces"
+import { ColorMetrics } from "./../ArkColorMetricsMaterialized"
+import { ResourceColor, Position, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback, Offset, Font, LengthMetricsUnit, MarkStyle, Bias, EdgeWidth, DirectionalEdgesT, LengthConstrain, DividerStyleOptions, VP, PX, LPX, TouchPoint } from "./../ArkUnitsInterfaces"
 import { WebviewController } from "./../ArkWebviewControllerMaterialized"
 import { GlobalScope_ohos_arkui_componentSnapshot } from "./../ArkGlobalScopeOhosArkuiComponentSnapshotMaterialized"
-import { AsyncCallback_image_PixelMap_Void, Literal_Want_want, Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_DismissDialogAction_Void, Callback_Number_Void, Literal_Number_day_month_year, Type_CalendarInterface_value, Callback_CalendarSelectedDate_Void, Callback_CalendarRequestedData_Void, Callback_Date_Void, Callback_Boolean_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Literal_TransitionEffect_appear_disappear, Tuple_Number_Number, Callback_DismissContentCoverAction_Void, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_SheetType_Void, Literal_String_value_Callback_Void_action, Literal_Boolean_isVisible, Literal_ResourceColor_color, Callback_Literal_Boolean_isVisible_Void, Callback_DismissPopupAction_Void, AnimationRange_Number, Literal_Empty, Callback_Number_Number_Void, Literal_String_key_Any_defaultValue, Callback_DatePickerResult_Void, Callback_TerminationInfo_Void, Literal_Number_errcode_String_msg, Callback_FormCallbackInfo_Void, Callback_Literal_Number_errcode_String_msg_Void, Callback_Any_Void, Tuple_Union_ResourceColor_LinearGradient_Number, Callback_GestureEvent_Void, Literal_Number_duration_fingers_Boolean_repeat, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_angle_fingers, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Literal_Number_offsetRemain, Callback_Number_Number_ComputedBarAttribute, Callback_ItemDragInfo_Number_CustomBuilder, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Callback_String_Void, Type_ImageAttribute_onComplete_callback_event, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Literal_Boolean_next_Axis_direction, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, Callback_SwipeActionState_Void, Callback_ClickEvent_LocationButtonOnClickResult_Void, Callback_Boolean, Callback_NavDestinationContext_Void, Callback_PopInfo_Void, Tuple_Dimension_Dimension, Callback_NavigationTitleMode_Void, Callback_NavigationMode_Void, Callback_String_Unknown_Void, Type_NavigationAttribute_customNavContentTransition_delegate, Callback_NavigationTransitionProxy_Void, Literal_String_target_NavigationType_type, Callback_Number_Number_PanelMode_Void, Callback_PanelMode_Void, Callback_ClickEvent_PasteButtonOnClickResult_Void, Callback_Array_Number_Void, Callback_RefreshStatus_Void, Callback_RichEditorSelection_Void, Callback_RichEditorRange_Void, Callback_RichEditorInsertValue_Boolean, Callback_RichEditorTextSpanResult_Void, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, Callback_RichEditorChangeValue_Boolean, Callback_CutEvent_Void, Callback_CopyEvent_Void, Callback_ClickEvent_SaveButtonOnClickResult_Void, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_Number_String_Void, Callback_Union_Number_Resource_Void, Callback_ResourceStr_Void, Callback_Number_SliderChangeMode_Void, Literal_Number_index, Callback_SwiperContentTransitionProxy_Void, Callback_TabContentTransitionProxy_Void, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, Callback_StyledStringChangeValue_Boolean, Callback_String_Number_Void, Type_TextPickerAttribute_onChange_callback, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, Callback_TextPickerResult_Void, Callback_TimePickerResult_Void, Callback_FullscreenInfo_Void, Callback_PreparedInfo_Void, Callback_PlaybackInfo_Void, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Literal_Object_object__String_name_Array_String_methodList, Literal_Union_String_WebResourceRequest_data, Literal_Function_handler_Object_error, Literal_Object_detail, Literal_Function_callback__Object_fileSelector, Callback_OnPageEndEvent_Void, Callback_OnPageBeginEvent_Void, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, Callback_OnGeolocationShowEvent_Void, Callback_OnAlertEvent_Boolean, Callback_OnBeforeUnloadEvent_Boolean, Callback_OnConfirmEvent_Boolean, Callback_OnPromptEvent_Boolean, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, Callback_OnHttpErrorReceiveEvent_Void, Callback_OnDownloadStartEvent_Void, Callback_OnRefreshAccessedHistoryEvent_Void, Type_WebAttribute_onUrlLoadIntercept_callback, Callback_Literal_Function_handler_Object_error_Void, Callback_OnRenderExitedEvent_Void, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Type_WebAttribute_onFileSelectorShow_callback, Callback_OnResourceLoadEvent_Void, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, Callback_OnInterceptRequestEvent_WebResourceResponse, Callback_OnPermissionRequestEvent_Void, Callback_OnScreenCaptureRequestEvent_Void, Callback_OnContextMenuShowEvent_Boolean, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, Callback_OnClientAuthenticationEvent_Void, Callback_OnWindowNewEvent_Void, Callback_OnTouchIconUrlReceivedEvent_Void, Callback_OnFaviconReceivedEvent_Void, Callback_OnPageVisibleEvent_Void, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, Callback_OnLoadInterceptEvent_Boolean, Callback_OnOverScrollEvent_Void, Callback_NativeEmbedDataInfo_Void, Callback_NativeEmbedTouchInfo_Void, Literal_String_plainText, Callback_Literal_String_plainText_Void, Literal_Number_surfaceHeight_surfaceWidth, Type_XComponentInterface_value, Callback_UIExtensionProxy_Void, Literal_Number_code_Want_want, Callback_Literal_Number_code_Want_want_Void } from "./../SyntheticDeclarations"
+import { AsyncCallback_image_PixelMap_Void, Literal_Want_want, Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_DismissDialogAction_Void, Callback_Number_Void, Literal_Number_day_month_year, Type_CalendarInterface_value, Callback_CalendarSelectedDate_Void, Callback_CalendarRequestedData_Void, Callback_Date_Void, Callback_Boolean_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Literal_TransitionEffect_appear_disappear, Tuple_Number_Number, Callback_DismissContentCoverAction_Void, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_SheetType_Void, Literal_String_value_Callback_Void_action, Literal_Boolean_isVisible, Literal_ResourceColor_color, Callback_Literal_Boolean_isVisible_Void, Callback_DismissPopupAction_Void, AnimationRange_Number, Literal_Empty, Callback_Number_Number_Void, Literal_String_key_Any_defaultValue, Callback_DatePickerResult_Void, Callback_TerminationInfo_Void, Literal_Number_errcode_String_msg, Callback_FormCallbackInfo_Void, Callback_Literal_Number_errcode_String_msg_Void, Callback_Any_Void, Tuple_Union_ResourceColor_LinearGradient_Number, Callback_GestureEvent_Void, Literal_Number_duration_fingers_Boolean_repeat, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_angle_fingers, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Literal_Number_offsetRemain, Callback_Number_Number_ComputedBarAttribute, onItemDragStart_event_type, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Callback_String_Void, Type_ImageAttribute_onComplete_callback_event, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Literal_Boolean_next_Axis_direction, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, Callback_SwipeActionState_Void, Callback_ClickEvent_LocationButtonOnClickResult_Void, Callback_Boolean, Callback_NavDestinationContext_Void, Callback_PopInfo_Void, Tuple_Dimension_Dimension, Callback_NavigationTitleMode_Void, Callback_NavigationMode_Void, Callback_String_Unknown_Void, Type_NavigationAttribute_customNavContentTransition_delegate, Callback_NavigationTransitionProxy_Void, Literal_String_target_NavigationType_type, Callback_Number_Number_PanelMode_Void, Callback_PanelMode_Void, Callback_ClickEvent_PasteButtonOnClickResult_Void, Callback_Array_Number_Void, Callback_RefreshStatus_Void, Callback_RichEditorSelection_Void, Callback_RichEditorRange_Void, Callback_RichEditorInsertValue_Boolean, Callback_RichEditorTextSpanResult_Void, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, Callback_RichEditorChangeValue_Boolean, Callback_CutEvent_Void, Callback_CopyEvent_Void, Callback_ClickEvent_SaveButtonOnClickResult_Void, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_Number_String_Void, Callback_Union_Number_Resource_Void, Callback_ResourceStr_Void, Callback_Number_SliderChangeMode_Void, Literal_Number_index, Callback_SwiperContentTransitionProxy_Void, Callback_TabContentTransitionProxy_Void, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, Callback_StyledStringChangeValue_Boolean, Callback_String_Number_Void, Type_TextPickerAttribute_onChange_callback, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, Callback_TextPickerResult_Void, Callback_TimePickerResult_Void, Callback_FullscreenInfo_Void, Callback_PreparedInfo_Void, Callback_PlaybackInfo_Void, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Literal_Object_object__String_name_Array_String_methodList, Literal_Union_String_WebResourceRequest_data, Literal_Function_handler_Object_error, Literal_Object_detail, Literal_Function_callback__Object_fileSelector, Callback_OnPageEndEvent_Void, Callback_OnPageBeginEvent_Void, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, Callback_OnGeolocationShowEvent_Void, Callback_OnAlertEvent_Boolean, Callback_OnBeforeUnloadEvent_Boolean, Callback_OnConfirmEvent_Boolean, Callback_OnPromptEvent_Boolean, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, Callback_OnHttpErrorReceiveEvent_Void, Callback_OnDownloadStartEvent_Void, Callback_OnRefreshAccessedHistoryEvent_Void, Type_WebAttribute_onUrlLoadIntercept_callback, Callback_Literal_Function_handler_Object_error_Void, Callback_OnRenderExitedEvent_Void, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Type_WebAttribute_onFileSelectorShow_callback, Callback_OnResourceLoadEvent_Void, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, Callback_OnInterceptRequestEvent_WebResourceResponse, Callback_OnPermissionRequestEvent_Void, Callback_OnScreenCaptureRequestEvent_Void, Callback_OnContextMenuShowEvent_Boolean, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, Callback_OnClientAuthenticationEvent_Void, Callback_OnWindowNewEvent_Void, Callback_OnTouchIconUrlReceivedEvent_Void, Callback_OnFaviconReceivedEvent_Void, Callback_OnPageVisibleEvent_Void, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, Callback_OnLoadInterceptEvent_Boolean, Callback_OnOverScrollEvent_Void, Callback_NativeEmbedDataInfo_Void, Callback_NativeEmbedTouchInfo_Void, Literal_String_plainText, Callback_Literal_String_plainText_Void, Literal_Number_surfaceHeight_surfaceWidth, Type_XComponentInterface_value, Callback_UIExtensionProxy_Void, Literal_Number_code_Want_want, Callback_Literal_Number_code_Want_want_Void } from "./../SyntheticDeclarations"
 import { GlobalScope_ohos_arkui_performanceMonitor } from "./../ArkGlobalScopeOhosArkuiPerformanceMonitorMaterialized"
 import { CommonShape } from "./../ArkCommonShapeMaterialized"
-import { Position, ResourceColor, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback, Offset, Font, LengthMetricsUnit, MarkStyle, Bias, EdgeWidth, DirectionalEdgesT, ColorMetrics, LengthConstrain, DividerStyleOptions, VP, PX, LPX, TouchPoint } from "./../ArkUnitsInterfaces"
 import { BaseShape } from "./../ArkBaseShapeMaterialized"
 import { RectShape } from "./../ArkRectShapeMaterialized"
 import { CircleShape } from "./../ArkCircleShapeMaterialized"
@@ -48,7 +51,7 @@ import { DragEvent } from "./../ArkDragEventMaterialized"
 import { ProgressMask } from "./../ArkProgressMaskMaterialized"
 import { AttributeModifier, CustomComponent, AbstractProperty, IPropertySubscriber, ISinglePropertyChangeSubscriber, SubscribaleAbstract, NavigationAttribute, CommonTransition, PageTransitionEnterInterface, PageTransitionExitInterface } from "./../../handwritten"
 import { GestureModifier } from "./../ArkGestureModifierMaterialized"
-import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, GestureHandler, GesturePriority, PanDirection, SwipeDirection, GestureMode, FingerInfo, GestureInterface, TapGestureParameters, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, SwipeGestureInterface, PinchGestureInterface, RotationGestureInterface, GestureGroupInterface, TapGestureHandlerOptions, TapGestureHandler, LongPressGestureHandlerOptions, LongPressGestureHandler, PanGestureHandlerOptions, PanGestureHandler, SwipeGestureHandlerOptions, SwipeGestureHandler, PinchGestureHandlerOptions, PinchGestureHandler, RotationGestureHandlerOptions, RotationGestureHandler, GestureGroupGestureHandlerOptions, GestureRecognizerState } from "./../ArkGestureInterfaces"
+import { GestureInfo, GestureJudgeResult, GestureType, GestureMask, GestureHandler, GesturePriority, PanDirection, SwipeDirection, GestureMode, FingerInfo, GestureInterface, TapGestureParameters, TapGestureHandlerOptions, TapGestureHandler, LongPressGestureHandlerOptions, LongPressGestureHandler, PanGestureHandlerOptions, PanGestureHandler, SwipeGestureHandlerOptions, SwipeGestureHandler, PinchGestureHandlerOptions, PinchGestureHandler, RotationGestureHandlerOptions, RotationGestureHandler, GestureGroupGestureHandlerOptions, GestureRecognizerState } from "./../ArkGestureInterfaces"
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { SheetInfo, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, ActionSheetOptions } from "./../ArkActionSheetInterfaces"
 import { DialogAlignment, DialogButtonDirection, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, TextStyle_alert_dialog, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from "./../ArkAlertDialogInterfaces"
@@ -94,7 +97,6 @@ import { Measurable } from "./../ArkMeasurableMaterialized"
 import { View } from "./../ArkViewMaterialized"
 import { TextContentControllerBase } from "./../ArkTextContentControllerBaseMaterialized"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, OffsetResult, ScrollAlign, ScrollToIndexOptions, ScrollDirection, ScrollAnimationOptions, OffsetOptions, ScrollSnapOptions, ScrollInterface, ScrollAttribute, OnScrollFrameBeginHandlerResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback } from "./../ArkScrollInterfaces"
-import { DynamicNode } from "./../ArkDynamicNodeMaterialized"
 import { ChildrenMainSize } from "./../ArkChildrenMainSizeMaterialized"
 import { UICommonEvent } from "./../ArkUICommonEventMaterialized"
 import { EnvPropsOptions, PersistPropsOptions } from "./../ArkCommonTsEtsApiInterfaces"
@@ -129,7 +131,14 @@ import { PinchGestureEvent } from "./../ArkPinchGestureEventMaterialized"
 import { RotationGestureEvent } from "./../ArkRotationGestureEventMaterialized"
 import { SwipeGestureEvent } from "./../ArkSwipeGestureEventMaterialized"
 import { GestureEvent } from "./../ArkGestureEventMaterialized"
+import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
 import { PanGestureOptions } from "./../ArkPanGestureOptionsMaterialized"
+import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
+import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized"
+import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
+import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { ScrollableTargetInfo } from "./../ArkScrollableTargetInfoMaterialized"
 import { EventTargetInfo } from "./../ArkEventTargetInfoMaterialized"
 import { GestureRecognizer } from "./../ArkGestureRecognizerMaterialized"
@@ -307,6 +316,9 @@ export class TypeChecker {
     }
     static typeCast<T>(value: Object): T {
         return value as unknown as T
+    }
+    static isNativeBuffer(value: Object): boolean {
+        return value instanceof ArrayBuffer
     }
     static isAbilityComponentAttribute(value: object|string|number|undefined|null|boolean, duplicated_onConnect: boolean, duplicated_onDisconnect: boolean): boolean {
         if ((!duplicated_onConnect) && (value?.hasOwnProperty("onConnect"))) {
@@ -2648,8 +2660,20 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ColoringStrategy")
         }
     }
-    static isColorMetrics(value: object|string|number|undefined|null|boolean, duplicated__ColorMetricsStub: boolean): boolean {
-        if ((!duplicated__ColorMetricsStub) && (value?.hasOwnProperty("_ColorMetricsStub"))) {
+    static isColorMetrics(value: object|string|number|undefined|null|boolean, duplicated_color: boolean, duplicated_red: boolean, duplicated_green: boolean, duplicated_blue: boolean, duplicated_alpha: boolean): boolean {
+        if ((!duplicated_color) && (value?.hasOwnProperty("color"))) {
+            return true
+        }
+        else if ((!duplicated_red) && (value?.hasOwnProperty("red"))) {
+            return true
+        }
+        else if ((!duplicated_green) && (value?.hasOwnProperty("green"))) {
+            return true
+        }
+        else if ((!duplicated_blue) && (value?.hasOwnProperty("blue"))) {
+            return true
+        }
+        else if ((!duplicated_alpha) && (value?.hasOwnProperty("alpha"))) {
             return true
         }
         else {
@@ -15846,14 +15870,6 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof StyledStringKey")
         }
     }
-    static isStyledStringValue(value: object|string|number|undefined|null|boolean, duplicated_stub: boolean): boolean {
-        if ((!duplicated_stub) && (value?.hasOwnProperty("stub"))) {
-            return true
-        }
-        else {
-            throw new Error("Can not discriminate value typeof StyledStringValue")
-        }
-    }
     static isStyleOptions(value: object|string|number|undefined|null|boolean, duplicated_start: boolean, duplicated_length: boolean, duplicated_styledKey: boolean, duplicated_styledValue: boolean): boolean {
         if ((!duplicated_styledKey) && (value?.hasOwnProperty("styledKey"))) {
             return true
@@ -19623,6 +19639,1704 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof XComponentType")
         }
     }
+    static PointerStyle_ToOrdinal(value: PointerStyle): int32 {
+        return value as int32
+    }
+    static PointerStyle_FromOrdinal(ordinal: int32): PointerStyle {
+        return ordinal as PointerStyle
+    }
+    static RectWidthStyle_ToOrdinal(value: RectWidthStyle): int32 {
+        return value as int32
+    }
+    static RectWidthStyle_FromOrdinal(ordinal: int32): RectWidthStyle {
+        return ordinal as RectWidthStyle
+    }
+    static RectHeightStyle_ToOrdinal(value: RectHeightStyle): int32 {
+        return value as int32
+    }
+    static RectHeightStyle_FromOrdinal(ordinal: int32): RectHeightStyle {
+        return ordinal as RectHeightStyle
+    }
+    static LengthUnit_ToOrdinal(value: LengthUnit): int32 {
+        return value as int32
+    }
+    static LengthUnit_FromOrdinal(ordinal: int32): LengthUnit {
+        return ordinal as LengthUnit
+    }
+    static PerfMonitorActionType_ToOrdinal(value: PerfMonitorActionType): int32 {
+        return value as int32
+    }
+    static PerfMonitorActionType_FromOrdinal(ordinal: int32): PerfMonitorActionType {
+        return ordinal as PerfMonitorActionType
+    }
+    static PerfMonitorSourceType_ToOrdinal(value: PerfMonitorSourceType): int32 {
+        return value as int32
+    }
+    static PerfMonitorSourceType_FromOrdinal(ordinal: int32): PerfMonitorSourceType {
+        return ordinal as PerfMonitorSourceType
+    }
+    static EffectDirection_ToOrdinal(value: EffectDirection): int32 {
+        return value as int32
+    }
+    static EffectDirection_FromOrdinal(ordinal: int32): EffectDirection {
+        return ordinal as EffectDirection
+    }
+    static EffectScope_ToOrdinal(value: EffectScope): int32 {
+        return value as int32
+    }
+    static EffectScope_FromOrdinal(ordinal: int32): EffectScope {
+        return ordinal as EffectScope
+    }
+    static DialogAlignment_ToOrdinal(value: DialogAlignment): int32 {
+        return value as int32
+    }
+    static DialogAlignment_FromOrdinal(ordinal: int32): DialogAlignment {
+        return ordinal as DialogAlignment
+    }
+    static DialogButtonDirection_ToOrdinal(value: DialogButtonDirection): int32 {
+        return value as int32
+    }
+    static DialogButtonDirection_FromOrdinal(ordinal: int32): DialogButtonDirection {
+        return ordinal as DialogButtonDirection
+    }
+    static IndexerAlign_ToOrdinal(value: IndexerAlign): int32 {
+        return value as int32
+    }
+    static IndexerAlign_FromOrdinal(ordinal: int32): IndexerAlign {
+        return ordinal as IndexerAlign
+    }
+    static BadgePosition_ToOrdinal(value: BadgePosition): int32 {
+        return value as int32
+    }
+    static BadgePosition_FromOrdinal(ordinal: int32): BadgePosition {
+        return ordinal as BadgePosition
+    }
+    static ButtonType_ToOrdinal(value: ButtonType): int32 {
+        return value as int32
+    }
+    static ButtonType_FromOrdinal(ordinal: int32): ButtonType {
+        return ordinal as ButtonType
+    }
+    static ButtonStyleMode_ToOrdinal(value: ButtonStyleMode): int32 {
+        return value as int32
+    }
+    static ButtonStyleMode_FromOrdinal(ordinal: int32): ButtonStyleMode {
+        return ordinal as ButtonStyleMode
+    }
+    static ButtonRole_ToOrdinal(value: ButtonRole): int32 {
+        return value as int32
+    }
+    static ButtonRole_FromOrdinal(ordinal: int32): ButtonRole {
+        return ordinal as ButtonRole
+    }
+    static ControlSize_ToOrdinal(value: ControlSize): int32 {
+        return value as int32
+    }
+    static ControlSize_FromOrdinal(ordinal: int32): ControlSize {
+        return ordinal as ControlSize
+    }
+    static CalendarAlign_ToOrdinal(value: CalendarAlign): int32 {
+        return value as int32
+    }
+    static CalendarAlign_FromOrdinal(ordinal: int32): CalendarAlign {
+        return ordinal as CalendarAlign
+    }
+    static SelectStatus_ToOrdinal(value: SelectStatus): int32 {
+        return value as int32
+    }
+    static SelectStatus_FromOrdinal(ordinal: int32): SelectStatus {
+        return ordinal as SelectStatus
+    }
+    static FinishCallbackType_ToOrdinal(value: FinishCallbackType): int32 {
+        return value as int32
+    }
+    static FinishCallbackType_FromOrdinal(ordinal: int32): FinishCallbackType {
+        return ordinal as FinishCallbackType
+    }
+    static TouchTestStrategy_ToOrdinal(value: TouchTestStrategy): int32 {
+        return value as int32
+    }
+    static TouchTestStrategy_FromOrdinal(ordinal: int32): TouchTestStrategy {
+        return ordinal as TouchTestStrategy
+    }
+    static TransitionHierarchyStrategy_ToOrdinal(value: TransitionHierarchyStrategy): int32 {
+        return value as int32
+    }
+    static TransitionHierarchyStrategy_FromOrdinal(ordinal: int32): TransitionHierarchyStrategy {
+        return ordinal as TransitionHierarchyStrategy
+    }
+    static ChainStyle_ToOrdinal(value: ChainStyle): int32 {
+        return value as int32
+    }
+    static ChainStyle_FromOrdinal(ordinal: int32): ChainStyle {
+        return ordinal as ChainStyle
+    }
+    static TransitionEdge_ToOrdinal(value: TransitionEdge): int32 {
+        return value as int32
+    }
+    static TransitionEdge_FromOrdinal(ordinal: int32): TransitionEdge {
+        return ordinal as TransitionEdge
+    }
+    static EffectType_ToOrdinal(value: EffectType): int32 {
+        return value as int32
+    }
+    static EffectType_FromOrdinal(ordinal: int32): EffectType {
+        return ordinal as EffectType
+    }
+    static PreDragStatus_ToOrdinal(value: PreDragStatus): int32 {
+        return value as int32
+    }
+    static PreDragStatus_FromOrdinal(ordinal: int32): PreDragStatus {
+        return ordinal as PreDragStatus
+    }
+    static SourceType_ToOrdinal(value: SourceType): int32 {
+        return value as int32
+    }
+    static SourceType_FromOrdinal(ordinal: int32): SourceType {
+        return ordinal as SourceType
+    }
+    static SourceTool_ToOrdinal(value: SourceTool): int32 {
+        return value as int32
+    }
+    static SourceTool_FromOrdinal(ordinal: int32): SourceTool {
+        return ordinal as SourceTool
+    }
+    static RepeatMode_ToOrdinal(value: RepeatMode): int32 {
+        return value as int32
+    }
+    static RepeatMode_FromOrdinal(ordinal: int32): RepeatMode {
+        return ordinal as RepeatMode
+    }
+    static BlurStyle_ToOrdinal(value: BlurStyle): int32 {
+        return value as int32
+    }
+    static BlurStyle_FromOrdinal(ordinal: int32): BlurStyle {
+        return ordinal as BlurStyle
+    }
+    static BlurStyleActivePolicy_ToOrdinal(value: BlurStyleActivePolicy): int32 {
+        return value as int32
+    }
+    static BlurStyleActivePolicy_FromOrdinal(ordinal: int32): BlurStyleActivePolicy {
+        return ordinal as BlurStyleActivePolicy
+    }
+    static ThemeColorMode_ToOrdinal(value: ThemeColorMode): int32 {
+        return value as int32
+    }
+    static ThemeColorMode_FromOrdinal(ordinal: int32): ThemeColorMode {
+        return ordinal as ThemeColorMode
+    }
+    static AdaptiveColor_ToOrdinal(value: AdaptiveColor): int32 {
+        return value as int32
+    }
+    static AdaptiveColor_FromOrdinal(ordinal: int32): AdaptiveColor {
+        return ordinal as AdaptiveColor
+    }
+    static ModalTransition_ToOrdinal(value: ModalTransition): int32 {
+        return value as int32
+    }
+    static ModalTransition_FromOrdinal(ordinal: int32): ModalTransition {
+        return ordinal as ModalTransition
+    }
+    static ShadowType_ToOrdinal(value: ShadowType): int32 {
+        return value as int32
+    }
+    static ShadowType_FromOrdinal(ordinal: int32): ShadowType {
+        return ordinal as ShadowType
+    }
+    static ShadowStyle_ToOrdinal(value: ShadowStyle): int32 {
+        return value as int32
+    }
+    static ShadowStyle_FromOrdinal(ordinal: int32): ShadowStyle {
+        return ordinal as ShadowStyle
+    }
+    static SafeAreaType_ToOrdinal(value: SafeAreaType): int32 {
+        return value as int32
+    }
+    static SafeAreaType_FromOrdinal(ordinal: int32): SafeAreaType {
+        return ordinal as SafeAreaType
+    }
+    static SafeAreaEdge_ToOrdinal(value: SafeAreaEdge): int32 {
+        return value as int32
+    }
+    static SafeAreaEdge_FromOrdinal(ordinal: int32): SafeAreaEdge {
+        return ordinal as SafeAreaEdge
+    }
+    static LayoutSafeAreaType_ToOrdinal(value: LayoutSafeAreaType): int32 {
+        return value as int32
+    }
+    static LayoutSafeAreaType_FromOrdinal(ordinal: int32): LayoutSafeAreaType {
+        return ordinal as LayoutSafeAreaType
+    }
+    static LayoutSafeAreaEdge_ToOrdinal(value: LayoutSafeAreaEdge): int32 {
+        return value as int32
+    }
+    static LayoutSafeAreaEdge_FromOrdinal(ordinal: int32): LayoutSafeAreaEdge {
+        return ordinal as LayoutSafeAreaEdge
+    }
+    static SheetSize_ToOrdinal(value: SheetSize): int32 {
+        return value as int32
+    }
+    static SheetSize_FromOrdinal(ordinal: int32): SheetSize {
+        return ordinal as SheetSize
+    }
+    static DragBehavior_ToOrdinal(value: DragBehavior): int32 {
+        return value as int32
+    }
+    static DragBehavior_FromOrdinal(ordinal: int32): DragBehavior {
+        return ordinal as DragBehavior
+    }
+    static DragResult_ToOrdinal(value: DragResult): int32 {
+        return value as int32
+    }
+    static DragResult_FromOrdinal(ordinal: int32): DragResult {
+        return ordinal as DragResult
+    }
+    static BlendMode_ToOrdinal(value: BlendMode): int32 {
+        return value as int32
+    }
+    static BlendMode_FromOrdinal(ordinal: int32): BlendMode {
+        return ordinal as BlendMode
+    }
+    static BlendApplyType_ToOrdinal(value: BlendApplyType): int32 {
+        return value as int32
+    }
+    static BlendApplyType_FromOrdinal(ordinal: int32): BlendApplyType {
+        return ordinal as BlendApplyType
+    }
+    static SheetType_ToOrdinal(value: SheetType): int32 {
+        return value as int32
+    }
+    static SheetType_FromOrdinal(ordinal: int32): SheetType {
+        return ordinal as SheetType
+    }
+    static SheetMode_ToOrdinal(value: SheetMode): int32 {
+        return value as int32
+    }
+    static SheetMode_FromOrdinal(ordinal: int32): SheetMode {
+        return ordinal as SheetMode
+    }
+    static ScrollSizeMode_ToOrdinal(value: ScrollSizeMode): int32 {
+        return value as int32
+    }
+    static ScrollSizeMode_FromOrdinal(ordinal: int32): ScrollSizeMode {
+        return ordinal as ScrollSizeMode
+    }
+    static SheetKeyboardAvoidMode_ToOrdinal(value: SheetKeyboardAvoidMode): int32 {
+        return value as int32
+    }
+    static SheetKeyboardAvoidMode_FromOrdinal(ordinal: int32): SheetKeyboardAvoidMode {
+        return ordinal as SheetKeyboardAvoidMode
+    }
+    static DismissReason_ToOrdinal(value: DismissReason): int32 {
+        return value as int32
+    }
+    static DismissReason_FromOrdinal(ordinal: int32): DismissReason {
+        return ordinal as DismissReason
+    }
+    static MenuPreviewMode_ToOrdinal(value: MenuPreviewMode): int32 {
+        return value as int32
+    }
+    static MenuPreviewMode_FromOrdinal(ordinal: int32): MenuPreviewMode {
+        return ordinal as MenuPreviewMode
+    }
+    static OutlineStyle_ToOrdinal(value: OutlineStyle): int32 {
+        return value as int32
+    }
+    static OutlineStyle_FromOrdinal(ordinal: int32): OutlineStyle {
+        return ordinal as OutlineStyle
+    }
+    static DragPreviewMode_ToOrdinal(value: DragPreviewMode): int32 {
+        return value as int32
+    }
+    static DragPreviewMode_FromOrdinal(ordinal: int32): DragPreviewMode {
+        return ordinal as DragPreviewMode
+    }
+    static MenuPolicy_ToOrdinal(value: MenuPolicy): int32 {
+        return value as int32
+    }
+    static MenuPolicy_FromOrdinal(ordinal: int32): MenuPolicy {
+        return ordinal as MenuPolicy
+    }
+    static ContentClipMode_ToOrdinal(value: ContentClipMode): int32 {
+        return value as int32
+    }
+    static ContentClipMode_FromOrdinal(ordinal: int32): ContentClipMode {
+        return ordinal as ContentClipMode
+    }
+    static KeyboardAvoidMode_ToOrdinal(value: KeyboardAvoidMode): int32 {
+        return value as int32
+    }
+    static KeyboardAvoidMode_FromOrdinal(ordinal: int32): KeyboardAvoidMode {
+        return ordinal as KeyboardAvoidMode
+    }
+    static HoverModeAreaType_ToOrdinal(value: HoverModeAreaType): int32 {
+        return value as int32
+    }
+    static HoverModeAreaType_FromOrdinal(ordinal: int32): HoverModeAreaType {
+        return ordinal as HoverModeAreaType
+    }
+    static ModelType_ToOrdinal(value: ModelType): int32 {
+        return value as int32
+    }
+    static ModelType_FromOrdinal(ordinal: int32): ModelType {
+        return ordinal as ModelType
+    }
+    static DataPanelType_ToOrdinal(value: DataPanelType): int32 {
+        return value as int32
+    }
+    static DataPanelType_FromOrdinal(ordinal: int32): DataPanelType {
+        return ordinal as DataPanelType
+    }
+    static CheckBoxShape_ToOrdinal(value: CheckBoxShape): int32 {
+        return value as int32
+    }
+    static CheckBoxShape_FromOrdinal(ordinal: int32): CheckBoxShape {
+        return ordinal as CheckBoxShape
+    }
+    static Color_ToOrdinal(value: Color): int32 {
+        return value as int32
+    }
+    static Color_FromOrdinal(ordinal: int32): Color {
+        return ordinal as Color
+    }
+    static ColoringStrategy_ToOrdinal(value: ColoringStrategy): int32 {
+        return value as int32
+    }
+    static ColoringStrategy_FromOrdinal(ordinal: int32): ColoringStrategy {
+        return ordinal as ColoringStrategy
+    }
+    static ImageFit_ToOrdinal(value: ImageFit): int32 {
+        return value as int32
+    }
+    static ImageFit_FromOrdinal(ordinal: int32): ImageFit {
+        return ordinal as ImageFit
+    }
+    static BorderStyle_ToOrdinal(value: BorderStyle): int32 {
+        return value as int32
+    }
+    static BorderStyle_FromOrdinal(ordinal: int32): BorderStyle {
+        return ordinal as BorderStyle
+    }
+    static LineJoinStyle_ToOrdinal(value: LineJoinStyle): int32 {
+        return value as int32
+    }
+    static LineJoinStyle_FromOrdinal(ordinal: int32): LineJoinStyle {
+        return ordinal as LineJoinStyle
+    }
+    static TouchType_ToOrdinal(value: TouchType): int32 {
+        return value as int32
+    }
+    static TouchType_FromOrdinal(ordinal: int32): TouchType {
+        return ordinal as TouchType
+    }
+    static MouseButton_ToOrdinal(value: MouseButton): int32 {
+        return value as int32
+    }
+    static MouseButton_FromOrdinal(ordinal: int32): MouseButton {
+        return ordinal as MouseButton
+    }
+    static MouseAction_ToOrdinal(value: MouseAction): int32 {
+        return value as int32
+    }
+    static MouseAction_FromOrdinal(ordinal: int32): MouseAction {
+        return ordinal as MouseAction
+    }
+    static AnimationStatus_ToOrdinal(value: AnimationStatus): int32 {
+        return value as int32
+    }
+    static AnimationStatus_FromOrdinal(ordinal: int32): AnimationStatus {
+        return ordinal as AnimationStatus
+    }
+    static Curve_ToOrdinal(value: Curve): int32 {
+        return value as int32
+    }
+    static Curve_FromOrdinal(ordinal: int32): Curve {
+        return ordinal as Curve
+    }
+    static FillMode_ToOrdinal(value: FillMode): int32 {
+        return value as int32
+    }
+    static FillMode_FromOrdinal(ordinal: int32): FillMode {
+        return ordinal as FillMode
+    }
+    static PlayMode_ToOrdinal(value: PlayMode): int32 {
+        return value as int32
+    }
+    static PlayMode_FromOrdinal(ordinal: int32): PlayMode {
+        return ordinal as PlayMode
+    }
+    static KeyType_ToOrdinal(value: KeyType): int32 {
+        return value as int32
+    }
+    static KeyType_FromOrdinal(ordinal: int32): KeyType {
+        return ordinal as KeyType
+    }
+    static KeySource_ToOrdinal(value: KeySource): int32 {
+        return value as int32
+    }
+    static KeySource_FromOrdinal(ordinal: int32): KeySource {
+        return ordinal as KeySource
+    }
+    static Edge_ToOrdinal(value: Edge): int32 {
+        return value as int32
+    }
+    static Edge_FromOrdinal(ordinal: int32): Edge {
+        return ordinal as Edge
+    }
+    static Week_ToOrdinal(value: Week): int32 {
+        return value as int32
+    }
+    static Week_FromOrdinal(ordinal: int32): Week {
+        return ordinal as Week
+    }
+    static Direction_ToOrdinal(value: Direction): int32 {
+        return value as int32
+    }
+    static Direction_FromOrdinal(ordinal: int32): Direction {
+        return ordinal as Direction
+    }
+    static BarState_ToOrdinal(value: BarState): int32 {
+        return value as int32
+    }
+    static BarState_FromOrdinal(ordinal: int32): BarState {
+        return ordinal as BarState
+    }
+    static EdgeEffect_ToOrdinal(value: EdgeEffect): int32 {
+        return value as int32
+    }
+    static EdgeEffect_FromOrdinal(ordinal: int32): EdgeEffect {
+        return ordinal as EdgeEffect
+    }
+    static Alignment_ToOrdinal(value: Alignment): int32 {
+        return value as int32
+    }
+    static Alignment_FromOrdinal(ordinal: int32): Alignment {
+        return ordinal as Alignment
+    }
+    static TransitionType_ToOrdinal(value: TransitionType): int32 {
+        return value as int32
+    }
+    static TransitionType_FromOrdinal(ordinal: int32): TransitionType {
+        return ordinal as TransitionType
+    }
+    static RelateType_ToOrdinal(value: RelateType): int32 {
+        return value as int32
+    }
+    static RelateType_FromOrdinal(ordinal: int32): RelateType {
+        return ordinal as RelateType
+    }
+    static Visibility_ToOrdinal(value: Visibility): int32 {
+        return value as int32
+    }
+    static Visibility_FromOrdinal(ordinal: int32): Visibility {
+        return ordinal as Visibility
+    }
+    static LineCapStyle_ToOrdinal(value: LineCapStyle): int32 {
+        return value as int32
+    }
+    static LineCapStyle_FromOrdinal(ordinal: int32): LineCapStyle {
+        return ordinal as LineCapStyle
+    }
+    static Axis_ToOrdinal(value: Axis): int32 {
+        return value as int32
+    }
+    static Axis_FromOrdinal(ordinal: int32): Axis {
+        return ordinal as Axis
+    }
+    static HorizontalAlign_ToOrdinal(value: HorizontalAlign): int32 {
+        return value as int32
+    }
+    static HorizontalAlign_FromOrdinal(ordinal: int32): HorizontalAlign {
+        return ordinal as HorizontalAlign
+    }
+    static FlexAlign_ToOrdinal(value: FlexAlign): int32 {
+        return value as int32
+    }
+    static FlexAlign_FromOrdinal(ordinal: int32): FlexAlign {
+        return ordinal as FlexAlign
+    }
+    static ItemAlign_ToOrdinal(value: ItemAlign): int32 {
+        return value as int32
+    }
+    static ItemAlign_FromOrdinal(ordinal: int32): ItemAlign {
+        return ordinal as ItemAlign
+    }
+    static FlexDirection_ToOrdinal(value: FlexDirection): int32 {
+        return value as int32
+    }
+    static FlexDirection_FromOrdinal(ordinal: int32): FlexDirection {
+        return ordinal as FlexDirection
+    }
+    static PixelRoundCalcPolicy_ToOrdinal(value: PixelRoundCalcPolicy): int32 {
+        return value as int32
+    }
+    static PixelRoundCalcPolicy_FromOrdinal(ordinal: int32): PixelRoundCalcPolicy {
+        return ordinal as PixelRoundCalcPolicy
+    }
+    static FlexWrap_ToOrdinal(value: FlexWrap): int32 {
+        return value as int32
+    }
+    static FlexWrap_FromOrdinal(ordinal: int32): FlexWrap {
+        return ordinal as FlexWrap
+    }
+    static VerticalAlign_ToOrdinal(value: VerticalAlign): int32 {
+        return value as int32
+    }
+    static VerticalAlign_FromOrdinal(ordinal: int32): VerticalAlign {
+        return ordinal as VerticalAlign
+    }
+    static ImageRepeat_ToOrdinal(value: ImageRepeat): int32 {
+        return value as int32
+    }
+    static ImageRepeat_FromOrdinal(ordinal: int32): ImageRepeat {
+        return ordinal as ImageRepeat
+    }
+    static ImageSize_ToOrdinal(value: ImageSize): int32 {
+        return value as int32
+    }
+    static ImageSize_FromOrdinal(ordinal: int32): ImageSize {
+        return ordinal as ImageSize
+    }
+    static GradientDirection_ToOrdinal(value: GradientDirection): int32 {
+        return value as int32
+    }
+    static GradientDirection_FromOrdinal(ordinal: int32): GradientDirection {
+        return ordinal as GradientDirection
+    }
+    static SharedTransitionEffectType_ToOrdinal(value: SharedTransitionEffectType): int32 {
+        return value as int32
+    }
+    static SharedTransitionEffectType_FromOrdinal(ordinal: int32): SharedTransitionEffectType {
+        return ordinal as SharedTransitionEffectType
+    }
+    static FontStyle_ToOrdinal(value: FontStyle): int32 {
+        return value as int32
+    }
+    static FontStyle_FromOrdinal(ordinal: int32): FontStyle {
+        return ordinal as FontStyle
+    }
+    static FontWeight_ToOrdinal(value: FontWeight): int32 {
+        return value as int32
+    }
+    static FontWeight_FromOrdinal(ordinal: int32): FontWeight {
+        return ordinal as FontWeight
+    }
+    static TextAlign_ToOrdinal(value: TextAlign): int32 {
+        return value as int32
+    }
+    static TextAlign_FromOrdinal(ordinal: int32): TextAlign {
+        return ordinal as TextAlign
+    }
+    static TextOverflow_ToOrdinal(value: TextOverflow): int32 {
+        return value as int32
+    }
+    static TextOverflow_FromOrdinal(ordinal: int32): TextOverflow {
+        return ordinal as TextOverflow
+    }
+    static TextDecorationType_ToOrdinal(value: TextDecorationType): int32 {
+        return value as int32
+    }
+    static TextDecorationType_FromOrdinal(ordinal: int32): TextDecorationType {
+        return ordinal as TextDecorationType
+    }
+    static TextCase_ToOrdinal(value: TextCase): int32 {
+        return value as int32
+    }
+    static TextCase_FromOrdinal(ordinal: int32): TextCase {
+        return ordinal as TextCase
+    }
+    static TextHeightAdaptivePolicy_ToOrdinal(value: TextHeightAdaptivePolicy): int32 {
+        return value as int32
+    }
+    static TextHeightAdaptivePolicy_FromOrdinal(ordinal: int32): TextHeightAdaptivePolicy {
+        return ordinal as TextHeightAdaptivePolicy
+    }
+    static ResponseType_ToOrdinal(value: ResponseType): int32 {
+        return value as int32
+    }
+    static ResponseType_FromOrdinal(ordinal: int32): ResponseType {
+        return ordinal as ResponseType
+    }
+    static HoverEffect_ToOrdinal(value: HoverEffect): int32 {
+        return value as int32
+    }
+    static HoverEffect_FromOrdinal(ordinal: int32): HoverEffect {
+        return ordinal as HoverEffect
+    }
+    static Placement_ToOrdinal(value: Placement): int32 {
+        return value as int32
+    }
+    static Placement_FromOrdinal(ordinal: int32): Placement {
+        return ordinal as Placement
+    }
+    static ArrowPointPosition_ToOrdinal(value: ArrowPointPosition): int32 {
+        return value as int32
+    }
+    static ArrowPointPosition_FromOrdinal(ordinal: int32): ArrowPointPosition {
+        return ordinal as ArrowPointPosition
+    }
+    static CopyOptions_ToOrdinal(value: CopyOptions): int32 {
+        return value as int32
+    }
+    static CopyOptions_FromOrdinal(ordinal: int32): CopyOptions {
+        return ordinal as CopyOptions
+    }
+    static HitTestMode_ToOrdinal(value: HitTestMode): int32 {
+        return value as int32
+    }
+    static HitTestMode_FromOrdinal(ordinal: int32): HitTestMode {
+        return ordinal as HitTestMode
+    }
+    static TitleHeight_ToOrdinal(value: TitleHeight): int32 {
+        return value as int32
+    }
+    static TitleHeight_FromOrdinal(ordinal: int32): TitleHeight {
+        return ordinal as TitleHeight
+    }
+    static ModifierKey_ToOrdinal(value: ModifierKey): int32 {
+        return value as int32
+    }
+    static ModifierKey_FromOrdinal(ordinal: int32): ModifierKey {
+        return ordinal as ModifierKey
+    }
+    static FunctionKey_ToOrdinal(value: FunctionKey): int32 {
+        return value as int32
+    }
+    static FunctionKey_FromOrdinal(ordinal: int32): FunctionKey {
+        return ordinal as FunctionKey
+    }
+    static ImageSpanAlignment_ToOrdinal(value: ImageSpanAlignment): int32 {
+        return value as int32
+    }
+    static ImageSpanAlignment_FromOrdinal(ordinal: int32): ImageSpanAlignment {
+        return ordinal as ImageSpanAlignment
+    }
+    static ObscuredReasons_ToOrdinal(value: ObscuredReasons): int32 {
+        return value as int32
+    }
+    static ObscuredReasons_FromOrdinal(ordinal: int32): ObscuredReasons {
+        return ordinal as ObscuredReasons
+    }
+    static TextContentStyle_ToOrdinal(value: TextContentStyle): int32 {
+        return value as int32
+    }
+    static TextContentStyle_FromOrdinal(ordinal: int32): TextContentStyle {
+        return ordinal as TextContentStyle
+    }
+    static ClickEffectLevel_ToOrdinal(value: ClickEffectLevel): int32 {
+        return value as int32
+    }
+    static ClickEffectLevel_FromOrdinal(ordinal: int32): ClickEffectLevel {
+        return ordinal as ClickEffectLevel
+    }
+    static XComponentType_ToOrdinal(value: XComponentType): int32 {
+        return value as int32
+    }
+    static XComponentType_FromOrdinal(ordinal: int32): XComponentType {
+        return ordinal as XComponentType
+    }
+    static NestedScrollMode_ToOrdinal(value: NestedScrollMode): int32 {
+        return value as int32
+    }
+    static NestedScrollMode_FromOrdinal(ordinal: int32): NestedScrollMode {
+        return ordinal as NestedScrollMode
+    }
+    static ScrollSource_ToOrdinal(value: ScrollSource): int32 {
+        return value as int32
+    }
+    static ScrollSource_FromOrdinal(ordinal: int32): ScrollSource {
+        return ordinal as ScrollSource
+    }
+    static RenderFit_ToOrdinal(value: RenderFit): int32 {
+        return value as int32
+    }
+    static RenderFit_FromOrdinal(ordinal: int32): RenderFit {
+        return ordinal as RenderFit
+    }
+    static DialogButtonStyle_ToOrdinal(value: DialogButtonStyle): int32 {
+        return value as int32
+    }
+    static DialogButtonStyle_FromOrdinal(ordinal: int32): DialogButtonStyle {
+        return ordinal as DialogButtonStyle
+    }
+    static WordBreak_ToOrdinal(value: WordBreak): int32 {
+        return value as int32
+    }
+    static WordBreak_FromOrdinal(ordinal: int32): WordBreak {
+        return ordinal as WordBreak
+    }
+    static LineBreakStrategy_ToOrdinal(value: LineBreakStrategy): int32 {
+        return value as int32
+    }
+    static LineBreakStrategy_FromOrdinal(ordinal: int32): LineBreakStrategy {
+        return ordinal as LineBreakStrategy
+    }
+    static EllipsisMode_ToOrdinal(value: EllipsisMode): int32 {
+        return value as int32
+    }
+    static EllipsisMode_FromOrdinal(ordinal: int32): EllipsisMode {
+        return ordinal as EllipsisMode
+    }
+    static OptionWidthMode_ToOrdinal(value: OptionWidthMode): int32 {
+        return value as int32
+    }
+    static OptionWidthMode_FromOrdinal(ordinal: int32): OptionWidthMode {
+        return ordinal as OptionWidthMode
+    }
+    static IlluminatedType_ToOrdinal(value: IlluminatedType): int32 {
+        return value as int32
+    }
+    static IlluminatedType_FromOrdinal(ordinal: int32): IlluminatedType {
+        return ordinal as IlluminatedType
+    }
+    static FoldStatus_ToOrdinal(value: FoldStatus): int32 {
+        return value as int32
+    }
+    static FoldStatus_FromOrdinal(ordinal: int32): FoldStatus {
+        return ordinal as FoldStatus
+    }
+    static AppRotation_ToOrdinal(value: AppRotation): int32 {
+        return value as int32
+    }
+    static AppRotation_FromOrdinal(ordinal: int32): AppRotation {
+        return ordinal as AppRotation
+    }
+    static EmbeddedType_ToOrdinal(value: EmbeddedType): int32 {
+        return value as int32
+    }
+    static EmbeddedType_FromOrdinal(ordinal: int32): EmbeddedType {
+        return ordinal as EmbeddedType
+    }
+    static MarqueeUpdateStrategy_ToOrdinal(value: MarqueeUpdateStrategy): int32 {
+        return value as int32
+    }
+    static MarqueeUpdateStrategy_FromOrdinal(ordinal: int32): MarqueeUpdateStrategy {
+        return ordinal as MarqueeUpdateStrategy
+    }
+    static TextDecorationStyle_ToOrdinal(value: TextDecorationStyle): int32 {
+        return value as int32
+    }
+    static TextDecorationStyle_FromOrdinal(ordinal: int32): TextDecorationStyle {
+        return ordinal as TextDecorationStyle
+    }
+    static TextSelectableMode_ToOrdinal(value: TextSelectableMode): int32 {
+        return value as int32
+    }
+    static TextSelectableMode_FromOrdinal(ordinal: int32): TextSelectableMode {
+        return ordinal as TextSelectableMode
+    }
+    static AccessibilityHoverType_ToOrdinal(value: AccessibilityHoverType): int32 {
+        return value as int32
+    }
+    static AccessibilityHoverType_FromOrdinal(ordinal: int32): AccessibilityHoverType {
+        return ordinal as AccessibilityHoverType
+    }
+    static WidthBreakpoint_ToOrdinal(value: WidthBreakpoint): int32 {
+        return value as int32
+    }
+    static WidthBreakpoint_FromOrdinal(ordinal: int32): WidthBreakpoint {
+        return ordinal as WidthBreakpoint
+    }
+    static HeightBreakpoint_ToOrdinal(value: HeightBreakpoint): int32 {
+        return value as int32
+    }
+    static HeightBreakpoint_FromOrdinal(ordinal: int32): HeightBreakpoint {
+        return ordinal as HeightBreakpoint
+    }
+    static FocusPriority_ToOrdinal(value: FocusPriority): int32 {
+        return value as int32
+    }
+    static FocusPriority_FromOrdinal(ordinal: int32): FocusPriority {
+        return ordinal as FocusPriority
+    }
+    static FormDimension_ToOrdinal(value: FormDimension): int32 {
+        return value as int32
+    }
+    static FormDimension_FromOrdinal(ordinal: int32): FormDimension {
+        return ordinal as FormDimension
+    }
+    static FormRenderingMode_ToOrdinal(value: FormRenderingMode): int32 {
+        return value as int32
+    }
+    static FormRenderingMode_FromOrdinal(ordinal: int32): FormRenderingMode {
+        return ordinal as FormRenderingMode
+    }
+    static FormShape_ToOrdinal(value: FormShape): int32 {
+        return value as int32
+    }
+    static FormShape_FromOrdinal(ordinal: int32): FormShape {
+        return ordinal as FormShape
+    }
+    static PanDirection_ToOrdinal(value: PanDirection): int32 {
+        return value as int32
+    }
+    static PanDirection_FromOrdinal(ordinal: int32): PanDirection {
+        return ordinal as PanDirection
+    }
+    static SwipeDirection_ToOrdinal(value: SwipeDirection): int32 {
+        return value as int32
+    }
+    static SwipeDirection_FromOrdinal(ordinal: int32): SwipeDirection {
+        return ordinal as SwipeDirection
+    }
+    static GestureMode_ToOrdinal(value: GestureMode): int32 {
+        return value as int32
+    }
+    static GestureMode_FromOrdinal(ordinal: int32): GestureMode {
+        return ordinal as GestureMode
+    }
+    static GestureMask_ToOrdinal(value: GestureMask): int32 {
+        return value as int32
+    }
+    static GestureMask_FromOrdinal(ordinal: int32): GestureMask {
+        return ordinal as GestureMask
+    }
+    static GestureJudgeResult_ToOrdinal(value: GestureJudgeResult): int32 {
+        return value as int32
+    }
+    static GestureJudgeResult_FromOrdinal(ordinal: int32): GestureJudgeResult {
+        return ordinal as GestureJudgeResult
+    }
+    static GestureControl_GestureType_ToOrdinal(value: GestureControl.GestureType): int32 {
+        return value as int32
+    }
+    static GestureControl_GestureType_FromOrdinal(ordinal: int32): GestureControl.GestureType {
+        return ordinal as GestureControl.GestureType
+    }
+    static GesturePriority_ToOrdinal(value: GesturePriority): int32 {
+        return value as int32
+    }
+    static GesturePriority_FromOrdinal(ordinal: int32): GesturePriority {
+        return ordinal as GesturePriority
+    }
+    static GestureRecognizerState_ToOrdinal(value: GestureRecognizerState): int32 {
+        return value as int32
+    }
+    static GestureRecognizerState_FromOrdinal(ordinal: int32): GestureRecognizerState {
+        return ordinal as GestureRecognizerState
+    }
+    static GridDirection_ToOrdinal(value: GridDirection): int32 {
+        return value as int32
+    }
+    static GridDirection_FromOrdinal(ordinal: int32): GridDirection {
+        return ordinal as GridDirection
+    }
+    static GridItemAlignment_ToOrdinal(value: GridItemAlignment): int32 {
+        return value as int32
+    }
+    static GridItemAlignment_FromOrdinal(ordinal: int32): GridItemAlignment {
+        return ordinal as GridItemAlignment
+    }
+    static GridItemStyle_ToOrdinal(value: GridItemStyle): int32 {
+        return value as int32
+    }
+    static GridItemStyle_FromOrdinal(ordinal: int32): GridItemStyle {
+        return ordinal as GridItemStyle
+    }
+    static SizeType_ToOrdinal(value: SizeType): int32 {
+        return value as int32
+    }
+    static SizeType_FromOrdinal(ordinal: int32): SizeType {
+        return ordinal as SizeType
+    }
+    static BreakpointsReference_ToOrdinal(value: BreakpointsReference): int32 {
+        return value as int32
+    }
+    static BreakpointsReference_FromOrdinal(ordinal: int32): BreakpointsReference {
+        return ordinal as BreakpointsReference
+    }
+    static GridRowDirection_ToOrdinal(value: GridRowDirection): int32 {
+        return value as int32
+    }
+    static GridRowDirection_FromOrdinal(ordinal: int32): GridRowDirection {
+        return ordinal as GridRowDirection
+    }
+    static ImageRenderMode_ToOrdinal(value: ImageRenderMode): int32 {
+        return value as int32
+    }
+    static ImageRenderMode_FromOrdinal(ordinal: int32): ImageRenderMode {
+        return ordinal as ImageRenderMode
+    }
+    static ImageContent_ToOrdinal(value: ImageContent): int32 {
+        return value as int32
+    }
+    static ImageContent_FromOrdinal(ordinal: int32): ImageContent {
+        return ordinal as ImageContent
+    }
+    static DynamicRangeMode_ToOrdinal(value: DynamicRangeMode): int32 {
+        return value as int32
+    }
+    static DynamicRangeMode_FromOrdinal(ordinal: int32): DynamicRangeMode {
+        return ordinal as DynamicRangeMode
+    }
+    static ImageInterpolation_ToOrdinal(value: ImageInterpolation): int32 {
+        return value as int32
+    }
+    static ImageInterpolation_FromOrdinal(ordinal: int32): ImageInterpolation {
+        return ordinal as ImageInterpolation
+    }
+    static ImageAnalyzerType_ToOrdinal(value: ImageAnalyzerType): int32 {
+        return value as int32
+    }
+    static ImageAnalyzerType_FromOrdinal(ordinal: int32): ImageAnalyzerType {
+        return ordinal as ImageAnalyzerType
+    }
+    static DataOperationType_ToOrdinal(value: DataOperationType): int32 {
+        return value as int32
+    }
+    static DataOperationType_FromOrdinal(ordinal: int32): DataOperationType {
+        return ordinal as DataOperationType
+    }
+    static ScrollState_ToOrdinal(value: ScrollState): int32 {
+        return value as int32
+    }
+    static ScrollState_FromOrdinal(ordinal: int32): ScrollState {
+        return ordinal as ScrollState
+    }
+    static ListItemAlign_ToOrdinal(value: ListItemAlign): int32 {
+        return value as int32
+    }
+    static ListItemAlign_FromOrdinal(ordinal: int32): ListItemAlign {
+        return ordinal as ListItemAlign
+    }
+    static ListItemGroupArea_ToOrdinal(value: ListItemGroupArea): int32 {
+        return value as int32
+    }
+    static ListItemGroupArea_FromOrdinal(ordinal: int32): ListItemGroupArea {
+        return ordinal as ListItemGroupArea
+    }
+    static StickyStyle_ToOrdinal(value: StickyStyle): int32 {
+        return value as int32
+    }
+    static StickyStyle_FromOrdinal(ordinal: int32): StickyStyle {
+        return ordinal as StickyStyle
+    }
+    static ChainEdgeEffect_ToOrdinal(value: ChainEdgeEffect): int32 {
+        return value as int32
+    }
+    static ChainEdgeEffect_FromOrdinal(ordinal: int32): ChainEdgeEffect {
+        return ordinal as ChainEdgeEffect
+    }
+    static ScrollSnapAlign_ToOrdinal(value: ScrollSnapAlign): int32 {
+        return value as int32
+    }
+    static ScrollSnapAlign_FromOrdinal(ordinal: int32): ScrollSnapAlign {
+        return ordinal as ScrollSnapAlign
+    }
+    static Sticky_ToOrdinal(value: Sticky): int32 {
+        return value as int32
+    }
+    static Sticky_FromOrdinal(ordinal: int32): Sticky {
+        return ordinal as Sticky
+    }
+    static EditMode_ToOrdinal(value: EditMode): int32 {
+        return value as int32
+    }
+    static EditMode_FromOrdinal(ordinal: int32): EditMode {
+        return ordinal as EditMode
+    }
+    static SwipeEdgeEffect_ToOrdinal(value: SwipeEdgeEffect): int32 {
+        return value as int32
+    }
+    static SwipeEdgeEffect_FromOrdinal(ordinal: int32): SwipeEdgeEffect {
+        return ordinal as SwipeEdgeEffect
+    }
+    static SwipeActionState_ToOrdinal(value: SwipeActionState): int32 {
+        return value as int32
+    }
+    static SwipeActionState_FromOrdinal(ordinal: int32): SwipeActionState {
+        return ordinal as SwipeActionState
+    }
+    static ListItemStyle_ToOrdinal(value: ListItemStyle): int32 {
+        return value as int32
+    }
+    static ListItemStyle_FromOrdinal(ordinal: int32): ListItemStyle {
+        return ordinal as ListItemStyle
+    }
+    static ListItemGroupStyle_ToOrdinal(value: ListItemGroupStyle): int32 {
+        return value as int32
+    }
+    static ListItemGroupStyle_FromOrdinal(ordinal: int32): ListItemGroupStyle {
+        return ordinal as ListItemGroupStyle
+    }
+    static LoadingProgressStyle_ToOrdinal(value: LoadingProgressStyle): int32 {
+        return value as int32
+    }
+    static LoadingProgressStyle_FromOrdinal(ordinal: int32): LoadingProgressStyle {
+        return ordinal as LoadingProgressStyle
+    }
+    static LocationIconStyle_ToOrdinal(value: LocationIconStyle): int32 {
+        return value as int32
+    }
+    static LocationIconStyle_FromOrdinal(ordinal: int32): LocationIconStyle {
+        return ordinal as LocationIconStyle
+    }
+    static LocationDescription_ToOrdinal(value: LocationDescription): int32 {
+        return value as int32
+    }
+    static LocationDescription_FromOrdinal(ordinal: int32): LocationDescription {
+        return ordinal as LocationDescription
+    }
+    static LocationButtonOnClickResult_ToOrdinal(value: LocationButtonOnClickResult): int32 {
+        return value as int32
+    }
+    static LocationButtonOnClickResult_FromOrdinal(ordinal: int32): LocationButtonOnClickResult {
+        return ordinal as LocationButtonOnClickResult
+    }
+    static SubMenuExpandingMode_ToOrdinal(value: SubMenuExpandingMode): int32 {
+        return value as int32
+    }
+    static SubMenuExpandingMode_FromOrdinal(ordinal: int32): SubMenuExpandingMode {
+        return ordinal as SubMenuExpandingMode
+    }
+    static NavigationSystemTransitionType_ToOrdinal(value: NavigationSystemTransitionType): int32 {
+        return value as int32
+    }
+    static NavigationSystemTransitionType_FromOrdinal(ordinal: int32): NavigationSystemTransitionType {
+        return ordinal as NavigationSystemTransitionType
+    }
+    static NavDestinationMode_ToOrdinal(value: NavDestinationMode): int32 {
+        return value as int32
+    }
+    static NavDestinationMode_FromOrdinal(ordinal: int32): NavDestinationMode {
+        return ordinal as NavDestinationMode
+    }
+    static NavRouteMode_ToOrdinal(value: NavRouteMode): int32 {
+        return value as int32
+    }
+    static NavRouteMode_FromOrdinal(ordinal: int32): NavRouteMode {
+        return ordinal as NavRouteMode
+    }
+    static NavigationMode_ToOrdinal(value: NavigationMode): int32 {
+        return value as int32
+    }
+    static NavigationMode_FromOrdinal(ordinal: int32): NavigationMode {
+        return ordinal as NavigationMode
+    }
+    static NavBarPosition_ToOrdinal(value: NavBarPosition): int32 {
+        return value as int32
+    }
+    static NavBarPosition_FromOrdinal(ordinal: int32): NavBarPosition {
+        return ordinal as NavBarPosition
+    }
+    static NavigationTitleMode_ToOrdinal(value: NavigationTitleMode): int32 {
+        return value as int32
+    }
+    static NavigationTitleMode_FromOrdinal(ordinal: int32): NavigationTitleMode {
+        return ordinal as NavigationTitleMode
+    }
+    static LaunchMode_ToOrdinal(value: LaunchMode): int32 {
+        return value as int32
+    }
+    static LaunchMode_FromOrdinal(ordinal: int32): LaunchMode {
+        return ordinal as LaunchMode
+    }
+    static ToolbarItemStatus_ToOrdinal(value: ToolbarItemStatus): int32 {
+        return value as int32
+    }
+    static ToolbarItemStatus_FromOrdinal(ordinal: int32): ToolbarItemStatus {
+        return ordinal as ToolbarItemStatus
+    }
+    static NavigationOperation_ToOrdinal(value: NavigationOperation): int32 {
+        return value as int32
+    }
+    static NavigationOperation_FromOrdinal(ordinal: int32): NavigationOperation {
+        return ordinal as NavigationOperation
+    }
+    static BarStyle_ToOrdinal(value: BarStyle): int32 {
+        return value as int32
+    }
+    static BarStyle_FromOrdinal(ordinal: int32): BarStyle {
+        return ordinal as BarStyle
+    }
+    static NavigationType_ToOrdinal(value: NavigationType): int32 {
+        return value as int32
+    }
+    static NavigationType_FromOrdinal(ordinal: int32): NavigationType {
+        return ordinal as NavigationType
+    }
+    static RouteType_ToOrdinal(value: RouteType): int32 {
+        return value as int32
+    }
+    static RouteType_FromOrdinal(ordinal: int32): RouteType {
+        return ordinal as RouteType
+    }
+    static SlideEffect_ToOrdinal(value: SlideEffect): int32 {
+        return value as int32
+    }
+    static SlideEffect_FromOrdinal(ordinal: int32): SlideEffect {
+        return ordinal as SlideEffect
+    }
+    static PanelMode_ToOrdinal(value: PanelMode): int32 {
+        return value as int32
+    }
+    static PanelMode_FromOrdinal(ordinal: int32): PanelMode {
+        return ordinal as PanelMode
+    }
+    static PanelType_ToOrdinal(value: PanelType): int32 {
+        return value as int32
+    }
+    static PanelType_FromOrdinal(ordinal: int32): PanelType {
+        return ordinal as PanelType
+    }
+    static PanelHeight_ToOrdinal(value: PanelHeight): int32 {
+        return value as int32
+    }
+    static PanelHeight_FromOrdinal(ordinal: int32): PanelHeight {
+        return ordinal as PanelHeight
+    }
+    static ParticleType_ToOrdinal(value: ParticleType): int32 {
+        return value as int32
+    }
+    static ParticleType_FromOrdinal(ordinal: int32): ParticleType {
+        return ordinal as ParticleType
+    }
+    static ParticleEmitterShape_ToOrdinal(value: ParticleEmitterShape): int32 {
+        return value as int32
+    }
+    static ParticleEmitterShape_FromOrdinal(ordinal: int32): ParticleEmitterShape {
+        return ordinal as ParticleEmitterShape
+    }
+    static DistributionType_ToOrdinal(value: DistributionType): int32 {
+        return value as int32
+    }
+    static DistributionType_FromOrdinal(ordinal: int32): DistributionType {
+        return ordinal as DistributionType
+    }
+    static ParticleUpdater_ToOrdinal(value: ParticleUpdater): int32 {
+        return value as int32
+    }
+    static ParticleUpdater_FromOrdinal(ordinal: int32): ParticleUpdater {
+        return ordinal as ParticleUpdater
+    }
+    static DisturbanceFieldShape_ToOrdinal(value: DisturbanceFieldShape): int32 {
+        return value as int32
+    }
+    static DisturbanceFieldShape_FromOrdinal(ordinal: int32): DisturbanceFieldShape {
+        return ordinal as DisturbanceFieldShape
+    }
+    static PasteIconStyle_ToOrdinal(value: PasteIconStyle): int32 {
+        return value as int32
+    }
+    static PasteIconStyle_FromOrdinal(ordinal: int32): PasteIconStyle {
+        return ordinal as PasteIconStyle
+    }
+    static PasteDescription_ToOrdinal(value: PasteDescription): int32 {
+        return value as int32
+    }
+    static PasteDescription_FromOrdinal(ordinal: int32): PasteDescription {
+        return ordinal as PasteDescription
+    }
+    static PasteButtonOnClickResult_ToOrdinal(value: PasteButtonOnClickResult): int32 {
+        return value as int32
+    }
+    static PasteButtonOnClickResult_FromOrdinal(ordinal: int32): PasteButtonOnClickResult {
+        return ordinal as PasteButtonOnClickResult
+    }
+    static PatternLockChallengeResult_ToOrdinal(value: PatternLockChallengeResult): int32 {
+        return value as int32
+    }
+    static PatternLockChallengeResult_FromOrdinal(ordinal: int32): PatternLockChallengeResult {
+        return ordinal as PatternLockChallengeResult
+    }
+    static ProgressType_ToOrdinal(value: ProgressType): int32 {
+        return value as int32
+    }
+    static ProgressType_FromOrdinal(ordinal: int32): ProgressType {
+        return ordinal as ProgressType
+    }
+    static ProgressStatus_ToOrdinal(value: ProgressStatus): int32 {
+        return value as int32
+    }
+    static ProgressStatus_FromOrdinal(ordinal: int32): ProgressStatus {
+        return ordinal as ProgressStatus
+    }
+    static ProgressStyle_ToOrdinal(value: ProgressStyle): int32 {
+        return value as int32
+    }
+    static ProgressStyle_FromOrdinal(ordinal: int32): ProgressStyle {
+        return ordinal as ProgressStyle
+    }
+    static RadioIndicatorType_ToOrdinal(value: RadioIndicatorType): int32 {
+        return value as int32
+    }
+    static RadioIndicatorType_FromOrdinal(ordinal: int32): RadioIndicatorType {
+        return ordinal as RadioIndicatorType
+    }
+    static RefreshStatus_ToOrdinal(value: RefreshStatus): int32 {
+        return value as int32
+    }
+    static RefreshStatus_FromOrdinal(ordinal: int32): RefreshStatus {
+        return ordinal as RefreshStatus
+    }
+    static BarrierDirection_ToOrdinal(value: BarrierDirection): int32 {
+        return value as int32
+    }
+    static BarrierDirection_FromOrdinal(ordinal: int32): BarrierDirection {
+        return ordinal as BarrierDirection
+    }
+    static LocalizedBarrierDirection_ToOrdinal(value: LocalizedBarrierDirection): int32 {
+        return value as int32
+    }
+    static LocalizedBarrierDirection_FromOrdinal(ordinal: int32): LocalizedBarrierDirection {
+        return ordinal as LocalizedBarrierDirection
+    }
+    static RichEditorDeleteDirection_ToOrdinal(value: RichEditorDeleteDirection): int32 {
+        return value as int32
+    }
+    static RichEditorDeleteDirection_FromOrdinal(ordinal: int32): RichEditorDeleteDirection {
+        return ordinal as RichEditorDeleteDirection
+    }
+    static RichEditorSpanType_ToOrdinal(value: RichEditorSpanType): int32 {
+        return value as int32
+    }
+    static RichEditorSpanType_FromOrdinal(ordinal: int32): RichEditorSpanType {
+        return ordinal as RichEditorSpanType
+    }
+    static RichEditorResponseType_ToOrdinal(value: RichEditorResponseType): int32 {
+        return value as int32
+    }
+    static RichEditorResponseType_FromOrdinal(ordinal: int32): RichEditorResponseType {
+        return ordinal as RichEditorResponseType
+    }
+    static SaveIconStyle_ToOrdinal(value: SaveIconStyle): int32 {
+        return value as int32
+    }
+    static SaveIconStyle_FromOrdinal(ordinal: int32): SaveIconStyle {
+        return ordinal as SaveIconStyle
+    }
+    static SaveDescription_ToOrdinal(value: SaveDescription): int32 {
+        return value as int32
+    }
+    static SaveDescription_FromOrdinal(ordinal: int32): SaveDescription {
+        return ordinal as SaveDescription
+    }
+    static SaveButtonOnClickResult_ToOrdinal(value: SaveButtonOnClickResult): int32 {
+        return value as int32
+    }
+    static SaveButtonOnClickResult_FromOrdinal(ordinal: int32): SaveButtonOnClickResult {
+        return ordinal as SaveButtonOnClickResult
+    }
+    static ScrollDirection_ToOrdinal(value: ScrollDirection): int32 {
+        return value as int32
+    }
+    static ScrollDirection_FromOrdinal(ordinal: int32): ScrollDirection {
+        return ordinal as ScrollDirection
+    }
+    static ScrollAlign_ToOrdinal(value: ScrollAlign): int32 {
+        return value as int32
+    }
+    static ScrollAlign_FromOrdinal(ordinal: int32): ScrollAlign {
+        return ordinal as ScrollAlign
+    }
+    static ScrollBarDirection_ToOrdinal(value: ScrollBarDirection): int32 {
+        return value as int32
+    }
+    static ScrollBarDirection_FromOrdinal(ordinal: int32): ScrollBarDirection {
+        return ordinal as ScrollBarDirection
+    }
+    static CancelButtonStyle_ToOrdinal(value: CancelButtonStyle): int32 {
+        return value as int32
+    }
+    static CancelButtonStyle_FromOrdinal(ordinal: int32): CancelButtonStyle {
+        return ordinal as CancelButtonStyle
+    }
+    static SearchType_ToOrdinal(value: SearchType): int32 {
+        return value as int32
+    }
+    static SearchType_FromOrdinal(ordinal: int32): SearchType {
+        return ordinal as SearchType
+    }
+    static SecurityComponentLayoutDirection_ToOrdinal(value: SecurityComponentLayoutDirection): int32 {
+        return value as int32
+    }
+    static SecurityComponentLayoutDirection_FromOrdinal(ordinal: int32): SecurityComponentLayoutDirection {
+        return ordinal as SecurityComponentLayoutDirection
+    }
+    static ArrowPosition_ToOrdinal(value: ArrowPosition): int32 {
+        return value as int32
+    }
+    static ArrowPosition_FromOrdinal(ordinal: int32): ArrowPosition {
+        return ordinal as ArrowPosition
+    }
+    static MenuAlignType_ToOrdinal(value: MenuAlignType): int32 {
+        return value as int32
+    }
+    static MenuAlignType_FromOrdinal(ordinal: int32): MenuAlignType {
+        return ordinal as MenuAlignType
+    }
+    static SliderStyle_ToOrdinal(value: SliderStyle): int32 {
+        return value as int32
+    }
+    static SliderStyle_FromOrdinal(ordinal: int32): SliderStyle {
+        return ordinal as SliderStyle
+    }
+    static SliderChangeMode_ToOrdinal(value: SliderChangeMode): int32 {
+        return value as int32
+    }
+    static SliderChangeMode_FromOrdinal(ordinal: int32): SliderChangeMode {
+        return ordinal as SliderChangeMode
+    }
+    static SliderInteraction_ToOrdinal(value: SliderInteraction): int32 {
+        return value as int32
+    }
+    static SliderInteraction_FromOrdinal(ordinal: int32): SliderInteraction {
+        return ordinal as SliderInteraction
+    }
+    static SliderBlockType_ToOrdinal(value: SliderBlockType): int32 {
+        return value as int32
+    }
+    static SliderBlockType_FromOrdinal(ordinal: int32): SliderBlockType {
+        return ordinal as SliderBlockType
+    }
+    static ColorMode_ToOrdinal(value: ColorMode): int32 {
+        return value as int32
+    }
+    static ColorMode_FromOrdinal(ordinal: int32): ColorMode {
+        return ordinal as ColorMode
+    }
+    static LayoutDirection_ToOrdinal(value: LayoutDirection): int32 {
+        return value as int32
+    }
+    static LayoutDirection_FromOrdinal(ordinal: int32): LayoutDirection {
+        return ordinal as LayoutDirection
+    }
+    static ItemState_ToOrdinal(value: ItemState): int32 {
+        return value as int32
+    }
+    static ItemState_FromOrdinal(ordinal: int32): ItemState {
+        return ordinal as ItemState
+    }
+    static SwiperDisplayMode_ToOrdinal(value: SwiperDisplayMode): int32 {
+        return value as int32
+    }
+    static SwiperDisplayMode_FromOrdinal(ordinal: int32): SwiperDisplayMode {
+        return ordinal as SwiperDisplayMode
+    }
+    static SwiperNestedScrollMode_ToOrdinal(value: SwiperNestedScrollMode): int32 {
+        return value as int32
+    }
+    static SwiperNestedScrollMode_FromOrdinal(ordinal: int32): SwiperNestedScrollMode {
+        return ordinal as SwiperNestedScrollMode
+    }
+    static SymbolRenderingStrategy_ToOrdinal(value: SymbolRenderingStrategy): int32 {
+        return value as int32
+    }
+    static SymbolRenderingStrategy_FromOrdinal(ordinal: int32): SymbolRenderingStrategy {
+        return ordinal as SymbolRenderingStrategy
+    }
+    static SymbolEffectStrategy_ToOrdinal(value: SymbolEffectStrategy): int32 {
+        return value as int32
+    }
+    static SymbolEffectStrategy_FromOrdinal(ordinal: int32): SymbolEffectStrategy {
+        return ordinal as SymbolEffectStrategy
+    }
+    static EffectFillStyle_ToOrdinal(value: EffectFillStyle): int32 {
+        return value as int32
+    }
+    static EffectFillStyle_FromOrdinal(ordinal: int32): EffectFillStyle {
+        return ordinal as EffectFillStyle
+    }
+    static BarMode_ToOrdinal(value: BarMode): int32 {
+        return value as int32
+    }
+    static BarMode_FromOrdinal(ordinal: int32): BarMode {
+        return ordinal as BarMode
+    }
+    static AnimationMode_ToOrdinal(value: AnimationMode): int32 {
+        return value as int32
+    }
+    static AnimationMode_FromOrdinal(ordinal: int32): AnimationMode {
+        return ordinal as AnimationMode
+    }
+    static BarPosition_ToOrdinal(value: BarPosition): int32 {
+        return value as int32
+    }
+    static BarPosition_FromOrdinal(ordinal: int32): BarPosition {
+        return ordinal as BarPosition
+    }
+    static LayoutStyle_ToOrdinal(value: LayoutStyle): int32 {
+        return value as int32
+    }
+    static LayoutStyle_FromOrdinal(ordinal: int32): LayoutStyle {
+        return ordinal as LayoutStyle
+    }
+    static SelectedMode_ToOrdinal(value: SelectedMode): int32 {
+        return value as int32
+    }
+    static SelectedMode_FromOrdinal(ordinal: int32): SelectedMode {
+        return ordinal as SelectedMode
+    }
+    static LayoutMode_ToOrdinal(value: LayoutMode): int32 {
+        return value as int32
+    }
+    static LayoutMode_FromOrdinal(ordinal: int32): LayoutMode {
+        return ordinal as LayoutMode
+    }
+    static TextSpanType_ToOrdinal(value: TextSpanType): int32 {
+        return value as int32
+    }
+    static TextSpanType_FromOrdinal(ordinal: int32): TextSpanType {
+        return ordinal as TextSpanType
+    }
+    static TextResponseType_ToOrdinal(value: TextResponseType): int32 {
+        return value as int32
+    }
+    static TextResponseType_FromOrdinal(ordinal: int32): TextResponseType {
+        return ordinal as TextResponseType
+    }
+    static TextAreaType_ToOrdinal(value: TextAreaType): int32 {
+        return value as int32
+    }
+    static TextAreaType_FromOrdinal(ordinal: int32): TextAreaType {
+        return ordinal as TextAreaType
+    }
+    static ContentType_ToOrdinal(value: ContentType): int32 {
+        return value as int32
+    }
+    static ContentType_FromOrdinal(ordinal: int32): ContentType {
+        return ordinal as ContentType
+    }
+    static TextDataDetectorType_ToOrdinal(value: TextDataDetectorType): int32 {
+        return value as int32
+    }
+    static TextDataDetectorType_FromOrdinal(ordinal: int32): TextDataDetectorType {
+        return ordinal as TextDataDetectorType
+    }
+    static TextDeleteDirection_ToOrdinal(value: TextDeleteDirection): int32 {
+        return value as int32
+    }
+    static TextDeleteDirection_FromOrdinal(ordinal: int32): TextDeleteDirection {
+        return ordinal as TextDeleteDirection
+    }
+    static MenuType_ToOrdinal(value: MenuType): int32 {
+        return value as int32
+    }
+    static MenuType_FromOrdinal(ordinal: int32): MenuType {
+        return ordinal as MenuType
+    }
+    static InputType_ToOrdinal(value: InputType): int32 {
+        return value as int32
+    }
+    static InputType_FromOrdinal(ordinal: int32): InputType {
+        return ordinal as InputType
+    }
+    static EnterKeyType_ToOrdinal(value: EnterKeyType): int32 {
+        return value as int32
+    }
+    static EnterKeyType_FromOrdinal(ordinal: int32): EnterKeyType {
+        return ordinal as EnterKeyType
+    }
+    static TextInputStyle_ToOrdinal(value: TextInputStyle): int32 {
+        return value as int32
+    }
+    static TextInputStyle_FromOrdinal(ordinal: int32): TextInputStyle {
+        return ordinal as TextInputStyle
+    }
+    static TimePickerFormat_ToOrdinal(value: TimePickerFormat): int32 {
+        return value as int32
+    }
+    static TimePickerFormat_FromOrdinal(ordinal: int32): TimePickerFormat {
+        return ordinal as TimePickerFormat
+    }
+    static ToggleType_ToOrdinal(value: ToggleType): int32 {
+        return value as int32
+    }
+    static ToggleType_FromOrdinal(ordinal: int32): ToggleType {
+        return ordinal as ToggleType
+    }
+    static SeekMode_ToOrdinal(value: SeekMode): int32 {
+        return value as int32
+    }
+    static SeekMode_FromOrdinal(ordinal: int32): SeekMode {
+        return ordinal as SeekMode
+    }
+    static PlaybackSpeed_ToOrdinal(value: PlaybackSpeed): int32 {
+        return value as int32
+    }
+    static PlaybackSpeed_FromOrdinal(ordinal: int32): PlaybackSpeed {
+        return ordinal as PlaybackSpeed
+    }
+    static MessageLevel_ToOrdinal(value: MessageLevel): int32 {
+        return value as int32
+    }
+    static MessageLevel_FromOrdinal(ordinal: int32): MessageLevel {
+        return ordinal as MessageLevel
+    }
+    static MixedMode_ToOrdinal(value: MixedMode): int32 {
+        return value as int32
+    }
+    static MixedMode_FromOrdinal(ordinal: int32): MixedMode {
+        return ordinal as MixedMode
+    }
+    static HitTestType_ToOrdinal(value: HitTestType): int32 {
+        return value as int32
+    }
+    static HitTestType_FromOrdinal(ordinal: int32): HitTestType {
+        return ordinal as HitTestType
+    }
+    static CacheMode_ToOrdinal(value: CacheMode): int32 {
+        return value as int32
+    }
+    static CacheMode_FromOrdinal(ordinal: int32): CacheMode {
+        return ordinal as CacheMode
+    }
+    static OverScrollMode_ToOrdinal(value: OverScrollMode): int32 {
+        return value as int32
+    }
+    static OverScrollMode_FromOrdinal(ordinal: int32): OverScrollMode {
+        return ordinal as OverScrollMode
+    }
+    static WebDarkMode_ToOrdinal(value: WebDarkMode): int32 {
+        return value as int32
+    }
+    static WebDarkMode_FromOrdinal(ordinal: int32): WebDarkMode {
+        return ordinal as WebDarkMode
+    }
+    static WebCaptureMode_ToOrdinal(value: WebCaptureMode): int32 {
+        return value as int32
+    }
+    static WebCaptureMode_FromOrdinal(ordinal: int32): WebCaptureMode {
+        return ordinal as WebCaptureMode
+    }
+    static ThreatType_ToOrdinal(value: ThreatType): int32 {
+        return value as int32
+    }
+    static ThreatType_FromOrdinal(ordinal: int32): ThreatType {
+        return ordinal as ThreatType
+    }
+    static RenderExitReason_ToOrdinal(value: RenderExitReason): int32 {
+        return value as int32
+    }
+    static RenderExitReason_FromOrdinal(ordinal: int32): RenderExitReason {
+        return ordinal as RenderExitReason
+    }
+    static SslError_ToOrdinal(value: SslError): int32 {
+        return value as int32
+    }
+    static SslError_FromOrdinal(ordinal: int32): SslError {
+        return ordinal as SslError
+    }
+    static FileSelectorMode_ToOrdinal(value: FileSelectorMode): int32 {
+        return value as int32
+    }
+    static FileSelectorMode_FromOrdinal(ordinal: int32): FileSelectorMode {
+        return ordinal as FileSelectorMode
+    }
+    static WebLayoutMode_ToOrdinal(value: WebLayoutMode): int32 {
+        return value as int32
+    }
+    static WebLayoutMode_FromOrdinal(ordinal: int32): WebLayoutMode {
+        return ordinal as WebLayoutMode
+    }
+    static RenderProcessNotRespondingReason_ToOrdinal(value: RenderProcessNotRespondingReason): int32 {
+        return value as int32
+    }
+    static RenderProcessNotRespondingReason_FromOrdinal(ordinal: int32): RenderProcessNotRespondingReason {
+        return ordinal as RenderProcessNotRespondingReason
+    }
+    static ProtectedResourceType_ToOrdinal(value: ProtectedResourceType): int32 {
+        return value as int32
+    }
+    static ProtectedResourceType_FromOrdinal(ordinal: int32): ProtectedResourceType {
+        return ordinal as ProtectedResourceType
+    }
+    static ContextMenuSourceType_ToOrdinal(value: ContextMenuSourceType): int32 {
+        return value as int32
+    }
+    static ContextMenuSourceType_FromOrdinal(ordinal: int32): ContextMenuSourceType {
+        return ordinal as ContextMenuSourceType
+    }
+    static ContextMenuMediaType_ToOrdinal(value: ContextMenuMediaType): int32 {
+        return value as int32
+    }
+    static ContextMenuMediaType_FromOrdinal(ordinal: int32): ContextMenuMediaType {
+        return ordinal as ContextMenuMediaType
+    }
+    static ContextMenuInputFieldType_ToOrdinal(value: ContextMenuInputFieldType): int32 {
+        return value as int32
+    }
+    static ContextMenuInputFieldType_FromOrdinal(ordinal: int32): ContextMenuInputFieldType {
+        return ordinal as ContextMenuInputFieldType
+    }
+    static NativeEmbedStatus_ToOrdinal(value: NativeEmbedStatus): int32 {
+        return value as int32
+    }
+    static NativeEmbedStatus_FromOrdinal(ordinal: int32): NativeEmbedStatus {
+        return ordinal as NativeEmbedStatus
+    }
+    static ContextMenuEditStateFlags_ToOrdinal(value: ContextMenuEditStateFlags): int32 {
+        return value as int32
+    }
+    static ContextMenuEditStateFlags_FromOrdinal(ordinal: int32): ContextMenuEditStateFlags {
+        return ordinal as ContextMenuEditStateFlags
+    }
+    static WebNavigationType_ToOrdinal(value: WebNavigationType): int32 {
+        return value as int32
+    }
+    static WebNavigationType_FromOrdinal(ordinal: int32): WebNavigationType {
+        return ordinal as WebNavigationType
+    }
+    static RenderMode_ToOrdinal(value: RenderMode): int32 {
+        return value as int32
+    }
+    static RenderMode_FromOrdinal(ordinal: int32): RenderMode {
+        return ordinal as RenderMode
+    }
+    static ViewportFit_ToOrdinal(value: ViewportFit): int32 {
+        return value as int32
+    }
+    static ViewportFit_FromOrdinal(ordinal: int32): ViewportFit {
+        return ordinal as ViewportFit
+    }
+    static WebKeyboardAvoidMode_ToOrdinal(value: WebKeyboardAvoidMode): int32 {
+        return value as int32
+    }
+    static WebKeyboardAvoidMode_FromOrdinal(ordinal: int32): WebKeyboardAvoidMode {
+        return ordinal as WebKeyboardAvoidMode
+    }
+    static WebElementType_ToOrdinal(value: WebElementType): int32 {
+        return value as int32
+    }
+    static WebElementType_FromOrdinal(ordinal: int32): WebElementType {
+        return ordinal as WebElementType
+    }
+    static WebResponseType_ToOrdinal(value: WebResponseType): int32 {
+        return value as int32
+    }
+    static WebResponseType_FromOrdinal(ordinal: int32): WebResponseType {
+        return ordinal as WebResponseType
+    }
+    static SideBarContainerType_ToOrdinal(value: SideBarContainerType): int32 {
+        return value as int32
+    }
+    static SideBarContainerType_FromOrdinal(ordinal: int32): SideBarContainerType {
+        return ordinal as SideBarContainerType
+    }
+    static SideBarPosition_ToOrdinal(value: SideBarPosition): int32 {
+        return value as int32
+    }
+    static SideBarPosition_FromOrdinal(ordinal: int32): SideBarPosition {
+        return ordinal as SideBarPosition
+    }
+    static WaterFlowLayoutMode_ToOrdinal(value: WaterFlowLayoutMode): int32 {
+        return value as int32
+    }
+    static WaterFlowLayoutMode_FromOrdinal(ordinal: int32): WaterFlowLayoutMode {
+        return ordinal as WaterFlowLayoutMode
+    }
+    static DpiFollowStrategy_ToOrdinal(value: DpiFollowStrategy): int32 {
+        return value as int32
+    }
+    static DpiFollowStrategy_FromOrdinal(ordinal: int32): DpiFollowStrategy {
+        return ordinal as DpiFollowStrategy
+    }
+    static StyledStringKey_ToOrdinal(value: StyledStringKey): int32 {
+        return value as int32
+    }
+    static StyledStringKey_FromOrdinal(ordinal: int32): StyledStringKey {
+        return ordinal as StyledStringKey
+    }
     static isArray_String(value: object|string|number|undefined|null): boolean {
         return Array.isArray(value)
     }
@@ -19642,6 +21356,9 @@ export class TypeChecker {
         return Array.isArray(value)
     }
     static isArray_Number(value: object|string|number|undefined|null): boolean {
+        return Array.isArray(value)
+    }
+    static isArray_CustomObject(value: object|string|number|undefined|null): boolean {
         return Array.isArray(value)
     }
     static isArray_TouchObject(value: object|string|number|undefined|null): boolean {
@@ -19732,9 +21449,6 @@ export class TypeChecker {
         return Array.isArray(value)
     }
     static isArray_LayoutSafeAreaEdge(value: object|string|number|undefined|null): boolean {
-        return Array.isArray(value)
-    }
-    static isArray_CustomObject(value: object|string|number|undefined|null): boolean {
         return Array.isArray(value)
     }
     static isArray_Point(value: object|string|number|undefined|null): boolean {

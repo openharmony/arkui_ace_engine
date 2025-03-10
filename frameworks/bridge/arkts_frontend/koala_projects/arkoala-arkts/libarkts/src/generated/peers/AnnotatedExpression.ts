@@ -39,6 +39,11 @@ export class AnnotatedExpression extends Expression {
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._AnnotatedExpressionTypeAnnotationConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setTsTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._AnnotatedExpressionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
+    }
 }
 export function isAnnotatedExpression(node: AstNode): node is AnnotatedExpression {
     return node instanceof AnnotatedExpression

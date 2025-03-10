@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/compat",
-    "version": "1.5.7+devel",
+    "version": "1.5.8+devel",
     "description": "",
     "main": "build/src/index.js",
     "types": "build/src/index.d.ts",

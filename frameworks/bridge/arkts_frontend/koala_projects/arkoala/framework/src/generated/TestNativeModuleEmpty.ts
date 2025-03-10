@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KInt, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer } from "@koalaui/interop"
+import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer } from "@koalaui/interop"
 import { int32, float32 } from "@koalaui/common"
 
 export class TestNativeModuleEmpty {
@@ -36,26 +36,8 @@ export class TestNativeModuleEmpty {
         console.log("_TestCallIntMemory")
         return 0
     }
-    _Test_SetEventsApi(): void {
-        console.log("_Test_SetEventsApi")
-    }
-    _Test_Common_OnChildTouchTest(arr: Uint8Array, arg: int32): void {
-        console.log("_Test_Common_OnChildTouchTest")
-    }
-    _Test_List_OnScrollVisibleContentChange(arr: Uint8Array, arg: int32): void {
-        console.log("_Test_List_OnScrollVisibleContentChange")
-    }
-    _Test_TextPicker_OnAccept(arr: Uint8Array, arg: int32): void {
-        console.log("_Test_TextPicker_OnAccept")
-    }
     _TestWithBuffer(buffer: ArrayBuffer): void {
         console.log("_TestWithBuffer")
-    }
-    _TestSetArkoalaCallbackCaller(): void {
-        console.log("_TestSetArkoalaCallbackCaller")
-    }
-    _TestSetArkoalaCallbackCallerSync(): void {
-        console.log("_TestSetArkoalaCallbackCallerSync")
     }
     _TestGetManagedCaller(kind: int32): KPointer {
         console.log("_TestGetManagedCaller")

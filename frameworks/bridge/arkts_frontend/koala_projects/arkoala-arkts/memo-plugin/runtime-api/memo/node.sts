@@ -22,7 +22,6 @@ import { StateContext } from "../states/State"
 export declare function NodeAttach<Node extends IncrementalNode>(__memo_context: StateContext, __memo_id: KoalaCallsiteKey, create: () => Node, update: (__memo_context: StateContext, __memo_id: KoalaCallsiteKey, node: Node) => void): void
 export declare function contextNode<T extends IncrementalNode>(__memo_context: StateContext, __memo_id: KoalaCallsiteKey, kind: uint32 = 1, name?: string): T
 export declare class DataNode<Data> extends IncrementalNode {
-    private data: Data | undefined
     constructor(kind: uint32 = 1)
     static attach<Data>(kind: uint32, data: Data, onDataChange?: () => void): void
     static extract<Data>(kind: uint32, node: IncrementalNode): Data | undefined

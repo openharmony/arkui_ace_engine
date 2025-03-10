@@ -14,14 +14,13 @@
  */
 
 import { global } from "../static/global"
-import { throwError } from "../../utils"
+import { isNumber, throwError } from "../../utils"
 import { nullptr, withStringResult } from "@koalaui/interop"
 import { passNode, unpackNodeArray, unpackNonNullableNode } from "./private"
-import { isClassDefinition, isFunctionDeclaration, isScriptFunction } from "../factory/nodeTests"
-import { Es2pandaContextState } from "../../generated/Es2pandaEnums"
+import { isFunctionDeclaration, isMemberExpression, isScriptFunction } from "../factory/nodeTests"
+import { Es2pandaContextState, Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
 import type { AstNode } from "../peers/AstNode"
-import type { AnnotationUsage } from "../../generated"
-import { MemberExpression } from "../to-be-generated/MemberExpression"
+import { ClassDefinition, isClassDefinition, type AnnotationUsage } from "../../generated"
 
 export function proceedToState(state: Es2pandaContextState): void {
     if (state <= global.es2panda._ContextState(global.context)) {
@@ -61,7 +60,7 @@ export function rebindSubtree(node: AstNode): void {
 }
 
 export function getDecl(node: AstNode): AstNode | undefined {
-    if (node instanceof MemberExpression) {
+    if (isMemberExpression(node)) {
         return getDecl(node.property)
     }
     const decl = global.es2panda._DeclarationFromIdentifier(global.context, passNode(node))
@@ -91,4 +90,21 @@ export function getOriginalNode(node: AstNode): AstNode {
 
 export function getFileName(): string {
     return global.filePath
+}
+
+// TODO: It seems like Definition overrides AstNode  modifiers
+// with it's own modifiers which is completely unrelated set of flags.
+// Use this function if you need
+// the language level modifiers: public, declare, export, etc.
+export function classDefinitionFlags(node: ClassDefinition): Es2pandaModifierFlags {
+    return global.generatedEs2panda._AstNodeModifiers(global.context, node.peer)
+}
+
+export function modifiersToString(modifiers: Es2pandaModifierFlags): string {
+     return Object.values(Es2pandaModifierFlags)
+            .filter(isNumber)
+            .map(it => {
+                console.log(it.valueOf(), Es2pandaModifierFlags[it], modifiers.valueOf() & it)
+                return ((modifiers.valueOf() & it) === it) ? Es2pandaModifierFlags[it] : ""
+            }).join(" ")
 }

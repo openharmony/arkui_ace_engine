@@ -115,7 +115,8 @@ function implementedPackages(kind: ArkUIImplementation): string[] {
         'system.router'
     ]
     if (kind == ArkUIImplementation.ARKTS) return [
-        'ohos.router'
+        'ohos.router',
+        'ohos.arkui.UIContext'
     ]
 
     assertUnreachable(kind)

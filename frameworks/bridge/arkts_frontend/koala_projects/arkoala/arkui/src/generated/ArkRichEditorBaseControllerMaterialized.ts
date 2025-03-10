@@ -27,10 +27,11 @@ import { ResourceColor, Length, ResourceStr } from "./ArkUnitsInterfaces"
 import { FontStyle, FontWeight, TextDecorationType, TextDecorationStyle, Color, ColoringStrategy } from "./ArkEnumsInterfaces"
 import { DecorationStyleInterface } from "./ArkStyledStringInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -42,7 +43,7 @@ export class RichEditorBaseControllerInternal {
     }
 }
 export class RichEditorBaseController implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -109,7 +110,9 @@ export class RichEditorBaseController implements MaterializedBase {
     }
     private getTypingStyle_serialize(): RichEditorTextStyle {
         const retval = ArkUIGeneratedNativeModule._RichEditorBaseController_getTypingStyle(this.peer!.ptr)
-        return new Deserializer(retval.buffer, retval.byteLength).readRichEditorTextStyle()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: RichEditorTextStyle = retvalDeserializer.readRichEditorTextStyle()
+        return returnResult
     }
     private setTypingStyle_serialize(value: RichEditorTextStyle): void {
         const thisSerializer: Serializer = Serializer.hold()
@@ -138,10 +141,13 @@ export class RichEditorBaseController implements MaterializedBase {
     }
     private getLayoutManager_serialize(): LayoutManager {
         const retval = ArkUIGeneratedNativeModule._RichEditorBaseController_getLayoutManager(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj: LayoutManager = LayoutManagerInternal.fromPtr(retval)
+        return obj
     }
     private getPreviewText_serialize(): PreviewText {
         const retval = ArkUIGeneratedNativeModule._RichEditorBaseController_getPreviewText(this.peer!.ptr)
-        return new Deserializer(retval.buffer, retval.byteLength).readPreviewText()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const returnResult: PreviewText = retvalDeserializer.readPreviewText()
+        return returnResult
     }
 }

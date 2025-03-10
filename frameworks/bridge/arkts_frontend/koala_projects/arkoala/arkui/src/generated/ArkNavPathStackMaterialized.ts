@@ -18,10 +18,11 @@
 
 import { NavPathInfo, NavPathInfoInternal } from "./ArkNavPathInfoMaterialized"
 import { NavigationOptions, NavigationInterception, PopInfo, LaunchMode, InterceptionShowCallback, InterceptionModeCallback } from "./ArkNavigationInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -33,7 +34,7 @@ export class NavPathStackInternal {
     }
 }
 export class NavPathStack implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -262,7 +263,6 @@ export class NavPathStack implements MaterializedBase {
     }
     private pushPath0_serialize(info: NavPathInfo, animated?: boolean): void {
         const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeNavPathInfo(info)
         let animated_type: int32 = RuntimeType.UNDEFINED
         animated_type = runtimeType(animated)
         thisSerializer.writeInt8(animated_type)
@@ -270,12 +270,11 @@ export class NavPathStack implements MaterializedBase {
             const animated_value = animated!
             thisSerializer.writeBoolean(animated_value)
         }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPath0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavPathStack_pushPath0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private pushPath1_serialize(info: NavPathInfo, options?: NavigationOptions): void {
         const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeNavPathInfo(info)
         let options_type: int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8(options_type)
@@ -283,12 +282,11 @@ export class NavPathStack implements MaterializedBase {
             const options_value = options!
             thisSerializer.writeNavigationOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._NavPathStack_pushPath1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavPathStack_pushPath1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private pushDestination0_serialize(info: NavPathInfo, animated?: boolean): Promise<void> {
         const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeNavPathInfo(info)
         let animated_type: int32 = RuntimeType.UNDEFINED
         animated_type = runtimeType(animated)
         thisSerializer.writeInt8(animated_type)
@@ -297,13 +295,12 @@ export class NavPathStack implements MaterializedBase {
             thisSerializer.writeBoolean(animated_value)
         }
         const retval = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        ArkUIGeneratedNativeModule._NavPathStack_pushDestination0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavPathStack_pushDestination0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
     private pushDestination1_serialize(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
         const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeNavPathInfo(info)
         let options_type: int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8(options_type)
@@ -312,7 +309,7 @@ export class NavPathStack implements MaterializedBase {
             thisSerializer.writeNavigationOptions(options_value)
         }
         const retval = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        ArkUIGeneratedNativeModule._NavPathStack_pushDestination1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavPathStack_pushDestination1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -376,7 +373,6 @@ export class NavPathStack implements MaterializedBase {
     }
     private replacePath0_serialize(info: NavPathInfo, animated?: boolean): void {
         const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeNavPathInfo(info)
         let animated_type: int32 = RuntimeType.UNDEFINED
         animated_type = runtimeType(animated)
         thisSerializer.writeInt8(animated_type)
@@ -384,12 +380,11 @@ export class NavPathStack implements MaterializedBase {
             const animated_value = animated!
             thisSerializer.writeBoolean(animated_value)
         }
-        ArkUIGeneratedNativeModule._NavPathStack_replacePath0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavPathStack_replacePath0(this.peer!.ptr, toPeerPtr(info), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private replacePath1_serialize(info: NavPathInfo, options?: NavigationOptions): void {
         const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeNavPathInfo(info)
         let options_type: int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8(options_type)
@@ -397,12 +392,11 @@ export class NavPathStack implements MaterializedBase {
             const options_value = options!
             thisSerializer.writeNavigationOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._NavPathStack_replacePath1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavPathStack_replacePath1(this.peer!.ptr, toPeerPtr(info), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
     }
     private replaceDestination_serialize(info: NavPathInfo, options?: NavigationOptions): Promise<void> {
         const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeNavPathInfo(info)
         let options_type: int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8(options_type)
@@ -411,7 +405,7 @@ export class NavPathStack implements MaterializedBase {
             thisSerializer.writeNavigationOptions(options_value)
         }
         const retval = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        ArkUIGeneratedNativeModule._NavPathStack_replaceDestination(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavPathStack_replaceDestination(this.peer!.ptr, toPeerPtr(info), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -458,8 +452,7 @@ export class NavPathStack implements MaterializedBase {
         }
         const retval = ArkUIGeneratedNativeModule._NavPathStack_pop0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        console.log("Object deserialization is not implemented for type: undefined, return default value.")
-        return undefined
+        throw new Error("Object deserialization is not implemented.")
     }
     private pop1_serialize(result: Object, animated?: boolean): NavPathInfo | undefined {
         const thisSerializer: Serializer = Serializer.hold()
@@ -473,8 +466,7 @@ export class NavPathStack implements MaterializedBase {
         }
         const retval = ArkUIGeneratedNativeModule._NavPathStack_pop1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        console.log("Object deserialization is not implemented for type: undefined, return default value.")
-        return undefined
+        throw new Error("Object deserialization is not implemented.")
     }
     private popToName0_serialize(name: string, animated?: boolean): number {
         const thisSerializer: Serializer = Serializer.hold()
@@ -567,28 +559,44 @@ export class NavPathStack implements MaterializedBase {
     }
     private getAllPathName_serialize(): Array<string> {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr)
-        console.log("Object deserialization is not implemented for type: [object Object], return default value.")
-        return new Array<string>()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<string> = new Array<string>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult: Array<string> = buffer
+        return returnResult
     }
     private getParamByIndex_serialize(index: number): unknown | undefined {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getParamByIndex(this.peer!.ptr, index)
-        console.log("Object deserialization is not implemented for type: undefined, return default value.")
-        return undefined
+        throw new Error("Object deserialization is not implemented.")
     }
     private getParamByName_serialize(name: string): Array<unknown> {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getParamByName(this.peer!.ptr, name)
-        console.log("Object deserialization is not implemented for type: [object Object], return default value.")
-        return new Array<unknown>()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<unknown> = new Array<unknown>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readCustomObject("Any") as Object)
+        }
+        const returnResult: Array<unknown> = buffer
+        return returnResult
     }
     private getIndexByName_serialize(name: string): Array<number> {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name)
-        console.log("Object deserialization is not implemented for type: [object Object], return default value.")
-        return new Array<number>()
+        let retvalDeserializer: Deserializer = new Deserializer(retval.buffer, retval.byteLength)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<number> = new Array<number>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readNumber() as number)
+        }
+        const returnResult: Array<number> = buffer
+        return returnResult
     }
     private getParent_serialize(): NavPathStack | undefined {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_getParent(this.peer!.ptr)
-        console.log("Object deserialization is not implemented for type: undefined, return default value.")
-        return undefined
+        throw new Error("Object deserialization is not implemented.")
     }
     private size_serialize(): number {
         const retval = ArkUIGeneratedNativeModule._NavPathStack_size(this.peer!.ptr)

@@ -17,6 +17,7 @@ import { remember } from "@koalaui/runtime"
 import { CustomComponentImpl } from "./CustomComponent";
 import { ArkComponentRoot } from "./ArkComponentRoot";
 import { ArkCommonMethodComponent } from "./generated/ArkCommon";
+import { ArkPageTransitionEnter, ArkPageTransitionExit } from "./handwritten/ArkPageTransition";
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> extends CustomComponentImpl {
@@ -73,7 +74,8 @@ export abstract class ArkStructBase<T, T_Options> extends CustomComponentImpl {
     ): void
 
     /** @memo */
-    pageTransition?(): void {
-
+    pageTransition(): void {
+        ArkPageTransitionEnter(undefined, undefined, { duration: 100 })
+        ArkPageTransitionExit(undefined, undefined, { duration: 100 })
     }
 }

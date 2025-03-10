@@ -27,7 +27,7 @@ import { StyledStringController, StyledStringControllerInternal } from "./ArkSty
 import { StyledString, StyledStringInternal } from "./ArkStyledStringMaterialized"
 import { MutableStyledString, MutableStyledStringInternal } from "./ArkMutableStyledStringMaterialized"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -41,10 +41,6 @@ export class RichEditorStyledStringControllerInternal {
     }
 }
 export class RichEditorStyledStringController extends RichEditorBaseController implements MaterializedBase {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     static ctor_richeditorstyledstringcontroller(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_ctor()
         return retval
@@ -74,18 +70,18 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
         return
     }
     private setStyledString_serialize(styledString: StyledString): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(styledString)
-        ArkUIGeneratedNativeModule._RichEditorStyledStringController_setStyledString(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._RichEditorStyledStringController_setStyledString(this.peer!.ptr, toPeerPtr(styledString))
     }
     private getStyledString_serialize(): MutableStyledString {
         const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_getStyledString(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj : MutableStyledString = MutableStyledStringInternal.fromPtr(retval)
+        return obj
     }
     private getSelection_serialize(): RichEditorRange {
         const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_getSelection(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readRichEditorRange()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : RichEditorRange = retvalDeserializer.readRichEditorRange()
+        return returnResult
     }
     private onContentChanged_serialize(listener: StyledStringChangedListener): void {
         const thisSerializer : Serializer = Serializer.hold()

@@ -22,14 +22,14 @@ import { CallbackKind } from "./CallbackKind"
 import { TypeChecker } from "#components"
 import { KUint8ArrayPtr, NativeBuffer, InteropNativeModule } from "@koalaui/interop"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, CustomBuilder, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ShadowType, SymbolGlyphModifier, ShadowOptions, SheetSize, ShadowStyle, ComponentContent, SheetTitleOptions, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, MenuPreviewMode, DismissPopupAction, DragPreviewMode, OutlineStyle, SourceTool, SourceType, EventTarget, HoverModeAreaType, BlurStyle, Rectangle, PickerTextStyle, PickerDialogButtonStyle, MenuPolicy, BlurStyleActivePolicy, BlurOptions, AdaptiveColor, ThemeColorMode, ExpectedFrameRateRange, FinishCallbackType, SheetKeyboardAvoidMode, UIContext, SheetType, ScrollSizeMode, SheetMode, SpringBackAction, DismissSheetAction, SheetDismiss, DismissContentCoverAction, ModalTransition, ContextMenuAnimationOptions, PopupMessageOptions, TransitionHierarchyStrategy, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, DrawContext, ScrollableCommonMethod, CommonMethod, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, TransitionOptions, MotionBlurOptions, InvertOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragItemInfo, UniformDataType, PreDragStatus, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, SafeAreaType, SafeAreaEdge, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ContentCoverOptions, SheetOptions, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, RectResult, TouchObject, HistoricalPoint, TextDecorationOptions, InputCounterOptions, CaretOffset, SelectionOptions, BlurStyleOptions, ContentModifier, LayoutSafeAreaType, LayoutSafeAreaEdge, ItemDragInfo, KeyboardAvoidMode, Context, UIGestureEvent, VisibleAreaEventOptions, MeasureResult, SizeResult, DismissReason, BindOptions, FractionStop, LocalizedVerticalAlignParam, LocalizedHorizontalAlignParam, MotionBlurAnchor, RepeatMode, TouchTestStrategy, IntentionCode, DragResult, Summary, DragBehavior, LightSource, MultiShadowOptions, PointLightStyle } from "./../ArkCommonInterfaces"
+import { AccessibilityCallback, CustomBuilder, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ShadowType, SymbolGlyphModifier, ShadowOptions, SheetSize, DrawContext, ShadowStyle, ComponentContent, SheetTitleOptions, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, MenuPreviewMode, DismissPopupAction, DragPreviewMode, OutlineStyle, SourceTool, SourceType, EventTarget, HoverModeAreaType, BlurStyle, Rectangle, PickerTextStyle, PickerDialogButtonStyle, MenuPolicy, BlurStyleActivePolicy, BlurOptions, AdaptiveColor, ThemeColorMode, ExpectedFrameRateRange, FinishCallbackType, SheetKeyboardAvoidMode, UIContext, SheetType, ScrollSizeMode, SheetMode, SpringBackAction, DismissSheetAction, SheetDismiss, DismissContentCoverAction, ModalTransition, ContextMenuAnimationOptions, PopupMessageOptions, TransitionHierarchyStrategy, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, ScrollableCommonMethod, CommonMethod, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, TransitionOptions, MotionBlurOptions, InvertOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragItemInfo, UniformDataType, PreDragStatus, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, SafeAreaType, SafeAreaEdge, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ContentCoverOptions, SheetOptions, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, RectResult, TouchObject, HistoricalPoint, TextDecorationOptions, InputCounterOptions, CaretOffset, SelectionOptions, BlurStyleOptions, ContentModifier, LayoutSafeAreaType, LayoutSafeAreaEdge, ItemDragInfo, KeyboardAvoidMode, UIGestureEvent, VisibleAreaEventOptions, MeasureResult, SizeResult, DismissReason, BindOptions, FractionStop, LocalizedVerticalAlignParam, LocalizedHorizontalAlignParam, MotionBlurAnchor, RepeatMode, TouchTestStrategy, IntentionCode, DragResult, Summary, DragBehavior, Context, LightSource, MultiShadowOptions, PointLightStyle } from "./../ArkCommonInterfaces"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, LabelStyle, ControlSize, ButtonOptions } from "./../ArkButtonInterfaces"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../ArkAnimationExtenderInterfaces"
 import { Callback_RangeUpdate, PointerStyle } from "./../ArkArkuiCustomInterfaces"
 import { ContentDidScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, IndicatorStyle, SwiperAttribute, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ArrowStyle, SwiperAutoFill, SwiperAnimationEvent } from "./../ArkSwiperInterfaces"
 import { CustomNodeBuilder } from "./../ArkCustomBuilderInterfaces"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, DecorationStyleResult, MenuType, Affinity, TextRange, StyledStringChangeValue, CaretStyle, InsertValue, DeleteValue, TextMenuItem, LineMetrics, PositionWithAffinity, PreviewText, TextBox, TextDataDetectorConfig, FontSettingOptions, TextDeleteDirection, StyledStringChangedListener, TextDataDetectorType } from "./../ArkTextCommonInterfaces"
-import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController, BusinessError } from "./../ArkArkuiExternalInterfaces"
+import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController } from "./../ArkArkuiExternalInterfaces"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, SectionOptions, WaterFlowOptions } from "./../ArkWaterFlowInterfaces"
 import { ImageCompleteCallback, ImageLoadResult } from "./../ArkImageSpanInterfaces"
 import { ImageErrorCallback, ResizableOptions, DrawableDescriptor, DrawingColorFilter, ImageContent, DrawingLattice, ResolutionQuality, ImageError, ImageSourceSize, ImageInterpolation, DynamicRangeMode, ImageRenderMode } from "./../ArkImageInterfaces"
@@ -53,18 +53,31 @@ import { PluginErrorCallback, PluginComponentTemplate, PluginErrorData, PluginCo
 import { SearchSubmitCallback, CancelButtonStyle, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchAttribute, SearchType, SearchButtonOptions, SearchOptions } from "./../ArkSearchInterfaces"
 import { SliderTriggerChangeCallback, SliderAttribute, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../ArkSliderInterfaces"
 import { TextAreaSubmitCallback, ContentType, TextAreaAttribute, TextAreaType, TextAreaOptions } from "./../ArkTextAreaInterfaces"
-import { VoidCallback, Position, Length, Dimension, PX, VP, FP, LPX, Percentage, Area, Font, LocalizedPadding, Margin, BorderRadiuses, Padding, ResourceColor, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, ColorMetrics, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Offset, DividerStyleOptions, LengthMetricsUnit, LengthConstrain, DirectionalEdgesT, Bias, MarkStyle } from "./../ArkUnitsInterfaces"
+import { VoidCallback, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, BorderRadiuses, Margin, Padding, SizeOptions, Length, Position, Area, Font, LocalizedPadding, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Offset, DividerStyleOptions, LengthMetricsUnit, LengthConstrain, DirectionalEdgesT, Bias, MarkStyle } from "./../ArkUnitsInterfaces"
 import { WithThemeInterface, CustomTheme, WithThemeOptions, WithThemeAttribute } from "./../ArkWithThemeInterfaces"
 import { Resource } from "./../ArkResourceInterfaces"
-import { ColoringStrategy, Color, FontWeight, Curve, FontStyle, TextDecorationStyle, TextDecorationType, BorderStyle, TextHeightAdaptivePolicy, TextOverflow, ImageFit, ImageSpanAlignment, LineBreakStrategy, WordBreak, TextAlign, TitleHeight, GradientDirection, DialogButtonStyle, TouchType, NestedScrollMode, VerticalAlign, Axis, PlayMode, Placement, ArrowPointPosition, Alignment, SharedTransitionEffectType, ClickEffectLevel, HorizontalAlign, TransitionType, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, FlexDirection, Edge, XComponentType, CopyOptions, TextContentStyle, TextCase, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, AppRotation, FoldStatus, FlexAlign, FlexWrap, PixelRoundCalcPolicy, KeySource, KeyType, AccessibilityHoverType, MouseAction, MouseButton, IlluminatedType, HeightBreakpoint, WidthBreakpoint, MarqueeUpdateStrategy, RelateType, Week, EmbeddedType, CheckBoxShape, FillMode, AnimationStatus } from "./../ArkEnumsInterfaces"
-import { ICurve, ICurveInternal } from "./../ArkICurveMaterialized"
+import { Color, ColoringStrategy, FontWeight, Curve, WordBreak, TextOverflow, TextAlign, ImageFit, ImageSpanAlignment, TextDecorationStyle, TextDecorationType, FontStyle, BorderStyle, TextHeightAdaptivePolicy, LineBreakStrategy, TitleHeight, GradientDirection, DialogButtonStyle, TouchType, NestedScrollMode, VerticalAlign, Axis, PlayMode, Placement, ArrowPointPosition, Alignment, SharedTransitionEffectType, ClickEffectLevel, HorizontalAlign, TransitionType, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, FlexDirection, Edge, XComponentType, CopyOptions, TextContentStyle, TextCase, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, AppRotation, FoldStatus, FlexAlign, FlexWrap, PixelRoundCalcPolicy, KeySource, KeyType, AccessibilityHoverType, MouseAction, MouseButton, IlluminatedType, HeightBreakpoint, WidthBreakpoint, MarqueeUpdateStrategy, RelateType, Week, EmbeddedType, CheckBoxShape, FillMode, AnimationStatus } from "./../ArkEnumsInterfaces"
 import { PixelMap, PixelMapInternal } from "./../ArkPixelMapMaterialized"
 import { LengthMetrics, LengthMetricsInternal } from "./../ArkLengthMetricsMaterialized"
-import { Tuple_Dimension_Dimension, Callback_GestureEvent_Void, Callback_ClickEvent_Void, Callback_PopInfo_Void, Callback_SwipeActionState_Void, Callback_Void, Callback_DismissPopupAction_Void, Callback_NavigationTransitionProxy_Void, Callback_Boolean_Void, Literal_String_script_Callback_String_Void_callback_, Callback_String_Void, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Literal_Object_object__String_name_Array_String_methodList, Callback_TimePickerResult_Void, Callback_TextPickerResult_Void, Tuple_Number_Number, Callback_TabContentTransitionProxy_Void, Callback_StyledStringChangeValue_Boolean, Callback_Date_Void, Callback_DatePickerResult_Void, Callback_SheetType_Void, Callback_Number_Void, Callback_SpringBackAction_Void, Callback_DismissSheetAction_Void, Callback_SheetDismiss_Void, Callback_DismissContentCoverAction_Void, AnimationRange_Number, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Literal_Number_angle_fingers, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_duration_fingers_Boolean_repeat, Tuple_ResourceColor_Number, Callback_DismissDialogAction_Void, Callback_UIExtensionProxy_Void, Callback_Array_TouchTestInfo_TouchResult, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Literal_Boolean_next_Axis_direction, Literal_Number_surfaceHeight_surfaceWidth, Callback_OnPageEndEvent_Void, Callback_OnPageBeginEvent_Void, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, Callback_OnGeolocationShowEvent_Void, Callback_OnAlertEvent_Boolean, Callback_OnBeforeUnloadEvent_Boolean, Callback_OnConfirmEvent_Boolean, Callback_OnPromptEvent_Boolean, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, Callback_OnHttpErrorReceiveEvent_Void, Callback_OnDownloadStartEvent_Void, Callback_OnRefreshAccessedHistoryEvent_Void, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, Callback_OnInterceptRequestEvent_WebResourceResponse, Callback_OnPermissionRequestEvent_Void, Callback_OnScreenCaptureRequestEvent_Void, Callback_OnContextMenuShowEvent_Boolean, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, Callback_OnClientAuthenticationEvent_Void, Callback_OnWindowNewEvent_Void, Callback_OnTouchIconUrlReceivedEvent_Void, Callback_OnFaviconReceivedEvent_Void, Callback_OnPageVisibleEvent_Void, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, Callback_OnLoadInterceptEvent_Boolean, Callback_OnOverScrollEvent_Void, Callback_NativeEmbedDataInfo_Void, Callback_NativeEmbedTouchInfo_Void, Callback_Literal_String_plainText_Void, Literal_String_plainText, Callback_Union_String_Array_String_Void, Callback_Union_Number_Array_Number_Void, Callback_ResourceStr_Void, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, Callback_SwiperContentTransitionProxy_Void, Callback_Number_SliderChangeMode_Void, Callback_Union_Number_Resource_Void, Callback_Number_String_Void, Callback_RichEditorSelection_Void, Callback_RichEditorRange_Void, Callback_RichEditorInsertValue_Boolean, Callback_RichEditorTextSpanResult_Void, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, Callback_RichEditorChangeValue_Boolean, Callback_CutEvent_Void, Callback_CopyEvent_Void, Callback_PanelMode_Void, Callback_Boolean, Callback_NavDestinationContext_Void, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, Callback_ItemDragInfo_Number_CustomBuilder, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_Number_ComputedBarAttribute, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Callback_Number_Tuple_Number_Number, Type_SheetOptions_detents, Literal_ResourceColor_color, Literal_String_value_Callback_Void_action, Literal_Number_day_month_year, AsyncCallback_image_PixelMap_Void, Type_NavigationAttribute_customNavContentTransition_delegate, Callback_WithThemeAttribute_Void, Callback_WebResourceResponse_Void, Callback_WebKeyboardOptions_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_Tuple_Number_Number_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_TouchResult_Void, Callback_String_Unknown_Void, Callback_Pointer_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_Array_String_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_OffsetResult_Void, Callback_NavigationTitleMode_Void, Callback_NavigationMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_IsolatedComponentAttribute_Void, Callback_HitTestMode_Void, Callback_GestureRecognizer_Void, Callback_GestureJudgeResult_Void, Callback_CustomBuilder_Void, Callback_ComputedBarAttribute_Void, Callback_Array_String_Void, Callback_Literal_Number_code_Want_want_Void, Literal_Number_code_Want_want, Callback_PlaybackInfo_Void, Callback_PreparedInfo_Void, Callback_FullscreenInfo_Void, Type_TextPickerAttribute_onChange_callback, Callback_String_Number_Void, Callback_ClickEvent_SaveButtonOnClickResult_Void, Callback_RefreshStatus_Void, Callback_Array_Number_Void, Callback_ClickEvent_PasteButtonOnClickResult_Void, Callback_Number_Number_PanelMode_Void, Callback_ClickEvent_LocationButtonOnClickResult_Void, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, Callback_Any_Void, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg, Callback_FormCallbackInfo_Void, Callback_TerminationInfo_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Callback_CalendarRequestedData_Void, Callback_CalendarSelectedDate_Void } from "./../SyntheticDeclarations"
+import { Tuple_Dimension_Dimension, Callback_GestureEvent_Void, Callback_ClickEvent_Void, Callback_PopInfo_Void, Callback_SwipeActionState_Void, Callback_Void, Callback_DismissPopupAction_Void, Callback_NavigationTransitionProxy_Void, Callback_Boolean_Void, Literal_String_script_Callback_String_Void_callback_, Callback_String_Void, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Literal_Object_object__String_name_Array_String_methodList, Callback_TimePickerResult_Void, Callback_TextPickerResult_Void, Tuple_Number_Number, Callback_TabContentTransitionProxy_Void, Callback_StyledStringChangeValue_Boolean, Callback_Date_Void, Callback_DatePickerResult_Void, Callback_SheetType_Void, Callback_Number_Void, Callback_SpringBackAction_Void, Callback_DismissSheetAction_Void, Callback_SheetDismiss_Void, Callback_DismissContentCoverAction_Void, AnimationRange_Number, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Literal_Number_angle_fingers, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_duration_fingers_Boolean_repeat, Tuple_ResourceColor_Number, Callback_DismissDialogAction_Void, Callback_UIExtensionProxy_Void, Callback_Array_TouchTestInfo_TouchResult, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Literal_Boolean_next_Axis_direction, Literal_Number_surfaceHeight_surfaceWidth, Callback_OnPageEndEvent_Void, Callback_OnPageBeginEvent_Void, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, Callback_OnGeolocationShowEvent_Void, Callback_OnAlertEvent_Boolean, Callback_OnBeforeUnloadEvent_Boolean, Callback_OnConfirmEvent_Boolean, Callback_OnPromptEvent_Boolean, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, Callback_OnHttpErrorReceiveEvent_Void, Callback_OnDownloadStartEvent_Void, Callback_OnRefreshAccessedHistoryEvent_Void, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, Callback_OnInterceptRequestEvent_WebResourceResponse, Callback_OnPermissionRequestEvent_Void, Callback_OnScreenCaptureRequestEvent_Void, Callback_OnContextMenuShowEvent_Boolean, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, Callback_OnClientAuthenticationEvent_Void, Callback_OnWindowNewEvent_Void, Callback_OnTouchIconUrlReceivedEvent_Void, Callback_OnFaviconReceivedEvent_Void, Callback_OnPageVisibleEvent_Void, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, Callback_OnLoadInterceptEvent_Boolean, Callback_OnOverScrollEvent_Void, Callback_NativeEmbedDataInfo_Void, Callback_NativeEmbedTouchInfo_Void, Callback_Literal_String_plainText_Void, Literal_String_plainText, Callback_Union_String_Array_String_Void, Callback_Union_Number_Array_Number_Void, Callback_ResourceStr_Void, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, Callback_SwiperContentTransitionProxy_Void, Callback_Number_SliderChangeMode_Void, Callback_Union_Number_Resource_Void, Callback_Number_String_Void, Callback_RichEditorSelection_Void, Callback_RichEditorRange_Void, Callback_RichEditorInsertValue_Boolean, Callback_RichEditorTextSpanResult_Void, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, Callback_RichEditorChangeValue_Boolean, Callback_CutEvent_Void, Callback_CopyEvent_Void, Callback_PanelMode_Void, Callback_Boolean, Callback_NavDestinationContext_Void, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, onItemDragStart_event_type, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_Number_ComputedBarAttribute, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Callback_Number_Tuple_Number_Number, Type_SheetOptions_detents, Literal_ResourceColor_color, Literal_String_value_Callback_Void_action, Literal_Number_day_month_year, AsyncCallback_image_PixelMap_Void, Type_NavigationAttribute_customNavContentTransition_delegate, Callback_WithThemeAttribute_Void, Callback_WebResourceResponse_Void, Callback_WebKeyboardOptions_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_Tuple_Number_Number_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_TouchResult_Void, Callback_String_Unknown_Void, Callback_Pointer_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_Array_String_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_OffsetResult_Void, Callback_NavigationTitleMode_Void, Callback_NavigationMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_IsolatedComponentAttribute_Void, Callback_HitTestMode_Void, Callback_GestureRecognizer_Void, Callback_GestureJudgeResult_Void, Callback_CustomBuilder_Void, Callback_ComputedBarAttribute_Void, Callback_Array_String_Void, Callback_Literal_Number_code_Want_want_Void, Literal_Number_code_Want_want, Callback_PlaybackInfo_Void, Callback_PreparedInfo_Void, Callback_FullscreenInfo_Void, Type_TextPickerAttribute_onChange_callback, Callback_String_Number_Void, Callback_ClickEvent_SaveButtonOnClickResult_Void, Callback_RefreshStatus_Void, Callback_Array_Number_Void, Callback_ClickEvent_PasteButtonOnClickResult_Void, Callback_Number_Number_PanelMode_Void, Callback_ClickEvent_LocationButtonOnClickResult_Void, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, Callback_Any_Void, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg, Callback_FormCallbackInfo_Void, Callback_TerminationInfo_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Callback_CalendarRequestedData_Void, Callback_CalendarSelectedDate_Void } from "./../SyntheticDeclarations"
+import { ICurve, ICurveInternal } from "./../ArkICurveMaterialized"
+import { TextBackgroundStyle } from "./../ArkSpanInterfaces"
+import { ImageAttachmentLayoutStyle, UserDataSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, ParagraphStyleInterface, ImageAttachmentInterface, GestureStyleInterface, DecorationStyleInterface, TextStyleInterface, StyledStringKey, StyleOptions, SpanStyle, StyledStringValue } from "./../ArkStyledStringInterfaces"
 import { GridRowSizeOption, BreakpointsReference, GridRowColumnOption, GutterOption, GridRowDirection, BreakPoints, GridRowOptions } from "./../ArkGridRowInterfaces"
+import { BackgroundColorStyle, BackgroundColorStyleInternal } from "./../ArkBackgroundColorStyleMaterialized"
+import { CustomSpan, CustomSpanInternal } from "./../ArkCustomSpanMaterialized"
+import { UrlStyle, UrlStyleInternal } from "./../ArkUrlStyleMaterialized"
+import { LineHeightStyle, LineHeightStyleInternal } from "./../ArkLineHeightStyleMaterialized"
+import { ParagraphStyle, ParagraphStyleInternal } from "./../ArkParagraphStyleMaterialized"
+import { ImageAttachment, ImageAttachmentInternal } from "./../ArkImageAttachmentMaterialized"
+import { GestureStyle, GestureStyleInternal } from "./../ArkGestureStyleMaterialized"
+import { TextShadowStyle, TextShadowStyleInternal } from "./../ArkTextShadowStyleMaterialized"
+import { LetterSpacingStyle, LetterSpacingStyleInternal } from "./../ArkLetterSpacingStyleMaterialized"
+import { BaselineOffsetStyle, BaselineOffsetStyleInternal } from "./../ArkBaselineOffsetStyleMaterialized"
+import { DecorationStyle, DecorationStyleInternal } from "./../ArkDecorationStyleMaterialized"
+import { TextStyle_styled_string, TextStyle_styled_stringInternal } from "./../ArkTextStyleStyledStringMaterialized"
 import { TabBarSymbol, TabBarIconStyle, LayoutMode, BoardStyle, SelectedMode, TabBarOptions } from "./../ArkTabContentInterfaces"
 import { SymbolRenderingStrategy, SymbolEffectStrategy, SymbolGlyphAttribute, EffectFillStyle } from "./../ArkSymbolglyphInterfaces"
-import { DecorationStyleInterface, StyledStringValue, StyledStringKey, ImageAttachmentLayoutStyle, StyleOptions, SpanStyle, CustomSpanDrawInfo, CustomSpanMetrics, CustomSpanMeasureInfo, ImageAttachmentInterface, ParagraphStyleInterface, GestureStyleInterface, TextStyleInterface } from "./../ArkStyledStringInterfaces"
 import { GestureEvent, GestureEventInternal } from "./../ArkGestureEventMaterialized"
 import { ClickEvent, ClickEventInternal } from "./../ArkClickEventMaterialized"
 import { SwipeActionState, SwipeActionItem, SwipeEdgeEffect, EditMode, ListItemStyle, SwipeActionOptions, ListItemOptions, Sticky } from "./../ArkListItemInterfaces"
@@ -73,6 +86,7 @@ import { CanvasPattern, CanvasPatternInternal } from "./../ArkCanvasPatternMater
 import { Matrix2D, Matrix2DInternal } from "./../ArkMatrix2DMaterialized"
 import { CanvasGradient, CanvasGradientInternal } from "./../ArkCanvasGradientMaterialized"
 import { NavigationTransitionProxy, NavigationTransitionProxyInternal } from "./../ArkNavigationTransitionProxyMaterialized"
+import { ColorMetrics, ColorMetricsInternal } from "./../ArkColorMetricsMaterialized"
 import { ImageAnalyzerController, ImageAnalyzerControllerInternal } from "./../ArkImageAnalyzerControllerMaterialized"
 import { ImageAnalyzerType, ImageAIOptions, ImageAnalyzerConfig } from "./../ArkImageCommonInterfaces"
 import { WebResourceRequest, WebResourceRequestInternal } from "./../ArkWebResourceRequestMaterialized"
@@ -91,11 +105,18 @@ import { NavPathStack, NavPathStackInternal } from "./../ArkNavPathStackMaterial
 import { NavPathInfo, NavPathInfoInternal } from "./../ArkNavPathInfoMaterialized"
 import { NavDestinationContext, NavDestinationContextInternal } from "./../ArkNavDestinationContextMaterialized"
 import { GridColColumnOption, GridColOptions } from "./../ArkGridColInterfaces"
+import { PanDirection, GestureMode, GestureType, GestureInterface, SwipeDirection, TapGestureParameters, GestureInfo, GestureJudgeResult, GestureMask, GestureRecognizerState, GestureHandler, GesturePriority, FingerInfo } from "./../ArkGestureInterfaces"
 import { LinearGradient, LinearGradientInternal } from "./../ArkLinearGradientMaterialized"
 import { ColorStop, DataPanelType, DataPanelShadowOptions, DataPanelOptions } from "./../ArkDataPanelInterfaces"
 import { DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, DatePickerOptions } from "./../ArkDatePickerInterfaces"
 import { Scene, Component3DAttribute, ModelType, SceneOptions } from "./../ArkComponent3dInterfaces"
-import { GestureGroupInterface, GestureMode, GestureType, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureInterface, SwipeDirection, PanDirection, TapGestureParameters, GestureInfo, GestureJudgeResult, GestureMask, GestureRecognizerState, GestureHandler, GesturePriority, FingerInfo } from "./../ArkGestureInterfaces"
+import { GestureGroupInterface, GestureGroupInterfaceInternal } from "./../ArkGestureGroupInterfaceMaterialized"
+import { TapGestureInterface, TapGestureInterfaceInternal } from "./../ArkTapGestureInterfaceMaterialized"
+import { LongPressGestureInterface, LongPressGestureInterfaceInternal } from "./../ArkLongPressGestureInterfaceMaterialized"
+import { PanGestureInterface, PanGestureInterfaceInternal } from "./../ArkPanGestureInterfaceMaterialized"
+import { PinchGestureInterface, PinchGestureInterfaceInternal } from "./../ArkPinchGestureInterfaceMaterialized"
+import { SwipeGestureInterface, SwipeGestureInterfaceInternal } from "./../ArkSwipeGestureInterfaceMaterialized"
+import { RotationGestureInterface, RotationGestureInterfaceInternal } from "./../ArkRotationGestureInterfaceMaterialized"
 import { PanGestureOptions, PanGestureOptionsInternal } from "./../ArkPanGestureOptionsMaterialized"
 import { DrawingCanvas, DrawingCanvasInternal } from "./../ArkDrawingCanvasMaterialized"
 import { Size, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, TextMetrics } from "./../ArkCanvasInterfaces"
@@ -103,9 +124,6 @@ import { FrameNode, FrameNodeInternal } from "./../ArkFrameNodeMaterialized"
 import { BadgePosition, BadgeStyle, BadgeParamWithString, BadgeParam, BadgeParamWithNumber } from "./../ArkBadgeInterfaces"
 import { DismissDialogAction, ActionSheetOffset, ActionSheetButtonOptions, ActionSheetOptions, SheetInfo } from "./../ArkActionSheetInterfaces"
 import { StyledString, StyledStringInternal } from "./../ArkStyledStringMaterialized"
-import { ImageAttachment, ImageAttachmentInternal } from "./../ArkImageAttachmentMaterialized"
-import { CustomSpan, CustomSpanInternal } from "./../ArkCustomSpanMaterialized"
-import { TextBackgroundStyle } from "./../ArkSpanInterfaces"
 import { DpiFollowStrategy, ReceiveCallback, UIExtensionOptions } from "./../ArkUiExtensionComponentInterfaces"
 import { UIExtensionProxy, UIExtensionProxyInternal } from "./../ArkUIExtensionProxyMaterialized"
 import { DrawModifier, DrawModifierInternal } from "./../ArkDrawModifierMaterialized"
@@ -218,19 +236,7 @@ import { MonthData, CalendarDay, CalendarRequestedData, CalendarSelectedDate, Wo
 import { BaseShape, BaseShapeInternal } from "./../ArkBaseShapeMaterialized"
 import { CommonShape, CommonShapeInternal } from "./../ArkCommonShapeMaterialized"
 import { LinearIndicatorController, LinearIndicatorControllerInternal } from "./../ArkLinearIndicatorControllerMaterialized"
-import { UrlStyle, UrlStyleInternal } from "./../ArkUrlStyleMaterialized"
-import { LineHeightStyle, LineHeightStyleInternal } from "./../ArkLineHeightStyleMaterialized"
-import { ParagraphStyle, ParagraphStyleInternal } from "./../ArkParagraphStyleMaterialized"
-import { GestureStyle, GestureStyleInternal } from "./../ArkGestureStyleMaterialized"
-import { BackgroundColorStyle, BackgroundColorStyleInternal } from "./../ArkBackgroundColorStyleMaterialized"
-import { TextShadowStyle, TextShadowStyleInternal } from "./../ArkTextShadowStyleMaterialized"
-import { LetterSpacingStyle, LetterSpacingStyleInternal } from "./../ArkLetterSpacingStyleMaterialized"
-import { BaselineOffsetStyle, BaselineOffsetStyleInternal } from "./../ArkBaselineOffsetStyleMaterialized"
-import { DecorationStyle, DecorationStyleInternal } from "./../ArkDecorationStyleMaterialized"
-import { TextStyle_styled_string, TextStyle_styled_stringInternal } from "./../ArkTextStyleStyledStringMaterialized"
-import { TimePickerDialog, TimePickerDialogInternal } from "./../ArkTimePickerDialogMaterialized"
 import { TextTimerOptions } from "./../ArkTextTimerInterfaces"
-import { TextPickerDialog, TextPickerDialogInternal } from "./../ArkTextPickerDialogMaterialized"
 import { SubmitEvent, SubmitEventInternal } from "./../ArkSubmitEventMaterialized"
 import { TextClockOptions } from "./../ArkTextClockInterfaces"
 import { BounceSymbolEffect, BounceSymbolEffectInternal } from "./../ArkBounceSymbolEffectMaterialized"
@@ -271,12 +277,11 @@ import { LongPressGestureEvent, LongPressGestureEventInternal } from "./../ArkLo
 import { TapGestureEvent, TapGestureEventInternal } from "./../ArkTapGestureEventMaterialized"
 import { GaugeIndicatorOptions, GaugeShadowOptions, GaugeOptions } from "./../ArkGaugeInterfaces"
 import { FormLinkOptions } from "./../ArkFormLinkInterfaces"
+import { BusinessError } from "./../ArkBaseInterfaces"
 import { TerminationInfo } from "./../ArkEmbeddedComponentInterfaces"
 import { EllipseOptions } from "./../ArkEllipseInterfaces"
-import { DatePickerDialog, DatePickerDialogInternal } from "./../ArkDatePickerDialogMaterialized"
 import { CustomDialogControllerOptions } from "./../ArkCustomDialogControllerInterfaces"
 import { CustomDialogController, CustomDialogControllerInternal } from "./../ArkCustomDialogControllerMaterialized"
-import { ContextMenu, ContextMenuInternal } from "./../ArkContextMenuMaterialized"
 import { UICommonEvent, UICommonEventInternal } from "./../ArkUICommonEventMaterialized"
 import { View, ViewInternal } from "./../ArkViewMaterialized"
 import { Measurable, MeasurableInternal } from "./../ArkMeasurableMaterialized"
@@ -285,23 +290,12 @@ import { PixelMapMock, PixelMapMockInternal } from "./../ArkPixelMapMockMaterial
 import { ColumnOptions } from "./../ArkColumnInterfaces"
 import { CircleOptions } from "./../ArkCircleInterfaces"
 import { OffscreenCanvas, OffscreenCanvasInternal } from "./../ArkOffscreenCanvasMaterialized"
-import { CalendarPickerDialog, CalendarPickerDialogInternal } from "./../ArkCalendarPickerDialogMaterialized"
 import { ScrollMotion, ScrollMotionInternal } from "./../ArkScrollMotionMaterialized"
 import { SpringProp, SpringPropInternal } from "./../ArkSpringPropMaterialized"
 import { FrictionMotion, FrictionMotionInternal } from "./../ArkFrictionMotionMaterialized"
 import { SpringMotion, SpringMotionInternal } from "./../ArkSpringMotionMaterialized"
-import { AlertDialog, AlertDialogInternal } from "./../ArkAlertDialogMaterialized"
-import { ActionSheet, ActionSheetInternal } from "./../ArkActionSheetMaterialized"
-import { EventEmulator, EventEmulatorInternal } from "./../ArkEventEmulatorMaterialized"
-import { NavExtender, NavExtenderInternal } from "./../ArkNavExtenderMaterialized"
 import { ReplaceSymbolEffect, ReplaceSymbolEffectInternal } from "./../ArkReplaceSymbolEffectMaterialized"
 import { ScaleSymbolEffect, ScaleSymbolEffectInternal } from "./../ArkScaleSymbolEffectMaterialized"
-import { GlobalScope_ohos_font, GlobalScope_ohos_fontInternal } from "./../ArkGlobalScopeOhosFontMaterialized"
-import { GlobalScope_ohos_arkui_performanceMonitor, GlobalScope_ohos_arkui_performanceMonitorInternal } from "./../ArkGlobalScopeOhosArkuiPerformanceMonitorMaterialized"
-import { GlobalScope_ohos_arkui_componentSnapshot, GlobalScope_ohos_arkui_componentSnapshotInternal } from "./../ArkGlobalScopeOhosArkuiComponentSnapshotMaterialized"
-import { SystemOps, SystemOpsInternal } from "./../ArkSystemOpsMaterialized"
-import { LazyForEachOps, LazyForEachOpsInternal } from "./../ArkLazyForEachOpsMaterialized"
-import { AnimationExtender, AnimationExtenderInternal } from "./../ArkAnimationExtenderMaterialized"
 
 export class Deserializer extends DeserializerBase {
      constructor(data: KUint8ArrayPtr, length: int32) {
@@ -317,7 +311,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (params_buf_runtimeType))
         {
             const params_buf__length : int32 = valueDeserializer.readInt32()
-            let params_buf_ : Array<string> = new Array<string>()
+            let params_buf_ : Array<string> = new Array<string>(params_buf__length)
             for (let params_buf__i = 0; params_buf__i < params_buf__length; params_buf__i++) {
                 params_buf_[params_buf__i] = (valueDeserializer.readString() as string)
             }
@@ -331,13 +325,8 @@ export class Deserializer extends DeserializerBase {
             type_buf = (valueDeserializer.readNumber() as number)
         }
         const type_result : number | undefined = type_buf
-        let value : Resource = ({bundleName: bundleName_result,moduleName: moduleName_result,id: id_result,params: params_result,type: type_result} as Resource)
+        let value : Resource = ({bundleName: bundleName_result, moduleName: moduleName_result, id: id_result, params: params_result, type: type_result} as Resource)
         return value
-    }
-    readICurve(): ICurve {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ICurveInternal.fromPtr(ptr)
     }
     readPixelMap(): PixelMap {
         let valueDeserializer : Deserializer = this
@@ -349,465 +338,22 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return LengthMetricsInternal.fromPtr(ptr)
     }
-    readPosition(): Position {
-        let valueDeserializer : Deserializer = this
-        const x_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let x_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (x_buf_runtimeType))
-        {
-            x_buf = (valueDeserializer.readLength() as Length)
-        }
-        const x_result : Length | undefined = x_buf
-        const y_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let y_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (y_buf_runtimeType))
-        {
-            y_buf = (valueDeserializer.readLength() as Length)
-        }
-        const y_result : Length | undefined = y_buf
-        let value : Position = ({x: x_result,y: y_result} as Position)
-        return value
-    }
-    readSymbolGlyphModifier(): SymbolGlyphModifier {
-        let valueDeserializer : Deserializer = this
-        const _SymbolGlyphModifierStub_result : string = (valueDeserializer.readString() as string)
-        let value : SymbolGlyphModifier = ({_SymbolGlyphModifierStub: _SymbolGlyphModifierStub_result} as SymbolGlyphModifier)
-        return value
-    }
     readLeadingMarginPlaceholder(): LeadingMarginPlaceholder {
         let valueDeserializer : Deserializer = this
         const pixelMap_result : PixelMap = (valueDeserializer.readPixelMap() as PixelMap)
         const size_buf_value0 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_buf_value1 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_result : [ Dimension, Dimension ] = ([size_buf_value0, size_buf_value1] as [ Dimension, Dimension ])
-        let value : LeadingMarginPlaceholder = ({pixelMap: pixelMap_result,size: size_result} as LeadingMarginPlaceholder)
+        let value : LeadingMarginPlaceholder = ({pixelMap: pixelMap_result, size: size_result} as LeadingMarginPlaceholder)
         return value
     }
-    readShadowOptions(): ShadowOptions {
+    readICurve(): ICurve {
         let valueDeserializer : Deserializer = this
-        const radius_buf_selector : int32 = valueDeserializer.readInt8()
-        let radius_buf : number | Resource | undefined
-        if (radius_buf_selector == 0) {
-            radius_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (radius_buf_selector == 1) {
-            radius_buf = valueDeserializer.readResource()
-        }
-        else {
-            throw new Error("One of the branches for radius_buf has to be chosen through deserialisation.")
-        }
-        const radius_result : number | Resource = (radius_buf as number | Resource)
-        const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let type_buf : ShadowType | undefined
-        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
-        {
-            type_buf = (valueDeserializer.readInt32() as ShadowType)
-        }
-        const type_result : ShadowType | undefined = type_buf
-        const color_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let color_buf : Color | string | Resource | ColoringStrategy | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
-        {
-            const color_buf__selector : int32 = valueDeserializer.readInt8()
-            let color_buf_ : Color | string | Resource | ColoringStrategy | undefined
-            if (color_buf__selector == 0) {
-                color_buf_ = (valueDeserializer.readInt32() as Color)
-            }
-            else if (color_buf__selector == 1) {
-                color_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (color_buf__selector == 2) {
-                color_buf_ = valueDeserializer.readResource()
-            }
-            else if (color_buf__selector == 3) {
-                color_buf_ = valueDeserializer.readInt32() as ColoringStrategy
-            }
-            else {
-                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
-            }
-            color_buf = (color_buf_ as Color | string | Resource | ColoringStrategy)
-        }
-        const color_result : Color | string | Resource | ColoringStrategy | undefined = color_buf
-        const offsetX_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let offsetX_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (offsetX_buf_runtimeType))
-        {
-            const offsetX_buf__selector : int32 = valueDeserializer.readInt8()
-            let offsetX_buf_ : number | Resource | undefined
-            if (offsetX_buf__selector == 0) {
-                offsetX_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (offsetX_buf__selector == 1) {
-                offsetX_buf_ = valueDeserializer.readResource()
-            }
-            else {
-                throw new Error("One of the branches for offsetX_buf_ has to be chosen through deserialisation.")
-            }
-            offsetX_buf = (offsetX_buf_ as number | Resource)
-        }
-        const offsetX_result : number | Resource | undefined = offsetX_buf
-        const offsetY_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let offsetY_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (offsetY_buf_runtimeType))
-        {
-            const offsetY_buf__selector : int32 = valueDeserializer.readInt8()
-            let offsetY_buf_ : number | Resource | undefined
-            if (offsetY_buf__selector == 0) {
-                offsetY_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (offsetY_buf__selector == 1) {
-                offsetY_buf_ = valueDeserializer.readResource()
-            }
-            else {
-                throw new Error("One of the branches for offsetY_buf_ has to be chosen through deserialisation.")
-            }
-            offsetY_buf = (offsetY_buf_ as number | Resource)
-        }
-        const offsetY_result : number | Resource | undefined = offsetY_buf
-        const fill_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let fill_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (fill_buf_runtimeType))
-        {
-            fill_buf = valueDeserializer.readBoolean()
-        }
-        const fill_result : boolean | undefined = fill_buf
-        let value : ShadowOptions = ({radius: radius_result,type: type_result,color: color_result,offsetX: offsetX_result,offsetY: offsetY_result,fill: fill_result} as ShadowOptions)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ICurveInternal.fromPtr(ptr)
     }
-    readGridRowSizeOption(): GridRowSizeOption {
+    readTextBackgroundStyle(): TextBackgroundStyle {
         let valueDeserializer : Deserializer = this
-        const xs_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let xs_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (xs_buf_runtimeType))
-        {
-            xs_buf = (valueDeserializer.readLength() as Length)
-        }
-        const xs_result : Length | undefined = xs_buf
-        const sm_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let sm_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (sm_buf_runtimeType))
-        {
-            sm_buf = (valueDeserializer.readLength() as Length)
-        }
-        const sm_result : Length | undefined = sm_buf
-        const md_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let md_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (md_buf_runtimeType))
-        {
-            md_buf = (valueDeserializer.readLength() as Length)
-        }
-        const md_result : Length | undefined = md_buf
-        const lg_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let lg_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (lg_buf_runtimeType))
-        {
-            lg_buf = (valueDeserializer.readLength() as Length)
-        }
-        const lg_result : Length | undefined = lg_buf
-        const xl_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let xl_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (xl_buf_runtimeType))
-        {
-            xl_buf = (valueDeserializer.readLength() as Length)
-        }
-        const xl_result : Length | undefined = xl_buf
-        const xxl_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let xxl_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (xxl_buf_runtimeType))
-        {
-            xxl_buf = (valueDeserializer.readLength() as Length)
-        }
-        const xxl_result : Length | undefined = xxl_buf
-        let value : GridRowSizeOption = ({xs: xs_result,sm: sm_result,md: md_result,lg: lg_result,xl: xl_result,xxl: xxl_result} as GridRowSizeOption)
-        return value
-    }
-    readArea(): Area {
-        let valueDeserializer : Deserializer = this
-        const width_result : Length = (valueDeserializer.readLength() as Length)
-        const height_result : Length = (valueDeserializer.readLength() as Length)
-        const position_result : Position = valueDeserializer.readPosition()
-        const globalPosition_result : Position = valueDeserializer.readPosition()
-        let value : Area = ({width: width_result,height: height_result,position: position_result,globalPosition: globalPosition_result} as Area)
-        return value
-    }
-    readFont(): Font {
-        let valueDeserializer : Deserializer = this
-        const size_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let size_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (size_buf_runtimeType))
-        {
-            size_buf = (valueDeserializer.readLength() as Length)
-        }
-        const size_result : Length | undefined = size_buf
-        const weight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let weight_buf : FontWeight | number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (weight_buf_runtimeType))
-        {
-            const weight_buf__selector : int32 = valueDeserializer.readInt8()
-            let weight_buf_ : FontWeight | number | string | undefined
-            if (weight_buf__selector == 0) {
-                weight_buf_ = (valueDeserializer.readInt32() as FontWeight)
-            }
-            else if (weight_buf__selector == 1) {
-                weight_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (weight_buf__selector == 2) {
-                weight_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for weight_buf_ has to be chosen through deserialisation.")
-            }
-            weight_buf = (weight_buf_ as FontWeight | number | string)
-        }
-        const weight_result : FontWeight | number | string | undefined = weight_buf
-        const family_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let family_buf : string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (family_buf_runtimeType))
-        {
-            const family_buf__selector : int32 = valueDeserializer.readInt8()
-            let family_buf_ : string | Resource | undefined
-            if (family_buf__selector == 0) {
-                family_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (family_buf__selector == 1) {
-                family_buf_ = valueDeserializer.readResource()
-            }
-            else {
-                throw new Error("One of the branches for family_buf_ has to be chosen through deserialisation.")
-            }
-            family_buf = (family_buf_ as string | Resource)
-        }
-        const family_result : string | Resource | undefined = family_buf
-        const style_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let style_buf : FontStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
-        {
-            style_buf = (valueDeserializer.readInt32() as FontStyle)
-        }
-        const style_result : FontStyle | undefined = style_buf
-        let value : Font = ({size: size_result,weight: weight_result,family: family_result,style: style_result} as Font)
-        return value
-    }
-    readLocalizedPadding(): LocalizedPadding {
-        let valueDeserializer : Deserializer = this
-        const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let top_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
-        {
-            top_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const top_result : LengthMetrics | undefined = top_buf
-        const end_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let end_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
-        {
-            end_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const end_result : LengthMetrics | undefined = end_buf
-        const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let bottom_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
-        {
-            bottom_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const bottom_result : LengthMetrics | undefined = bottom_buf
-        const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let start_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
-        {
-            start_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const start_result : LengthMetrics | undefined = start_buf
-        let value : LocalizedPadding = ({top: top_result,end: end_result,bottom: bottom_result,start: start_result} as LocalizedPadding)
-        return value
-    }
-    readTabBarSymbol(): TabBarSymbol {
-        let valueDeserializer : Deserializer = this
-        const normal_result : SymbolGlyphModifier = valueDeserializer.readSymbolGlyphModifier()
-        const selected_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let selected_buf : SymbolGlyphModifier | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
-        {
-            selected_buf = valueDeserializer.readSymbolGlyphModifier()
-        }
-        const selected_result : SymbolGlyphModifier | undefined = selected_buf
-        let value : TabBarSymbol = ({normal: normal_result,selected: selected_result} as TabBarSymbol)
-        return value
-    }
-    readComponentContent(): ComponentContent {
-        let valueDeserializer : Deserializer = this
-        const _ComponentContentStub_result : string = (valueDeserializer.readString() as string)
-        let value : ComponentContent = ({_ComponentContentStub: _ComponentContentStub_result} as ComponentContent)
-        return value
-    }
-    readScrollAnimationOptions(): ScrollAnimationOptions {
-        let valueDeserializer : Deserializer = this
-        const duration_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let duration_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (duration_buf_runtimeType))
-        {
-            duration_buf = (valueDeserializer.readNumber() as number)
-        }
-        const duration_result : number | undefined = duration_buf
-        const curve_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let curve_buf : Curve | ICurve | undefined
-        if ((RuntimeType.UNDEFINED) != (curve_buf_runtimeType))
-        {
-            const curve_buf__selector : int32 = valueDeserializer.readInt8()
-            let curve_buf_ : Curve | ICurve | undefined
-            if (curve_buf__selector == 0) {
-                curve_buf_ = (valueDeserializer.readInt32() as Curve)
-            }
-            else if (curve_buf__selector == 1) {
-                curve_buf_ = (valueDeserializer.readICurve() as ICurve)
-            }
-            else {
-                throw new Error("One of the branches for curve_buf_ has to be chosen through deserialisation.")
-            }
-            curve_buf = (curve_buf_ as Curve | ICurve)
-        }
-        const curve_result : Curve | ICurve | undefined = curve_buf
-        const canOverScroll_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let canOverScroll_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (canOverScroll_buf_runtimeType))
-        {
-            canOverScroll_buf = valueDeserializer.readBoolean()
-        }
-        const canOverScroll_result : boolean | undefined = canOverScroll_buf
-        let value : ScrollAnimationOptions = ({duration: duration_result,curve: curve_result,canOverScroll: canOverScroll_result} as ScrollAnimationOptions)
-        return value
-    }
-    readRichEditorLayoutStyle(): RichEditorLayoutStyle {
-        let valueDeserializer : Deserializer = this
-        const margin_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let margin_buf : Dimension | Margin | undefined
-        if ((RuntimeType.UNDEFINED) != (margin_buf_runtimeType))
-        {
-            const margin_buf__selector : int32 = valueDeserializer.readInt8()
-            let margin_buf_ : Dimension | Margin | undefined
-            if (margin_buf__selector == 0) {
-                margin_buf_ = (valueDeserializer.readLength() as Dimension)
-            }
-            else if (margin_buf__selector == 1) {
-                const margin_buf__u_top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let margin_buf__u_top_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (margin_buf__u_top_buf_runtimeType))
-                {
-                    margin_buf__u_top_buf = (valueDeserializer.readLength() as Length)
-                }
-                const margin_buf__u_top : undefined | Length = margin_buf__u_top_buf
-                const margin_buf__u_right_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let margin_buf__u_right_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (margin_buf__u_right_buf_runtimeType))
-                {
-                    margin_buf__u_right_buf = (valueDeserializer.readLength() as Length)
-                }
-                const margin_buf__u_right : undefined | Length = margin_buf__u_right_buf
-                const margin_buf__u_bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let margin_buf__u_bottom_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (margin_buf__u_bottom_buf_runtimeType))
-                {
-                    margin_buf__u_bottom_buf = (valueDeserializer.readLength() as Length)
-                }
-                const margin_buf__u_bottom : undefined | Length = margin_buf__u_bottom_buf
-                const margin_buf__u_left_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let margin_buf__u_left_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (margin_buf__u_left_buf_runtimeType))
-                {
-                    margin_buf__u_left_buf = (valueDeserializer.readLength() as Length)
-                }
-                const margin_buf__u_left : undefined | Length = margin_buf__u_left_buf
-                margin_buf_ = ({top: margin_buf__u_top, right: margin_buf__u_right, bottom: margin_buf__u_bottom, left: margin_buf__u_left} as Padding)
-            }
-            else {
-                throw new Error("One of the branches for margin_buf_ has to be chosen through deserialisation.")
-            }
-            margin_buf = (margin_buf_ as Dimension | Margin)
-        }
-        const margin_result : Dimension | Margin | undefined = margin_buf
-        const borderRadius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let borderRadius_buf : Dimension | BorderRadiuses | undefined
-        if ((RuntimeType.UNDEFINED) != (borderRadius_buf_runtimeType))
-        {
-            const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
-            let borderRadius_buf_ : Dimension | BorderRadiuses | undefined
-            if (borderRadius_buf__selector == 0) {
-                borderRadius_buf_ = (valueDeserializer.readLength() as Dimension)
-            }
-            else if (borderRadius_buf__selector == 1) {
-                const borderRadius_buf__u_topLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let borderRadius_buf__u_topLeft_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (borderRadius_buf__u_topLeft_buf_runtimeType))
-                {
-                    borderRadius_buf__u_topLeft_buf = (valueDeserializer.readLength() as Length)
-                }
-                const borderRadius_buf__u_topLeft : undefined | Length = borderRadius_buf__u_topLeft_buf
-                const borderRadius_buf__u_topRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let borderRadius_buf__u_topRight_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (borderRadius_buf__u_topRight_buf_runtimeType))
-                {
-                    borderRadius_buf__u_topRight_buf = (valueDeserializer.readLength() as Length)
-                }
-                const borderRadius_buf__u_topRight : undefined | Length = borderRadius_buf__u_topRight_buf
-                const borderRadius_buf__u_bottomLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let borderRadius_buf__u_bottomLeft_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (borderRadius_buf__u_bottomLeft_buf_runtimeType))
-                {
-                    borderRadius_buf__u_bottomLeft_buf = (valueDeserializer.readLength() as Length)
-                }
-                const borderRadius_buf__u_bottomLeft : undefined | Length = borderRadius_buf__u_bottomLeft_buf
-                const borderRadius_buf__u_bottomRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let borderRadius_buf__u_bottomRight_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (borderRadius_buf__u_bottomRight_buf_runtimeType))
-                {
-                    borderRadius_buf__u_bottomRight_buf = (valueDeserializer.readLength() as Length)
-                }
-                const borderRadius_buf__u_bottomRight : undefined | Length = borderRadius_buf__u_bottomRight_buf
-                borderRadius_buf_ = ({topLeft: borderRadius_buf__u_topLeft, topRight: borderRadius_buf__u_topRight, bottomLeft: borderRadius_buf__u_bottomLeft, bottomRight: borderRadius_buf__u_bottomRight} as BorderRadiuses)
-            }
-            else {
-                throw new Error("One of the branches for borderRadius_buf_ has to be chosen through deserialisation.")
-            }
-            borderRadius_buf = (borderRadius_buf_ as Dimension | BorderRadiuses)
-        }
-        const borderRadius_result : Dimension | BorderRadiuses | undefined = borderRadius_buf
-        let value : RichEditorLayoutStyle = ({margin: margin_result,borderRadius: borderRadius_result} as RichEditorLayoutStyle)
-        return value
-    }
-    readDecorationStyleResult(): DecorationStyleResult {
-        let valueDeserializer : Deserializer = this
-        const type_result : TextDecorationType = (valueDeserializer.readInt32() as TextDecorationType)
-        const color_buf_selector : int32 = valueDeserializer.readInt8()
-        let color_buf : Color | number | string | Resource | undefined
-        if (color_buf_selector == 0) {
-            color_buf = (valueDeserializer.readInt32() as Color)
-        }
-        else if (color_buf_selector == 1) {
-            color_buf = (valueDeserializer.readNumber() as number)
-        }
-        else if (color_buf_selector == 2) {
-            color_buf = (valueDeserializer.readString() as string)
-        }
-        else if (color_buf_selector == 3) {
-            color_buf = valueDeserializer.readResource()
-        }
-        else {
-            throw new Error("One of the branches for color_buf has to be chosen through deserialisation.")
-        }
-        const color_result : ResourceColor = (color_buf as Color | number | string | Resource)
-        const style_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let style_buf : TextDecorationStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
-        {
-            style_buf = (valueDeserializer.readInt32() as TextDecorationStyle)
-        }
-        const style_result : TextDecorationStyle | undefined = style_buf
-        let value : DecorationStyleResult = ({type: type_result,color: color_result,style: style_result} as DecorationStyleResult)
-        return value
-    }
-    readDecorationStyleInterface(): DecorationStyleInterface {
-        let valueDeserializer : Deserializer = this
-        const type_result : TextDecorationType = (valueDeserializer.readInt32() as TextDecorationType)
         const color_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let color_buf : ResourceColor | undefined
         if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
@@ -832,384 +378,53 @@ export class Deserializer extends DeserializerBase {
             color_buf = (color_buf_ as Color | number | string | Resource)
         }
         const color_result : ResourceColor | undefined = color_buf
-        const style_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let style_buf : TextDecorationStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        const radius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let radius_buf : Dimension | BorderRadiuses | undefined
+        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
         {
-            style_buf = (valueDeserializer.readInt32() as TextDecorationStyle)
-        }
-        const style_result : TextDecorationStyle | undefined = style_buf
-        let value : DecorationStyleInterface = ({type: type_result,color: color_result,style: style_result} as DecorationStyleInterface)
-        return value
-    }
-    readCallback_GestureEvent_Void(isSync: boolean = false): ((event: GestureEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event: GestureEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeGestureEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1143194492, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1143194492, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_ClickEvent_Void(isSync: boolean = false): ((event: ClickEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event: ClickEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeClickEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1097178637, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1097178637, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_PopInfo_Void(isSync: boolean = false): ((parameter: PopInfo) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: PopInfo):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writePopInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(624053870, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(624053870, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_SwipeActionState_Void(isSync: boolean = false): ((state: SwipeActionState) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (state: SwipeActionState):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((state.valueOf() as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-301561698, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-301561698, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_Void(isSync: boolean = false): (() => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return ():void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1867723152, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1867723152, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCustomNodeBuilder(isSync: boolean = false): CustomNodeBuilder {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parentNode: KPointer):KPointer => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writePointer(parentNode);
-    let _continuationValue : KPointer | undefined;
-    const _continuationCallback : ((value: KPointer) => void) = (value: KPointer):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1766817632, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1766817632, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as KPointer); }
-    }
-    readLocalizedEdgeColors(): LocalizedEdgeColors {
-        let valueDeserializer : Deserializer = this
-        const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let top_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
-        {
-            const top_buf__selector : int32 = valueDeserializer.readInt8()
-            let top_buf_ : Color | number | string | Resource | undefined
-            if (top_buf__selector == 0) {
-                top_buf_ = (valueDeserializer.readInt32() as Color)
+            const radius_buf__selector : int32 = valueDeserializer.readInt8()
+            let radius_buf_ : Dimension | BorderRadiuses | undefined
+            if (radius_buf__selector == 0) {
+                radius_buf_ = (valueDeserializer.readLength() as Dimension)
             }
-            else if (top_buf__selector == 1) {
-                top_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (top_buf__selector == 2) {
-                top_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (top_buf__selector == 3) {
-                top_buf_ = valueDeserializer.readResource()
+            else if (radius_buf__selector == 1) {
+                const radius_buf__u_topLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let radius_buf__u_topLeft_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (radius_buf__u_topLeft_buf_runtimeType))
+                {
+                    radius_buf__u_topLeft_buf = (valueDeserializer.readLength() as Length)
+                }
+                const radius_buf__u_topLeft : undefined | Length = radius_buf__u_topLeft_buf
+                const radius_buf__u_topRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let radius_buf__u_topRight_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (radius_buf__u_topRight_buf_runtimeType))
+                {
+                    radius_buf__u_topRight_buf = (valueDeserializer.readLength() as Length)
+                }
+                const radius_buf__u_topRight : undefined | Length = radius_buf__u_topRight_buf
+                const radius_buf__u_bottomLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let radius_buf__u_bottomLeft_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (radius_buf__u_bottomLeft_buf_runtimeType))
+                {
+                    radius_buf__u_bottomLeft_buf = (valueDeserializer.readLength() as Length)
+                }
+                const radius_buf__u_bottomLeft : undefined | Length = radius_buf__u_bottomLeft_buf
+                const radius_buf__u_bottomRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let radius_buf__u_bottomRight_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (radius_buf__u_bottomRight_buf_runtimeType))
+                {
+                    radius_buf__u_bottomRight_buf = (valueDeserializer.readLength() as Length)
+                }
+                const radius_buf__u_bottomRight : undefined | Length = radius_buf__u_bottomRight_buf
+                radius_buf_ = ({topLeft: radius_buf__u_topLeft, topRight: radius_buf__u_topRight, bottomLeft: radius_buf__u_bottomLeft, bottomRight: radius_buf__u_bottomRight} as BorderRadiuses)
             }
             else {
-                throw new Error("One of the branches for top_buf_ has to be chosen through deserialisation.")
+                throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
             }
-            top_buf = (top_buf_ as Color | number | string | Resource)
+            radius_buf = (radius_buf_ as Dimension | BorderRadiuses)
         }
-        const top_result : ResourceColor | undefined = top_buf
-        const end_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let end_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
-        {
-            const end_buf__selector : int32 = valueDeserializer.readInt8()
-            let end_buf_ : Color | number | string | Resource | undefined
-            if (end_buf__selector == 0) {
-                end_buf_ = (valueDeserializer.readInt32() as Color)
-            }
-            else if (end_buf__selector == 1) {
-                end_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (end_buf__selector == 2) {
-                end_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (end_buf__selector == 3) {
-                end_buf_ = valueDeserializer.readResource()
-            }
-            else {
-                throw new Error("One of the branches for end_buf_ has to be chosen through deserialisation.")
-            }
-            end_buf = (end_buf_ as Color | number | string | Resource)
-        }
-        const end_result : ResourceColor | undefined = end_buf
-        const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let bottom_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
-        {
-            const bottom_buf__selector : int32 = valueDeserializer.readInt8()
-            let bottom_buf_ : Color | number | string | Resource | undefined
-            if (bottom_buf__selector == 0) {
-                bottom_buf_ = (valueDeserializer.readInt32() as Color)
-            }
-            else if (bottom_buf__selector == 1) {
-                bottom_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (bottom_buf__selector == 2) {
-                bottom_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (bottom_buf__selector == 3) {
-                bottom_buf_ = valueDeserializer.readResource()
-            }
-            else {
-                throw new Error("One of the branches for bottom_buf_ has to be chosen through deserialisation.")
-            }
-            bottom_buf = (bottom_buf_ as Color | number | string | Resource)
-        }
-        const bottom_result : ResourceColor | undefined = bottom_buf
-        const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let start_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
-        {
-            const start_buf__selector : int32 = valueDeserializer.readInt8()
-            let start_buf_ : Color | number | string | Resource | undefined
-            if (start_buf__selector == 0) {
-                start_buf_ = (valueDeserializer.readInt32() as Color)
-            }
-            else if (start_buf__selector == 1) {
-                start_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (start_buf__selector == 2) {
-                start_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (start_buf__selector == 3) {
-                start_buf_ = valueDeserializer.readResource()
-            }
-            else {
-                throw new Error("One of the branches for start_buf_ has to be chosen through deserialisation.")
-            }
-            start_buf = (start_buf_ as Color | number | string | Resource)
-        }
-        const start_result : ResourceColor | undefined = start_buf
-        let value : LocalizedEdgeColors = ({top: top_result,end: end_result,bottom: bottom_result,start: start_result} as LocalizedEdgeColors)
-        return value
-    }
-    readLocalizedEdgeWidths(): LocalizedEdgeWidths {
-        let valueDeserializer : Deserializer = this
-        const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let top_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
-        {
-            top_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const top_result : LengthMetrics | undefined = top_buf
-        const end_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let end_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
-        {
-            end_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const end_result : LengthMetrics | undefined = end_buf
-        const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let bottom_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
-        {
-            bottom_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const bottom_result : LengthMetrics | undefined = bottom_buf
-        const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let start_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
-        {
-            start_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const start_result : LengthMetrics | undefined = start_buf
-        let value : LocalizedEdgeWidths = ({top: top_result,end: end_result,bottom: bottom_result,start: start_result} as LocalizedEdgeWidths)
-        return value
-    }
-    readSheetTitleOptions(): SheetTitleOptions {
-        let valueDeserializer : Deserializer = this
-        const title_buf_selector : int32 = valueDeserializer.readInt8()
-        let title_buf : string | Resource | undefined
-        if (title_buf_selector == 0) {
-            title_buf = (valueDeserializer.readString() as string)
-        }
-        else if (title_buf_selector == 1) {
-            title_buf = valueDeserializer.readResource()
-        }
-        else {
-            throw new Error("One of the branches for title_buf has to be chosen through deserialisation.")
-        }
-        const title_result : ResourceStr = (title_buf as string | Resource)
-        const subtitle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let subtitle_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (subtitle_buf_runtimeType))
-        {
-            const subtitle_buf__selector : int32 = valueDeserializer.readInt8()
-            let subtitle_buf_ : string | Resource | undefined
-            if (subtitle_buf__selector == 0) {
-                subtitle_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (subtitle_buf__selector == 1) {
-                subtitle_buf_ = valueDeserializer.readResource()
-            }
-            else {
-                throw new Error("One of the branches for subtitle_buf_ has to be chosen through deserialisation.")
-            }
-            subtitle_buf = (subtitle_buf_ as string | Resource)
-        }
-        const subtitle_result : ResourceStr | undefined = subtitle_buf
-        let value : SheetTitleOptions = ({title: title_result,subtitle: subtitle_result} as SheetTitleOptions)
-        return value
-    }
-    readTransitionEffect(): TransitionEffect {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return TransitionEffectInternal.fromPtr(ptr)
-    }
-    readLocalizedBorderRadiuses(): LocalizedBorderRadiuses {
-        let valueDeserializer : Deserializer = this
-        const topStart_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let topStart_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (topStart_buf_runtimeType))
-        {
-            topStart_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const topStart_result : LengthMetrics | undefined = topStart_buf
-        const topEnd_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let topEnd_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (topEnd_buf_runtimeType))
-        {
-            topEnd_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const topEnd_result : LengthMetrics | undefined = topEnd_buf
-        const bottomStart_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let bottomStart_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (bottomStart_buf_runtimeType))
-        {
-            bottomStart_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const bottomStart_result : LengthMetrics | undefined = bottomStart_buf
-        const bottomEnd_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let bottomEnd_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (bottomEnd_buf_runtimeType))
-        {
-            bottomEnd_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
-        }
-        const bottomEnd_result : LengthMetrics | undefined = bottomEnd_buf
-        let value : LocalizedBorderRadiuses = ({topStart: topStart_result,topEnd: topEnd_result,bottomStart: bottomStart_result,bottomEnd: bottomEnd_result} as LocalizedBorderRadiuses)
-        return value
-    }
-    readCallback_DismissPopupAction_Void(isSync: boolean = false): ((parameter: DismissPopupAction) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: DismissPopupAction):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeDismissPopupAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2004166751, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2004166751, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCanvasPattern(): CanvasPattern {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return CanvasPatternInternal.fromPtr(ptr)
-    }
-    readCanvasGradient(): CanvasGradient {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return CanvasGradientInternal.fromPtr(ptr)
-    }
-    readVoidCallback(isSync: boolean = false): VoidCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return ():void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2038961969, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2038961969, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_NavigationTransitionProxy_Void(isSync: boolean = false): ((transitionProxy: NavigationTransitionProxy) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (transitionProxy: NavigationTransitionProxy):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNavigationTransitionProxy(transitionProxy);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1375731066, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1375731066, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_Boolean_Void(isSync: boolean = false): ((parameter: boolean) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: boolean):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeBoolean(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(313269291, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(313269291, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readColorMetrics(): ColorMetrics {
-        let valueDeserializer : Deserializer = this
-        const _ColorMetricsStub_result : string = (valueDeserializer.readString() as string)
-        let value : ColorMetrics = ({_ColorMetricsStub: _ColorMetricsStub_result} as ColorMetrics)
-        return value
-    }
-    readStyledStringValue(): StyledStringValue {
-        let valueDeserializer : Deserializer = this
-        const stub_result : string = (valueDeserializer.readString() as string)
-        let value : StyledStringValue = ({stub: stub_result} as StyledStringValue)
+        const radius_result : Dimension | BorderRadiuses | undefined = radius_buf
+        let value : TextBackgroundStyle = ({color: color_result, radius: radius_result} as TextBackgroundStyle)
         return value
     }
     readImageAttachmentLayoutStyle(): ImageAttachmentLayoutStyle {
@@ -1352,7 +567,7 @@ export class Deserializer extends DeserializerBase {
             borderRadius_buf = (borderRadius_buf_ as LengthMetrics | BorderRadiuses)
         }
         const borderRadius_result : LengthMetrics | BorderRadiuses | undefined = borderRadius_buf
-        let value : ImageAttachmentLayoutStyle = ({margin: margin_result,padding: padding_result,borderRadius: borderRadius_result} as ImageAttachmentLayoutStyle)
+        let value : ImageAttachmentLayoutStyle = ({margin: margin_result, padding: padding_result, borderRadius: borderRadius_result} as ImageAttachmentLayoutStyle)
         return value
     }
     readSizeOptions(): SizeOptions {
@@ -1371,8 +586,919 @@ export class Deserializer extends DeserializerBase {
             height_buf = (valueDeserializer.readLength() as Length)
         }
         const height_result : Length | undefined = height_buf
-        let value : SizeOptions = ({width: width_result,height: height_result} as SizeOptions)
+        let value : SizeOptions = ({width: width_result, height: height_result} as SizeOptions)
         return value
+    }
+    readPosition(): Position {
+        let valueDeserializer : Deserializer = this
+        const x_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let x_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (x_buf_runtimeType))
+        {
+            x_buf = (valueDeserializer.readLength() as Length)
+        }
+        const x_result : Length | undefined = x_buf
+        const y_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let y_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (y_buf_runtimeType))
+        {
+            y_buf = (valueDeserializer.readLength() as Length)
+        }
+        const y_result : Length | undefined = y_buf
+        let value : Position = ({x: x_result, y: y_result} as Position)
+        return value
+    }
+    readSymbolGlyphModifier(): SymbolGlyphModifier {
+        let valueDeserializer : Deserializer = this
+        const _SymbolGlyphModifierStub_result : string = (valueDeserializer.readString() as string)
+        let value : SymbolGlyphModifier = ({_SymbolGlyphModifierStub: _SymbolGlyphModifierStub_result} as SymbolGlyphModifier)
+        return value
+    }
+    readShadowOptions(): ShadowOptions {
+        let valueDeserializer : Deserializer = this
+        const radius_buf_selector : int32 = valueDeserializer.readInt8()
+        let radius_buf : number | Resource | undefined
+        if (radius_buf_selector == 0) {
+            radius_buf = (valueDeserializer.readNumber() as number)
+        }
+        else if (radius_buf_selector == 1) {
+            radius_buf = valueDeserializer.readResource()
+        }
+        else {
+            throw new Error("One of the branches for radius_buf has to be chosen through deserialisation.")
+        }
+        const radius_result : number | Resource = (radius_buf as number | Resource)
+        const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let type_buf : ShadowType | undefined
+        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        {
+            type_buf = (valueDeserializer.readInt32() as ShadowType)
+        }
+        const type_result : ShadowType | undefined = type_buf
+        const color_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let color_buf : Color | string | Resource | ColoringStrategy | undefined
+        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        {
+            const color_buf__selector : int32 = valueDeserializer.readInt8()
+            let color_buf_ : Color | string | Resource | ColoringStrategy | undefined
+            if (color_buf__selector == 0) {
+                color_buf_ = (valueDeserializer.readInt32() as Color)
+            }
+            else if (color_buf__selector == 1) {
+                color_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (color_buf__selector == 2) {
+                color_buf_ = valueDeserializer.readResource()
+            }
+            else if (color_buf__selector == 3) {
+                color_buf_ = TypeChecker.ColoringStrategy_FromOrdinal(valueDeserializer.readInt32())
+            }
+            else {
+                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
+            }
+            color_buf = (color_buf_ as Color | string | Resource | ColoringStrategy)
+        }
+        const color_result : Color | string | Resource | ColoringStrategy | undefined = color_buf
+        const offsetX_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let offsetX_buf : number | Resource | undefined
+        if ((RuntimeType.UNDEFINED) != (offsetX_buf_runtimeType))
+        {
+            const offsetX_buf__selector : int32 = valueDeserializer.readInt8()
+            let offsetX_buf_ : number | Resource | undefined
+            if (offsetX_buf__selector == 0) {
+                offsetX_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (offsetX_buf__selector == 1) {
+                offsetX_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for offsetX_buf_ has to be chosen through deserialisation.")
+            }
+            offsetX_buf = (offsetX_buf_ as number | Resource)
+        }
+        const offsetX_result : number | Resource | undefined = offsetX_buf
+        const offsetY_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let offsetY_buf : number | Resource | undefined
+        if ((RuntimeType.UNDEFINED) != (offsetY_buf_runtimeType))
+        {
+            const offsetY_buf__selector : int32 = valueDeserializer.readInt8()
+            let offsetY_buf_ : number | Resource | undefined
+            if (offsetY_buf__selector == 0) {
+                offsetY_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (offsetY_buf__selector == 1) {
+                offsetY_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for offsetY_buf_ has to be chosen through deserialisation.")
+            }
+            offsetY_buf = (offsetY_buf_ as number | Resource)
+        }
+        const offsetY_result : number | Resource | undefined = offsetY_buf
+        const fill_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fill_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (fill_buf_runtimeType))
+        {
+            fill_buf = valueDeserializer.readBoolean()
+        }
+        const fill_result : boolean | undefined = fill_buf
+        let value : ShadowOptions = ({radius: radius_result, type: type_result, color: color_result, offsetX: offsetX_result, offsetY: offsetY_result, fill: fill_result} as ShadowOptions)
+        return value
+    }
+    readGridRowSizeOption(): GridRowSizeOption {
+        let valueDeserializer : Deserializer = this
+        const xs_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let xs_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (xs_buf_runtimeType))
+        {
+            xs_buf = (valueDeserializer.readLength() as Length)
+        }
+        const xs_result : Length | undefined = xs_buf
+        const sm_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let sm_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (sm_buf_runtimeType))
+        {
+            sm_buf = (valueDeserializer.readLength() as Length)
+        }
+        const sm_result : Length | undefined = sm_buf
+        const md_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let md_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (md_buf_runtimeType))
+        {
+            md_buf = (valueDeserializer.readLength() as Length)
+        }
+        const md_result : Length | undefined = md_buf
+        const lg_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let lg_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (lg_buf_runtimeType))
+        {
+            lg_buf = (valueDeserializer.readLength() as Length)
+        }
+        const lg_result : Length | undefined = lg_buf
+        const xl_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let xl_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (xl_buf_runtimeType))
+        {
+            xl_buf = (valueDeserializer.readLength() as Length)
+        }
+        const xl_result : Length | undefined = xl_buf
+        const xxl_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let xxl_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (xxl_buf_runtimeType))
+        {
+            xxl_buf = (valueDeserializer.readLength() as Length)
+        }
+        const xxl_result : Length | undefined = xxl_buf
+        let value : GridRowSizeOption = ({xs: xs_result, sm: sm_result, md: md_result, lg: lg_result, xl: xl_result, xxl: xxl_result} as GridRowSizeOption)
+        return value
+    }
+    readBackgroundColorStyle(): BackgroundColorStyle {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return BackgroundColorStyleInternal.fromPtr(ptr)
+    }
+    readUserDataSpan(): UserDataSpan {
+        let value : UserDataSpan = ({} as UserDataSpan)
+        return value
+    }
+    readCustomSpan(): CustomSpan {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return CustomSpanInternal.fromPtr(ptr)
+    }
+    readUrlStyle(): UrlStyle {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return UrlStyleInternal.fromPtr(ptr)
+    }
+    readLineHeightStyle(): LineHeightStyle {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LineHeightStyleInternal.fromPtr(ptr)
+    }
+    readParagraphStyle(): ParagraphStyle {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ParagraphStyleInternal.fromPtr(ptr)
+    }
+    readImageAttachment(): ImageAttachment {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ImageAttachmentInternal.fromPtr(ptr)
+    }
+    readGestureStyle(): GestureStyle {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return GestureStyleInternal.fromPtr(ptr)
+    }
+    readTextShadowStyle(): TextShadowStyle {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return TextShadowStyleInternal.fromPtr(ptr)
+    }
+    readLetterSpacingStyle(): LetterSpacingStyle {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LetterSpacingStyleInternal.fromPtr(ptr)
+    }
+    readBaselineOffsetStyle(): BaselineOffsetStyle {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return BaselineOffsetStyleInternal.fromPtr(ptr)
+    }
+    readDecorationStyle(): DecorationStyle {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return DecorationStyleInternal.fromPtr(ptr)
+    }
+    readTextStyle_styled_string(): TextStyle_styled_string {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return TextStyle_styled_stringInternal.fromPtr(ptr)
+    }
+    readArea(): Area {
+        let valueDeserializer : Deserializer = this
+        const width_result : Length = (valueDeserializer.readLength() as Length)
+        const height_result : Length = (valueDeserializer.readLength() as Length)
+        const position_result : Position = valueDeserializer.readPosition()
+        const globalPosition_result : Position = valueDeserializer.readPosition()
+        let value : Area = ({width: width_result, height: height_result, position: position_result, globalPosition: globalPosition_result} as Area)
+        return value
+    }
+    readFont(): Font {
+        let valueDeserializer : Deserializer = this
+        const size_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let size_buf : Length | undefined
+        if ((RuntimeType.UNDEFINED) != (size_buf_runtimeType))
+        {
+            size_buf = (valueDeserializer.readLength() as Length)
+        }
+        const size_result : Length | undefined = size_buf
+        const weight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let weight_buf : FontWeight | number | string | undefined
+        if ((RuntimeType.UNDEFINED) != (weight_buf_runtimeType))
+        {
+            const weight_buf__selector : int32 = valueDeserializer.readInt8()
+            let weight_buf_ : FontWeight | number | string | undefined
+            if (weight_buf__selector == 0) {
+                weight_buf_ = (valueDeserializer.readInt32() as FontWeight)
+            }
+            else if (weight_buf__selector == 1) {
+                weight_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (weight_buf__selector == 2) {
+                weight_buf_ = (valueDeserializer.readString() as string)
+            }
+            else {
+                throw new Error("One of the branches for weight_buf_ has to be chosen through deserialisation.")
+            }
+            weight_buf = (weight_buf_ as FontWeight | number | string)
+        }
+        const weight_result : FontWeight | number | string | undefined = weight_buf
+        const family_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let family_buf : string | Resource | undefined
+        if ((RuntimeType.UNDEFINED) != (family_buf_runtimeType))
+        {
+            const family_buf__selector : int32 = valueDeserializer.readInt8()
+            let family_buf_ : string | Resource | undefined
+            if (family_buf__selector == 0) {
+                family_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (family_buf__selector == 1) {
+                family_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for family_buf_ has to be chosen through deserialisation.")
+            }
+            family_buf = (family_buf_ as string | Resource)
+        }
+        const family_result : string | Resource | undefined = family_buf
+        const style_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let style_buf : FontStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        {
+            style_buf = (valueDeserializer.readInt32() as FontStyle)
+        }
+        const style_result : FontStyle | undefined = style_buf
+        let value : Font = ({size: size_result, weight: weight_result, family: family_result, style: style_result} as Font)
+        return value
+    }
+    readLocalizedPadding(): LocalizedPadding {
+        let valueDeserializer : Deserializer = this
+        const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let top_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        {
+            top_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const top_result : LengthMetrics | undefined = top_buf
+        const end_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let end_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        {
+            end_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const end_result : LengthMetrics | undefined = end_buf
+        const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let bottom_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        {
+            bottom_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const bottom_result : LengthMetrics | undefined = bottom_buf
+        const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let start_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        {
+            start_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const start_result : LengthMetrics | undefined = start_buf
+        let value : LocalizedPadding = ({top: top_result, end: end_result, bottom: bottom_result, start: start_result} as LocalizedPadding)
+        return value
+    }
+    readTabBarSymbol(): TabBarSymbol {
+        let valueDeserializer : Deserializer = this
+        const normal_result : SymbolGlyphModifier = valueDeserializer.readSymbolGlyphModifier()
+        const selected_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let selected_buf : SymbolGlyphModifier | undefined
+        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+        {
+            selected_buf = valueDeserializer.readSymbolGlyphModifier()
+        }
+        const selected_result : SymbolGlyphModifier | undefined = selected_buf
+        let value : TabBarSymbol = ({normal: normal_result, selected: selected_result} as TabBarSymbol)
+        return value
+    }
+    readComponentContent(): ComponentContent {
+        let valueDeserializer : Deserializer = this
+        const _ComponentContentStub_result : string = (valueDeserializer.readString() as string)
+        let value : ComponentContent = ({_ComponentContentStub: _ComponentContentStub_result} as ComponentContent)
+        return value
+    }
+    readScrollAnimationOptions(): ScrollAnimationOptions {
+        let valueDeserializer : Deserializer = this
+        const duration_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let duration_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (duration_buf_runtimeType))
+        {
+            duration_buf = (valueDeserializer.readNumber() as number)
+        }
+        const duration_result : number | undefined = duration_buf
+        const curve_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let curve_buf : Curve | ICurve | undefined
+        if ((RuntimeType.UNDEFINED) != (curve_buf_runtimeType))
+        {
+            const curve_buf__selector : int32 = valueDeserializer.readInt8()
+            let curve_buf_ : Curve | ICurve | undefined
+            if (curve_buf__selector == 0) {
+                curve_buf_ = (valueDeserializer.readInt32() as Curve)
+            }
+            else if (curve_buf__selector == 1) {
+                curve_buf_ = (valueDeserializer.readICurve() as ICurve)
+            }
+            else {
+                throw new Error("One of the branches for curve_buf_ has to be chosen through deserialisation.")
+            }
+            curve_buf = (curve_buf_ as Curve | ICurve)
+        }
+        const curve_result : Curve | ICurve | undefined = curve_buf
+        const canOverScroll_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let canOverScroll_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (canOverScroll_buf_runtimeType))
+        {
+            canOverScroll_buf = valueDeserializer.readBoolean()
+        }
+        const canOverScroll_result : boolean | undefined = canOverScroll_buf
+        let value : ScrollAnimationOptions = ({duration: duration_result, curve: curve_result, canOverScroll: canOverScroll_result} as ScrollAnimationOptions)
+        return value
+    }
+    readRichEditorLayoutStyle(): RichEditorLayoutStyle {
+        let valueDeserializer : Deserializer = this
+        const margin_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let margin_buf : Dimension | Margin | undefined
+        if ((RuntimeType.UNDEFINED) != (margin_buf_runtimeType))
+        {
+            const margin_buf__selector : int32 = valueDeserializer.readInt8()
+            let margin_buf_ : Dimension | Margin | undefined
+            if (margin_buf__selector == 0) {
+                margin_buf_ = (valueDeserializer.readLength() as Dimension)
+            }
+            else if (margin_buf__selector == 1) {
+                const margin_buf__u_top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let margin_buf__u_top_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (margin_buf__u_top_buf_runtimeType))
+                {
+                    margin_buf__u_top_buf = (valueDeserializer.readLength() as Length)
+                }
+                const margin_buf__u_top : undefined | Length = margin_buf__u_top_buf
+                const margin_buf__u_right_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let margin_buf__u_right_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (margin_buf__u_right_buf_runtimeType))
+                {
+                    margin_buf__u_right_buf = (valueDeserializer.readLength() as Length)
+                }
+                const margin_buf__u_right : undefined | Length = margin_buf__u_right_buf
+                const margin_buf__u_bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let margin_buf__u_bottom_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (margin_buf__u_bottom_buf_runtimeType))
+                {
+                    margin_buf__u_bottom_buf = (valueDeserializer.readLength() as Length)
+                }
+                const margin_buf__u_bottom : undefined | Length = margin_buf__u_bottom_buf
+                const margin_buf__u_left_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let margin_buf__u_left_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (margin_buf__u_left_buf_runtimeType))
+                {
+                    margin_buf__u_left_buf = (valueDeserializer.readLength() as Length)
+                }
+                const margin_buf__u_left : undefined | Length = margin_buf__u_left_buf
+                margin_buf_ = ({top: margin_buf__u_top, right: margin_buf__u_right, bottom: margin_buf__u_bottom, left: margin_buf__u_left} as Padding)
+            }
+            else {
+                throw new Error("One of the branches for margin_buf_ has to be chosen through deserialisation.")
+            }
+            margin_buf = (margin_buf_ as Dimension | Margin)
+        }
+        const margin_result : Dimension | Margin | undefined = margin_buf
+        const borderRadius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let borderRadius_buf : Dimension | BorderRadiuses | undefined
+        if ((RuntimeType.UNDEFINED) != (borderRadius_buf_runtimeType))
+        {
+            const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
+            let borderRadius_buf_ : Dimension | BorderRadiuses | undefined
+            if (borderRadius_buf__selector == 0) {
+                borderRadius_buf_ = (valueDeserializer.readLength() as Dimension)
+            }
+            else if (borderRadius_buf__selector == 1) {
+                const borderRadius_buf__u_topLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let borderRadius_buf__u_topLeft_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (borderRadius_buf__u_topLeft_buf_runtimeType))
+                {
+                    borderRadius_buf__u_topLeft_buf = (valueDeserializer.readLength() as Length)
+                }
+                const borderRadius_buf__u_topLeft : undefined | Length = borderRadius_buf__u_topLeft_buf
+                const borderRadius_buf__u_topRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let borderRadius_buf__u_topRight_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (borderRadius_buf__u_topRight_buf_runtimeType))
+                {
+                    borderRadius_buf__u_topRight_buf = (valueDeserializer.readLength() as Length)
+                }
+                const borderRadius_buf__u_topRight : undefined | Length = borderRadius_buf__u_topRight_buf
+                const borderRadius_buf__u_bottomLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let borderRadius_buf__u_bottomLeft_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (borderRadius_buf__u_bottomLeft_buf_runtimeType))
+                {
+                    borderRadius_buf__u_bottomLeft_buf = (valueDeserializer.readLength() as Length)
+                }
+                const borderRadius_buf__u_bottomLeft : undefined | Length = borderRadius_buf__u_bottomLeft_buf
+                const borderRadius_buf__u_bottomRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+                let borderRadius_buf__u_bottomRight_buf : Length | undefined
+                if ((RuntimeType.UNDEFINED) != (borderRadius_buf__u_bottomRight_buf_runtimeType))
+                {
+                    borderRadius_buf__u_bottomRight_buf = (valueDeserializer.readLength() as Length)
+                }
+                const borderRadius_buf__u_bottomRight : undefined | Length = borderRadius_buf__u_bottomRight_buf
+                borderRadius_buf_ = ({topLeft: borderRadius_buf__u_topLeft, topRight: borderRadius_buf__u_topRight, bottomLeft: borderRadius_buf__u_bottomLeft, bottomRight: borderRadius_buf__u_bottomRight} as BorderRadiuses)
+            }
+            else {
+                throw new Error("One of the branches for borderRadius_buf_ has to be chosen through deserialisation.")
+            }
+            borderRadius_buf = (borderRadius_buf_ as Dimension | BorderRadiuses)
+        }
+        const borderRadius_result : Dimension | BorderRadiuses | undefined = borderRadius_buf
+        let value : RichEditorLayoutStyle = ({margin: margin_result, borderRadius: borderRadius_result} as RichEditorLayoutStyle)
+        return value
+    }
+    readDecorationStyleResult(): DecorationStyleResult {
+        let valueDeserializer : Deserializer = this
+        const type_result : TextDecorationType = (valueDeserializer.readInt32() as TextDecorationType)
+        const color_buf_selector : int32 = valueDeserializer.readInt8()
+        let color_buf : Color | number | string | Resource | undefined
+        if (color_buf_selector == 0) {
+            color_buf = (valueDeserializer.readInt32() as Color)
+        }
+        else if (color_buf_selector == 1) {
+            color_buf = (valueDeserializer.readNumber() as number)
+        }
+        else if (color_buf_selector == 2) {
+            color_buf = (valueDeserializer.readString() as string)
+        }
+        else if (color_buf_selector == 3) {
+            color_buf = valueDeserializer.readResource()
+        }
+        else {
+            throw new Error("One of the branches for color_buf has to be chosen through deserialisation.")
+        }
+        const color_result : ResourceColor = (color_buf as Color | number | string | Resource)
+        const style_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let style_buf : TextDecorationStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        {
+            style_buf = (valueDeserializer.readInt32() as TextDecorationStyle)
+        }
+        const style_result : TextDecorationStyle | undefined = style_buf
+        let value : DecorationStyleResult = ({type: type_result, color: color_result, style: style_result} as DecorationStyleResult)
+        return value
+    }
+    readDecorationStyleInterface(): DecorationStyleInterface {
+        let valueDeserializer : Deserializer = this
+        const type_result : TextDecorationType = (valueDeserializer.readInt32() as TextDecorationType)
+        const color_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let color_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        {
+            const color_buf__selector : int32 = valueDeserializer.readInt8()
+            let color_buf_ : Color | number | string | Resource | undefined
+            if (color_buf__selector == 0) {
+                color_buf_ = (valueDeserializer.readInt32() as Color)
+            }
+            else if (color_buf__selector == 1) {
+                color_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (color_buf__selector == 2) {
+                color_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (color_buf__selector == 3) {
+                color_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
+            }
+            color_buf = (color_buf_ as Color | number | string | Resource)
+        }
+        const color_result : ResourceColor | undefined = color_buf
+        const style_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let style_buf : TextDecorationStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        {
+            style_buf = (valueDeserializer.readInt32() as TextDecorationStyle)
+        }
+        const style_result : TextDecorationStyle | undefined = style_buf
+        let value : DecorationStyleInterface = ({type: type_result, color: color_result, style: style_result} as DecorationStyleInterface)
+        return value
+    }
+    readCallback_GestureEvent_Void(isSync: boolean = false): ((event: GestureEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event: GestureEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeGestureEvent(event);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1143194492, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1143194492, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_ClickEvent_Void(isSync: boolean = false): ((event: ClickEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event: ClickEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeClickEvent(event);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1097178637, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1097178637, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_PopInfo_Void(isSync: boolean = false): ((parameter: PopInfo) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: PopInfo):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writePopInfo(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(624053870, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(624053870, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_SwipeActionState_Void(isSync: boolean = false): ((state: SwipeActionState) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (state: SwipeActionState):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(((state as SwipeActionState) as int32));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-301561698, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-301561698, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_Void(isSync: boolean = false): (() => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return ():void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1867723152, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1867723152, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCustomNodeBuilder(isSync: boolean = false): CustomNodeBuilder {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parentNode: KPointer):KPointer => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writePointer(parentNode);
+    let _continuationValue : KPointer | undefined;
+    const _continuationCallback : ((value: KPointer) => void) = (value: KPointer):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1766817632, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1766817632, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as KPointer); }
+    }
+    readLocalizedEdgeColors(): LocalizedEdgeColors {
+        let valueDeserializer : Deserializer = this
+        const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let top_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        {
+            const top_buf__selector : int32 = valueDeserializer.readInt8()
+            let top_buf_ : Color | number | string | Resource | undefined
+            if (top_buf__selector == 0) {
+                top_buf_ = (valueDeserializer.readInt32() as Color)
+            }
+            else if (top_buf__selector == 1) {
+                top_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (top_buf__selector == 2) {
+                top_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (top_buf__selector == 3) {
+                top_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for top_buf_ has to be chosen through deserialisation.")
+            }
+            top_buf = (top_buf_ as Color | number | string | Resource)
+        }
+        const top_result : ResourceColor | undefined = top_buf
+        const end_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let end_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        {
+            const end_buf__selector : int32 = valueDeserializer.readInt8()
+            let end_buf_ : Color | number | string | Resource | undefined
+            if (end_buf__selector == 0) {
+                end_buf_ = (valueDeserializer.readInt32() as Color)
+            }
+            else if (end_buf__selector == 1) {
+                end_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (end_buf__selector == 2) {
+                end_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (end_buf__selector == 3) {
+                end_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for end_buf_ has to be chosen through deserialisation.")
+            }
+            end_buf = (end_buf_ as Color | number | string | Resource)
+        }
+        const end_result : ResourceColor | undefined = end_buf
+        const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let bottom_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        {
+            const bottom_buf__selector : int32 = valueDeserializer.readInt8()
+            let bottom_buf_ : Color | number | string | Resource | undefined
+            if (bottom_buf__selector == 0) {
+                bottom_buf_ = (valueDeserializer.readInt32() as Color)
+            }
+            else if (bottom_buf__selector == 1) {
+                bottom_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (bottom_buf__selector == 2) {
+                bottom_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (bottom_buf__selector == 3) {
+                bottom_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for bottom_buf_ has to be chosen through deserialisation.")
+            }
+            bottom_buf = (bottom_buf_ as Color | number | string | Resource)
+        }
+        const bottom_result : ResourceColor | undefined = bottom_buf
+        const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let start_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        {
+            const start_buf__selector : int32 = valueDeserializer.readInt8()
+            let start_buf_ : Color | number | string | Resource | undefined
+            if (start_buf__selector == 0) {
+                start_buf_ = (valueDeserializer.readInt32() as Color)
+            }
+            else if (start_buf__selector == 1) {
+                start_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (start_buf__selector == 2) {
+                start_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (start_buf__selector == 3) {
+                start_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for start_buf_ has to be chosen through deserialisation.")
+            }
+            start_buf = (start_buf_ as Color | number | string | Resource)
+        }
+        const start_result : ResourceColor | undefined = start_buf
+        let value : LocalizedEdgeColors = ({top: top_result, end: end_result, bottom: bottom_result, start: start_result} as LocalizedEdgeColors)
+        return value
+    }
+    readLocalizedEdgeWidths(): LocalizedEdgeWidths {
+        let valueDeserializer : Deserializer = this
+        const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let top_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        {
+            top_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const top_result : LengthMetrics | undefined = top_buf
+        const end_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let end_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        {
+            end_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const end_result : LengthMetrics | undefined = end_buf
+        const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let bottom_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        {
+            bottom_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const bottom_result : LengthMetrics | undefined = bottom_buf
+        const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let start_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        {
+            start_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const start_result : LengthMetrics | undefined = start_buf
+        let value : LocalizedEdgeWidths = ({top: top_result, end: end_result, bottom: bottom_result, start: start_result} as LocalizedEdgeWidths)
+        return value
+    }
+    readSheetTitleOptions(): SheetTitleOptions {
+        let valueDeserializer : Deserializer = this
+        const title_buf_selector : int32 = valueDeserializer.readInt8()
+        let title_buf : string | Resource | undefined
+        if (title_buf_selector == 0) {
+            title_buf = (valueDeserializer.readString() as string)
+        }
+        else if (title_buf_selector == 1) {
+            title_buf = valueDeserializer.readResource()
+        }
+        else {
+            throw new Error("One of the branches for title_buf has to be chosen through deserialisation.")
+        }
+        const title_result : ResourceStr = (title_buf as string | Resource)
+        const subtitle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let subtitle_buf : ResourceStr | undefined
+        if ((RuntimeType.UNDEFINED) != (subtitle_buf_runtimeType))
+        {
+            const subtitle_buf__selector : int32 = valueDeserializer.readInt8()
+            let subtitle_buf_ : string | Resource | undefined
+            if (subtitle_buf__selector == 0) {
+                subtitle_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (subtitle_buf__selector == 1) {
+                subtitle_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for subtitle_buf_ has to be chosen through deserialisation.")
+            }
+            subtitle_buf = (subtitle_buf_ as string | Resource)
+        }
+        const subtitle_result : ResourceStr | undefined = subtitle_buf
+        let value : SheetTitleOptions = ({title: title_result, subtitle: subtitle_result} as SheetTitleOptions)
+        return value
+    }
+    readTransitionEffect(): TransitionEffect {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return TransitionEffectInternal.fromPtr(ptr)
+    }
+    readLocalizedBorderRadiuses(): LocalizedBorderRadiuses {
+        let valueDeserializer : Deserializer = this
+        const topStart_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let topStart_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (topStart_buf_runtimeType))
+        {
+            topStart_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const topStart_result : LengthMetrics | undefined = topStart_buf
+        const topEnd_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let topEnd_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (topEnd_buf_runtimeType))
+        {
+            topEnd_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const topEnd_result : LengthMetrics | undefined = topEnd_buf
+        const bottomStart_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let bottomStart_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (bottomStart_buf_runtimeType))
+        {
+            bottomStart_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const bottomStart_result : LengthMetrics | undefined = bottomStart_buf
+        const bottomEnd_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let bottomEnd_buf : LengthMetrics | undefined
+        if ((RuntimeType.UNDEFINED) != (bottomEnd_buf_runtimeType))
+        {
+            bottomEnd_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
+        }
+        const bottomEnd_result : LengthMetrics | undefined = bottomEnd_buf
+        let value : LocalizedBorderRadiuses = ({topStart: topStart_result, topEnd: topEnd_result, bottomStart: bottomStart_result, bottomEnd: bottomEnd_result} as LocalizedBorderRadiuses)
+        return value
+    }
+    readCallback_DismissPopupAction_Void(isSync: boolean = false): ((parameter: DismissPopupAction) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: DismissPopupAction):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeDismissPopupAction(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2004166751, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2004166751, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCanvasPattern(): CanvasPattern {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return CanvasPatternInternal.fromPtr(ptr)
+    }
+    readCanvasGradient(): CanvasGradient {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return CanvasGradientInternal.fromPtr(ptr)
+    }
+    readVoidCallback(isSync: boolean = false): VoidCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return ():void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2038961969, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2038961969, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_NavigationTransitionProxy_Void(isSync: boolean = false): ((transitionProxy: NavigationTransitionProxy) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (transitionProxy: NavigationTransitionProxy):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNavigationTransitionProxy(transitionProxy);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1375731066, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1375731066, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_Boolean_Void(isSync: boolean = false): ((parameter: boolean) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(313269291, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(313269291, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readColorMetrics(): ColorMetrics {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ColorMetricsInternal.fromPtr(ptr)
     }
     readGetItemMainSizeByIndex(isSync: boolean = false): GetItemMainSizeByIndex {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -1481,7 +1607,7 @@ export class Deserializer extends DeserializerBase {
             height_buf = (valueDeserializer.readLength() as Length)
         }
         const height_result : Length | undefined = height_buf
-        let value : Rectangle = ({x: x_result,y: y_result,width: width_result,height: height_result} as Rectangle)
+        let value : Rectangle = ({x: x_result, y: y_result, width: width_result, height: height_result} as Rectangle)
         return value
     }
     readPickerTextStyle(): PickerTextStyle {
@@ -1517,7 +1643,7 @@ export class Deserializer extends DeserializerBase {
             font_buf = valueDeserializer.readFont()
         }
         const font_result : Font | undefined = font_buf
-        let value : PickerTextStyle = ({color: color_result,font: font_result} as PickerTextStyle)
+        let value : PickerTextStyle = ({color: color_result, font: font_result} as PickerTextStyle)
         return value
     }
     readPickerDialogButtonStyle(): PickerDialogButtonStyle {
@@ -1697,7 +1823,7 @@ export class Deserializer extends DeserializerBase {
             primary_buf = valueDeserializer.readBoolean()
         }
         const primary_result : boolean | undefined = primary_buf
-        let value : PickerDialogButtonStyle = ({type: type_result,style: style_result,role: role_result,fontSize: fontSize_result,fontColor: fontColor_result,fontWeight: fontWeight_result,fontStyle: fontStyle_result,fontFamily: fontFamily_result,backgroundColor: backgroundColor_result,borderRadius: borderRadius_result,primary: primary_result} as PickerDialogButtonStyle)
+        let value : PickerDialogButtonStyle = ({type: type_result, style: style_result, role: role_result, fontSize: fontSize_result, fontColor: fontColor_result, fontWeight: fontWeight_result, fontStyle: fontStyle_result, fontFamily: fontFamily_result, backgroundColor: backgroundColor_result, borderRadius: borderRadius_result, primary: primary_result} as PickerDialogButtonStyle)
         return value
     }
     readCallback_TextPickerResult_Void(isSync: boolean = false): ((value: TextPickerResult) => void) {
@@ -1790,7 +1916,7 @@ export class Deserializer extends DeserializerBase {
             unselectedColor_buf = (unselectedColor_buf_ as Color | number | string | Resource)
         }
         const unselectedColor_result : ResourceColor | undefined = unselectedColor_buf
-        let value : TabBarIconStyle = ({selectedColor: selectedColor_result,unselectedColor: unselectedColor_result} as TabBarIconStyle)
+        let value : TabBarIconStyle = ({selectedColor: selectedColor_result, unselectedColor: unselectedColor_result} as TabBarIconStyle)
         return value
     }
     readLabelStyle(): LabelStyle {
@@ -1881,7 +2007,7 @@ export class Deserializer extends DeserializerBase {
             font_buf = valueDeserializer.readFont()
         }
         const font_result : Font | undefined = font_buf
-        let value : LabelStyle = ({overflow: overflow_result,maxLines: maxLines_result,minFontSize: minFontSize_result,maxFontSize: maxFontSize_result,heightAdaptivePolicy: heightAdaptivePolicy_result,font: font_result} as LabelStyle)
+        let value : LabelStyle = ({overflow: overflow_result, maxLines: maxLines_result, minFontSize: minFontSize_result, maxFontSize: maxFontSize_result, heightAdaptivePolicy: heightAdaptivePolicy_result, font: font_result} as LabelStyle)
         return value
     }
     readBoardStyle(): BoardStyle {
@@ -1988,7 +2114,7 @@ export class Deserializer extends DeserializerBase {
             selectedColor_buf = (selectedColor_buf_ as Color | number | string | Resource)
         }
         const selectedColor_result : ResourceColor | undefined = selectedColor_buf
-        let value : IndicatorStyle = ({left: left_result,top: top_result,right: right_result,bottom: bottom_result,size: size_result,mask: mask_result,color: color_result,selectedColor: selectedColor_result} as IndicatorStyle)
+        let value : IndicatorStyle = ({left: left_result, top: top_result, right: right_result, bottom: bottom_result, size: size_result, mask: mask_result, color: color_result, selectedColor: selectedColor_result} as IndicatorStyle)
         return value
     }
     readBlurOptions(): BlurOptions {
@@ -2064,7 +2190,7 @@ export class Deserializer extends DeserializerBase {
             src_buf = (src_buf_ as string | Resource)
         }
         const src_result : ResourceStr | undefined = src_buf
-        let value : IconOptions = ({size: size_result,color: color_result,src: src_result} as IconOptions)
+        let value : IconOptions = ({size: size_result, color: color_result, src: src_result} as IconOptions)
         return value
     }
     readRichEditorImageSpanStyleResult(): RichEditorImageSpanStyleResult {
@@ -2081,7 +2207,7 @@ export class Deserializer extends DeserializerBase {
             layoutStyle_buf = valueDeserializer.readRichEditorLayoutStyle()
         }
         const layoutStyle_result : RichEditorLayoutStyle | undefined = layoutStyle_buf
-        let value : RichEditorImageSpanStyleResult = ({size: size_result,verticalAlign: verticalAlign_result,objectFit: objectFit_result,layoutStyle: layoutStyle_result} as RichEditorImageSpanStyleResult)
+        let value : RichEditorImageSpanStyleResult = ({size: size_result, verticalAlign: verticalAlign_result, objectFit: objectFit_result, layoutStyle: layoutStyle_result} as RichEditorImageSpanStyleResult)
         return value
     }
     readRichEditorSpanPosition(): RichEditorSpanPosition {
@@ -2090,7 +2216,7 @@ export class Deserializer extends DeserializerBase {
         const spanRange_buf_value0 : number = (valueDeserializer.readNumber() as number)
         const spanRange_buf_value1 : number = (valueDeserializer.readNumber() as number)
         const spanRange_result : [ number, number ] = ([spanRange_buf_value0, spanRange_buf_value1] as [ number, number ])
-        let value : RichEditorSpanPosition = ({spanIndex: spanIndex_result,spanRange: spanRange_result} as RichEditorSpanPosition)
+        let value : RichEditorSpanPosition = ({spanIndex: spanIndex_result, spanRange: spanRange_result} as RichEditorSpanPosition)
         return value
     }
     readRichEditorParagraphStyle(): RichEditorParagraphStyle {
@@ -2134,7 +2260,7 @@ export class Deserializer extends DeserializerBase {
             lineBreakStrategy_buf = (valueDeserializer.readInt32() as LineBreakStrategy)
         }
         const lineBreakStrategy_result : LineBreakStrategy | undefined = lineBreakStrategy_buf
-        let value : RichEditorParagraphStyle = ({textAlign: textAlign_result,leadingMargin: leadingMargin_result,wordBreak: wordBreak_result,lineBreakStrategy: lineBreakStrategy_result} as RichEditorParagraphStyle)
+        let value : RichEditorParagraphStyle = ({textAlign: textAlign_result, leadingMargin: leadingMargin_result, wordBreak: wordBreak_result, lineBreakStrategy: lineBreakStrategy_result} as RichEditorParagraphStyle)
         return value
     }
     readRichEditorSymbolSpanStyle(): RichEditorSymbolSpanStyle {
@@ -2165,7 +2291,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (fontColor_buf_runtimeType))
         {
             const fontColor_buf__length : int32 = valueDeserializer.readInt32()
-            let fontColor_buf_ : Array<ResourceColor> = new Array<ResourceColor>()
+            let fontColor_buf_ : Array<ResourceColor> = new Array<ResourceColor>(fontColor_buf__length)
             for (let fontColor_buf__i = 0; fontColor_buf__i < fontColor_buf__length; fontColor_buf__i++) {
                 const fontColor_buf__buf_selector : int32 = valueDeserializer.readInt8()
                 let fontColor_buf__buf : Color | number | string | Resource | undefined
@@ -2224,7 +2350,7 @@ export class Deserializer extends DeserializerBase {
             renderingStrategy_buf = (valueDeserializer.readInt32() as SymbolRenderingStrategy)
         }
         const renderingStrategy_result : SymbolRenderingStrategy | undefined = renderingStrategy_buf
-        let value : RichEditorSymbolSpanStyle = ({fontSize: fontSize_result,fontColor: fontColor_result,fontWeight: fontWeight_result,effectStrategy: effectStrategy_result,renderingStrategy: renderingStrategy_result} as RichEditorSymbolSpanStyle)
+        let value : RichEditorSymbolSpanStyle = ({fontSize: fontSize_result, fontColor: fontColor_result, fontWeight: fontWeight_result, effectStrategy: effectStrategy_result, renderingStrategy: renderingStrategy_result} as RichEditorSymbolSpanStyle)
         return value
     }
     readRichEditorTextStyleResult(): RichEditorTextStyleResult {
@@ -2257,7 +2383,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (textShadow_buf_runtimeType))
         {
             const textShadow_buf__length : int32 = valueDeserializer.readInt32()
-            let textShadow_buf_ : Array<ShadowOptions> = new Array<ShadowOptions>()
+            let textShadow_buf_ : Array<ShadowOptions> = new Array<ShadowOptions>(textShadow_buf__length)
             for (let textShadow_buf__i = 0; textShadow_buf__i < textShadow_buf__length; textShadow_buf__i++) {
                 textShadow_buf_[textShadow_buf__i] = valueDeserializer.readShadowOptions()
             }
@@ -2285,7 +2411,7 @@ export class Deserializer extends DeserializerBase {
             fontFeature_buf = (valueDeserializer.readString() as string)
         }
         const fontFeature_result : string | undefined = fontFeature_buf
-        let value : RichEditorTextStyleResult = ({fontColor: fontColor_result,fontSize: fontSize_result,fontStyle: fontStyle_result,fontWeight: fontWeight_result,fontFamily: fontFamily_result,decoration: decoration_result,textShadow: textShadow_result,letterSpacing: letterSpacing_result,lineHeight: lineHeight_result,fontFeature: fontFeature_result} as RichEditorTextStyleResult)
+        let value : RichEditorTextStyleResult = ({fontColor: fontColor_result, fontSize: fontSize_result, fontStyle: fontStyle_result, fontWeight: fontWeight_result, fontFamily: fontFamily_result, decoration: decoration_result, textShadow: textShadow_result, letterSpacing: letterSpacing_result, lineHeight: lineHeight_result, fontFeature: fontFeature_result} as RichEditorTextStyleResult)
         return value
     }
     readOnDidChangeCallback(isSync: boolean = false): OnDidChangeCallback {
@@ -2352,7 +2478,7 @@ export class Deserializer extends DeserializerBase {
             layoutStyle_buf = valueDeserializer.readRichEditorLayoutStyle()
         }
         const layoutStyle_result : RichEditorLayoutStyle | undefined = layoutStyle_buf
-        let value : RichEditorImageSpanStyle = ({size: size_result,verticalAlign: verticalAlign_result,objectFit: objectFit_result,layoutStyle: layoutStyle_result} as RichEditorImageSpanStyle)
+        let value : RichEditorImageSpanStyle = ({size: size_result, verticalAlign: verticalAlign_result, objectFit: objectFit_result, layoutStyle: layoutStyle_result} as RichEditorImageSpanStyle)
         return value
     }
     readRichEditorTextStyle(): RichEditorTextStyle {
@@ -2463,7 +2589,7 @@ export class Deserializer extends DeserializerBase {
             }
             else if (textShadow_buf__selector == 1) {
                 const textShadow_buf__u_length : int32 = valueDeserializer.readInt32()
-                let textShadow_buf__u : Array<ShadowOptions> = new Array<ShadowOptions>()
+                let textShadow_buf__u : Array<ShadowOptions> = new Array<ShadowOptions>(textShadow_buf__u_length)
                 for (let textShadow_buf__u_i = 0; textShadow_buf__u_i < textShadow_buf__u_length; textShadow_buf__u_i++) {
                     textShadow_buf__u[textShadow_buf__u_i] = valueDeserializer.readShadowOptions()
                 }
@@ -2521,7 +2647,7 @@ export class Deserializer extends DeserializerBase {
             fontFeature_buf = (valueDeserializer.readString() as string)
         }
         const fontFeature_result : string | undefined = fontFeature_buf
-        let value : RichEditorTextStyle = ({fontColor: fontColor_result,fontSize: fontSize_result,fontStyle: fontStyle_result,fontWeight: fontWeight_result,fontFamily: fontFamily_result,decoration: decoration_result,textShadow: textShadow_result,letterSpacing: letterSpacing_result,lineHeight: lineHeight_result,fontFeature: fontFeature_result} as RichEditorTextStyle)
+        let value : RichEditorTextStyle = ({fontColor: fontColor_result, fontSize: fontSize_result, fontStyle: fontStyle_result, fontWeight: fontWeight_result, fontFamily: fontFamily_result, decoration: decoration_result, textShadow: textShadow_result, letterSpacing: letterSpacing_result, lineHeight: lineHeight_result, fontFeature: fontFeature_result} as RichEditorTextStyle)
         return value
     }
     readRichEditorGesture(): RichEditorGesture {
@@ -2540,7 +2666,7 @@ export class Deserializer extends DeserializerBase {
             onLongPress_buf = valueDeserializer.readCallback_GestureEvent_Void()
         }
         const onLongPress_result : ((event: GestureEvent) => void) | undefined = onLongPress_buf
-        let value : RichEditorGesture = ({onClick: onClick_result,onLongPress: onLongPress_result} as RichEditorGesture)
+        let value : RichEditorGesture = ({onClick: onClick_result, onLongPress: onLongPress_result} as RichEditorGesture)
         return value
     }
     readNavPathStack(): NavPathStack {
@@ -2562,7 +2688,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((mode.valueOf() as int32));
+    _argsSerializer.writeInt32(((mode as NavigationMode) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(1502213270, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1502213270, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -2600,7 +2726,7 @@ export class Deserializer extends DeserializerBase {
         const to_1  = to as NavBar;
         _argsSerializer.writeString(to_1);
     }
-    _argsSerializer.writeInt32((operation.valueOf() as int32));
+    _argsSerializer.writeInt32(((operation as NavigationOperation) as int32));
     _argsSerializer.writeBoolean(isAnimated);
     (isSync) ? (InteropNativeModule._CallCallbackSync(1852781814, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1852781814, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
@@ -2654,7 +2780,7 @@ export class Deserializer extends DeserializerBase {
             onStateChange_buf = valueDeserializer.readCallback_SwipeActionState_Void()
         }
         const onStateChange_result : ((state: SwipeActionState) => void) | undefined = onStateChange_buf
-        let value : SwipeActionItem = ({builder: builder_result,actionAreaDistance: actionAreaDistance_result,onAction: onAction_result,onEnterActionArea: onEnterActionArea_result,onExitActionArea: onExitActionArea_result,onStateChange: onStateChange_result} as SwipeActionItem)
+        let value : SwipeActionItem = ({builder: builder_result, actionAreaDistance: actionAreaDistance_result, onAction: onAction_result, onEnterActionArea: onEnterActionArea_result, onExitActionArea: onExitActionArea_result, onStateChange: onStateChange_result} as SwipeActionItem)
         return value
     }
     readGridRowColumnOption(): GridRowColumnOption {
@@ -2701,7 +2827,7 @@ export class Deserializer extends DeserializerBase {
             xxl_buf = (valueDeserializer.readNumber() as number)
         }
         const xxl_result : number | undefined = xxl_buf
-        let value : GridRowColumnOption = ({xs: xs_result,sm: sm_result,md: md_result,lg: lg_result,xl: xl_result,xxl: xxl_result} as GridRowColumnOption)
+        let value : GridRowColumnOption = ({xs: xs_result, sm: sm_result, md: md_result, lg: lg_result, xl: xl_result, xxl: xxl_result} as GridRowColumnOption)
         return value
     }
     readGutterOption(): GutterOption {
@@ -2742,7 +2868,7 @@ export class Deserializer extends DeserializerBase {
             y_buf = (y_buf_ as Length | GridRowSizeOption)
         }
         const y_result : Length | GridRowSizeOption | undefined = y_buf
-        let value : GutterOption = ({x: x_result,y: y_result} as GutterOption)
+        let value : GutterOption = ({x: x_result, y: y_result} as GutterOption)
         return value
     }
     readGridColColumnOption(): GridColColumnOption {
@@ -2789,7 +2915,7 @@ export class Deserializer extends DeserializerBase {
             xxl_buf = (valueDeserializer.readNumber() as number)
         }
         const xxl_result : number | undefined = xxl_buf
-        let value : GridColColumnOption = ({xs: xs_result,sm: sm_result,md: md_result,lg: lg_result,xl: xl_result,xxl: xxl_result} as GridColColumnOption)
+        let value : GridColColumnOption = ({xs: xs_result, sm: sm_result, md: md_result, lg: lg_result, xl: xl_result, xxl: xxl_result} as GridColColumnOption)
         return value
     }
     readLinearGradient(): LinearGradient {
@@ -2899,7 +3025,7 @@ export class Deserializer extends DeserializerBase {
             strokeColor_buf = (strokeColor_buf_ as Color | number | string | Resource)
         }
         const strokeColor_result : ResourceColor | undefined = strokeColor_buf
-        let value : LunarSwitchStyle = ({selectedColor: selectedColor_result,unselectedColor: unselectedColor_result,strokeColor: strokeColor_result} as LunarSwitchStyle)
+        let value : LunarSwitchStyle = ({selectedColor: selectedColor_result, unselectedColor: unselectedColor_result, strokeColor: strokeColor_result} as LunarSwitchStyle)
         return value
     }
     readExpectedFrameRateRange(): ExpectedFrameRateRange {
@@ -2907,7 +3033,7 @@ export class Deserializer extends DeserializerBase {
         const min_result : number = (valueDeserializer.readNumber() as number)
         const max_result : number = (valueDeserializer.readNumber() as number)
         const expected_result : number = (valueDeserializer.readNumber() as number)
-        let value : ExpectedFrameRateRange = ({min: min_result,max: max_result,expected: expected_result} as ExpectedFrameRateRange)
+        let value : ExpectedFrameRateRange = ({min: min_result, max: max_result, expected: expected_result} as ExpectedFrameRateRange)
         return value
     }
     readScene(): Scene {
@@ -2931,7 +3057,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((parameter.valueOf() as int32));
+    _argsSerializer.writeInt32(((parameter as SheetType) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(-224451112, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-224451112, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -3033,7 +3159,7 @@ export class Deserializer extends DeserializerBase {
             hoverScale_buf = ([hoverScale_buf__value0, hoverScale_buf__value1] as [ number, number ])
         }
         const hoverScale_result : [ number, number ] | undefined = hoverScale_buf
-        let value : ContextMenuAnimationOptions = ({scale: scale_result,transition: transition_result,hoverScale: hoverScale_result} as ContextMenuAnimationOptions)
+        let value : ContextMenuAnimationOptions = ({scale: scale_result, transition: transition_result, hoverScale: hoverScale_result} as ContextMenuAnimationOptions)
         return value
     }
     readCallback_Literal_Boolean_isVisible_Void(isSync: boolean = false): ((event: Literal_Boolean_isVisible) => void) {
@@ -3084,7 +3210,7 @@ export class Deserializer extends DeserializerBase {
             font_buf = valueDeserializer.readFont()
         }
         const font_result : Font | undefined = font_buf
-        let value : PopupMessageOptions = ({textColor: textColor_result,font: font_result} as PopupMessageOptions)
+        let value : PopupMessageOptions = ({textColor: textColor_result, font: font_result} as PopupMessageOptions)
         return value
     }
     readOverlayOffset(): OverlayOffset {
@@ -3103,7 +3229,7 @@ export class Deserializer extends DeserializerBase {
             y_buf = (valueDeserializer.readNumber() as number)
         }
         const y_result : number | undefined = y_buf
-        let value : OverlayOffset = ({x: x_result,y: y_result} as OverlayOffset)
+        let value : OverlayOffset = ({x: x_result, y: y_result} as OverlayOffset)
         return value
     }
     readImageModifier(): ImageModifier {
@@ -3136,29 +3262,43 @@ export class Deserializer extends DeserializerBase {
             rotatable_buf = valueDeserializer.readBoolean()
         }
         const rotatable_result : boolean | undefined = rotatable_buf
-        let value : MotionPathOptions = ({path: path_result,from: from_result,to: to_result,rotatable: rotatable_result} as MotionPathOptions)
+        let value : MotionPathOptions = ({path: path_result, from: from_result, to: to_result, rotatable: rotatable_result} as MotionPathOptions)
         return value
     }
     readGestureGroupInterface(): GestureGroupInterface {
-        throw new Error("Interface with functions is not supported")
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return GestureGroupInterfaceInternal.fromPtr(ptr)
     }
     readRotationGestureInterface(): RotationGestureInterface {
-        throw new Error("Interface with functions is not supported")
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return RotationGestureInterfaceInternal.fromPtr(ptr)
     }
     readSwipeGestureInterface(): SwipeGestureInterface {
-        throw new Error("Interface with functions is not supported")
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return SwipeGestureInterfaceInternal.fromPtr(ptr)
     }
     readPinchGestureInterface(): PinchGestureInterface {
-        throw new Error("Interface with functions is not supported")
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return PinchGestureInterfaceInternal.fromPtr(ptr)
     }
     readPanGestureInterface(): PanGestureInterface {
-        throw new Error("Interface with functions is not supported")
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return PanGestureInterfaceInternal.fromPtr(ptr)
     }
     readLongPressGestureInterface(): LongPressGestureInterface {
-        throw new Error("Interface with functions is not supported")
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LongPressGestureInterfaceInternal.fromPtr(ptr)
     }
     readTapGestureInterface(): TapGestureInterface {
-        throw new Error("Interface with functions is not supported")
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return TapGestureInterfaceInternal.fromPtr(ptr)
     }
     readRotateOptions(): RotateOptions {
         let valueDeserializer : Deserializer = this
@@ -3245,7 +3385,7 @@ export class Deserializer extends DeserializerBase {
             throw new Error("One of the branches for angle_buf has to be chosen through deserialisation.")
         }
         const angle_result : number | string = (angle_buf as number | string)
-        let value : RotateOptions = ({x: x_result,y: y_result,z: z_result,centerX: centerX_result,centerY: centerY_result,centerZ: centerZ_result,perspective: perspective_result,angle: angle_result} as RotateOptions)
+        let value : RotateOptions = ({x: x_result, y: y_result, z: z_result, centerX: centerX_result, centerY: centerY_result, centerZ: centerZ_result, perspective: perspective_result, angle: angle_result} as RotateOptions)
         return value
     }
     readScaleOptions(): ScaleOptions {
@@ -3307,7 +3447,7 @@ export class Deserializer extends DeserializerBase {
             centerY_buf = (centerY_buf_ as number | string)
         }
         const centerY_result : number | string | undefined = centerY_buf
-        let value : ScaleOptions = ({x: x_result,y: y_result,z: z_result,centerX: centerX_result,centerY: centerY_result} as ScaleOptions)
+        let value : ScaleOptions = ({x: x_result, y: y_result, z: z_result, centerX: centerX_result, centerY: centerY_result} as ScaleOptions)
         return value
     }
     readTranslateOptions(): TranslateOptions {
@@ -3366,7 +3506,7 @@ export class Deserializer extends DeserializerBase {
             z_buf = (z_buf_ as number | string)
         }
         const z_result : number | string | undefined = z_buf
-        let value : TranslateOptions = ({x: x_result,y: y_result,z: z_result} as TranslateOptions)
+        let value : TranslateOptions = ({x: x_result, y: y_result, z: z_result} as TranslateOptions)
         return value
     }
     readLinearGradient_common(): LinearGradient_common {
@@ -3397,7 +3537,7 @@ export class Deserializer extends DeserializerBase {
         }
         const direction_result : GradientDirection | undefined = direction_buf
         const colors_buf_length : int32 = valueDeserializer.readInt32()
-        let colors_buf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>()
+        let colors_buf : Array<[ ResourceColor, number ]> = new Array<[ ResourceColor, number ]>(colors_buf_length)
         for (let colors_buf_i = 0; colors_buf_i < colors_buf_length; colors_buf_i++) {
             const colors_buf_buf_value0_buf_selector : int32 = valueDeserializer.readInt8()
             let colors_buf_buf_value0_buf : Color | number | string | Resource | undefined
@@ -3428,7 +3568,7 @@ export class Deserializer extends DeserializerBase {
             repeating_buf = valueDeserializer.readBoolean()
         }
         const repeating_result : boolean | undefined = repeating_buf
-        let value : LinearGradient_common = ({angle: angle_result,direction: direction_result,colors: colors_result,repeating: repeating_result} as LinearGradient_common)
+        let value : LinearGradient_common = ({angle: angle_result, direction: direction_result, colors: colors_result, repeating: repeating_result} as LinearGradient_common)
         return value
     }
     readDrawingCanvas(): DrawingCanvas {
@@ -3440,7 +3580,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const width_result : number = (valueDeserializer.readNumber() as number)
         const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : Size = ({width: width_result,height: height_result} as Size)
+        let value : Size = ({width: width_result, height: height_result} as Size)
         return value
     }
     readFrameNode(): FrameNode {
@@ -3558,7 +3698,7 @@ export class Deserializer extends DeserializerBase {
         }
         const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
         const action_result : VoidCallback = valueDeserializer.readVoidCallback()
-        let value : AlertDialogButtonBaseOptions = ({enabled: enabled_result,defaultFocus: defaultFocus_result,style: style_result,value: value_result,fontColor: fontColor_result,backgroundColor: backgroundColor_result,action: action_result} as AlertDialogButtonBaseOptions)
+        let value : AlertDialogButtonBaseOptions = ({enabled: enabled_result, defaultFocus: defaultFocus_result, style: style_result, value: value_result, fontColor: fontColor_result, backgroundColor: backgroundColor_result, action: action_result} as AlertDialogButtonBaseOptions)
         return value
     }
     readActionSheetOffset(): ActionSheetOffset {
@@ -3593,7 +3733,7 @@ export class Deserializer extends DeserializerBase {
             throw new Error("One of the branches for dy_buf has to be chosen through deserialisation.")
         }
         const dy_result : number | string | Resource = (dy_buf as number | string | Resource)
-        let value : ActionSheetOffset = ({dx: dx_result,dy: dy_result} as ActionSheetOffset)
+        let value : ActionSheetOffset = ({dx: dx_result, dy: dy_result} as ActionSheetOffset)
         return value
     }
     readActionSheetButtonOptions(): ActionSheetButtonOptions {
@@ -3632,7 +3772,7 @@ export class Deserializer extends DeserializerBase {
         }
         const value_result : string | Resource = (value_buf as string | Resource)
         const action_result : VoidCallback = valueDeserializer.readVoidCallback()
-        let value : ActionSheetButtonOptions = ({enabled: enabled_result,defaultFocus: defaultFocus_result,style: style_result,value: value_result,action: action_result} as ActionSheetButtonOptions)
+        let value : ActionSheetButtonOptions = ({enabled: enabled_result, defaultFocus: defaultFocus_result, style: style_result, value: value_result, action: action_result} as ActionSheetButtonOptions)
         return value
     }
     readCallback_Extender_OnFinish(isSync: boolean = false): Callback_Extender_OnFinish {
@@ -3745,7 +3885,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (entities_buf_runtimeType))
         {
             const entities_buf__length : int32 = valueDeserializer.readInt32()
-            let entities_buf_ : Array<string> = new Array<string>()
+            let entities_buf_ : Array<string> = new Array<string>(entities_buf__length)
             for (let entities_buf__i = 0; entities_buf__i < entities_buf__length; entities_buf__i++) {
                 entities_buf_[entities_buf__i] = (valueDeserializer.readString() as string)
             }
@@ -3759,7 +3899,7 @@ export class Deserializer extends DeserializerBase {
             moduleName_buf = (valueDeserializer.readString() as string)
         }
         const moduleName_result : string | undefined = moduleName_buf
-        let value : Want = ({bundleName: bundleName_result,abilityName: abilityName_result,deviceId: deviceId_result,uri: uri_result,type: type_result,flags: flags_result,action: action_result,parameters: parameters_result,entities: entities_result,moduleName: moduleName_result} as Want)
+        let value : Want = ({bundleName: bundleName_result, abilityName: abilityName_result, deviceId: deviceId_result, uri: uri_result, type: type_result, flags: flags_result, action: action_result, parameters: parameters_result, entities: entities_result, moduleName: moduleName_result} as Want)
         return value
     }
     readStyledString(): StyledString {
@@ -3791,7 +3931,7 @@ export class Deserializer extends DeserializerBase {
         }
         const isInteractive_result : boolean | undefined = isInteractive_buf
         const transition_result : ((transitionProxy: NavigationTransitionProxy) => void) = valueDeserializer.readCallback_NavigationTransitionProxy_Void()
-        let value : NavigationAnimatedTransition = ({onTransitionEnd: onTransitionEnd_result,timeout: timeout_result,isInteractive: isInteractive_result,transition: transition_result} as NavigationAnimatedTransition)
+        let value : NavigationAnimatedTransition = ({onTransitionEnd: onTransitionEnd_result, timeout: timeout_result, isInteractive: isInteractive_result, transition: transition_result} as NavigationAnimatedTransition)
         return value
     }
     readOnLinearIndicatorChangeCallback(isSync: boolean = false): OnLinearIndicatorChangeCallback {
@@ -3836,17 +3976,17 @@ export class Deserializer extends DeserializerBase {
         let trackBackgroundColor_buf : ColorMetrics | undefined
         if ((RuntimeType.UNDEFINED) != (trackBackgroundColor_buf_runtimeType))
         {
-            trackBackgroundColor_buf = valueDeserializer.readColorMetrics()
+            trackBackgroundColor_buf = (valueDeserializer.readColorMetrics() as ColorMetrics)
         }
         const trackBackgroundColor_result : ColorMetrics | undefined = trackBackgroundColor_buf
         const trackColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let trackColor_buf : ColorMetrics | undefined
         if ((RuntimeType.UNDEFINED) != (trackColor_buf_runtimeType))
         {
-            trackColor_buf = valueDeserializer.readColorMetrics()
+            trackColor_buf = (valueDeserializer.readColorMetrics() as ColorMetrics)
         }
         const trackColor_result : ColorMetrics | undefined = trackColor_buf
-        let value : LinearIndicatorStyle = ({space: space_result,strokeWidth: strokeWidth_result,strokeRadius: strokeRadius_result,trackBackgroundColor: trackBackgroundColor_result,trackColor: trackColor_result} as LinearIndicatorStyle)
+        let value : LinearIndicatorStyle = ({space: space_result, strokeWidth: strokeWidth_result, strokeRadius: strokeRadius_result, trackBackgroundColor: trackBackgroundColor_result, trackColor: trackColor_result} as LinearIndicatorStyle)
         return value
     }
     readLinearIndicatorStartOptions(): LinearIndicatorStartOptions {
@@ -3865,7 +4005,7 @@ export class Deserializer extends DeserializerBase {
             duration_buf = (valueDeserializer.readNumber() as number)
         }
         const duration_result : number | undefined = duration_buf
-        let value : LinearIndicatorStartOptions = ({interval: interval_result,duration: duration_result} as LinearIndicatorStartOptions)
+        let value : LinearIndicatorStartOptions = ({interval: interval_result, duration: duration_result} as LinearIndicatorStartOptions)
         return value
     }
     readCustomSpanDrawInfo(): CustomSpanDrawInfo {
@@ -3874,7 +4014,7 @@ export class Deserializer extends DeserializerBase {
         const lineTop_result : number = (valueDeserializer.readNumber() as number)
         const lineBottom_result : number = (valueDeserializer.readNumber() as number)
         const baseline_result : number = (valueDeserializer.readNumber() as number)
-        let value : CustomSpanDrawInfo = ({x: x_result,lineTop: lineTop_result,lineBottom: lineBottom_result,baseline: baseline_result} as CustomSpanDrawInfo)
+        let value : CustomSpanDrawInfo = ({x: x_result, lineTop: lineTop_result, lineBottom: lineBottom_result, baseline: baseline_result} as CustomSpanDrawInfo)
         return value
     }
     readDrawContext(): DrawContext {
@@ -3893,7 +4033,7 @@ export class Deserializer extends DeserializerBase {
             height_buf = (valueDeserializer.readNumber() as number)
         }
         const height_result : number | undefined = height_buf
-        let value : CustomSpanMetrics = ({width: width_result,height: height_result} as CustomSpanMetrics)
+        let value : CustomSpanMetrics = ({width: width_result, height: height_result} as CustomSpanMetrics)
         return value
     }
     readCustomSpanMeasureInfo(): CustomSpanMeasureInfo {
@@ -3907,94 +4047,53 @@ export class Deserializer extends DeserializerBase {
         const start_result : number = (valueDeserializer.readNumber() as number)
         const length_result : number = (valueDeserializer.readNumber() as number)
         const styledKey_result : StyledStringKey = (valueDeserializer.readInt32() as StyledStringKey)
-        const styledValue_result : StyledStringValue = valueDeserializer.readStyledStringValue()
-        let value : SpanStyle = ({start: start_result,length: length_result,styledKey: styledKey_result,styledValue: styledValue_result} as SpanStyle)
-        return value
-    }
-    readTextBackgroundStyle(): TextBackgroundStyle {
-        let valueDeserializer : Deserializer = this
-        const color_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let color_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
-        {
-            const color_buf__selector : int32 = valueDeserializer.readInt8()
-            let color_buf_ : Color | number | string | Resource | undefined
-            if (color_buf__selector == 0) {
-                color_buf_ = (valueDeserializer.readInt32() as Color)
-            }
-            else if (color_buf__selector == 1) {
-                color_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (color_buf__selector == 2) {
-                color_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (color_buf__selector == 3) {
-                color_buf_ = valueDeserializer.readResource()
-            }
-            else {
-                throw new Error("One of the branches for color_buf_ has to be chosen through deserialisation.")
-            }
-            color_buf = (color_buf_ as Color | number | string | Resource)
+        const styledValue_buf_selector : int32 = valueDeserializer.readInt8()
+        let styledValue_buf : TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        if (styledValue_buf_selector == 0) {
+            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle_styled_string)
         }
-        const color_result : ResourceColor | undefined = color_buf
-        const radius_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let radius_buf : Dimension | BorderRadiuses | undefined
-        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
-        {
-            const radius_buf__selector : int32 = valueDeserializer.readInt8()
-            let radius_buf_ : Dimension | BorderRadiuses | undefined
-            if (radius_buf__selector == 0) {
-                radius_buf_ = (valueDeserializer.readLength() as Dimension)
-            }
-            else if (radius_buf__selector == 1) {
-                const radius_buf__u_topLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let radius_buf__u_topLeft_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (radius_buf__u_topLeft_buf_runtimeType))
-                {
-                    radius_buf__u_topLeft_buf = (valueDeserializer.readLength() as Length)
-                }
-                const radius_buf__u_topLeft : undefined | Length = radius_buf__u_topLeft_buf
-                const radius_buf__u_topRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let radius_buf__u_topRight_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (radius_buf__u_topRight_buf_runtimeType))
-                {
-                    radius_buf__u_topRight_buf = (valueDeserializer.readLength() as Length)
-                }
-                const radius_buf__u_topRight : undefined | Length = radius_buf__u_topRight_buf
-                const radius_buf__u_bottomLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let radius_buf__u_bottomLeft_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (radius_buf__u_bottomLeft_buf_runtimeType))
-                {
-                    radius_buf__u_bottomLeft_buf = (valueDeserializer.readLength() as Length)
-                }
-                const radius_buf__u_bottomLeft : undefined | Length = radius_buf__u_bottomLeft_buf
-                const radius_buf__u_bottomRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-                let radius_buf__u_bottomRight_buf : Length | undefined
-                if ((RuntimeType.UNDEFINED) != (radius_buf__u_bottomRight_buf_runtimeType))
-                {
-                    radius_buf__u_bottomRight_buf = (valueDeserializer.readLength() as Length)
-                }
-                const radius_buf__u_bottomRight : undefined | Length = radius_buf__u_bottomRight_buf
-                radius_buf_ = ({topLeft: radius_buf__u_topLeft, topRight: radius_buf__u_topRight, bottomLeft: radius_buf__u_bottomLeft, bottomRight: radius_buf__u_bottomRight} as BorderRadiuses)
-            }
-            else {
-                throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
-            }
-            radius_buf = (radius_buf_ as Dimension | BorderRadiuses)
+        else if (styledValue_buf_selector == 1) {
+            styledValue_buf = (valueDeserializer.readDecorationStyle() as DecorationStyle)
         }
-        const radius_result : Dimension | BorderRadiuses | undefined = radius_buf
-        let value : TextBackgroundStyle = ({color: color_result,radius: radius_result} as TextBackgroundStyle)
+        else if (styledValue_buf_selector == 2) {
+            styledValue_buf = (valueDeserializer.readBaselineOffsetStyle() as BaselineOffsetStyle)
+        }
+        else if (styledValue_buf_selector == 3) {
+            styledValue_buf = (valueDeserializer.readLetterSpacingStyle() as LetterSpacingStyle)
+        }
+        else if (styledValue_buf_selector == 4) {
+            styledValue_buf = (valueDeserializer.readTextShadowStyle() as TextShadowStyle)
+        }
+        else if (styledValue_buf_selector == 5) {
+            styledValue_buf = (valueDeserializer.readGestureStyle() as GestureStyle)
+        }
+        else if (styledValue_buf_selector == 6) {
+            styledValue_buf = (valueDeserializer.readImageAttachment() as ImageAttachment)
+        }
+        else if (styledValue_buf_selector == 7) {
+            styledValue_buf = (valueDeserializer.readParagraphStyle() as ParagraphStyle)
+        }
+        else if (styledValue_buf_selector == 8) {
+            styledValue_buf = (valueDeserializer.readLineHeightStyle() as LineHeightStyle)
+        }
+        else if (styledValue_buf_selector == 9) {
+            styledValue_buf = (valueDeserializer.readUrlStyle() as UrlStyle)
+        }
+        else if (styledValue_buf_selector == 10) {
+            styledValue_buf = (valueDeserializer.readCustomSpan() as CustomSpan)
+        }
+        else if (styledValue_buf_selector == 11) {
+            styledValue_buf = valueDeserializer.readUserDataSpan()
+        }
+        else if (styledValue_buf_selector == 12) {
+            styledValue_buf = (valueDeserializer.readBackgroundColorStyle() as BackgroundColorStyle)
+        }
+        else {
+            throw new Error("One of the branches for styledValue_buf has to be chosen through deserialisation.")
+        }
+        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        let value : SpanStyle = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as SpanStyle)
         return value
-    }
-    readCustomSpan(): CustomSpan {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return CustomSpanInternal.fromPtr(ptr)
-    }
-    readImageAttachment(): ImageAttachment {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ImageAttachmentInternal.fromPtr(ptr)
     }
     readCallback_UIExtensionProxy_Void(isSync: boolean = false): ((parameter: UIExtensionProxy) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -4100,7 +4199,7 @@ export class Deserializer extends DeserializerBase {
             margin_buf = (margin_buf_ as Margin | Dimension)
         }
         const margin_result : Margin | Dimension | undefined = margin_buf
-        let value : SectionOptions = ({itemsCount: itemsCount_result,crossCount: crossCount_result,onGetItemMainSizeByIndex: onGetItemMainSizeByIndex_result,columnsGap: columnsGap_result,rowsGap: rowsGap_result,margin: margin_result} as SectionOptions)
+        let value : SectionOptions = ({itemsCount: itemsCount_result, crossCount: crossCount_result, onGetItemMainSizeByIndex: onGetItemMainSizeByIndex_result, columnsGap: columnsGap_result, rowsGap: rowsGap_result, margin: margin_result} as SectionOptions)
         return value
     }
     readRRect(): RRect {
@@ -4110,7 +4209,7 @@ export class Deserializer extends DeserializerBase {
         const width_result : number = (valueDeserializer.readNumber() as number)
         const height_result : number = (valueDeserializer.readNumber() as number)
         const radius_result : number = (valueDeserializer.readNumber() as number)
-        let value : RRect = ({left: left_result,top: top_result,width: width_result,height: height_result,radius: radius_result} as RRect)
+        let value : RRect = ({left: left_result, top: top_result, width: width_result, height: height_result, radius: radius_result} as RRect)
         return value
     }
     readDividerStyle(): DividerStyle {
@@ -4154,7 +4253,7 @@ export class Deserializer extends DeserializerBase {
             endMargin_buf = (valueDeserializer.readLength() as Length)
         }
         const endMargin_result : Length | undefined = endMargin_buf
-        let value : DividerStyle = ({strokeWidth: strokeWidth_result,color: color_result,startMargin: startMargin_result,endMargin: endMargin_result} as DividerStyle)
+        let value : DividerStyle = ({strokeWidth: strokeWidth_result, color: color_result, startMargin: startMargin_result, endMargin: endMargin_result} as DividerStyle)
         return value
     }
     readButtonIconOptions(): ButtonIconOptions {
@@ -4210,7 +4309,7 @@ export class Deserializer extends DeserializerBase {
             switching_buf = (switching_buf_ as string | PixelMap | Resource)
         }
         const switching_result : string | PixelMap | Resource | undefined = switching_buf
-        let value : ButtonIconOptions = ({shown: shown_result,hidden: hidden_result,switching: switching_result} as ButtonIconOptions)
+        let value : ButtonIconOptions = ({shown: shown_result, hidden: hidden_result, switching: switching_result} as ButtonIconOptions)
         return value
     }
     readImageAIOptions(): ImageAIOptions {
@@ -4220,7 +4319,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (types_buf_runtimeType))
         {
             const types_buf__length : int32 = valueDeserializer.readInt32()
-            let types_buf_ : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>()
+            let types_buf_ : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(types_buf__length)
             for (let types_buf__i = 0; types_buf__i < types_buf__length; types_buf__i++) {
                 types_buf_[types_buf__i] = (valueDeserializer.readInt32() as ImageAnalyzerType)
             }
@@ -4234,7 +4333,7 @@ export class Deserializer extends DeserializerBase {
             aiController_buf = (valueDeserializer.readImageAnalyzerController() as ImageAnalyzerController)
         }
         const aiController_result : ImageAnalyzerController | undefined = aiController_buf
-        let value : ImageAIOptions = ({types: types_result,aiController: aiController_result} as ImageAIOptions)
+        let value : ImageAIOptions = ({types: types_result, aiController: aiController_result} as ImageAIOptions)
         return value
     }
     readXComponentController(): XComponentController {
@@ -4245,7 +4344,7 @@ export class Deserializer extends DeserializerBase {
     readImageAnalyzerConfig(): ImageAnalyzerConfig {
         let valueDeserializer : Deserializer = this
         const types_buf_length : int32 = valueDeserializer.readInt32()
-        let types_buf : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>()
+        let types_buf : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(types_buf_length)
         for (let types_buf_i = 0; types_buf_i < types_buf_length; types_buf_i++) {
             types_buf[types_buf_i] = (valueDeserializer.readInt32() as ImageAnalyzerType)
         }
@@ -4271,7 +4370,7 @@ export class Deserializer extends DeserializerBase {
         const offsetY_result : number | undefined = offsetY_buf
         const surfaceWidth_result : number = (valueDeserializer.readNumber() as number)
         const surfaceHeight_result : number = (valueDeserializer.readNumber() as number)
-        let value : SurfaceRect = ({offsetX: offsetX_result,offsetY: offsetY_result,surfaceWidth: surfaceWidth_result,surfaceHeight: surfaceHeight_result} as SurfaceRect)
+        let value : SurfaceRect = ({offsetX: offsetX_result, offsetY: offsetY_result, surfaceWidth: surfaceWidth_result, surfaceHeight: surfaceHeight_result} as SurfaceRect)
         return value
     }
     readSurfaceRotationOptions(): SurfaceRotationOptions {
@@ -4322,7 +4421,7 @@ export class Deserializer extends DeserializerBase {
             menuType_buf = (valueDeserializer.readInt32() as MenuType)
         }
         const menuType_result : MenuType | undefined = menuType_buf
-        let value : SelectionMenuOptionsExt = ({onAppear: onAppear_result,onDisappear: onDisappear_result,preview: preview_result,menuType: menuType_result} as SelectionMenuOptionsExt)
+        let value : SelectionMenuOptionsExt = ({onAppear: onAppear_result, onDisappear: onDisappear_result, preview: preview_result, menuType: menuType_result} as SelectionMenuOptionsExt)
         return value
     }
     readWebKeyboardController(): WebKeyboardController {
@@ -4428,7 +4527,7 @@ export class Deserializer extends DeserializerBase {
             params_buf = params_buf_
         }
         const params_result : Map<string, string> | undefined = params_buf
-        let value : NativeEmbedInfo = ({id: id_result,type: type_result,src: src_result,position: position_result,width: width_result,height: height_result,url: url_result,tag: tag_result,params: params_result} as NativeEmbedInfo)
+        let value : NativeEmbedInfo = ({id: id_result, type: type_result, src: src_result, position: position_result, width: width_result, height: height_result, url: url_result, tag: tag_result, params: params_result} as NativeEmbedInfo)
         return value
     }
     readNestedScrollOptionsExt(): NestedScrollOptionsExt {
@@ -4461,14 +4560,14 @@ export class Deserializer extends DeserializerBase {
             scrollLeft_buf = (valueDeserializer.readInt32() as NestedScrollMode)
         }
         const scrollLeft_result : NestedScrollMode | undefined = scrollLeft_buf
-        let value : NestedScrollOptionsExt = ({scrollUp: scrollUp_result,scrollDown: scrollDown_result,scrollRight: scrollRight_result,scrollLeft: scrollLeft_result} as NestedScrollOptionsExt)
+        let value : NestedScrollOptionsExt = ({scrollUp: scrollUp_result, scrollDown: scrollDown_result, scrollRight: scrollRight_result, scrollLeft: scrollLeft_result} as NestedScrollOptionsExt)
         return value
     }
     readNestedScrollOptions(): NestedScrollOptions {
         let valueDeserializer : Deserializer = this
         const scrollForward_result : NestedScrollMode = (valueDeserializer.readInt32() as NestedScrollMode)
         const scrollBackward_result : NestedScrollMode = (valueDeserializer.readInt32() as NestedScrollMode)
-        let value : NestedScrollOptions = ({scrollForward: scrollForward_result,scrollBackward: scrollBackward_result} as NestedScrollOptions)
+        let value : NestedScrollOptions = ({scrollForward: scrollForward_result, scrollBackward: scrollBackward_result} as NestedScrollOptions)
         return value
     }
     readDataResubmissionHandler(): DataResubmissionHandler {
@@ -4772,7 +4871,7 @@ export class Deserializer extends DeserializerBase {
             hoverModeArea_buf = (valueDeserializer.readInt32() as HoverModeAreaType)
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
-        let value : TimePickerDialogOptions = ({selected: selected_result,format: format_result,useMilitaryTime: useMilitaryTime_result,disappearTextStyle: disappearTextStyle_result,textStyle: textStyle_result,acceptButtonStyle: acceptButtonStyle_result,cancelButtonStyle: cancelButtonStyle_result,selectedTextStyle: selectedTextStyle_result,maskRect: maskRect_result,alignment: alignment_result,offset: offset_result,onAccept: onAccept_result,onCancel: onCancel_result,onChange: onChange_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,onDidAppear: onDidAppear_result,onDidDisappear: onDidDisappear_result,onWillAppear: onWillAppear_result,onWillDisappear: onWillDisappear_result,shadow: shadow_result,dateTimeOptions: dateTimeOptions_result,enableHoverMode: enableHoverMode_result,hoverModeArea: hoverModeArea_result} as TimePickerDialogOptions)
+        let value : TimePickerDialogOptions = ({selected: selected_result, format: format_result, useMilitaryTime: useMilitaryTime_result, disappearTextStyle: disappearTextStyle_result, textStyle: textStyle_result, acceptButtonStyle: acceptButtonStyle_result, cancelButtonStyle: cancelButtonStyle_result, selectedTextStyle: selectedTextStyle_result, maskRect: maskRect_result, alignment: alignment_result, offset: offset_result, onAccept: onAccept_result, onCancel: onCancel_result, onChange: onChange_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, shadow: shadow_result, dateTimeOptions: dateTimeOptions_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result} as TimePickerDialogOptions)
         return value
     }
     readTextTimerController(): TextTimerController {
@@ -4786,7 +4885,7 @@ export class Deserializer extends DeserializerBase {
         let range_buf : Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> | undefined
         if (range_buf_selector == 0) {
             const range_buf_u_length : int32 = valueDeserializer.readInt32()
-            let range_buf_u : Array<string> = new Array<string>()
+            let range_buf_u : Array<string> = new Array<string>(range_buf_u_length)
             for (let range_buf_u_i = 0; range_buf_u_i < range_buf_u_length; range_buf_u_i++) {
                 range_buf_u[range_buf_u_i] = (valueDeserializer.readString() as string)
             }
@@ -4794,10 +4893,10 @@ export class Deserializer extends DeserializerBase {
         }
         else if (range_buf_selector == 1) {
             const range_buf_u_length : int32 = valueDeserializer.readInt32()
-            let range_buf_u : Array<Array<string>> = new Array<Array<string>>()
+            let range_buf_u : Array<Array<string>> = new Array<Array<string>>(range_buf_u_length)
             for (let range_buf_u_i = 0; range_buf_u_i < range_buf_u_length; range_buf_u_i++) {
                 const range_buf_u_buf_length : int32 = valueDeserializer.readInt32()
-                let range_buf_u_buf : Array<string> = new Array<string>()
+                let range_buf_u_buf : Array<string> = new Array<string>(range_buf_u_buf_length)
                 for (let range_buf_u_buf_i = 0; range_buf_u_buf_i < range_buf_u_buf_length; range_buf_u_buf_i++) {
                     range_buf_u_buf[range_buf_u_buf_i] = (valueDeserializer.readString() as string)
                 }
@@ -4810,7 +4909,7 @@ export class Deserializer extends DeserializerBase {
         }
         else if (range_buf_selector == 3) {
             const range_buf_u_length : int32 = valueDeserializer.readInt32()
-            let range_buf_u : Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>()
+            let range_buf_u : Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>(range_buf_u_length)
             for (let range_buf_u_i = 0; range_buf_u_i < range_buf_u_length; range_buf_u_i++) {
                 range_buf_u[range_buf_u_i] = valueDeserializer.readTextPickerRangeContent()
             }
@@ -4818,7 +4917,7 @@ export class Deserializer extends DeserializerBase {
         }
         else if (range_buf_selector == 4) {
             const range_buf_u_length : int32 = valueDeserializer.readInt32()
-            let range_buf_u : Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>()
+            let range_buf_u : Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(range_buf_u_length)
             for (let range_buf_u_i = 0; range_buf_u_i < range_buf_u_length; range_buf_u_i++) {
                 range_buf_u[range_buf_u_i] = valueDeserializer.readTextCascadePickerRangeContent()
             }
@@ -4839,7 +4938,7 @@ export class Deserializer extends DeserializerBase {
             }
             else if (value_buf__selector == 1) {
                 const value_buf__u_length : int32 = valueDeserializer.readInt32()
-                let value_buf__u : Array<string> = new Array<string>()
+                let value_buf__u : Array<string> = new Array<string>(value_buf__u_length)
                 for (let value_buf__u_i = 0; value_buf__u_i < value_buf__u_length; value_buf__u_i++) {
                     value_buf__u[value_buf__u_i] = (valueDeserializer.readString() as string)
                 }
@@ -4862,7 +4961,7 @@ export class Deserializer extends DeserializerBase {
             }
             else if (selected_buf__selector == 1) {
                 const selected_buf__u_length : int32 = valueDeserializer.readInt32()
-                let selected_buf__u : Array<number> = new Array<number>()
+                let selected_buf__u : Array<number> = new Array<number>(selected_buf__u_length)
                 for (let selected_buf__u_i = 0; selected_buf__u_i < selected_buf__u_length; selected_buf__u_i++) {
                     selected_buf__u[selected_buf__u_i] = (valueDeserializer.readNumber() as number)
                 }
@@ -5069,7 +5168,7 @@ export class Deserializer extends DeserializerBase {
             hoverModeArea_buf = (valueDeserializer.readInt32() as HoverModeAreaType)
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
-        let value : TextPickerDialogOptions = ({range: range_result,value: value_result,selected: selected_result,defaultPickerItemHeight: defaultPickerItemHeight_result,canLoop: canLoop_result,disappearTextStyle: disappearTextStyle_result,textStyle: textStyle_result,acceptButtonStyle: acceptButtonStyle_result,cancelButtonStyle: cancelButtonStyle_result,selectedTextStyle: selectedTextStyle_result,onAccept: onAccept_result,onCancel: onCancel_result,onChange: onChange_result,maskRect: maskRect_result,alignment: alignment_result,offset: offset_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,onDidAppear: onDidAppear_result,onDidDisappear: onDidDisappear_result,onWillAppear: onWillAppear_result,onWillDisappear: onWillDisappear_result,shadow: shadow_result,enableHoverMode: enableHoverMode_result,hoverModeArea: hoverModeArea_result} as TextPickerDialogOptions)
+        let value : TextPickerDialogOptions = ({range: range_result, value: value_result, selected: selected_result, defaultPickerItemHeight: defaultPickerItemHeight_result, canLoop: canLoop_result, disappearTextStyle: disappearTextStyle_result, textStyle: textStyle_result, acceptButtonStyle: acceptButtonStyle_result, cancelButtonStyle: cancelButtonStyle_result, selectedTextStyle: selectedTextStyle_result, onAccept: onAccept_result, onCancel: onCancel_result, onChange: onChange_result, maskRect: maskRect_result, alignment: alignment_result, offset: offset_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, shadow: shadow_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result} as TextPickerDialogOptions)
         return value
     }
     readCallback_Union_String_Array_String_Void(isSync: boolean = false): ((value: string | Array<string>) => void) {
@@ -5177,7 +5276,7 @@ export class Deserializer extends DeserializerBase {
             endMargin_buf = (valueDeserializer.readLength() as Dimension)
         }
         const endMargin_result : Dimension | undefined = endMargin_buf
-        let value : DividerOptions = ({strokeWidth: strokeWidth_result,color: color_result,startMargin: startMargin_result,endMargin: endMargin_result} as DividerOptions)
+        let value : DividerOptions = ({strokeWidth: strokeWidth_result, color: color_result, startMargin: startMargin_result, endMargin: endMargin_result} as DividerOptions)
         return value
     }
     readCallback_ResourceStr_Void(isSync: boolean = false): ((value: ResourceStr) => void) {
@@ -5224,7 +5323,7 @@ export class Deserializer extends DeserializerBase {
             highlightBorder_buf = valueDeserializer.readBoolean()
         }
         const highlightBorder_result : boolean | undefined = highlightBorder_buf
-        let value : InputCounterOptions = ({thresholdPercentage: thresholdPercentage_result,highlightBorder: highlightBorder_result} as InputCounterOptions)
+        let value : InputCounterOptions = ({thresholdPercentage: thresholdPercentage_result, highlightBorder: highlightBorder_result} as InputCounterOptions)
         return value
     }
     readKeyboardOptions(): KeyboardOptions {
@@ -5337,7 +5436,7 @@ export class Deserializer extends DeserializerBase {
             disable_buf = (disable_buf_ as Color | number | string | Resource)
         }
         const disable_result : ResourceColor | undefined = disable_buf
-        let value : UnderlineColor = ({typing: typing_result,normal: normal_result,error: error_result,disable: disable_result} as UnderlineColor)
+        let value : UnderlineColor = ({typing: typing_result, normal: normal_result, error: error_result, disable: disable_result} as UnderlineColor)
         return value
     }
     readTextInputController(): TextInputController {
@@ -5373,7 +5472,7 @@ export class Deserializer extends DeserializerBase {
             end_buf = (valueDeserializer.readNumber() as number)
         }
         const end_result : number | undefined = end_buf
-        let value : TextRange = ({start: start_result,end: end_result} as TextRange)
+        let value : TextRange = ({start: start_result, end: end_result} as TextRange)
         return value
     }
     readTextMenuItem(): TextMenuItem {
@@ -5409,7 +5508,7 @@ export class Deserializer extends DeserializerBase {
         }
         const icon_result : ResourceStr | undefined = icon_buf
         const id_result : TextMenuItemId = (valueDeserializer.readTextMenuItemId() as TextMenuItemId)
-        let value : TextMenuItem = ({content: content_result,icon: icon_result,id: id_result} as TextMenuItem)
+        let value : TextMenuItem = ({content: content_result, icon: icon_result, id: id_result} as TextMenuItem)
         return value
     }
     readLineMetrics(): LineMetrics {
@@ -5422,7 +5521,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const position_result : number = (valueDeserializer.readNumber() as number)
         const affinity_result : Affinity = valueDeserializer.readAffinity()
-        let value : PositionWithAffinity = ({position: position_result,affinity: affinity_result} as PositionWithAffinity)
+        let value : PositionWithAffinity = ({position: position_result, affinity: affinity_result} as PositionWithAffinity)
         return value
     }
     readMutableStyledString(): MutableStyledString {
@@ -5434,7 +5533,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const offset_result : number = (valueDeserializer.readNumber() as number)
         const value_result : string = (valueDeserializer.readString() as string)
-        let value : PreviewText = ({offset: offset_result,value: value_result} as PreviewText)
+        let value : PreviewText = ({offset: offset_result, value: value_result} as PreviewText)
         return value
     }
     readLayoutManager(): LayoutManager {
@@ -5481,7 +5580,7 @@ export class Deserializer extends DeserializerBase {
             menuType_buf = (valueDeserializer.readInt32() as MenuType)
         }
         const menuType_result : MenuType | undefined = menuType_buf
-        let value : SelectionMenuOptions = ({onAppear: onAppear_result,onDisappear: onDisappear_result,menuType: menuType_result} as SelectionMenuOptions)
+        let value : SelectionMenuOptions = ({onAppear: onAppear_result, onDisappear: onDisappear_result, menuType: menuType_result} as SelectionMenuOptions)
         return value
     }
     readFontSettingOptions(): FontSettingOptions {
@@ -5545,7 +5644,7 @@ export class Deserializer extends DeserializerBase {
             text_buf = (text_buf_ as string | Resource)
         }
         const text_result : string | Resource | undefined = text_buf
-        let value : TabBarOptions = ({icon: icon_result,text: text_result} as TabBarOptions)
+        let value : TabBarOptions = ({icon: icon_result, text: text_result} as TabBarOptions)
         return value
     }
     readTabsAttribute(): TabsAttribute {
@@ -5612,7 +5711,7 @@ export class Deserializer extends DeserializerBase {
             inactiveColor_buf = (inactiveColor_buf_ as Color | number | string | Resource)
         }
         const inactiveColor_result : ResourceColor | undefined = inactiveColor_buf
-        let value : BackgroundBlurStyleOptions = ({colorMode: colorMode_result,adaptiveColor: adaptiveColor_result,scale: scale_result,blurOptions: blurOptions_result,policy: policy_result,inactiveColor: inactiveColor_result} as BackgroundBlurStyleOptions)
+        let value : BackgroundBlurStyleOptions = ({colorMode: colorMode_result, adaptiveColor: adaptiveColor_result, scale: scale_result, blurOptions: blurOptions_result, policy: policy_result, inactiveColor: inactiveColor_result} as BackgroundBlurStyleOptions)
         return value
     }
     readScrollableBarModeOptions(): ScrollableBarModeOptions {
@@ -5631,7 +5730,7 @@ export class Deserializer extends DeserializerBase {
             nonScrollableLayoutStyle_buf = (valueDeserializer.readInt32() as LayoutStyle)
         }
         const nonScrollableLayoutStyle_result : LayoutStyle | undefined = nonScrollableLayoutStyle_buf
-        let value : ScrollableBarModeOptions = ({margin: margin_result,nonScrollableLayoutStyle: nonScrollableLayoutStyle_result} as ScrollableBarModeOptions)
+        let value : ScrollableBarModeOptions = ({margin: margin_result, nonScrollableLayoutStyle: nonScrollableLayoutStyle_result} as ScrollableBarModeOptions)
         return value
     }
     readTabContentAnimatedTransition(): TabContentAnimatedTransition {
@@ -5644,7 +5743,7 @@ export class Deserializer extends DeserializerBase {
         }
         const timeout_result : number | undefined = timeout_buf
         const transition_result : ((parameter: TabContentTransitionProxy) => void) = valueDeserializer.readCallback_TabContentTransitionProxy_Void()
-        let value : TabContentAnimatedTransition = ({timeout: timeout_result,transition: transition_result} as TabContentAnimatedTransition)
+        let value : TabContentAnimatedTransition = ({timeout: timeout_result, transition: transition_result} as TabContentAnimatedTransition)
         return value
     }
     readTabsController(): TabsController {
@@ -5763,7 +5862,7 @@ export class Deserializer extends DeserializerBase {
             arrowColor_buf = (arrowColor_buf_ as Color | number | string | Resource)
         }
         const arrowColor_result : ResourceColor | undefined = arrowColor_buf
-        let value : ArrowStyle = ({showBackground: showBackground_result,isSidebarMiddle: isSidebarMiddle_result,backgroundSize: backgroundSize_result,backgroundColor: backgroundColor_result,arrowSize: arrowSize_result,arrowColor: arrowColor_result} as ArrowStyle)
+        let value : ArrowStyle = ({showBackground: showBackground_result, isSidebarMiddle: isSidebarMiddle_result, backgroundSize: backgroundSize_result, backgroundColor: backgroundColor_result, arrowSize: arrowSize_result, arrowColor: arrowColor_result} as ArrowStyle)
         return value
     }
     readCallback_SwiperContentTransitionProxy_Void(isSync: boolean = false): ((parameter: SwiperContentTransitionProxy) => void) {
@@ -5844,7 +5943,7 @@ export class Deserializer extends DeserializerBase {
             end_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
         }
         const end_result : LengthMetrics | undefined = end_buf
-        let value : LocalizedEdges = ({top: top_result,start: start_result,bottom: bottom_result,end: end_result} as LocalizedEdges)
+        let value : LocalizedEdges = ({top: top_result, start: start_result, bottom: bottom_result, end: end_result} as LocalizedEdges)
         return value
     }
     readEdges(): Edges {
@@ -5877,7 +5976,7 @@ export class Deserializer extends DeserializerBase {
             right_buf = (valueDeserializer.readLength() as Dimension)
         }
         const right_result : Dimension | undefined = right_buf
-        let value : Edges = ({top: top_result,left: left_result,bottom: bottom_result,right: right_result} as Edges)
+        let value : Edges = ({top: top_result, left: left_result, bottom: bottom_result, right: right_result} as Edges)
         return value
     }
     readSearchAttribute(): SearchAttribute {
@@ -5923,7 +6022,7 @@ export class Deserializer extends DeserializerBase {
             autoDisable_buf = valueDeserializer.readBoolean()
         }
         const autoDisable_result : boolean | undefined = autoDisable_buf
-        let value : SearchButtonOptions = ({fontSize: fontSize_result,fontColor: fontColor_result,autoDisable: autoDisable_result} as SearchButtonOptions)
+        let value : SearchButtonOptions = ({fontSize: fontSize_result, fontColor: fontColor_result, autoDisable: autoDisable_result} as SearchButtonOptions)
         return value
     }
     readCancelButtonSymbolOptions(): CancelButtonSymbolOptions {
@@ -5942,7 +6041,7 @@ export class Deserializer extends DeserializerBase {
             icon_buf = valueDeserializer.readSymbolGlyphModifier()
         }
         const icon_result : SymbolGlyphModifier | undefined = icon_buf
-        let value : CancelButtonSymbolOptions = ({style: style_result,icon: icon_result} as CancelButtonSymbolOptions)
+        let value : CancelButtonSymbolOptions = ({style: style_result, icon: icon_result} as CancelButtonSymbolOptions)
         return value
     }
     readCancelButtonOptions(): CancelButtonOptions {
@@ -5961,7 +6060,7 @@ export class Deserializer extends DeserializerBase {
             icon_buf = valueDeserializer.readIconOptions()
         }
         const icon_result : IconOptions | undefined = icon_buf
-        let value : CancelButtonOptions = ({style: style_result,icon: icon_result} as CancelButtonOptions)
+        let value : CancelButtonOptions = ({style: style_result, icon: icon_result} as CancelButtonOptions)
         return value
     }
     readSearchController(): SearchController {
@@ -5989,8 +6088,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(xOffset);
     _argsSerializer.writeNumber(yOffset);
-    _argsSerializer.writeInt32((scrollState.valueOf() as int32));
-    _argsSerializer.writeInt32((scrollSource.valueOf() as int32));
+    _argsSerializer.writeInt32(((scrollState as ScrollState) as int32));
+    _argsSerializer.writeInt32(((scrollSource as ScrollSource) as int32));
     let _continuationValue : OffsetResult | undefined;
     const _continuationCallback : ((value: OffsetResult) => void) = (value: OffsetResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
@@ -6004,7 +6103,7 @@ export class Deserializer extends DeserializerBase {
         const y_result : number = (valueDeserializer.readNumber() as number)
         const width_result : number = (valueDeserializer.readNumber() as number)
         const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : RectResult = ({x: x_result,y: y_result,width: width_result,height: height_result} as RectResult)
+        let value : RectResult = ({x: x_result, y: y_result, width: width_result, height: height_result} as RectResult)
         return value
     }
     readScrollToIndexOptions(): ScrollToIndexOptions {
@@ -6023,7 +6122,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const xOffset_result : number = (valueDeserializer.readNumber() as number)
         const yOffset_result : number = (valueDeserializer.readNumber() as number)
-        let value : OffsetResult = ({xOffset: xOffset_result,yOffset: yOffset_result} as OffsetResult)
+        let value : OffsetResult = ({xOffset: xOffset_result, yOffset: yOffset_result} as OffsetResult)
         return value
     }
     readScrollPageOptions(): ScrollPageOptions {
@@ -6036,7 +6135,7 @@ export class Deserializer extends DeserializerBase {
             animation_buf = valueDeserializer.readBoolean()
         }
         const animation_result : boolean | undefined = animation_buf
-        let value : ScrollPageOptions = ({next: next_result,animation: animation_result} as ScrollPageOptions)
+        let value : ScrollPageOptions = ({next: next_result, animation: animation_result} as ScrollPageOptions)
         return value
     }
     readScrollEdgeOptions(): ScrollEdgeOptions {
@@ -6095,7 +6194,7 @@ export class Deserializer extends DeserializerBase {
             animation_buf = (animation_buf_ as ScrollAnimationOptions | boolean)
         }
         const animation_result : ScrollAnimationOptions | boolean | undefined = animation_buf
-        let value : ScrollOptions = ({xOffset: xOffset_result,yOffset: yOffset_result,animation: animation_result} as ScrollOptions)
+        let value : ScrollOptions = ({xOffset: xOffset_result, yOffset: yOffset_result, animation: animation_result} as ScrollOptions)
         return value
     }
     readRichEditorStyledStringController(): RichEditorStyledStringController {
@@ -6144,7 +6243,7 @@ export class Deserializer extends DeserializerBase {
             fontColor_buf = (fontColor_buf_ as Color | number | string | Resource)
         }
         const fontColor_result : ResourceColor | undefined = fontColor_buf
-        let value : PlaceholderStyle = ({font: font_result,fontColor: fontColor_result} as PlaceholderStyle)
+        let value : PlaceholderStyle = ({font: font_result, fontColor: fontColor_result} as PlaceholderStyle)
         return value
     }
     readRichEditorImageSpanResult(): RichEditorImageSpanResult {
@@ -6179,7 +6278,7 @@ export class Deserializer extends DeserializerBase {
         const offsetInSpan_buf_value0 : number = (valueDeserializer.readNumber() as number)
         const offsetInSpan_buf_value1 : number = (valueDeserializer.readNumber() as number)
         const offsetInSpan_result : [ number, number ] = ([offsetInSpan_buf_value0, offsetInSpan_buf_value1] as [ number, number ])
-        let value : RichEditorImageSpanResult = ({spanPosition: spanPosition_result,valuePixelMap: valuePixelMap_result,valueResourceStr: valueResourceStr_result,imageStyle: imageStyle_result,offsetInSpan: offsetInSpan_result} as RichEditorImageSpanResult)
+        let value : RichEditorImageSpanResult = ({spanPosition: spanPosition_result, valuePixelMap: valuePixelMap_result, valueResourceStr: valueResourceStr_result, imageStyle: imageStyle_result, offsetInSpan: offsetInSpan_result} as RichEditorImageSpanResult)
         return value
     }
     readRichEditorTextSpanResult(): RichEditorTextSpanResult {
@@ -6218,7 +6317,7 @@ export class Deserializer extends DeserializerBase {
             previewText_buf = (valueDeserializer.readString() as string)
         }
         const previewText_result : string | undefined = previewText_buf
-        let value : RichEditorTextSpanResult = ({spanPosition: spanPosition_result,value: value_result,textStyle: textStyle_result,offsetInSpan: offsetInSpan_result,symbolSpanStyle: symbolSpanStyle_result,valueResource: valueResource_result,paragraphStyle: paragraphStyle_result,previewText: previewText_result} as RichEditorTextSpanResult)
+        let value : RichEditorTextSpanResult = ({spanPosition: spanPosition_result, value: value_result, textStyle: textStyle_result, offsetInSpan: offsetInSpan_result, symbolSpanStyle: symbolSpanStyle_result, valueResource: valueResource_result, paragraphStyle: paragraphStyle_result, previewText: previewText_result} as RichEditorTextSpanResult)
         return value
     }
     readStyledStringChangedListener(): StyledStringChangedListener {
@@ -6237,7 +6336,7 @@ export class Deserializer extends DeserializerBase {
             onDidChange_buf = valueDeserializer.readOnDidChangeCallback()
         }
         const onDidChange_result : OnDidChangeCallback | undefined = onDidChange_buf
-        let value : StyledStringChangedListener = ({onWillChange: onWillChange_result,onDidChange: onDidChange_result} as StyledStringChangedListener)
+        let value : StyledStringChangedListener = ({onWillChange: onWillChange_result, onDidChange: onDidChange_result} as StyledStringChangedListener)
         return value
     }
     readRichEditorRange(): RichEditorRange {
@@ -6256,7 +6355,7 @@ export class Deserializer extends DeserializerBase {
             end_buf = (valueDeserializer.readNumber() as number)
         }
         const end_result : number | undefined = end_buf
-        let value : RichEditorRange = ({start: start_result,end: end_result} as RichEditorRange)
+        let value : RichEditorRange = ({start: start_result, end: end_result} as RichEditorRange)
         return value
     }
     readRichEditorSelection(): RichEditorSelection {
@@ -6265,7 +6364,7 @@ export class Deserializer extends DeserializerBase {
         const selection_buf_value1 : number = (valueDeserializer.readNumber() as number)
         const selection_result : [ number, number ] = ([selection_buf_value0, selection_buf_value1] as [ number, number ])
         const spans_buf_length : int32 = valueDeserializer.readInt32()
-        let spans_buf : Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = new Array<RichEditorTextSpanResult | RichEditorImageSpanResult>()
+        let spans_buf : Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = new Array<RichEditorTextSpanResult | RichEditorImageSpanResult>(spans_buf_length)
         for (let spans_buf_i = 0; spans_buf_i < spans_buf_length; spans_buf_i++) {
             const spans_buf_buf_selector : int32 = valueDeserializer.readInt8()
             let spans_buf_buf : RichEditorTextSpanResult | RichEditorImageSpanResult | undefined
@@ -6281,7 +6380,7 @@ export class Deserializer extends DeserializerBase {
             spans_buf[spans_buf_i] = (spans_buf_buf as RichEditorTextSpanResult | RichEditorImageSpanResult)
         }
         const spans_result : Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = spans_buf
-        let value : RichEditorSelection = ({selection: selection_result,spans: spans_result} as RichEditorSelection)
+        let value : RichEditorSelection = ({selection: selection_result, spans: spans_result} as RichEditorSelection)
         return value
     }
     readRichEditorParagraphStyleOptions(): RichEditorParagraphStyleOptions {
@@ -6301,7 +6400,7 @@ export class Deserializer extends DeserializerBase {
         }
         const end_result : number | undefined = end_buf
         const style_result : RichEditorParagraphStyle = valueDeserializer.readRichEditorParagraphStyle()
-        let value : RichEditorParagraphStyleOptions = ({start: start_result,end: end_result,style: style_result} as RichEditorParagraphStyleOptions)
+        let value : RichEditorParagraphStyleOptions = ({start: start_result, end: end_result, style: style_result} as RichEditorParagraphStyleOptions)
         return value
     }
     readRichEditorUpdateSymbolSpanStyleOptions(): RichEditorUpdateSymbolSpanStyleOptions {
@@ -6321,7 +6420,7 @@ export class Deserializer extends DeserializerBase {
         }
         const end_result : number | undefined = end_buf
         const symbolStyle_result : RichEditorSymbolSpanStyle = valueDeserializer.readRichEditorSymbolSpanStyle()
-        let value : RichEditorUpdateSymbolSpanStyleOptions = ({start: start_result,end: end_result,symbolStyle: symbolStyle_result} as RichEditorUpdateSymbolSpanStyleOptions)
+        let value : RichEditorUpdateSymbolSpanStyleOptions = ({start: start_result, end: end_result, symbolStyle: symbolStyle_result} as RichEditorUpdateSymbolSpanStyleOptions)
         return value
     }
     readRichEditorUpdateImageSpanStyleOptions(): RichEditorUpdateImageSpanStyleOptions {
@@ -6341,7 +6440,7 @@ export class Deserializer extends DeserializerBase {
         }
         const end_result : number | undefined = end_buf
         const imageStyle_result : RichEditorImageSpanStyle = valueDeserializer.readRichEditorImageSpanStyle()
-        let value : RichEditorUpdateImageSpanStyleOptions = ({start: start_result,end: end_result,imageStyle: imageStyle_result} as RichEditorUpdateImageSpanStyleOptions)
+        let value : RichEditorUpdateImageSpanStyleOptions = ({start: start_result, end: end_result, imageStyle: imageStyle_result} as RichEditorUpdateImageSpanStyleOptions)
         return value
     }
     readRichEditorUpdateTextSpanStyleOptions(): RichEditorUpdateTextSpanStyleOptions {
@@ -6361,7 +6460,7 @@ export class Deserializer extends DeserializerBase {
         }
         const end_result : number | undefined = end_buf
         const textStyle_result : RichEditorTextStyle = valueDeserializer.readRichEditorTextStyle()
-        let value : RichEditorUpdateTextSpanStyleOptions = ({start: start_result,end: end_result,textStyle: textStyle_result} as RichEditorUpdateTextSpanStyleOptions)
+        let value : RichEditorUpdateTextSpanStyleOptions = ({start: start_result, end: end_result, textStyle: textStyle_result} as RichEditorUpdateTextSpanStyleOptions)
         return value
     }
     readRichEditorSymbolSpanOptions(): RichEditorSymbolSpanOptions {
@@ -6380,7 +6479,7 @@ export class Deserializer extends DeserializerBase {
             style_buf = valueDeserializer.readRichEditorSymbolSpanStyle()
         }
         const style_result : RichEditorSymbolSpanStyle | undefined = style_buf
-        let value : RichEditorSymbolSpanOptions = ({offset: offset_result,style: style_result} as RichEditorSymbolSpanOptions)
+        let value : RichEditorSymbolSpanOptions = ({offset: offset_result, style: style_result} as RichEditorSymbolSpanOptions)
         return value
     }
     readRichEditorBuilderSpanOptions(): RichEditorBuilderSpanOptions {
@@ -6418,7 +6517,7 @@ export class Deserializer extends DeserializerBase {
             gesture_buf = valueDeserializer.readRichEditorGesture()
         }
         const gesture_result : RichEditorGesture | undefined = gesture_buf
-        let value : RichEditorImageSpanOptions = ({offset: offset_result,imageStyle: imageStyle_result,gesture: gesture_result} as RichEditorImageSpanOptions)
+        let value : RichEditorImageSpanOptions = ({offset: offset_result, imageStyle: imageStyle_result, gesture: gesture_result} as RichEditorImageSpanOptions)
         return value
     }
     readRichEditorTextSpanOptions(): RichEditorTextSpanOptions {
@@ -6451,7 +6550,7 @@ export class Deserializer extends DeserializerBase {
             gesture_buf = valueDeserializer.readRichEditorGesture()
         }
         const gesture_result : RichEditorGesture | undefined = gesture_buf
-        let value : RichEditorTextSpanOptions = ({offset: offset_result,style: style_result,paragraphStyle: paragraphStyle_result,gesture: gesture_result} as RichEditorTextSpanOptions)
+        let value : RichEditorTextSpanOptions = ({offset: offset_result, style: style_result, paragraphStyle: paragraphStyle_result, gesture: gesture_result} as RichEditorTextSpanOptions)
         return value
     }
     readGuideLinePosition(): GuideLinePosition {
@@ -6470,7 +6569,7 @@ export class Deserializer extends DeserializerBase {
             end_buf = (valueDeserializer.readLength() as Dimension)
         }
         const end_result : Dimension | undefined = end_buf
-        let value : GuideLinePosition = ({start: start_result,end: end_result} as GuideLinePosition)
+        let value : GuideLinePosition = ({start: start_result, end: end_result} as GuideLinePosition)
         return value
     }
     readRoundedRectOptions(): RoundedRectOptions {
@@ -6547,7 +6646,7 @@ export class Deserializer extends DeserializerBase {
             radiusHeight_buf = (radiusHeight_buf_ as number | string)
         }
         const radiusHeight_result : number | string | undefined = radiusHeight_buf
-        let value : RoundedRectOptions = ({width: width_result,height: height_result,radiusWidth: radiusWidth_result,radiusHeight: radiusHeight_result} as RoundedRectOptions)
+        let value : RoundedRectOptions = ({width: width_result, height: height_result, radiusWidth: radiusWidth_result, radiusHeight: radiusHeight_result} as RoundedRectOptions)
         return value
     }
     readRectOptions(): RectOptions {
@@ -6602,7 +6701,7 @@ export class Deserializer extends DeserializerBase {
             }
             else if (radius_buf__selector == 2) {
                 const radius_buf__u_length : int32 = valueDeserializer.readInt32()
-                let radius_buf__u : Array<number | string> = new Array<number | string>()
+                let radius_buf__u : Array<number | string> = new Array<number | string>(radius_buf__u_length)
                 for (let radius_buf__u_i = 0; radius_buf__u_i < radius_buf__u_length; radius_buf__u_i++) {
                     const radius_buf__u_buf_selector : int32 = valueDeserializer.readInt8()
                     let radius_buf__u_buf : number | string | undefined
@@ -6625,7 +6724,7 @@ export class Deserializer extends DeserializerBase {
             radius_buf = (radius_buf_ as number | string | Array<number | string>)
         }
         const radius_result : number | string | Array<number | string> | undefined = radius_buf
-        let value : RectOptions = ({width: width_result,height: height_result,radius: radius_result} as RectOptions)
+        let value : RectOptions = ({width: width_result, height: height_result, radius: radius_result} as RectOptions)
         return value
     }
     readProgressStyleOptions(): ProgressStyleOptions {
@@ -6658,7 +6757,7 @@ export class Deserializer extends DeserializerBase {
             scaleWidth_buf = (valueDeserializer.readLength() as Length)
         }
         const scaleWidth_result : Length | undefined = scaleWidth_buf
-        let value : ProgressStyleOptions = ({enableSmoothEffect: enableSmoothEffect_result,strokeWidth: strokeWidth_result,scaleCount: scaleCount_result,scaleWidth: scaleWidth_result} as ProgressStyleOptions)
+        let value : ProgressStyleOptions = ({enableSmoothEffect: enableSmoothEffect_result, strokeWidth: strokeWidth_result, scaleCount: scaleCount_result, scaleWidth: scaleWidth_result} as ProgressStyleOptions)
         return value
     }
     readCapsuleStyleOptions(): CapsuleStyleOptions {
@@ -6746,7 +6845,7 @@ export class Deserializer extends DeserializerBase {
             showDefaultPercentage_buf = valueDeserializer.readBoolean()
         }
         const showDefaultPercentage_result : boolean | undefined = showDefaultPercentage_buf
-        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffect_result,borderColor: borderColor_result,borderWidth: borderWidth_result,content: content_result,font: font_result,fontColor: fontColor_result,showDefaultPercentage: showDefaultPercentage_result} as CapsuleStyleOptions)
+        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffect_result, borderColor: borderColor_result, borderWidth: borderWidth_result, content: content_result, font: font_result, fontColor: fontColor_result, showDefaultPercentage: showDefaultPercentage_result} as CapsuleStyleOptions)
         return value
     }
     readRingStyleOptions(): RingStyleOptions {
@@ -6779,7 +6878,7 @@ export class Deserializer extends DeserializerBase {
             status_buf = (valueDeserializer.readInt32() as ProgressStatus)
         }
         const status_result : ProgressStatus | undefined = status_buf
-        let value : RingStyleOptions = ({enableScanEffect: enableScanEffect_result,strokeWidth: strokeWidth_result,shadow: shadow_result,status: status_result} as RingStyleOptions)
+        let value : RingStyleOptions = ({enableScanEffect: enableScanEffect_result, strokeWidth: strokeWidth_result, shadow: shadow_result, status: status_result} as RingStyleOptions)
         return value
     }
     readLinearStyleOptions(): LinearStyleOptions {
@@ -6819,14 +6918,14 @@ export class Deserializer extends DeserializerBase {
             strokeRadius_buf = (strokeRadius_buf_ as string | number | Resource)
         }
         const strokeRadius_result : PX | VP | LPX | Resource | undefined = strokeRadius_buf
-        let value : LinearStyleOptions = ({enableScanEffect: enableScanEffect_result,strokeWidth: strokeWidth_result,strokeRadius: strokeRadius_result} as LinearStyleOptions)
+        let value : LinearStyleOptions = ({enableScanEffect: enableScanEffect_result, strokeWidth: strokeWidth_result, strokeRadius: strokeRadius_result} as LinearStyleOptions)
         return value
     }
     readPluginComponentTemplate(): PluginComponentTemplate {
         let valueDeserializer : Deserializer = this
         const source_result : string = (valueDeserializer.readString() as string)
         const bundleName_result : string = (valueDeserializer.readString() as string)
-        let value : PluginComponentTemplate = ({source: source_result,bundleName: bundleName_result} as PluginComponentTemplate)
+        let value : PluginComponentTemplate = ({source: source_result, bundleName: bundleName_result} as PluginComponentTemplate)
         return value
     }
     readCircleStyleOptions(): CircleStyleOptions {
@@ -6869,7 +6968,7 @@ export class Deserializer extends DeserializerBase {
             enableWaveEffect_buf = valueDeserializer.readBoolean()
         }
         const enableWaveEffect_result : boolean | undefined = enableWaveEffect_buf
-        let value : CircleStyleOptions = ({color: color_result,radius: radius_result,enableWaveEffect: enableWaveEffect_result} as CircleStyleOptions)
+        let value : CircleStyleOptions = ({color: color_result, radius: radius_result, enableWaveEffect: enableWaveEffect_result} as CircleStyleOptions)
         return value
     }
     readCallback_PanelMode_Void(isSync: boolean = false): ((mode: PanelMode) => void) {
@@ -6881,7 +6980,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((mode.valueOf() as int32));
+    _argsSerializer.writeInt32(((mode as PanelMode) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(388680218, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(388680218, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -6917,7 +7016,7 @@ export class Deserializer extends DeserializerBase {
             navDestinationId_buf = (valueDeserializer.readString() as string)
         }
         const navDestinationId_result : string | undefined = navDestinationId_buf
-        let value : NavContentInfo = ({name: name_result,index: index_result,mode: mode_result,param: param_result,navDestinationId: navDestinationId_result} as NavContentInfo)
+        let value : NavContentInfo = ({name: name_result, index: index_result, mode: mode_result, param: param_result, navDestinationId: navDestinationId_result} as NavContentInfo)
         return value
     }
     readNavDestinationContext(): NavDestinationContext {
@@ -6948,7 +7047,7 @@ export class Deserializer extends DeserializerBase {
             modeChange_buf = valueDeserializer.readInterceptionModeCallback()
         }
         const modeChange_result : InterceptionModeCallback | undefined = modeChange_buf
-        let value : NavigationInterception = ({willShow: willShow_result,didShow: didShow_result,modeChange: modeChange_result} as NavigationInterception)
+        let value : NavigationInterception = ({willShow: willShow_result, didShow: didShow_result, modeChange: modeChange_result} as NavigationInterception)
         return value
     }
     readNavigationOptions(): NavigationOptions {
@@ -6967,7 +7066,7 @@ export class Deserializer extends DeserializerBase {
             animated_buf = valueDeserializer.readBoolean()
         }
         const animated_result : boolean | undefined = animated_buf
-        let value : NavigationOptions = ({launchMode: launchMode_result,animated: animated_result} as NavigationOptions)
+        let value : NavigationOptions = ({launchMode: launchMode_result, animated: animated_result} as NavigationOptions)
         return value
     }
     readNavDestinationAttribute(): NavDestinationAttribute {
@@ -7013,7 +7112,7 @@ export class Deserializer extends DeserializerBase {
             barStyle_buf = (valueDeserializer.readInt32() as BarStyle)
         }
         const barStyle_result : BarStyle | undefined = barStyle_buf
-        let value : NavigationToolbarOptions = ({backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,barStyle: barStyle_result} as NavigationToolbarOptions)
+        let value : NavigationToolbarOptions = ({backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, barStyle: barStyle_result} as NavigationToolbarOptions)
         return value
     }
     readNavigationTitleOptions(): NavigationTitleOptions {
@@ -7091,7 +7190,7 @@ export class Deserializer extends DeserializerBase {
             enableHoverMode_buf = valueDeserializer.readBoolean()
         }
         const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
-        let value : NavigationTitleOptions = ({backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,barStyle: barStyle_result,paddingStart: paddingStart_result,paddingEnd: paddingEnd_result,mainTitleModifier: mainTitleModifier_result,subTitleModifier: subTitleModifier_result,enableHoverMode: enableHoverMode_result} as NavigationTitleOptions)
+        let value : NavigationTitleOptions = ({backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, barStyle: barStyle_result, paddingStart: paddingStart_result, paddingEnd: paddingEnd_result, mainTitleModifier: mainTitleModifier_result, subTitleModifier: subTitleModifier_result, enableHoverMode: enableHoverMode_result} as NavigationTitleOptions)
         return value
     }
     readNavDestinationCustomTitle(): NavDestinationCustomTitle {
@@ -7109,7 +7208,7 @@ export class Deserializer extends DeserializerBase {
             throw new Error("One of the branches for height_buf has to be chosen through deserialisation.")
         }
         const height_result : TitleHeight | Length = (height_buf as TitleHeight | Length)
-        let value : NavDestinationCustomTitle = ({builder: builder_result,height: height_result} as NavDestinationCustomTitle)
+        let value : NavDestinationCustomTitle = ({builder: builder_result, height: height_result} as NavDestinationCustomTitle)
         return value
     }
     readNavDestinationCommonTitle(): NavDestinationCommonTitle {
@@ -7138,7 +7237,7 @@ export class Deserializer extends DeserializerBase {
             throw new Error("One of the branches for sub_buf has to be chosen through deserialisation.")
         }
         const sub_result : string | Resource = (sub_buf as string | Resource)
-        let value : NavDestinationCommonTitle = ({main: main_result,sub: sub_result} as NavDestinationCommonTitle)
+        let value : NavDestinationCommonTitle = ({main: main_result, sub: sub_result} as NavDestinationCommonTitle)
         return value
     }
     readSystemBarStyle(): SystemBarStyle {
@@ -7152,7 +7251,7 @@ export class Deserializer extends DeserializerBase {
         const name_result : string = (valueDeserializer.readString() as string)
         const pageSourceFile_result : string = (valueDeserializer.readString() as string)
         const data_result : Object = (valueDeserializer.readCustomObject("Object") as Object)
-        let value : RouteMapConfig = ({name: name_result,pageSourceFile: pageSourceFile_result,data: data_result} as RouteMapConfig)
+        let value : RouteMapConfig = ({name: name_result, pageSourceFile: pageSourceFile_result, data: data_result} as RouteMapConfig)
         return value
     }
     readMenuItemOptions(): MenuItemOptions {
@@ -7250,7 +7349,7 @@ export class Deserializer extends DeserializerBase {
             builder_buf = CallbackTransformer.transformToCustomBuilder(valueDeserializer.readCustomNodeBuilder())
         }
         const builder_result : CustomBuilder | undefined = builder_buf
-        let value : MenuItemOptions = ({startIcon: startIcon_result,symbolStartIcon: symbolStartIcon_result,content: content_result,endIcon: endIcon_result,symbolEndIcon: symbolEndIcon_result,labelInfo: labelInfo_result,builder: builder_result} as MenuItemOptions)
+        let value : MenuItemOptions = ({startIcon: startIcon_result, symbolStartIcon: symbolStartIcon_result, content: content_result, endIcon: endIcon_result, symbolEndIcon: symbolEndIcon_result, labelInfo: labelInfo_result, builder: builder_result} as MenuItemOptions)
         return value
     }
     readDividerStyleOptions(): DividerStyleOptions {
@@ -7300,19 +7399,19 @@ export class Deserializer extends DeserializerBase {
             endMargin_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
         }
         const endMargin_result : LengthMetrics | undefined = endMargin_buf
-        let value : DividerStyleOptions = ({strokeWidth: strokeWidth_result,color: color_result,startMargin: startMargin_result,endMargin: endMargin_result} as DividerStyleOptions)
+        let value : DividerStyleOptions = ({strokeWidth: strokeWidth_result, color: color_result, startMargin: startMargin_result, endMargin: endMargin_result} as DividerStyleOptions)
         return value
     }
     readASTCResource(): ASTCResource {
         let valueDeserializer : Deserializer = this
         const sources_buf_length : int32 = valueDeserializer.readInt32()
-        let sources_buf : Array<string> = new Array<string>()
+        let sources_buf : Array<string> = new Array<string>(sources_buf_length)
         for (let sources_buf_i = 0; sources_buf_i < sources_buf_length; sources_buf_i++) {
             sources_buf[sources_buf_i] = (valueDeserializer.readString() as string)
         }
         const sources_result : Array<string> = sources_buf
         const column_result : number = (valueDeserializer.readNumber() as number)
-        let value : ASTCResource = ({sources: sources_result,column: column_result} as ASTCResource)
+        let value : ASTCResource = ({sources: sources_result, column: column_result} as ASTCResource)
         return value
     }
     readDrawableDescriptor(): DrawableDescriptor {
@@ -7367,7 +7466,7 @@ export class Deserializer extends DeserializerBase {
             endMargin_buf = (valueDeserializer.readLength() as Length)
         }
         const endMargin_result : Length | undefined = endMargin_buf
-        let value : ListDividerOptions = ({strokeWidth: strokeWidth_result,color: color_result,startMargin: startMargin_result,endMargin: endMargin_result} as ListDividerOptions)
+        let value : ListDividerOptions = ({strokeWidth: strokeWidth_result, color: color_result, startMargin: startMargin_result, endMargin: endMargin_result} as ListDividerOptions)
         return value
     }
     readListAttribute(): ListAttribute {
@@ -7390,7 +7489,7 @@ export class Deserializer extends DeserializerBase {
             itemIndexInGroup_buf = (valueDeserializer.readNumber() as number)
         }
         const itemIndexInGroup_result : number | undefined = itemIndexInGroup_buf
-        let value : VisibleListContentInfo = ({index: index_result,itemGroupArea: itemGroupArea_result,itemIndexInGroup: itemIndexInGroup_result} as VisibleListContentInfo)
+        let value : VisibleListContentInfo = ({index: index_result, itemGroupArea: itemGroupArea_result, itemIndexInGroup: itemIndexInGroup_result} as VisibleListContentInfo)
         return value
     }
     readCloseSwipeActionOptions(): CloseSwipeActionOptions {
@@ -7423,7 +7522,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
         {
             const value_buf__length : int32 = valueDeserializer.readInt32()
-            let value_buf_ : Array<string> = new Array<string>()
+            let value_buf_ : Array<string> = new Array<string>(value_buf__length)
             for (let value_buf__i = 0; value_buf__i < value_buf__length; value_buf__i++) {
                 value_buf_[value_buf__i] = (valueDeserializer.readString() as string)
             }
@@ -7437,7 +7536,7 @@ export class Deserializer extends DeserializerBase {
             reference_buf = (valueDeserializer.readInt32() as BreakpointsReference)
         }
         const reference_result : BreakpointsReference | undefined = reference_buf
-        let value : BreakPoints = ({value: value_result,reference: reference_result} as BreakPoints)
+        let value : BreakPoints = ({value: value_result, reference: reference_result} as BreakPoints)
         return value
     }
     readGridAttribute(): GridAttribute {
@@ -7509,7 +7608,7 @@ export class Deserializer extends DeserializerBase {
             cross_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
         }
         const cross_result : LengthMetrics | undefined = cross_buf
-        let value : FlexSpaceOptions = ({main: main_result,cross: cross_result} as FlexSpaceOptions)
+        let value : FlexSpaceOptions = ({main: main_result, cross: cross_result} as FlexSpaceOptions)
         return value
     }
     readDatePickerDialogOptions(): DatePickerDialogOptions {
@@ -7761,7 +7860,7 @@ export class Deserializer extends DeserializerBase {
             hoverModeArea_buf = (valueDeserializer.readInt32() as HoverModeAreaType)
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
-        let value : DatePickerDialogOptions = ({start: start_result,end: end_result,selected: selected_result,lunar: lunar_result,lunarSwitch: lunarSwitch_result,lunarSwitchStyle: lunarSwitchStyle_result,showTime: showTime_result,useMilitaryTime: useMilitaryTime_result,disappearTextStyle: disappearTextStyle_result,textStyle: textStyle_result,acceptButtonStyle: acceptButtonStyle_result,cancelButtonStyle: cancelButtonStyle_result,selectedTextStyle: selectedTextStyle_result,maskRect: maskRect_result,alignment: alignment_result,offset: offset_result,onAccept: onAccept_result,onCancel: onCancel_result,onChange: onChange_result,onDateAccept: onDateAccept_result,onDateChange: onDateChange_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,onDidAppear: onDidAppear_result,onDidDisappear: onDidDisappear_result,onWillAppear: onWillAppear_result,onWillDisappear: onWillDisappear_result,shadow: shadow_result,dateTimeOptions: dateTimeOptions_result,enableHoverMode: enableHoverMode_result,hoverModeArea: hoverModeArea_result} as DatePickerDialogOptions)
+        let value : DatePickerDialogOptions = ({start: start_result, end: end_result, selected: selected_result, lunar: lunar_result, lunarSwitch: lunarSwitch_result, lunarSwitchStyle: lunarSwitchStyle_result, showTime: showTime_result, useMilitaryTime: useMilitaryTime_result, disappearTextStyle: disappearTextStyle_result, textStyle: textStyle_result, acceptButtonStyle: acceptButtonStyle_result, cancelButtonStyle: cancelButtonStyle_result, selectedTextStyle: selectedTextStyle_result, maskRect: maskRect_result, alignment: alignment_result, offset: offset_result, onAccept: onAccept_result, onCancel: onCancel_result, onChange: onChange_result, onDateAccept: onDateAccept_result, onDateChange: onDateChange_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, shadow: shadow_result, dateTimeOptions: dateTimeOptions_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result} as DatePickerDialogOptions)
         return value
     }
     readAnimateParam(): AnimateParam {
@@ -7843,17 +7942,11 @@ export class Deserializer extends DeserializerBase {
             expectedFrameRateRange_buf = valueDeserializer.readExpectedFrameRateRange()
         }
         const expectedFrameRateRange_result : ExpectedFrameRateRange | undefined = expectedFrameRateRange_buf
-        let value : AnimateParam = ({duration: duration_result,tempo: tempo_result,curve: curve_result,delay: delay_result,iterations: iterations_result,playMode: playMode_result,onFinish: onFinish_result,finishCallbackType: finishCallbackType_result,expectedFrameRateRange: expectedFrameRateRange_result} as AnimateParam)
+        let value : AnimateParam = ({duration: duration_result, tempo: tempo_result, curve: curve_result, delay: delay_result, iterations: iterations_result, playMode: playMode_result, onFinish: onFinish_result, finishCallbackType: finishCallbackType_result, expectedFrameRateRange: expectedFrameRateRange_result} as AnimateParam)
         return value
     }
     readComponent3DAttribute(): Component3DAttribute {
         throw new Error("Interface with functions is not supported")
-    }
-    readContext(): Context {
-        let valueDeserializer : Deserializer = this
-        const _ContextStub_result : string = (valueDeserializer.readString() as string)
-        let value : Context = ({_ContextStub: _ContextStub_result} as Context)
-        return value
     }
     readUIGestureEvent(): UIGestureEvent {
         throw new Error("Interface with functions is not supported")
@@ -7876,7 +7969,7 @@ export class Deserializer extends DeserializerBase {
     readVisibleAreaEventOptions(): VisibleAreaEventOptions {
         let valueDeserializer : Deserializer = this
         const ratios_buf_length : int32 = valueDeserializer.readInt32()
-        let ratios_buf : Array<number> = new Array<number>()
+        let ratios_buf : Array<number> = new Array<number>(ratios_buf_length)
         for (let ratios_buf_i = 0; ratios_buf_i < ratios_buf_length; ratios_buf_i++) {
             ratios_buf[ratios_buf_i] = (valueDeserializer.readNumber() as number)
         }
@@ -7888,7 +7981,7 @@ export class Deserializer extends DeserializerBase {
             expectedUpdateInterval_buf = (valueDeserializer.readNumber() as number)
         }
         const expectedUpdateInterval_result : number | undefined = expectedUpdateInterval_buf
-        let value : VisibleAreaEventOptions = ({ratios: ratios_result,expectedUpdateInterval: expectedUpdateInterval_result} as VisibleAreaEventOptions)
+        let value : VisibleAreaEventOptions = ({ratios: ratios_result, expectedUpdateInterval: expectedUpdateInterval_result} as VisibleAreaEventOptions)
         return value
     }
     readSizeChangeCallback(isSync: boolean = false): SizeChangeCallback {
@@ -7963,21 +8056,6 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return; }
     }
-    readOnMoveHandler(isSync: boolean = false): OnMoveHandler {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (from: number, to: number):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(from);
-    _argsSerializer.writeNumber(to);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1200281222, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1200281222, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
     readFadingEdgeOptions(): FadingEdgeOptions {
         let valueDeserializer : Deserializer = this
         const fadingEdgeLength_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -8000,7 +8078,7 @@ export class Deserializer extends DeserializerBase {
         const index_result : number = (valueDeserializer.readNumber() as number)
         const x_result : number = (valueDeserializer.readNumber() as number)
         const y_result : number = (valueDeserializer.readNumber() as number)
-        let value : CaretOffset = ({index: index_result,x: x_result,y: y_result} as CaretOffset)
+        let value : CaretOffset = ({index: index_result, x: x_result, y: y_result} as CaretOffset)
         return value
     }
     readDirectionalEdgesT(): DirectionalEdgesT {
@@ -8009,14 +8087,14 @@ export class Deserializer extends DeserializerBase {
         const end_result : number = (valueDeserializer.readNumber() as number)
         const top_result : number = (valueDeserializer.readNumber() as number)
         const bottom_result : number = (valueDeserializer.readNumber() as number)
-        let value : DirectionalEdgesT = ({start: start_result,end: end_result,top: top_result,bottom: bottom_result} as DirectionalEdgesT)
+        let value : DirectionalEdgesT = ({start: start_result, end: end_result, top: top_result, bottom: bottom_result} as DirectionalEdgesT)
         return value
     }
     readMeasureResult(): MeasureResult {
         let valueDeserializer : Deserializer = this
         const width_result : number = (valueDeserializer.readNumber() as number)
         const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : MeasureResult = ({width: width_result,height: height_result} as MeasureResult)
+        let value : MeasureResult = ({width: width_result, height: height_result} as MeasureResult)
         return value
     }
     readConstraintSizeOptions(): ConstraintSizeOptions {
@@ -8049,7 +8127,7 @@ export class Deserializer extends DeserializerBase {
             maxHeight_buf = (valueDeserializer.readLength() as Length)
         }
         const maxHeight_result : Length | undefined = maxHeight_buf
-        let value : ConstraintSizeOptions = ({minWidth: minWidth_result,maxWidth: maxWidth_result,minHeight: minHeight_result,maxHeight: maxHeight_result} as ConstraintSizeOptions)
+        let value : ConstraintSizeOptions = ({minWidth: minWidth_result, maxWidth: maxWidth_result, minHeight: minHeight_result, maxHeight: maxHeight_result} as ConstraintSizeOptions)
         return value
     }
     readGestureRecognizerJudgeBeginCallback(isSync: boolean = false): GestureRecognizerJudgeBeginCallback {
@@ -8633,7 +8711,7 @@ export class Deserializer extends DeserializerBase {
             keyboardAvoidMode_buf = (valueDeserializer.readInt32() as SheetKeyboardAvoidMode)
         }
         const keyboardAvoidMode_result : SheetKeyboardAvoidMode | undefined = keyboardAvoidMode_buf
-        let value : SheetOptions = ({backgroundColor: backgroundColor_result,onAppear: onAppear_result,onDisappear: onDisappear_result,onWillAppear: onWillAppear_result,onWillDisappear: onWillDisappear_result,height: height_result,dragBar: dragBar_result,maskColor: maskColor_result,detents: detents_result,blurStyle: blurStyle_result,showClose: showClose_result,preferType: preferType_result,title: title_result,shouldDismiss: shouldDismiss_result,onWillDismiss: onWillDismiss_result,onWillSpringBackWhenDismiss: onWillSpringBackWhenDismiss_result,enableOutsideInteractive: enableOutsideInteractive_result,width: width_result,borderWidth: borderWidth_result,borderColor: borderColor_result,borderStyle: borderStyle_result,shadow: shadow_result,onHeightDidChange: onHeightDidChange_result,mode: mode_result,scrollSizeMode: scrollSizeMode_result,onDetentsDidChange: onDetentsDidChange_result,onWidthDidChange: onWidthDidChange_result,onTypeDidChange: onTypeDidChange_result,uiContext: uiContext_result,keyboardAvoidMode: keyboardAvoidMode_result} as SheetOptions)
+        let value : SheetOptions = ({backgroundColor: backgroundColor_result, onAppear: onAppear_result, onDisappear: onDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, height: height_result, dragBar: dragBar_result, maskColor: maskColor_result, detents: detents_result, blurStyle: blurStyle_result, showClose: showClose_result, preferType: preferType_result, title: title_result, shouldDismiss: shouldDismiss_result, onWillDismiss: onWillDismiss_result, onWillSpringBackWhenDismiss: onWillSpringBackWhenDismiss_result, enableOutsideInteractive: enableOutsideInteractive_result, width: width_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, onHeightDidChange: onHeightDidChange_result, mode: mode_result, scrollSizeMode: scrollSizeMode_result, onDetentsDidChange: onDetentsDidChange_result, onWidthDidChange: onWidthDidChange_result, onTypeDidChange: onTypeDidChange_result, uiContext: uiContext_result, keyboardAvoidMode: keyboardAvoidMode_result} as SheetOptions)
         return value
     }
     readContentCoverOptions(): ContentCoverOptions {
@@ -8711,7 +8789,7 @@ export class Deserializer extends DeserializerBase {
             transition_buf = (valueDeserializer.readTransitionEffect() as TransitionEffect)
         }
         const transition_result : TransitionEffect | undefined = transition_buf
-        let value : ContentCoverOptions = ({backgroundColor: backgroundColor_result,onAppear: onAppear_result,onDisappear: onDisappear_result,onWillAppear: onWillAppear_result,onWillDisappear: onWillDisappear_result,modalTransition: modalTransition_result,onWillDismiss: onWillDismiss_result,transition: transition_result} as ContentCoverOptions)
+        let value : ContentCoverOptions = ({backgroundColor: backgroundColor_result, onAppear: onAppear_result, onDisappear: onDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, modalTransition: modalTransition_result, onWillDismiss: onWillDismiss_result, transition: transition_result} as ContentCoverOptions)
         return value
     }
     readContextMenuOptions(): ContextMenuOptions {
@@ -8926,7 +9004,7 @@ export class Deserializer extends DeserializerBase {
             enableHoverMode_buf = valueDeserializer.readBoolean()
         }
         const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
-        let value : ContextMenuOptions = ({offset: offset_result,placement: placement_result,enableArrow: enableArrow_result,arrowOffset: arrowOffset_result,preview: preview_result,borderRadius: borderRadius_result,onAppear: onAppear_result,onDisappear: onDisappear_result,aboutToAppear: aboutToAppear_result,aboutToDisappear: aboutToDisappear_result,layoutRegionMargin: layoutRegionMargin_result,previewAnimationOptions: previewAnimationOptions_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,transition: transition_result,enableHoverMode: enableHoverMode_result} as ContextMenuOptions)
+        let value : ContextMenuOptions = ({offset: offset_result, placement: placement_result, enableArrow: enableArrow_result, arrowOffset: arrowOffset_result, preview: preview_result, borderRadius: borderRadius_result, onAppear: onAppear_result, onDisappear: onDisappear_result, aboutToAppear: aboutToAppear_result, aboutToDisappear: aboutToDisappear_result, layoutRegionMargin: layoutRegionMargin_result, previewAnimationOptions: previewAnimationOptions_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, transition: transition_result, enableHoverMode: enableHoverMode_result} as ContextMenuOptions)
         return value
     }
     readMenuOptions(): MenuOptions {
@@ -9166,7 +9244,7 @@ export class Deserializer extends DeserializerBase {
             showInSubWindow_buf = valueDeserializer.readBoolean()
         }
         const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
-        let value : MenuOptions = ({offset: offset_result,placement: placement_result,enableArrow: enableArrow_result,arrowOffset: arrowOffset_result,preview: preview_result,borderRadius: borderRadius_result,onAppear: onAppear_result,onDisappear: onDisappear_result,aboutToAppear: aboutToAppear_result,aboutToDisappear: aboutToDisappear_result,layoutRegionMargin: layoutRegionMargin_result,previewAnimationOptions: previewAnimationOptions_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,transition: transition_result,enableHoverMode: enableHoverMode_result,title: title_result,showInSubWindow: showInSubWindow_result} as MenuOptions)
+        let value : MenuOptions = ({offset: offset_result, placement: placement_result, enableArrow: enableArrow_result, arrowOffset: arrowOffset_result, preview: preview_result, borderRadius: borderRadius_result, onAppear: onAppear_result, onDisappear: onDisappear_result, aboutToAppear: aboutToAppear_result, aboutToDisappear: aboutToDisappear_result, layoutRegionMargin: layoutRegionMargin_result, previewAnimationOptions: previewAnimationOptions_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, transition: transition_result, enableHoverMode: enableHoverMode_result, title: title_result, showInSubWindow: showInSubWindow_result} as MenuOptions)
         return value
     }
     readCustomPopupOptions(): CustomPopupOptions {
@@ -9323,7 +9401,7 @@ export class Deserializer extends DeserializerBase {
         let arrowPointPosition_buf : ArrowPointPosition | undefined
         if ((RuntimeType.UNDEFINED) != (arrowPointPosition_buf_runtimeType))
         {
-            arrowPointPosition_buf = valueDeserializer.readInt32() as ArrowPointPosition
+            arrowPointPosition_buf = TypeChecker.ArrowPointPosition_FromOrdinal(valueDeserializer.readInt32())
         }
         const arrowPointPosition_result : ArrowPointPosition | undefined = arrowPointPosition_buf
         const arrowWidth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -9418,7 +9496,7 @@ export class Deserializer extends DeserializerBase {
             followTransformOfTarget_buf = valueDeserializer.readBoolean()
         }
         const followTransformOfTarget_result : boolean | undefined = followTransformOfTarget_buf
-        let value : CustomPopupOptions = ({builder: builder_result,placement: placement_result,maskColor: maskColor_result,popupColor: popupColor_result,enableArrow: enableArrow_result,autoCancel: autoCancel_result,onStateChange: onStateChange_result,arrowOffset: arrowOffset_result,showInSubWindow: showInSubWindow_result,mask: mask_result,targetSpace: targetSpace_result,offset: offset_result,width: width_result,arrowPointPosition: arrowPointPosition_result,arrowWidth: arrowWidth_result,arrowHeight: arrowHeight_result,radius: radius_result,shadow: shadow_result,backgroundBlurStyle: backgroundBlurStyle_result,focusable: focusable_result,transition: transition_result,onWillDismiss: onWillDismiss_result,enableHoverMode: enableHoverMode_result,followTransformOfTarget: followTransformOfTarget_result} as CustomPopupOptions)
+        let value : CustomPopupOptions = ({builder: builder_result, placement: placement_result, maskColor: maskColor_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result} as CustomPopupOptions)
         return value
     }
     readPopupOptions(): PopupOptions {
@@ -9583,7 +9661,7 @@ export class Deserializer extends DeserializerBase {
         let arrowPointPosition_buf : ArrowPointPosition | undefined
         if ((RuntimeType.UNDEFINED) != (arrowPointPosition_buf_runtimeType))
         {
-            arrowPointPosition_buf = valueDeserializer.readInt32() as ArrowPointPosition
+            arrowPointPosition_buf = TypeChecker.ArrowPointPosition_FromOrdinal(valueDeserializer.readInt32())
         }
         const arrowPointPosition_result : ArrowPointPosition | undefined = arrowPointPosition_buf
         const arrowWidth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -9671,7 +9749,7 @@ export class Deserializer extends DeserializerBase {
             followTransformOfTarget_buf = valueDeserializer.readBoolean()
         }
         const followTransformOfTarget_result : boolean | undefined = followTransformOfTarget_buf
-        let value : PopupOptions = ({message: message_result,placementOnTop: placementOnTop_result,placement: placement_result,primaryButton: primaryButton_result,secondaryButton: secondaryButton_result,onStateChange: onStateChange_result,arrowOffset: arrowOffset_result,showInSubWindow: showInSubWindow_result,mask: mask_result,messageOptions: messageOptions_result,targetSpace: targetSpace_result,enableArrow: enableArrow_result,offset: offset_result,popupColor: popupColor_result,autoCancel: autoCancel_result,width: width_result,arrowPointPosition: arrowPointPosition_result,arrowWidth: arrowWidth_result,arrowHeight: arrowHeight_result,radius: radius_result,shadow: shadow_result,backgroundBlurStyle: backgroundBlurStyle_result,transition: transition_result,onWillDismiss: onWillDismiss_result,enableHoverMode: enableHoverMode_result,followTransformOfTarget: followTransformOfTarget_result} as PopupOptions)
+        let value : PopupOptions = ({message: message_result, placementOnTop: placementOnTop_result, placement: placement_result, primaryButton: primaryButton_result, secondaryButton: secondaryButton_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, messageOptions: messageOptions_result, targetSpace: targetSpace_result, enableArrow: enableArrow_result, offset: offset_result, popupColor: popupColor_result, autoCancel: autoCancel_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result} as PopupOptions)
         return value
     }
     readGeometryTransitionOptions(): GeometryTransitionOptions {
@@ -9690,7 +9768,7 @@ export class Deserializer extends DeserializerBase {
             hierarchyStrategy_buf = (valueDeserializer.readInt32() as TransitionHierarchyStrategy)
         }
         const hierarchyStrategy_result : TransitionHierarchyStrategy | undefined = hierarchyStrategy_buf
-        let value : GeometryTransitionOptions = ({follow: follow_result,hierarchyStrategy: hierarchyStrategy_result} as GeometryTransitionOptions)
+        let value : GeometryTransitionOptions = ({follow: follow_result, hierarchyStrategy: hierarchyStrategy_result} as GeometryTransitionOptions)
         return value
     }
     readBlender(): Blender {
@@ -9715,7 +9793,7 @@ export class Deserializer extends DeserializerBase {
             offset_buf = valueDeserializer.readOverlayOffset()
         }
         const offset_result : OverlayOffset | undefined = offset_buf
-        let value : OverlayOptions = ({align: align_result,offset: offset_result} as OverlayOptions)
+        let value : OverlayOptions = ({align: align_result, offset: offset_result} as OverlayOptions)
         return value
     }
     readDragInteractionOptions(): DragInteractionOptions {
@@ -9734,7 +9812,7 @@ export class Deserializer extends DeserializerBase {
             defaultAnimationBeforeLifting_buf = valueDeserializer.readBoolean()
         }
         const defaultAnimationBeforeLifting_result : boolean | undefined = defaultAnimationBeforeLifting_buf
-        let value : DragInteractionOptions = ({isMultiSelectionEnabled: isMultiSelectionEnabled_result,defaultAnimationBeforeLifting: defaultAnimationBeforeLifting_result} as DragInteractionOptions)
+        let value : DragInteractionOptions = ({isMultiSelectionEnabled: isMultiSelectionEnabled_result, defaultAnimationBeforeLifting: defaultAnimationBeforeLifting_result} as DragInteractionOptions)
         return value
     }
     readDragPreviewOptions(): DragPreviewOptions {
@@ -9750,7 +9828,7 @@ export class Deserializer extends DeserializerBase {
             }
             else if (mode_buf__selector == 1) {
                 const mode_buf__u_length : int32 = valueDeserializer.readInt32()
-                let mode_buf__u : Array<DragPreviewMode> = new Array<DragPreviewMode>()
+                let mode_buf__u : Array<DragPreviewMode> = new Array<DragPreviewMode>(mode_buf__u_length)
                 for (let mode_buf__u_i = 0; mode_buf__u_i < mode_buf__u_length; mode_buf__u_i++) {
                     mode_buf__u[mode_buf__u_i] = (valueDeserializer.readInt32() as DragPreviewMode)
                 }
@@ -9787,7 +9865,7 @@ export class Deserializer extends DeserializerBase {
             numberBadge_buf = (numberBadge_buf_ as boolean | number)
         }
         const numberBadge_result : boolean | number | undefined = numberBadge_buf
-        let value : DragPreviewOptions = ({mode: mode_result,modifier: modifier_result,numberBadge: numberBadge_result} as DragPreviewOptions)
+        let value : DragPreviewOptions = ({mode: mode_result, modifier: modifier_result, numberBadge: numberBadge_result} as DragPreviewOptions)
         return value
     }
     readsharedTransitionOptions(): sharedTransitionOptions {
@@ -9848,13 +9926,13 @@ export class Deserializer extends DeserializerBase {
             type_buf = (valueDeserializer.readInt32() as SharedTransitionEffectType)
         }
         const type_result : SharedTransitionEffectType | undefined = type_buf
-        let value : sharedTransitionOptions = ({duration: duration_result,curve: curve_result,delay: delay_result,motionPath: motionPath_result,zIndex: zIndex_result,type: type_result} as sharedTransitionOptions)
+        let value : sharedTransitionOptions = ({duration: duration_result, curve: curve_result, delay: delay_result, motionPath: motionPath_result, zIndex: zIndex_result, type: type_result} as sharedTransitionOptions)
         return value
     }
     readLinearGradientBlurOptions(): LinearGradientBlurOptions {
         let valueDeserializer : Deserializer = this
         const fractionStops_buf_length : int32 = valueDeserializer.readInt32()
-        let fractionStops_buf : Array<FractionStop> = new Array<FractionStop>()
+        let fractionStops_buf : Array<FractionStop> = new Array<FractionStop>(fractionStops_buf_length)
         for (let fractionStops_buf_i = 0; fractionStops_buf_i < fractionStops_buf_length; fractionStops_buf_i++) {
             const fractionStops_buf_buf_value0 : number = (valueDeserializer.readNumber() as number)
             const fractionStops_buf_buf_value1 : number = (valueDeserializer.readNumber() as number)
@@ -9862,7 +9940,7 @@ export class Deserializer extends DeserializerBase {
         }
         const fractionStops_result : Array<FractionStop> = fractionStops_buf
         const direction_result : GradientDirection = (valueDeserializer.readInt32() as GradientDirection)
-        let value : LinearGradientBlurOptions = ({fractionStops: fractionStops_result,direction: direction_result} as LinearGradientBlurOptions)
+        let value : LinearGradientBlurOptions = ({fractionStops: fractionStops_result, direction: direction_result} as LinearGradientBlurOptions)
         return value
     }
     readTransitionFinishCallback(isSync: boolean = false): TransitionFinishCallback {
@@ -9909,7 +9987,7 @@ export class Deserializer extends DeserializerBase {
             blurOptions_buf = valueDeserializer.readBlurOptions()
         }
         const blurOptions_result : BlurOptions | undefined = blurOptions_buf
-        let value : ForegroundBlurStyleOptions = ({colorMode: colorMode_result,adaptiveColor: adaptiveColor_result,scale: scale_result,blurOptions: blurOptions_result} as ForegroundBlurStyleOptions)
+        let value : ForegroundBlurStyleOptions = ({colorMode: colorMode_result, adaptiveColor: adaptiveColor_result, scale: scale_result, blurOptions: blurOptions_result} as ForegroundBlurStyleOptions)
         return value
     }
     readPathShape(): PathShape {
@@ -9955,7 +10033,7 @@ export class Deserializer extends DeserializerBase {
             extraInfo_buf = (valueDeserializer.readString() as string)
         }
         const extraInfo_result : string | undefined = extraInfo_buf
-        let value : DragItemInfo = ({pixelMap: pixelMap_result,builder: builder_result,extraInfo: extraInfo_result} as DragItemInfo)
+        let value : DragItemInfo = ({pixelMap: pixelMap_result, builder: builder_result, extraInfo: extraInfo_result} as DragItemInfo)
         return value
     }
     readClickEffect(): ClickEffect {
@@ -9968,7 +10046,7 @@ export class Deserializer extends DeserializerBase {
             scale_buf = (valueDeserializer.readNumber() as number)
         }
         const scale_result : number | undefined = scale_buf
-        let value : ClickEffect = ({level: level_result,scale: scale_result} as ClickEffect)
+        let value : ClickEffect = ({level: level_result, scale: scale_result} as ClickEffect)
         return value
     }
     readBias(): Bias {
@@ -9987,21 +10065,21 @@ export class Deserializer extends DeserializerBase {
             vertical_buf = (valueDeserializer.readNumber() as number)
         }
         const vertical_result : number | undefined = vertical_buf
-        let value : Bias = ({horizontal: horizontal_result,vertical: vertical_result} as Bias)
+        let value : Bias = ({horizontal: horizontal_result, vertical: vertical_result} as Bias)
         return value
     }
     readLocalizedVerticalAlignParam(): LocalizedVerticalAlignParam {
         let valueDeserializer : Deserializer = this
         const anchor_result : string = (valueDeserializer.readString() as string)
         const align_result : VerticalAlign = (valueDeserializer.readInt32() as VerticalAlign)
-        let value : LocalizedVerticalAlignParam = ({anchor: anchor_result,align: align_result} as LocalizedVerticalAlignParam)
+        let value : LocalizedVerticalAlignParam = ({anchor: anchor_result, align: align_result} as LocalizedVerticalAlignParam)
         return value
     }
     readLocalizedHorizontalAlignParam(): LocalizedHorizontalAlignParam {
         let valueDeserializer : Deserializer = this
         const anchor_result : string = (valueDeserializer.readString() as string)
         const align_result : HorizontalAlign = (valueDeserializer.readInt32() as HorizontalAlign)
-        let value : LocalizedHorizontalAlignParam = ({anchor: anchor_result,align: align_result} as LocalizedHorizontalAlignParam)
+        let value : LocalizedHorizontalAlignParam = ({anchor: anchor_result, align: align_result} as LocalizedHorizontalAlignParam)
         return value
     }
     readLocalizedPosition(): LocalizedPosition {
@@ -10020,7 +10098,7 @@ export class Deserializer extends DeserializerBase {
             top_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
         }
         const top_result : LengthMetrics | undefined = top_buf
-        let value : LocalizedPosition = ({start: start_result,top: top_result} as LocalizedPosition)
+        let value : LocalizedPosition = ({start: start_result, top: top_result} as LocalizedPosition)
         return value
     }
     readInvertOptions(): InvertOptions {
@@ -10029,14 +10107,14 @@ export class Deserializer extends DeserializerBase {
         const high_result : number = (valueDeserializer.readNumber() as number)
         const threshold_result : number = (valueDeserializer.readNumber() as number)
         const thresholdRange_result : number = (valueDeserializer.readNumber() as number)
-        let value : InvertOptions = ({low: low_result,high: high_result,threshold: threshold_result,thresholdRange: thresholdRange_result} as InvertOptions)
+        let value : InvertOptions = ({low: low_result, high: high_result, threshold: threshold_result, thresholdRange: thresholdRange_result} as InvertOptions)
         return value
     }
     readMotionBlurAnchor(): MotionBlurAnchor {
         let valueDeserializer : Deserializer = this
         const x_result : number = (valueDeserializer.readNumber() as number)
         const y_result : number = (valueDeserializer.readNumber() as number)
-        let value : MotionBlurAnchor = ({x: x_result,y: y_result} as MotionBlurAnchor)
+        let value : MotionBlurAnchor = ({x: x_result, y: y_result} as MotionBlurAnchor)
         return value
     }
     readTransitionOptions(): TransitionOptions {
@@ -10076,7 +10154,7 @@ export class Deserializer extends DeserializerBase {
             rotate_buf = valueDeserializer.readRotateOptions()
         }
         const rotate_result : RotateOptions | undefined = rotate_buf
-        let value : TransitionOptions = ({type: type_result,opacity: opacity_result,translate: translate_result,scale: scale_result,rotate: rotate_result} as TransitionOptions)
+        let value : TransitionOptions = ({type: type_result, opacity: opacity_result, translate: translate_result, scale: scale_result, rotate: rotate_result} as TransitionOptions)
         return value
     }
     readDrawingLattice(): DrawingLattice {
@@ -10119,7 +10197,13 @@ export class Deserializer extends DeserializerBase {
         const screenY_result : number = (valueDeserializer.readNumber() as number)
         const x_result : number = (valueDeserializer.readNumber() as number)
         const y_result : number = (valueDeserializer.readNumber() as number)
-        let value : TouchObject = ({type: type_result,id: id_result,displayX: displayX_result,displayY: displayY_result,windowX: windowX_result,windowY: windowY_result,screenX: screenX_result,screenY: screenY_result,x: x_result,y: y_result} as TouchObject)
+        let value : TouchObject = ({type: type_result, id: id_result, displayX: displayX_result, displayY: displayY_result, windowX: windowX_result, windowY: windowY_result, screenX: screenX_result, screenY: screenY_result, x: x_result, y: y_result} as TouchObject)
+        return value
+    }
+    readContext(): Context {
+        let valueDeserializer : Deserializer = this
+        const _ContextStub_result : string = (valueDeserializer.readString() as string)
+        let value : Context = ({_ContextStub: _ContextStub_result} as Context)
         return value
     }
     readColumnSplitDividerStyle(): ColumnSplitDividerStyle {
@@ -10138,7 +10222,7 @@ export class Deserializer extends DeserializerBase {
             endMargin_buf = (valueDeserializer.readLength() as Dimension)
         }
         const endMargin_result : Dimension | undefined = endMargin_buf
-        let value : ColumnSplitDividerStyle = ({startMargin: startMargin_result,endMargin: endMargin_result} as ColumnSplitDividerStyle)
+        let value : ColumnSplitDividerStyle = ({startMargin: startMargin_result, endMargin: endMargin_result} as ColumnSplitDividerStyle)
         return value
     }
     readLightSource(): LightSource {
@@ -10171,7 +10255,7 @@ export class Deserializer extends DeserializerBase {
             color_buf = (color_buf_ as Color | number | string | Resource)
         }
         const color_result : ResourceColor | undefined = color_buf
-        let value : LightSource = ({positionX: positionX_result,positionY: positionY_result,positionZ: positionZ_result,intensity: intensity_result,color: color_result} as LightSource)
+        let value : LightSource = ({positionX: positionX_result, positionY: positionY_result, positionZ: positionZ_result, intensity: intensity_result, color: color_result} as LightSource)
         return value
     }
     readDrawingRenderingContext(): DrawingRenderingContext {
@@ -10214,7 +10298,7 @@ export class Deserializer extends DeserializerBase {
         const ideographicBaseline_result : number = (valueDeserializer.readNumber() as number)
         const width_result : number = (valueDeserializer.readNumber() as number)
         const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : TextMetrics = ({actualBoundingBoxAscent: actualBoundingBoxAscent_result,actualBoundingBoxDescent: actualBoundingBoxDescent_result,actualBoundingBoxLeft: actualBoundingBoxLeft_result,actualBoundingBoxRight: actualBoundingBoxRight_result,alphabeticBaseline: alphabeticBaseline_result,emHeightAscent: emHeightAscent_result,emHeightDescent: emHeightDescent_result,fontBoundingBoxAscent: fontBoundingBoxAscent_result,fontBoundingBoxDescent: fontBoundingBoxDescent_result,hangingBaseline: hangingBaseline_result,ideographicBaseline: ideographicBaseline_result,width: width_result,height: height_result} as TextMetrics)
+        let value : TextMetrics = ({actualBoundingBoxAscent: actualBoundingBoxAscent_result, actualBoundingBoxDescent: actualBoundingBoxDescent_result, actualBoundingBoxLeft: actualBoundingBoxLeft_result, actualBoundingBoxRight: actualBoundingBoxRight_result, alphabeticBaseline: alphabeticBaseline_result, emHeightAscent: emHeightAscent_result, emHeightDescent: emHeightDescent_result, fontBoundingBoxAscent: fontBoundingBoxAscent_result, fontBoundingBoxDescent: fontBoundingBoxDescent_result, hangingBaseline: hangingBaseline_result, ideographicBaseline: ideographicBaseline_result, width: width_result, height: height_result} as TextMetrics)
         return value
     }
     readImageData(): ImageData {
@@ -10380,7 +10464,7 @@ export class Deserializer extends DeserializerBase {
             hoverModeArea_buf = (valueDeserializer.readInt32() as HoverModeAreaType)
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
-        let value : CalendarDialogOptions = ({hintRadius: hintRadius_result,selected: selected_result,onAccept: onAccept_result,onCancel: onCancel_result,onChange: onChange_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,acceptButtonStyle: acceptButtonStyle_result,cancelButtonStyle: cancelButtonStyle_result,onDidAppear: onDidAppear_result,onDidDisappear: onDidDisappear_result,onWillAppear: onWillAppear_result,onWillDisappear: onWillDisappear_result,shadow: shadow_result,enableHoverMode: enableHoverMode_result,hoverModeArea: hoverModeArea_result} as CalendarDialogOptions)
+        let value : CalendarDialogOptions = ({hintRadius: hintRadius_result, selected: selected_result, onAccept: onAccept_result, onCancel: onCancel_result, onChange: onChange_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, acceptButtonStyle: acceptButtonStyle_result, cancelButtonStyle: cancelButtonStyle_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, shadow: shadow_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result} as CalendarDialogOptions)
         return value
     }
     readCalendarPickerAttribute(): CalendarPickerAttribute {
@@ -10396,12 +10480,12 @@ export class Deserializer extends DeserializerBase {
         const year_result : number = (valueDeserializer.readNumber() as number)
         const month_result : number = (valueDeserializer.readNumber() as number)
         const data_buf_length : int32 = valueDeserializer.readInt32()
-        let data_buf : Array<CalendarDay> = new Array<CalendarDay>()
+        let data_buf : Array<CalendarDay> = new Array<CalendarDay>(data_buf_length)
         for (let data_buf_i = 0; data_buf_i < data_buf_length; data_buf_i++) {
             data_buf[data_buf_i] = valueDeserializer.readCalendarDay()
         }
         const data_result : Array<CalendarDay> = data_buf
-        let value : MonthData = ({year: year_result,month: month_result,data: data_result} as MonthData)
+        let value : MonthData = ({year: year_result, month: month_result, data: data_result} as MonthData)
         return value
     }
     readBadgeStyle(): BadgeStyle {
@@ -10542,7 +10626,7 @@ export class Deserializer extends DeserializerBase {
             fontWeight_buf = (fontWeight_buf_ as number | FontWeight | string)
         }
         const fontWeight_result : number | FontWeight | string | undefined = fontWeight_buf
-        let value : BadgeStyle = ({color: color_result,fontSize: fontSize_result,badgeSize: badgeSize_result,badgeColor: badgeColor_result,borderColor: borderColor_result,borderWidth: borderWidth_result,fontWeight: fontWeight_result} as BadgeStyle)
+        let value : BadgeStyle = ({color: color_result, fontSize: fontSize_result, badgeSize: badgeSize_result, badgeColor: badgeColor_result, borderColor: borderColor_result, borderWidth: borderWidth_result, fontWeight: fontWeight_result} as BadgeStyle)
         return value
     }
     readAlphabetIndexerAttribute(): AlphabetIndexerAttribute {
@@ -11033,7 +11117,7 @@ export class Deserializer extends DeserializerBase {
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
         const buttons_buf_length : int32 = valueDeserializer.readInt32()
-        let buttons_buf : Array<AlertDialogButtonOptions> = new Array<AlertDialogButtonOptions>()
+        let buttons_buf : Array<AlertDialogButtonOptions> = new Array<AlertDialogButtonOptions>(buttons_buf_length)
         for (let buttons_buf_i = 0; buttons_buf_i < buttons_buf_length; buttons_buf_i++) {
             buttons_buf[buttons_buf_i] = valueDeserializer.readAlertDialogButtonOptions()
         }
@@ -11045,7 +11129,7 @@ export class Deserializer extends DeserializerBase {
             buttonDirection_buf = (valueDeserializer.readInt32() as DialogButtonDirection)
         }
         const buttonDirection_result : DialogButtonDirection | undefined = buttonDirection_buf
-        let value : AlertDialogParamWithOptions = ({title: title_result,subtitle: subtitle_result,message: message_result,autoCancel: autoCancel_result,cancel: cancel_result,alignment: alignment_result,offset: offset_result,gridCount: gridCount_result,maskRect: maskRect_result,showInSubWindow: showInSubWindow_result,isModal: isModal_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,onWillDismiss: onWillDismiss_result,transition: transition_result,cornerRadius: cornerRadius_result,width: width_result,height: height_result,borderWidth: borderWidth_result,borderColor: borderColor_result,borderStyle: borderStyle_result,shadow: shadow_result,textStyle: textStyle_result,enableHoverMode: enableHoverMode_result,hoverModeArea: hoverModeArea_result,buttons: buttons_result,buttonDirection: buttonDirection_result} as AlertDialogParamWithOptions)
+        let value : AlertDialogParamWithOptions = ({title: title_result, subtitle: subtitle_result, message: message_result, autoCancel: autoCancel_result, cancel: cancel_result, alignment: alignment_result, offset: offset_result, gridCount: gridCount_result, maskRect: maskRect_result, showInSubWindow: showInSubWindow_result, isModal: isModal_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, onWillDismiss: onWillDismiss_result, transition: transition_result, cornerRadius: cornerRadius_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, textStyle: textStyle_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result, buttons: buttons_result, buttonDirection: buttonDirection_result} as AlertDialogParamWithOptions)
         return value
     }
     readAlertDialogParamWithButtons(): AlertDialogParamWithButtons {
@@ -11534,7 +11618,7 @@ export class Deserializer extends DeserializerBase {
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
         const primaryButton_result : AlertDialogButtonBaseOptions = valueDeserializer.readAlertDialogButtonBaseOptions()
         const secondaryButton_result : AlertDialogButtonBaseOptions = valueDeserializer.readAlertDialogButtonBaseOptions()
-        let value : AlertDialogParamWithButtons = ({title: title_result,subtitle: subtitle_result,message: message_result,autoCancel: autoCancel_result,cancel: cancel_result,alignment: alignment_result,offset: offset_result,gridCount: gridCount_result,maskRect: maskRect_result,showInSubWindow: showInSubWindow_result,isModal: isModal_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,onWillDismiss: onWillDismiss_result,transition: transition_result,cornerRadius: cornerRadius_result,width: width_result,height: height_result,borderWidth: borderWidth_result,borderColor: borderColor_result,borderStyle: borderStyle_result,shadow: shadow_result,textStyle: textStyle_result,enableHoverMode: enableHoverMode_result,hoverModeArea: hoverModeArea_result,primaryButton: primaryButton_result,secondaryButton: secondaryButton_result} as AlertDialogParamWithButtons)
+        let value : AlertDialogParamWithButtons = ({title: title_result, subtitle: subtitle_result, message: message_result, autoCancel: autoCancel_result, cancel: cancel_result, alignment: alignment_result, offset: offset_result, gridCount: gridCount_result, maskRect: maskRect_result, showInSubWindow: showInSubWindow_result, isModal: isModal_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, onWillDismiss: onWillDismiss_result, transition: transition_result, cornerRadius: cornerRadius_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, textStyle: textStyle_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result, primaryButton: primaryButton_result, secondaryButton: secondaryButton_result} as AlertDialogParamWithButtons)
         return value
     }
     readAlertDialogParamWithConfirm(): AlertDialogParamWithConfirm {
@@ -12028,7 +12112,7 @@ export class Deserializer extends DeserializerBase {
             confirm_buf = valueDeserializer.readAlertDialogButtonBaseOptions()
         }
         const confirm_result : AlertDialogButtonBaseOptions | undefined = confirm_buf
-        let value : AlertDialogParamWithConfirm = ({title: title_result,subtitle: subtitle_result,message: message_result,autoCancel: autoCancel_result,cancel: cancel_result,alignment: alignment_result,offset: offset_result,gridCount: gridCount_result,maskRect: maskRect_result,showInSubWindow: showInSubWindow_result,isModal: isModal_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,onWillDismiss: onWillDismiss_result,transition: transition_result,cornerRadius: cornerRadius_result,width: width_result,height: height_result,borderWidth: borderWidth_result,borderColor: borderColor_result,borderStyle: borderStyle_result,shadow: shadow_result,textStyle: textStyle_result,enableHoverMode: enableHoverMode_result,hoverModeArea: hoverModeArea_result,confirm: confirm_result} as AlertDialogParamWithConfirm)
+        let value : AlertDialogParamWithConfirm = ({title: title_result, subtitle: subtitle_result, message: message_result, autoCancel: autoCancel_result, cancel: cancel_result, alignment: alignment_result, offset: offset_result, gridCount: gridCount_result, maskRect: maskRect_result, showInSubWindow: showInSubWindow_result, isModal: isModal_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, onWillDismiss: onWillDismiss_result, transition: transition_result, cornerRadius: cornerRadius_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, textStyle: textStyle_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result, confirm: confirm_result} as AlertDialogParamWithConfirm)
         return value
     }
     readActionSheetOptions(): ActionSheetOptions {
@@ -12090,7 +12174,7 @@ export class Deserializer extends DeserializerBase {
         }
         const cancel_result : VoidCallback | undefined = cancel_buf
         const sheets_buf_length : int32 = valueDeserializer.readInt32()
-        let sheets_buf : Array<SheetInfo> = new Array<SheetInfo>()
+        let sheets_buf : Array<SheetInfo> = new Array<SheetInfo>(sheets_buf_length)
         for (let sheets_buf_i = 0; sheets_buf_i < sheets_buf_length; sheets_buf_i++) {
             sheets_buf[sheets_buf_i] = valueDeserializer.readSheetInfo()
         }
@@ -12506,7 +12590,7 @@ export class Deserializer extends DeserializerBase {
             hoverModeArea_buf = (valueDeserializer.readInt32() as HoverModeAreaType)
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
-        let value : ActionSheetOptions = ({title: title_result,subtitle: subtitle_result,message: message_result,confirm: confirm_result,cancel: cancel_result,sheets: sheets_result,autoCancel: autoCancel_result,alignment: alignment_result,offset: offset_result,maskRect: maskRect_result,showInSubWindow: showInSubWindow_result,isModal: isModal_result,backgroundColor: backgroundColor_result,backgroundBlurStyle: backgroundBlurStyle_result,onWillDismiss: onWillDismiss_result,transition: transition_result,cornerRadius: cornerRadius_result,width: width_result,height: height_result,borderWidth: borderWidth_result,borderColor: borderColor_result,borderStyle: borderStyle_result,shadow: shadow_result,enableHoverMode: enableHoverMode_result,hoverModeArea: hoverModeArea_result} as ActionSheetOptions)
+        let value : ActionSheetOptions = ({title: title_result, subtitle: subtitle_result, message: message_result, confirm: confirm_result, cancel: cancel_result, sheets: sheets_result, autoCancel: autoCancel_result, alignment: alignment_result, offset: offset_result, maskRect: maskRect_result, showInSubWindow: showInSubWindow_result, isModal: isModal_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, onWillDismiss: onWillDismiss_result, transition: transition_result, cornerRadius: cornerRadius_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result} as ActionSheetOptions)
         return value
     }
     readClickEvent(): ClickEvent {
@@ -12554,7 +12638,7 @@ export class Deserializer extends DeserializerBase {
             throw new Error("One of the branches for familySrc_buf has to be chosen through deserialisation.")
         }
         const familySrc_result : string | Resource = (familySrc_buf as string | Resource)
-        let value : FontOptions = ({familyName: familyName_result,familySrc: familySrc_result} as FontOptions)
+        let value : FontOptions = ({familyName: familyName_result, familySrc: familySrc_result} as FontOptions)
         return value
     }
     readRoundRectShapeOptions(): RoundRectShapeOptions {
@@ -12631,7 +12715,7 @@ export class Deserializer extends DeserializerBase {
             radiusHeight_buf = (radiusHeight_buf_ as number | string)
         }
         const radiusHeight_result : number | string | undefined = radiusHeight_buf
-        let value : RoundRectShapeOptions = ({width: width_result,height: height_result,radiusWidth: radiusWidth_result,radiusHeight: radiusHeight_result} as RoundRectShapeOptions)
+        let value : RoundRectShapeOptions = ({width: width_result, height: height_result, radiusWidth: radiusWidth_result, radiusHeight: radiusHeight_result} as RoundRectShapeOptions)
         return value
     }
     readRectShapeOptions(): RectShapeOptions {
@@ -12686,7 +12770,7 @@ export class Deserializer extends DeserializerBase {
             }
             else if (radius_buf__selector == 2) {
                 const radius_buf__u_length : int32 = valueDeserializer.readInt32()
-                let radius_buf__u : Array<number | string> = new Array<number | string>()
+                let radius_buf__u : Array<number | string> = new Array<number | string>(radius_buf__u_length)
                 for (let radius_buf__u_i = 0; radius_buf__u_i < radius_buf__u_length; radius_buf__u_i++) {
                     const radius_buf__u_buf_selector : int32 = valueDeserializer.readInt8()
                     let radius_buf__u_buf : number | string | undefined
@@ -12709,7 +12793,7 @@ export class Deserializer extends DeserializerBase {
             radius_buf = (radius_buf_ as number | string | Array<number | string>)
         }
         const radius_result : number | string | Array<number | string> | undefined = radius_buf
-        let value : RectShapeOptions = ({width: width_result,height: height_result,radius: radius_result} as RectShapeOptions)
+        let value : RectShapeOptions = ({width: width_result, height: height_result, radius: radius_result} as RectShapeOptions)
         return value
     }
     readBaseShape(): BaseShape {
@@ -12738,7 +12822,7 @@ export class Deserializer extends DeserializerBase {
             waitUntilRenderFinished_buf = valueDeserializer.readBoolean()
         }
         const waitUntilRenderFinished_result : boolean | undefined = waitUntilRenderFinished_buf
-        let value : SnapshotOptions = ({scale: scale_result,waitUntilRenderFinished: waitUntilRenderFinished_result} as SnapshotOptions)
+        let value : SnapshotOptions = ({scale: scale_result, waitUntilRenderFinished: waitUntilRenderFinished_result} as SnapshotOptions)
         return value
     }
     readAsyncCallback_image_PixelMap_Void(isSync: boolean = false): ((result: PixelMap) => void) {
@@ -12807,7 +12891,7 @@ export class Deserializer extends DeserializerBase {
             onFinish_buf = valueDeserializer.readCallback_Extender_OnFinish()
         }
         const onFinish_result : Callback_Extender_OnFinish | undefined = onFinish_buf
-        let value : DoubleAnimationParam = ({propertyName: propertyName_result,startValue: startValue_result,endValue: endValue_result,duration: duration_result,delay: delay_result,curve: curve_result,onProgress: onProgress_result,onFinish: onFinish_result} as DoubleAnimationParam)
+        let value : DoubleAnimationParam = ({propertyName: propertyName_result, startValue: startValue_result, endValue: endValue_result, duration: duration_result, delay: delay_result, curve: curve_result, onProgress: onProgress_result, onFinish: onFinish_result} as DoubleAnimationParam)
         return value
     }
     readWithThemeOptions(): WithThemeOptions {
@@ -12826,7 +12910,7 @@ export class Deserializer extends DeserializerBase {
             colorMode_buf = (valueDeserializer.readInt32() as ThemeColorMode)
         }
         const colorMode_result : ThemeColorMode | undefined = colorMode_buf
-        let value : WithThemeOptions = ({theme: theme_result,colorMode: colorMode_result} as WithThemeOptions)
+        let value : WithThemeOptions = ({theme: theme_result, colorMode: colorMode_result} as WithThemeOptions)
         return value
     }
     readWithThemeInterface(isSync: boolean = false): WithThemeInterface {
@@ -12857,7 +12941,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNavContentInfo(from);
     _argsSerializer.writeNavContentInfo(to);
-    _argsSerializer.writeInt32((operation.valueOf() as int32));
+    _argsSerializer.writeInt32(((operation as NavigationOperation) as int32));
     let _continuationValue : NavigationAnimatedTransition | undefined;
     const _continuationCallback : ((value: NavigationAnimatedTransition | undefined) => void) = (value?: NavigationAnimatedTransition | undefined):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
@@ -12875,7 +12959,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(value);
-    _argsSerializer.writeInt32((mode.valueOf() as int32));
+    _argsSerializer.writeInt32(((mode as SliderChangeMode) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(711649376, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(711649376, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -12889,7 +12973,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((type.valueOf() as int32));
+    _argsSerializer.writeInt32(((type as RouteType) as int32));
     _argsSerializer.writeNumber(progress);
     (isSync) ? (InteropNativeModule._CallCallbackSync(1627123591, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1627123591, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
@@ -12905,8 +12989,23 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(scrollOffset);
-    _argsSerializer.writeInt32((scrollState.valueOf() as int32));
+    _argsSerializer.writeInt32(((scrollState as ScrollState) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(-160015401, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-160015401, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnMoveHandler(isSync: boolean = false): OnMoveHandler {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (from: number, to: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(from);
+    _argsSerializer.writeNumber(to);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1200281222, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1200281222, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -12914,7 +13013,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const want_result : Want = valueDeserializer.readWant()
         const worker_result : RestrictedWorker = valueDeserializer.readRestrictedWorker()
-        let value : IsolatedOptions = ({want: want_result,worker: worker_result} as IsolatedOptions)
+        let value : IsolatedOptions = ({want: want_result, worker: worker_result} as IsolatedOptions)
         return value
     }
     readIsolatedComponentInterface(isSync: boolean = false): IsolatedComponentInterface {
@@ -13218,7 +13317,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((titleMode.valueOf() as int32));
+    _argsSerializer.writeInt32(((titleMode as NavigationTitleMode) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(1685437830, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1685437830, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -13232,7 +13331,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((mode.valueOf() as int32));
+    _argsSerializer.writeInt32(((mode as NavigationMode) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(960690982, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(960690982, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -13278,7 +13377,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((value.valueOf() as int32));
+    _argsSerializer.writeInt32(((value as HitTestMode) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(-1755111025, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1755111025, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -13306,7 +13405,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((value.valueOf() as int32));
+    _argsSerializer.writeInt32(((value as GestureJudgeResult) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(-684588584, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-684588584, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -13408,18 +13507,8 @@ export class Deserializer extends DeserializerBase {
             layoutStyle_buf = valueDeserializer.readImageAttachmentLayoutStyle()
         }
         const layoutStyle_result : ImageAttachmentLayoutStyle | undefined = layoutStyle_buf
-        let value : ImageAttachmentInterface = ({value: value_result,size: size_result,verticalAlign: verticalAlign_result,objectFit: objectFit_result,layoutStyle: layoutStyle_result} as ImageAttachmentInterface)
+        let value : ImageAttachmentInterface = ({value: value_result, size: size_result, verticalAlign: verticalAlign_result, objectFit: objectFit_result, layoutStyle: layoutStyle_result} as ImageAttachmentInterface)
         return value
-    }
-    readUrlStyle(): UrlStyle {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return UrlStyleInternal.fromPtr(ptr)
-    }
-    readLineHeightStyle(): LineHeightStyle {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LineHeightStyleInternal.fromPtr(ptr)
     }
     readParagraphStyleInterface(): ParagraphStyleInterface {
         let valueDeserializer : Deserializer = this
@@ -13476,13 +13565,8 @@ export class Deserializer extends DeserializerBase {
             leadingMargin_buf = (leadingMargin_buf_ as LengthMetrics | LeadingMarginPlaceholder)
         }
         const leadingMargin_result : LengthMetrics | LeadingMarginPlaceholder | undefined = leadingMargin_buf
-        let value : ParagraphStyleInterface = ({textAlign: textAlign_result,textIndent: textIndent_result,maxLines: maxLines_result,overflow: overflow_result,wordBreak: wordBreak_result,leadingMargin: leadingMargin_result} as ParagraphStyleInterface)
+        let value : ParagraphStyleInterface = ({textAlign: textAlign_result, textIndent: textIndent_result, maxLines: maxLines_result, overflow: overflow_result, wordBreak: wordBreak_result, leadingMargin: leadingMargin_result} as ParagraphStyleInterface)
         return value
-    }
-    readParagraphStyle(): ParagraphStyle {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ParagraphStyleInternal.fromPtr(ptr)
     }
     readGestureStyleInterface(): GestureStyleInterface {
         let valueDeserializer : Deserializer = this
@@ -13500,38 +13584,8 @@ export class Deserializer extends DeserializerBase {
             onLongPress_buf = valueDeserializer.readCallback_GestureEvent_Void()
         }
         const onLongPress_result : ((event: GestureEvent) => void) | undefined = onLongPress_buf
-        let value : GestureStyleInterface = ({onClick: onClick_result,onLongPress: onLongPress_result} as GestureStyleInterface)
+        let value : GestureStyleInterface = ({onClick: onClick_result, onLongPress: onLongPress_result} as GestureStyleInterface)
         return value
-    }
-    readGestureStyle(): GestureStyle {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return GestureStyleInternal.fromPtr(ptr)
-    }
-    readBackgroundColorStyle(): BackgroundColorStyle {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return BackgroundColorStyleInternal.fromPtr(ptr)
-    }
-    readTextShadowStyle(): TextShadowStyle {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return TextShadowStyleInternal.fromPtr(ptr)
-    }
-    readLetterSpacingStyle(): LetterSpacingStyle {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LetterSpacingStyleInternal.fromPtr(ptr)
-    }
-    readBaselineOffsetStyle(): BaselineOffsetStyle {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return BaselineOffsetStyleInternal.fromPtr(ptr)
-    }
-    readDecorationStyle(): DecorationStyle {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return DecorationStyleInternal.fromPtr(ptr)
     }
     readTextStyleInterface(): TextStyleInterface {
         let valueDeserializer : Deserializer = this
@@ -13612,13 +13666,8 @@ export class Deserializer extends DeserializerBase {
             fontStyle_buf = (valueDeserializer.readInt32() as FontStyle)
         }
         const fontStyle_result : FontStyle | undefined = fontStyle_buf
-        let value : TextStyleInterface = ({fontColor: fontColor_result,fontFamily: fontFamily_result,fontSize: fontSize_result,fontWeight: fontWeight_result,fontStyle: fontStyle_result} as TextStyleInterface)
+        let value : TextStyleInterface = ({fontColor: fontColor_result, fontFamily: fontFamily_result, fontSize: fontSize_result, fontWeight: fontWeight_result, fontStyle: fontStyle_result} as TextStyleInterface)
         return value
-    }
-    readTextStyle_styled_string(): TextStyle_styled_string {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return TextStyle_styled_stringInternal.fromPtr(ptr)
     }
     readStyleOptions(): StyleOptions {
         let valueDeserializer : Deserializer = this
@@ -13637,8 +13686,52 @@ export class Deserializer extends DeserializerBase {
         }
         const length_result : number | undefined = length_buf
         const styledKey_result : StyledStringKey = (valueDeserializer.readInt32() as StyledStringKey)
-        const styledValue_result : StyledStringValue = valueDeserializer.readStyledStringValue()
-        let value : StyleOptions = ({start: start_result,length: length_result,styledKey: styledKey_result,styledValue: styledValue_result} as StyleOptions)
+        const styledValue_buf_selector : int32 = valueDeserializer.readInt8()
+        let styledValue_buf : TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        if (styledValue_buf_selector == 0) {
+            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle_styled_string)
+        }
+        else if (styledValue_buf_selector == 1) {
+            styledValue_buf = (valueDeserializer.readDecorationStyle() as DecorationStyle)
+        }
+        else if (styledValue_buf_selector == 2) {
+            styledValue_buf = (valueDeserializer.readBaselineOffsetStyle() as BaselineOffsetStyle)
+        }
+        else if (styledValue_buf_selector == 3) {
+            styledValue_buf = (valueDeserializer.readLetterSpacingStyle() as LetterSpacingStyle)
+        }
+        else if (styledValue_buf_selector == 4) {
+            styledValue_buf = (valueDeserializer.readTextShadowStyle() as TextShadowStyle)
+        }
+        else if (styledValue_buf_selector == 5) {
+            styledValue_buf = (valueDeserializer.readGestureStyle() as GestureStyle)
+        }
+        else if (styledValue_buf_selector == 6) {
+            styledValue_buf = (valueDeserializer.readImageAttachment() as ImageAttachment)
+        }
+        else if (styledValue_buf_selector == 7) {
+            styledValue_buf = (valueDeserializer.readParagraphStyle() as ParagraphStyle)
+        }
+        else if (styledValue_buf_selector == 8) {
+            styledValue_buf = (valueDeserializer.readLineHeightStyle() as LineHeightStyle)
+        }
+        else if (styledValue_buf_selector == 9) {
+            styledValue_buf = (valueDeserializer.readUrlStyle() as UrlStyle)
+        }
+        else if (styledValue_buf_selector == 10) {
+            styledValue_buf = (valueDeserializer.readCustomSpan() as CustomSpan)
+        }
+        else if (styledValue_buf_selector == 11) {
+            styledValue_buf = valueDeserializer.readUserDataSpan()
+        }
+        else if (styledValue_buf_selector == 12) {
+            styledValue_buf = (valueDeserializer.readBackgroundColorStyle() as BackgroundColorStyle)
+        }
+        else {
+            throw new Error("One of the branches for styledValue_buf has to be chosen through deserialisation.")
+        }
+        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        let value : StyleOptions = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as StyleOptions)
         return value
     }
     readCallback_Literal_Number_code_Want_want_Void(isSync: boolean = false): ((parameter: Literal_Number_code_Want_want) => void) {
@@ -13708,7 +13801,7 @@ export class Deserializer extends DeserializerBase {
             dpiFollowStrategy_buf = (valueDeserializer.readInt32() as DpiFollowStrategy)
         }
         const dpiFollowStrategy_result : DpiFollowStrategy | undefined = dpiFollowStrategy_buf
-        let value : UIExtensionOptions = ({isTransferringCaller: isTransferringCaller_result,placeholder: placeholder_result,areaChangePlaceholder: areaChangePlaceholder_result,dpiFollowStrategy: dpiFollowStrategy_result} as UIExtensionOptions)
+        let value : UIExtensionOptions = ({isTransferringCaller: isTransferringCaller_result, placeholder: placeholder_result, areaChangePlaceholder: areaChangePlaceholder_result, dpiFollowStrategy: dpiFollowStrategy_result} as UIExtensionOptions)
         return value
     }
     readUIExtensionProxy(): UIExtensionProxy {
@@ -13746,7 +13839,7 @@ export class Deserializer extends DeserializerBase {
             layoutMode_buf = (valueDeserializer.readInt32() as WaterFlowLayoutMode)
         }
         const layoutMode_result : WaterFlowLayoutMode | undefined = layoutMode_buf
-        let value : WaterFlowOptions = ({footer: footer_result,scroller: scroller_result,sections: sections_result,layoutMode: layoutMode_result} as WaterFlowOptions)
+        let value : WaterFlowOptions = ({footer: footer_result, scroller: scroller_result, sections: sections_result, layoutMode: layoutMode_result} as WaterFlowOptions)
         return value
     }
     readWindowAnimationTarget(): WindowAnimationTarget {
@@ -13755,7 +13848,7 @@ export class Deserializer extends DeserializerBase {
         const abilityName_result : string = (valueDeserializer.readString() as string)
         const windowBounds_result : RRect = valueDeserializer.readRRect()
         const missionId_result : number = (valueDeserializer.readNumber() as number)
-        let value : WindowAnimationTarget = ({bundleName: bundleName_result,abilityName: abilityName_result,windowBounds: windowBounds_result,missionId: missionId_result} as WindowAnimationTarget)
+        let value : WindowAnimationTarget = ({bundleName: bundleName_result, abilityName: abilityName_result, windowBounds: windowBounds_result, missionId: missionId_result} as WindowAnimationTarget)
         return value
     }
     readButtonStyle(): ButtonStyle {
@@ -13795,7 +13888,7 @@ export class Deserializer extends DeserializerBase {
             icons_buf = valueDeserializer.readButtonIconOptions()
         }
         const icons_result : ButtonIconOptions | undefined = icons_buf
-        let value : ButtonStyle = ({left: left_result,top: top_result,width: width_result,height: height_result,icons: icons_result} as ButtonStyle)
+        let value : ButtonStyle = ({left: left_result, top: top_result, width: width_result, height: height_result, icons: icons_result} as ButtonStyle)
         return value
     }
     readOnNativeLoadCallback(isSync: boolean = false): OnNativeLoadCallback {
@@ -13829,19 +13922,19 @@ export class Deserializer extends DeserializerBase {
             imageAIOptions_buf = valueDeserializer.readImageAIOptions()
         }
         const imageAIOptions_result : ImageAIOptions | undefined = imageAIOptions_buf
-        let value : XComponentOptions = ({type: type_result,controller: controller_result,imageAIOptions: imageAIOptions_result} as XComponentOptions)
+        let value : XComponentOptions = ({type: type_result, controller: controller_result, imageAIOptions: imageAIOptions_result} as XComponentOptions)
         return value
     }
     readAdsBlockedDetails(): AdsBlockedDetails {
         let valueDeserializer : Deserializer = this
         const url_result : string = (valueDeserializer.readString() as string)
         const adsBlocked_buf_length : int32 = valueDeserializer.readInt32()
-        let adsBlocked_buf : Array<string> = new Array<string>()
+        let adsBlocked_buf : Array<string> = new Array<string>(adsBlocked_buf_length)
         for (let adsBlocked_buf_i = 0; adsBlocked_buf_i < adsBlocked_buf_length; adsBlocked_buf_i++) {
             adsBlocked_buf[adsBlocked_buf_i] = (valueDeserializer.readString() as string)
         }
         const adsBlocked_result : Array<string> = adsBlocked_buf
-        let value : AdsBlockedDetails = ({url: url_result,adsBlocked: adsBlocked_result} as AdsBlockedDetails)
+        let value : AdsBlockedDetails = ({url: url_result, adsBlocked: adsBlocked_result} as AdsBlockedDetails)
         return value
     }
     readOnAdsBlockedCallback(isSync: boolean = false): OnAdsBlockedCallback {
@@ -13875,7 +13968,7 @@ export class Deserializer extends DeserializerBase {
             customKeyboard_buf = CallbackTransformer.transformToCustomBuilder(valueDeserializer.readCustomNodeBuilder())
         }
         const customKeyboard_result : CustomBuilder | undefined = customKeyboard_buf
-        let value : WebKeyboardOptions = ({useSystemKeyboard: useSystemKeyboard_result,enterKeyType: enterKeyType_result,customKeyboard: customKeyboard_result} as WebKeyboardOptions)
+        let value : WebKeyboardOptions = ({useSystemKeyboard: useSystemKeyboard_result, enterKeyType: enterKeyType_result, customKeyboard: customKeyboard_result} as WebKeyboardOptions)
         return value
     }
     readWebKeyboardCallbackInfo(): WebKeyboardCallbackInfo {
@@ -13890,7 +13983,7 @@ export class Deserializer extends DeserializerBase {
             attributes_buf.set(attributes_buf_key, attributes_buf_value)
         }
         const attributes_result : Map<string, string> = attributes_buf
-        let value : WebKeyboardCallbackInfo = ({controller: controller_result,attributes: attributes_result} as WebKeyboardCallbackInfo)
+        let value : WebKeyboardCallbackInfo = ({controller: controller_result, attributes: attributes_result} as WebKeyboardCallbackInfo)
         return value
     }
     readWebKeyboardCallback(isSync: boolean = false): WebKeyboardCallback {
@@ -13919,7 +14012,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((viewportFit.valueOf() as int32));
+    _argsSerializer.writeInt32(((viewportFit as ViewportFit) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(1847083191, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1847083191, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -13957,7 +14050,7 @@ export class Deserializer extends DeserializerBase {
         }
         const startIcon_result : ResourceStr | undefined = startIcon_buf
         const action_result : ((selectedText: Literal_String_plainText) => void) = valueDeserializer.readCallback_Literal_String_plainText_Void()
-        let value : ExpandedMenuItemOptions = ({content: content_result,startIcon: startIcon_result,action: action_result} as ExpandedMenuItemOptions)
+        let value : ExpandedMenuItemOptions = ({content: content_result, startIcon: startIcon_result, action: action_result} as ExpandedMenuItemOptions)
         return value
     }
     readOnRenderProcessRespondingCallback(isSync: boolean = false): OnRenderProcessRespondingCallback {
@@ -13978,7 +14071,7 @@ export class Deserializer extends DeserializerBase {
         const jsStack_result : string = (valueDeserializer.readString() as string)
         const pid_result : number = (valueDeserializer.readNumber() as number)
         const reason_result : RenderProcessNotRespondingReason = (valueDeserializer.readInt32() as RenderProcessNotRespondingReason)
-        let value : RenderProcessNotRespondingData = ({jsStack: jsStack_result,pid: pid_result,reason: reason_result} as RenderProcessNotRespondingData)
+        let value : RenderProcessNotRespondingData = ({jsStack: jsStack_result, pid: pid_result, reason: reason_result} as RenderProcessNotRespondingData)
         return value
     }
     readOnRenderProcessNotRespondingCallback(isSync: boolean = false): OnRenderProcessNotRespondingCallback {
@@ -13999,7 +14092,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const enable_result : boolean = valueDeserializer.readBoolean()
         const shouldOverlay_result : boolean = valueDeserializer.readBoolean()
-        let value : NativeMediaPlayerConfig = ({enable: enable_result,shouldOverlay: shouldOverlay_result} as NativeMediaPlayerConfig)
+        let value : NativeMediaPlayerConfig = ({enable: enable_result, shouldOverlay: shouldOverlay_result} as NativeMediaPlayerConfig)
         return value
     }
     readOnOverrideUrlLoadingCallback(isSync: boolean = false): OnOverrideUrlLoadingCallback {
@@ -14042,7 +14135,7 @@ export class Deserializer extends DeserializerBase {
             result_buf = (valueDeserializer.readEventResult() as EventResult)
         }
         const result_result : EventResult | undefined = result_buf
-        let value : NativeEmbedTouchInfo = ({embedId: embedId_result,touchEvent: touchEvent_result,result: result_result} as NativeEmbedTouchInfo)
+        let value : NativeEmbedTouchInfo = ({embedId: embedId_result, touchEvent: touchEvent_result, result: result_result} as NativeEmbedTouchInfo)
         return value
     }
     readCallback_NativeEmbedTouchInfo_Void(isSync: boolean = false): ((event: NativeEmbedTouchInfo) => void) {
@@ -14063,7 +14156,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const visibility_result : boolean = valueDeserializer.readBoolean()
         const embedId_result : string = (valueDeserializer.readString() as string)
-        let value : NativeEmbedVisibilityInfo = ({visibility: visibility_result,embedId: embedId_result} as NativeEmbedVisibilityInfo)
+        let value : NativeEmbedVisibilityInfo = ({visibility: visibility_result, embedId: embedId_result} as NativeEmbedVisibilityInfo)
         return value
     }
     readOnNativeEmbedVisibilityChangeCallback(isSync: boolean = false): OnNativeEmbedVisibilityChangeCallback {
@@ -14110,7 +14203,7 @@ export class Deserializer extends DeserializerBase {
             info_buf = valueDeserializer.readNativeEmbedInfo()
         }
         const info_result : NativeEmbedInfo | undefined = info_buf
-        let value : NativeEmbedDataInfo = ({status: status_result,surfaceId: surfaceId_result,embedId: embedId_result,info: info_result} as NativeEmbedDataInfo)
+        let value : NativeEmbedDataInfo = ({status: status_result, surfaceId: surfaceId_result, embedId: embedId_result, info: info_result} as NativeEmbedDataInfo)
         return value
     }
     readCallback_NativeEmbedDataInfo_Void(isSync: boolean = false): ((event: NativeEmbedDataInfo) => void) {
@@ -14131,19 +14224,19 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const script_result : string = (valueDeserializer.readString() as string)
         const scriptRules_buf_length : int32 = valueDeserializer.readInt32()
-        let scriptRules_buf : Array<string> = new Array<string>()
+        let scriptRules_buf : Array<string> = new Array<string>(scriptRules_buf_length)
         for (let scriptRules_buf_i = 0; scriptRules_buf_i < scriptRules_buf_length; scriptRules_buf_i++) {
             scriptRules_buf[scriptRules_buf_i] = (valueDeserializer.readString() as string)
         }
         const scriptRules_result : Array<string> = scriptRules_buf
-        let value : ScriptItem = ({script: script_result,scriptRules: scriptRules_result} as ScriptItem)
+        let value : ScriptItem = ({script: script_result, scriptRules: scriptRules_result} as ScriptItem)
         return value
     }
     readIntelligentTrackingPreventionDetails(): IntelligentTrackingPreventionDetails {
         let valueDeserializer : Deserializer = this
         const host_result : string = (valueDeserializer.readString() as string)
         const trackerHost_result : string = (valueDeserializer.readString() as string)
-        let value : IntelligentTrackingPreventionDetails = ({host: host_result,trackerHost: trackerHost_result} as IntelligentTrackingPreventionDetails)
+        let value : IntelligentTrackingPreventionDetails = ({host: host_result, trackerHost: trackerHost_result} as IntelligentTrackingPreventionDetails)
         return value
     }
     readOnIntelligentTrackingPreventionCallback(isSync: boolean = false): OnIntelligentTrackingPreventionCallback {
@@ -14167,7 +14260,7 @@ export class Deserializer extends DeserializerBase {
         const didReplaceEntry_result : boolean = valueDeserializer.readBoolean()
         const navigationType_result : WebNavigationType = (valueDeserializer.readInt32() as WebNavigationType)
         const url_result : string = (valueDeserializer.readString() as string)
-        let value : LoadCommittedDetails = ({isMainFrame: isMainFrame_result,isSameDocument: isSameDocument_result,didReplaceEntry: didReplaceEntry_result,navigationType: navigationType_result,url: url_result} as LoadCommittedDetails)
+        let value : LoadCommittedDetails = ({isMainFrame: isMainFrame_result, isSameDocument: isSameDocument_result, didReplaceEntry: didReplaceEntry_result, navigationType: navigationType_result, url: url_result} as LoadCommittedDetails)
         return value
     }
     readOnNavigationEntryCommittedCallback(isSync: boolean = false): OnNavigationEntryCommittedCallback {
@@ -14193,7 +14286,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((threatType.valueOf() as int32));
+    _argsSerializer.writeInt32(((threatType as ThreatType) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(-1099824577, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1099824577, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -14202,7 +14295,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const xOffset_result : number = (valueDeserializer.readNumber() as number)
         const yOffset_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnOverScrollEvent = ({xOffset: xOffset_result,yOffset: yOffset_result} as OnOverScrollEvent)
+        let value : OnOverScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnOverScrollEvent)
         return value
     }
     readCallback_OnOverScrollEvent_Void(isSync: boolean = false): ((parameter: OnOverScrollEvent) => void) {
@@ -14286,7 +14379,7 @@ export class Deserializer extends DeserializerBase {
             largestImageLoadEndTime_buf = (valueDeserializer.readNumber() as number)
         }
         const largestImageLoadEndTime_result : number | undefined = largestImageLoadEndTime_buf
-        let value : LargestContentfulPaint = ({navigationStartTime: navigationStartTime_result,largestImagePaintTime: largestImagePaintTime_result,largestTextPaintTime: largestTextPaintTime_result,imageBPP: imageBPP_result,largestImageLoadStartTime: largestImageLoadStartTime_result,largestImageLoadEndTime: largestImageLoadEndTime_result} as LargestContentfulPaint)
+        let value : LargestContentfulPaint = ({navigationStartTime: navigationStartTime_result, largestImagePaintTime: largestImagePaintTime_result, largestTextPaintTime: largestTextPaintTime_result, imageBPP: imageBPP_result, largestImageLoadStartTime: largestImageLoadStartTime_result, largestImageLoadEndTime: largestImageLoadEndTime_result} as LargestContentfulPaint)
         return value
     }
     readOnLargestContentfulPaintCallback(isSync: boolean = false): OnLargestContentfulPaintCallback {
@@ -14319,7 +14412,7 @@ export class Deserializer extends DeserializerBase {
             firstMeaningfulPaintTime_buf = (valueDeserializer.readNumber() as number)
         }
         const firstMeaningfulPaintTime_result : number | undefined = firstMeaningfulPaintTime_buf
-        let value : FirstMeaningfulPaint = ({navigationStartTime: navigationStartTime_result,firstMeaningfulPaintTime: firstMeaningfulPaintTime_result} as FirstMeaningfulPaint)
+        let value : FirstMeaningfulPaint = ({navigationStartTime: navigationStartTime_result, firstMeaningfulPaintTime: firstMeaningfulPaintTime_result} as FirstMeaningfulPaint)
         return value
     }
     readOnFirstMeaningfulPaintCallback(isSync: boolean = false): OnFirstMeaningfulPaintCallback {
@@ -14340,7 +14433,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const navigationStartTick_result : number = (valueDeserializer.readNumber() as number)
         const firstContentfulPaintMs_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnFirstContentfulPaintEvent = ({navigationStartTick: navigationStartTick_result,firstContentfulPaintMs: firstContentfulPaintMs_result} as OnFirstContentfulPaintEvent)
+        let value : OnFirstContentfulPaintEvent = ({navigationStartTick: navigationStartTick_result, firstContentfulPaintMs: firstContentfulPaintMs_result} as OnFirstContentfulPaintEvent)
         return value
     }
     readCallback_OnFirstContentfulPaintEvent_Void(isSync: boolean = false): ((parameter: OnFirstContentfulPaintEvent) => void) {
@@ -14441,7 +14534,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const url_result : string = (valueDeserializer.readString() as string)
         const precomposed_result : boolean = valueDeserializer.readBoolean()
-        let value : OnTouchIconUrlReceivedEvent = ({url: url_result,precomposed: precomposed_result} as OnTouchIconUrlReceivedEvent)
+        let value : OnTouchIconUrlReceivedEvent = ({url: url_result, precomposed: precomposed_result} as OnTouchIconUrlReceivedEvent)
         return value
     }
     readCallback_OnTouchIconUrlReceivedEvent_Void(isSync: boolean = false): ((parameter: OnTouchIconUrlReceivedEvent) => void) {
@@ -14464,7 +14557,7 @@ export class Deserializer extends DeserializerBase {
         const isUserTrigger_result : boolean = valueDeserializer.readBoolean()
         const targetUrl_result : string = (valueDeserializer.readString() as string)
         const handler_result : ControllerHandler = (valueDeserializer.readControllerHandler() as ControllerHandler)
-        let value : OnWindowNewEvent = ({isAlert: isAlert_result,isUserTrigger: isUserTrigger_result,targetUrl: targetUrl_result,handler: handler_result} as OnWindowNewEvent)
+        let value : OnWindowNewEvent = ({isAlert: isAlert_result, isUserTrigger: isUserTrigger_result, targetUrl: targetUrl_result, handler: handler_result} as OnWindowNewEvent)
         return value
     }
     readCallback_OnWindowNewEvent_Void(isSync: boolean = false): ((parameter: OnWindowNewEvent) => void) {
@@ -14487,18 +14580,18 @@ export class Deserializer extends DeserializerBase {
         const host_result : string = (valueDeserializer.readString() as string)
         const port_result : number = (valueDeserializer.readNumber() as number)
         const keyTypes_buf_length : int32 = valueDeserializer.readInt32()
-        let keyTypes_buf : Array<string> = new Array<string>()
+        let keyTypes_buf : Array<string> = new Array<string>(keyTypes_buf_length)
         for (let keyTypes_buf_i = 0; keyTypes_buf_i < keyTypes_buf_length; keyTypes_buf_i++) {
             keyTypes_buf[keyTypes_buf_i] = (valueDeserializer.readString() as string)
         }
         const keyTypes_result : Array<string> = keyTypes_buf
         const issuers_buf_length : int32 = valueDeserializer.readInt32()
-        let issuers_buf : Array<string> = new Array<string>()
+        let issuers_buf : Array<string> = new Array<string>(issuers_buf_length)
         for (let issuers_buf_i = 0; issuers_buf_i < issuers_buf_length; issuers_buf_i++) {
             issuers_buf[issuers_buf_i] = (valueDeserializer.readString() as string)
         }
         const issuers_result : Array<string> = issuers_buf
-        let value : OnClientAuthenticationEvent = ({handler: handler_result,host: host_result,port: port_result,keyTypes: keyTypes_result,issuers: issuers_result} as OnClientAuthenticationEvent)
+        let value : OnClientAuthenticationEvent = ({handler: handler_result, host: host_result, port: port_result, keyTypes: keyTypes_result, issuers: issuers_result} as OnClientAuthenticationEvent)
         return value
     }
     readCallback_OnClientAuthenticationEvent_Void(isSync: boolean = false): ((parameter: OnClientAuthenticationEvent) => void) {
@@ -14524,7 +14617,7 @@ export class Deserializer extends DeserializerBase {
         const referrer_result : string = (valueDeserializer.readString() as string)
         const isFatalError_result : boolean = valueDeserializer.readBoolean()
         const isMainFrame_result : boolean = valueDeserializer.readBoolean()
-        let value : SslErrorEvent = ({handler: handler_result,error: error_result,url: url_result,originalUrl: originalUrl_result,referrer: referrer_result,isFatalError: isFatalError_result,isMainFrame: isMainFrame_result} as SslErrorEvent)
+        let value : SslErrorEvent = ({handler: handler_result, error: error_result, url: url_result, originalUrl: originalUrl_result, referrer: referrer_result, isFatalError: isFatalError_result, isMainFrame: isMainFrame_result} as SslErrorEvent)
         return value
     }
     readOnSslErrorEventCallback(isSync: boolean = false): OnSslErrorEventCallback {
@@ -14550,14 +14643,14 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (certChainData_buf_runtimeType))
         {
             const certChainData_buf__length : int32 = valueDeserializer.readInt32()
-            let certChainData_buf_ : Array<NativeBuffer> = new Array<NativeBuffer>()
+            let certChainData_buf_ : Array<NativeBuffer> = new Array<NativeBuffer>(certChainData_buf__length)
             for (let certChainData_buf__i = 0; certChainData_buf__i < certChainData_buf__length; certChainData_buf__i++) {
                 certChainData_buf_[certChainData_buf__i] = (valueDeserializer.readBuffer() as NativeBuffer)
             }
             certChainData_buf = certChainData_buf_
         }
         const certChainData_result : Array<NativeBuffer> | undefined = certChainData_buf
-        let value : OnSslErrorEventReceiveEvent = ({handler: handler_result,error: error_result,certChainData: certChainData_result} as OnSslErrorEventReceiveEvent)
+        let value : OnSslErrorEventReceiveEvent = ({handler: handler_result, error: error_result, certChainData: certChainData_result} as OnSslErrorEventReceiveEvent)
         return value
     }
     readCallback_OnSslErrorEventReceiveEvent_Void(isSync: boolean = false): ((parameter: OnSslErrorEventReceiveEvent) => void) {
@@ -14578,7 +14671,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const xOffset_result : number = (valueDeserializer.readNumber() as number)
         const yOffset_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnScrollEvent = ({xOffset: xOffset_result,yOffset: yOffset_result} as OnScrollEvent)
+        let value : OnScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnScrollEvent)
         return value
     }
     readCallback_OnScrollEvent_Void(isSync: boolean = false): ((parameter: OnScrollEvent) => void) {
@@ -14600,7 +14693,7 @@ export class Deserializer extends DeserializerBase {
         const activeMatchOrdinal_result : number = (valueDeserializer.readNumber() as number)
         const numberOfMatches_result : number = (valueDeserializer.readNumber() as number)
         const isDoneCounting_result : boolean = valueDeserializer.readBoolean()
-        let value : OnSearchResultReceiveEvent = ({activeMatchOrdinal: activeMatchOrdinal_result,numberOfMatches: numberOfMatches_result,isDoneCounting: isDoneCounting_result} as OnSearchResultReceiveEvent)
+        let value : OnSearchResultReceiveEvent = ({activeMatchOrdinal: activeMatchOrdinal_result, numberOfMatches: numberOfMatches_result, isDoneCounting: isDoneCounting_result} as OnSearchResultReceiveEvent)
         return value
     }
     readCallback_OnSearchResultReceiveEvent_Void(isSync: boolean = false): ((parameter: OnSearchResultReceiveEvent) => void) {
@@ -14634,7 +14727,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const param_result : WebContextMenuParam = (valueDeserializer.readWebContextMenuParam() as WebContextMenuParam)
         const result_result : WebContextMenuResult = (valueDeserializer.readWebContextMenuResult() as WebContextMenuResult)
-        let value : OnContextMenuShowEvent = ({param: param_result,result: result_result} as OnContextMenuShowEvent)
+        let value : OnContextMenuShowEvent = ({param: param_result, result: result_result} as OnContextMenuShowEvent)
         return value
     }
     readCallback_OnContextMenuShowEvent_Boolean(isSync: boolean = false): ((parameter: OnContextMenuShowEvent) => boolean) {
@@ -14722,7 +14815,7 @@ export class Deserializer extends DeserializerBase {
         const handler_result : HttpAuthHandler = (valueDeserializer.readHttpAuthHandler() as HttpAuthHandler)
         const host_result : string = (valueDeserializer.readString() as string)
         const realm_result : string = (valueDeserializer.readString() as string)
-        let value : OnHttpAuthRequestEvent = ({handler: handler_result,host: host_result,realm: realm_result} as OnHttpAuthRequestEvent)
+        let value : OnHttpAuthRequestEvent = ({handler: handler_result, host: host_result, realm: realm_result} as OnHttpAuthRequestEvent)
         return value
     }
     readCallback_OnHttpAuthRequestEvent_Boolean(isSync: boolean = false): ((parameter: OnHttpAuthRequestEvent) => boolean) {
@@ -14746,7 +14839,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const oldScale_result : number = (valueDeserializer.readNumber() as number)
         const newScale_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnScaleChangeEvent = ({oldScale: oldScale_result,newScale: newScale_result} as OnScaleChangeEvent)
+        let value : OnScaleChangeEvent = ({oldScale: oldScale_result, newScale: newScale_result} as OnScaleChangeEvent)
         return value
     }
     readCallback_OnScaleChangeEvent_Void(isSync: boolean = false): ((parameter: OnScaleChangeEvent) => void) {
@@ -14780,7 +14873,7 @@ export class Deserializer extends DeserializerBase {
             videoHeight_buf = (valueDeserializer.readNumber() as number)
         }
         const videoHeight_result : number | undefined = videoHeight_buf
-        let value : FullScreenEnterEvent = ({handler: handler_result,videoWidth: videoWidth_result,videoHeight: videoHeight_result} as FullScreenEnterEvent)
+        let value : FullScreenEnterEvent = ({handler: handler_result, videoWidth: videoWidth_result, videoHeight: videoHeight_result} as FullScreenEnterEvent)
         return value
     }
     readOnFullScreenEnterCallback(isSync: boolean = false): OnFullScreenEnterCallback {
@@ -14868,7 +14961,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const result_result : FileSelectorResult = (valueDeserializer.readFileSelectorResult() as FileSelectorResult)
         const fileSelector_result : FileSelectorParam = (valueDeserializer.readFileSelectorParam() as FileSelectorParam)
-        let value : OnShowFileSelectorEvent = ({result: result_result,fileSelector: fileSelector_result} as OnShowFileSelectorEvent)
+        let value : OnShowFileSelectorEvent = ({result: result_result, fileSelector: fileSelector_result} as OnShowFileSelectorEvent)
         return value
     }
     readCallback_OnShowFileSelectorEvent_Boolean(isSync: boolean = false): ((parameter: OnShowFileSelectorEvent) => boolean) {
@@ -14970,7 +15063,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const url_result : string = (valueDeserializer.readString() as string)
         const isRefreshed_result : boolean = valueDeserializer.readBoolean()
-        let value : OnRefreshAccessedHistoryEvent = ({url: url_result,isRefreshed: isRefreshed_result} as OnRefreshAccessedHistoryEvent)
+        let value : OnRefreshAccessedHistoryEvent = ({url: url_result, isRefreshed: isRefreshed_result} as OnRefreshAccessedHistoryEvent)
         return value
     }
     readCallback_OnRefreshAccessedHistoryEvent_Void(isSync: boolean = false): ((parameter: OnRefreshAccessedHistoryEvent) => void) {
@@ -14994,7 +15087,7 @@ export class Deserializer extends DeserializerBase {
         const contentDisposition_result : string = (valueDeserializer.readString() as string)
         const mimetype_result : string = (valueDeserializer.readString() as string)
         const contentLength_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnDownloadStartEvent = ({url: url_result,userAgent: userAgent_result,contentDisposition: contentDisposition_result,mimetype: mimetype_result,contentLength: contentLength_result} as OnDownloadStartEvent)
+        let value : OnDownloadStartEvent = ({url: url_result, userAgent: userAgent_result, contentDisposition: contentDisposition_result, mimetype: mimetype_result, contentLength: contentLength_result} as OnDownloadStartEvent)
         return value
     }
     readCallback_OnDownloadStartEvent_Void(isSync: boolean = false): ((parameter: OnDownloadStartEvent) => void) {
@@ -15015,7 +15108,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const request_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
         const response_result : WebResourceResponse = (valueDeserializer.readWebResourceResponse() as WebResourceResponse)
-        let value : OnHttpErrorReceiveEvent = ({request: request_result,response: response_result} as OnHttpErrorReceiveEvent)
+        let value : OnHttpErrorReceiveEvent = ({request: request_result, response: response_result} as OnHttpErrorReceiveEvent)
         return value
     }
     readCallback_OnHttpErrorReceiveEvent_Void(isSync: boolean = false): ((parameter: OnHttpErrorReceiveEvent) => void) {
@@ -15036,7 +15129,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const request_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
         const error_result : WebResourceError = (valueDeserializer.readWebResourceError() as WebResourceError)
-        let value : OnErrorReceiveEvent = ({request: request_result,error: error_result} as OnErrorReceiveEvent)
+        let value : OnErrorReceiveEvent = ({request: request_result, error: error_result} as OnErrorReceiveEvent)
         return value
     }
     readCallback_OnErrorReceiveEvent_Void(isSync: boolean = false): ((parameter: OnErrorReceiveEvent) => void) {
@@ -15082,7 +15175,7 @@ export class Deserializer extends DeserializerBase {
         const message_result : string = (valueDeserializer.readString() as string)
         const value_result : string = (valueDeserializer.readString() as string)
         const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
-        let value : OnPromptEvent = ({url: url_result,message: message_result,value: value_result,result: result_result} as OnPromptEvent)
+        let value : OnPromptEvent = ({url: url_result, message: message_result, value: value_result, result: result_result} as OnPromptEvent)
         return value
     }
     readCallback_OnPromptEvent_Boolean(isSync: boolean = false): ((parameter: OnPromptEvent) => boolean) {
@@ -15107,7 +15200,7 @@ export class Deserializer extends DeserializerBase {
         const url_result : string = (valueDeserializer.readString() as string)
         const message_result : string = (valueDeserializer.readString() as string)
         const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
-        let value : OnConfirmEvent = ({url: url_result,message: message_result,result: result_result} as OnConfirmEvent)
+        let value : OnConfirmEvent = ({url: url_result, message: message_result, result: result_result} as OnConfirmEvent)
         return value
     }
     readCallback_OnConfirmEvent_Boolean(isSync: boolean = false): ((parameter: OnConfirmEvent) => boolean) {
@@ -15132,7 +15225,7 @@ export class Deserializer extends DeserializerBase {
         const url_result : string = (valueDeserializer.readString() as string)
         const message_result : string = (valueDeserializer.readString() as string)
         const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
-        let value : OnBeforeUnloadEvent = ({url: url_result,message: message_result,result: result_result} as OnBeforeUnloadEvent)
+        let value : OnBeforeUnloadEvent = ({url: url_result, message: message_result, result: result_result} as OnBeforeUnloadEvent)
         return value
     }
     readCallback_OnBeforeUnloadEvent_Boolean(isSync: boolean = false): ((parameter: OnBeforeUnloadEvent) => boolean) {
@@ -15157,7 +15250,7 @@ export class Deserializer extends DeserializerBase {
         const url_result : string = (valueDeserializer.readString() as string)
         const message_result : string = (valueDeserializer.readString() as string)
         const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
-        let value : OnAlertEvent = ({url: url_result,message: message_result,result: result_result} as OnAlertEvent)
+        let value : OnAlertEvent = ({url: url_result, message: message_result, result: result_result} as OnAlertEvent)
         return value
     }
     readCallback_OnAlertEvent_Boolean(isSync: boolean = false): ((parameter: OnAlertEvent) => boolean) {
@@ -15181,7 +15274,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const origin_result : string = (valueDeserializer.readString() as string)
         const geolocation_result : JsGeolocation = (valueDeserializer.readJsGeolocation() as JsGeolocation)
-        let value : OnGeolocationShowEvent = ({origin: origin_result,geolocation: geolocation_result} as OnGeolocationShowEvent)
+        let value : OnGeolocationShowEvent = ({origin: origin_result, geolocation: geolocation_result} as OnGeolocationShowEvent)
         return value
     }
     readCallback_OnGeolocationShowEvent_Void(isSync: boolean = false): ((parameter: OnGeolocationShowEvent) => void) {
@@ -15294,7 +15387,7 @@ export class Deserializer extends DeserializerBase {
             audioExclusive_buf = valueDeserializer.readBoolean()
         }
         const audioExclusive_result : boolean | undefined = audioExclusive_buf
-        let value : WebMediaOptions = ({resumeInterval: resumeInterval_result,audioExclusive: audioExclusive_result} as WebMediaOptions)
+        let value : WebMediaOptions = ({resumeInterval: resumeInterval_result, audioExclusive: audioExclusive_result} as WebMediaOptions)
         return value
     }
     readJavaScriptProxy(): JavaScriptProxy {
@@ -15302,7 +15395,7 @@ export class Deserializer extends DeserializerBase {
         const object__result : Object = (valueDeserializer.readCustomObject("Object") as Object)
         const name_result : string = (valueDeserializer.readString() as string)
         const methodList_buf_length : int32 = valueDeserializer.readInt32()
-        let methodList_buf : Array<string> = new Array<string>()
+        let methodList_buf : Array<string> = new Array<string>(methodList_buf_length)
         for (let methodList_buf_i = 0; methodList_buf_i < methodList_buf_length; methodList_buf_i++) {
             methodList_buf[methodList_buf_i] = (valueDeserializer.readString() as string)
         }
@@ -15324,7 +15417,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (asyncMethodList_buf_runtimeType))
         {
             const asyncMethodList_buf__length : int32 = valueDeserializer.readInt32()
-            let asyncMethodList_buf_ : Array<string> = new Array<string>()
+            let asyncMethodList_buf_ : Array<string> = new Array<string>(asyncMethodList_buf__length)
             for (let asyncMethodList_buf__i = 0; asyncMethodList_buf__i < asyncMethodList_buf__length; asyncMethodList_buf__i++) {
                 asyncMethodList_buf_[asyncMethodList_buf__i] = (valueDeserializer.readString() as string)
             }
@@ -15338,7 +15431,7 @@ export class Deserializer extends DeserializerBase {
             permission_buf = (valueDeserializer.readString() as string)
         }
         const permission_result : string | undefined = permission_buf
-        let value : JavaScriptProxy = ({object_: object__result,name: name_result,methodList: methodList_result,controller: controller_result,asyncMethodList: asyncMethodList_result,permission: permission_result} as JavaScriptProxy)
+        let value : JavaScriptProxy = ({object_: object__result, name: name_result, methodList: methodList_result, controller: controller_result, asyncMethodList: asyncMethodList_result, permission: permission_result} as JavaScriptProxy)
         return value
     }
     readWebOptions(): WebOptions {
@@ -15388,14 +15481,14 @@ export class Deserializer extends DeserializerBase {
             sharedRenderProcessToken_buf = (valueDeserializer.readString() as string)
         }
         const sharedRenderProcessToken_result : string | undefined = sharedRenderProcessToken_buf
-        let value : WebOptions = ({src: src_result,controller: controller_result,renderMode: renderMode_result,incognitoMode: incognitoMode_result,sharedRenderProcessToken: sharedRenderProcessToken_result} as WebOptions)
+        let value : WebOptions = ({src: src_result, controller: controller_result, renderMode: renderMode_result, incognitoMode: incognitoMode_result, sharedRenderProcessToken: sharedRenderProcessToken_result} as WebOptions)
         return value
     }
     readHeader(): Header {
         let valueDeserializer : Deserializer = this
         const headerKey_result : string = (valueDeserializer.readString() as string)
         const headerValue_result : string = (valueDeserializer.readString() as string)
-        let value : Header = ({headerKey: headerKey_result,headerValue: headerValue_result} as Header)
+        let value : Header = ({headerKey: headerKey_result, headerValue: headerValue_result} as Header)
         return value
     }
     readPlaybackInfo(): PlaybackInfo {
@@ -15534,7 +15627,7 @@ export class Deserializer extends DeserializerBase {
             imageAIOptions_buf = valueDeserializer.readImageAIOptions()
         }
         const imageAIOptions_result : ImageAIOptions | undefined = imageAIOptions_buf
-        let value : VideoOptions = ({src: src_result,currentProgressRate: currentProgressRate_result,previewUri: previewUri_result,controller: controller_result,imageAIOptions: imageAIOptions_result} as VideoOptions)
+        let value : VideoOptions = ({src: src_result, currentProgressRate: currentProgressRate_result, previewUri: previewUri_result, controller: controller_result, imageAIOptions: imageAIOptions_result} as VideoOptions)
         return value
     }
     readSwitchStyle(): SwitchStyle {
@@ -15623,7 +15716,7 @@ export class Deserializer extends DeserializerBase {
             trackBorderRadius_buf = (trackBorderRadius_buf_ as number | Resource)
         }
         const trackBorderRadius_result : number | Resource | undefined = trackBorderRadius_buf
-        let value : SwitchStyle = ({pointRadius: pointRadius_result,unselectedColor: unselectedColor_result,pointColor: pointColor_result,trackBorderRadius: trackBorderRadius_result} as SwitchStyle)
+        let value : SwitchStyle = ({pointRadius: pointRadius_result, unselectedColor: unselectedColor_result, pointColor: pointColor_result, trackBorderRadius: trackBorderRadius_result} as SwitchStyle)
         return value
     }
     readToggleOptions(): ToggleOptions {
@@ -15636,20 +15729,15 @@ export class Deserializer extends DeserializerBase {
             isOn_buf = valueDeserializer.readBoolean()
         }
         const isOn_result : boolean | undefined = isOn_buf
-        let value : ToggleOptions = ({type: type_result,isOn: isOn_result} as ToggleOptions)
+        let value : ToggleOptions = ({type: type_result, isOn: isOn_result} as ToggleOptions)
         return value
-    }
-    readTimePickerDialog(): TimePickerDialog {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return TimePickerDialogInternal.fromPtr(ptr)
     }
     readTimePickerResult(): TimePickerResult {
         let valueDeserializer : Deserializer = this
         const hour_result : number = (valueDeserializer.readNumber() as number)
         const minute_result : number = (valueDeserializer.readNumber() as number)
         const second_result : number = (valueDeserializer.readNumber() as number)
-        let value : TimePickerResult = ({hour: hour_result,minute: minute_result,second: second_result} as TimePickerResult)
+        let value : TimePickerResult = ({hour: hour_result, minute: minute_result, second: second_result} as TimePickerResult)
         return value
     }
     readTimePickerOptions(): TimePickerOptions {
@@ -15668,7 +15756,7 @@ export class Deserializer extends DeserializerBase {
             format_buf = (valueDeserializer.readInt32() as TimePickerFormat)
         }
         const format_result : TimePickerFormat | undefined = format_buf
-        let value : TimePickerOptions = ({selected: selected_result,format: format_result} as TimePickerOptions)
+        let value : TimePickerOptions = ({selected: selected_result, format: format_result} as TimePickerOptions)
         return value
     }
     readTextTimerOptions(): TextTimerOptions {
@@ -15694,7 +15782,7 @@ export class Deserializer extends DeserializerBase {
             controller_buf = (valueDeserializer.readTextTimerController() as TextTimerController)
         }
         const controller_result : TextTimerController | undefined = controller_buf
-        let value : TextTimerOptions = ({isCountDown: isCountDown_result,count: count_result,controller: controller_result} as TextTimerOptions)
+        let value : TextTimerOptions = ({isCountDown: isCountDown_result, count: count_result, controller: controller_result} as TextTimerOptions)
         return value
     }
     readTextPickerResult(): TextPickerResult {
@@ -15706,7 +15794,7 @@ export class Deserializer extends DeserializerBase {
         }
         else if (value_buf_selector == 1) {
             const value_buf_u_length : int32 = valueDeserializer.readInt32()
-            let value_buf_u : Array<string> = new Array<string>()
+            let value_buf_u : Array<string> = new Array<string>(value_buf_u_length)
             for (let value_buf_u_i = 0; value_buf_u_i < value_buf_u_length; value_buf_u_i++) {
                 value_buf_u[value_buf_u_i] = (valueDeserializer.readString() as string)
             }
@@ -15723,7 +15811,7 @@ export class Deserializer extends DeserializerBase {
         }
         else if (index_buf_selector == 1) {
             const index_buf_u_length : int32 = valueDeserializer.readInt32()
-            let index_buf_u : Array<number> = new Array<number>()
+            let index_buf_u : Array<number> = new Array<number>(index_buf_u_length)
             for (let index_buf_u_i = 0; index_buf_u_i < index_buf_u_length; index_buf_u_i++) {
                 index_buf_u[index_buf_u_i] = (valueDeserializer.readNumber() as number)
             }
@@ -15733,13 +15821,8 @@ export class Deserializer extends DeserializerBase {
             throw new Error("One of the branches for index_buf has to be chosen through deserialisation.")
         }
         const index_result : number | Array<number> = (index_buf as number | Array<number>)
-        let value : TextPickerResult = ({value: value_result,index: index_result} as TextPickerResult)
+        let value : TextPickerResult = ({value: value_result, index: index_result} as TextPickerResult)
         return value
-    }
-    readTextPickerDialog(): TextPickerDialog {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return TextPickerDialogInternal.fromPtr(ptr)
     }
     readType_TextPickerAttribute_onChange_callback(isSync: boolean = false): ((value: string | Array<string>,index: number | Array<number>) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -15820,14 +15903,14 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (children_buf_runtimeType))
         {
             const children_buf__length : int32 = valueDeserializer.readInt32()
-            let children_buf_ : Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>()
+            let children_buf_ : Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(children_buf__length)
             for (let children_buf__i = 0; children_buf__i < children_buf__length; children_buf__i++) {
                 children_buf_[children_buf__i] = valueDeserializer.readTextCascadePickerRangeContent()
             }
             children_buf = children_buf_
         }
         const children_result : Array<TextCascadePickerRangeContent> | undefined = children_buf
-        let value : TextCascadePickerRangeContent = ({text: text_result,children: children_result} as TextCascadePickerRangeContent)
+        let value : TextCascadePickerRangeContent = ({text: text_result, children: children_result} as TextCascadePickerRangeContent)
         return value
     }
     readTextPickerRangeContent(): TextPickerRangeContent {
@@ -15862,7 +15945,7 @@ export class Deserializer extends DeserializerBase {
             text_buf = (text_buf_ as string | Resource)
         }
         const text_result : string | Resource | undefined = text_buf
-        let value : TextPickerRangeContent = ({icon: icon_result,text: text_result} as TextPickerRangeContent)
+        let value : TextPickerRangeContent = ({icon: icon_result, text: text_result} as TextPickerRangeContent)
         return value
     }
     readTextPickerOptions(): TextPickerOptions {
@@ -15871,7 +15954,7 @@ export class Deserializer extends DeserializerBase {
         let range_buf : Array<string> | Array<Array<string>> | Resource | Array<TextPickerRangeContent> | Array<TextCascadePickerRangeContent> | undefined
         if (range_buf_selector == 0) {
             const range_buf_u_length : int32 = valueDeserializer.readInt32()
-            let range_buf_u : Array<string> = new Array<string>()
+            let range_buf_u : Array<string> = new Array<string>(range_buf_u_length)
             for (let range_buf_u_i = 0; range_buf_u_i < range_buf_u_length; range_buf_u_i++) {
                 range_buf_u[range_buf_u_i] = (valueDeserializer.readString() as string)
             }
@@ -15879,10 +15962,10 @@ export class Deserializer extends DeserializerBase {
         }
         else if (range_buf_selector == 1) {
             const range_buf_u_length : int32 = valueDeserializer.readInt32()
-            let range_buf_u : Array<Array<string>> = new Array<Array<string>>()
+            let range_buf_u : Array<Array<string>> = new Array<Array<string>>(range_buf_u_length)
             for (let range_buf_u_i = 0; range_buf_u_i < range_buf_u_length; range_buf_u_i++) {
                 const range_buf_u_buf_length : int32 = valueDeserializer.readInt32()
-                let range_buf_u_buf : Array<string> = new Array<string>()
+                let range_buf_u_buf : Array<string> = new Array<string>(range_buf_u_buf_length)
                 for (let range_buf_u_buf_i = 0; range_buf_u_buf_i < range_buf_u_buf_length; range_buf_u_buf_i++) {
                     range_buf_u_buf[range_buf_u_buf_i] = (valueDeserializer.readString() as string)
                 }
@@ -15895,7 +15978,7 @@ export class Deserializer extends DeserializerBase {
         }
         else if (range_buf_selector == 3) {
             const range_buf_u_length : int32 = valueDeserializer.readInt32()
-            let range_buf_u : Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>()
+            let range_buf_u : Array<TextPickerRangeContent> = new Array<TextPickerRangeContent>(range_buf_u_length)
             for (let range_buf_u_i = 0; range_buf_u_i < range_buf_u_length; range_buf_u_i++) {
                 range_buf_u[range_buf_u_i] = valueDeserializer.readTextPickerRangeContent()
             }
@@ -15903,7 +15986,7 @@ export class Deserializer extends DeserializerBase {
         }
         else if (range_buf_selector == 4) {
             const range_buf_u_length : int32 = valueDeserializer.readInt32()
-            let range_buf_u : Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>()
+            let range_buf_u : Array<TextCascadePickerRangeContent> = new Array<TextCascadePickerRangeContent>(range_buf_u_length)
             for (let range_buf_u_i = 0; range_buf_u_i < range_buf_u_length; range_buf_u_i++) {
                 range_buf_u[range_buf_u_i] = valueDeserializer.readTextCascadePickerRangeContent()
             }
@@ -15924,7 +16007,7 @@ export class Deserializer extends DeserializerBase {
             }
             else if (value_buf__selector == 1) {
                 const value_buf__u_length : int32 = valueDeserializer.readInt32()
-                let value_buf__u : Array<string> = new Array<string>()
+                let value_buf__u : Array<string> = new Array<string>(value_buf__u_length)
                 for (let value_buf__u_i = 0; value_buf__u_i < value_buf__u_length; value_buf__u_i++) {
                     value_buf__u[value_buf__u_i] = (valueDeserializer.readString() as string)
                 }
@@ -15947,7 +16030,7 @@ export class Deserializer extends DeserializerBase {
             }
             else if (selected_buf__selector == 1) {
                 const selected_buf__u_length : int32 = valueDeserializer.readInt32()
-                let selected_buf__u : Array<number> = new Array<number>()
+                let selected_buf__u : Array<number> = new Array<number>(selected_buf__u_length)
                 for (let selected_buf__u_i = 0; selected_buf__u_i < selected_buf__u_length; selected_buf__u_i++) {
                     selected_buf__u[selected_buf__u_i] = (valueDeserializer.readNumber() as number)
                 }
@@ -15959,7 +16042,7 @@ export class Deserializer extends DeserializerBase {
             selected_buf = (selected_buf_ as number | Array<number>)
         }
         const selected_result : number | Array<number> | undefined = selected_buf
-        let value : TextPickerOptions = ({range: range_result,value: value_result,selected: selected_result} as TextPickerOptions)
+        let value : TextPickerOptions = ({range: range_result, value: value_result, selected: selected_result} as TextPickerOptions)
         return value
     }
     readPasswordIcon(): PasswordIcon {
@@ -16000,7 +16083,7 @@ export class Deserializer extends DeserializerBase {
             offIconSrc_buf = (offIconSrc_buf_ as string | Resource)
         }
         const offIconSrc_result : string | Resource | undefined = offIconSrc_buf
-        let value : PasswordIcon = ({onIconSrc: onIconSrc_result,offIconSrc: offIconSrc_result} as PasswordIcon)
+        let value : PasswordIcon = ({onIconSrc: onIconSrc_result, offIconSrc: offIconSrc_result} as PasswordIcon)
         return value
     }
     readOnSubmitCallback(isSync: boolean = false): OnSubmitCallback {
@@ -16012,7 +16095,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((enterKey.valueOf() as int32));
+    _argsSerializer.writeInt32(((enterKey as EnterKeyType) as int32));
     _argsSerializer.writeSubmitEvent(event);
     (isSync) ? (InteropNativeModule._CallCallbackSync(-1961646162, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1961646162, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
@@ -16063,7 +16146,7 @@ export class Deserializer extends DeserializerBase {
             controller_buf = (valueDeserializer.readTextInputController() as TextInputController)
         }
         const controller_result : TextInputController | undefined = controller_buf
-        let value : TextInputOptions = ({placeholder: placeholder_result,text: text_result,controller: controller_result} as TextInputOptions)
+        let value : TextInputOptions = ({placeholder: placeholder_result, text: text_result, controller: controller_result} as TextInputOptions)
         return value
     }
     readTextBox(): TextBox {
@@ -16103,7 +16186,7 @@ export class Deserializer extends DeserializerBase {
             controller_buf = (valueDeserializer.readTextClockController() as TextClockController)
         }
         const controller_result : TextClockController | undefined = controller_buf
-        let value : TextClockOptions = ({timeZoneOffset: timeZoneOffset_result,controller: controller_result} as TextClockOptions)
+        let value : TextClockOptions = ({timeZoneOffset: timeZoneOffset_result, controller: controller_result} as TextClockOptions)
         return value
     }
     readCallback_String_PasteEvent_Void(isSync: boolean = false): ((value: string,event: PasteEvent) => void) {
@@ -16130,7 +16213,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((enterKeyType.valueOf() as int32));
+    _argsSerializer.writeInt32(((enterKeyType as EnterKeyType) as int32));
     let event_type : int32 = RuntimeType.UNDEFINED;
     event_type = runtimeType(event);
     _argsSerializer.writeInt8(event_type as int32);
@@ -16151,7 +16234,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((enterKey.valueOf() as int32));
+    _argsSerializer.writeInt32(((enterKey as EnterKeyType) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(-1802605016, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1802605016, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -16201,7 +16284,7 @@ export class Deserializer extends DeserializerBase {
             controller_buf = (valueDeserializer.readTextAreaController() as TextAreaController)
         }
         const controller_result : TextAreaController | undefined = controller_buf
-        let value : TextAreaOptions = ({placeholder: placeholder_result,text: text_result,controller: controller_result} as TextAreaOptions)
+        let value : TextAreaOptions = ({placeholder: placeholder_result, text: text_result, controller: controller_result} as TextAreaOptions)
         return value
     }
     readTextOverflowOptions(): TextOverflowOptions {
@@ -16294,7 +16377,7 @@ export class Deserializer extends DeserializerBase {
             gutter_buf = (valueDeserializer.readLength() as Dimension)
         }
         const gutter_result : Dimension | undefined = gutter_buf
-        let value : BarGridColumnOptions = ({sm: sm_result,md: md_result,lg: lg_result,margin: margin_result,gutter: gutter_result} as BarGridColumnOptions)
+        let value : BarGridColumnOptions = ({sm: sm_result, md: md_result, lg: lg_result, margin: margin_result, gutter: gutter_result} as BarGridColumnOptions)
         return value
     }
     readOnTabsGestureSwipeCallback(isSync: boolean = false): OnTabsGestureSwipeCallback {
@@ -16332,7 +16415,7 @@ export class Deserializer extends DeserializerBase {
         const currentOffset_result : number = (valueDeserializer.readNumber() as number)
         const targetOffset_result : number = (valueDeserializer.readNumber() as number)
         const velocity_result : number = (valueDeserializer.readNumber() as number)
-        let value : TabsAnimationEvent = ({currentOffset: currentOffset_result,targetOffset: targetOffset_result,velocity: velocity_result} as TabsAnimationEvent)
+        let value : TabsAnimationEvent = ({currentOffset: currentOffset_result, targetOffset: targetOffset_result, velocity: velocity_result} as TabsAnimationEvent)
         return value
     }
     readOnTabsAnimationStartCallback(isSync: boolean = false): OnTabsAnimationStartCallback {
@@ -16374,7 +16457,7 @@ export class Deserializer extends DeserializerBase {
             controller_buf = (valueDeserializer.readTabsController() as TabsController)
         }
         const controller_result : TabsController | undefined = controller_buf
-        let value : TabsOptions = ({barPosition: barPosition_result,index: index_result,controller: controller_result} as TabsOptions)
+        let value : TabsOptions = ({barPosition: barPosition_result, index: index_result, controller: controller_result} as TabsOptions)
         return value
     }
     readBounceSymbolEffect(): BounceSymbolEffect {
@@ -16429,7 +16512,7 @@ export class Deserializer extends DeserializerBase {
         }
         const timeout_result : number | undefined = timeout_buf
         const transition_result : ((parameter: SwiperContentTransitionProxy) => void) = valueDeserializer.readCallback_SwiperContentTransitionProxy_Void()
-        let value : SwiperContentAnimatedTransition = ({timeout: timeout_result,transition: transition_result} as SwiperContentAnimatedTransition)
+        let value : SwiperContentAnimatedTransition = ({timeout: timeout_result, transition: transition_result} as SwiperContentAnimatedTransition)
         return value
     }
     readOnSwiperGestureSwipeCallback(isSync: boolean = false): OnSwiperGestureSwipeCallback {
@@ -16467,7 +16550,7 @@ export class Deserializer extends DeserializerBase {
         const currentOffset_result : number = (valueDeserializer.readNumber() as number)
         const targetOffset_result : number = (valueDeserializer.readNumber() as number)
         const velocity_result : number = (valueDeserializer.readNumber() as number)
-        let value : SwiperAnimationEvent = ({currentOffset: currentOffset_result,targetOffset: targetOffset_result,velocity: velocity_result} as SwiperAnimationEvent)
+        let value : SwiperAnimationEvent = ({currentOffset: currentOffset_result, targetOffset: targetOffset_result, velocity: velocity_result} as SwiperAnimationEvent)
         return value
     }
     readOnSwiperAnimationStartCallback(isSync: boolean = false): OnSwiperAnimationStartCallback {
@@ -16524,7 +16607,7 @@ export class Deserializer extends DeserializerBase {
             to_buf = (valueDeserializer.readNumber() as number)
         }
         const to_result : number | undefined = to_buf
-        let value : SlideRange = ({from: from_result,to: to_result} as SlideRange)
+        let value : SlideRange = ({from: from_result, to: to_result} as SlideRange)
         return value
     }
     readSliderBlockStyle(): SliderBlockStyle {
@@ -16555,7 +16638,7 @@ export class Deserializer extends DeserializerBase {
             shape_buf = (valueDeserializer.readString() as string)
         }
         const shape_result : string | undefined = shape_buf
-        let value : SliderBlockStyle = ({type: type_result,image: image_result,shape: shape_result} as SliderBlockStyle)
+        let value : SliderBlockStyle = ({type: type_result, image: image_result, shape: shape_result} as SliderBlockStyle)
         return value
     }
     readCallback_Number_SliderChangeMode_Void(isSync: boolean = false): ((value: number,mode: SliderChangeMode) => void) {
@@ -16568,7 +16651,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(value);
-    _argsSerializer.writeInt32((mode.valueOf() as int32));
+    _argsSerializer.writeInt32(((mode as SliderChangeMode) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(88697971, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(88697971, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -16624,7 +16707,7 @@ export class Deserializer extends DeserializerBase {
             reverse_buf = valueDeserializer.readBoolean()
         }
         const reverse_result : boolean | undefined = reverse_buf
-        let value : SliderOptions = ({value: value_result,min: min_result,max: max_result,step: step_result,style: style_result,direction: direction_result,reverse: reverse_result} as SliderOptions)
+        let value : SliderOptions = ({value: value_result, min: min_result, max: max_result, step: step_result, style: style_result, direction: direction_result, reverse: reverse_result} as SliderOptions)
         return value
     }
     readViewportRect(): ViewportRect {
@@ -16701,7 +16784,7 @@ export class Deserializer extends DeserializerBase {
             height_buf = (height_buf_ as number | string)
         }
         const height_result : number | string | undefined = height_buf
-        let value : ViewportRect = ({x: x_result,y: y_result,width: width_result,height: height_result} as ViewportRect)
+        let value : ViewportRect = ({x: x_result, y: y_result, width: width_result, height: height_result} as ViewportRect)
         return value
     }
     readCallback_Number_String_Void(isSync: boolean = false): ((index: number,value: string) => void) {
@@ -16758,7 +16841,7 @@ export class Deserializer extends DeserializerBase {
             symbolIcon_buf = valueDeserializer.readSymbolGlyphModifier()
         }
         const symbolIcon_result : SymbolGlyphModifier | undefined = symbolIcon_buf
-        let value : SelectOption = ({value: value_result,icon: icon_result,symbolIcon: symbolIcon_result} as SelectOption)
+        let value : SelectOption = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result} as SelectOption)
         return value
     }
     readCallback_DeleteValue_Void(isSync: boolean = false): ((parameter: DeleteValue) => void) {
@@ -16780,7 +16863,7 @@ export class Deserializer extends DeserializerBase {
         const deleteOffset_result : number = (valueDeserializer.readNumber() as number)
         const direction_result : TextDeleteDirection = (valueDeserializer.readInt32() as TextDeleteDirection)
         const deleteValue_result : string = (valueDeserializer.readString() as string)
-        let value : DeleteValue = ({deleteOffset: deleteOffset_result,direction: direction_result,deleteValue: deleteValue_result} as DeleteValue)
+        let value : DeleteValue = ({deleteOffset: deleteOffset_result, direction: direction_result, deleteValue: deleteValue_result} as DeleteValue)
         return value
     }
     readCallback_DeleteValue_Boolean(isSync: boolean = false): ((parameter: DeleteValue) => boolean) {
@@ -16818,7 +16901,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const insertOffset_result : number = (valueDeserializer.readNumber() as number)
         const insertValue_result : string = (valueDeserializer.readString() as string)
-        let value : InsertValue = ({insertOffset: insertOffset_result,insertValue: insertValue_result} as InsertValue)
+        let value : InsertValue = ({insertOffset: insertOffset_result, insertValue: insertValue_result} as InsertValue)
         return value
     }
     readCallback_InsertValue_Boolean(isSync: boolean = false): ((parameter: InsertValue) => boolean) {
@@ -16872,7 +16955,7 @@ export class Deserializer extends DeserializerBase {
             style_buf = (valueDeserializer.readInt32() as TextDecorationStyle)
         }
         const style_result : TextDecorationStyle | undefined = style_buf
-        let value : TextDecorationOptions = ({type: type_result,color: color_result,style: style_result} as TextDecorationOptions)
+        let value : TextDecorationOptions = ({type: type_result, color: color_result, style: style_result} as TextDecorationOptions)
         return value
     }
     readOnPasteCallback(isSync: boolean = false): OnPasteCallback {
@@ -16995,7 +17078,7 @@ export class Deserializer extends DeserializerBase {
             color_buf = (color_buf_ as Color | number | string | Resource)
         }
         const color_result : ResourceColor | undefined = color_buf
-        let value : CaretStyle = ({width: width_result,color: color_result} as CaretStyle)
+        let value : CaretStyle = ({width: width_result, color: color_result} as CaretStyle)
         return value
     }
     readSearchOptions(): SearchOptions {
@@ -17039,7 +17122,7 @@ export class Deserializer extends DeserializerBase {
             controller_buf = (valueDeserializer.readSearchController() as SearchController)
         }
         const controller_result : SearchController | undefined = controller_buf
-        let value : SearchOptions = ({value: value_result,placeholder: placeholder_result,icon: icon_result,controller: controller_result} as SearchOptions)
+        let value : SearchOptions = ({value: value_result, placeholder: placeholder_result, icon: icon_result, controller: controller_result} as SearchOptions)
         return value
     }
     readScrollBarOptions(): ScrollBarOptions {
@@ -17059,7 +17142,7 @@ export class Deserializer extends DeserializerBase {
             state_buf = (valueDeserializer.readInt32() as BarState)
         }
         const state_result : BarState | undefined = state_buf
-        let value : ScrollBarOptions = ({scroller: scroller_result,direction: direction_result,state: state_result} as ScrollBarOptions)
+        let value : ScrollBarOptions = ({scroller: scroller_result, direction: direction_result, state: state_result} as ScrollBarOptions)
         return value
     }
     readOffsetOptions(): OffsetOptions {
@@ -17078,7 +17161,7 @@ export class Deserializer extends DeserializerBase {
             yOffset_buf = (valueDeserializer.readLength() as Dimension)
         }
         const yOffset_result : Dimension | undefined = yOffset_buf
-        let value : OffsetOptions = ({xOffset: xOffset_result,yOffset: yOffset_result} as OffsetOptions)
+        let value : OffsetOptions = ({xOffset: xOffset_result, yOffset: yOffset_result} as OffsetOptions)
         return value
     }
     readScrollSnapOptions(): ScrollSnapOptions {
@@ -17095,7 +17178,7 @@ export class Deserializer extends DeserializerBase {
             }
             else if (snapPagination_buf__selector == 1) {
                 const snapPagination_buf__u_length : int32 = valueDeserializer.readInt32()
-                let snapPagination_buf__u : Array<Dimension> = new Array<Dimension>()
+                let snapPagination_buf__u : Array<Dimension> = new Array<Dimension>(snapPagination_buf__u_length)
                 for (let snapPagination_buf__u_i = 0; snapPagination_buf__u_i < snapPagination_buf__u_length; snapPagination_buf__u_i++) {
                     snapPagination_buf__u[snapPagination_buf__u_i] = (valueDeserializer.readLength() as Dimension)
                 }
@@ -17121,7 +17204,7 @@ export class Deserializer extends DeserializerBase {
             enableSnapToEnd_buf = valueDeserializer.readBoolean()
         }
         const enableSnapToEnd_result : boolean | undefined = enableSnapToEnd_buf
-        let value : ScrollSnapOptions = ({snapAlign: snapAlign_result,snapPagination: snapPagination_result,enableSnapToStart: enableSnapToStart_result,enableSnapToEnd: enableSnapToEnd_result} as ScrollSnapOptions)
+        let value : ScrollSnapOptions = ({snapAlign: snapAlign_result, snapPagination: snapPagination_result, enableSnapToStart: enableSnapToStart_result, enableSnapToEnd: enableSnapToEnd_result} as ScrollSnapOptions)
         return value
     }
     readOnScrollFrameBeginHandlerResult(): OnScrollFrameBeginHandlerResult {
@@ -17140,7 +17223,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(offset);
-    _argsSerializer.writeInt32((state.valueOf() as int32));
+    _argsSerializer.writeInt32(((state as ScrollState) as int32));
     let _continuationValue : OnScrollFrameBeginHandlerResult | undefined;
     const _continuationCallback : ((value: OnScrollFrameBeginHandlerResult) => void) = (value: OnScrollFrameBeginHandlerResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
@@ -17157,7 +17240,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((side.valueOf() as int32));
+    _argsSerializer.writeInt32(((side as Edge) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(-1259214476, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1259214476, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -17172,7 +17255,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
-    _argsSerializer.writeInt32((result.valueOf() as int32));
+    _argsSerializer.writeInt32(((result as SaveButtonOnClickResult) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(846787331, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(846787331, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -17200,7 +17283,7 @@ export class Deserializer extends DeserializerBase {
             buttonType_buf = (valueDeserializer.readInt32() as ButtonType)
         }
         const buttonType_result : ButtonType | undefined = buttonType_buf
-        let value : SaveButtonOptions = ({icon: icon_result,text: text_result,buttonType: buttonType_result} as SaveButtonOptions)
+        let value : SaveButtonOptions = ({icon: icon_result, text: text_result, buttonType: buttonType_result} as SaveButtonOptions)
         return value
     }
     readRowOptions(): RowOptions {
@@ -17303,24 +17386,24 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const rangeBefore_result : TextRange = valueDeserializer.readTextRange()
         const replacedSpans_buf_length : int32 = valueDeserializer.readInt32()
-        let replacedSpans_buf : Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>()
+        let replacedSpans_buf : Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSpans_buf_length)
         for (let replacedSpans_buf_i = 0; replacedSpans_buf_i < replacedSpans_buf_length; replacedSpans_buf_i++) {
             replacedSpans_buf[replacedSpans_buf_i] = valueDeserializer.readRichEditorTextSpanResult()
         }
         const replacedSpans_result : Array<RichEditorTextSpanResult> = replacedSpans_buf
         const replacedImageSpans_buf_length : int32 = valueDeserializer.readInt32()
-        let replacedImageSpans_buf : Array<RichEditorImageSpanResult> = new Array<RichEditorImageSpanResult>()
+        let replacedImageSpans_buf : Array<RichEditorImageSpanResult> = new Array<RichEditorImageSpanResult>(replacedImageSpans_buf_length)
         for (let replacedImageSpans_buf_i = 0; replacedImageSpans_buf_i < replacedImageSpans_buf_length; replacedImageSpans_buf_i++) {
             replacedImageSpans_buf[replacedImageSpans_buf_i] = valueDeserializer.readRichEditorImageSpanResult()
         }
         const replacedImageSpans_result : Array<RichEditorImageSpanResult> = replacedImageSpans_buf
         const replacedSymbolSpans_buf_length : int32 = valueDeserializer.readInt32()
-        let replacedSymbolSpans_buf : Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>()
+        let replacedSymbolSpans_buf : Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSymbolSpans_buf_length)
         for (let replacedSymbolSpans_buf_i = 0; replacedSymbolSpans_buf_i < replacedSymbolSpans_buf_length; replacedSymbolSpans_buf_i++) {
             replacedSymbolSpans_buf[replacedSymbolSpans_buf_i] = valueDeserializer.readRichEditorTextSpanResult()
         }
         const replacedSymbolSpans_result : Array<RichEditorTextSpanResult> = replacedSymbolSpans_buf
-        let value : RichEditorChangeValue = ({rangeBefore: rangeBefore_result,replacedSpans: replacedSpans_result,replacedImageSpans: replacedImageSpans_result,replacedSymbolSpans: replacedSymbolSpans_result} as RichEditorChangeValue)
+        let value : RichEditorChangeValue = ({rangeBefore: rangeBefore_result, replacedSpans: replacedSpans_result, replacedImageSpans: replacedImageSpans_result, replacedSymbolSpans: replacedSymbolSpans_result} as RichEditorChangeValue)
         return value
     }
     readCallback_RichEditorChangeValue_Boolean(isSync: boolean = false): ((parameter: RichEditorChangeValue) => boolean) {
@@ -17354,7 +17437,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((enterKey.valueOf() as int32));
+    _argsSerializer.writeInt32(((enterKey as EnterKeyType) as int32));
     _argsSerializer.writeSubmitEvent(event);
     (isSync) ? (InteropNativeModule._CallCallbackSync(-712186065, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-712186065, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
@@ -17363,7 +17446,7 @@ export class Deserializer extends DeserializerBase {
     readTextDataDetectorConfig(): TextDataDetectorConfig {
         let valueDeserializer : Deserializer = this
         const types_buf_length : int32 = valueDeserializer.readInt32()
-        let types_buf : Array<TextDataDetectorType> = new Array<TextDataDetectorType>()
+        let types_buf : Array<TextDataDetectorType> = new Array<TextDataDetectorType>(types_buf_length)
         for (let types_buf_i = 0; types_buf_i < types_buf_length; types_buf_i++) {
             types_buf[types_buf_i] = (valueDeserializer.readInt32() as TextDataDetectorType)
         }
@@ -17406,7 +17489,7 @@ export class Deserializer extends DeserializerBase {
             decoration_buf = valueDeserializer.readDecorationStyleInterface()
         }
         const decoration_result : DecorationStyleInterface | undefined = decoration_buf
-        let value : TextDataDetectorConfig = ({types: types_result,onDetectResultUpdate: onDetectResultUpdate_result,color: color_result,decoration: decoration_result} as TextDataDetectorConfig)
+        let value : TextDataDetectorConfig = ({types: types_result, onDetectResultUpdate: onDetectResultUpdate_result, color: color_result, decoration: decoration_result} as TextDataDetectorConfig)
         return value
     }
     readPasteEvent(): PasteEvent {
@@ -17447,7 +17530,7 @@ export class Deserializer extends DeserializerBase {
         const direction_result : RichEditorDeleteDirection = (valueDeserializer.readInt32() as RichEditorDeleteDirection)
         const length_result : number = (valueDeserializer.readNumber() as number)
         const richEditorDeleteSpans_buf_length : int32 = valueDeserializer.readInt32()
-        let richEditorDeleteSpans_buf : Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = new Array<RichEditorTextSpanResult | RichEditorImageSpanResult>()
+        let richEditorDeleteSpans_buf : Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = new Array<RichEditorTextSpanResult | RichEditorImageSpanResult>(richEditorDeleteSpans_buf_length)
         for (let richEditorDeleteSpans_buf_i = 0; richEditorDeleteSpans_buf_i < richEditorDeleteSpans_buf_length; richEditorDeleteSpans_buf_i++) {
             const richEditorDeleteSpans_buf_buf_selector : int32 = valueDeserializer.readInt8()
             let richEditorDeleteSpans_buf_buf : RichEditorTextSpanResult | RichEditorImageSpanResult | undefined
@@ -17463,7 +17546,7 @@ export class Deserializer extends DeserializerBase {
             richEditorDeleteSpans_buf[richEditorDeleteSpans_buf_i] = (richEditorDeleteSpans_buf_buf as RichEditorTextSpanResult | RichEditorImageSpanResult)
         }
         const richEditorDeleteSpans_result : Array<RichEditorTextSpanResult | RichEditorImageSpanResult> = richEditorDeleteSpans_buf
-        let value : RichEditorDeleteValue = ({offset: offset_result,direction: direction_result,length: length_result,richEditorDeleteSpans: richEditorDeleteSpans_result} as RichEditorDeleteValue)
+        let value : RichEditorDeleteValue = ({offset: offset_result, direction: direction_result, length: length_result, richEditorDeleteSpans: richEditorDeleteSpans_result} as RichEditorDeleteValue)
         return value
     }
     readCallback_RichEditorDeleteValue_Boolean(isSync: boolean = false): ((parameter: RichEditorDeleteValue) => boolean) {
@@ -17522,7 +17605,7 @@ export class Deserializer extends DeserializerBase {
             previewText_buf = (valueDeserializer.readString() as string)
         }
         const previewText_result : string | undefined = previewText_buf
-        let value : RichEditorInsertValue = ({insertOffset: insertOffset_result,insertValue: insertValue_result,previewText: previewText_result} as RichEditorInsertValue)
+        let value : RichEditorInsertValue = ({insertOffset: insertOffset_result, insertValue: insertValue_result, previewText: previewText_result} as RichEditorInsertValue)
         return value
     }
     readCallback_RichEditorInsertValue_Boolean(isSync: boolean = false): ((parameter: RichEditorInsertValue) => boolean) {
@@ -17581,7 +17664,7 @@ export class Deserializer extends DeserializerBase {
             previewText_buf = (valueDeserializer.readStyledString() as StyledString)
         }
         const previewText_result : StyledString | undefined = previewText_buf
-        let value : StyledStringChangeValue = ({range: range_result,replacementString: replacementString_result,previewText: previewText_result} as StyledStringChangeValue)
+        let value : StyledStringChangeValue = ({range: range_result, replacementString: replacementString_result, previewText: previewText_result} as StyledStringChangeValue)
         return value
     }
     readRichEditorParagraphResult(): RichEditorParagraphResult {
@@ -17590,7 +17673,7 @@ export class Deserializer extends DeserializerBase {
         const range_buf_value0 : number = (valueDeserializer.readNumber() as number)
         const range_buf_value1 : number = (valueDeserializer.readNumber() as number)
         const range_result : [ number, number ] = ([range_buf_value0, range_buf_value1] as [ number, number ])
-        let value : RichEditorParagraphResult = ({style: style_result,range: range_result} as RichEditorParagraphResult)
+        let value : RichEditorParagraphResult = ({style: style_result, range: range_result} as RichEditorParagraphResult)
         return value
     }
     readRichEditorBaseController(): RichEditorBaseController {
@@ -17603,12 +17686,12 @@ export class Deserializer extends DeserializerBase {
         const id_result : string = (valueDeserializer.readString() as string)
         const localizedDirection_result : LocalizedBarrierDirection = (valueDeserializer.readInt32() as LocalizedBarrierDirection)
         const referencedId_buf_length : int32 = valueDeserializer.readInt32()
-        let referencedId_buf : Array<string> = new Array<string>()
+        let referencedId_buf : Array<string> = new Array<string>(referencedId_buf_length)
         for (let referencedId_buf_i = 0; referencedId_buf_i < referencedId_buf_length; referencedId_buf_i++) {
             referencedId_buf[referencedId_buf_i] = (valueDeserializer.readString() as string)
         }
         const referencedId_result : Array<string> = referencedId_buf
-        let value : LocalizedBarrierStyle = ({id: id_result,localizedDirection: localizedDirection_result,referencedId: referencedId_result} as LocalizedBarrierStyle)
+        let value : LocalizedBarrierStyle = ({id: id_result, localizedDirection: localizedDirection_result, referencedId: referencedId_result} as LocalizedBarrierStyle)
         return value
     }
     readBarrierStyle(): BarrierStyle {
@@ -17616,12 +17699,12 @@ export class Deserializer extends DeserializerBase {
         const id_result : string = (valueDeserializer.readString() as string)
         const direction_result : BarrierDirection = (valueDeserializer.readInt32() as BarrierDirection)
         const referencedId_buf_length : int32 = valueDeserializer.readInt32()
-        let referencedId_buf : Array<string> = new Array<string>()
+        let referencedId_buf : Array<string> = new Array<string>(referencedId_buf_length)
         for (let referencedId_buf_i = 0; referencedId_buf_i < referencedId_buf_length; referencedId_buf_i++) {
             referencedId_buf[referencedId_buf_i] = (valueDeserializer.readString() as string)
         }
         const referencedId_result : Array<string> = referencedId_buf
-        let value : BarrierStyle = ({id: id_result,direction: direction_result,referencedId: referencedId_result} as BarrierStyle)
+        let value : BarrierStyle = ({id: id_result, direction: direction_result, referencedId: referencedId_result} as BarrierStyle)
         return value
     }
     readGuideLineStyle(): GuideLineStyle {
@@ -17629,7 +17712,7 @@ export class Deserializer extends DeserializerBase {
         const id_result : string = (valueDeserializer.readString() as string)
         const direction_result : Axis = (valueDeserializer.readInt32() as Axis)
         const position_result : GuideLinePosition = valueDeserializer.readGuideLinePosition()
-        let value : GuideLineStyle = ({id: id_result,direction: direction_result,position: position_result} as GuideLineStyle)
+        let value : GuideLineStyle = ({id: id_result, direction: direction_result, position: position_result} as GuideLineStyle)
         return value
     }
     readCallback_RefreshStatus_Void(isSync: boolean = false): ((state: RefreshStatus) => void) {
@@ -17641,7 +17724,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((state.valueOf() as int32));
+    _argsSerializer.writeInt32(((state as RefreshStatus) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(934309126, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(934309126, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -17717,7 +17800,7 @@ export class Deserializer extends DeserializerBase {
             refreshingContent_buf = valueDeserializer.readComponentContent()
         }
         const refreshingContent_result : ComponentContent | undefined = refreshingContent_buf
-        let value : RefreshOptions = ({refreshing: refreshing_result,offset: offset_result,friction: friction_result,promptText: promptText_result,builder: builder_result,refreshingContent: refreshingContent_result} as RefreshOptions)
+        let value : RefreshOptions = ({refreshing: refreshing_result, offset: offset_result, friction: friction_result, promptText: promptText_result, builder: builder_result, refreshingContent: refreshingContent_result} as RefreshOptions)
         return value
     }
     readStarStyleOptions(): StarStyleOptions {
@@ -17731,7 +17814,7 @@ export class Deserializer extends DeserializerBase {
             secondaryUri_buf = (valueDeserializer.readString() as string)
         }
         const secondaryUri_result : string | undefined = secondaryUri_buf
-        let value : StarStyleOptions = ({backgroundUri: backgroundUri_result,foregroundUri: foregroundUri_result,secondaryUri: secondaryUri_result} as StarStyleOptions)
+        let value : StarStyleOptions = ({backgroundUri: backgroundUri_result, foregroundUri: foregroundUri_result, secondaryUri: secondaryUri_result} as StarStyleOptions)
         return value
     }
     readRatingOptions(): RatingOptions {
@@ -17744,7 +17827,7 @@ export class Deserializer extends DeserializerBase {
             indicator_buf = valueDeserializer.readBoolean()
         }
         const indicator_result : boolean | undefined = indicator_buf
-        let value : RatingOptions = ({rating: rating_result,indicator: indicator_result} as RatingOptions)
+        let value : RatingOptions = ({rating: rating_result, indicator: indicator_result} as RatingOptions)
         return value
     }
     readRadioStyle(): RadioStyle {
@@ -17821,7 +17904,7 @@ export class Deserializer extends DeserializerBase {
             indicatorColor_buf = (indicatorColor_buf_ as Color | number | string | Resource)
         }
         const indicatorColor_result : ResourceColor | undefined = indicatorColor_buf
-        let value : RadioStyle = ({checkedBackgroundColor: checkedBackgroundColor_result,uncheckedBorderColor: uncheckedBorderColor_result,indicatorColor: indicatorColor_result} as RadioStyle)
+        let value : RadioStyle = ({checkedBackgroundColor: checkedBackgroundColor_result, uncheckedBorderColor: uncheckedBorderColor_result, indicatorColor: indicatorColor_result} as RadioStyle)
         return value
     }
     readRadioOptions(): RadioOptions {
@@ -17842,7 +17925,7 @@ export class Deserializer extends DeserializerBase {
             indicatorBuilder_buf = CallbackTransformer.transformToCustomBuilder(valueDeserializer.readCustomNodeBuilder())
         }
         const indicatorBuilder_result : CustomBuilder | undefined = indicatorBuilder_buf
-        let value : RadioOptions = ({group: group_result,value: value_result,indicatorType: indicatorType_result,indicatorBuilder: indicatorBuilder_result} as RadioOptions)
+        let value : RadioOptions = ({group: group_result, value: value_result, indicatorType: indicatorType_result, indicatorBuilder: indicatorBuilder_result} as RadioOptions)
         return value
     }
     readProgressOptions(): ProgressOptions {
@@ -17869,7 +17952,7 @@ export class Deserializer extends DeserializerBase {
             type_buf = (valueDeserializer.readInt32() as ProgressType)
         }
         const type_result : ProgressType | undefined = type_buf
-        let value : ProgressOptions = ({value: value_result,total: total_result,style: style_result,type: type_result} as ProgressOptions)
+        let value : ProgressOptions = ({value: value_result, total: total_result, style: style_result, type: type_result} as ProgressOptions)
         return value
     }
     readPolylineOptions(): PolylineOptions {
@@ -17910,14 +17993,14 @@ export class Deserializer extends DeserializerBase {
             height_buf = (height_buf_ as string | number)
         }
         const height_result : string | number | undefined = height_buf
-        let value : PolylineOptions = ({width: width_result,height: height_result} as PolylineOptions)
+        let value : PolylineOptions = ({width: width_result, height: height_result} as PolylineOptions)
         return value
     }
     readPoint(): Point {
         let valueDeserializer : Deserializer = this
         const x_result : number = (valueDeserializer.readNumber() as number)
         const y_result : number = (valueDeserializer.readNumber() as number)
-        let value : Point = ({x: x_result,y: y_result} as Point)
+        let value : Point = ({x: x_result, y: y_result} as Point)
         return value
     }
     readPolygonOptions(): PolygonOptions {
@@ -17958,14 +18041,14 @@ export class Deserializer extends DeserializerBase {
             height_buf = (height_buf_ as string | number)
         }
         const height_result : string | number | undefined = height_buf
-        let value : PolygonOptions = ({width: width_result,height: height_result} as PolygonOptions)
+        let value : PolygonOptions = ({width: width_result, height: height_result} as PolygonOptions)
         return value
     }
     readPluginErrorData(): PluginErrorData {
         let valueDeserializer : Deserializer = this
         const errcode_result : number = (valueDeserializer.readNumber() as number)
         const msg_result : string = (valueDeserializer.readString() as string)
-        let value : PluginErrorData = ({errcode: errcode_result,msg: msg_result} as PluginErrorData)
+        let value : PluginErrorData = ({errcode: errcode_result, msg: msg_result} as PluginErrorData)
         return value
     }
     readPluginErrorCallback(isSync: boolean = false): PluginErrorCallback {
@@ -17986,7 +18069,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const template_result : PluginComponentTemplate = valueDeserializer.readPluginComponentTemplate()
         const data_result : string = (valueDeserializer.readString() as string)
-        let value : PluginComponentOptions = ({template: template_result,data: data_result} as PluginComponentOptions)
+        let value : PluginComponentOptions = ({template: template_result, data: data_result} as PluginComponentOptions)
         return value
     }
     readCallback_Array_Number_Void(isSync: boolean = false): ((input: Array<number>) => void) {
@@ -18057,7 +18140,7 @@ export class Deserializer extends DeserializerBase {
             commands_buf = (valueDeserializer.readString() as string)
         }
         const commands_result : string | undefined = commands_buf
-        let value : PathOptions = ({width: width_result,height: height_result,commands: commands_result} as PathOptions)
+        let value : PathOptions = ({width: width_result, height: height_result, commands: commands_result} as PathOptions)
         return value
     }
     readCallback_ClickEvent_PasteButtonOnClickResult_Void(isSync: boolean = false): ((event: ClickEvent,result: PasteButtonOnClickResult) => void) {
@@ -18070,7 +18153,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
-    _argsSerializer.writeInt32((result.valueOf() as int32));
+    _argsSerializer.writeInt32(((result as PasteButtonOnClickResult) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(659292561, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(659292561, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -18098,7 +18181,7 @@ export class Deserializer extends DeserializerBase {
             buttonType_buf = (valueDeserializer.readInt32() as ButtonType)
         }
         const buttonType_result : ButtonType | undefined = buttonType_buf
-        let value : PasteButtonOptions = ({icon: icon_result,text: text_result,buttonType: buttonType_result} as PasteButtonOptions)
+        let value : PasteButtonOptions = ({icon: icon_result, text: text_result, buttonType: buttonType_result} as PasteButtonOptions)
         return value
     }
     readCallback_Number_Number_PanelMode_Void(isSync: boolean = false): ((width: number,height: number,mode: PanelMode) => void) {
@@ -18112,7 +18195,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(width);
     _argsSerializer.writeNumber(height);
-    _argsSerializer.writeInt32((mode.valueOf() as int32));
+    _argsSerializer.writeInt32(((mode as PanelMode) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(1613628570, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1613628570, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -18136,7 +18219,7 @@ export class Deserializer extends DeserializerBase {
             param_buf = (valueDeserializer.readCustomObject("Any") as Object)
         }
         const param_result : object | undefined = param_buf
-        let value : RouteInfo = ({name: name_result,param: param_result} as RouteInfo)
+        let value : RouteInfo = ({name: name_result, param: param_result} as RouteInfo)
         return value
     }
     readToolbarItem(): ToolbarItem {
@@ -18217,7 +18300,7 @@ export class Deserializer extends DeserializerBase {
             activeSymbolIcon_buf = valueDeserializer.readSymbolGlyphModifier()
         }
         const activeSymbolIcon_result : SymbolGlyphModifier | undefined = activeSymbolIcon_buf
-        let value : ToolbarItem = ({value: value_result,icon: icon_result,symbolIcon: symbolIcon_result,action: action_result,status: status_result,activeIcon: activeIcon_result,activeSymbolIcon: activeSymbolIcon_result} as ToolbarItem)
+        let value : ToolbarItem = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result, action: action_result, status: status_result, activeIcon: activeIcon_result, activeSymbolIcon: activeSymbolIcon_result} as ToolbarItem)
         return value
     }
     readCallback_NavDestinationContext_Void(isSync: boolean = false): ((parameter: NavDestinationContext) => void) {
@@ -18287,7 +18370,7 @@ export class Deserializer extends DeserializerBase {
             action_buf = valueDeserializer.readCallback_Void()
         }
         const action_result : (() => void) | undefined = action_buf
-        let value : NavigationMenuItem = ({value: value_result,icon: icon_result,symbolIcon: symbolIcon_result,isEnabled: isEnabled_result,action: action_result} as NavigationMenuItem)
+        let value : NavigationMenuItem = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result, isEnabled: isEnabled_result, action: action_result} as NavigationMenuItem)
         return value
     }
     readCallback_Boolean(isSync: boolean = false): (() => boolean) {
@@ -18310,7 +18393,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const info_result : NavPathInfo = (valueDeserializer.readNavPathInfo() as NavPathInfo)
         const result_result : Object = (valueDeserializer.readCustomObject("Object") as Object)
-        let value : PopInfo = ({info: info_result,result: result_result} as PopInfo)
+        let value : PopInfo = ({info: info_result, result: result_result} as PopInfo)
         return value
     }
     readMenuItemGroupOptions(): MenuItemGroupOptions {
@@ -18373,7 +18456,7 @@ export class Deserializer extends DeserializerBase {
             footer_buf = (footer_buf_ as ResourceStr | CustomBuilder)
         }
         const footer_result : ResourceStr | CustomBuilder | undefined = footer_buf
-        let value : MenuItemGroupOptions = ({header: header_result,footer: footer_result} as MenuItemGroupOptions)
+        let value : MenuItemGroupOptions = ({header: header_result, footer: footer_result} as MenuItemGroupOptions)
         return value
     }
     readMarqueeOptions(): MarqueeOptions {
@@ -18401,7 +18484,7 @@ export class Deserializer extends DeserializerBase {
         }
         const fromStart_result : boolean | undefined = fromStart_buf
         const src_result : string = (valueDeserializer.readString() as string)
-        let value : MarqueeOptions = ({start: start_result,step: step_result,loop: loop_result,fromStart: fromStart_result,src: src_result} as MarqueeOptions)
+        let value : MarqueeOptions = ({start: start_result, step: step_result, loop: loop_result, fromStart: fromStart_result, src: src_result} as MarqueeOptions)
         return value
     }
     readCallback_ClickEvent_LocationButtonOnClickResult_Void(isSync: boolean = false): ((event: ClickEvent,result: LocationButtonOnClickResult) => void) {
@@ -18414,7 +18497,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
-    _argsSerializer.writeInt32((result.valueOf() as int32));
+    _argsSerializer.writeInt32(((result as LocationButtonOnClickResult) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(-1189087745, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1189087745, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -18442,7 +18525,7 @@ export class Deserializer extends DeserializerBase {
             buttonType_buf = (valueDeserializer.readInt32() as ButtonType)
         }
         const buttonType_result : ButtonType | undefined = buttonType_buf
-        let value : LocationButtonOptions = ({icon: icon_result,text: text_result,buttonType: buttonType_result} as LocationButtonOptions)
+        let value : LocationButtonOptions = ({icon: icon_result, text: text_result, buttonType: buttonType_result} as LocationButtonOptions)
         return value
     }
     readListItemGroupOptions(): ListItemGroupOptions {
@@ -18500,7 +18583,7 @@ export class Deserializer extends DeserializerBase {
             style_buf = (valueDeserializer.readInt32() as ListItemGroupStyle)
         }
         const style_result : ListItemGroupStyle | undefined = style_buf
-        let value : ListItemGroupOptions = ({header: header_result,headerComponent: headerComponent_result,footer: footer_result,footerComponent: footerComponent_result,space: space_result,style: style_result} as ListItemGroupOptions)
+        let value : ListItemGroupOptions = ({header: header_result, headerComponent: headerComponent_result, footer: footer_result, footerComponent: footerComponent_result, space: space_result, style: style_result} as ListItemGroupOptions)
         return value
     }
     readSwipeActionOptions(): SwipeActionOptions {
@@ -18555,7 +18638,7 @@ export class Deserializer extends DeserializerBase {
             onOffsetChange_buf = valueDeserializer.readCallback_Number_Void()
         }
         const onOffsetChange_result : ((index: number) => void) | undefined = onOffsetChange_buf
-        let value : SwipeActionOptions = ({start: start_result,end: end_result,edgeEffect: edgeEffect_result,onOffsetChange: onOffsetChange_result} as SwipeActionOptions)
+        let value : SwipeActionOptions = ({start: start_result, end: end_result, edgeEffect: edgeEffect_result, onOffsetChange: onOffsetChange_result} as SwipeActionOptions)
         return value
     }
     readListItemOptions(): ListItemOptions {
@@ -18675,7 +18758,7 @@ export class Deserializer extends DeserializerBase {
             damping_buf = (valueDeserializer.readNumber() as number)
         }
         const damping_result : number | undefined = damping_buf
-        let value : ChainAnimationOptions = ({minSpace: minSpace_result,maxSpace: maxSpace_result,conductivity: conductivity_result,intensity: intensity_result,edgeEffect: edgeEffect_result,stiffness: stiffness_result,damping: damping_result} as ChainAnimationOptions)
+        let value : ChainAnimationOptions = ({minSpace: minSpace_result, maxSpace: maxSpace_result, conductivity: conductivity_result, intensity: intensity_result, edgeEffect: edgeEffect_result, stiffness: stiffness_result, damping: damping_result} as ChainAnimationOptions)
         return value
     }
     readListOptions(): ListOptions {
@@ -18712,7 +18795,7 @@ export class Deserializer extends DeserializerBase {
             scroller_buf = (valueDeserializer.readScroller() as Scroller)
         }
         const scroller_result : Scroller | undefined = scroller_buf
-        let value : ListOptions = ({initialIndex: initialIndex_result,space: space_result,scroller: scroller_result} as ListOptions)
+        let value : ListOptions = ({initialIndex: initialIndex_result, space: space_result, scroller: scroller_result} as ListOptions)
         return value
     }
     readListScroller(): ListScroller {
@@ -18758,7 +18841,7 @@ export class Deserializer extends DeserializerBase {
             height_buf = (height_buf_ as string | number)
         }
         const height_result : string | number | undefined = height_buf
-        let value : LineOptions = ({width: width_result,height: height_result} as LineOptions)
+        let value : LineOptions = ({width: width_result, height: height_result} as LineOptions)
         return value
     }
     readImageLoadResult(): ImageLoadResult {
@@ -18772,7 +18855,7 @@ export class Deserializer extends DeserializerBase {
         const contentHeight_result : number = (valueDeserializer.readNumber() as number)
         const contentOffsetX_result : number = (valueDeserializer.readNumber() as number)
         const contentOffsetY_result : number = (valueDeserializer.readNumber() as number)
-        let value : ImageLoadResult = ({width: width_result,height: height_result,componentWidth: componentWidth_result,componentHeight: componentHeight_result,loadingStatus: loadingStatus_result,contentWidth: contentWidth_result,contentHeight: contentHeight_result,contentOffsetX: contentOffsetX_result,contentOffsetY: contentOffsetY_result} as ImageLoadResult)
+        let value : ImageLoadResult = ({width: width_result, height: height_result, componentWidth: componentWidth_result, componentHeight: componentHeight_result, loadingStatus: loadingStatus_result, contentWidth: contentWidth_result, contentHeight: contentHeight_result, contentOffsetX: contentOffsetX_result, contentOffsetY: contentOffsetY_result} as ImageLoadResult)
         return value
     }
     readImageCompleteCallback(isSync: boolean = false): ImageCompleteCallback {
@@ -18885,7 +18968,7 @@ export class Deserializer extends DeserializerBase {
             duration_buf = (valueDeserializer.readNumber() as number)
         }
         const duration_result : number | undefined = duration_buf
-        let value : ImageFrameInfo = ({src: src_result,width: width_result,height: height_result,top: top_result,left: left_result,duration: duration_result} as ImageFrameInfo)
+        let value : ImageFrameInfo = ({src: src_result, width: width_result, height: height_result, top: top_result, left: left_result, duration: duration_result} as ImageFrameInfo)
         return value
     }
     readResolutionQuality(): ResolutionQuality {
@@ -18899,7 +18982,7 @@ export class Deserializer extends DeserializerBase {
         const componentWidth_result : number = (valueDeserializer.readNumber() as number)
         const componentHeight_result : number = (valueDeserializer.readNumber() as number)
         const message_result : string = (valueDeserializer.readString() as string)
-        let value : ImageError = ({componentWidth: componentWidth_result,componentHeight: componentHeight_result,message: message_result} as ImageError)
+        let value : ImageError = ({componentWidth: componentWidth_result, componentHeight: componentHeight_result, message: message_result} as ImageError)
         return value
     }
     readImageErrorCallback(isSync: boolean = false): ImageErrorCallback {
@@ -18957,7 +19040,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const width_result : number = (valueDeserializer.readNumber() as number)
         const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : ImageSourceSize = ({width: width_result,height: height_result} as ImageSourceSize)
+        let value : ImageSourceSize = ({width: width_result, height: height_result} as ImageSourceSize)
         return value
     }
     readGridRowOptions(): GridRowOptions {
@@ -19012,7 +19095,7 @@ export class Deserializer extends DeserializerBase {
             direction_buf = (valueDeserializer.readInt32() as GridRowDirection)
         }
         const direction_result : GridRowDirection | undefined = direction_buf
-        let value : GridRowOptions = ({gutter: gutter_result,columns: columns_result,breakpoints: breakpoints_result,direction: direction_result} as GridRowOptions)
+        let value : GridRowOptions = ({gutter: gutter_result, columns: columns_result, breakpoints: breakpoints_result, direction: direction_result} as GridRowOptions)
         return value
     }
     readGridContainerOptions(): GridContainerOptions {
@@ -19078,7 +19161,7 @@ export class Deserializer extends DeserializerBase {
             margin_buf = (margin_buf_ as number | string)
         }
         const margin_result : number | string | undefined = margin_buf
-        let value : GridContainerOptions = ({columns: columns_result,sizeType: sizeType_result,gutter: gutter_result,margin: margin_result} as GridContainerOptions)
+        let value : GridContainerOptions = ({columns: columns_result, sizeType: sizeType_result, gutter: gutter_result, margin: margin_result} as GridContainerOptions)
         return value
     }
     readGridColOptions(): GridColOptions {
@@ -19137,7 +19220,7 @@ export class Deserializer extends DeserializerBase {
             order_buf = (order_buf_ as number | GridColColumnOption)
         }
         const order_result : number | GridColColumnOption | undefined = order_buf
-        let value : GridColOptions = ({span: span_result,offset: offset_result,order: order_result} as GridColOptions)
+        let value : GridColOptions = ({span: span_result, offset: offset_result, order: order_result} as GridColOptions)
         return value
     }
     readGridItemOptions(): GridItemOptions {
@@ -19162,7 +19245,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(offset);
-    _argsSerializer.writeInt32((state.valueOf() as int32));
+    _argsSerializer.writeInt32(((state as ScrollState) as int32));
     let _continuationValue : Literal_Number_offsetRemain | undefined;
     const _continuationCallback : ((value: Literal_Number_offsetRemain) => void) = (value: Literal_Number_offsetRemain):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
@@ -19236,10 +19319,10 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const x_result : number = (valueDeserializer.readNumber() as number)
         const y_result : number = (valueDeserializer.readNumber() as number)
-        let value : ItemDragInfo = ({x: x_result,y: y_result} as ItemDragInfo)
+        let value : ItemDragInfo = ({x: x_result, y: y_result} as ItemDragInfo)
         return value
     }
-    readCallback_ItemDragInfo_Number_CustomBuilder(isSync: boolean = false): ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) {
+    readonItemDragStart_event_type(isSync: boolean = false): ((event: ItemDragInfo,itemIndex: number) => CustomBuilder) {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
@@ -19253,7 +19336,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : CustomBuilder | undefined;
     const _continuationCallback : ((value: CustomBuilder) => void) = (value: CustomBuilder):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(2071721246, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2071721246, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1340995650, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1340995650, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as CustomBuilder); }
     }
@@ -19261,7 +19344,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const totalOffset_result : number = (valueDeserializer.readNumber() as number)
         const totalLength_result : number = (valueDeserializer.readNumber() as number)
-        let value : ComputedBarAttribute = ({totalOffset: totalOffset_result,totalLength: totalLength_result} as ComputedBarAttribute)
+        let value : ComputedBarAttribute = ({totalOffset: totalOffset_result, totalLength: totalLength_result} as ComputedBarAttribute)
         return value
     }
     readCallback_Number_Number_ComputedBarAttribute(isSync: boolean = false): ((index: number,offset: number) => ComputedBarAttribute) {
@@ -19292,7 +19375,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (irregularIndexes_buf_runtimeType))
         {
             const irregularIndexes_buf__length : int32 = valueDeserializer.readInt32()
-            let irregularIndexes_buf_ : Array<number> = new Array<number>()
+            let irregularIndexes_buf_ : Array<number> = new Array<number>(irregularIndexes_buf__length)
             for (let irregularIndexes_buf__i = 0; irregularIndexes_buf__i < irregularIndexes_buf__length; irregularIndexes_buf__i++) {
                 irregularIndexes_buf_[irregularIndexes_buf__i] = (valueDeserializer.readNumber() as number)
             }
@@ -19313,7 +19396,7 @@ export class Deserializer extends DeserializerBase {
             onGetRectByIndex_buf = valueDeserializer.readCallback_Number_Tuple_Number_Number_Number_Number()
         }
         const onGetRectByIndex_result : ((index: number) => [ number, number, number, number ]) | undefined = onGetRectByIndex_buf
-        let value : GridLayoutOptions = ({regularSize: regularSize_result,irregularIndexes: irregularIndexes_result,onGetIrregularSizeByIndex: onGetIrregularSizeByIndex_result,onGetRectByIndex: onGetRectByIndex_result} as GridLayoutOptions)
+        let value : GridLayoutOptions = ({regularSize: regularSize_result, irregularIndexes: irregularIndexes_result, onGetIrregularSizeByIndex: onGetIrregularSizeByIndex_result, onGetRectByIndex: onGetRectByIndex_result} as GridLayoutOptions)
         return value
     }
     readPanRecognizer(): PanRecognizer {
@@ -19325,6 +19408,32 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return ScrollableTargetInfoInternal.fromPtr(ptr)
+    }
+    readTapGestureParameters(): TapGestureParameters {
+        let valueDeserializer : Deserializer = this
+        const count_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let count_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (count_buf_runtimeType))
+        {
+            count_buf = (valueDeserializer.readNumber() as number)
+        }
+        const count_result : number | undefined = count_buf
+        const fingers_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fingers_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (fingers_buf_runtimeType))
+        {
+            fingers_buf = (valueDeserializer.readNumber() as number)
+        }
+        const fingers_result : number | undefined = fingers_buf
+        const distanceThreshold_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let distanceThreshold_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (distanceThreshold_buf_runtimeType))
+        {
+            distanceThreshold_buf = (valueDeserializer.readNumber() as number)
+        }
+        const distanceThreshold_result : number | undefined = distanceThreshold_buf
+        let value : TapGestureParameters = ({count: count_result, fingers: fingers_result, distanceThreshold: distanceThreshold_result} as TapGestureParameters)
+        return value
     }
     readGestureEvent(): GestureEvent {
         let valueDeserializer : Deserializer = this
@@ -19388,7 +19497,7 @@ export class Deserializer extends DeserializerBase {
             space_buf = (valueDeserializer.readLength() as Dimension)
         }
         const space_result : Dimension | undefined = space_buf
-        let value : GaugeIndicatorOptions = ({icon: icon_result,space: space_result} as GaugeIndicatorOptions)
+        let value : GaugeIndicatorOptions = ({icon: icon_result, space: space_result} as GaugeIndicatorOptions)
         return value
     }
     readGaugeShadowOptions(): GaugeShadowOptions {
@@ -19447,7 +19556,7 @@ export class Deserializer extends DeserializerBase {
             offsetY_buf = (offsetY_buf_ as number | Resource)
         }
         const offsetY_result : number | Resource | undefined = offsetY_buf
-        let value : GaugeShadowOptions = ({radius: radius_result,offsetX: offsetX_result,offsetY: offsetY_result} as GaugeShadowOptions)
+        let value : GaugeShadowOptions = ({radius: radius_result, offsetX: offsetX_result, offsetY: offsetY_result} as GaugeShadowOptions)
         return value
     }
     readGaugeOptions(): GaugeOptions {
@@ -19467,7 +19576,7 @@ export class Deserializer extends DeserializerBase {
             max_buf = (valueDeserializer.readNumber() as number)
         }
         const max_result : number | undefined = max_buf
-        let value : GaugeOptions = ({value: value_result,min: min_result,max: max_result} as GaugeOptions)
+        let value : GaugeOptions = ({value: value_result, min: min_result, max: max_result} as GaugeOptions)
         return value
     }
     readFormLinkOptions(): FormLinkOptions {
@@ -19508,7 +19617,7 @@ export class Deserializer extends DeserializerBase {
             params_buf = (valueDeserializer.readCustomObject("Object") as Object)
         }
         const params_result : Object | undefined = params_buf
-        let value : FormLinkOptions = ({action: action_result,moduleName: moduleName_result,bundleName: bundleName_result,abilityName: abilityName_result,uri: uri_result,params: params_result} as FormLinkOptions)
+        let value : FormLinkOptions = ({action: action_result, moduleName: moduleName_result, bundleName: bundleName_result, abilityName: abilityName_result, uri: uri_result, params: params_result} as FormLinkOptions)
         return value
     }
     readCallback_Any_Void(isSync: boolean = false): ((info: object) => void) {
@@ -19546,7 +19655,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const id_result : number = (valueDeserializer.readNumber() as number)
         const idString_result : string = (valueDeserializer.readString() as string)
-        let value : FormCallbackInfo = ({id: id_result,idString: idString_result} as FormCallbackInfo)
+        let value : FormCallbackInfo = ({id: id_result, idString: idString_result} as FormCallbackInfo)
         return value
     }
     readCallback_FormCallbackInfo_Void(isSync: boolean = false): ((parameter: FormCallbackInfo) => void) {
@@ -19616,7 +19725,7 @@ export class Deserializer extends DeserializerBase {
             shape_buf = (valueDeserializer.readInt32() as FormShape)
         }
         const shape_result : FormShape | undefined = shape_buf
-        let value : FormInfo = ({id: id_result,name: name_result,bundle: bundle_result,ability: ability_result,module: module_result,dimension: dimension_result,temporary: temporary_result,want: want_result,renderingMode: renderingMode_result,shape: shape_result} as FormInfo)
+        let value : FormInfo = ({id: id_result, name: name_result, bundle: bundle_result, ability: ability_result, module: module_result, dimension: dimension_result, temporary: temporary_result, want: want_result, renderingMode: renderingMode_result, shape: shape_result} as FormInfo)
         return value
     }
     readHoverEventParam(): HoverEventParam {
@@ -19625,7 +19734,7 @@ export class Deserializer extends DeserializerBase {
         const isHoverMode_result : boolean = valueDeserializer.readBoolean()
         const appRotation_result : AppRotation = (valueDeserializer.readInt32() as AppRotation)
         const windowStatusType_result : WindowStatusType = valueDeserializer.readWindowStatusType()
-        let value : HoverEventParam = ({foldStatus: foldStatus_result,isHoverMode: isHoverMode_result,appRotation: appRotation_result,windowStatusType: windowStatusType_result} as HoverEventParam)
+        let value : HoverEventParam = ({foldStatus: foldStatus_result, isHoverMode: isHoverMode_result, appRotation: appRotation_result, windowStatusType: windowStatusType_result} as HoverEventParam)
         return value
     }
     readOnHoverStatusChangeCallback(isSync: boolean = false): OnHoverStatusChangeCallback {
@@ -19669,7 +19778,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (upperItems_buf_runtimeType))
         {
             const upperItems_buf__length : int32 = valueDeserializer.readInt32()
-            let upperItems_buf_ : Array<string> = new Array<string>()
+            let upperItems_buf_ : Array<string> = new Array<string>(upperItems_buf__length)
             for (let upperItems_buf__i = 0; upperItems_buf__i < upperItems_buf__length; upperItems_buf__i++) {
                 upperItems_buf_[upperItems_buf__i] = (valueDeserializer.readString() as string)
             }
@@ -19723,7 +19832,7 @@ export class Deserializer extends DeserializerBase {
             space_buf = valueDeserializer.readFlexSpaceOptions()
         }
         const space_result : FlexSpaceOptions | undefined = space_buf
-        let value : FlexOptions = ({direction: direction_result,wrap: wrap_result,justifyContent: justifyContent_result,alignItems: alignItems_result,alignContent: alignContent_result,space: space_result} as FlexOptions)
+        let value : FlexOptions = ({direction: direction_result, wrap: wrap_result, justifyContent: justifyContent_result, alignItems: alignItems_result, alignContent: alignContent_result, space: space_result} as FlexOptions)
         return value
     }
     readBusinessError(): BusinessError {
@@ -19738,7 +19847,7 @@ export class Deserializer extends DeserializerBase {
         }
         const stack_result : string | undefined = stack_buf
         const code_result : number = (valueDeserializer.readNumber() as number)
-        let value : BusinessError = ({name: name_result,message: message_result,stack: stack_result,code: code_result} as BusinessError)
+        let value : BusinessError = ({name: name_result, message: message_result, stack: stack_result, code: code_result} as BusinessError)
         return value
     }
     readErrorCallback(isSync: boolean = false): ErrorCallback {
@@ -19765,7 +19874,7 @@ export class Deserializer extends DeserializerBase {
             want_buf = valueDeserializer.readWant()
         }
         const want_result : Want | undefined = want_buf
-        let value : TerminationInfo = ({code: code_result,want: want_result} as TerminationInfo)
+        let value : TerminationInfo = ({code: code_result, want: want_result} as TerminationInfo)
         return value
     }
     readCallback_TerminationInfo_Void(isSync: boolean = false): ((parameter: TerminationInfo) => void) {
@@ -19820,13 +19929,8 @@ export class Deserializer extends DeserializerBase {
             height_buf = (height_buf_ as string | number)
         }
         const height_result : string | number | undefined = height_buf
-        let value : EllipseOptions = ({width: width_result,height: height_result} as EllipseOptions)
+        let value : EllipseOptions = ({width: width_result, height: height_result} as EllipseOptions)
         return value
-    }
-    readDatePickerDialog(): DatePickerDialog {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return DatePickerDialogInternal.fromPtr(ptr)
     }
     readDatePickerResult(): DatePickerResult {
         let valueDeserializer : Deserializer = this
@@ -19851,7 +19955,7 @@ export class Deserializer extends DeserializerBase {
             day_buf = (valueDeserializer.readNumber() as number)
         }
         const day_result : number | undefined = day_buf
-        let value : DatePickerResult = ({year: year_result,month: month_result,day: day_result} as DatePickerResult)
+        let value : DatePickerResult = ({year: year_result, month: month_result, day: day_result} as DatePickerResult)
         return value
     }
     readDatePickerOptions(): DatePickerOptions {
@@ -19877,7 +19981,7 @@ export class Deserializer extends DeserializerBase {
             selected_buf = new Date(valueDeserializer.readInt64())
         }
         const selected_result : Date | undefined = selected_buf
-        let value : DatePickerOptions = ({start: start_result,end: end_result,selected: selected_result} as DatePickerOptions)
+        let value : DatePickerOptions = ({start: start_result, end: end_result, selected: selected_result} as DatePickerOptions)
         return value
     }
     readDataPanelShadowOptions(): DataPanelShadowOptions {
@@ -19941,7 +20045,7 @@ export class Deserializer extends DeserializerBase {
         if ((RuntimeType.UNDEFINED) != (colors_buf_runtimeType))
         {
             const colors_buf__length : int32 = valueDeserializer.readInt32()
-            let colors_buf_ : Array<ResourceColor | LinearGradient> = new Array<ResourceColor | LinearGradient>()
+            let colors_buf_ : Array<ResourceColor | LinearGradient> = new Array<ResourceColor | LinearGradient>(colors_buf__length)
             for (let colors_buf__i = 0; colors_buf__i < colors_buf__length; colors_buf__i++) {
                 const colors_buf__buf_selector : int32 = valueDeserializer.readInt8()
                 let colors_buf__buf : ResourceColor | LinearGradient | undefined
@@ -19976,13 +20080,13 @@ export class Deserializer extends DeserializerBase {
             colors_buf = colors_buf_
         }
         const colors_result : Array<ResourceColor | LinearGradient> | undefined = colors_buf
-        let value : DataPanelShadowOptions = ({radius: radius_result,offsetX: offsetX_result,offsetY: offsetY_result,colors: colors_result} as DataPanelShadowOptions)
+        let value : DataPanelShadowOptions = ({radius: radius_result, offsetX: offsetX_result, offsetY: offsetY_result, colors: colors_result} as DataPanelShadowOptions)
         return value
     }
     readDataPanelOptions(): DataPanelOptions {
         let valueDeserializer : Deserializer = this
         const values_buf_length : int32 = valueDeserializer.readInt32()
-        let values_buf : Array<number> = new Array<number>()
+        let values_buf : Array<number> = new Array<number>(values_buf_length)
         for (let values_buf_i = 0; values_buf_i < values_buf_length; values_buf_i++) {
             values_buf[values_buf_i] = (valueDeserializer.readNumber() as number)
         }
@@ -20001,7 +20105,7 @@ export class Deserializer extends DeserializerBase {
             type_buf = (valueDeserializer.readInt32() as DataPanelType)
         }
         const type_result : DataPanelType | undefined = type_buf
-        let value : DataPanelOptions = ({values: values_result,max: max_result,type: type_result} as DataPanelOptions)
+        let value : DataPanelOptions = ({values: values_result, max: max_result, type: type_result} as DataPanelOptions)
         return value
     }
     readColorStop(): ColorStop {
@@ -20025,7 +20129,7 @@ export class Deserializer extends DeserializerBase {
         }
         const color_result : ResourceColor = (color_buf as Color | number | string | Resource)
         const offset_result : Length = (valueDeserializer.readLength() as Length)
-        let value : ColorStop = ({color: color_result,offset: offset_result} as ColorStop)
+        let value : ColorStop = ({color: color_result, offset: offset_result} as ColorStop)
         return value
     }
     readCustomDialogControllerOptions(): CustomDialogControllerOptions {
@@ -20494,18 +20598,13 @@ export class Deserializer extends DeserializerBase {
             hoverModeArea_buf = (valueDeserializer.readInt32() as HoverModeAreaType)
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
-        let value : CustomDialogControllerOptions = ({builder: builder_result,cancel: cancel_result,autoCancel: autoCancel_result,alignment: alignment_result,offset: offset_result,customStyle: customStyle_result,gridCount: gridCount_result,maskColor: maskColor_result,maskRect: maskRect_result,openAnimation: openAnimation_result,closeAnimation: closeAnimation_result,showInSubWindow: showInSubWindow_result,backgroundColor: backgroundColor_result,cornerRadius: cornerRadius_result,isModal: isModal_result,onWillDismiss: onWillDismiss_result,width: width_result,height: height_result,borderWidth: borderWidth_result,borderColor: borderColor_result,borderStyle: borderStyle_result,shadow: shadow_result,backgroundBlurStyle: backgroundBlurStyle_result,keyboardAvoidMode: keyboardAvoidMode_result,enableHoverMode: enableHoverMode_result,hoverModeArea: hoverModeArea_result} as CustomDialogControllerOptions)
+        let value : CustomDialogControllerOptions = ({builder: builder_result, cancel: cancel_result, autoCancel: autoCancel_result, alignment: alignment_result, offset: offset_result, customStyle: customStyle_result, gridCount: gridCount_result, maskColor: maskColor_result, maskRect: maskRect_result, openAnimation: openAnimation_result, closeAnimation: closeAnimation_result, showInSubWindow: showInSubWindow_result, backgroundColor: backgroundColor_result, cornerRadius: cornerRadius_result, isModal: isModal_result, onWillDismiss: onWillDismiss_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, keyboardAvoidMode: keyboardAvoidMode_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result} as CustomDialogControllerOptions)
         return value
     }
     readCustomDialogController(): CustomDialogController {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return CustomDialogControllerInternal.fromPtr(ptr)
-    }
-    readContextMenu(): ContextMenu {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ContextMenuInternal.fromPtr(ptr)
     }
     readSceneOptions(): SceneOptions {
         let valueDeserializer : Deserializer = this
@@ -20545,7 +20644,7 @@ export class Deserializer extends DeserializerBase {
             modelType_buf = (valueDeserializer.readInt32() as ModelType)
         }
         const modelType_result : ModelType | undefined = modelType_buf
-        let value : SceneOptions = ({scene: scene_result,modelType: modelType_result} as SceneOptions)
+        let value : SceneOptions = ({scene: scene_result, modelType: modelType_result} as SceneOptions)
         return value
     }
     readUICommonEvent(): UICommonEvent {
@@ -20569,7 +20668,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(xOffset);
     _argsSerializer.writeNumber(yOffset);
-    _argsSerializer.writeInt32((scrollState.valueOf() as int32));
+    _argsSerializer.writeInt32(((scrollState as ScrollState) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(-1265626662, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1265626662, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -20614,7 +20713,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
         const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
-        let value : DismissSheetAction = ({dismiss: dismiss_result,reason: reason_result} as DismissSheetAction)
+        let value : DismissSheetAction = ({dismiss: dismiss_result, reason: reason_result} as DismissSheetAction)
         return value
     }
     readSheetDismiss(): SheetDismiss {
@@ -20627,7 +20726,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
         const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
-        let value : DismissContentCoverAction = ({dismiss: dismiss_result,reason: reason_result} as DismissContentCoverAction)
+        let value : DismissContentCoverAction = ({dismiss: dismiss_result, reason: reason_result} as DismissContentCoverAction)
         return value
     }
     readMenuElement(): MenuElement {
@@ -20677,14 +20776,14 @@ export class Deserializer extends DeserializerBase {
         }
         const enabled_result : boolean | undefined = enabled_buf
         const action_result : (() => void) = valueDeserializer.readCallback_Void()
-        let value : MenuElement = ({value: value_result,icon: icon_result,symbolIcon: symbolIcon_result,enabled: enabled_result,action: action_result} as MenuElement)
+        let value : MenuElement = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result, enabled: enabled_result, action: action_result} as MenuElement)
         return value
     }
     readDismissPopupAction(): DismissPopupAction {
         let valueDeserializer : Deserializer = this
         const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
         const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
-        let value : DismissPopupAction = ({dismiss: dismiss_result,reason: reason_result} as DismissPopupAction)
+        let value : DismissPopupAction = ({dismiss: dismiss_result, reason: reason_result} as DismissPopupAction)
         return value
     }
     readCallback_TouchEvent_HitTestMode(isSync: boolean = false): ((parameter: TouchEvent) => HitTestMode) {
@@ -20740,7 +20839,7 @@ export class Deserializer extends DeserializerBase {
         const localY_result : number = (valueDeserializer.readNumber() as number)
         const displayX_result : number = (valueDeserializer.readNumber() as number)
         const displayY_result : number = (valueDeserializer.readNumber() as number)
-        let value : FingerInfo = ({id: id_result,globalX: globalX_result,globalY: globalY_result,localX: localX_result,localY: localY_result,displayX: displayX_result,displayY: displayY_result} as FingerInfo)
+        let value : FingerInfo = ({id: id_result, globalX: globalX_result, globalY: globalY_result, localX: localX_result, localY: localY_result, displayX: displayX_result, displayY: displayY_result} as FingerInfo)
         return value
     }
     readBaseGestureEvent(): BaseGestureEvent {
@@ -20759,7 +20858,7 @@ export class Deserializer extends DeserializerBase {
         const tag_result : string | undefined = tag_buf
         const type_result : GestureControl.GestureType = (valueDeserializer.readInt32() as GestureControl.GestureType)
         const isSystemGesture_result : boolean = valueDeserializer.readBoolean()
-        let value : GestureInfo = ({tag: tag_result,type: type_result,isSystemGesture: isSystemGesture_result} as GestureInfo)
+        let value : GestureInfo = ({tag: tag_result, type: type_result, isSystemGesture: isSystemGesture_result} as GestureInfo)
         return value
     }
     readCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(isSync: boolean = false): ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) {
@@ -20784,7 +20883,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const rate_result : number = (valueDeserializer.readNumber() as number)
         const lightUpDegree_result : number = (valueDeserializer.readNumber() as number)
-        let value : BackgroundBrightnessOptions = ({rate: rate_result,lightUpDegree: lightUpDegree_result} as BackgroundBrightnessOptions)
+        let value : BackgroundBrightnessOptions = ({rate: rate_result, lightUpDegree: lightUpDegree_result} as BackgroundBrightnessOptions)
         return value
     }
     readGestureModifier(): GestureModifier {
@@ -20822,7 +20921,7 @@ export class Deserializer extends DeserializerBase {
             right_buf = (valueDeserializer.readLength() as Length)
         }
         const right_result : Length | undefined = right_buf
-        let value : PixelStretchEffectOptions = ({top: top_result,bottom: bottom_result,left: left_result,right: right_result} as PixelStretchEffectOptions)
+        let value : PixelStretchEffectOptions = ({top: top_result, bottom: bottom_result, left: left_result, right: right_result} as PixelStretchEffectOptions)
         return value
     }
     readStateStyles(): StateStyles {
@@ -20869,7 +20968,7 @@ export class Deserializer extends DeserializerBase {
             selected_buf = (valueDeserializer.readCustomObject("Object") as Object)
         }
         const selected_result : Object | undefined = selected_buf
-        let value : StateStyles = ({normal: normal_result,pressed: pressed_result,disabled: disabled_result,focused: focused_result,clicked: clicked_result,selected: selected_result} as StateStyles)
+        let value : StateStyles = ({normal: normal_result, pressed: pressed_result, disabled: disabled_result, focused: focused_result, clicked: clicked_result, selected: selected_result} as StateStyles)
         return value
     }
     readCallback_PreDragStatus_Void(isSync: boolean = false): ((parameter: PreDragStatus) => void) {
@@ -20881,7 +20980,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32((parameter.valueOf() as int32));
+    _argsSerializer.writeInt32(((parameter as PreDragStatus) as int32));
     (isSync) ? (InteropNativeModule._CallCallbackSync(463894668, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(463894668, _argsSerializer.asArray(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -20988,7 +21087,7 @@ export class Deserializer extends DeserializerBase {
             bias_buf = valueDeserializer.readBias()
         }
         const bias_result : Bias | undefined = bias_buf
-        let value : LocalizedAlignRuleOptions = ({start: start_result,end: end_result,middle: middle_result,top: top_result,bottom: bottom_result,center: center_result,bias: bias_result} as LocalizedAlignRuleOptions)
+        let value : LocalizedAlignRuleOptions = ({start: start_result, end: end_result, middle: middle_result, top: top_result, bottom: bottom_result, center: center_result, bias: bias_result} as LocalizedAlignRuleOptions)
         return value
     }
     readAlignRuleOption(): AlignRuleOption {
@@ -21054,7 +21153,7 @@ export class Deserializer extends DeserializerBase {
             bias_buf = valueDeserializer.readBias()
         }
         const bias_result : Bias | undefined = bias_buf
-        let value : AlignRuleOption = ({left: left_result,right: right_result,middle: middle_result,top: top_result,bottom: bottom_result,center: center_result,bias: bias_result} as AlignRuleOption)
+        let value : AlignRuleOption = ({left: left_result, right: right_result, middle: middle_result, top: top_result, bottom: bottom_result, center: center_result, bias: bias_result} as AlignRuleOption)
         return value
     }
     readCallback_Area_Area_Void(isSync: boolean = false): ((oldValue: Area,newValue: Area) => void) {
@@ -21076,7 +21175,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const radius_result : number = (valueDeserializer.readNumber() as number)
         const anchor_result : MotionBlurAnchor = valueDeserializer.readMotionBlurAnchor()
-        let value : MotionBlurOptions = ({radius: radius_result,anchor: anchor_result} as MotionBlurOptions)
+        let value : MotionBlurOptions = ({radius: radius_result, anchor: anchor_result} as MotionBlurOptions)
         return value
     }
     readFocusBoxStyle(): FocusBoxStyle {
@@ -21092,7 +21191,7 @@ export class Deserializer extends DeserializerBase {
         let strokeColor_buf : ColorMetrics | undefined
         if ((RuntimeType.UNDEFINED) != (strokeColor_buf_runtimeType))
         {
-            strokeColor_buf = valueDeserializer.readColorMetrics()
+            strokeColor_buf = (valueDeserializer.readColorMetrics() as ColorMetrics)
         }
         const strokeColor_result : ColorMetrics | undefined = strokeColor_buf
         const strokeWidth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -21102,7 +21201,7 @@ export class Deserializer extends DeserializerBase {
             strokeWidth_buf = (valueDeserializer.readLengthMetrics() as LengthMetrics)
         }
         const strokeWidth_result : LengthMetrics | undefined = strokeWidth_buf
-        let value : FocusBoxStyle = ({margin: margin_result,strokeColor: strokeColor_result,strokeWidth: strokeWidth_result} as FocusBoxStyle)
+        let value : FocusBoxStyle = ({margin: margin_result, strokeColor: strokeColor_result, strokeWidth: strokeWidth_result} as FocusBoxStyle)
         return value
     }
     readCallback_KeyEvent_Boolean(isSync: boolean = false): ((parameter: KeyEvent) => boolean) {
@@ -21426,7 +21525,7 @@ export class Deserializer extends DeserializerBase {
             style_buf = (style_buf_ as EdgeOutlineStyles | OutlineStyle)
         }
         const style_result : EdgeOutlineStyles | OutlineStyle | undefined = style_buf
-        let value : OutlineOptions = ({width: width_result,color: color_result,radius: radius_result,style: style_result} as OutlineOptions)
+        let value : OutlineOptions = ({width: width_result, color: color_result, radius: radius_result, style: style_result} as OutlineOptions)
         return value
     }
     readBorderImageOption(): BorderImageOption {
@@ -21613,7 +21712,7 @@ export class Deserializer extends DeserializerBase {
             fill_buf = valueDeserializer.readBoolean()
         }
         const fill_result : boolean | undefined = fill_buf
-        let value : BorderImageOption = ({slice: slice_result,repeat: repeat_result,source: source_result,width: width_result,outset: outset_result,fill: fill_result} as BorderImageOption)
+        let value : BorderImageOption = ({slice: slice_result, repeat: repeat_result, source: source_result, width: width_result, outset: outset_result, fill: fill_result} as BorderImageOption)
         return value
     }
     readBorderOptions(): BorderOptions {
@@ -21994,7 +22093,7 @@ export class Deserializer extends DeserializerBase {
             dashWidth_buf = (dashWidth_buf_ as EdgeWidths | LengthMetrics | LocalizedEdgeWidths)
         }
         const dashWidth_result : EdgeWidths | LengthMetrics | LocalizedEdgeWidths | undefined = dashWidth_buf
-        let value : BorderOptions = ({width: width_result,color: color_result,radius: radius_result,style: style_result,dashGap: dashGap_result,dashWidth: dashWidth_result} as BorderOptions)
+        let value : BorderOptions = ({width: width_result, color: color_result, radius: radius_result, style: style_result, dashGap: dashGap_result, dashWidth: dashWidth_result} as BorderOptions)
         return value
     }
     readFilter(): Filter {
@@ -22059,7 +22158,7 @@ export class Deserializer extends DeserializerBase {
             lattice_buf = valueDeserializer.readDrawingLattice()
         }
         const lattice_result : DrawingLattice | undefined = lattice_buf
-        let value : ResizableOptions = ({slice: slice_result,lattice: lattice_result} as ResizableOptions)
+        let value : ResizableOptions = ({slice: slice_result, lattice: lattice_result} as ResizableOptions)
         return value
     }
     readBackgroundEffectOptions(): BackgroundEffectOptions {
@@ -22148,7 +22247,7 @@ export class Deserializer extends DeserializerBase {
             inactiveColor_buf = (inactiveColor_buf_ as Color | number | string | Resource)
         }
         const inactiveColor_result : ResourceColor | undefined = inactiveColor_buf
-        let value : BackgroundEffectOptions = ({radius: radius_result,saturation: saturation_result,brightness: brightness_result,color: color_result,adaptiveColor: adaptiveColor_result,blurOptions: blurOptions_result,policy: policy_result,inactiveColor: inactiveColor_result} as BackgroundEffectOptions)
+        let value : BackgroundEffectOptions = ({radius: radius_result, saturation: saturation_result, brightness: brightness_result, color: color_result, adaptiveColor: adaptiveColor_result, blurOptions: blurOptions_result, policy: policy_result, inactiveColor: inactiveColor_result} as BackgroundEffectOptions)
         return value
     }
     readPixelRoundPolicy(): PixelRoundPolicy {
@@ -22181,7 +22280,7 @@ export class Deserializer extends DeserializerBase {
             bottom_buf = (valueDeserializer.readInt32() as PixelRoundCalcPolicy)
         }
         const bottom_result : PixelRoundCalcPolicy | undefined = bottom_buf
-        let value : PixelRoundPolicy = ({start: start_result,top: top_result,end: end_result,bottom: bottom_result} as PixelRoundPolicy)
+        let value : PixelRoundPolicy = ({start: start_result, top: top_result, end: end_result, bottom: bottom_result} as PixelRoundPolicy)
         return value
     }
     readChainWeightOptions(): ChainWeightOptions {
@@ -22200,7 +22299,7 @@ export class Deserializer extends DeserializerBase {
             vertical_buf = (valueDeserializer.readNumber() as number)
         }
         const vertical_result : number | undefined = vertical_buf
-        let value : ChainWeightOptions = ({horizontal: horizontal_result,vertical: vertical_result} as ChainWeightOptions)
+        let value : ChainWeightOptions = ({horizontal: horizontal_result, vertical: vertical_result} as ChainWeightOptions)
         return value
     }
     readTouchResult(): TouchResult {
@@ -22213,7 +22312,7 @@ export class Deserializer extends DeserializerBase {
             id_buf = (valueDeserializer.readString() as string)
         }
         const id_result : string | undefined = id_buf
-        let value : TouchResult = ({strategy: strategy_result,id: id_result} as TouchResult)
+        let value : TouchResult = ({strategy: strategy_result, id: id_result} as TouchResult)
         return value
     }
     readTouchTestInfo(): TouchTestInfo {
@@ -22226,7 +22325,7 @@ export class Deserializer extends DeserializerBase {
         const y_result : number = (valueDeserializer.readNumber() as number)
         const rect_result : RectResult = valueDeserializer.readRectResult()
         const id_result : string = (valueDeserializer.readString() as string)
-        let value : TouchTestInfo = ({windowX: windowX_result,windowY: windowY_result,parentX: parentX_result,parentY: parentY_result,x: x_result,y: y_result,rect: rect_result,id: id_result} as TouchTestInfo)
+        let value : TouchTestInfo = ({windowX: windowX_result, windowY: windowY_result, parentX: parentX_result, parentY: parentY_result, x: x_result, y: y_result, rect: rect_result, id: id_result} as TouchTestInfo)
         return value
     }
     readCallback_Array_TouchTestInfo_TouchResult(isSync: boolean = false): ((value: Array<TouchTestInfo>) => TouchResult) {
@@ -22271,7 +22370,7 @@ export class Deserializer extends DeserializerBase {
         const size_result : number = (valueDeserializer.readNumber() as number)
         const force_result : number = (valueDeserializer.readNumber() as number)
         const timestamp_result : number = (valueDeserializer.readNumber() as number)
-        let value : HistoricalPoint = ({touchObject: touchObject_result,size: size_result,force: force_result,timestamp: timestamp_result} as HistoricalPoint)
+        let value : HistoricalPoint = ({touchObject: touchObject_result, size: size_result, force: force_result, timestamp: timestamp_result} as HistoricalPoint)
         return value
     }
     readAccessibilityHoverEvent(): AccessibilityHoverEvent {
@@ -22317,7 +22416,7 @@ export class Deserializer extends DeserializerBase {
             bloom_buf = (valueDeserializer.readNumber() as number)
         }
         const bloom_result : number | undefined = bloom_buf
-        let value : PointLightStyle = ({lightSource: lightSource_result,illuminated: illuminated_result,bloom: bloom_result} as PointLightStyle)
+        let value : PointLightStyle = ({lightSource: lightSource_result, illuminated: illuminated_result, bloom: bloom_result} as PointLightStyle)
         return value
     }
     readColumnOptions(): ColumnOptions {
@@ -22381,19 +22480,19 @@ export class Deserializer extends DeserializerBase {
             height_buf = (height_buf_ as string | number)
         }
         const height_result : string | number | undefined = height_buf
-        let value : CircleOptions = ({width: width_result,height: height_result} as CircleOptions)
+        let value : CircleOptions = ({width: width_result, height: height_result} as CircleOptions)
         return value
     }
     readCheckboxGroupResult(): CheckboxGroupResult {
         let valueDeserializer : Deserializer = this
         const name_buf_length : int32 = valueDeserializer.readInt32()
-        let name_buf : Array<string> = new Array<string>()
+        let name_buf : Array<string> = new Array<string>(name_buf_length)
         for (let name_buf_i = 0; name_buf_i < name_buf_length; name_buf_i++) {
             name_buf[name_buf_i] = (valueDeserializer.readString() as string)
         }
         const name_result : Array<string> = name_buf
         const status_result : SelectStatus = (valueDeserializer.readInt32() as SelectStatus)
-        let value : CheckboxGroupResult = ({name: name_result,status: status_result} as CheckboxGroupResult)
+        let value : CheckboxGroupResult = ({name: name_result, status: status_result} as CheckboxGroupResult)
         return value
     }
     readOnCheckboxGroupChangeCallback(isSync: boolean = false): OnCheckboxGroupChangeCallback {
@@ -22476,7 +22575,7 @@ export class Deserializer extends DeserializerBase {
             strokeWidth_buf = (valueDeserializer.readLength() as Length)
         }
         const strokeWidth_result : Length | undefined = strokeWidth_buf
-        let value : MarkStyle = ({strokeColor: strokeColor_result,size: size_result,strokeWidth: strokeWidth_result} as MarkStyle)
+        let value : MarkStyle = ({strokeColor: strokeColor_result, size: size_result, strokeWidth: strokeWidth_result} as MarkStyle)
         return value
     }
     readCheckboxOptions(): CheckboxOptions {
@@ -22502,7 +22601,7 @@ export class Deserializer extends DeserializerBase {
             indicatorBuilder_buf = CallbackTransformer.transformToCustomBuilder(valueDeserializer.readCustomNodeBuilder())
         }
         const indicatorBuilder_result : CustomBuilder | undefined = indicatorBuilder_buf
-        let value : CheckboxOptions = ({name: name_result,group: group_result,indicatorBuilder: indicatorBuilder_result} as CheckboxOptions)
+        let value : CheckboxOptions = ({name: name_result, group: group_result, indicatorBuilder: indicatorBuilder_result} as CheckboxOptions)
         return value
     }
     readOffscreenCanvas(): OffscreenCanvas {
@@ -22525,11 +22624,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return CanvasPathInternal.fromPtr(ptr)
-    }
-    readCalendarPickerDialog(): CalendarPickerDialog {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return CalendarPickerDialogInternal.fromPtr(ptr)
     }
     readCalendarOptions(): CalendarOptions {
         let valueDeserializer : Deserializer = this
@@ -22558,7 +22652,7 @@ export class Deserializer extends DeserializerBase {
             selected_buf = new Date(valueDeserializer.readInt64())
         }
         const selected_result : Date | undefined = selected_buf
-        let value : CalendarOptions = ({hintRadius: hintRadius_result,selected: selected_result} as CalendarOptions)
+        let value : CalendarOptions = ({hintRadius: hintRadius_result, selected: selected_result} as CalendarOptions)
         return value
     }
     readCalendarRequestedData(): CalendarRequestedData {
@@ -22568,7 +22662,7 @@ export class Deserializer extends DeserializerBase {
         const currentYear_result : number = (valueDeserializer.readNumber() as number)
         const currentMonth_result : number = (valueDeserializer.readNumber() as number)
         const monthState_result : number = (valueDeserializer.readNumber() as number)
-        let value : CalendarRequestedData = ({year: year_result,month: month_result,currentYear: currentYear_result,currentMonth: currentMonth_result,monthState: monthState_result} as CalendarRequestedData)
+        let value : CalendarRequestedData = ({year: year_result, month: month_result, currentYear: currentYear_result, currentMonth: currentMonth_result, monthState: monthState_result} as CalendarRequestedData)
         return value
     }
     readCallback_CalendarRequestedData_Void(isSync: boolean = false): ((event: CalendarRequestedData) => void) {
@@ -22590,7 +22684,7 @@ export class Deserializer extends DeserializerBase {
         const year_result : number = (valueDeserializer.readNumber() as number)
         const month_result : number = (valueDeserializer.readNumber() as number)
         const day_result : number = (valueDeserializer.readNumber() as number)
-        let value : CalendarSelectedDate = ({year: year_result,month: month_result,day: day_result} as CalendarSelectedDate)
+        let value : CalendarSelectedDate = ({year: year_result, month: month_result, day: day_result} as CalendarSelectedDate)
         return value
     }
     readCallback_CalendarSelectedDate_Void(isSync: boolean = false): ((event: CalendarSelectedDate) => void) {
@@ -22692,7 +22786,7 @@ export class Deserializer extends DeserializerBase {
             workStateVerticalMovingDistance_buf = (valueDeserializer.readNumber() as number)
         }
         const workStateVerticalMovingDistance_result : number | undefined = workStateVerticalMovingDistance_buf
-        let value : WorkStateStyle = ({workDayMarkColor: workDayMarkColor_result,offDayMarkColor: offDayMarkColor_result,workDayMarkSize: workDayMarkSize_result,offDayMarkSize: offDayMarkSize_result,workStateWidth: workStateWidth_result,workStateHorizontalMovingDistance: workStateHorizontalMovingDistance_result,workStateVerticalMovingDistance: workStateVerticalMovingDistance_result} as WorkStateStyle)
+        let value : WorkStateStyle = ({workDayMarkColor: workDayMarkColor_result, offDayMarkColor: offDayMarkColor_result, workDayMarkSize: workDayMarkSize_result, offDayMarkSize: offDayMarkSize_result, workStateWidth: workStateWidth_result, workStateHorizontalMovingDistance: workStateHorizontalMovingDistance_result, workStateVerticalMovingDistance: workStateVerticalMovingDistance_result} as WorkStateStyle)
         return value
     }
     readWeekStyle(): WeekStyle {
@@ -22797,7 +22891,7 @@ export class Deserializer extends DeserializerBase {
             weekAndDayRowSpace_buf = (valueDeserializer.readNumber() as number)
         }
         const weekAndDayRowSpace_result : number | undefined = weekAndDayRowSpace_buf
-        let value : WeekStyle = ({weekColor: weekColor_result,weekendDayColor: weekendDayColor_result,weekendLunarColor: weekendLunarColor_result,weekFontSize: weekFontSize_result,weekHeight: weekHeight_result,weekWidth: weekWidth_result,weekAndDayRowSpace: weekAndDayRowSpace_result} as WeekStyle)
+        let value : WeekStyle = ({weekColor: weekColor_result, weekendDayColor: weekendDayColor_result, weekendLunarColor: weekendLunarColor_result, weekFontSize: weekFontSize_result, weekHeight: weekHeight_result, weekWidth: weekWidth_result, weekAndDayRowSpace: weekAndDayRowSpace_result} as WeekStyle)
         return value
     }
     readTodayStyle(): TodayStyle {
@@ -22881,7 +22975,7 @@ export class Deserializer extends DeserializerBase {
             focusedAreaRadius_buf = (valueDeserializer.readNumber() as number)
         }
         const focusedAreaRadius_result : number | undefined = focusedAreaRadius_buf
-        let value : TodayStyle = ({focusedDayColor: focusedDayColor_result,focusedLunarColor: focusedLunarColor_result,focusedAreaBackgroundColor: focusedAreaBackgroundColor_result,focusedAreaRadius: focusedAreaRadius_result} as TodayStyle)
+        let value : TodayStyle = ({focusedDayColor: focusedDayColor_result, focusedLunarColor: focusedLunarColor_result, focusedAreaBackgroundColor: focusedAreaBackgroundColor_result, focusedAreaRadius: focusedAreaRadius_result} as TodayStyle)
         return value
     }
     readNonCurrentDayStyle(): NonCurrentDayStyle {
@@ -22982,7 +23076,7 @@ export class Deserializer extends DeserializerBase {
             nonCurrentMonthOffDayMarkColor_buf = (nonCurrentMonthOffDayMarkColor_buf_ as Color | number | string | Resource)
         }
         const nonCurrentMonthOffDayMarkColor_result : ResourceColor | undefined = nonCurrentMonthOffDayMarkColor_buf
-        let value : NonCurrentDayStyle = ({nonCurrentMonthDayColor: nonCurrentMonthDayColor_result,nonCurrentMonthLunarColor: nonCurrentMonthLunarColor_result,nonCurrentMonthWorkDayMarkColor: nonCurrentMonthWorkDayMarkColor_result,nonCurrentMonthOffDayMarkColor: nonCurrentMonthOffDayMarkColor_result} as NonCurrentDayStyle)
+        let value : NonCurrentDayStyle = ({nonCurrentMonthDayColor: nonCurrentMonthDayColor_result, nonCurrentMonthLunarColor: nonCurrentMonthLunarColor_result, nonCurrentMonthWorkDayMarkColor: nonCurrentMonthWorkDayMarkColor_result, nonCurrentMonthOffDayMarkColor: nonCurrentMonthOffDayMarkColor_result} as NonCurrentDayStyle)
         return value
     }
     readCurrentDayStyle(): CurrentDayStyle {
@@ -23199,7 +23293,7 @@ export class Deserializer extends DeserializerBase {
             boundaryColOffset_buf = (valueDeserializer.readNumber() as number)
         }
         const boundaryColOffset_result : number | undefined = boundaryColOffset_buf
-        let value : CurrentDayStyle = ({dayColor: dayColor_result,lunarColor: lunarColor_result,markLunarColor: markLunarColor_result,dayFontSize: dayFontSize_result,lunarDayFontSize: lunarDayFontSize_result,dayHeight: dayHeight_result,dayWidth: dayWidth_result,gregorianCalendarHeight: gregorianCalendarHeight_result,dayYAxisOffset: dayYAxisOffset_result,lunarDayYAxisOffset: lunarDayYAxisOffset_result,underscoreXAxisOffset: underscoreXAxisOffset_result,underscoreYAxisOffset: underscoreYAxisOffset_result,scheduleMarkerXAxisOffset: scheduleMarkerXAxisOffset_result,scheduleMarkerYAxisOffset: scheduleMarkerYAxisOffset_result,colSpace: colSpace_result,dailyFiveRowSpace: dailyFiveRowSpace_result,dailySixRowSpace: dailySixRowSpace_result,lunarHeight: lunarHeight_result,underscoreWidth: underscoreWidth_result,underscoreLength: underscoreLength_result,scheduleMarkerRadius: scheduleMarkerRadius_result,boundaryRowOffset: boundaryRowOffset_result,boundaryColOffset: boundaryColOffset_result} as CurrentDayStyle)
+        let value : CurrentDayStyle = ({dayColor: dayColor_result, lunarColor: lunarColor_result, markLunarColor: markLunarColor_result, dayFontSize: dayFontSize_result, lunarDayFontSize: lunarDayFontSize_result, dayHeight: dayHeight_result, dayWidth: dayWidth_result, gregorianCalendarHeight: gregorianCalendarHeight_result, dayYAxisOffset: dayYAxisOffset_result, lunarDayYAxisOffset: lunarDayYAxisOffset_result, underscoreXAxisOffset: underscoreXAxisOffset_result, underscoreYAxisOffset: underscoreYAxisOffset_result, scheduleMarkerXAxisOffset: scheduleMarkerXAxisOffset_result, scheduleMarkerYAxisOffset: scheduleMarkerYAxisOffset_result, colSpace: colSpace_result, dailyFiveRowSpace: dailyFiveRowSpace_result, dailySixRowSpace: dailySixRowSpace_result, lunarHeight: lunarHeight_result, underscoreWidth: underscoreWidth_result, underscoreLength: underscoreLength_result, scheduleMarkerRadius: scheduleMarkerRadius_result, boundaryRowOffset: boundaryRowOffset_result, boundaryColOffset: boundaryColOffset_result} as CurrentDayStyle)
         return value
     }
     readCalendarDay(): CalendarDay {
@@ -23215,7 +23309,7 @@ export class Deserializer extends DeserializerBase {
         const isFirstOfLunar_result : boolean = valueDeserializer.readBoolean()
         const hasSchedule_result : boolean = valueDeserializer.readBoolean()
         const markLunarDay_result : boolean = valueDeserializer.readBoolean()
-        let value : CalendarDay = ({index: index_result,lunarMonth: lunarMonth_result,lunarDay: lunarDay_result,dayMark: dayMark_result,dayMarkValue: dayMarkValue_result,year: year_result,month: month_result,day: day_result,isFirstOfLunar: isFirstOfLunar_result,hasSchedule: hasSchedule_result,markLunarDay: markLunarDay_result} as CalendarDay)
+        let value : CalendarDay = ({index: index_result, lunarMonth: lunarMonth_result, lunarDay: lunarDay_result, dayMark: dayMark_result, dayMarkValue: dayMarkValue_result, year: year_result, month: month_result, day: day_result, isFirstOfLunar: isFirstOfLunar_result, hasSchedule: hasSchedule_result, markLunarDay: markLunarDay_result} as CalendarDay)
         return value
     }
     readButtonOptions(): ButtonOptions {
@@ -23245,7 +23339,7 @@ export class Deserializer extends DeserializerBase {
         let controlSize_buf : ControlSize | undefined
         if ((RuntimeType.UNDEFINED) != (controlSize_buf_runtimeType))
         {
-            controlSize_buf = valueDeserializer.readInt32() as ControlSize
+            controlSize_buf = TypeChecker.ControlSize_FromOrdinal(valueDeserializer.readInt32())
         }
         const controlSize_result : ControlSize | undefined = controlSize_buf
         const role_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -23255,7 +23349,7 @@ export class Deserializer extends DeserializerBase {
             role_buf = (valueDeserializer.readInt32() as ButtonRole)
         }
         const role_result : ButtonRole | undefined = role_buf
-        let value : ButtonOptions = ({type: type_result,stateEffect: stateEffect_result,buttonStyle: buttonStyle_result,controlSize: controlSize_result,role: role_result} as ButtonOptions)
+        let value : ButtonOptions = ({type: type_result, stateEffect: stateEffect_result, buttonStyle: buttonStyle_result, controlSize: controlSize_result, role: role_result} as ButtonOptions)
         return value
     }
     readBadgeParamWithString(): BadgeParamWithString {
@@ -23280,7 +23374,7 @@ export class Deserializer extends DeserializerBase {
         const position_result : BadgePosition | Position | undefined = position_buf
         const style_result : BadgeStyle = valueDeserializer.readBadgeStyle()
         const value_result : string = (valueDeserializer.readString() as string)
-        let value : BadgeParamWithString = ({position: position_result,style: style_result,value: value_result} as BadgeParamWithString)
+        let value : BadgeParamWithString = ({position: position_result, style: style_result, value: value_result} as BadgeParamWithString)
         return value
     }
     readBadgeParamWithNumber(): BadgeParamWithNumber {
@@ -23312,7 +23406,7 @@ export class Deserializer extends DeserializerBase {
             maxCount_buf = (valueDeserializer.readNumber() as number)
         }
         const maxCount_result : number | undefined = maxCount_buf
-        let value : BadgeParamWithNumber = ({position: position_result,style: style_result,count: count_result,maxCount: maxCount_result} as BadgeParamWithNumber)
+        let value : BadgeParamWithNumber = ({position: position_result, style: style_result, count: count_result, maxCount: maxCount_result} as BadgeParamWithNumber)
         return value
     }
     readScrollMotion(): ScrollMotion {
@@ -23383,13 +23477,13 @@ export class Deserializer extends DeserializerBase {
     readAlphabetIndexerOptions(): AlphabetIndexerOptions {
         let valueDeserializer : Deserializer = this
         const arrayValue_buf_length : int32 = valueDeserializer.readInt32()
-        let arrayValue_buf : Array<string> = new Array<string>()
+        let arrayValue_buf : Array<string> = new Array<string>(arrayValue_buf_length)
         for (let arrayValue_buf_i = 0; arrayValue_buf_i < arrayValue_buf_length; arrayValue_buf_i++) {
             arrayValue_buf[arrayValue_buf_i] = (valueDeserializer.readString() as string)
         }
         const arrayValue_result : Array<string> = arrayValue_buf
         const selected_result : number = (valueDeserializer.readNumber() as number)
-        let value : AlphabetIndexerOptions = ({arrayValue: arrayValue_result,selected: selected_result} as AlphabetIndexerOptions)
+        let value : AlphabetIndexerOptions = ({arrayValue: arrayValue_result, selected: selected_result} as AlphabetIndexerOptions)
         return value
     }
     readAlertDialogButtonOptions(): AlertDialogButtonOptions {
@@ -23483,19 +23577,14 @@ export class Deserializer extends DeserializerBase {
             primary_buf = valueDeserializer.readBoolean()
         }
         const primary_result : boolean | undefined = primary_buf
-        let value : AlertDialogButtonOptions = ({enabled: enabled_result,defaultFocus: defaultFocus_result,style: style_result,value: value_result,fontColor: fontColor_result,backgroundColor: backgroundColor_result,action: action_result,primary: primary_result} as AlertDialogButtonOptions)
+        let value : AlertDialogButtonOptions = ({enabled: enabled_result, defaultFocus: defaultFocus_result, style: style_result, value: value_result, fontColor: fontColor_result, backgroundColor: backgroundColor_result, action: action_result, primary: primary_result} as AlertDialogButtonOptions)
         return value
-    }
-    readAlertDialog(): AlertDialog {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return AlertDialogInternal.fromPtr(ptr)
     }
     readDismissDialogAction(): DismissDialogAction {
         let valueDeserializer : Deserializer = this
         const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
         const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
-        let value : DismissDialogAction = ({dismiss: dismiss_result,reason: reason_result} as DismissDialogAction)
+        let value : DismissDialogAction = ({dismiss: dismiss_result, reason: reason_result} as DismissDialogAction)
         return value
     }
     readSheetInfo(): SheetInfo {
@@ -23531,23 +23620,8 @@ export class Deserializer extends DeserializerBase {
         }
         const icon_result : string | Resource | undefined = icon_buf
         const action_result : VoidCallback = valueDeserializer.readVoidCallback()
-        let value : SheetInfo = ({title: title_result,icon: icon_result,action: action_result} as SheetInfo)
+        let value : SheetInfo = ({title: title_result, icon: icon_result, action: action_result} as SheetInfo)
         return value
-    }
-    readActionSheet(): ActionSheet {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ActionSheetInternal.fromPtr(ptr)
-    }
-    readEventEmulator(): EventEmulator {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return EventEmulatorInternal.fromPtr(ptr)
-    }
-    readNavExtender(): NavExtender {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return NavExtenderInternal.fromPtr(ptr)
     }
     readReplaceSymbolEffect(): ReplaceSymbolEffect {
         let valueDeserializer : Deserializer = this
@@ -23558,11 +23632,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return ScaleSymbolEffectInternal.fromPtr(ptr)
-    }
-    readGlobalScope_ohos_font(): GlobalScope_ohos_font {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return GlobalScope_ohos_fontInternal.fromPtr(ptr)
     }
     readPathShapeOptions(): PathShapeOptions {
         let valueDeserializer : Deserializer = this
@@ -23614,40 +23683,15 @@ export class Deserializer extends DeserializerBase {
             height_buf = (height_buf_ as number | string)
         }
         const height_result : number | string | undefined = height_buf
-        let value : ShapeSize = ({width: width_result,height: height_result} as ShapeSize)
+        let value : ShapeSize = ({width: width_result, height: height_result} as ShapeSize)
         return value
-    }
-    readGlobalScope_ohos_arkui_performanceMonitor(): GlobalScope_ohos_arkui_performanceMonitor {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return GlobalScope_ohos_arkui_performanceMonitorInternal.fromPtr(ptr)
-    }
-    readGlobalScope_ohos_arkui_componentSnapshot(): GlobalScope_ohos_arkui_componentSnapshot {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return GlobalScope_ohos_arkui_componentSnapshotInternal.fromPtr(ptr)
     }
     readWebHeader(): WebHeader {
         let valueDeserializer : Deserializer = this
         const headerKey_result : string = (valueDeserializer.readString() as string)
         const headerValue_result : string = (valueDeserializer.readString() as string)
-        let value : WebHeader = ({headerKey: headerKey_result,headerValue: headerValue_result} as WebHeader)
+        let value : WebHeader = ({headerKey: headerKey_result, headerValue: headerValue_result} as WebHeader)
         return value
-    }
-    readSystemOps(): SystemOps {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return SystemOpsInternal.fromPtr(ptr)
-    }
-    readLazyForEachOps(): LazyForEachOps {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LazyForEachOpsInternal.fromPtr(ptr)
-    }
-    readAnimationExtender(): AnimationExtender {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return AnimationExtenderInternal.fromPtr(ptr)
     }
     readLength(): Length | undefined {
         const valueType  = this.readInt8()

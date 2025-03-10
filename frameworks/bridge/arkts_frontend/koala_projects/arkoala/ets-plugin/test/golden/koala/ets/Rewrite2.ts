@@ -17,6 +17,7 @@ import { observableProxy } from "@koalaui/common";
  * limitations under the License.
  */
 export const storage = new LocalStorage();
+/** @memo:stable */
 class ArkLocalStorageLinkExampleComponent extends ArkStructBase<ArkLocalStorageLinkExampleComponent, LocalStorageLinkExampleOptions> {
     private _entry_local_storage_ = storage;
     __initializeStruct(/**/

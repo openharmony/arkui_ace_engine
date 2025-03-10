@@ -1004,34 +1004,6 @@ void callManagedCallback_IsolatedComponentAttribute_VoidSync(Ark_VMContext vmCon
     argsSerializer.writeIsolatedComponentAttribute(value);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
-void callManagedCallback_ItemDragInfo_Number_CustomBuilder(Ark_Int32 resourceId, Ark_ItemDragInfo event, Ark_Number itemIndex, Callback_CustomBuilder_Void continuation)
-{
-    CallbackBuffer _buffer = {{}, {}};
-    const Ark_CallbackResource _callbackResource = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    _buffer.resourceHolder.holdCallbackResource(&_callbackResource);
-    Serializer argsSerializer = Serializer(_buffer.buffer, sizeof(_buffer.buffer), &(_buffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_Callback_ItemDragInfo_Number_CustomBuilder);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeItemDragInfo(event);
-    argsSerializer.writeNumber(itemIndex);
-    argsSerializer.writeCallbackResource(continuation.resource);
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    enqueueCallback(&_buffer);
-}
-void callManagedCallback_ItemDragInfo_Number_CustomBuilderSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ItemDragInfo event, Ark_Number itemIndex, Callback_CustomBuilder_Void continuation)
-{
-    uint8_t _buffer[60 * 4];
-    Serializer argsSerializer = Serializer(_buffer, sizeof(_buffer), nullptr);
-    argsSerializer.writeInt32(Kind_Callback_ItemDragInfo_Number_CustomBuilder);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeItemDragInfo(event);
-    argsSerializer.writeNumber(itemIndex);
-    argsSerializer.writeCallbackResource(continuation.resource);
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
-}
 void callManagedCallback_ItemDragInfo_Number_Number_Boolean_Void(Ark_Int32 resourceId, Ark_ItemDragInfo event, Ark_Number itemIndex, Ark_Number insertIndex, Ark_Boolean isSuccess)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -4604,6 +4576,34 @@ void callManagedOnIntelligentTrackingPreventionCallbackSync(Ark_VMContext vmCont
     argsSerializer.writeIntelligentTrackingPreventionDetails(details);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedonItemDragStart_event_type(Ark_Int32 resourceId, Ark_ItemDragInfo event, Ark_Number itemIndex, Callback_CustomBuilder_Void continuation)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResource = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResource);
+    Serializer argsSerializer = Serializer(_buffer.buffer, sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_onItemDragStart_event_type);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeItemDragInfo(event);
+    argsSerializer.writeNumber(itemIndex);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    enqueueCallback(&_buffer);
+}
+void callManagedonItemDragStart_event_typeSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ItemDragInfo event, Ark_Number itemIndex, Callback_CustomBuilder_Void continuation)
+{
+    uint8_t _buffer[60 * 4];
+    Serializer argsSerializer = Serializer(_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_onItemDragStart_event_type);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeItemDragInfo(event);
+    argsSerializer.writeNumber(itemIndex);
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
 void callManagedOnLargestContentfulPaintCallback(Ark_Int32 resourceId, Ark_LargestContentfulPaint largestContentfulPaint)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -5885,7 +5885,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_InsertValue_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_InsertValue_Boolean);
         case Kind_Callback_InsertValue_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_InsertValue_Void);
         case Kind_Callback_IsolatedComponentAttribute_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_IsolatedComponentAttribute_Void);
-        case Kind_Callback_ItemDragInfo_Number_CustomBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Number_CustomBuilder);
         case Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Number_Number_Boolean_Void);
         case Kind_Callback_ItemDragInfo_Number_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Number_Number_Void);
         case Kind_Callback_ItemDragInfo_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Number_Void);
@@ -6033,6 +6032,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnFullScreenEnterCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFullScreenEnterCallback);
         case Kind_OnHoverStatusChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnHoverStatusChangeCallback);
         case Kind_OnIntelligentTrackingPreventionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnIntelligentTrackingPreventionCallback);
+        case Kind_onItemDragStart_event_type: return reinterpret_cast<Ark_NativePointer>(callManagedonItemDragStart_event_type);
         case Kind_OnLargestContentfulPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLargestContentfulPaintCallback);
         case Kind_OnLinearIndicatorChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLinearIndicatorChangeCallback);
         case Kind_OnMoveHandler: return reinterpret_cast<Ark_NativePointer>(callManagedOnMoveHandler);
@@ -6130,7 +6130,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_InsertValue_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_InsertValue_BooleanSync);
         case Kind_Callback_InsertValue_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_InsertValue_VoidSync);
         case Kind_Callback_IsolatedComponentAttribute_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_IsolatedComponentAttribute_VoidSync);
-        case Kind_Callback_ItemDragInfo_Number_CustomBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Number_CustomBuilderSync);
         case Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Number_Number_Boolean_VoidSync);
         case Kind_Callback_ItemDragInfo_Number_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Number_Number_VoidSync);
         case Kind_Callback_ItemDragInfo_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ItemDragInfo_Number_VoidSync);
@@ -6278,6 +6277,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnFullScreenEnterCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFullScreenEnterCallbackSync);
         case Kind_OnHoverStatusChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnHoverStatusChangeCallbackSync);
         case Kind_OnIntelligentTrackingPreventionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnIntelligentTrackingPreventionCallbackSync);
+        case Kind_onItemDragStart_event_type: return reinterpret_cast<Ark_NativePointer>(callManagedonItemDragStart_event_typeSync);
         case Kind_OnLargestContentfulPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLargestContentfulPaintCallbackSync);
         case Kind_OnLinearIndicatorChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLinearIndicatorChangeCallbackSync);
         case Kind_OnMoveHandler: return reinterpret_cast<Ark_NativePointer>(callManagedOnMoveHandlerSync);

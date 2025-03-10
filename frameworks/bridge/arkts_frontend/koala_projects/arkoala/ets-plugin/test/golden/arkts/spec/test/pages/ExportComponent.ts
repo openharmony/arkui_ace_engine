@@ -17,6 +17,7 @@ import { observableProxy } from "@koalaui/common";
  * limitations under the License.
  */
 import DefaultComponent from "./DefaultComponent";
+/** @memo:stable */
 class ArkExportComponent1Component extends ArkStructBase<ArkExportComponent1Component, ExportComponent1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -105,6 +106,7 @@ class ArkExportComponent1Component extends ArkStructBase<ArkExportComponent1Comp
         });
     }
 }
+/** @memo:stable */
 class ArkExportComponent2Component extends ArkStructBase<ArkExportComponent2Component, ExportComponent2Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -193,6 +195,7 @@ class ArkExportComponent2Component extends ArkStructBase<ArkExportComponent2Comp
         });
     }
 }
+/** @memo:stable */
 class ArkExportComponent3Component extends ArkStructBase<ArkExportComponent3Component, ExportComponent3Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -281,6 +284,7 @@ class ArkExportComponent3Component extends ArkStructBase<ArkExportComponent3Comp
         });
     }
 }
+/** @memo:stable */
 export default class ArkExportComponent4Component extends ArkStructBase<ArkExportComponent4Component, ExportComponent4Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

@@ -3,6 +3,7 @@ import { LocalStorage } from "@koalaui/arkui-common";
 import { MutableState } from "@koalaui/runtime";
 import { observableProxy } from "@koalaui/common";
 import { CustomContainerExport, CustomContainerExportOptions } from './test/pages/TestComponent';
+/** @memo:stable */
 class ArkCustomContainerComponent extends ArkStructBase<ArkCustomContainerComponent, CustomContainerOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -69,6 +70,7 @@ class ArkCustomContainerComponent extends ArkStructBase<ArkCustomContainerCompon
         });
     }
 }
+/** @memo:stable */
 class ArkCustomContainer2Component extends ArkStructBase<ArkCustomContainer2Component, CustomContainer2Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -122,6 +124,7 @@ function specificWithParam(label1: string, label2: string) {
         }, undefined, label2);
     });
 }
+/** @memo:stable */
 class ArkCustomContainerUserComponent extends ArkStructBase<ArkCustomContainerUserComponent, CustomContainerUserOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

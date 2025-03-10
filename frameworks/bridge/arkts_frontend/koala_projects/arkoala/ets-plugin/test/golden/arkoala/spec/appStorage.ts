@@ -2,6 +2,7 @@ import { AppStorage, AppStorageLinkState, ArkButton, ArkButtonComponent, ArkComm
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 let varA = AppStorage.Link('varA');
 let envLang = AppStorage.Prop('languageCode');
+/** @memo:stable */
 class ArkMyComponentComponent extends ArkStructBase<ArkMyComponentComponent, MyComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

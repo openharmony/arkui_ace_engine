@@ -25,28 +25,29 @@ import { TouchType, KeyType, KeySource, MouseButton, MouseAction } from "./ArkEn
 import { KeyEvent, KeyEventInternal } from "./ArkKeyEventMaterialized"
 import { MouseEvent, MouseEventInternal } from "./ArkMouseEventMaterialized"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
 export interface UICommonEvent {
-    setOnClick(callback_?: ((event: ClickEvent) => void)): void 
-    setOnTouch(callback_?: ((event: TouchEvent) => void)): void 
-    setOnAppear(callback_?: (() => void)): void 
-    setOnDisappear(callback_?: (() => void)): void 
-    setOnKeyEvent(callback_?: ((event: KeyEvent) => void)): void 
-    setOnFocus(callback_?: (() => void)): void 
-    setOnBlur(callback_?: (() => void)): void 
-    setOnHover(callback_?: HoverCallback): void 
-    setOnMouse(callback_?: ((event: MouseEvent) => void)): void 
-    setOnSizeChange(callback_?: SizeChangeCallback): void 
-    setOnVisibleAreaApproximateChange(options: VisibleAreaEventOptions, event?: VisibleAreaChangeCallback): void 
+    setOnClick(callback_?: ((event: ClickEvent) => void)): void
+    setOnTouch(callback_?: ((event: TouchEvent) => void)): void
+    setOnAppear(callback_?: (() => void)): void
+    setOnDisappear(callback_?: (() => void)): void
+    setOnKeyEvent(callback_?: ((event: KeyEvent) => void)): void
+    setOnFocus(callback_?: (() => void)): void
+    setOnBlur(callback_?: (() => void)): void
+    setOnHover(callback_?: HoverCallback): void
+    setOnMouse(callback_?: ((event: MouseEvent) => void)): void
+    setOnSizeChange(callback_?: SizeChangeCallback): void
+    setOnVisibleAreaApproximateChange(options: VisibleAreaEventOptions, event?: VisibleAreaChangeCallback): void
 }
 export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }

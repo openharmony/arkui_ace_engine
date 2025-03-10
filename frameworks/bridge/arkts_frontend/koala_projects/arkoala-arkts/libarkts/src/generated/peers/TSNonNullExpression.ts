@@ -45,6 +45,11 @@ export class TSNonNullExpression extends Expression {
     get expr(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TSNonNullExpressionExprConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setExpr(expr: Expression): this {
+        global.generatedEs2panda._TSNonNullExpressionSetExpr(global.context, this.peer, passNode(expr))
+        return this
+    }
 }
 export function isTSNonNullExpression(node: AstNode): node is TSNonNullExpression {
     return node instanceof TSNonNullExpression

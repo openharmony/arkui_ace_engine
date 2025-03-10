@@ -19,6 +19,7 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { BusinessError } from "./ArkBaseInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 export interface NodeController {
 }
@@ -74,12 +75,6 @@ export enum PerfMonitorSourceType {
     PERF_TOUCHPAD_EVENT = 2,
     PERF_JOYSTICK_EVENT = 3,
     PERF_KEY_EVENT = 4
-}
-export interface BusinessError {
-    name: string;
-    message: string;
-    stack?: string;
-    code: number;
 }
 export type ErrorCallback = (err: BusinessError) => void;
 export interface ShapeSize {

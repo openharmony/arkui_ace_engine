@@ -1,6 +1,7 @@
 import { $r, $rawfile, AppStorage, ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, CanvasRenderingContext2D, CustomDialogController, DataChangeListener, Environment, ForEach, GestureGroup, IDataSource, LocalStorage, LongPressGesture, PanGesture, PanGestureOptions, PersistentStorage, PinchGesture, RenderingContextSettings, RotationGesture, Scroller, SubscribedAbstractProperty, SwipeGesture, SwiperController, TabsController, TapGesture, TextAreaController, VideoController, animateTo, fp2px, getContext, getInspectorByKey, lpx2px, px2fp, px2lpx, px2vp, vp2px } from "@koalaui/arkui";
 import { MutableState } from "@koalaui/runtime";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkNamespaceComponent1Component extends ArkStructBase<ArkNamespaceComponent1Component, NamespaceComponent1Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -88,6 +89,7 @@ class ArkNamespaceComponent1Component extends ArkStructBase<ArkNamespaceComponen
         });
     }
 }
+/** @memo:stable */
 class ArkNamespaceComponent2Component extends ArkStructBase<ArkNamespaceComponent2Component, NamespaceComponent2Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -175,6 +177,7 @@ class ArkNamespaceComponent2Component extends ArkStructBase<ArkNamespaceComponen
         });
     }
 }
+/** @memo:stable */
 class ArkNamespaceComponent3Component extends ArkStructBase<ArkNamespaceComponent3Component, NamespaceComponent3Options> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

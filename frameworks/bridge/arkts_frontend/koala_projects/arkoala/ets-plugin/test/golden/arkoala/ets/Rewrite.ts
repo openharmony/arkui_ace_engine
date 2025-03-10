@@ -1,5 +1,6 @@
-import { AppStorageLinkState, ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkCommonMethodInterface, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, Color, CustomDialogController, DialogAlignment, LocalStorage, MutableState, Observed, OnChange, SyncedProperty, bindCustomDialog, contextLocal, contextLocalStateOf, objectLinkState, observableProxy, propState, stateOf } from "@koalaui/arkoala-arkui";
+import { AppStorageLinkState, ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkCommonMethodInterface, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, Color, CustomDialogController, DialogAlignment, LocalStorage, MutableState, OnChange, SyncedProperty, bindCustomDialog, contextLocal, contextLocalStateOf, objectLinkState, observableProxy, propState, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 export class ArkEntryExampleComponent extends ArkStructBase<ArkEntryExampleComponent, EntryExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -13,6 +14,7 @@ export class ArkEntryExampleComponent extends ArkStructBase<ArkEntryExampleCompo
     /** @memo */
     content?: () => void, initializers?: EntryExampleOptions) { }
 }
+/** @memo:stable */
 class ArkComponentExampleComponent extends ArkStructBase<ArkComponentExampleComponent, ComponentExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -26,6 +28,7 @@ class ArkComponentExampleComponent extends ArkStructBase<ArkComponentExampleComp
     /** @memo */
     content?: () => void, initializers?: ComponentExampleOptions) { }
 }
+/** @memo:stable */
 class ArkBuildExampleComponent extends ArkStructBase<ArkBuildExampleComponent, BuildExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -47,6 +50,7 @@ class ArkBuildExampleComponent extends ArkStructBase<ArkBuildExampleComponent, B
         }, undefined, "message");
     }
 }
+/** @memo:stable */
 class ArkStateExampleComponent extends ArkStructBase<ArkStateExampleComponent, StateExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -70,6 +74,7 @@ class ArkStateExampleComponent extends ArkStructBase<ArkStateExampleComponent, S
         ArkText(__builder, undefined, this.x);
     }
 }
+/** @memo:stable */
 class ArkLinkExampleComponent extends ArkStructBase<ArkLinkExampleComponent, LinkExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -93,6 +98,7 @@ class ArkLinkExampleComponent extends ArkStructBase<ArkLinkExampleComponent, Lin
         ArkText(__builder, undefined, this.x);
     }
 }
+/** @memo:stable */
 class ArkPropExampleComponent extends ArkStructBase<ArkPropExampleComponent, PropExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -120,6 +126,7 @@ class ArkPropExampleComponent extends ArkStructBase<ArkPropExampleComponent, Pro
         ArkText(__builder, undefined, this.x);
     }
 }
+/** @memo:stable */
 class ArkPropInitializedExampleComponent extends ArkStructBase<ArkPropInitializedExampleComponent, PropInitializedExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -147,6 +154,7 @@ class ArkPropInitializedExampleComponent extends ArkStructBase<ArkPropInitialize
         ArkText(__builder, undefined, this.x);
     }
 }
+/** @memo:stable */
 class ArkProvideExampleComponent extends ArkStructBase<ArkProvideExampleComponent, ProvideExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -170,6 +178,7 @@ class ArkProvideExampleComponent extends ArkStructBase<ArkProvideExampleComponen
         ArkText(__builder, undefined, this.x);
     }
 }
+/** @memo:stable */
 class ArkConsumeExampleComponent extends ArkStructBase<ArkConsumeExampleComponent, ConsumeExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -193,6 +202,7 @@ class ArkConsumeExampleComponent extends ArkStructBase<ArkConsumeExampleComponen
         ArkText(__builder, undefined, this.x);
     }
 }
+/** @memo:stable */
 class ArkBuilderExampleComponent extends ArkStructBase<ArkBuilderExampleComponent, BuilderExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -216,6 +226,7 @@ class ArkBuilderExampleComponent extends ArkStructBase<ArkBuilderExampleComponen
 function bar() {
     ArkText(undefined, undefined, "hello");
 }
+/** @memo:stable */
 class ArkGlobalBuilderExampleComponent extends ArkStructBase<ArkGlobalBuilderExampleComponent, GlobalBuilderExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -231,6 +242,7 @@ class ArkGlobalBuilderExampleComponent extends ArkStructBase<ArkGlobalBuilderExa
         bar();
     }
 }
+/** @memo:stable */
 class ArkBuilderParamExampleComponent extends ArkStructBase<ArkBuilderParamExampleComponent, BuilderParamExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -268,6 +280,7 @@ function looks<T extends ArkCommonMethodInterface<T>>(CommonInstance: T): T {
         .width(400)
         .backgroundColor(Color.Gray);
 }
+/** @memo:stable */
 class ArkStylesExampleComponent extends ArkStructBase<ArkStylesExampleComponent, StylesExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -288,6 +301,7 @@ class ArkStylesExampleComponent extends ArkStructBase<ArkStylesExampleComponent,
         }, undefined);
     }
 }
+/** @memo:stable */
 class ArkStylesMethodExampleComponent extends ArkStructBase<ArkStylesMethodExampleComponent, StylesMethodExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -320,6 +334,7 @@ function clown__Column<T extends ArkColumnComponent>(ColumnInstance: T): T {
         .width(400)
         .backgroundColor(Color.Gray);
 }
+/** @memo:stable */
 class ArkExtendExampleComponent extends ArkStructBase<ArkExtendExampleComponent, ExtendExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -344,6 +359,7 @@ class ArkExtendExampleComponent extends ArkStructBase<ArkExtendExampleComponent,
 function attributeExtend__Text<T extends ArkTextComponent>(TextInstance: T, n: number, unused: string): T {
     return TextInstance.fontSize(n);
 }
+/** @memo:stable */
 class ArkAnimatableExtendExampleComponent extends ArkStructBase<ArkAnimatableExtendExampleComponent, AnimatableExtendExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -364,6 +380,7 @@ class ArkAnimatableExtendExampleComponent extends ArkStructBase<ArkAnimatableExt
         }, undefined);
     }
 }
+/** @memo:stable */
 class ArkWatchExampleComponent extends ArkStructBase<ArkWatchExampleComponent, WatchExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -393,6 +410,7 @@ class ArkWatchExampleComponent extends ArkStructBase<ArkWatchExampleComponent, W
     content?: () => void, initializers?: WatchExampleOptions) {
     }
 }
+/** @memo:stable */
 class ArkStorageLinkExampleComponent extends ArkStructBase<ArkStorageLinkExampleComponent, StorageLinkExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -415,6 +433,7 @@ class ArkStorageLinkExampleComponent extends ArkStructBase<ArkStorageLinkExample
     content?: () => void, initializers?: StorageLinkExampleOptions) {
     }
 }
+/** @memo:stable */
 class ArkStoragePropExampleComponent extends ArkStructBase<ArkStoragePropExampleComponent, StoragePropExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -441,6 +460,7 @@ class ArkStoragePropExampleComponent extends ArkStructBase<ArkStoragePropExample
     content?: () => void, initializers?: StoragePropExampleOptions) {
     }
 }
+/** @memo:stable */
 class ArkCustomDialogExampleComponent extends ArkStructBase<ArkCustomDialogExampleComponent, CustomDialogExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -465,6 +485,7 @@ class ArkCustomDialogExampleComponent extends ArkStructBase<ArkCustomDialogExamp
     content?: () => void, initializers?: CustomDialogExampleOptions) {
     }
 }
+/** @memo:stable */
 export class ArkCustomDialogControllerExampleComponent extends ArkStructBase<ArkCustomDialogControllerExampleComponent, CustomDialogControllerExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -501,13 +522,22 @@ export class ArkCustomDialogControllerExampleComponent extends ArkStructBase<Ark
     }
 }
 // ObjectLink and Observed
-@Observed
 class ObservedExample {
-    public c: number;
+    private __backing_c?: MutableState<number>;
+    public get c(): number {
+        return this.__backing_c!.value;
+    }
+    public set c(value: number) {
+        if (this.__backing_c)
+            this.__backing_c!.value = observableProxy(value);
+        else
+            this.__backing_c = stateOf<number>(value);
+    }
     constructor(c: number) {
         this.c = c;
     }
 }
+/** @memo:stable */
 class ArkObjectLinkExampleComponent extends ArkStructBase<ArkObjectLinkExampleComponent, ObjectLinkExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -542,6 +572,7 @@ class ArkObjectLinkExampleComponent extends ArkStructBase<ArkObjectLinkExampleCo
         }, undefined);
     }
 }
+/** @memo:stable */
 class ArkObjectLinkExampleParentComponent extends ArkStructBase<ArkObjectLinkExampleParentComponent, ObjectLinkExampleParentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -565,6 +596,7 @@ class ArkObjectLinkExampleParentComponent extends ArkStructBase<ArkObjectLinkExa
         ObjectLinkExample(__builder, undefined);
     }
 }
+/** @memo:stable */
 class ArkPlainPropertyExampleComponent extends ArkStructBase<ArkPlainPropertyExampleComponent, PlainPropertyExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -580,6 +612,7 @@ class ArkPlainPropertyExampleComponent extends ArkStructBase<ArkPlainPropertyExa
         this.__backing_field = value;
     }
 }
+/** @memo:stable */
 class ArkCallExampleComponent extends ArkStructBase<ArkCallExampleComponent, CallExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -603,6 +636,7 @@ class ArkCallExampleComponent extends ArkStructBase<ArkCallExampleComponent, Cal
         Child(__builder, undefined, { __backing_counter: this.__backing_state } as ChildOptions);
     }
 }
+/** @memo:stable */
 class ArkChildComponent extends ArkStructBase<ArkChildComponent, ChildOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -624,6 +658,7 @@ class ArkChildComponent extends ArkStructBase<ArkChildComponent, ChildOptions> {
     /** @memo */
     content?: () => void, initializers?: ChildOptions) { }
 }
+/** @memo:stable */
 class ArkBuilderPropagationExampleComponent extends ArkStructBase<ArkBuilderPropagationExampleComponent, BuilderPropagationExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -644,6 +679,7 @@ class ArkBuilderPropagationExampleComponent extends ArkStructBase<ArkBuilderProp
         }, undefined);
     }
 }
+/** @memo:stable */
 class ArkChildWithBuilderComponent extends ArkStructBase<ArkChildWithBuilderComponent, ChildWithBuilderOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -659,6 +695,7 @@ class ArkChildWithBuilderComponent extends ArkStructBase<ArkChildWithBuilderComp
         ArkColumn(__builder, undefined);
     }
 }
+/** @memo:stable */
 class ArkStaticFieldComponent extends ArkStructBase<ArkStaticFieldComponent, StaticFieldOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

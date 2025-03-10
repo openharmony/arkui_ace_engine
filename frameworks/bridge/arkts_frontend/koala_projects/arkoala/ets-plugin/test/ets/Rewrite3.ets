@@ -14,7 +14,7 @@
  */
 
 import { storage } from "./Rewrite2"
-@Entry(storage)
+@Entry("storage")
 @Component
 struct LocalStoragePropExample {
     @LocalStorageProp("storage") prop: string = "Start"

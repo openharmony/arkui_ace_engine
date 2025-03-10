@@ -55,7 +55,7 @@ struct InteropTypeConverter<KInt> {
 
 template<>
 struct InteropTypeConverter<KUInt> {
-    using InteropType = KUInt;
+    using InteropType = ets_int;
     static KUInt convertFrom(EtsEnv* env, InteropType value) { return value; }
     static InteropType convertTo(EtsEnv* env, KUInt value) { return value; }
     static void release(EtsEnv* env, InteropType value, KUInt converted) {}
@@ -79,18 +79,37 @@ struct InteropTypeConverter<KFloat> {
 
 template<>
 struct InteropTypeConverter<KVMObjectHandle> {
-    using InteropType = KVMObjectHandle;
-    static KVMObjectHandle convertFrom(EtsEnv* env, InteropType value) { return value; }
-    static InteropType convertTo(EtsEnv* env, KVMObjectHandle value) { return value; }
+    using InteropType = ets_object;
+    static KVMObjectHandle convertFrom(EtsEnv* env, InteropType value) {
+      return reinterpret_cast<KVMObjectHandle>(value);
+    }
+    static InteropType convertTo(EtsEnv* env, KVMObjectHandle value) {
+      return reinterpret_cast<InteropType>(value);
+    }
     static void release(EtsEnv* env, InteropType value, KVMObjectHandle converted) {}
 };
 
 template<>
 struct InteropTypeConverter<KInteropBuffer> {
-    using InteropType = KInteropBuffer;
-    static KInteropBuffer convertFrom(EtsEnv* env, InteropType value) { return value; }
-    static InteropType convertTo(EtsEnv* env, KInteropBuffer value) { return value; }
-    static void release(EtsEnv* env, InteropType value, KInteropBuffer converted) {}
+    using InteropType = ets_byteArray;
+    static KInteropBuffer convertFrom(EtsEnv* env, InteropType value) {
+      if (!value) return KInteropBuffer();
+      KInteropBuffer result;
+      result.data = (KByte*)env->PinByteArray(value);
+      result.length = env->GetArrayLength(value);
+      return result;
+    }
+    static InteropType convertTo(EtsEnv* env, KInteropBuffer value) {
+      ets_byteArray array = env->NewByteArray(value.length);
+      KByte* data = (KByte*)env->PinByteArray(array);
+      memcpy(data, (KByte*)value.data, value.length);
+      env->UnpinByteArray(array);
+      value.dispose(value.resourceId);
+      return array;
+    }
+    static void release(EtsEnv* env, InteropType value, KInteropBuffer converted) {
+      env->UnpinByteArray(value);
+    }
 };
 
 template<>
@@ -151,7 +170,7 @@ template<>
 struct InteropTypeConverter<KInt*> {
     using InteropType = ets_intArray;
     static KInt* convertFrom(EtsEnv* env, InteropType value) {
-     if (!value) return nullptr;
+      if (!value) return nullptr;
       return env->PinIntArray(value);
     }
     static InteropType convertTo(EtsEnv* env, KInt* value) = delete;

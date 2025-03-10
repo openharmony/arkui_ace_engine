@@ -53,6 +53,11 @@ export class VariableDeclarator extends TypedStatement {
     get init(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._VariableDeclaratorInitConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setInit(init: Expression): this {
+        global.generatedEs2panda._VariableDeclaratorSetInit(global.context, this.peer, passNode(init))
+        return this
+    }
     get id(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._VariableDeclaratorIdConst(global.context, this.peer))
     }

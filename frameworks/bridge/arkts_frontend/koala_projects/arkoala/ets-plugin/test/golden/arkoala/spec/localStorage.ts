@@ -9,8 +9,9 @@ class ClassA {
         this.a = a;
     }
 }
+/** @memo:stable */
 class ArkLocalStorageComponentComponent extends ArkStructBase<ArkLocalStorageComponentComponent, LocalStorageComponentOptions> {
-    private _entry_local_storage_ = storage;
+    private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
     /** @memo */
     content?: () => void, initializers?: LocalStorageComponentOptions): void {

@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
 import { TypeChecker } from "#components"
 import { ArkCalendarPeer } from "./peers/ArkCalendarPeer"
-import { UseEventsProperties } from "./use_properties"
 import { Axis } from "./ArkEnumsInterfaces"
 import { CurrentDayStyle, NonCurrentDayStyle, TodayStyle, WeekStyle, WorkStateStyle, CalendarSelectedDate, CalendarRequestedData, MonthData, CalendarAttribute } from "./ArkCalendarInterfaces"
 import { Callback_CalendarSelectedDate_Void, Callback_CalendarRequestedData_Void, Type_CalendarInterface_value, Literal_Number_day_month_year } from "./SyntheticDeclarations"

@@ -17,18 +17,18 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkCalendarPeer } from "./peers/ArkCalendarPeer"
-import { UseEventsProperties } from "./use_properties"
 import { Axis } from "./ArkEnumsInterfaces"
 import { CurrentDayStyle, NonCurrentDayStyle, TodayStyle, WeekStyle, WorkStateStyle, CalendarSelectedDate, CalendarRequestedData, MonthData, CalendarAttribute, CalendarDay } from "./ArkCalendarInterfaces"
 import { ResourceColor } from "./ArkUnitsInterfaces"
 import { CalendarController } from "./ArkCalendarControllerMaterialized"
 /** @memo:stable */
 export class ArkCalendarComponent extends ComponentBase {
-    getPeer(): ArkCalendarPeer {
+    protected getPeer(): ArkCalendarPeer {
         return (this.peer as ArkCalendarPeer)
     }
     /** @memo */
@@ -143,7 +143,6 @@ export class ArkCalendarComponent extends ComponentBase {
     public onSelectChange(value: ((event: CalendarSelectedDate) => void)): this {
         if (this.checkPriority("onSelectChange")) {
             const value_casted = value as (((event: CalendarSelectedDate) => void))
-            UseEventsProperties({Calendar_onSelectChange: value_casted})
             this.getPeer()?.onSelectChangeAttribute(value_casted)
             return this
         }
@@ -153,7 +152,6 @@ export class ArkCalendarComponent extends ComponentBase {
     public onRequestData(value: ((event: CalendarRequestedData) => void)): this {
         if (this.checkPriority("onRequestData")) {
             const value_casted = value as (((event: CalendarRequestedData) => void))
-            UseEventsProperties({Calendar_onRequestData: value_casted})
             this.getPeer()?.onRequestDataAttribute(value_casted)
             return this
         }

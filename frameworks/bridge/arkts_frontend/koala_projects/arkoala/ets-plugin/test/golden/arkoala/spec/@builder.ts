@@ -13,6 +13,7 @@ function specificParam(label1: string, label2: string) {
         ArkText(undefined, undefined, label2);
     });
 }
+/** @memo:stable */
 class ArkMyComponentComponent extends ArkStructBase<ArkMyComponentComponent, MyComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

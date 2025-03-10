@@ -20,7 +20,8 @@ import { KPointer } from "@koalaui/interop"
 import { hasMemoAnnotation, hasMemoIntrinsicAnnotation, isMemoParametersDeclaration, PositionalIdTracker } from "./utils"
 
 export class ParameterTransformer extends AbstractVisitor {
-    private rewrites?: Map<KPointer, (passArgs?: arkts.AstNode[]) => arkts.CallExpression | arkts.MemberExpression>
+    private rewriteIdentifiers?: Map<KPointer, () => arkts.MemberExpression | arkts.Identifier>
+    private rewriteCalls?: Map<KPointer, (passArgs: arkts.AstNode[]) => arkts.CallExpression>
     private skipNode?: arkts.VariableDeclaration
 
     constructor(private positionalIdTracker: PositionalIdTracker) {
@@ -28,13 +29,22 @@ export class ParameterTransformer extends AbstractVisitor {
     }
 
     withParameters(parameters: arkts.ETSParameterExpression[]): ParameterTransformer {
-        this.rewrites = new Map(parameters.map((it) => {
-            return [it.peer, (passArgs?: arkts.AstNode[]) => {
-                if (it.type instanceof arkts.ETSFunctionType) {
-                    if (hasMemoAnnotation(it) || hasMemoIntrinsicAnnotation(it)) {
-                        return factory.createMemoParameterAccessMemo(it.identifier.name, this.positionalIdTracker?.id(), passArgs)
+        this.rewriteCalls = new Map(parameters.filter(it => it.type && (arkts.isETSFunctionType(it.type) || arkts.isETSUnionType(it.type))).map((it) => {
+            return [it.peer, (passArgs: arkts.AstNode[]) => {
+                if (hasMemoAnnotation(it) || hasMemoIntrinsicAnnotation(it)) {
+                    if (it.type && arkts.isETSFunctionType(it.type) && !it.optional) {
+                        return factory.createMemoParameterAccessMemoWithScope(it.identifier.name, this.positionalIdTracker?.id(), passArgs)
+                    } else {
+                        return factory.createMemoParameterAccessMemoWithoutScope(it.identifier.name, this.positionalIdTracker?.id(), passArgs)
                     }
-                    return factory.createMemoParameterAccessCall(it.identifier.name, this.positionalIdTracker?.id(), passArgs)
+                }
+                return factory.createMemoParameterAccessCall(it.identifier.name, this.positionalIdTracker?.id(), passArgs)
+            }]
+        }))
+        this.rewriteIdentifiers = new Map(parameters.map((it) => {
+            return [it.peer, () => {
+                if ((it.type && arkts.isETSFunctionType(it.type)) || it.optional) {
+                    return arkts.factory.createIdentifier(it.identifier.name)
                 }
                 return factory.createMemoParameterAccess(it.identifier.name)
             }]
@@ -53,22 +63,22 @@ export class ParameterTransformer extends AbstractVisitor {
         if (/* beforeChildren === this.skipNode */ isMemoParametersDeclaration(beforeChildren)) {
             return beforeChildren
         }
-        if (beforeChildren instanceof arkts.CallExpression) {
-            if (beforeChildren.expression instanceof arkts.Identifier) {
+        if (arkts.isCallExpression(beforeChildren)) {
+            if (arkts.isIdentifier(beforeChildren.expression)) {
                 const decl = arkts.getDecl(beforeChildren.expression)
-                if (decl instanceof arkts.ETSParameterExpression && this.rewrites?.has(decl.peer)) {
-                    return this.rewrites.get(decl.peer)!(
+                if (decl && arkts.isEtsParameterExpression(decl) && this.rewriteCalls?.has(decl.peer)) {
+                    return this.rewriteCalls.get(decl.peer)!(
                         beforeChildren.arguments.map((it) => this.visitor(it))
                     )
                 }
             }
         }
         const node = this.visitEachChild(beforeChildren)
-        if (node instanceof arkts.Identifier) {
+        if (arkts.isIdentifier(node)) {
             const decl = arkts.getDecl(node)
-            if (decl instanceof arkts.ETSParameterExpression && this.rewrites?.has(decl.peer)) {
-                const res = this.rewrites.get(decl.peer)!()
-                if (res instanceof arkts.MemberExpression) {
+            if ((decl && arkts.isEtsParameterExpression(decl)) && this.rewriteIdentifiers?.has(decl.peer)) {
+                const res = this.rewriteIdentifiers.get(decl.peer)!()
+                if (arkts.isMemberExpression(res)) {
                     return res
                 }
             }

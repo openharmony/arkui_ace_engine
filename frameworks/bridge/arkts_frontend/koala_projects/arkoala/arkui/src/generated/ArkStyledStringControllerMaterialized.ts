@@ -20,27 +20,44 @@ import { StyledString, StyledStringInternal } from "./ArkStyledStringMaterialize
 import { MutableStyledString, MutableStyledStringInternal } from "./ArkMutableStyledStringMaterialized"
 import { ImageAttachment, ImageAttachmentInternal } from "./ArkImageAttachmentMaterialized"
 import { CustomSpan, CustomSpanInternal } from "./ArkCustomSpanMaterialized"
-import { StyleOptions, StyledStringKey, SpanStyle, ImageAttachmentLayoutStyle, ImageAttachmentInterface, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledStringValue } from "./ArkStyledStringInterfaces"
+import { StyleOptions, StyledStringKey, SpanStyle, ImageAttachmentLayoutStyle, ImageAttachmentInterface, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledStringValue, UserDataSpan, TextStyleInterface, DecorationStyleInterface, GestureStyleInterface, ParagraphStyleInterface } from "./ArkStyledStringInterfaces"
 import { PixelMap, PixelMapInternal } from "./ArkPixelMapMaterialized"
-import { SizeOptions, Length, Margin, Padding, BorderRadiuses } from "./ArkUnitsInterfaces"
-import { ImageSpanAlignment, ImageFit } from "./ArkEnumsInterfaces"
-import { DrawContext } from "./ArkCommonInterfaces"
+import { SizeOptions, Length, Margin, Padding, BorderRadiuses, ResourceColor, ResourceStr, Area, Position, Dimension, PX, VP, FP, LPX, Percentage } from "./ArkUnitsInterfaces"
+import { ImageSpanAlignment, ImageFit, FontStyle, TextDecorationType, TextDecorationStyle, TextAlign, TextOverflow, WordBreak, FontWeight, Color, ColoringStrategy } from "./ArkEnumsInterfaces"
+import { DrawContext, ShadowOptions, ShadowType, EventTarget, SourceType, SourceTool } from "./ArkCommonInterfaces"
 import { LengthMetrics, LengthMetricsInternal } from "./ArkLengthMetricsMaterialized"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { TextStyle_styled_string, TextStyle_styled_stringInternal } from "./ArkTextStyleStyledStringMaterialized"
+import { DecorationStyle, DecorationStyleInternal } from "./ArkDecorationStyleMaterialized"
+import { BaselineOffsetStyle, BaselineOffsetStyleInternal } from "./ArkBaselineOffsetStyleMaterialized"
+import { LetterSpacingStyle, LetterSpacingStyleInternal } from "./ArkLetterSpacingStyleMaterialized"
+import { TextShadowStyle, TextShadowStyleInternal } from "./ArkTextShadowStyleMaterialized"
+import { GestureStyle, GestureStyleInternal } from "./ArkGestureStyleMaterialized"
+import { ParagraphStyle, ParagraphStyleInternal } from "./ArkParagraphStyleMaterialized"
+import { LineHeightStyle, LineHeightStyleInternal } from "./ArkLineHeightStyleMaterialized"
+import { UrlStyle, UrlStyleInternal } from "./ArkUrlStyleMaterialized"
+import { BackgroundColorStyle, BackgroundColorStyleInternal } from "./ArkBackgroundColorStyleMaterialized"
+import { LeadingMarginPlaceholder } from "./ArkRichEditorInterfaces"
+import { TextBackgroundStyle } from "./ArkSpanInterfaces"
+import { ClickEvent, ClickEventInternal } from "./ArkClickEventMaterialized"
+import { BaseEvent, BaseEventInternal } from "./ArkBaseEventMaterialized"
+import { GestureEvent, GestureEventInternal } from "./ArkGestureEventMaterialized"
+import { FingerInfo } from "./ArkGestureInterfaces"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
 export interface StyledStringController {
-    setStyledString(styledString: StyledString): void 
-    getStyledString(): MutableStyledString 
+    setStyledString(styledString: StyledString): void
+    getStyledString(): MutableStyledString
 }
 export class StyledStringControllerInternal implements MaterializedBase,StyledStringController {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -64,14 +81,12 @@ export class StyledStringControllerInternal implements MaterializedBase,StyledSt
         return this.getStyledString_serialize()
     }
     private setStyledString_serialize(styledString: StyledString): void {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeStyledString(styledString)
-        ArkUIGeneratedNativeModule._StyledStringController_setStyledString(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        ArkUIGeneratedNativeModule._StyledStringController_setStyledString(this.peer!.ptr, toPeerPtr(styledString))
     }
     private getStyledString_serialize(): MutableStyledString {
         const retval = ArkUIGeneratedNativeModule._StyledStringController_getStyledString(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj: MutableStyledString = MutableStyledStringInternal.fromPtr(retval)
+        return obj
     }
     public static fromPtr(ptr: KPointer): StyledStringControllerInternal {
         const obj: StyledStringControllerInternal = new StyledStringControllerInternal()

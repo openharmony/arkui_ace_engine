@@ -18,7 +18,7 @@
 
 import { EventTarget, SourceType, SourceTool } from "./ArkCommonInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -35,10 +35,10 @@ export interface BaseEvent {
     tiltY: number
     sourceTool: SourceTool
     deviceId?: number
-    getModifierKeyState(keys: Array<string>): boolean 
+    getModifierKeyState(keys: Array<string>): boolean
 }
 export class BaseEventInternal implements MaterializedBase,BaseEvent {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -226,7 +226,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         throw new Error("Object deserialization is not implemented.")
     }
     private setSource_serialize(source: SourceType): void {
-        ArkUIGeneratedNativeModule._BaseEvent_setSource(this.peer!.ptr, (source.valueOf() as int32))
+        ArkUIGeneratedNativeModule._BaseEvent_setSource(this.peer!.ptr, ((source as SourceType) as int32))
     }
     private getAxisHorizontal_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisHorizontal(this.peer!.ptr)
@@ -268,7 +268,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         throw new Error("Object deserialization is not implemented.")
     }
     private setSourceTool_serialize(sourceTool: SourceTool): void {
-        ArkUIGeneratedNativeModule._BaseEvent_setSourceTool(this.peer!.ptr, (sourceTool.valueOf() as int32))
+        ArkUIGeneratedNativeModule._BaseEvent_setSourceTool(this.peer!.ptr, ((sourceTool as SourceTool) as int32))
     }
     private getDeviceId_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getDeviceId(this.peer!.ptr)

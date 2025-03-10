@@ -16,7 +16,6 @@ import { global } from "./static/global"
 import { KInt, KNativePointer, KNativePointer as KPtr, nullptr } from "@koalaui/interop"
 import {
     Es2pandaContextState,
-    Es2pandaIdentifierFlags,
     Es2pandaImportKinds,
     Es2pandaMethodDefinitionKind,
     Es2pandaModifierFlags,
@@ -31,11 +30,9 @@ import {
     nodeType,
     passNode,
     passNodeArray,
-    passString,
     unpackNode,
     unpackNodeArray,
     unpackNonNullableNode,
-    unpackString,
     updatePeerByNode,
 } from "./utilities/private"
 import { proceedToState } from "./utilities/public"
@@ -50,9 +47,12 @@ import { MemberExpression } from "./to-be-generated/MemberExpression"
 import {
     AnnotationUsage,
     BlockStatement,
-    ClassElement,
+    ClassDefinition,
     Expression,
     FunctionSignature,
+    Identifier,
+    ImportSpecifier,
+    Literal,
     StringLiteral,
     TSTypeParameterDeclaration,
     TSTypeParameterInstantiation,
@@ -85,7 +85,7 @@ export class EtsScript extends AstNode {
         if (!global.configIsInitialized()) {
             global.config = Config.createDefault().peer
         }
-        global.context = Context.createFromString(source).peer
+        global.compilerContext = Context.createFromString(source)
         proceedToState(state)
         return new EtsScript(global.es2panda._ProgramAst(global.context, global.es2panda._ContextProgram(global.context)))
     }
@@ -134,7 +134,7 @@ export class ExpressionStatement extends AstNode {
 // TODO:
 //  the CallExpression idl Create signature doesn't include the trailing block at all.
 //  Need to clarify with the compiler people if they will provide create signature with a trailing block argument.
-export class CallExpression extends AstNode {
+export class CallExpression extends Expression {
     constructor(peer: KPtr) {
         assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CALL_EXPRESSION)
         super(peer)
@@ -175,68 +175,8 @@ export class CallExpression extends AstNode {
 
     readonly expression: AstNode // Expression
     readonly typeArguments: readonly TypeNode[] | undefined
-    readonly arguments: readonly AstNode[]
+    readonly arguments: readonly Expression[]
     readonly trailingBlock: AstNode|undefined // BlockStatement
-}
-
-export class ETSTypeReference extends TypeNode {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE)
-        super(peer)
-    }
-
-    static create(
-        part: ETSTypeReferencePart,
-    ): ETSTypeReference {
-        return new ETSTypeReference(
-            global.generatedEs2panda._CreateETSTypeReference(
-                global.context,
-                passNode(part)
-            )
-        )
-    }
-
-    static createFromId(
-        typeName: Identifier,
-    ): ETSTypeReference {
-        return new ETSTypeReference(
-            global.generatedEs2panda._CreateETSTypeReference(
-                global.context,
-                ETSTypeReferencePart.create(typeName).peer
-            )
-        )
-    }
-
-    // TODO:
-    // readonly typeName: Identifier
-    // readonly typeRefPart: TypeReferencePart
-}
-
-export class ETSTypeReferencePart extends AstNode {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE_PART)
-        super(peer)
-        this.typeName = unpackNonNullableNode(global.generatedEs2panda._ETSTypeReferencePartName(global.context, this.peer));
-    }
-
-    // TODO: support type params and prev
-    static create(
-        typeName: Identifier,
-        typeParamsDecl?: AstNode,
-    ) {
-        // typeName.setReference(true)
-        // TODO: support type params and prev
-        return new ETSTypeReferencePart(
-            global.generatedEs2panda._CreateETSTypeReferencePart(
-                global.context,
-                passNode(typeName),
-                passNode(typeParamsDecl),
-                nullptr
-            )
-        )
-    }
-
-    readonly typeName: Identifier
 }
 
 export class TSUnionType extends AstNode {
@@ -265,53 +205,7 @@ export class TSUnionType extends AstNode {
     readonly types: readonly AstNode[]
 }
 
-export class Identifier extends Expression {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER)
-        super(peer)
-    }
-
-    static create(
-        name: string,
-        typeAnnotation?: AstNode,
-    ): Identifier {
-        return new Identifier(
-            global.es2panda._CreateIdentifier2(global.context, passString(name), passNode(typeAnnotation))
-        )
-    }
-
-    setOptional(optional: boolean): Identifier {
-        global.generatedEs2panda._IdentifierSetOptional(global.context, this.peer, optional)
-        return this
-    }
-
-    setAnnotationUsage(): Identifier {
-        global.generatedEs2panda._IdentifierSetAnnotationUsage(global.context, this.peer);
-        return this;
-    }
-
-    protected override dumpMessage(): string {
-        return ` <name: ${this.name}> <identifierFlags: ${this.identifierFlags}>`
-    }
-
-    get name(): string {
-        return unpackString(global.generatedEs2panda._IdentifierName(global.context, this.peer))
-    }
-
-    set name(name: string) {
-        global.generatedEs2panda._IdentifierSetName(global.context, this.peer, passString(name))
-    }
-
-    get isPrivate(): boolean {
-        return global.generatedEs2panda._IdentifierIsPrivateIdentConst(global.context, this.peer)
-    }
-
-    get identifierFlags(): Es2pandaIdentifierFlags {
-        return global.es2panda._IdentifierIdentifierFlags(global.context, this.peer)
-    }
-}
-
-export class NumberLiteral extends AstNode {
+export class NumberLiteral extends Literal {
     constructor(peer: KPtr) {
         assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_NUMBER_LITERAL)
         super(peer)
@@ -359,14 +253,15 @@ export class ScriptFunction extends AstNode {
         ident: Identifier | undefined,
         parameters: ETSParameterExpression[]|undefined,
         typeParamsDecl: TSTypeParameterDeclaration|undefined,
-        returnTypeAnnotation: TypeNode|undefined
+        returnTypeAnnotation: TypeNode|undefined,
+        annotations?: AnnotationUsage[],
     ): ScriptFunction {
         const peer = global.generatedEs2panda._CreateScriptFunction(
             global.context,
             passNode(body),
             FunctionSignature.createFunctionSignature(
                 typeParamsDecl,
-                parameters!,
+                parameters ?? [],
                 returnTypeAnnotation,
                 false
             ).peer,
@@ -376,7 +271,11 @@ export class ScriptFunction extends AstNode {
         if (ident !== undefined) {
             global.generatedEs2panda._ScriptFunctionSetIdent(global.context, peer, ident.peer)
         }
-        return new ScriptFunction(peer)
+        const res = new ScriptFunction(peer)
+        if (annotations) {
+            res.annotations = annotations
+        }
+        return res
     }
 
     setIdent(id: Identifier): ScriptFunction {
@@ -430,15 +329,14 @@ export class ScriptFunction extends AstNode {
     readonly ident?: Identifier
 
     get annotations(): AnnotationUsage[] {
-        return unpackNodeArray(global.es2panda._ScriptFunctionAnnotations(
+        return unpackNodeArray(global.generatedEs2panda._ScriptFunctionAnnotations(
             global.context,
-            this.peer,
-            nullptr
+            this.peer
         ))
     }
 
     set annotations(newAnnotations: AnnotationUsage[]) {
-        global.es2panda._ScriptFunctionSetAnnotations(
+        global.generatedEs2panda._ScriptFunctionSetAnnotations(
             global.context,
             this.peer,
             passNodeArray(newAnnotations),
@@ -483,10 +381,11 @@ export class FunctionDeclaration extends AstNode {
 
     static create(
         scriptFunction: ScriptFunction,
-        isAnon: boolean
+        isAnon: boolean,
+        annotations?: AnnotationUsage[]
     ): FunctionDeclaration {
         const res = new FunctionDeclaration(
-            global.es2panda._CreateFunctionDeclaration(
+            global.generatedEs2panda._CreateFunctionDeclaration(
                 global.context,
                 scriptFunction.peer,
                 // TODO: support annotations
@@ -497,7 +396,18 @@ export class FunctionDeclaration extends AstNode {
         )
         // TODO: maybe wrong
         res.modifiers = scriptFunction.modifiers
+        if (annotations) {
+            res.annotations = annotations
+        }
         return res
+    }
+
+    get annotations(): AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._FunctionDeclarationAnnotationsConst(global.context, this.peer))
+    }
+
+    set annotations(newAnnotations: AnnotationUsage[]) {
+        global.generatedEs2panda._FunctionDeclarationSetAnnotations(global.context, this.peer, passNodeArray(newAnnotations), newAnnotations.length)
     }
 
     readonly scriptFunction: ScriptFunction
@@ -560,15 +470,14 @@ export class ETSParameterExpression extends Expression {
     }
 
     get annotations(): AnnotationUsage[] {
-        return unpackNodeArray(global.es2panda._ETSParameterExpressionAnnotations(
+        return unpackNodeArray(global.generatedEs2panda._ETSParameterExpressionAnnotations(
             global.context,
-            this.peer,
-            nullptr
+            this.peer
         ))
     }
 
     set annotations(newAnnotations: AnnotationUsage[]) {
-        global.es2panda._ETSParameterExpressionSetAnnotations(
+        global.generatedEs2panda._ETSParameterExpressionSetAnnotations(
             global.context,
             this.peer,
             passNodeArray(newAnnotations),
@@ -586,66 +495,11 @@ export class ETSParameterExpression extends Expression {
         global.generatedEs2panda._ETSParameterExpressionSetTypeAnnotation(global.context, this.peer, t.peer)
     }
 
+    get optional(): Boolean {
+        return global.generatedEs2panda._ETSParameterExpressionIsOptionalConst(global.context, this.peer)
+    }
+
     identifier: Identifier
-}
-
-export class TSTypeParameter extends TypeNode {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER)
-        super(peer)
-        this.name = unpackNonNullableNode(global.generatedEs2panda._TSTypeParameterName(global.context, this.peer))
-    }
-
-    static create(
-        name: Identifier,
-        constraint: AstNode | undefined,
-        defaultType: AstNode | undefined,
-        modifierFlags: KInt,
-    ): TSTypeParameter {
-        const peer = global.generatedEs2panda._CreateTSTypeParameter(
-            global.context,
-            passNode(name),
-            passNode(constraint),
-            passNode(defaultType)
-        )
-        global.generatedEs2panda._AstNodeClearModifier(global.context, peer, allFlags)
-        global.generatedEs2panda._AstNodeAddModifier(global.context, peer, modifierFlags)
-        return new TSTypeParameter(
-            peer
-        )
-    }
-
-    readonly name: Identifier
-}
-
-export class ReturnStatement extends AstNode {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_RETURN_STATEMENT)
-        super(peer)
-        this.argument = unpackNode(
-            global.generatedEs2panda._ReturnStatementArgument(global.context, this.peer)
-        )
-    }
-
-    static create(
-        argument?: AstNode,
-    ): ReturnStatement {
-        if (argument === undefined) {
-            return new ReturnStatement(
-                global.generatedEs2panda._CreateReturnStatement(
-                    global.context
-                )
-            )
-        }
-        return new ReturnStatement(
-            global.es2panda._CreateReturnStatement1(
-                global.context,
-                passNode(argument)
-            )
-        )
-    }
-
-    readonly argument: AstNode | undefined
 }
 
 export class IfStatement extends AstNode {
@@ -699,68 +553,6 @@ export class StructDeclaration extends AstNode {
     readonly definition: ClassDefinition
 }
 
-
-export class ClassDeclaration extends AstNode {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DECLARATION)
-        super(peer)
-        this.definition = unpackNonNullableNode(global.generatedEs2panda._ClassDeclarationDefinition(global.context, this.peer))
-    }
-
-    static create(
-        definition: ClassDefinition,
-    ): ClassDeclaration {
-        return new ClassDeclaration(
-            global.generatedEs2panda._CreateClassDeclaration(
-                global.context,
-                passNode(definition)
-            )
-        )
-    }
-
-    readonly definition: ClassDefinition
-}
-
-export class ClassDefinition extends AstNode {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DEFINITION)
-        super(peer)
-        this.name = unpackNonNullableNode(global.generatedEs2panda._ClassDefinitionIdent(global.context, this.peer))
-        this.members = unpackNodeArray(global.generatedEs2panda._ClassDefinitionBody(global.context, this.peer))
-        this.typeParamsDecl = unpackNode(global.generatedEs2panda._ClassDefinitionTypeParamsConst(global.context, this.peer))
-        this.superClass = unpackNode(global.generatedEs2panda._ClassDefinitionSuper(global.context, this.peer))
-        this.modifiers = global.generatedEs2panda._ClassDefinitionModifiersConst(global.context, this.peer)
-    }
-
-    static create(
-        name: Identifier | undefined,
-        members: readonly AstNode[],
-        modifiers: KInt,
-        classFlags: KInt,
-        typeParamsDecl: TSTypeParameterDeclaration | undefined,
-        superClass?: AstNode,
-    ): ClassDefinition {
-        const peer = global.es2panda._CreateClassDefinition1(
-            global.context,
-            passNode(name),
-            passNodeArray(members),
-            members.length,
-            classFlags,
-            modifiers
-        )
-        global.generatedEs2panda._ClassDefinitionSetTypeParams(global.context, peer, passNode(typeParamsDecl))
-        global.generatedEs2panda._ClassDefinitionSetSuper(global.context, peer, passNode(superClass))
-        return new ClassDefinition(
-            peer
-        )
-    }
-
-    readonly name: Identifier
-    readonly members: readonly AstNode[]
-    readonly typeParamsDecl?: TSTypeParameterDeclaration
-    readonly superClass?: AstNode
-}
-
 export class MethodDefinition extends AstNode {
     constructor(peer: KPtr, key?: KPtr) {
         assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_METHOD_DEFINITION)
@@ -808,54 +600,6 @@ export class MethodDefinition extends AstNode {
     readonly kind: Es2pandaMethodDefinitionKind;
     readonly scriptFunction: ScriptFunction
     readonly name: Identifier
-}
-
-export class ClassProperty extends ClassElement {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_PROPERTY)
-        super(peer)
-        this.typeAnnotation = unpackNode(global.generatedEs2panda._ClassPropertyTypeAnnotationConst(global.context, this.peer));
-    }
-
-    static create(
-        key: AstNode,
-        value: AstNode,
-        typeAnnotation: AstNode,
-        modifiers: KInt,
-        isComputed: boolean
-    ): ClassProperty {
-        return new ClassProperty(
-            global.generatedEs2panda._CreateClassProperty(
-                global.context,
-                passNode(key),
-                passNode(value),
-                passNode(typeAnnotation),
-                modifiers,
-                isComputed
-            )
-        )
-    }
-
-    get annotations(): AnnotationUsage[] {
-        return unpackNodeArray(
-            global.es2panda._ScriptFunctionAnnotations(
-                global.context,
-                this.peer,
-                nullptr
-            )
-        )
-    }
-
-    set annotations(newAnnotations: AnnotationUsage[]) {
-        global.es2panda._ScriptFunctionSetAnnotations(
-            global.context,
-            this.peer,
-            passNodeArray(newAnnotations),
-            newAnnotations.length
-        );
-    }
-
-    readonly typeAnnotation?: ETSTypeReference
 }
 
 export class VariableDeclaration extends AstNode {
@@ -952,7 +696,7 @@ export class ImportSource extends ArktsObject {
         hasDecl: boolean,
     ): ImportSource {
         return new ImportSource(
-            global.es2panda._CreateImportSource(
+            global.generatedEs2panda._CreateImportSource(
                 global.context,
                 source.peer,
                 StringLiteral.create1StringLiteral(
@@ -1002,26 +746,6 @@ export class EtsImportDeclaration extends AstNode {
     readonly hasDecl: boolean
 }
 
-export class ImportSpecifier extends AstNode {
-    constructor(peer: KPtr) {
-        assertValidPeer(peer, Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_SPECIFIER)
-        super(peer)
-    }
-
-    static create(
-        imported: Identifier,
-        local: Identifier,
-    ): ImportSpecifier {
-        return new ImportSpecifier(
-            global.generatedEs2panda._CreateImportSpecifier(
-                global.context,
-                passNode(imported),
-                passNode(local),
-            )
-        )
-    }
-}
-
 const pairs: [Es2pandaAstNodeType, { new(peer: KNativePointer): AstNode }][] = [
     [Es2pandaAstNodeType.AST_NODE_TYPE_ETS_MODULE, EtsScript],
     [Es2pandaAstNodeType.AST_NODE_TYPE_IDENTIFIER, Identifier],
@@ -1030,23 +754,19 @@ const pairs: [Es2pandaAstNodeType, { new(peer: KNativePointer): AstNode }][] = [
     [Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_DECLARATION, FunctionDeclaration],
     [Es2pandaAstNodeType.AST_NODE_TYPE_SCRIPT_FUNCTION, ScriptFunction],
     [Es2pandaAstNodeType.AST_NODE_TYPE_BLOCK_STATEMENT, BlockStatement],
-    [Es2pandaAstNodeType.AST_NODE_TYPE_RETURN_STATEMENT, ReturnStatement],
     [Es2pandaAstNodeType.AST_NODE_TYPE_ETS_PARAMETER_EXPRESSION, ETSParameterExpression],
-    [Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE, ETSTypeReference],
-    [Es2pandaAstNodeType.AST_NODE_TYPE_ETS_TYPE_REFERENCE_PART, ETSTypeReferencePart],
     [Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER_DECLARATION, TSTypeParameterDeclaration],
     [Es2pandaAstNodeType.AST_NODE_TYPE_CALL_EXPRESSION, CallExpression],
     [Es2pandaAstNodeType.AST_NODE_TYPE_MEMBER_EXPRESSION, MemberExpression],
-    [Es2pandaAstNodeType.AST_NODE_TYPE_TS_TYPE_PARAMETER, TSTypeParameter],
     [Es2pandaAstNodeType.AST_NODE_TYPE_IF_STATEMENT, IfStatement],
     [Es2pandaAstNodeType.AST_NODE_TYPE_ARROW_FUNCTION_EXPRESSION, ArrowFunctionExpression],
     [Es2pandaAstNodeType.AST_NODE_TYPE_STRUCT_DECLARATION, StructDeclaration],
-    [Es2pandaAstNodeType.AST_NODE_TYPE_CLASS_DEFINITION, ClassDefinition],
     [Es2pandaAstNodeType.AST_NODE_TYPE_METHOD_DEFINITION, MethodDefinition],
     [Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATION, VariableDeclaration],
     [Es2pandaAstNodeType.AST_NODE_TYPE_VARIABLE_DECLARATOR, VariableDeclarator],
     [Es2pandaAstNodeType.AST_NODE_TYPE_FUNCTION_EXPRESSION, FunctionExpression],
     [Es2pandaAstNodeType.AST_NODE_TYPE_ETS_IMPORT_DECLARATION, EtsImportDeclaration],
-    [Es2pandaAstNodeType.AST_NODE_TYPE_IMPORT_SPECIFIER, ImportSpecifier],
 ]
-pairs.forEach(([tp, cctor]) => nodeByType.set(tp, cctor))
+pairs.forEach(([nodeType, astNode]) =>
+    nodeByType.set(nodeType, astNode)
+)

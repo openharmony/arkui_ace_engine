@@ -67,14 +67,6 @@ export function runtimeType(value: any): int32 {
     throw new Error(`bug: ${value} is ${type}`)
 }
 
-export function isResource(value: unknown): boolean {
-    return value !== undefined
-        && typeof value === 'object'
-        && value !== null
-        && value.hasOwnProperty("bundleName")
-        && value.hasOwnProperty("moduleName")
-}
-
 // Poor man's instanceof, fails on subclasses
 export function isInstanceOf(className: string, value: object | undefined): boolean {
     return value?.constructor.name === className

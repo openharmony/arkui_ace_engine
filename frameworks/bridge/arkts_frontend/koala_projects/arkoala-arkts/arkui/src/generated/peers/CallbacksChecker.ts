@@ -38,12 +38,12 @@ export function checkArkoalaCallbacks() {
             case CallbackEventKind.Event_CallCallback: {
                 deserializeAndCallCallback(deserializer)
                 break;
-            }
+            } 
             case CallbackEventKind.Event_HoldManagedResource: {
                 const resourceId = deserializer.readInt32()
                 ResourceHolder.instance().hold(resourceId)
                 break;
-            }
+            } 
             case CallbackEventKind.Event_ReleaseManagedResource: {
                 const resourceId = deserializer.readInt32()
                 ResourceHolder.instance().release(resourceId)

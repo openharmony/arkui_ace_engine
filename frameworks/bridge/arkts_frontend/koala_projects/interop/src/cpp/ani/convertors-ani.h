@@ -29,9 +29,135 @@
 template<class T>
 struct InteropTypeConverter {
     using InteropType = T;
-    static T convertFrom(ani_env* env, InteropType value) { return value; }
-    static InteropType convertTo(ani_env* env, T value) { return value; }
+    static T convertFrom(ani_env* env, InteropType value) = delete;
+    static InteropType convertTo(ani_env* env, T value) = delete;
     static void release(ani_env* env, InteropType value, T converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KByte> {
+    using InteropType = ani_byte;
+    static inline KByte convertFrom(ani_env* env, InteropType value) {
+      return value;
+    }
+    static inline InteropType convertTo(ani_env* env, KByte value) {
+      return value;
+    }
+    static inline void release(ani_env* env, InteropType value, KByte converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KBoolean> {
+    using InteropType = ani_boolean;
+    static inline KBoolean convertFrom(ani_env* env, InteropType value) {
+      return value;
+    }
+    static inline InteropType convertTo(ani_env* env, KBoolean value) {
+      return value;
+    }
+    static inline void release(ani_env* env, InteropType value, KBoolean converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KInt> {
+    using InteropType = ani_int;
+    static inline KInt convertFrom(ani_env* env, InteropType value) {
+      return value;
+    }
+    static inline InteropType convertTo(ani_env* env, KInt value) {
+      return value;
+    }
+    static inline void release(ani_env* env, InteropType value, KInt converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KUInt> {
+    using InteropType = ani_int;
+    static inline KUInt convertFrom(ani_env* env, InteropType value) {
+      return value;
+    }
+    static inline InteropType convertTo(ani_env* env, KUInt value) {
+      return value;
+    }
+    static inline void release(ani_env* env, InteropType value, KUInt converted) {}
+};
+
+
+template<>
+struct InteropTypeConverter<KFloat> {
+    using InteropType = ani_float;
+    static inline KFloat convertFrom(ani_env* env, InteropType value) {
+      return value;
+    }
+    static inline InteropType convertTo(ani_env* env, KFloat value) {
+      return value;
+    }
+    static inline void release(ani_env* env, InteropType value, KFloat converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KLong> {
+    using InteropType = ani_long;
+    static inline KLong convertFrom(ani_env* env, InteropType value) {
+      return value;
+    }
+    static inline InteropType convertTo(ani_env* env, KLong value) {
+      return value;
+    }
+    static inline void release(ani_env* env, InteropType value, KLong converted) {}
+};
+
+
+template<>
+struct InteropTypeConverter<KVMObjectHandle> {
+    using InteropType = ani_object;
+    static inline KVMObjectHandle convertFrom(ani_env* env, InteropType value) {
+      return reinterpret_cast<KVMObjectHandle>(value);
+    }
+    static inline InteropType convertTo(ani_env* env, KVMObjectHandle value) {
+      return reinterpret_cast<InteropType>(value);
+    }
+    static inline void release(ani_env* env, InteropType value, KVMObjectHandle converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KInteropBuffer> {
+    using InteropType = ani_array_byte;
+    static inline KInteropBuffer convertFrom(ani_env* env, InteropType value) {
+      if (value == nullptr) return KInteropBuffer();
+      ani_size length = 0;
+      env->Array_GetLength(value, &length);
+      KByte* data = new KByte[length];
+      env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data);
+      KInteropBuffer result = { 0 };
+      result.data = data;
+      result.length = length;
+      return result;
+    }
+    static inline InteropType convertTo(ani_env* env, KInteropBuffer value) {
+      ani_array_byte result;
+      env->Array_New_Byte(value.length, &result);
+      env->Array_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data));
+      value.dispose(value.resourceId);
+      return result;
+    }
+    static inline void release(ani_env* env, InteropType value, KInteropBuffer converted) {
+      delete [] (KByte*)converted.data;
+    }
+};
+
+template<>
+struct InteropTypeConverter<KInteropReturnBuffer> {
+    using InteropType = ani_array_byte;
+    static inline KInteropReturnBuffer convertFrom(ani_env* env, InteropType value) = delete;
+    static inline InteropType convertTo(ani_env* env, KInteropReturnBuffer value) {
+      ani_array_byte result;
+      env->Array_New_Byte(value.length, &result);
+      env->Array_SetRegion_Byte(result, 0, value.length, reinterpret_cast<const ani_byte*>(value.data));
+      value.dispose(value.data, value.length);
+      return result;
+    };
+    static inline void release(ani_env* env, InteropType value, KInteropReturnBuffer converted) {}
 };
 
 template<>
@@ -46,12 +172,13 @@ struct InteropTypeConverter<KStringPtr> {
         result.resize(lengthUtf8);
         ani_size lengthUtf16 = 0;
         env->String_GetUTF16Size(value, &lengthUtf16);
-        ani_size count;
-        env->String_GetUTF8SubString(value, 0, lengthUtf16, result.data(), result.length(), &count);
+        ani_size count = 0;
+        env->String_GetUTF8SubString(value, 0, lengthUtf16, result.data(), lengthUtf8 + 1, &count);
+        result.data()[lengthUtf8] = 0;
         return result;
     }
     static InteropType convertTo(ani_env* env, const KStringPtr& value) {
-      ani_string result;
+      ani_string result = nullptr;
       env->String_NewUTF8(value.c_str(), value.length(), &result);
       return result;
     }
@@ -72,52 +199,61 @@ struct InteropTypeConverter<KNativePointer> {
 
 template<>
 struct InteropTypeConverter<KInt*> {
-    using InteropType = ani_fixedarray_int;
+    using InteropType = ani_array_int;
     static KInt* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
+      KInt* result = nullptr;
+      //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
-      env->FixedArray_GetLength(value, &length);
-      KInt* result = new KInt[length];
-      env->FixedArray_GetRegion_Int(value, 0, length, result);
+      env->Array_GetLength(value, &length);
+      KInt* data = new KInt[length];
+      env->Array_GetRegion_Int(value, 0, length, (ani_int*)data);
       return result;
     }
     static InteropType convertTo(ani_env* env, KInt* value) = delete;
     static void release(ani_env* env, InteropType value, KInt* converted) {
-      if (converted) delete [] converted;
+      //if (converted) env->Array_Unpin(value, converted);
+      delete [] converted;
     }
 };
 
 template<>
 struct InteropTypeConverter<KFloat*> {
-    using InteropType = ani_fixedarray_float;
+    using InteropType = ani_array_float;
     static KFloat* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
+      //KFloat* result = nullptr;
+      //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
-      env->FixedArray_GetLength(value, &length);
-      KFloat* result = new KFloat[length];
-      env->FixedArray_GetRegion_Float(value, 0, length, result);
-      return result;
+      env->Array_GetLength(value, &length);
+      KFloat* data = new KFloat[length];
+      env->Array_GetRegion_Float(value, 0, length, (ani_float*)data);
+      return data;
     }
     static InteropType convertTo(ani_env* env, KFloat* value) = delete;
     static void release(ani_env* env, InteropType value, KFloat* converted) {
-      if (converted) delete [] converted;
+      //if (converted) env->Array_Unpin(value, converted);
+      delete [] converted;
     }
 };
 
 template<>
 struct InteropTypeConverter<KByte*> {
-    using InteropType = ani_fixedarray_byte;
+    using InteropType = ani_array_byte;
     static KByte* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
+      //KByte* result = nullptr;
+      //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
-      env->FixedArray_GetLength(value, &length);
-      KByte* result = new KByte[length];
-      env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)result);
-      return result;
+      env->Array_GetLength(value, &length);
+      KByte* data = new KByte[length];
+      env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data);
+      return data;
     }
     static InteropType convertTo(ani_env* env, KByte* value) = delete;
     static void release(ani_env* env, InteropType value, KByte* converted) {
-      if (converted) delete [] converted;
+      // if (converted) env->Array_Unpin(value, converted);
+      delete[] converted;
     }
 };
 
@@ -202,7 +338,7 @@ public:
 #else
 #define MAKE_ANI_EXPORT(module, name, type, flag) \
     __attribute__((constructor)) \
-    static void __init_ets_##name() { \
+    static void __init_ani_##name() { \
         AniExports::getInstance()->addMethod(KOALA_QUOTE(module), "_"#name, type, reinterpret_cast<void *>(Ani_##name), flag); \
     }
 #define KOALA_ANI_INTEROP_MODULE_CLASSPATH(module, classpath)                                 \
@@ -1310,43 +1446,30 @@ MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void|" #P0 "|" #P1 "|" #P2 "|" #P3,
   } \
 MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4, ANI_SLOW_NATIVE_FLAG)
 
-bool setKoalaEtsNapiCallbackDispatcher(
+bool setKoalaANICallbackDispatcher(
     ani_env* ani_env,
     ani_class clazz,
     const char* dispatcherMethodName,
     const char* dispactherMethodSig
 );
-void getKoalaEtsNapiCallbackDispatcher(ani_class* clazz, ani_method* method);
+void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
 
-#if 0
-#define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                               \
-{                                                                                     \
-  ani_class clazz = nullptr;                                                          \
-  ani_method method = nullptr;                                                        \
-  getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
-  ani_env* ani_env = reinterpret_cast<ani_env*>(vmContext);                              \
-  ani_env->PushLocalFrame(1);                                                          \
-  ani_fixedarray_byte args_ets = ani_env->NewByteArray(length);                              \
-  ani_env->SetByteArrayRegion(args_ets, 0, length, reinterpret_cast<ets_byte*>(args)); \
-  ani_env->CallStaticIntMethod(clazz, method, id, args_ets, length);                   \
-  ani_env->GetByteArrayRegion(args_ets, 0, length, reinterpret_cast<ets_byte*>(args)); \
-  ani_env->PopLocalFrame(nullptr);                                                     \
+// TODO: maybe use CreateArrayBufferExternal here instead, no need for allocations.
+#define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                                \
+{                                                                                      \
+  ani_class clazz = nullptr;                                                           \
+  ani_static_method method = nullptr;                                                  \
+  getKoalaANICallbackDispatcher(&clazz, &method);                                      \
+  ani_env* env = reinterpret_cast<ani_env*>(venv);                            \
+  ani_array_byte args_managed = nullptr;                                          \
+  env->Array_New_Byte(length, &args_managed);                                 \
+  env->Array_SetRegion_Byte(args_managed, 0, length, reinterpret_cast<ani_byte*>(args)); \
+  ani_int result = 0;                                                                  \
+  env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_managed, length); \
+  env->Array_GetRegion_Byte(args_managed, 0, length, reinterpret_cast<ani_byte*>(args)); \
 }
 
-#define KOALA_INTEROP_CALL_INT(venv, id, length, args)                                \
-{                                                                                     \
-  ani_class clazz = nullptr;                                                          \
-  ani_method method = nullptr;                                                        \
-  getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
-  ani_env* ani_env = reinterpret_cast<ani_env*>(venv);                              \
-  ani_env->PushLocalFrame(1);                                                          \
-  ani_fixedarray_byte args_ets = ani_env->NewByteArray(length);                              \
-  ani_env->SetByteArrayRegion(args_ets, 0, length, reinterpret_cast<ets_byte*>(args)); \
-  int32_t rv = ani_env->CallStaticIntMethod(clazz, method, id, args_ets, length);      \
-  ani_env->GetByteArrayRegion(args_ets, 0, length, reinterpret_cast<ets_byte*>(args)); \
-  ani_env->PopLocalFrame(nullptr);                                                     \
-  return rv;                                                                          \
-}
+#define KOALA_INTEROP_CALL_INT(venv, id, length, args) KOALA_INTEROP_CALL_VOID(venv, id, length, args)
 
 #define KOALA_INTEROP_CALL_VOID_INTS32(venv, id, argc, args) KOALA_INTEROP_CALL_VOID(venv, id, (argc) * sizeof(int32_t), args)
 #define KOALA_INTEROP_CALL_INT_INTS32(venv, id, argc, args) KOALA_INTEROP_CALL_INT(venv, id, (argc) * sizeof(int32_t), args)
@@ -1361,17 +1484,13 @@ void getKoalaEtsNapiCallbackDispatcher(ani_class* clazz, ani_method* method);
 #define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
   do { \
     ani_env* env = reinterpret_cast<ani_env*>(vmContext); \
-    const static ani_class errorClass = env->FindClass("std/core/Error"); \
-    env->ThrowErrorNew(errorClass, message); \
+    ani_class errorClass = nullptr; \
+    env->FindClass("Lstd/core/Error;", &errorClass); \
+    ani_method errorCtor = nullptr; \
+    env->Class_FindMethod(errorClass, "<init>", "Lstd/core/Error;", &errorCtor); \
+    ani_error messageObject = nullptr; \
+    env->Object_New(errorClass, errorCtor, (ani_object*)&messageObject, message); \
+    env->ThrowError(messageObject); \
   } while (0)
-#else
 
-#define KOALA_INTEROP_CALL_VOID(venv, id, length, args)
-#define KOALA_INTEROP_CALL_INT(venv, id, length, args) { return 0; }
-#define KOALA_INTEROP_CALL_VOID_INTS32(venv, id, argc, args) { return; }
-#define KOALA_INTEROP_CALL_INT_INTS32(venv, id, argc, args) { return 0; }
-#define KOALA_INTEROP_THROW(vmContext, object, ...) { return __VA_ARGS__; }
-#define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) { return __VA_ARGS__; }
-#endif
-
-#endif // KOALA_ETS_NAPI
+#endif // KOALA_ANI

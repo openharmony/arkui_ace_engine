@@ -1,3 +1,5 @@
+//import router from '@ohos.router'
+
 //@Entry
 
 @Component
@@ -86,6 +88,7 @@ function globalBuilder() {
     Text("AnotherBuilder")
 }
 
+@Entry
 @Component
 struct Page1 {
     @State color1: string = '#ff0000'
@@ -96,7 +99,7 @@ struct Page1 {
     data: Array<string> = makeArray(10)
 
     build() {
-        console.log(`In Page1`)
+        console.log(`In Page1 build()`)
 
         Column() {
         if (this.visible) {
@@ -104,6 +107,7 @@ struct Page1 {
             Button("Blinker")
                 .width(200).height(100)
                 .backgroundColor('#ff0000')
+            Child1()
         }
 
         ForEach(this.data, (item: string, index: number) => {
@@ -111,17 +115,26 @@ struct Page1 {
             Button("Hi")
                 .backgroundColor(this.color1)
                 .width(200).height(100)
-                .onClick((e?: ClickEvent) => { this.swap() })
+                .onClick((e?: ClickEvent) => {
+                    console.log("Hi button")
+                    console.log(`navigate to page2`)
+                    this.swap()
+                    // router.push({ url: "page2" })
+                })
             Button("Bye")
                 .backgroundColor(this.color2)
                 .width(200).height(100)
-                .onClick((e?: ClickEvent) => { this.swap() })
+                .onClick((e?: ClickEvent) => {
+                    console.log("Bye button")
+                    this.swap()
+                })
             Text($r('app.string.my_text')).height(50)
             Button("Click! " + this.state)
                 .width(200).height(100)
                 .backgroundColor($r('app.color.my_color'))
                 .onClick((e?: ClickEvent) => {
                     this.state++
+                    console.log("Click button")
                     console.log("#### Set Button onClick! #" + this.state)
                 })
             Image($r('app.media.startIcon')).width(60).height(60)
@@ -145,5 +158,29 @@ struct Page1 {
         this.color1 = this.color2
         this.color2 = tmp
         this.visible = !this.visible
+    }
+}
+
+@Component
+struct Child1 {
+    onPageShow() {
+        console.log('Child1 onPageShow()')
+    }
+
+    onPageHide() {
+        console.log('Child1 onPageHide()')
+    }
+
+    aboutToAppear() {
+        console.log('Child1 aboutToAppear()')
+    }
+
+    aboutToDisappear() {
+        console.log('Child1 aboutToDisappear()')
+    }
+
+
+    build() {
+        console.log('Child1 build()')
     }
 }

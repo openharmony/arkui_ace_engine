@@ -21,7 +21,7 @@ import { EventTarget, SourceType, SourceTool } from "./ArkCommonInterfaces"
 import { MouseButton, MouseAction } from "./ArkEnumsInterfaces"
 import { Callback_Void } from "./SyntheticDeclarations"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -41,10 +41,6 @@ export interface MouseEvent {
     stopPropagation: (() => void)
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
-    peer?: Finalizable | undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
     get button(): MouseButton {
         return this.getButton()
     }
@@ -216,14 +212,14 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         throw new Error("Object deserialization is not implemented.")
     }
     private setButton_serialize(button: MouseButton): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setButton(this.peer!.ptr, (button.valueOf() as int32))
+        ArkUIGeneratedNativeModule._MouseEvent_setButton(this.peer!.ptr, ((button as MouseButton) as int32))
     }
     private getAction_serialize(): MouseAction {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getAction(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
     private setAction_serialize(action: MouseAction): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setAction(this.peer!.ptr, (action.valueOf() as int32))
+        ArkUIGeneratedNativeModule._MouseEvent_setAction(this.peer!.ptr, ((action as MouseAction) as int32))
     }
     private getDisplayX_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getDisplayX(this.peer!.ptr)

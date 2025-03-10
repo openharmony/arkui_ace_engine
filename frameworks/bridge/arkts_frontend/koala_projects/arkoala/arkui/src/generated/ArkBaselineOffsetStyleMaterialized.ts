@@ -19,10 +19,11 @@
 import { LengthMetrics, LengthMetricsInternal } from "./ArkLengthMetricsMaterialized"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -34,7 +35,7 @@ export class BaselineOffsetStyleInternal {
     }
 }
 export class BaselineOffsetStyle implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -42,16 +43,13 @@ export class BaselineOffsetStyle implements MaterializedBase {
         return this.getBaselineOffset()
     }
     static ctor_baselineoffsetstyle(value: LengthMetrics): KPointer {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeLengthMetrics(value)
-        const retval = ArkUIGeneratedNativeModule._BaselineOffsetStyle_ctor(thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
+        const retval = ArkUIGeneratedNativeModule._BaselineOffsetStyle_ctor(toPeerPtr(value))
         return retval
     }
      constructor(value?: LengthMetrics) {
         if ((value) !== (undefined))
         {
-            const ctorPtr: KPointer = BaselineOffsetStyle.ctor_baselineoffsetstyle(value)
+            const ctorPtr: KPointer = BaselineOffsetStyle.ctor_baselineoffsetstyle((value)!)
             this.peer = new Finalizable(ctorPtr, BaselineOffsetStyle.getFinalizer())
         }
     }

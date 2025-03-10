@@ -2,6 +2,7 @@ import { ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, Ark
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkDialogExampleComponent extends ArkStructBase<ArkDialogExampleComponent, DialogExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -104,6 +105,7 @@ class ArkDialogExampleComponent extends ArkStructBase<ArkDialogExampleComponent,
         });
     }
 }
+/** @memo:stable */
 class ArkCustomDialogUserComponent extends ArkStructBase<ArkCustomDialogUserComponent, CustomDialogUserOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

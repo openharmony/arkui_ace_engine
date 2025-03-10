@@ -1,17 +1,44 @@
-import { ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkStructBase, ArkText, LocalStorage, MutableState, Observed, SyncedProperty, observableProxy, propState, stateOf } from "@koalaui/arkoala-arkui";
+import { ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkRow, ArkStructBase, ArkText, LocalStorage, MutableState, SyncedProperty, observableProxy, propState, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 var nextID: number = 0;
-@Observed
 class ClassA {
-    public name: string;
-    public c: number;
-    public id: number;
+    private __backing_name?: MutableState<string>;
+    public get name(): string {
+        return this.__backing_name!.value;
+    }
+    public set name(value: string) {
+        if (this.__backing_name)
+            this.__backing_name!.value = observableProxy(value);
+        else
+            this.__backing_name = stateOf<string>(value);
+    }
+    private __backing_c?: MutableState<number>;
+    public get c(): number {
+        return this.__backing_c!.value;
+    }
+    public set c(value: number) {
+        if (this.__backing_c)
+            this.__backing_c!.value = observableProxy(value);
+        else
+            this.__backing_c = stateOf<number>(value);
+    }
+    private __backing_id?: MutableState<number>;
+    public get id(): number {
+        return this.__backing_id!.value;
+    }
+    public set id(value: number) {
+        if (this.__backing_id)
+            this.__backing_id!.value = observableProxy(value);
+        else
+            this.__backing_id = stateOf<number>(value);
+    }
     constructor(c: number, name: string = 'OK') {
         this.name = name;
         this.c = c;
         this.id = nextID++;
     }
 }
+/** @memo:stable */
 class ArkCustomXComponent extends ArkStructBase<ArkCustomXComponent, CustomXOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -41,6 +68,7 @@ class ArkCustomXComponent extends ArkStructBase<ArkCustomXComponent, CustomXOpti
         });
     }
 }
+/** @memo:stable */
 class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

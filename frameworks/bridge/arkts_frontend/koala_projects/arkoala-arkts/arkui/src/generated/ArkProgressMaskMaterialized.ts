@@ -20,7 +20,7 @@ import { ResourceColor } from "./ArkUnitsInterfaces"
 import { Color } from "./ArkEnumsInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -34,7 +34,7 @@ export class ProgressMaskInternal {
     }
 }
 export class ProgressMask implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -45,7 +45,7 @@ export class ProgressMask implements MaterializedBase {
         if (TypeChecker.isColor(color)) {
             thisSerializer.writeInt8(0 as int32)
             const color_0  = color as Color
-            thisSerializer.writeInt32((color_0.valueOf() as int32))
+            thisSerializer.writeInt32(((color_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == color_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -67,9 +67,9 @@ export class ProgressMask implements MaterializedBase {
         return retval
     }
      constructor(value?: number, total?: number, color?: ResourceColor) {
-        if (((value) !== (undefined)) && ((total) !== (undefined)) && ((color) !== (undefined)))
+        if (((value) !== (undefined)) || ((total) !== (undefined)) || ((color) !== (undefined)))
         {
-            const ctorPtr : KPointer = ProgressMask.ctor_progressmask(value, total, color)
+            const ctorPtr : KPointer = ProgressMask.ctor_progressmask((value)!, (total)!, (color)!)
             this.peer = new Finalizable(ctorPtr, ProgressMask.getFinalizer())
         }
     }
@@ -101,7 +101,7 @@ export class ProgressMask implements MaterializedBase {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32((value_0.valueOf() as int32))
+            thisSerializer.writeInt32(((value_0 as Color) as int32))
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)

@@ -1,7 +1,7 @@
 import { ArkTestComponentPeer, checkArkoalaCallbacks, checkEvents, PeerNode, setCustomEventsChecker, UserView, UserViewBuilder } from "@koalaui/arkts-arkui"
 import { int64 } from "@koalaui/common"
 import { InteropNativeModule, KPointer, pointer, registerNativeModuleLibraryName } from "@koalaui/interop"
-import { ComputableState, createAnimationTimer, GlobalStateManager, memoEntry, MutableState, StateContext, StateManager } from "@koalaui/runtime"
+import { callScheduledCallbacks, ComputableState, createAnimationTimer, GlobalStateManager, memoEntry, MutableState, StateContext, StateManager } from "@koalaui/runtime"
 import { ArkUINativeModule } from "#components"
 import { int32 } from "@koalaui/common"
 
@@ -110,6 +110,7 @@ export class EtsHarnessApplication {
         this.timer!.value = Date.now() as int64
         checkEvents()
         this.updateStates(this.manager!, this.root!)
+        callScheduledCallbacks()
         return true
     }
 
@@ -159,6 +160,7 @@ export class EtsHarnessApplication {
                 // Update states.
                 update.update()
                 // Propagate changes.
+                manager.syncChanges()
                 manager.updateSnapshot()
                 // Notify subscriber.
                 update.callback(true)

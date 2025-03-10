@@ -2,6 +2,7 @@ import { ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkPageTransit
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
+/** @memo:stable */
 class ArkSwipeGestureExampleComponent extends ArkStructBase<ArkSwipeGestureExampleComponent, SwipeGestureExampleOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

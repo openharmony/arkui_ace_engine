@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KInt, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer } from "@koalaui/interop"
+import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer } from "@koalaui/interop"
 import { int32, float32 } from "@koalaui/common"
 
 export class ArkUINativeModuleEmpty {
@@ -150,14 +150,6 @@ export class ArkUINativeModuleEmpty {
     }
     _ShowCrash(message: string): void {
         console.log("_ShowCrash")
-    }
-    _CheckArkoalaGeneratedEvents(result: Uint8Array, size: int32): int32 {
-        console.log("_CheckArkoalaGeneratedEvents")
-        return 0
-    }
-    _InjectEvent(data: Uint8Array, size: int32): int32 {
-        console.log("_InjectEvent")
-        return 0
     }
     _StartPerf(str1: string): void {
         console.log("_StartPerf")

@@ -46,6 +46,11 @@ export class TSTypeParameterDeclaration extends Expression {
     get params(): readonly TSTypeParameter[] {
         return unpackNodeArray(global.generatedEs2panda._TSTypeParameterDeclarationParamsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    addParam(param: TSTypeParameter): this {
+        global.generatedEs2panda._TSTypeParameterDeclarationAddParam(global.context, this.peer, passNode(param))
+        return this
+    }
     get requiredParams(): number {
         return global.generatedEs2panda._TSTypeParameterDeclarationRequiredParamsConst(global.context, this.peer)
     }

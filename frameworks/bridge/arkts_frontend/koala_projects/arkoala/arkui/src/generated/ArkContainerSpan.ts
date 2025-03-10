@@ -17,9 +17,10 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32, unsafeCast } from "@koalaui/common"
-import { KStringPtr, KBoolean, RuntimeType, runtimeType, isResource, isInstanceOf } from "@koalaui/interop"
+import { KStringPtr, KBoolean, RuntimeType, runtimeType, isInstanceOf } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentBase } from "./../ComponentBase"
+import { isResource, isPadding } from "./../utils"
 import { ArkContainerSpanPeer } from "./peers/ArkContainerSpanPeer"
 import { TextBackgroundStyle } from "./ArkSpanInterfaces"
 import { AttributeModifier } from "./../handwritten"
@@ -27,7 +28,7 @@ import { ContainerSpanAttribute } from "./ArkContainerSpanInterfaces"
 import { ResourceColor, Dimension, BorderRadiuses, Length } from "./ArkUnitsInterfaces"
 /** @memo:stable */
 export class ArkContainerSpanComponent extends ComponentBase {
-    getPeer(): ArkContainerSpanPeer {
+    protected getPeer(): ArkContainerSpanPeer {
         return (this.peer as ArkContainerSpanPeer)
     }
     /** @memo */

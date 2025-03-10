@@ -18,8 +18,7 @@ import { contextNode, remember, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode, PeerNodeType } from "../PeerNode"
 import {
     CurrentRouter,
-    CurrentRouterTransitionState,
-    RouterTransitionVisibility
+    CurrentRouterTransitionState
 } from "./Router"
 import {
     ArkPageTransitionData,
@@ -28,13 +27,20 @@ import {
 } from "./ArkPageTransitionData"
 import { PageTransitionOptions } from "../generated"
 
+// TODO: import it when panda is fixed.
+enum RouterTransitionVisibility {
+    Hidden,
+    Visible,
+    Showing,
+    Hiding
+}
+
 /** @memo */
 function NotifyPageTransition(pageId: int32, style: ArkPageTransitionData, state: RouterTransitionVisibility) {
     const node = contextNode<PeerNode>(PeerNodeType)
     // console.log("NotifyPageTransition: shall notify", "page", pageId, "state is", RouterTransitionVisibility[state])
     const router = CurrentRouter()
     scheduleCallback(() => {
-        console.log(`TODO SHOPPING: NotifyPageTransition`)
         // TODO: make it driven by actual animation.
         /*
             TODO SHOPPING: time: int32 (params.duration is double)
@@ -60,10 +66,9 @@ export function ArkPageTransitionEnter(
     const receiver = remember(() => new ArkPageTransitionEnterComponent(params))
     style?.(receiver)
     const state = CurrentRouterTransitionState()
-    console.log(`TODO SHOPPING: ArkPageTransitionEnter`)
-    // if (state !== undefined && state.visibility == RouterTransitionVisibility.Showing) {
-    //     NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Showing)
-    // }
+    if (state !== undefined && state.visibility == RouterTransitionVisibility.Showing) {
+        NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Showing)
+    }
 }
 
 /** @memo */
@@ -76,8 +81,7 @@ export function ArkPageTransitionExit(
     const receiver = remember(() => new ArkPageTransitionExitComponent(params))
     style?.(receiver)
     const state = CurrentRouterTransitionState()
-    console.log(`TODO SHOPPING: ArkPageTransitionExit`)
-    // if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding) {
-    //     NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Hiding)
-    // }
+        if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding) {
+            NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Hiding)
+    }
 }

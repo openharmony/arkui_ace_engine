@@ -3,6 +3,7 @@ import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
 import { MutableState } from "@koalaui/runtime";
 import { ClassB as ClassA } from './test/pages/import@Observed';
+/** @memo:stable */
 class ArkViewAComponent extends ArkStructBase<ArkViewAComponent, ViewAOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -49,6 +50,7 @@ class ArkViewAComponent extends ArkStructBase<ArkViewAComponent, ViewAOptions> {
         });
     }
 }
+/** @memo:stable */
 class ArkViewBComponent extends ArkStructBase<ArkViewBComponent, ViewBOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

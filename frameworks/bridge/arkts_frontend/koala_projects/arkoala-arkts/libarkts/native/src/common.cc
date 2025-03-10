@@ -39,16 +39,16 @@ static es2panda_Impl *impl = nullptr;
     #define LIB_SUFFIX ".so"
 #endif
 
-const char* defaultSdkPath = "../../../incremental/tools/panda/node_modules/@panda/sdk" ;
-const char* name = LIB_PREFIX "es2panda-public" LIB_SUFFIX;
+const char* DEFAULT_SDK_PATH = "../../../incremental/tools/panda/node_modules/@panda/sdk" ;
+const char* NAME = LIB_PREFIX "es2panda-public" LIB_SUFFIX;
 
-void* findLibrary() {
+void* FindLibrary() {
     char* envValue = getenv("PANDA_SDK_PATH");
     if (!envValue) {
-        std::cout << "PANDA_SDK_PATH not specified, assuming " << defaultSdkPath << std::endl;
+        std::cout << "PANDA_SDK_PATH not specified, assuming " << DEFAULT_SDK_PATH << std::endl;
     }
-    std::string prefix = envValue ? std::string(envValue) : defaultSdkPath;
-    std::string libraryName = prefix + ("/" PLUGIN_DIR "/lib/") + name;
+    std::string prefix = envValue ? std::string(envValue) : DEFAULT_SDK_PATH;
+    std::string libraryName = prefix + ("/" PLUGIN_DIR "/lib/") + NAME;
     return loadLibrary(libraryName);
 }
 
@@ -56,7 +56,7 @@ es2panda_Impl *GetImpl() {
     if (impl) {
         return impl;
     }
-    auto library = findLibrary();
+    auto library = FindLibrary();
     if (!library) {
         throw std::runtime_error("No library (es2panda_lib.cc)");
     }
@@ -68,7 +68,8 @@ es2panda_Impl *GetImpl() {
     return impl;
 }
 
-es2panda_ContextState intToState(KInt state) {
+es2panda_ContextState intToState(KInt state)
+{
     return es2panda_ContextState(state);
 }
 
@@ -81,20 +82,33 @@ char* getStringCopy(KStringPtr& ptr) {
 }
 
 inline KUInt unpackUInt(const KByte* bytes) {
-    return (bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24));
+    const KUInt BYTE_0 = 0;
+    const KUInt BYTE_1 = 1;
+    const KUInt BYTE_2 = 2;
+    const KUInt BYTE_3 = 3;
+
+    const KUInt BYTE_1_SHIFT = 8;
+    const KUInt BYTE_2_SHIFT = 16;
+    const KUInt BYTE_3_SHIFT = 24;
+    return (
+        bytes[BYTE_0] 
+        | (bytes[BYTE_1] << BYTE_1_SHIFT)
+        | (bytes[BYTE_2] << BYTE_2_SHIFT)
+        | (bytes[BYTE_3] << BYTE_3_SHIFT)
+    );
 }
 
 KNativePointer impl_CreateConfig(KInt argc, KStringArray argvPtr) {
-    const std::size_t HEADER_LEN = 4;
+    const std::size_t headerLen = 4;
 
     const char** argv = new const char*[argc];
-    std::size_t position = HEADER_LEN;
-    std::size_t str_len;
+    std::size_t position = headerLen;
+    std::size_t strLen;
     for (std::size_t i = 0; i < static_cast<std::size_t>(argc); ++i) {
-        str_len = unpackUInt(argvPtr + position);
-        position += HEADER_LEN;
-        argv[i] = strdup(std::string(reinterpret_cast<const char*>(argvPtr + position), str_len).c_str());
-        position += str_len;
+        strLen = unpackUInt(argvPtr + position);
+        position += headerLen;
+        argv[i] = strdup(std::string(reinterpret_cast<const char*>(argvPtr + position), strLen).c_str());
+        position += strLen;
     }
     return GetImpl()->CreateConfig(argc, argv);
 }
@@ -132,7 +146,9 @@ KNativePointer impl_UpdateCallExpression(
     auto optional = static_cast<bool>(optionalT);
     auto trailingComma = static_cast<bool>(trailingCommaT);
 
-   auto nn = GetImpl()->CreateCallExpression(context, callee, arguments, argumentsLen, typeParams, optional, trailingComma);
+    auto nn = GetImpl()->CreateCallExpression(
+        context, callee, arguments, argumentsLen, typeParams, optional, trailingComma
+    ); 
     GetImpl()->AstNodeSetOriginalNode(context, nn, node);
     return nn;
 }
@@ -154,19 +170,19 @@ TODO: NOT FROM API (shouldn't be there)
 -----------------------------------------------------------------------------------------------------------------------------
 */
 
-es2panda_AstNode * __parentNode;
-es2panda_Context * __context;
+es2panda_AstNode * cachedParentNode;
+es2panda_Context * cachedContext;
 
 static void changeParent(es2panda_AstNode *child)
 {
-    GetImpl()->AstNodeSetParent(__context, child, __parentNode);
+    GetImpl()->AstNodeSetParent(cachedContext, child, cachedParentNode);
 }
 
 static void SetRightParent(es2panda_AstNode *node, void *arg)
 {
     es2panda_Context *ctx = static_cast<es2panda_Context *>(arg);
-    __context = ctx;
-    __parentNode = node;
+    cachedContext = ctx;
+    cachedParentNode = node;
 
     GetImpl()->AstNodeIterateConst(ctx, node, changeParent);
 }
@@ -183,17 +199,17 @@ KOALA_INTEROP_2(AstNodeUpdateAll, KNativePointer, KNativePointer, KNativePointer
 KNativePointer impl_AstNodeUpdateChildren(KNativePointer contextPtr, KNativePointer nodePtr) {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
     auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    __parentNode = node;
+    cachedParentNode = node;
 
     GetImpl()->AstNodeIterateConst(context, node, changeParent);
     return node;
 }
 KOALA_INTEROP_2(AstNodeUpdateChildren, KNativePointer, KNativePointer, KNativePointer)
 
-std::vector<void*> __children;
+std::vector<void*> cachedChildren;
 
 static void visitChild(es2panda_AstNode *node) {
-    __children.emplace_back(node);
+    cachedChildren.emplace_back(node);
 }
 
 KNativePointer impl_AstNodeChildren(
@@ -202,11 +218,11 @@ KNativePointer impl_AstNodeChildren(
 ) {
     auto context = reinterpret_cast<es2panda_Context*>(contextPtr);
     auto node = reinterpret_cast<es2panda_AstNode*>(nodePtr);
-    __context = context;
-    __children.clear();
+    cachedContext = context;
+    cachedChildren.clear();
 
     GetImpl()->AstNodeIterateConst(context, node, visitChild);
-    return new std::vector(__children);
+    return new std::vector(cachedChildren);
 }
 KOALA_INTEROP_2(AstNodeChildren, KNativePointer, KNativePointer, KNativePointer)
 

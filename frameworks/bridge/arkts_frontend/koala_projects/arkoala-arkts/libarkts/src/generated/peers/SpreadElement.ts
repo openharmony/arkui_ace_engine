@@ -48,8 +48,18 @@ export class SpreadElement extends AnnotatedExpression {
     get decorators(): readonly Decorator[] {
         return unpackNodeArray(global.generatedEs2panda._SpreadElementDecoratorsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setOptional(optional_arg: boolean): this {
+        global.generatedEs2panda._SpreadElementSetOptional(global.context, this.peer, optional_arg)
+        return this
+    }
     get typeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._SpreadElementTypeAnnotationConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    setTsTypeAnnotation(typeAnnotation: TypeNode): this {
+        global.generatedEs2panda._SpreadElementSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
+        return this
     }
 }
 export function isSpreadElement(node: AstNode): node is SpreadElement {

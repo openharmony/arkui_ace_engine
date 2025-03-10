@@ -19,10 +19,12 @@ let foreignContext: pointer = nullptr
 
 export function enterForeignContext(context: pointer) {
     foreignContext = context
+    InteropNativeModule._SetForeignVMContext(context)
 }
 
 export function leaveForeignContext() {
     foreignContext = nullptr
+    InteropNativeModule._SetForeignVMContext(nullptr)
 }
 
 export function setTimeoutForeign(code: () => void, delay: int32): int32 {

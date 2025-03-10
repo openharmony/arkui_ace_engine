@@ -6,6 +6,7 @@ function fancybut__Button<T extends ArkButtonComponent>(ButtonInstance: T, color
         .width(200)
         .height(100);
 }
+/** @memo:stable */
 class ArkExtendComponentComponent extends ArkStructBase<ArkExtendComponentComponent, ExtendComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -39,6 +40,7 @@ class ArkExtendComponentComponent extends ArkStructBase<ArkExtendComponentCompon
 function globalFancy<T extends ArkCommonMethodInterface<T>>(CommonInstance: T): T {
     return CommonInstance.backgroundColor(Color.Red);
 }
+/** @memo:stable */
 class ArkStylesComponentComponent extends ArkStructBase<ArkStylesComponentComponent, StylesComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

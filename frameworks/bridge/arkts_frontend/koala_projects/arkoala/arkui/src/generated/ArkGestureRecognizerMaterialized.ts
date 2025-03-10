@@ -19,10 +19,11 @@
 import { GestureControl } from "./ArkGestureControlNamespace"
 import { GestureRecognizerState } from "./ArkGestureInterfaces"
 import { EventTargetInfo, EventTargetInfoInternal } from "./ArkEventTargetInfoMaterialized"
-import { Finalizable, isResource, isInstanceOf, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, KPointer, MaterializedBase } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, isInstanceOf } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
+import { isResource, isPadding } from "./../utils"
 import { Deserializer, createDeserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ArkUIGeneratedNativeModule } from "./ArkUIGeneratedNativeModule"
@@ -34,7 +35,7 @@ export class GestureRecognizerInternal {
     }
 }
 export class GestureRecognizer implements MaterializedBase {
-    peer?: Finalizable | undefined
+    peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -100,7 +101,8 @@ export class GestureRecognizer implements MaterializedBase {
     }
     private getEventTargetInfo_serialize(): EventTargetInfo {
         const retval = ArkUIGeneratedNativeModule._GestureRecognizer_getEventTargetInfo(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const obj: EventTargetInfo = EventTargetInfoInternal.fromPtr(retval)
+        return obj
     }
     private isValid_serialize(): boolean {
         const retval = ArkUIGeneratedNativeModule._GestureRecognizer_isValid(this.peer!.ptr)

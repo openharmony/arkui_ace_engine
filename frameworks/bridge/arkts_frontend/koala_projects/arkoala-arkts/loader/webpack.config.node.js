@@ -20,7 +20,7 @@ const DefinePlugin = require("webpack").DefinePlugin
 const minimize = !process.env.WEBPACK_NO_MINIMIZE
 
 /** @returns {import("webpack").WebpackOptionsNormalized} */
-const makeConfig = ({ os, arch, tsconfig }) => ({
+const makeConfig = ({ os, arch, isAni, tsconfig }) => ({
     target: "node",
     entry: `./src/loader.ts`,
     output: {
@@ -48,7 +48,7 @@ const makeConfig = ({ os, arch, tsconfig }) => ({
 
     plugins: [
         new CopyPlugin({
-            patterns: copyPluginPatterns(os, arch)
+            patterns: copyPluginPatterns(os, arch, isAni)
         }),
         new DefinePlugin({
             'LOAD_NATIVE': `require("./ArkoalaLoader.node")`
@@ -68,7 +68,7 @@ function getExt(os) {
     }
 }
 
-function copyPluginPatterns(os, arch) {
+function copyPluginPatterns(os, arch, isAni) {
     const patterns = []
     patterns.push({
         from: path.resolve(`../../arkoala/framework/native/build-node-host-vmloader/ArkoalaLoader.node`),
@@ -78,10 +78,17 @@ function copyPluginPatterns(os, arch) {
         from: path.resolve(`../../arkoala/framework/native/build-node-host-vmloader/libvmloader.${ getExt(os) }`),
         to: "."
     })
-    patterns.push({
-        from: path.resolve(`../../arkoala/framework/native/build-panda-host/libArkoalaNative_${os}_${arch}_ark.${ getExt(os) }`),
-        to: `./libArkoalaNative_ark.${ getExt(os) }`
-    })
+    if (!isAni) {
+        patterns.push({
+            from: path.resolve(`../../arkoala/framework/native/build-panda-host/libArkoalaNative_${os}_${arch}_ark.${ getExt(os) }`),
+            to: `./libArkoalaNative_ark.${ getExt(os) }`
+        })
+    } else {
+        patterns.push({
+            from: path.resolve(`../../arkoala/framework/native/build-panda-ani-host/libArkoalaNative_${os}_${arch}_ani.${ getExt(os) }`),
+            to: `./libArkoalaNative_ani.${ getExt(os) }`
+        })
+    }
     patterns.push({
         from: path.resolve(`../../arkoala/framework/native/build-panda-host/libace_compatible_mock.${ getExt(os) }`),
         to: `./libace_compatible_mock.${ getExt(os) }`
@@ -97,8 +104,9 @@ module.exports = env => {
 
     const os = env.os || oses[process.platform] || process.platform
     const arch = (env.arch || process.arch)
+    const isAni = env.isAni
 
     const tsconfig = env.tsconfig || ""
 
-    return makeConfig({os, arch, tsconfig})
+    return makeConfig({os, arch, isAni, tsconfig})
 }

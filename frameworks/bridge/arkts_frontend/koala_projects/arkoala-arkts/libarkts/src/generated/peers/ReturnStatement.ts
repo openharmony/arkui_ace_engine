@@ -52,6 +52,11 @@ export class ReturnStatement extends Statement {
     get argument(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ReturnStatementArgumentConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setArgument(arg: Expression): this {
+        global.generatedEs2panda._ReturnStatementSetArgument(global.context, this.peer, passNode(arg))
+        return this
+    }
 }
 export function isReturnStatement(node: AstNode): node is ReturnStatement {
     return node instanceof ReturnStatement

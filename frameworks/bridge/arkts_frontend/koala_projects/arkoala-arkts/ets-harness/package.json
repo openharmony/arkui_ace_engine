@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/ets-harness",
-    "version": "1.5.7+devel",
+    "version": "1.5.8+devel",
     "description": "",
     "main": "./build/lib/src/launcher.js",
     "types": "./build/lib/src/launcher.d.ts",
@@ -10,6 +10,7 @@
     ],
     "scripts": {
         "clean": "rimraf build",
+        "compile": "npm run compile:all",
         "compile:plugin": "cd ../../arkoala/ets-plugin && npm run compile",
         "compile:ets": "npm run compile:plugin && cd src/ets && ets-tsc -p ./etsconfig.json",
         "compile:unmemoize": "ets-tsc -p ./tsconfig-unmemoize.json",

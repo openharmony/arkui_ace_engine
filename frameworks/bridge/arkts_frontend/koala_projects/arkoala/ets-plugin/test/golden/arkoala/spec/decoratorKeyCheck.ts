@@ -3,8 +3,9 @@ import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
 import { stringVariable, stringObj, stringFunction } from './test/pages/decoratorKeyCheck';
 let para: Record<string, number> = { 'PropA': 47 };
 let storage: LocalStorage = new LocalStorage(para);
+/** @memo:stable */
 class ArkIndexComponent extends ArkStructBase<ArkIndexComponent, IndexOptions> {
-    private _entry_local_storage_ = storage;
+    private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
     /** @memo */
     content?: () => void, initializers?: IndexOptions): void {

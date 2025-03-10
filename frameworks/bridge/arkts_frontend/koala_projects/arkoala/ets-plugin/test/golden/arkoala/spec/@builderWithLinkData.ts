@@ -1,5 +1,6 @@
 import { ArkCommonMethodComponent, ArkFlex, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, LocalStorage, MutableState, observableProxy, stateOf } from "@koalaui/arkoala-arkui";
 import { registerArkuiEntry } from "@koalaui/arkoala-arkui/ohos.router";
+/** @memo:stable */
 class ArkTitleCompComponent extends ArkStructBase<ArkTitleCompComponent, TitleCompOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
@@ -23,6 +24,7 @@ class ArkTitleCompComponent extends ArkStructBase<ArkTitleCompComponent, TitleCo
         ArkText(__builder, undefined, this.title);
     }
 }
+/** @memo:stable */
 class ArkTestPageComponent extends ArkStructBase<ArkTestPageComponent, TestPageOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/

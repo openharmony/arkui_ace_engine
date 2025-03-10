@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/build-common",
-    "version": "1.5.7+devel",
+    "version": "1.5.8+devel",
     "description": "",
     "files": [
         "tsconfig.json"

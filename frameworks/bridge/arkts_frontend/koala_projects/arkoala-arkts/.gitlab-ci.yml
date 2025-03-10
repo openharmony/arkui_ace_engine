@@ -35,6 +35,28 @@ install node modules (arkoala-arkts):
       - arkoala/framework/native/build-panda-host/libace_compatible_mock.so
     expire_in: 1 day
 
+<ArkTS> build ArkoalaNative (linux, linux, node+panda-ani):
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+  script:
+    - npm run compile:native:node-host-ani --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala/framework/native/build-node-host-vmloader/ArkoalaLoader.node
+      - arkoala/framework/native/build-node-host-vmloader/libvmloader.so
+      - arkoala/framework/native/build-panda-ani-host/libArkoalaNative_linux_arm64_ani.so
+      - arkoala/framework/native/build-panda-ani-host/libace_compatible_mock.so
+    expire_in: 1 day
+
 <ArkTS> build ArkoalaNative (linux, ohos-arm32, hzvm+panda):
   stage: build
   interruptible: true
@@ -150,15 +172,23 @@ install node modules (arkoala-arkts):
 <ArkTS> run capi plugin demo (w/plugin):
   stage: build
   interruptible: true
+  allow_failure: true
   extends:
     - .linux-vm-shell-task
   needs:
     - install node modules (arkoala-arkts)
     - install node modules (incremental)
     - install node modules (interop)
+    - <ArkTS> build incremental.abc
   before_script:
     - !reference [.setup, script]
     - !reference [.setup, regenerate-plugin-api]
+    - npm run compile --prefix incremental/compat
+    - npm run compile --prefix incremental/common
+    - npm run compile --prefix incremental/compiler-plugin
+    - npm run compile --prefix incremental/runtime
+    - npm run unmemoize --prefix incremental/runtime
+    - npm run compile --prefix arkoala-arkts/memo-plugin
   script:
     - npm run run:user:pure-sts --prefix arkoala-arkts/trivial/user
 
