@@ -69,7 +69,7 @@ ArkUINativeModuleValue FormComponentBridge::DisallowUpdate(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));    
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getFormComponentModifier()->disallowUpdate(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -83,7 +83,7 @@ ArkUINativeModuleValue FormComponentBridge::SetDimension(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));     
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (dimensionArg->IsNull() || dimensionArg->IsUndefined()) {
         nodeModifiers->getFormComponentModifier()->resetDimension(nativeNode);
     } else {
@@ -101,7 +101,7 @@ ArkUINativeModuleValue FormComponentBridge::ResetDimension(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));    
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getFormComponentModifier()->resetDimension(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -115,7 +115,7 @@ ArkUINativeModuleValue FormComponentBridge::SetModuleName(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));       
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (moduleNameArg->IsNull() || moduleNameArg->IsUndefined()) {
         nodeModifiers->getFormComponentModifier()->resetModuleName(nativeNode);
     } else {
@@ -133,7 +133,7 @@ ArkUINativeModuleValue FormComponentBridge::ResetModuleName(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));     
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getFormComponentModifier()->resetModuleName(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -155,7 +155,7 @@ ArkUINativeModuleValue FormComponentBridge::SetSize(ArkUIRuntimeCallInfo* runtim
     bool hasHeight = (!heightValue->IsNull() && !heightValue->IsUndefined() &&
         ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height));
     auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));      
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (!hasWidth && !hasHeight) {
         nodeModifiers->getFormComponentModifier()->resetFormSize(nativeNode);
     } else {
@@ -174,7 +174,7 @@ ArkUINativeModuleValue FormComponentBridge::ResetSize(ArkUIRuntimeCallInfo* runt
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CommonBridge::ResetSize(runtimeCallInfo);
     auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));      
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getFormComponentModifier()->resetFormSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
