@@ -1222,7 +1222,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager025, TestSize.Level1)
     /**
      * @tc.steps: step2. test GetTransformRectInfoRelativeToWindow
      */
-    rectInfo = jsAccessibilityManager->GetTransformRectInfoRelativeToWindow(frameNode, context);
+    auto rectInfo = jsAccessibilityManager->GetTransformRectInfoRelativeToWindow(frameNode, context);
     EXPECT_EQ(rectInfo.left, 100);
     EXPECT_EQ(rectInfo.top, 200);
 }
