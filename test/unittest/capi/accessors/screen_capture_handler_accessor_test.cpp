@@ -16,6 +16,7 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 
@@ -48,19 +49,18 @@ public:
 };
 
 /**
- * @tc.name: DISABLED_getOriginTest
+ * @tc.name: getOriginTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenCaptureHandlerAccessorTest, DISABLED_getOriginTest, TestSize.Level1)
+HWTEST_F(ScreenCaptureHandlerAccessorTest, getOriginTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getOrigin, nullptr);
 
     std::string value = "value";
 
     EXPECT_CALL(*mockHandler_, GetOrigin()).Times(1).WillOnce(Return(value));
-    // should return value
-    accessor_->getOrigin(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getOrigin(peer_)), value);
 }
 
 /**
