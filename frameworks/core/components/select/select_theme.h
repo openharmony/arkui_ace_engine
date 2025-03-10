@@ -270,7 +270,7 @@ public:
                 static_cast<uint32_t>(pattern->GetAttr<double>("select_normal_shadow", NONE_SHADOW_VALUE)));
             theme->selectFocusedShadow_ = static_cast<ShadowStyle>(
                 static_cast<uint32_t>(pattern->GetAttr<double>("select_focused_shadow", NONE_SHADOW_VALUE)));
-            theme->selectFocusedScale_ = pattern->GetAttr<double>("select_focused_scale", SELECT_FOCUS_SCALE);
+            theme->selectHoverOrFocusedScale_ = pattern->GetAttr<double>("select_focused_scale", SELECT_FOCUS_SCALE);
             theme->selectFocusedTextColor_ = pattern->GetAttr<Color>("select_focused_text_color", Color(0xff182431));
             theme->selectFocusedBackgroundColor_ =
                 pattern->GetAttr<Color>("select_focused_back_ground_color", Color::TRANSPARENT);
@@ -521,7 +521,7 @@ public:
         theme->selectNormalBorderColor_ = selectNormalBorderColor_;
         theme->selectNormalShadow_ = selectNormalShadow_;
         theme->selectFocusedShadow_ = selectFocusedShadow_;
-        theme->selectFocusedScale_ = selectFocusedScale_;
+        theme->selectHoverOrFocusedScale_ = selectHoverOrFocusedScale_;
         theme->selectFocusedTextColor_ = selectFocusedTextColor_;
         theme->selectFocusedBackgroundColor_ = selectFocusedBackgroundColor_;
         theme->menuNormalBorderWidth_ = menuNormalBorderWidth_;
@@ -1314,9 +1314,9 @@ public:
         return selectFocusedShadow_;
     }
 
-    double GetSelectFocusedScale() const
+    double GetSelectHoverOrFocusedScale() const
     {
-        return selectFocusedScale_;
+        return selectHoverOrFocusedScale_;
     }
 
     Color GetSelectFocusedBackground() const
@@ -1632,7 +1632,7 @@ private:
     Color selectFocusedBackgroundColor_;
     ShadowStyle selectNormalShadow_;
     ShadowStyle selectFocusedShadow_;
-    double selectFocusedScale_;
+    double selectHoverOrFocusedScale_;
     Dimension menuNormalBorderWidth_;
     Color menuNormalBorderColor_;
     int menuNormalBackgroundBlurStyle_;
