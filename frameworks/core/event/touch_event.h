@@ -75,6 +75,14 @@ struct TouchPoint final {
     int32_t width = 0;
     int32_t height = 0;
     int32_t operatingHand = 0;
+
+    void CovertId()
+    {
+        if (sourceTool == SourceTool::PEN) {
+            originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+            id = id + originalId;
+        }
+    }
 };
 
 /**
