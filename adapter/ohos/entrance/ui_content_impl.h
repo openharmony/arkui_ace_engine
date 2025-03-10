@@ -44,11 +44,6 @@ namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 }
 
-enum KeyFrameActionResult {
-    KEYFRAME_BREAK,
-    KEYFRAME_RETURN
-};
-
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
@@ -407,14 +402,18 @@ public:
     void EnableContainerModalCustomGesture(bool enable) override;
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback) override;
-    void AddKeyFrameCanvasNodeCallback(
-        const std::function<void(std::shared_ptr<Rosen::RSCanvasNode> canvasNode)>& callback) override;
+    void AddKeyFrameCanvasNodeCallback(const std::function<
+        void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+            std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) override;
     void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode) override;
-    void CacheAnimateInfo(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+    void CacheAnimateInfo(const ViewportConfig& config,
+        OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
     void ExecKeyFrameCachedAnimateAction();
-    KeyFrameActionResult KeyFrameActionPolicy(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+    void KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context);
+    bool KeyFrameActionPolicy(const ViewportConfig& config,
+        OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
 
@@ -502,7 +501,8 @@ private:
     std::mutex setAppWindowIconMutex_;
     uint64_t listenedDisplayId_ = 0;
     OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
-    std::function<void(std::shared_ptr<Rosen::RSCanvasNode>)> addNodeCallback_ = nullptr;
+    std::function<void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+        std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)> addNodeCallback_ = nullptr;
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ = nullptr;
     std::atomic<bool> cachedAnimateFlag_ = false;
     ViewportConfig cachedConfig_;

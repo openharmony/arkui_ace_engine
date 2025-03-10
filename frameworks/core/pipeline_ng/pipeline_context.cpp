@@ -224,7 +224,7 @@ void PipelineContext::GetCurrentPageNameCallback()
 void PipelineContext::FreezeCanvasNode(bool freezeFlag)
 {
     if (canvasNode_) {
-        TAG_LOGD(AceLogTga::ACE_WINDOW, "FreezeCanvasNode. %{public}d", freezeFlag);
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "FreezeCanvasNode. %{public}d", freezeFlag);
         canvasNode_->SetFreeze(freezeFlag);
     }
 }

@@ -57,6 +57,7 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
+#include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
@@ -2859,8 +2860,9 @@ void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& c
     }
 }
 
-void UIContentImpl::AddKeyFrameCanvasNodeCallback(
-    const std::function<void(std::shared_ptr<Rosen::RSCanvasNode> canvasNode)>& callback)
+void UIContentImpl::AddKeyFrameCanvasNodeCallback(const std::function<
+    void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+        std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback)
 {
     TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameCanvasNodeCallback");
     addNodeCallback_ = callback;
@@ -2888,7 +2890,7 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config, OHOS::Rosen::
     cachedConfig_ = config;
     cachedReason_ = reason;
     cachedRsTransaction_ = rsTransaction;
-    cahcedAvoidAreas_ = avoidAreas;
+    cachedAvoidAreas_ = avoidAreas;
 }
 
 void UIContentImpl::ExecKeyFrameCachedAnimateAction()
@@ -2900,62 +2902,82 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
     }
 }
 
-KeyFrameActionResult KeyFrameActionPolicy(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
-        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
+{
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW, "context is null.");
+        return;
+    }
+    if (canvasNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "canvasNode already exist.");
+        return;
+    }
+    if (auto transactionController =  Rosen::RSTransactionController::GetInstance()) {
+        transactionController->OpenSyncTransaction();
+        auto rsTransaction = transactionController->GetRSTransaction();
+        canvasNode_ = context->GetCanvasNode();
+        if (addNodeCallback_ && canvasNode_) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
+            addNodeCallback_(canvasNode_, rsTransaction);
+        }
+        transactionController->CloseSyncTransaction();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WINDOW, "transactionController is null.");
+        return;
+    }
+    std::function<void()> callbackCachedAnimation =  std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
+    if (callbackCachedAnimation) {
+        context->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
+    }
+}
+
+bool KeyFrameActionPolicy(const ViewportConfig& config,
+    OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     if (!config.GetKeyFrameConfig().enableKeyFrame_) {
-        return KEYFRAME_BREAK;
+        return false;
     }
 
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     if (!container) {
-        return KEYFRAME_RETURN;
+        return true;
     }
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     if (!context) {
-        return KEYFRAME_RETURN;
+        return true;
     }
 
     bool animateRes = true;
     std::function<void()> callbackCachedAnimation =  nullptr;
     switch (reason) {
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
-            if (canvasNode_) {
-                return KEYFRAME_RETURN;
-            }
-            canvasNode_ = context->GetCanvasNode();
-            if (addNodeCallback_ && canvasNode_) {
-                addNodeCallback_(canvasNode_);
-            }
-            callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
-            if (callbackCachedAnimation) {
-                context->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
-            }
-            return KEYFRAME_RETURN;
+            KeyFrameDragStartPolicy(context);
+            return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
             canvasNode_ = nullptr;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
-            animateRes = context->SetCanvasNodeOpacityAnimation(config.GetKeyFrameConfig().animationDuration,
-            config.GetKeyFrameConfig().animationDelay, reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
+            animateRes = context->SetCanvasNodeOpacityAnimation(config.GetKeyFrameConfig().animationDuration_,
+            config.GetKeyFrameConfig().animationDelay_, reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
             if (!animateRes) {
                 CacheAnimateInfo(config, reason, rsTransaction, avoidAreas);
-                return KEYFRAME_RETURN;
+                return true;
             }
-            return KEYFRAME_BREAK;
+            return false;
         default:
-            return KEYFRAME_RETURN;
+            return true;
     }
-    return KEYFRAME_BREAK;
+    return false;
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    if (KeyFrameActionPolicy(config, reason, rsTransaction, avoidAreas) == KEYFRAME_RETURN) {
+    if (KeyFrameActionPolicy(config, reason, rsTransaction, avoidAreas)) {
         return;
     }
 

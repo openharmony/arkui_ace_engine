@@ -523,8 +523,9 @@ public:
     virtual void EnableContainerModalCustomGesture(bool enable) {};
 
     virtual void AddKeyFrameAnimateEndCallback(const std::function<void()> &callback) {};
-    virtual void AddKeyFrameCanvasNodeCallback(
-        const std::function<void(std::shared_ptr<Rosen::RSCanvasNode> canvasNode)> &callback) {};
+    virtual void AddKeyFrameCanvasNodeCallback(const std::function<
+        void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+            std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) {};
     virtual void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>&) {};
 };
 
