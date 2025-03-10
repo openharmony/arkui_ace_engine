@@ -554,20 +554,6 @@ export class ToolBarV2 extends ViewV2 {
         params: ['sys.float.ohos_id_corner_radius_clicked'],
         'bundleName': '__harDefaultBundleName__',
         'moduleName': '__harDefaultModuleName__' });
-      Button.padding({
-        start: LengthMetrics.resource({
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level2'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__' }),
-        end: LengthMetrics.resource({
-          'id': -1,
-          'type': 10002,
-          params: ['sys.float.padding_level2'],
-          'bundleName': '__harDefaultBundleName__',
-          'moduleName': '__harDefaultModuleName__' }),
-      });
       Button.focusable(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE));
       Button.focusOnTouch(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE));
       Button.focusBox({
@@ -620,6 +606,20 @@ export class ToolBarV2 extends ViewV2 {
         params: ['sys.float.ohos_id_corner_radius_clicked'],
         'bundleName': '__harDefaultBundleName__',
         'moduleName': '__harDefaultModuleName__' });
+      Column.padding({
+        start: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' }),
+        end: LengthMetrics.resource({
+          'id': -1,
+          'type': 10002,
+          params: ['sys.float.padding_level2'],
+          'bundleName': '__harDefaultBundleName__',
+          'moduleName': '__harDefaultModuleName__' }),
+      });
     }, Column);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
