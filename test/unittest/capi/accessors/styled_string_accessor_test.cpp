@@ -427,16 +427,6 @@ public:
     {
         AccessorTestCtorBase::SetUpTestCase();
         SetupTheme<TextTheme>();
-    }
-
-    void SetUp(void) override
-    {
-        AccessorTestCtorBase::SetUp();
-    }
-
-    static void SetUpTestCase()
-    {
-        AccessorTestCtorBase::SetUpTestCase();
 
         auto container = Container::CurrentSafely();
         ASSERT_NE(container, nullptr);
@@ -447,6 +437,11 @@ public:
         mockContainer->UpdateCurrent(TEST_CONTAINER_ID);
         AceEngine& aceEngine = AceEngine::Get();
         aceEngine.AddContainer(TEST_CONTAINER_ID, container);
+    }
+
+    void SetUp(void) override
+    {
+        AccessorTestCtorBase::SetUp();
     }
 
     static void TearDownTestCase()
