@@ -49,9 +49,10 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./ArkGestureInterfaces"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { ColumnOptions, ColumnAttribute } from "./ArkColumnInterfaces"
+import { ColumnOptions } from "./ArkColumnInterfaces"
+import { ColumnAttribute } from "@ohos/arkui"
 /** @memo:stable */
-export class ArkColumnComponent extends ArkCommonMethodComponent {
+export class ArkColumnComponent extends ArkCommonMethodComponent implements ColumnAttribute {
     getPeer(): ArkColumnPeer {
         return (this.peer as ArkColumnPeer)
     }

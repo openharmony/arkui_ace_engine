@@ -19,10 +19,12 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export interface Resource {
-    bundleName: string;
-    moduleName: string;
-    id: number;
-    params?: Array<string>;
-    type?: number;
-}
+export { Resource } from "@ohos/arkui"
+
+// export interface Resource {
+//     bundleName: string;
+//     moduleName: string;
+//     id: number;
+//     params?: Array<string>;
+//     type?: number;
+// }

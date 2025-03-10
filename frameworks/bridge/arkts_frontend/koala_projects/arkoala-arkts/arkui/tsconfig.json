@@ -9,6 +9,9 @@
     "compilerOptions": {
         "outDir": "./build/ts",
         "paths": {
+            "@ohos/arkui": [
+                "../bridge/declaration/src"
+            ],
             "@koalaui/arkui-common": [
                 "../../arkoala/arkui-common/src/arkts"
             ],
@@ -21,13 +24,14 @@
         }
     },
     "files": [
-        "../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/component/index-full.d.ts",
-        "../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/component/koala-extensions.d.ts",
-        "../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/api/@internal/full/global.d.ts",
+        // "../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/component/index-full.d.ts",
+        // "../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/component/koala-extensions.d.ts",
+        // "../../arkoala/arkui-common/ohos-sdk-ets/HarmonyOS-NEXT-DB1/openharmony/ets/api/@internal/full/global.d.ts",
         "../../arkoala-arkts/arkui/src/index-test.d.ts",
         "../../incremental/tools/panda/arkts/std-lib/global.d.ts"
     ], // TODO: maybe delete this section
     "references": [
+        { "path": "../bridge/declaration" },
         { "path": "../../incremental/runtime" },
         { "path": "../../arkoala/arkui-common" },
         { "path": "../../interop" }
