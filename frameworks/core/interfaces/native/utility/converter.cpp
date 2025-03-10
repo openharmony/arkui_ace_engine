@@ -2122,4 +2122,17 @@ PathShapeOptions Convert(const Ark_PathShapeOptions& value)
         .commands = Converter::OptConvert<std::string>(value.commands),
     };
 }
+
+template<>
+ImageSpanSize Convert(const Ark_SizeOptions& value)
+{
+    auto width = OptConvert<CalcDimension>(value.width);
+    auto height = OptConvert<CalcDimension>(value.height);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonNegative(height);
+    return {
+        .width = width,
+        .height = height,
+    };
+}
 } // namespace OHOS::Ace::NG::Converter

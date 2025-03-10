@@ -68,6 +68,13 @@
 #include "converter_union.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
+#define ARK_TAG_UNDEFINED INTEROP_TAG_UNDEFINED
+#define ARK_TAG_OBJECT INTEROP_TAG_OBJECT
+#define ARK_TAG_RESOURCE INTEROP_TAG_RESOURCE
+#define ARK_TAG_INT32 INTEROP_TAG_INT32
+#define ARK_TAG_FLOAT32 INTEROP_TAG_FLOAT32
+#define ARK_TAG_LENGTH INTEROP_TAG_LENGTH
+
 namespace OHOS::Ace {
 struct TextDetectConfig;
 }
@@ -466,6 +473,7 @@ namespace Converter {
     template<> Header Convert(const Ark_Header& src);
     template<> Header Convert(const Ark_WebHeader& src);
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
+    template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);

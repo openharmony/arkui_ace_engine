@@ -19,10 +19,100 @@
 #include <vector>
 
 // sorted part of the code
+#include "core/components/common/layout/constants.h"
+#include "core/components/theme/theme_style.h"
+#include "core/gestures/drag_event.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
-#include "frameworks/core/gestures/drag_event.h"
 
 namespace OHOS::Ace::NG::AccessorTestFixtures {
+enum ResAccessorID {
+    DIMENSIONS_RES_NON_NEG_0_ID,
+    DIMENSIONS_RES_NON_NEG_1_ID,
+    DIMENSIONS_RES_NON_NEG_2_ID,
+    DIMENSIONS_RES_NON_NEG_3_ID,
+    DIMENSIONS_RES_NON_NEG_4_ID,
+    DIMENSIONS_RES_NON_NEG_5_ID,
+    DIMENSIONS_RES_NON_NEG_6_ID,
+    DIMENSIONS_RES_NON_NEG_7_ID,
+    DIMENSIONS_RES_NON_NEG_8_ID,
+    DIMENSIONS_RES_NON_NEG_9_ID,
+    DIMENSIONS_RES_NON_NEG_10_ID,
+    DIMENSIONS_RES_NON_NEG_11_ID,
+    DIMENSIONS_RES_NON_NEG_12_ID,
+    DIMENSIONS_RES_NON_NEG_13_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_0_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_1_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_2_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_3_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_4_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_5_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_6_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_7_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_8_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_9_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_10_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID,
+    DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID,
+    DIMENSIONS_RES_NON_PCT_0_ID,
+    DIMENSIONS_RES_NON_PCT_1_ID,
+    DIMENSIONS_RES_NON_PCT_2_ID,
+    DIMENSIONS_RES_NON_PCT_3_ID,
+    DIMENSIONS_RES_NON_PCT_4_ID,
+    DIMENSIONS_RES_NON_PCT_5_ID,
+    DIMENSIONS_RES_NON_PCT_6_ID,
+    DIMENSIONS_RES_NON_PCT_7_ID,
+    DIMENSIONS_RES_NON_PCT_8_ID,
+    DIMENSIONS_RES_NON_PCT_9_ID,
+    DIMENSIONS_RES_NON_PCT_10_ID,
+    DIMENSIONS_RES_NON_PCT_11_ID,
+    DIMENSIONS_RES_NON_PCT_12_ID,
+    DIMENSIONS_RES_NON_PCT_13_ID,
+};
+
+inline constexpr auto DIMENSIONS_RES_NON_NEG_0_STR = "DIMENSIONS_RES_NON_NEG_0_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_1_STR = "DIMENSIONS_RES_NON_NEG_1_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_2_STR = "DIMENSIONS_RES_NON_NEG_2_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_3_STR = "DIMENSIONS_RES_NON_NEG_3_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_4_STR = "DIMENSIONS_RES_NON_NEG_4_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_5_STR = "DIMENSIONS_RES_NON_NEG_5_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_6_STR = "DIMENSIONS_RES_NON_NEG_6_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_7_STR = "DIMENSIONS_RES_NON_NEG_7_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_8_STR = "DIMENSIONS_RES_NON_NEG_8_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_9_STR = "DIMENSIONS_RES_NON_NEG_9_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_10_STR = "DIMENSIONS_RES_NON_NEG_10_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_11_STR = "DIMENSIONS_RES_NON_NEG_11_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_12_STR = "DIMENSIONS_RES_NON_NEG_12_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_13_STR = "DIMENSIONS_RES_NON_NEG_13_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_3_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_3_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_4_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_4_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_5_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_5_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_6_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_6_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_7_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_7_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_8_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_8_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_9_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_9_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR";
+inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_0_STR = "DIMENSIONS_RES_NON_PCT_0_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_1_STR = "DIMENSIONS_RES_NON_PCT_1_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_2_STR = "DIMENSIONS_RES_NON_PCT_2_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_3_STR = "DIMENSIONS_RES_NON_PCT_3_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_4_STR = "DIMENSIONS_RES_NON_PCT_4_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_5_STR = "DIMENSIONS_RES_NON_PCT_5_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_6_STR = "DIMENSIONS_RES_NON_PCT_6_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_7_STR = "DIMENSIONS_RES_NON_PCT_7_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_8_STR = "DIMENSIONS_RES_NON_PCT_8_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_9_STR = "DIMENSIONS_RES_NON_PCT_9_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_10_STR = "DIMENSIONS_RES_NON_PCT_10_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_11_STR = "DIMENSIONS_RES_NON_PCT_11_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_12_STR = "DIMENSIONS_RES_NON_PCT_12_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_13_STR = "DIMENSIONS_RES_NON_PCT_13_STR";
+
 // Fixture 'Boolean' for type 'Ark_Boolean'
 extern const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBooleanValues;
 extern const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues;
@@ -38,5 +128,17 @@ extern const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtur
 extern const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureVelocityValues;
 extern const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehavior>>
     testFixtureEnumDragBehaviorValues;
+extern const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceInitTable;
+
+extern const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, VerticalAlign>>
+    testFixtureVerticalAlignValidValues;
+extern const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, std::optional<VerticalAlign>>>
+    testFixtureVerticalAlignInvalidValues;
+
+extern const std::vector<std::tuple<std::string, Ark_ImageFit, ImageFit>> testFixtureObjectFitValidValues;
+extern const std::vector<std::tuple<std::string, Ark_ImageFit, std::optional<ImageFit>>>
+    testFixtureObjectFitInvalidValues;
+
+extern const std::vector<std::tuple<std::string, Ark_Length, Dimension>> testFixtureDimensionAnyValidValues;
 } // namespace OHOS::Ace::NG::AccessorTestFixtures
 #endif

@@ -116,5 +116,108 @@ const std::vector<std::tuple<std::string, Ark_DragBehavior, OHOS::Ace::DragBehav
     testFixtureEnumDragBehaviorValues = {
     { "ARK_DRAG_BEHAVIOR_COPY", ARK_DRAG_BEHAVIOR_COPY, OHOS::Ace::DragBehavior::COPY },
     { "ARK_DRAG_BEHAVIOR_MOVE", ARK_DRAG_BEHAVIOR_MOVE, OHOS::Ace::DragBehavior::MOVE },
+    { "-1", INVALID_ENUM_VAL<Ark_DragBehavior>, OHOS::Ace::DragBehavior::UNKNOWN },
+};
+
+// Fixture 'ImageSpanVerticalAlign' for type 'Ark_ImageSpanAlignment'
+const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, VerticalAlign>>
+    testFixtureVerticalAlignValidValues = {
+        { "ARK_IMAGE_SPAN_ALIGNMENT_TOP", ARK_IMAGE_SPAN_ALIGNMENT_TOP, VerticalAlign::TOP },
+        { "ARK_IMAGE_SPAN_ALIGNMENT_CENTER", ARK_IMAGE_SPAN_ALIGNMENT_CENTER, VerticalAlign::CENTER },
+        { "ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM", ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM, VerticalAlign::BOTTOM },
+        { "ARK_IMAGE_SPAN_ALIGNMENT_BASELINE", ARK_IMAGE_SPAN_ALIGNMENT_BASELINE, VerticalAlign::BASELINE },
+    };
+
+const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, std::optional<VerticalAlign>>>
+    testFixtureVerticalAlignInvalidValues = {
+        { "ARK_IMAGE_SPAN_ALIGNMENT_INVALID", INVALID_ENUM_VAL<Ark_ImageSpanAlignment>, std::nullopt }
+};
+
+// Valid values for attribute 'objectFit' of method 'objectFit'
+const std::vector<std::tuple<std::string, Ark_ImageFit, ImageFit>> testFixtureObjectFitValidValues = {
+    { "ARK_IMAGE_FIT_CONTAIN", ARK_IMAGE_FIT_CONTAIN, ImageFit::CONTAIN },
+    { "ARK_IMAGE_FIT_COVER", ARK_IMAGE_FIT_COVER, ImageFit::COVER },
+    { "ARK_IMAGE_FIT_AUTO", ARK_IMAGE_FIT_AUTO, ImageFit::FITWIDTH },
+    { "ARK_IMAGE_FIT_FILL", ARK_IMAGE_FIT_FILL, ImageFit::FILL },
+    { "ARK_IMAGE_FIT_SCALE_DOWN", ARK_IMAGE_FIT_SCALE_DOWN, ImageFit::SCALE_DOWN },
+    { "ARK_IMAGE_FIT_NONE", ARK_IMAGE_FIT_NONE, ImageFit::NONE },
+    { "ARK_IMAGE_FIT_TOP_START", ARK_IMAGE_FIT_TOP_START, ImageFit::TOP_LEFT },
+    { "ARK_IMAGE_FIT_TOP", ARK_IMAGE_FIT_TOP, ImageFit::TOP },
+    { "ARK_IMAGE_FIT_TOP_END", ARK_IMAGE_FIT_TOP_END, ImageFit::TOP_END },
+    { "ARK_IMAGE_FIT_START", ARK_IMAGE_FIT_START, ImageFit::START },
+    { "ARK_IMAGE_FIT_CENTER", ARK_IMAGE_FIT_CENTER, ImageFit::CENTER },
+    { "ARK_IMAGE_FIT_END", ARK_IMAGE_FIT_END, ImageFit::END },
+    { "ARK_IMAGE_FIT_BOTTOM_START", ARK_IMAGE_FIT_BOTTOM_START,
+        ImageFit::BOTTOM_START },
+    { "ARK_IMAGE_FIT_BOTTOM", ARK_IMAGE_FIT_BOTTOM, ImageFit::BOTTOM },
+    { "ARK_IMAGE_FIT_BOTTOM_END", ARK_IMAGE_FIT_BOTTOM_END, ImageFit::BOTTOM_END },
+};
+
+// Invalid values for attribute 'objectFit' of method 'objectFit'
+const std::vector<std::tuple<std::string, Ark_ImageFit, std::optional<ImageFit>>> testFixtureObjectFitInvalidValues = {
+    {"static_cast<Ark_ImageFit>(-1)", INVALID_ENUM_VAL<Ark_ImageFit>, std::nullopt },
+};
+
+const std::vector<std::tuple<std::string, Ark_Length, Dimension>> testFixtureDimensionAnyValidValues = {
+    { "123.0_vp", Converter::ArkValue<Ark_Length>(123.0_vp), 123.0_vp },
+    { "0.0_vp", Converter::ArkValue<Ark_Length>(0.0_vp), 0.0_vp },
+    { "1.23_vp", Converter::ArkValue<Ark_Length>(1.23_vp), 1.23_vp },
+    { "123.0_fp", Converter::ArkValue<Ark_Length>(123.0_fp), 123.0_fp },
+    { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp), 0.0_fp },
+    { "1.23_fp", Converter::ArkValue<Ark_Length>(1.23_fp), 1.23_fp },
+    { "123.0_px", Converter::ArkValue<Ark_Length>(123.0_px), 123.0_px },
+    { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px), 0.0_px },
+    { "1.23_px", Converter::ArkValue<Ark_Length>(1.23_px), 1.23_px },
+    { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp), -2.3_vp },
+    { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5_fp },
+    { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px), -5.6_px },
+    { "0.5_pct", Converter::ArkValue<Ark_Length>(0.5_pct), 0.5_pct },
+    { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct), 0.0_pct },
+    { "-0.8_pct", Converter::ArkValue<Ark_Length>(-0.8_pct), -0.8_pct }
+};
+
+const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceInitTable = {
+    { DIMENSIONS_RES_NON_NEG_0_ID, DIMENSIONS_RES_NON_NEG_0_STR, 123._vp },
+    { DIMENSIONS_RES_NON_NEG_1_ID, DIMENSIONS_RES_NON_NEG_1_STR, 0._vp },
+    { DIMENSIONS_RES_NON_NEG_2_ID, DIMENSIONS_RES_NON_NEG_2_STR, 1.23_vp },
+    { DIMENSIONS_RES_NON_NEG_3_ID, DIMENSIONS_RES_NON_NEG_3_STR, 123._fp },
+    { DIMENSIONS_RES_NON_NEG_4_ID, DIMENSIONS_RES_NON_NEG_4_STR, 0._fp },
+    { DIMENSIONS_RES_NON_NEG_5_ID, DIMENSIONS_RES_NON_NEG_5_STR, 1.23_fp },
+    { DIMENSIONS_RES_NON_NEG_6_ID, DIMENSIONS_RES_NON_NEG_6_STR, 123._px },
+    { DIMENSIONS_RES_NON_NEG_7_ID, DIMENSIONS_RES_NON_NEG_7_STR, 0._px },
+    { DIMENSIONS_RES_NON_NEG_8_ID, DIMENSIONS_RES_NON_NEG_8_STR, 1.23_px },
+    { DIMENSIONS_RES_NON_NEG_9_ID, DIMENSIONS_RES_NON_NEG_9_STR, 0.2_pct },
+    { DIMENSIONS_RES_NON_NEG_10_ID, DIMENSIONS_RES_NON_NEG_10_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_11_ID, DIMENSIONS_RES_NON_NEG_11_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_12_ID, DIMENSIONS_RES_NON_NEG_12_STR, -123._px },
+    { DIMENSIONS_RES_NON_NEG_13_ID, DIMENSIONS_RES_NON_NEG_13_STR, -0.2_pct },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_0_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_0_STR, 123._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_1_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_1_STR, 0._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_2_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_2_STR, 1.23_vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_3_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_3_STR, 123._fp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_4_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_4_STR, 0._fp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_5_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_5_STR, 1.23_fp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_6_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_6_STR, 123._px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_7_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_7_STR, 0._px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_8_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_8_STR, 1.23_px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_9_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_9_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_10_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR, -123._vp },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR, -123._px },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR, 0.2_pct },
+    { DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID, DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR, -0.2_pct },
+    { DIMENSIONS_RES_NON_PCT_0_ID, DIMENSIONS_RES_NON_PCT_0_STR, 123._vp },
+    { DIMENSIONS_RES_NON_PCT_1_ID, DIMENSIONS_RES_NON_PCT_1_STR, 0._vp },
+    { DIMENSIONS_RES_NON_PCT_2_ID, DIMENSIONS_RES_NON_PCT_2_STR, 1.23_vp },
+    { DIMENSIONS_RES_NON_PCT_3_ID, DIMENSIONS_RES_NON_PCT_3_STR, 123._fp },
+    { DIMENSIONS_RES_NON_PCT_4_ID, DIMENSIONS_RES_NON_PCT_4_STR, 0._fp },
+    { DIMENSIONS_RES_NON_PCT_5_ID, DIMENSIONS_RES_NON_PCT_5_STR, 1.23_fp },
+    { DIMENSIONS_RES_NON_PCT_6_ID, DIMENSIONS_RES_NON_PCT_6_STR, 123._px },
+    { DIMENSIONS_RES_NON_PCT_7_ID, DIMENSIONS_RES_NON_PCT_7_STR, 0._px },
+    { DIMENSIONS_RES_NON_PCT_8_ID, DIMENSIONS_RES_NON_PCT_8_STR, 1.23_px },
+    { DIMENSIONS_RES_NON_PCT_9_ID, DIMENSIONS_RES_NON_PCT_9_STR, -123._vp },
+    { DIMENSIONS_RES_NON_PCT_10_ID, DIMENSIONS_RES_NON_PCT_10_STR, -123._fp },
+    { DIMENSIONS_RES_NON_PCT_11_ID, DIMENSIONS_RES_NON_PCT_11_STR, -123._px },
+    { DIMENSIONS_RES_NON_PCT_12_ID, DIMENSIONS_RES_NON_PCT_12_STR, 0.2_pct },
+    { DIMENSIONS_RES_NON_PCT_13_ID, DIMENSIONS_RES_NON_PCT_13_STR, -0.2_pct },
 };
 } // namespace OHOS::Ace::NG::AccessorTestFixtures
