@@ -1009,7 +1009,9 @@ class __RepeatVirtualScroll2Impl<T> {
 
         try {
             // execute item builder function
+            const isTemplate: boolean = (ttype !== RepeatEachFuncTtype);
             itemGenFunc(repeatItem);
+            RepeatVirtualScroll2Native.setCreateByTemplate(isTemplate);
         } catch (e) {
             this.stopRecordDependencies();
             
