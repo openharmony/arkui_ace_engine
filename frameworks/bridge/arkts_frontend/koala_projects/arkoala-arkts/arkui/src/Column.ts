@@ -19,7 +19,7 @@ export class Column {
         factory: () => Column,
         /** @memo */
         content?: () => void,
-        options?: undefined | undefined
+        options?: ColumnOptions | undefined
     ): void {
         ArkColumn(undefined, content, CastColumnOptions(options))
     }
