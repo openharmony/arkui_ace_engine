@@ -1364,7 +1364,7 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
         auto bottom = std::max(textSelector_.firstHandle.Bottom(), textSelector_.secondHandle.Bottom());
         auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
         auto left = textContentGlobalOffset.GetX();
-        auto right = textContentGlobalOffset.GetY() + contentRect_.Width();
+        auto right = textContentGlobalOffset.GetX() + contentRect_.Width();
         aiRect = RectT(left, top, right - left, bottom - top);
     } else {
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
