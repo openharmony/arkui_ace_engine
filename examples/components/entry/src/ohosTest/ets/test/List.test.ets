@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import promptActionCustomDialogBootcampTest from './promptActionCustomDialogBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  promptActionCustomDialogBootcampTest();
 }
