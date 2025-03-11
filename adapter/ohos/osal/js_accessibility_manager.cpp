@@ -914,7 +914,7 @@ bool CheckAndSetAccessibilityVisible(const RefPtr<NG::FrameNode>& node, bool isR
 
 void GetFrameNodeChildren(
     const RefPtr<NG::UINode>& uiNode,
-    std::vector<int64_t>& children,
+    std::vector<std::pair<int64_t, int32_t>>& childrenIdInfo,
     const CommonProperty& commonProperty)
 {
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
@@ -930,7 +930,10 @@ void GetFrameNodeChildren(
         } else if (!frameNode->IsInternal() || frameNode->IsFirstVirtualNode()) {
             if (CheckFrameNodeByAccessibilityLevel(frameNode, false) &&
                 CheckAndSetAccessibilityVisible(frameNode, commonProperty.isReduceMode)) {
-                children.emplace_back(uiNode->GetAccessibilityId());
+                auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+                childrenIdInfo.emplace_back(
+                    std::make_pair(frameNode->GetAccessibilityId(),
+                        accessibilityProperty ? accessibilityProperty->GetAccessibilityZIndex() : -1));
                 return;
             }
         }
@@ -939,7 +942,7 @@ void GetFrameNodeChildren(
     if (frameNode) {
         auto overlayNode = frameNode->GetOverlayNode();
         if (overlayNode) {
-            GetFrameNodeChildren(overlayNode, children, commonProperty);
+            GetFrameNodeChildren(overlayNode, childrenIdInfo, commonProperty);
         }
     }
 
@@ -950,14 +953,14 @@ void GetFrameNodeChildren(
         if (uiVirtualNode != nullptr) {
             auto virtualNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
             if (virtualNode != nullptr) {
-                GetFrameNodeChildren(virtualNode, children, commonProperty);
+                GetFrameNodeChildren(virtualNode, childrenIdInfo, commonProperty);
                 return;
             }
         }
     }
 
     for (const auto& frameChild : uiNode->GetChildren(true)) {
-        GetFrameNodeChildren(frameChild, children, commonProperty);
+        GetFrameNodeChildren(frameChild, childrenIdInfo, commonProperty);
     }
 }
 
@@ -1688,14 +1691,14 @@ void UpdateChildrenOfAccessibilityElementInfo(
         return;
     }
     if (!IsExtensionComponent(node) || IsUIExtensionShowPlaceholder(node)) {
-        std::vector<int64_t> children;
+        std::vector<std::pair<int64_t, int32_t>> childrenIdInfo;
         for (const auto& item : node->GetChildren(true)) {
-            GetFrameNodeChildren(item, children, commonProperty);
+            GetFrameNodeChildren(item, childrenIdInfo, commonProperty);
         }
 
         auto overlayNode = node->GetOverlayNode();
         if (overlayNode != nullptr) {
-            GetFrameNodeChildren(overlayNode, children, commonProperty);
+            GetFrameNodeChildren(overlayNode, childrenIdInfo, commonProperty);
         }
 
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -1703,12 +1706,14 @@ void UpdateChildrenOfAccessibilityElementInfo(
         if (uiVirtualNode != nullptr) {
             auto virtualNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
             if (virtualNode != nullptr) {
-                children.clear();
-                GetFrameNodeChildren(virtualNode, children, commonProperty);
+                childrenIdInfo.clear();
+                GetFrameNodeChildren(virtualNode, childrenIdInfo, commonProperty);
             }
         }
-        for (const auto& child : children) {
-            nodeInfo.AddChild(child);
+        std::sort(childrenIdInfo.begin(), childrenIdInfo.end(),
+            [](const auto&zIndexA, const auto&zIndexB) { return zIndexA.second < zIndexB.second; });
+        for (const auto& childrenIdPair : childrenIdInfo) {
+            nodeInfo.AddChild(childrenIdPair.first);
         }
     }
 }
@@ -4408,12 +4413,12 @@ void JsAccessibilityManager::DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode
             return;
         }
     }
-    std::vector<int64_t> children;
+    std::vector<std::pair<int64_t, int32_t>> childrenIdInfo;
     for (const auto& item : uiNodeChildren) {
-        GetFrameNodeChildren(item, children, commonProperty);
+        GetFrameNodeChildren(item, childrenIdInfo, commonProperty);
     }
     if (vNode != nullptr) {
-        DumpTreeNodeInfoNG(vNode, depth + 1, commonProperty, children.size());
+        DumpTreeNodeInfoNG(vNode, depth + 1, commonProperty, childrenIdInfo.size());
     }
     for (const auto& item : uiNodeChildren) {
         DumpTreeAccessibilityNodeNG(item, depth + 1, item->GetAccessibilityId(), commonProperty);
@@ -4431,22 +4436,22 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
     if (!node->IsActive()) {
         return;
     }
-    std::vector<int64_t> children;
+    std::vector<std::pair<int64_t, int32_t>> childrenIdInfo;
     for (const auto& item : node->GetChildren(true)) {
-        GetFrameNodeChildren(item, children, commonProperty);
+        GetFrameNodeChildren(item, childrenIdInfo, commonProperty);
     }
 
     auto overlayNode = node->GetOverlayNode();
     if (overlayNode) {
-        GetFrameNodeChildren(overlayNode, children, commonProperty);
+        GetFrameNodeChildren(overlayNode, childrenIdInfo, commonProperty);
     }
 
     if (isDumpSimplify) {
-        DumpTreeNodeSimplifyInfoNG(node, depth, commonProperty, children.size());
+        DumpTreeNodeSimplifyInfoNG(node, depth, commonProperty, childrenIdInfo.size());
     } else if (!isUseJson_) {
-        DumpTreeNodeInfoNG(node, depth, commonProperty, children.size());
+        DumpTreeNodeInfoNG(node, depth, commonProperty, childrenIdInfo.size());
     } else {
-        DumpTreeNodeInfoInJson(node, depth, commonProperty, children.size());
+        DumpTreeNodeInfoInJson(node, depth, commonProperty, childrenIdInfo.size());
     }
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
@@ -4469,8 +4474,8 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
         }
     }
     if (!hasVirtualNode) {
-        for (auto childId : children) {
-            DumpTreeNG(node, depth + 1, childId, commonProperty, isDumpSimplify);
+        for (const auto& childIdPair : childrenIdInfo) {
+            DumpTreeNG(node, depth + 1, childIdPair.first, commonProperty, isDumpSimplify);
         }
     }
 }
