@@ -19,11 +19,14 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -133,7 +136,7 @@ HWTEST_F(GestureEventHubTestNg, GetPixelMapOffset_001, TestSize.Level1)
     RectF innerRect(0.0f, 0.0f, 0.0f, 0.0f);
     guestureEventHub->GetPixelMapOffset(info, size, dragInfoData, scale, innerRect);
     EXPECT_EQ(innerRect.Width(), 0.0);
-    
+
     size.SetWidth(2.0f);
     size.SetHeight(2.0f);
     scale = -1.0f;
@@ -147,13 +150,13 @@ HWTEST_F(GestureEventHubTestNg, GetPixelMapOffset_001, TestSize.Level1)
     innerRect.SetRect(1.0f, 1.0f, 5.0f, 6.0f);
     guestureEventHub->GetPixelMapOffset(info, size, dragInfoData, scale, innerRect);
     EXPECT_EQ(innerRect.Width(), 5.0);
-    
+
     guestureEventHub->frameNodeSize_.SetWidth(4.0f);
     guestureEventHub->frameNodeSize_.SetHeight(5.0f);
     innerRect.SetRect(0.0f, 0.0f, 0.0f, 0.0f);
     guestureEventHub->GetPixelMapOffset(info, size, dragInfoData, scale, innerRect);
     EXPECT_EQ(innerRect.Width(), 0);
-    
+
     dragInfoData.isNeedCreateTiled = true;
     guestureEventHub->GetPixelMapOffset(info, size, dragInfoData, scale, innerRect);
     EXPECT_EQ(innerRect.Width(), 0);
@@ -233,6 +236,11 @@ HWTEST_F(GestureEventHubTestNg, GetPreScaledPixelMapIfExist_001, TestSize.Level1
      * @tc.steps: step3. call GetPreScaledPixelMapIfExist.
      */
     EXPECT_NE(guestureEventHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
+
+    auto frameNode1 = guestureEventHub->GetFrameNode();
+    DragDropInfo info;
+    info.onlyForLifting = true;
+    frameNode1->SetDragPreview(info);
     EXPECT_NE(guestureEventHub->GetPreScaledPixelMapIfExist(2.0f, pixelMap), nullptr);
 }
 
@@ -458,7 +466,7 @@ HWTEST_F(GestureEventHubTestNg, HandleDragThroughTouch_001, TestSize.Level1)
     dragDropManager->SetGrayedState(true);
     guestureEventHub->HandleDragThroughTouch(frameNode);
     EXPECT_TRUE(dragDropManager->GetGrayedState());
-    
+
     dragDropManager->SetGrayedState(false);
     guestureEventHub->HandleDragThroughTouch(frameNode);
     EXPECT_FALSE(dragDropManager->GetGrayedState());
@@ -506,7 +514,7 @@ HWTEST_F(GestureEventHubTestNg, HandleDragThroughMouse_001, TestSize.Level1)
     dragDropManager->SetGrayedState(true);
     guestureEventHub->HandleDragThroughMouse(frameNode);
     EXPECT_TRUE(dragDropManager->GetGrayedState());
-    
+
     dragDropManager->SetGrayedState(false);
     guestureEventHub->HandleDragThroughMouse(frameNode);
     EXPECT_TRUE(dragDropManager->GetGrayedState());
@@ -541,12 +549,6 @@ HWTEST_F(GestureEventHubTestNg, IsNeedSwitchToSubWindow_001, TestSize.Level1)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_TRUE(pipeline);
-
-    auto frameNode2 = guestureEventHub->GetFrameNode();
-    EXPECT_NE(frameNode2, nullptr);
-    frameNode2->GetOrCreateFocusHub();
-    auto focusHub = frameNode2->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
 
     /**
      * @tc.steps: step3. call IsNeedSwitchToSubWindow.
@@ -592,12 +594,6 @@ HWTEST_F(GestureEventHubTestNg, ParsePixelMapAsync_001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_TRUE(pipeline);
 
-    auto frameNode2 = guestureEventHub->GetFrameNode();
-    EXPECT_NE(frameNode2, nullptr);
-    frameNode2->GetOrCreateFocusHub();
-    auto focusHub = frameNode2->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-
     /**
      * @tc.steps: step3. call ParsePixelMapAsync.
      */
@@ -607,11 +603,11 @@ HWTEST_F(GestureEventHubTestNg, ParsePixelMapAsync_001, TestSize.Level1)
     GestureEvent info;
     auto ret = guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info);
     EXPECT_FALSE(ret);
-    
+
     dragPreviewInfo.pixelMap = pixelMap;
     ret = guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info);
     EXPECT_TRUE(ret);
-    
+
     guestureEventHub->dragPreviewPixelMap_ = nullptr;
     dragPreviewInfo.pixelMap = nullptr;
     RefPtr<UINode> customNode1 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
@@ -629,7 +625,6 @@ HWTEST_F(GestureEventHubTestNg, ParsePixelMapAsync_001, TestSize.Level1)
     ret = guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info);
     EXPECT_TRUE(ret);
 
-    //dragPreviewInfo.inspectorId = "test";
     guestureEventHub->dragPreviewPixelMap_ = pixelMap;
     ret = guestureEventHub->ParsePixelMapAsync(dragDropInfo, dragPreviewInfo, info);
     EXPECT_TRUE(ret);
@@ -721,5 +716,592 @@ HWTEST_F(GestureEventHubTestNg, DoOnDragStartHandling_002, TestSize.Level1)
     guestureEventHub->pixelMap_ = nullptr;
     guestureEventHub->DoOnDragStartHandling(info, frameNode, dragDropInfo, event1, dragPreviewInfo, pipeline);
     EXPECT_EQ(dragDropInfo.pixelMap, 0);
+}
+
+/**
+ * @tc.name: StartVibratorByDrag_001
+ * @tc.desc: Test StartVibratorByDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, StartVibratorByDrag_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call StartVibratorByDrag.
+     */
+    guestureEventHub->StartVibratorByDrag(frameNode);
+    EXPECT_FALSE(OHOS::Ace::NG::DragDropGlobalController::GetInstance().isDragFilterShowing_);
+
+    DragPreviewOption previewOption;
+    previewOption.enableHapticFeedback = true;
+    frameNode->SetDragPreviewOptions(previewOption);
+    guestureEventHub->StartVibratorByDrag(frameNode);
+
+    previewOption.enableHapticFeedback = false;
+    frameNode->SetDragPreviewOptions(previewOption);
+    OHOS::Ace::NG::DragDropGlobalController::GetInstance().isDragFilterShowing_ = true;
+    guestureEventHub->StartVibratorByDrag(frameNode);
+
+    previewOption.enableHapticFeedback = true;
+    frameNode->SetDragPreviewOptions(previewOption);
+    OHOS::Ace::NG::DragDropGlobalController::GetInstance().isDragFilterShowing_ = true;
+    guestureEventHub->StartVibratorByDrag(frameNode);
+    EXPECT_FALSE(OHOS::Ace::NG::DragDropGlobalController::GetInstance().isDragFilterShowing_);
+}
+
+/**
+ * @tc.name: GetDragPreviewInitPositionToScreen_001
+ * @tc.desc: Test GetDragPreviewInitPositionToScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDragPreviewInitPositionToScreen_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call GetDragPreviewInitPositionToScreen.
+     */
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    PreparedInfoForDrag data;
+    auto offsetF = guestureEventHub->GetDragPreviewInitPositionToScreen(context, data);
+    EXPECT_EQ(offsetF.GetX(), 0.0f);
+
+    guestureEventHub->textDraggable_ = true;
+    offsetF = guestureEventHub->GetDragPreviewInitPositionToScreen(context, data);
+
+    guestureEventHub->textDraggable_ = false;
+    offsetF = guestureEventHub->GetDragPreviewInitPositionToScreen(context, data);
+    EXPECT_EQ(offsetF.GetX(), 0.0f);
+
+    data.imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 0, AceType::MakeRefPtr<ImagePattern>());
+    auto frameNode1 =guestureEventHub->GetFrameNode();
+    frameNode1->tag_ = V2::WEB_ETS_TAG;
+    data.isMenuShow = true;
+    offsetF = guestureEventHub->GetDragPreviewInitPositionToScreen(context, data);
+    EXPECT_EQ(offsetF.GetX(), 0.0f);
+
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect= DraggingSizeChangeEffect::SIZE_TRANSITION;
+    data.imageNode->SetDragPreviewOptions(previewOption);
+    OffsetF dragMovePosition = { 2.0f, 3.0f };
+    data.dragMovePosition = dragMovePosition;
+    offsetF = guestureEventHub->GetDragPreviewInitPositionToScreen(context, data);
+    EXPECT_EQ(offsetF.GetX(), 2.0f);
+}
+
+/**
+ * @tc.name: GetBadgeNumber_001
+ * @tc.desc: Test GetBadgeNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetBadgeNumber_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("nnnnn", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call GetBadgeNumber.
+     */
+    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+    auto badgeNumber = guestureEventHub->GetBadgeNumber(unifiedData);
+    EXPECT_NE(badgeNumber, 0);
+}
+
+/**
+ * @tc.name: TryDoDragStartAnimation_001
+ * @tc.desc: Test TryDoDragStartAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, TryDoDragStartAnimation_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("nnnnn", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call TryDoDragStartAnimation.
+     */
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    RefPtr<Subwindow> subWindow = nullptr;
+    GestureEvent info;
+    PreparedInfoForDrag data;
+    auto ret = guestureEventHub->TryDoDragStartAnimation(context, subWindow, info, data);
+    EXPECT_FALSE(ret);
+
+    auto pipeline1 = AceType::DynamicCast<PipelineContext>(context);
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    subWindow = SubwindowManager::GetInstance()->ShowPreviewNG((pipeline1 != mainPipeline));
+    ret = guestureEventHub->TryDoDragStartAnimation(context, subWindow, info, data);
+    EXPECT_FALSE(ret);
+
+    data.imageNode =  FrameNode::CreateCommonNode("node", 1, false, AceType::MakeRefPtr<Pattern>());
+    ret = guestureEventHub->TryDoDragStartAnimation(context, subWindow, info, data);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateNodePositionBeforeStartAnimation_001
+ * @tc.desc: Test UpdateNodePositionBeforeStartAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateNodePositionBeforeStartAnimation_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("nnnnn", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call UpdateNodePositionBeforeStartAnimation.
+     */
+    PreparedInfoForDrag data;
+    OffsetF subWindowOffset;
+    guestureEventHub->UpdateNodePositionBeforeStartAnimation(frameNode, data, subWindowOffset);
+    EXPECT_EQ(data.dragPreviewOffsetToScreen.GetX(), 0.0f);
+
+    data.isMenuShow = true;
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
+    guestureEventHub->UpdateNodePositionBeforeStartAnimation(frameNode, data, subWindowOffset);
+    EXPECT_EQ(data.dragPreviewOffsetToScreen.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: CheckAllowDrag_001
+ * @tc.desc: Test CheckAllowDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckAllowDrag_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("nnnnn", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call CheckAllowDrag.
+     */
+    GestureEvent info;
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    auto ret = guestureEventHub->CheckAllowDrag(info, context, frameNode);
+    EXPECT_FALSE(ret);
+
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) -> DragDropInfo {
+        NG::DragDropInfo itemInfo;
+        itemInfo.customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+        return itemInfo;
+    };
+    eventHub->SetDefaultOnDragStart(std::move(dragStart));
+    ret = guestureEventHub->CheckAllowDrag(info, context, frameNode);
+    EXPECT_TRUE(ret);
+
+    auto frameNode1 = guestureEventHub->GetFrameNode();
+    frameNode1->SetDraggable(false);
+    ret = guestureEventHub->CheckAllowDrag(info, context, frameNode);
+    EXPECT_FALSE(ret);
+
+    frameNode1->SetDraggable(true);
+    info.inputEventType_ = InputEventType::MOUSE_BUTTON;
+    auto pipeline1 = AceType::DynamicCast<PipelineContext>(context);
+    auto eventManager = pipeline1->GetEventManager();
+    eventManager->SetLastMoveBeforeUp(true);
+    ret = guestureEventHub->CheckAllowDrag(info, context, frameNode);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CreateDragEvent_001
+ * @tc.desc: Test CreateDragEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CreateDragEvent_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("nnnnn", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call CreateDragEvent.
+     */
+    GestureEvent info;
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    auto dragEvent = guestureEventHub->CreateDragEvent(info, context, frameNode);
+    EXPECT_EQ(dragEvent->GetX(), 0);
+}
+
+/**
+ * @tc.name: CreateDragEvent_002
+ * @tc.desc: Test CreateDragEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CreateDragEvent_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call CreateDragEvent.
+     */
+    GestureEvent info;
+    RefPtr<PipelineBase> context = NG::MockPipelineContext::pipeline_;
+    auto dragEvent = guestureEventHub->CreateDragEvent(info, context, frameNode);
+    EXPECT_EQ(dragEvent->GetX(), 0);
+}
+
+/**
+ * @tc.name: AddPreviewMenuHandleDragEnd_001
+ * @tc.desc: Test AddPreviewMenuHandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, AddPreviewMenuHandleDragEnd_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call AddPreviewMenuHandleDragEnd.
+     */
+    auto actionEnd = [](const GestureEvent& info) {
+        return;
+    };
+    guestureEventHub->AddPreviewMenuHandleDragEnd(actionEnd);
+    EXPECT_NE(guestureEventHub->scrollableActuator_, nullptr);
+
+    guestureEventHub->AddPreviewMenuHandleDragEnd(actionEnd);
+    EXPECT_NE(guestureEventHub->scrollableActuator_, nullptr);
+}
+
+/**
+ * @tc.name: SetDragEventd_001
+ * @tc.desc: Test SetDragEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetDragEvent_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call SetDragEvent.
+     */
+    RefPtr<DragEvent> dragEvent = nullptr;
+    PanDirection direction;
+    int32_t fingers = 0;
+    Dimension distance;
+    guestureEventHub->SetDragEvent(dragEvent, direction, fingers, distance);
+    EXPECT_NE(guestureEventHub->dragEventActuator_, nullptr);
+
+    guestureEventHub->dragEventActuator_->SetIsNewFwk(true);
+    guestureEventHub->SetDragEvent(dragEvent, direction, fingers, distance);
+    EXPECT_NE(guestureEventHub->dragEventActuator_, nullptr);
+
+    guestureEventHub->dragEventActuator_ = nullptr;
+    guestureEventHub->SetDragEvent(dragEvent, direction, fingers, distance);
+    EXPECT_NE(guestureEventHub->dragEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: SetDragDropEvent_001
+ * @tc.desc: Test SetDragDropEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetDragDropEvent_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call SetDragDropEvent.
+     */
+    guestureEventHub->SetDragDropEvent();
+    EXPECT_TRUE(guestureEventHub->isDragNewFwk_);
+
+    guestureEventHub->dragEventActuator_->SetIsNewFwk(true);
+    guestureEventHub->SetDragDropEvent();
+    EXPECT_TRUE(guestureEventHub->isDragNewFwk_);
+
+    guestureEventHub->dragEventActuator_ = nullptr;
+    guestureEventHub->SetDragDropEvent();
+    EXPECT_TRUE(guestureEventHub->isDragNewFwk_);
+}
+
+/**
+ * @tc.name: RemoveDragEvent_001
+ * @tc.desc: Test RemoveDragEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, RemoveDragEvent_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call RemoveDragEvent.
+     */
+    guestureEventHub->RemoveDragEvent();
+    EXPECT_NE(guestureEventHub->dragEventActuator_, nullptr);
+
+    guestureEventHub->dragEventActuator_->SetIsNewFwk(true);
+    guestureEventHub->RemoveDragEvent();
+    EXPECT_EQ(guestureEventHub->dragEventActuator_, 0);
+
+    guestureEventHub->dragEventActuator_ = nullptr;
+    guestureEventHub->RemoveDragEvent();
+    EXPECT_EQ(guestureEventHub->dragEventActuator_, 0);
+}
+
+/**
+ * @tc.name: SetThumbnailCallback_001
+ * @tc.desc: Test SetThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetThumbnailCallback_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call SetThumbnailCallback.
+     */
+    auto func = [](Offset offset) {
+        return;
+    };
+    guestureEventHub->SetThumbnailCallback(func);
+    EXPECT_NE(guestureEventHub->dragEventActuator_, nullptr);
+
+    guestureEventHub->dragEventActuator_ = nullptr;
+    guestureEventHub->SetThumbnailCallback(func);
+    EXPECT_EQ(guestureEventHub->dragEventActuator_, 0);
+}
+
+/**
+ * @tc.name: CheckNeedDragDropFrameworkStatus_001
+ * @tc.desc: Test CheckNeedDragDropFrameworkStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, CheckNeedDragDropFrameworkStatus_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    guestureEventHub->InitDragDropEvent();
+
+    /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+
+    /**
+     * @tc.steps: step3. call CheckNeedDragDropFrameworkStatus.
+     */
+    SystemProperties::dragDropFrameworkStatus_ = 0;
+    guestureEventHub->InitDragDropEvent();
+    
+    SystemProperties::dragDropFrameworkStatus_ = 1;
+    guestureEventHub->InitDragDropEvent();
+    auto frameNode1 = guestureEventHub->GetFrameNode();
+    EXPECT_EQ(frameNode1->GetTag(), "Web");
 }
 } // namespace OHOS::Ace::NG
