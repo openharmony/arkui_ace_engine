@@ -1071,4 +1071,30 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldControllerClearPreviewTextTest, Test
     EXPECT_FALSE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 }
+
+/**
+ * @tc.name: TextFieldControllerGetTextTest
+ * @tc.desc: test textfield controller GetText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetTextTest, TestSize.Level0)
+{
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+    FlushLayoutTask(frameNode_);
+
+    pattern_->contentController_->content_ = u"123";
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), u"123");
+
+    pattern_->contentController_->content_ = u"";
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), u"");
+
+    pattern_->contentController_->content_ = u"😓";
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), u"😓");
+
+    pattern_->contentController_->content_ = std::u16string(u"😓").substr(0, 1);
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), std::u16string(u"😓").substr(0, 1));
+}
 } // namespace OHOS::Ace::NG
