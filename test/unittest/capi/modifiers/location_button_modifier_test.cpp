@@ -375,21 +375,18 @@ HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto checkCallback = [](
-        Ark_VMContext, const Ark_Int32 resourceId, const Ark_ClickEvent event,
-        const Ark_LocationButtonOnClickResult result, Opt_BusinessError error
-    ) {
-            auto peer = event;
-            ASSERT_NE(peer, nullptr);
-            auto accessor = GeneratedModifier::GetClickEventAccessor();
-            checkEvent = {
-                .nodeId = resourceId,
-                .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
-                .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
-                .result = result
-            };
-            accessor->destroyPeer(peer);
+    auto checkCallback = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_ClickEvent peer,
+            const Ark_LocationButtonOnClickResult result, Opt_BusinessError error) {
+        ASSERT_NE(peer, nullptr);
+        auto accessor = GeneratedModifier::GetClickEventAccessor();
+        checkEvent = {
+            .nodeId = resourceId,
+            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
+            .result = result
         };
+        accessor->destroyPeer(peer);
+    };
     const int32_t contextId = 123;
     auto func = Converter::ArkValue<LocationButtonCallback>(checkCallback, contextId);
 
