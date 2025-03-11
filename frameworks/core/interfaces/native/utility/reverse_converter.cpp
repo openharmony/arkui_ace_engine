@@ -166,6 +166,18 @@ void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Di
     dst.value1 = ArkValue<Ark_Length>(src.second);
 }
 
+void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src)
+{
+    dst.radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(src.GetBlurRadius());
+    dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
+    dst.color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
+        src.GetColor().ColorToString());
+    auto offset = src.GetOffset();
+    dst.offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(offset.GetX());
+    dst.offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(offset.GetY());
+    dst.fill = Converter::ArkValue<Opt_Boolean>(src.GetIsFilled());
+}
+
 void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 {
     dst.x = ArkValue<Ark_Number>(static_cast<float>(src.GetX()));
