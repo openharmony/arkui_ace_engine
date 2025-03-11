@@ -78,6 +78,7 @@ public:
                                 : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(indicatorDisplayCount);
             indicatorLayoutAlgorithm->SetMaxDisplayCount(maxDisplayCount);
             indicatorLayoutAlgorithm->SetIsBindIndicator(swiperPattern->IsBindIndicator());
+            indicatorLayoutAlgorithm->SetIndicatorInteractive(swiperPattern->IsIndicatorInteractive());
             return indicatorLayoutAlgorithm;
         } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
             auto indicatorLayoutAlgorithm = MakeRefPtr<CircleDotIndicatorLayoutAlgorithm>();
