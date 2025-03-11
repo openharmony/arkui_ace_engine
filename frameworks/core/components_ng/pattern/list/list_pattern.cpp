@@ -645,6 +645,12 @@ void ListPattern::SetChainAnimationLayoutAlgorithm(
         CHECK_NULL_RETURN(list, 0.0f);
         return list->GetChainDelta(index);
     });
+    if (chainAnimation_ && chainAnimation_->HasSpaceDelta() && !itemPosition_.empty()) {
+        auto res = GetOutBoundaryOffset(currentDelta_, false);
+        if ((NearZero(res.start) && NearZero(res.end)) || !CanOverScroll(GetScrollSource())) {
+            chainAnimation_->ResetSpaceDelta();
+        }
+    }
     if (!listLayoutProperty->GetSpace().has_value() && chainAnimation_) {
         listLayoutAlgorithm->SetChainInterval(CHAIN_INTERVAL_DEFAULT.ConvertToPx());
     }
@@ -2151,7 +2157,7 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     }
     float overOffset = 0.0f;
     if (!itemPosition_.empty()) {
-        auto res = GetOutBoundaryOffset(-dragOffset, false);
+        auto res = GetOutBoundaryOffset(0.0f, true);
         overOffset = std::max(res.start, res.end);
         if (!NearZero(res.end)) {
             overOffset = -overOffset;
