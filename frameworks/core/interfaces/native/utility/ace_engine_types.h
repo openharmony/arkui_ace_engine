@@ -26,6 +26,9 @@ namespace OHOS::Ace::NG {
 struct KeyboardOptions {
     bool supportAvoidance;
 };
+struct PathShapeOptions {
+    std::optional<std::string> commands;
+};
 }
 
 namespace OHOS::Ace::NG::Converter {
