@@ -3669,6 +3669,7 @@ void RosenRenderContext::InitAccessibilityFocusModidifer(
     accessibilityFocusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
     accessibilityFocusStateModifier_->SetPaintColor(paintColor);
     accessibilityFocusStateModifier_->SetFrameNode(frameNode);
+    accessibilityFocusStateModifier_->SetNoNeedUICaptured(true);
 }
 
 void RosenRenderContext::InitFocusStateModidifer(
