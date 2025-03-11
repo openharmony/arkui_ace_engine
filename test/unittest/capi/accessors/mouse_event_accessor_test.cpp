@@ -491,4 +491,118 @@ HWTEST_F(MouseEventAccessorTest, SetYTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: SetRawDeltaXTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseEventAccessorTest, SetRawDeltaXTest, TestSize.Level1)
+{
+    auto info = peer_->GetEventInfo();
+    ASSERT_NE(info, nullptr);
+    auto deltaX = info->GetRawDeltaX();
+    EXPECT_EQ(deltaX, 0);
+    for (auto& [input, value, expected] : testFixtureNumberValues) {
+        accessor_->setRawDeltaX(peer_, &value);
+        auto info = peer_->GetEventInfo();
+        ASSERT_NE(info, nullptr);
+        auto deltaX = info->GetRawDeltaX();
+        EXPECT_NEAR(deltaX, expected, EPSILON) <<
+            "Input value is: " << input << ", method: SetRawDeltaX";
+    }
+}
+
+/**
+ * @tc.name: GetRawDeltaXTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseEventAccessorTest, GetRawDeltaXTest, TestSize.Level1)
+{
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
+        auto info = peer_->GetEventInfo();
+        ASSERT_NE(info, nullptr);
+        info->SetRawDeltaX(value);
+        auto arkRes = accessor_->getRawDeltaX(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
+            "Input value is: " << input << ", method: GetRawDeltaX";
+    }
+}
+
+/**
+ * @tc.name: SetRawDeltaYTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseEventAccessorTest, SetRawDeltaYTest, TestSize.Level1)
+{
+    auto info = peer_->GetEventInfo();
+    ASSERT_NE(info, nullptr);
+    auto deltaY = info->GetRawDeltaY();
+    EXPECT_EQ(deltaY, 0);
+    for (auto& [input, value, expected] : testFixtureNumberValues) {
+        accessor_->setRawDeltaY(peer_, &value);
+        auto info = peer_->GetEventInfo();
+        ASSERT_NE(info, nullptr);
+        auto deltaY = info->GetRawDeltaY();
+        EXPECT_NEAR(deltaY, expected, EPSILON) <<
+            "Input value is: " << input << ", method: SetRawDeltaY";
+    }
+}
+
+/**
+ * @tc.name: GetRawDeltaYTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseEventAccessorTest, GetRawDeltaYTest, TestSize.Level1)
+{
+    for (auto& [input, expected, value] : testFixtureNumberValues) {
+        auto info = peer_->GetEventInfo();
+        ASSERT_NE(info, nullptr);
+        info->SetRawDeltaY(value);
+        auto arkRes = accessor_->getRawDeltaY(peer_);
+        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
+            "Input value is: " << input << ", method: GetRawDeltaY";
+    }
+}
+
+/**
+ * @tc.name: GetPressedButtonsTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseEventAccessorTest, GetPressedButtonsTest, TestSize.Level1)
+{
+    auto eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    std::vector<MouseButton> buttons;
+    buttons.push_back(MouseButton::LEFT_BUTTON);
+    buttons.push_back(MouseButton::RIGHT_BUTTON);
+    eventInfo->SetPressedButtons(buttons);
+    Array_MouseButton pressedButtons = accessor_->getPressedButtons(peer_);
+    EXPECT_EQ(static_cast<int32_t>(pressedButtons.length), 2);
+    ASSERT_NE(pressedButtons.array, nullptr);
+    EXPECT_EQ(pressedButtons.array[0], Ark_MouseButton::ARK_MOUSE_BUTTON_LEFT);
+    EXPECT_EQ(pressedButtons.array[1], Ark_MouseButton::ARK_MOUSE_BUTTON_RIGHT);
+}
+
+/**
+ * @tc.name: SetPressedButtonsTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(MouseEventAccessorTest, SetPressedButtonsTest, TestSize.Level1)
+{
+    auto eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    Array_MouseButton pressedButtons;
+    Ark_MouseButton arr[] ={Ark_MouseButton::ARK_MOUSE_BUTTON_LEFT, Ark_MouseButton::ARK_MOUSE_BUTTON_RIGHT};
+    pressedButtons.array = arr;
+    pressedButtons.length = 2;
+    accessor_->setPressedButtons(peer_, &pressedButtons);
+    auto buttons = eventInfo->GetPressedButtons();
+    EXPECT_EQ(buttons[0], MouseButton::LEFT_BUTTON);
+    EXPECT_EQ(buttons[1], MouseButton::RIGHT_BUTTON);
+}
 }

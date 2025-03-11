@@ -315,27 +315,60 @@ void SetStopPropagationImpl(Ark_MouseEvent peer,
 }
 Ark_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    return Converter::ArkValue<Ark_Number>(info->GetRawDeltaX());
 }
 void SetRawDeltaXImpl(Ark_MouseEvent peer,
                       const Ark_Number* rawDeltaX)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(rawDeltaX);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetRawDeltaX(Converter::Convert<float>(*rawDeltaX));
 }
 Ark_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    return Converter::ArkValue<Ark_Number>(info->GetRawDeltaY());
 }
 void SetRawDeltaYImpl(Ark_MouseEvent peer,
                       const Ark_Number* rawDeltaY)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(rawDeltaY);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetRawDeltaY(Converter::Convert<float>(*rawDeltaY));
 }
 Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    return Converter::ArkValue<Array_MouseButton>(info->GetPressedButtons(), Converter::FC);
 }
 void SetPressedButtonsImpl(Ark_MouseEvent peer,
                            const Array_MouseButton* pressedButtons)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(pressedButtons);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    std::vector<MouseButton> buttons;
+    for (int i = 0; i < pressedButtons->length; ++i) {
+        auto mouseButton = Converter::OptConvert<MouseButton>(pressedButtons->array[i]);
+        if (mouseButton) {
+            buttons.push_back(mouseButton.value());
+        }
+    }
+    info->SetPressedButtons(buttons);
 }
 } // MouseEventAccessor
 const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
