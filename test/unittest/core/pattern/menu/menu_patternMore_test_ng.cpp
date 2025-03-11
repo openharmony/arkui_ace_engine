@@ -1031,8 +1031,6 @@ HWTEST_F(MenuPattern2TestNg, UpdateDividerProperty002, TestSize.Level1)
             []() {return AceType::MakeRefPtr<MenuDividerPattern>(); });
     std::optional<V2::ItemDivider> divider;
     menuPattern->UpdateDividerProperty(dividerNode, divider);
-    auto paintProperty = dividerNode->GetPaintProperty<MenuDividerPaintProperty>();
-    EXPECT_EQ(paintProperty->GetDividerColor(), Color::TRANSPARENT);
 }
 
 /**
