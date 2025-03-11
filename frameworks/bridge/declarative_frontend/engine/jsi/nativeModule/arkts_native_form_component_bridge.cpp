@@ -26,10 +26,10 @@ ArkUINativeModuleValue FormComponentBridge::SetVisibility(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> visibilityArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     int32_t visibility = visibilityArg->Int32Value(vm);
-    nodeModifiers->getFormComponentModifier()->setFormVisibility(nativeNode, visibility);
+    nodeModifiers->setFormVisibility(nativeNode, visibility);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -40,9 +40,9 @@ ArkUINativeModuleValue FormComponentBridge::ResetVisibility(ArkUIRuntimeCallInfo
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getFormComponentModifier()->resetFormVisibility(nativeNode);
+    nodeModifiers->resetFormVisibility(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -55,9 +55,9 @@ ArkUINativeModuleValue FormComponentBridge::AllowUpdate(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     bool allowUpdate = allowUpdateArg->ToBoolean(vm)->Value();
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getFormComponentModifier()->allowUpdate(nativeNode, allowUpdate);
+    nodeModifiers->allowUpdate(nativeNode, allowUpdate);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -68,9 +68,9 @@ ArkUINativeModuleValue FormComponentBridge::DisallowUpdate(ArkUIRuntimeCallInfo*
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getFormComponentModifier()->disallowUpdate(nativeNode);
+    nodeModifiers->disallowUpdate(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -82,13 +82,13 @@ ArkUINativeModuleValue FormComponentBridge::SetDimension(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> dimensionArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (dimensionArg->IsNull() || dimensionArg->IsUndefined()) {
-        nodeModifiers->getFormComponentModifier()->resetDimension(nativeNode);
+        nodeModifiers->resetDimension(nativeNode);
     } else {
         int32_t dimension = dimensionArg->Int32Value(vm);
-        nodeModifiers->getFormComponentModifier()->setDimension(nativeNode, dimension);
+        nodeModifiers->setDimension(nativeNode, dimension);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -100,9 +100,9 @@ ArkUINativeModuleValue FormComponentBridge::ResetDimension(ArkUIRuntimeCallInfo*
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getFormComponentModifier()->resetDimension(nativeNode);
+    nodeModifiers->resetDimension(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -114,13 +114,13 @@ ArkUINativeModuleValue FormComponentBridge::SetModuleName(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> moduleNameArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (moduleNameArg->IsNull() || moduleNameArg->IsUndefined()) {
-        nodeModifiers->getFormComponentModifier()->resetModuleName(nativeNode);
+        nodeModifiers->resetModuleName(nativeNode);
     } else {
         std::string moduleName = moduleNameArg->ToString(vm)->ToString(vm);
-        nodeModifiers->getFormComponentModifier()->setModuleName(nativeNode, moduleName.c_str());
+        nodeModifiers->setModuleName(nativeNode, moduleName.c_str());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -132,9 +132,9 @@ ArkUINativeModuleValue FormComponentBridge::ResetModuleName(ArkUIRuntimeCallInfo
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getFormComponentModifier()->resetModuleName(nativeNode);
+    nodeModifiers->resetModuleName(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -154,12 +154,12 @@ ArkUINativeModuleValue FormComponentBridge::SetSize(ArkUIRuntimeCallInfo* runtim
         ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width));
     bool hasHeight = (!heightValue->IsNull() && !heightValue->IsUndefined() &&
         ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height));
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (!hasWidth && !hasHeight) {
-        nodeModifiers->getFormComponentModifier()->resetFormSize(nativeNode);
+        nodeModifiers->resetFormSize(nativeNode);
     } else {
-        nodeModifiers->getFormComponentModifier()->setFormSize(nativeNode,
+        nodeModifiers->setFormSize(nativeNode,
             width.Value(), static_cast<int>(width.Unit()), height.Value(), static_cast<int>(height.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -173,9 +173,9 @@ ArkUINativeModuleValue FormComponentBridge::ResetSize(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CommonBridge::ResetSize(runtimeCallInfo);
-    auto nodeModifiers = GetArkUINodeModifiers();
+    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getFormComponentModifier()->resetFormSize(nativeNode);
+    nodeModifiers->resetFormSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }
