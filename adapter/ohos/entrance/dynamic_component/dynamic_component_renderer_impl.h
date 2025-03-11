@@ -56,6 +56,7 @@ public:
     void SetUIContentType(UIContentType uIContentType) override;
     bool IsRestrictedWorkerThread() override;
     bool HasWorkerUsing(void *worker) override;
+    bool CheckWorkerMaxConstraint() override;
 
     void SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
@@ -85,6 +86,8 @@ private:
     RefPtr<TaskExecutor> GetHostTaskExecutor();
     void AddWorkerUsing(void *worker);
     void DeleteWorkerUsing(void *worker);
+    void OnDestroyContent();
+    void AfterDestroyContent();
 
     void CreateIsolatedContent();
     void CreateDynamicContent();

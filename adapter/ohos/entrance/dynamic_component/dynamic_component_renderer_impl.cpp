@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t WORKER_ERROR = 10002;
+constexpr size_t WORKER_MAX_NUM = 16;
 }
 
 void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
@@ -102,6 +103,12 @@ bool DynamicComponentRendererImpl::IsRestrictedWorkerThread()
     }
 
     return runtime_->IsRestrictedWorkerThread();
+}
+
+bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint()
+{
+    std::lock_guard<std::mutex> lock(usingWorkerMutex_);
+    return usingWorkers_.size() <= WORKER_MAX_NUM;
 }
 
 bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker)
@@ -285,6 +292,7 @@ void DynamicComponentRendererImpl::FireOnErrorCallback(
 
 void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
@@ -355,6 +363,7 @@ void DynamicComponentRendererImpl::HandleCardSizeChangeEvent(const SizeF& size)
 
 void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto hostExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(hostExecutor);
     hostExecutor->PostTask(
@@ -385,6 +394,7 @@ void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
 
 void DynamicComponentRendererImpl::UnRegisterConfigChangedCallback()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto container = Platform::AceContainer::GetContainer(hostInstanceId_);
     CHECK_NULL_VOID(container);
     container->RemoveOnConfigurationChange(uiContent_->GetInstanceId());
@@ -402,6 +412,7 @@ void DynamicComponentRendererImpl::AttachRenderContext()
 
 void DynamicComponentRendererImpl::AttachRenderContextInIsolatedComponent()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask([weak = host_, hostInstanceId = hostInstanceId_,
@@ -447,6 +458,7 @@ void DynamicComponentRendererImpl::AttachRenderContextInIsolatedComponent()
 
 void DynamicComponentRendererImpl::AttachRenderContextInDynamicComponent()
 {
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask([weak = host_, hostInstanceId = hostInstanceId_,
@@ -484,6 +496,7 @@ void DynamicComponentRendererImpl::AttachRenderContextInDynamicComponent()
 
 void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -658,6 +671,13 @@ void DynamicComponentRendererImpl::UpdateParentOffsetToWindow(const OffsetF& off
 
 void DynamicComponentRendererImpl::DestroyContent()
 {
+    OnDestroyContent();
+    AfterDestroyContent();
+}
+
+void DynamicComponentRendererImpl::OnDestroyContent()
+{
+    CHECK_NULL_VOID(uiContent_);
     UnRegisterConfigChangedCallback();
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -668,6 +688,10 @@ void DynamicComponentRendererImpl::DestroyContent()
             uiContent->Destroy();
         },
         TaskExecutor::TaskType::UI, "ArkUIDynamicComponentDestroy");
+}
+
+void DynamicComponentRendererImpl::AfterDestroyContent()
+{
     if (uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
         DeleteWorkerUsing(runtime_);
         return;
@@ -793,6 +817,8 @@ void DynamicComponentRendererImpl::NotifyForeground()
     if (isForeground_) {
         return;
     }
+
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     isForeground_ = true;
@@ -811,6 +837,8 @@ void DynamicComponentRendererImpl::NotifyBackground()
     if (!isForeground_) {
         return;
     }
+
+    CHECK_NULL_VOID(uiContent_);
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     isForeground_ = false;
