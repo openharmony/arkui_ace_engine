@@ -172,6 +172,8 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         defaultBundleName, defaultModuleName, instanceId, resourceAdapter, true);
     if (!bundleName.empty() && !moduleName.empty()) {
         ResourceManager::GetInstance().RegisterMainResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter);
+        ResourceManager::GetInstance().RegisterMainResourceAdapter(
+            bundleName, moduleName, INSTANCE_ID_UNDEFINED, resourceAdapter);
     }
 }
 

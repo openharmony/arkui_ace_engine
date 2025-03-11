@@ -189,9 +189,9 @@ bool LocaleDiff(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig
     if ((!oldLocaleInfo && newLocaleInfo) || (oldLocaleInfo && !newLocaleInfo)) {
         return true;
     }
-    if (!StringUtils::StringEqual(oldLocaleInfo->getLanguage(), newLocaleInfo->getLanguage()) ||
-        !StringUtils::StringEqual(oldLocaleInfo->getScript(), newLocaleInfo->getScript()) ||
-        !StringUtils::StringEqual(oldLocaleInfo->getCountry(), newLocaleInfo->getCountry())) {
+    if (!StringUtils::CStringEqual(oldLocaleInfo->getLanguage(), newLocaleInfo->getLanguage()) ||
+        !StringUtils::CStringEqual(oldLocaleInfo->getScript(), newLocaleInfo->getScript()) ||
+        !StringUtils::CStringEqual(oldLocaleInfo->getCountry(), newLocaleInfo->getCountry())) {
         return true;
     }
     auto oldPreferredLocaleInfo = oldResConfig->GetPreferredLocaleInfo();
@@ -200,9 +200,9 @@ bool LocaleDiff(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig
         return true;
     }
     if (oldPreferredLocaleInfo && newPreferredLocaleInfo) {
-        if (!StringUtils::StringEqual(oldPreferredLocaleInfo->getLanguage(), newPreferredLocaleInfo->getLanguage()) ||
-            !StringUtils::StringEqual(oldPreferredLocaleInfo->getScript(), newPreferredLocaleInfo->getScript()) ||
-            !StringUtils::StringEqual(oldPreferredLocaleInfo->getCountry(), newPreferredLocaleInfo->getCountry())) {
+        if (!StringUtils::CStringEqual(oldPreferredLocaleInfo->getLanguage(), newPreferredLocaleInfo->getLanguage()) ||
+            !StringUtils::CStringEqual(oldPreferredLocaleInfo->getScript(), newPreferredLocaleInfo->getScript()) ||
+            !StringUtils::CStringEqual(oldPreferredLocaleInfo->getCountry(), newPreferredLocaleInfo->getCountry())) {
             return true;
         }
     }

@@ -687,7 +687,7 @@ inline void SplitStr(const std::string& str, const std::string& sep, std::vector
     }
 }
 
-inline bool StringEqual(const char* first, const char* second)
+inline bool CStringEqual(const char* first, const char* second)
 {
     if (first == nullptr && second == nullptr) {
         return true;
