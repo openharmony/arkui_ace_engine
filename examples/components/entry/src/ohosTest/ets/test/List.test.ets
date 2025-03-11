@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import BindMenuBootcampTest from './DialogBoxes/BindMenuBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  BindMenuBootcampTest();
 }
