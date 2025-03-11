@@ -977,13 +977,10 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
 
-    if (IsUsingMouse() && isMousePressed_ && leftMousePressed_) {
-        Offset clickOffset {textOffset.GetX(), textOffset.GetY()};
-        auto distance = (clickOffset - leftMousePressedOffset_).GetDistance();
-        if (distance >= CLICK_THRESHOLD.ConvertToPx()) {
-            TAG_LOGI(ACE_TEXT, "TextOffset not match not trigger click");
-            return;
-        }
+    if (IsUsingMouse() && isMousePressed_ && leftMousePressed_ && moveOverClickThreshold_) {
+        TAG_LOGI(ACE_TEXT, "not trigger click after mouse move");
+        moveOverClickThreshold_ = false;
+        return;
     }
 
     if (IsSelectableAndCopy() || NeedShowAIDetect()) {
@@ -1900,6 +1897,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
     isMousePressed_ = false;
     leftMousePressed_ = false;
+    moveOverClickThreshold_ = false;
     // stop auto scroll.
     auto host = GetHost();
     if (host && scrollableParent_.Upgrade() && !selectOverlay_->SelectOverlayIsOn()) {
@@ -1922,6 +1920,11 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
         HandleSelectionChange(textSelector_.baseOffset, end);
         selectOverlay_->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(), false);
+        auto distance = (textOffset - leftMousePressedOffset_).GetDistance();
+        if (distance >= CLICK_THRESHOLD.ConvertToPx()) {
+            moveOverClickThreshold_ = true;
+            return;
+        }
     }
 }
 
