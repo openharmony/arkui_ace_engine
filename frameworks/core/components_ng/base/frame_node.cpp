@@ -4244,45 +4244,40 @@ int32_t FrameNode::GetNodeExpectedRate()
     return iter->second;
 }
 
-void FrameNode::FrameRateDurationsStatistics(SceneStatus status, int32_t expectedRate, const std::string &scene)
+void FrameNode::FrameRateDurationsStatisticsStart(const std::string &scene)
 {
-    switch (status) {
-        case SceneStatus::START: {
-            curFRCSceneFpsInfo_ = FRCSceneFpsInfo();
-            calTime_ = 0;
-            calFrameRate_ = 0;
-            curFRCSceneFpsInfo_.scene = scene;
-            return;
-        }
-        case SceneStatus::RUNNING: {
-            if (calTime_ == 0) {
-                calTime_ = GetSysTimestamp();
-                calFrameRate_ = expectedRate;
-            }
-            if (expectedRate != calFrameRate_) {
-                int32_t endTime = GetSysTimestamp();
-                int32_t duration = endTime - calTime_;
-                calTime_ = endTime;
-            AddFrameRateDuration(calFrameRate_, duration);
-            }
-            calFrameRate_ = expectedRate;
-            return;
-        }
-        case SceneStatus::END: {
-            int32_t endTime = GetSysTimestamp();
-            int32_t duration = endTime - calTime_;
-            calTime_ = endTime;
-            AddFrameRateDuration(calFrameRate_, duration);
-            EventReport::SendDiffFrameRatesDuring(scene,
-                curFRCSceneFpsInfo_.duration_60,
-                curFRCSceneFpsInfo_.duration_72,
-                curFRCSceneFpsInfo_.duration_90,
-                curFRCSceneFpsInfo_.duration_120);
-            return;
-        }
-        default:
-            return;
+    curFRCSceneFpsInfo_ = FRCSceneFpsInfo();
+    calTime_ = 0;
+    calFrameRate_ = 0;
+    curFRCSceneFpsInfo_.scene = scene;
+}
+
+void FrameNode::FrameRateDurationsStatisticsRunning(int32_t expectedRate, const std::string &scene)
+{
+    if (calTime_ == 0) {
+        calTime_ = GetSysTimestamp();
+        calFrameRate_ = expectedRate;
     }
+    if (expectedRate != calFrameRate_) {
+        int32_t endTime = GetSysTimestamp();
+        int32_t duration = endTime - calTime_;
+        calTime_ = endTime;
+        AddFrameRateDuration(calFrameRate_, duration);
+    }
+    calFrameRate_ = expectedRate;
+}
+
+void FrameNOde::FrameRateDurationsStatisticsEnd(const std::string &scene)
+{
+    int32_t endTime = GetSysTimestamp();
+    int32_t duration = endTime - calTime_;
+    calTime_ = endTime;
+    AddFrameRateDuration(calFrameRate_, duration);
+    EventReport::SendDiffFrameRatesDuring(scene,
+        curFRCSceneFpsInfo_.duration_60,
+        curFRCSceneFpsInfo_.duration_72,
+        curFRCSceneFpsInfo_.duration_90,
+        curFRCSceneFpsInfo_.duration_120);
 }
 
 void FrameNode::AddFrameRateDuration(int32_t frameRate, int32_t duration)
@@ -4332,7 +4327,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
     auto expectedRate = renderContext->CalcExpectedFrameRate(scene, std::abs(speed));
     auto nodeId = GetId();
     auto iter = sceneRateMap_.find(scene);
-    FrameRateDurationsStatistics(status, expectedRate, scene);
+
     switch (status) {
         case SceneStatus::START: {
             if (iter == sceneRateMap_.end()) {
@@ -4342,6 +4337,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
                 sceneRateMap_.emplace(scene, expectedRate);
                 frameRateManager->UpdateNodeRate(nodeId, GetNodeExpectedRate());
             }
+            FrameRateDurationsStatisticsStart(scene);
             return;
         }
         case SceneStatus::RUNNING: {
@@ -4350,6 +4346,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
                 auto nodeExpectedRate = GetNodeExpectedRate();
                 frameRateManager->UpdateNodeRate(nodeId, nodeExpectedRate);
             }
+            FrameRateDurationsStatisticsRunning(expectedRate, scene);
             return;
         }
         case SceneStatus::END: {
@@ -4362,6 +4359,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
                     frameRateManager->UpdateNodeRate(nodeId, nodeExpectedRate);
                 }
             }
+            FrameRateDurationsStatisticsEnd(scene);
             return;
         }
         default:
