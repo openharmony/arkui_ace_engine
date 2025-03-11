@@ -161,7 +161,7 @@ export const defaultTheme: PopupTheme = {
     fillColor: $r('sys.color.icon_secondary'),
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
-    symbolSize: 18,
+    symbolSize: '18vp',
     accessibilityMessage: $r('sys.string.off_used_for_accessibility_text')
   },
 };
