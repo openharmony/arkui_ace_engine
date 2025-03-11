@@ -335,6 +335,11 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
         node = AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
+        GetNavDestinationNodeInUINode(node, desNode);
+        CHECK_NULL_RETURN(desNode, true);
+        auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        CHECK_NULL_RETURN(navDestinationPattern, true);
+        SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
         return true;
     }
     node = targetNode;
