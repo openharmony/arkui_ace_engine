@@ -562,7 +562,9 @@ void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src)
         case TextAlign::JUSTIFY: dst = ARK_TEXT_ALIGN_JUSTIFY; break;
         case TextAlign::START: dst = ARK_TEXT_ALIGN_START; break;
         case TextAlign::END: dst = ARK_TEXT_ALIGN_END; break;
-        default: LOGE("Unexpected enum value in TextAlign: %{public}d", src);
+        default:
+            dst = static_cast<Ark_TextAlign>(-1);
+            LOGE("Unexpected enum value in TextAlign: %{public}d", src);
     }
 }
 void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src)
@@ -573,7 +575,9 @@ void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src)
         case TextOverflow::ELLIPSIS: dst = ARK_TEXT_OVERFLOW_ELLIPSIS; break;
         case TextOverflow::MARQUEE: dst = ARK_TEXT_OVERFLOW_MARQUEE; break;
         case TextOverflow::DEFAULT: dst = ARK_TEXT_OVERFLOW_NONE; break;
-        default: LOGE("Unexpected enum value in TextOverflow: %{public}d", src);
+        default:
+            dst = static_cast<Ark_TextOverflow>(-1);
+            LOGE("Unexpected enum value in TextOverflow: %{public}d", src);
     }
 }
 void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src)
@@ -794,7 +798,9 @@ void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src)
         case WordBreak::NORMAL: dst = ARK_WORD_BREAK_NORMAL; break;
         case WordBreak::BREAK_ALL: dst = ARK_WORD_BREAK_BREAK_ALL; break;
         case WordBreak::BREAK_WORD: dst = ARK_WORD_BREAK_BREAK_WORD; break;
-        default: LOGE("Unexpected enum value in WordBreak: %{public}d", src);
+        default:
+            dst = static_cast<Ark_WordBreak>(-1);
+            LOGE("Unexpected enum value in WordBreak: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
