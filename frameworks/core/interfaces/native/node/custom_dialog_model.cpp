@@ -19,6 +19,9 @@
 #include "base/error/error_code.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
+#include "frameworks/core/components/dialog/dialog_properties.h"
+#include "frameworks/core/components/theme/shadow_theme.h"
+#include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
 namespace {
@@ -38,6 +41,21 @@ namespace {
     constexpr int32_t ARKUI_LEVEL_MODE_DEFAULT_VALUE = 0;
     constexpr int32_t ARKUI_DEFAULT_LEVEL_UNIQUEID = -1;
     constexpr int32_t ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE = 0;
+    constexpr int32_t ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK = 12;
+    constexpr int32_t HAS_COLORSTRATEGY = 1;
+    constexpr int32_t HAS_COLOR = 2;
+    constexpr int NUM_0 = 0;
+    constexpr int NUM_1 = 1;
+    constexpr int NUM_2 = 2;
+    constexpr int NUM_3 = 3;
+    constexpr int NUM_4 = 4;
+    constexpr int NUM_5 = 5;
+    constexpr int NUM_6 = 6;
+    constexpr int NUM_7 = 7;
+    constexpr int32_t DEFAULT_BORDER_WIDTH = 0;
+    constexpr uint32_t DEFAULT_BORDER_COLOR = 0xff000000;
+    constexpr int32_t DEFAULT_BORDER_STYLE = static_cast<int32_t>(OHOS::Ace::BorderStyle::SOLID);
+    DialogProperties g_dialogProperties;
 } // namespace
 
 ArkUIDialogHandle CreateDialog()
@@ -66,7 +84,6 @@ ArkUIDialogHandle CreateDialog()
         .levelUniqueId = ARKUI_DEFAULT_LEVEL_UNIQUEID,
         .immersiveMode = ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE,
         .levelOrder = 0.0f,
-        .focusable = true,
         .onWillAppearData = nullptr,
         .onDidAppearData = nullptr,
         .onWillDisappearData = nullptr,
@@ -75,6 +92,30 @@ ArkUIDialogHandle CreateDialog()
         .onDidAppear = nullptr,
         .onWillDisappear = nullptr,
         .onDidDisappear = nullptr,
+        .borderWidthEdgeWidths = new ArkUIBorderWidth({ .top = DEFAULT_BORDER_WIDTH,
+            .right = DEFAULT_BORDER_WIDTH,
+            .bottom = DEFAULT_BORDER_WIDTH,
+            .left = DEFAULT_BORDER_WIDTH }),
+        .borderWidthUnit = DimensionUnit::VP,
+        .borderColors = new ArkUIBorderColor({ .top = DEFAULT_BORDER_COLOR,
+            .right = DEFAULT_BORDER_COLOR,
+            .bottom = DEFAULT_BORDER_COLOR,
+            .left = DEFAULT_BORDER_COLOR }),
+        .borderStyles = new ArkUIBorderStyle({ .top = DEFAULT_BORDER_STYLE,
+            .right = DEFAULT_BORDER_STYLE,
+            .bottom = DEFAULT_BORDER_STYLE,
+            .left = DEFAULT_BORDER_STYLE }),
+        .widthValue = std::optional<ArkUI_Float32>(),
+        .widthUnit = DimensionUnit::VP,
+        .heightValue = std::optional<ArkUI_Float32>(),
+        .heightUnit = DimensionUnit::VP,
+        .shadowStyle = ShadowStyle::OuterDefaultMD,
+        .customShadow = Shadow(),
+        .blurStyle = ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK,
+        .keyboardAvoidMode = OHOS::Ace::KeyboardAvoidMode::DEFAULT,
+        .enableHoverMode = false,
+        .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
+        .focusable = true,
     });
 }
 
@@ -227,6 +268,93 @@ void ParseDialogKeyboardAvoidDistance(DialogProperties& dialogProperties, ArkUID
     }
 }
 
+void ParseDialogBorderWidth(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!controllerHandler->borderWidthEdgeWidths) {
+        return;
+    }
+    NG::BorderWidthProperty width;
+    auto unitEnum = controllerHandler->borderWidthUnit;
+    if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
+        width.leftDimen = Dimension(controllerHandler->borderWidthEdgeWidths->left, DimensionUnit::VP);
+        width.topDimen = Dimension(controllerHandler->borderWidthEdgeWidths->top, DimensionUnit::VP);
+        width.rightDimen = Dimension(controllerHandler->borderWidthEdgeWidths->right, DimensionUnit::VP);
+        width.bottomDimen = Dimension(controllerHandler->borderWidthEdgeWidths->bottom, DimensionUnit::VP);
+    } else {
+        width.leftDimen = Dimension(controllerHandler->borderWidthEdgeWidths->left, unitEnum);
+        width.topDimen = Dimension(controllerHandler->borderWidthEdgeWidths->top, unitEnum);
+        width.rightDimen = Dimension(controllerHandler->borderWidthEdgeWidths->right, unitEnum);
+        width.bottomDimen = Dimension(controllerHandler->borderWidthEdgeWidths->bottom, unitEnum);
+    }
+    dialogProperties.borderWidth = width;
+}
+
+void ParseDialogBorderColor(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!controllerHandler->borderColors) {
+        return;
+    }
+    NG::BorderColorProperty color;
+    color.topColor = Color(controllerHandler->borderColors->top);
+    color.rightColor = Color(controllerHandler->borderColors->right);
+    color.bottomColor = Color(controllerHandler->borderColors->bottom);
+    color.leftColor = Color(controllerHandler->borderColors->left);
+    dialogProperties.borderColor = color;
+}
+
+void ParseDialogBorderStyle(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!controllerHandler->borderStyles) {
+        return;
+    }
+    NG::BorderStyleProperty style;
+    style.styleLeft = static_cast<OHOS::Ace::BorderStyle>(controllerHandler->borderStyles->left);
+    style.styleRight = static_cast<OHOS::Ace::BorderStyle>(controllerHandler->borderStyles->right);
+    style.styleTop = static_cast<OHOS::Ace::BorderStyle>(controllerHandler->borderStyles->top);
+    style.styleBottom = static_cast<OHOS::Ace::BorderStyle>(controllerHandler->borderStyles->bottom);
+    dialogProperties.borderStyle = style;
+}
+
+void ParseDialogWidth(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!dialogProperties.width.has_value() && controllerHandler->widthValue.has_value()) {
+        auto unitEnum = controllerHandler->widthUnit;
+        if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
+            dialogProperties.width = Dimension(controllerHandler->widthValue.value(), OHOS::Ace::DimensionUnit::VP);
+        } else {
+            dialogProperties.width = Dimension(controllerHandler->widthValue.value(), unitEnum);
+        }
+    }
+}
+
+void ParseDialogHeight(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!dialogProperties.height.has_value() && controllerHandler->heightValue.has_value()) {
+        auto unitEnum = controllerHandler->heightUnit;
+        if (unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC) {
+            dialogProperties.height = Dimension(controllerHandler->heightValue.value(), OHOS::Ace::DimensionUnit::VP);
+        } else {
+            dialogProperties.height = Dimension(controllerHandler->heightValue.value(), unitEnum);
+        }
+    }
+}
+
+void ParseDialogShadowStyle(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (controllerHandler->shadowStyle < OHOS::Ace::ShadowStyle::OuterDefaultXS ||
+        controllerHandler->shadowStyle > OHOS::Ace::ShadowStyle::None) {
+        dialogProperties.shadow = Shadow::CreateShadow(OHOS::Ace::ShadowStyle::None);
+    } else {
+        dialogProperties.shadow = Shadow::CreateShadow(controllerHandler->shadowStyle);
+    }
+}
+
 void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
@@ -242,6 +370,11 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.dialogLevelMode = static_cast<LevelMode>(controllerHandler->levelMode);
     dialogProperties.dialogLevelUniqueId = controllerHandler->levelUniqueId;
     dialogProperties.dialogImmersiveMode = static_cast<ImmersiveMode>(controllerHandler->immersiveMode);
+    dialogProperties.backgroundBlurStyle = controllerHandler->blurStyle;
+    dialogProperties.keyboardAvoidMode = controllerHandler->keyboardAvoidMode;
+    dialogProperties.enableHoverMode = controllerHandler->enableHoverMode;
+    dialogProperties.hoverModeArea = controllerHandler->hoverModeAreaType;
+    dialogProperties.shadow = controllerHandler->customShadow;
     if (!dialogProperties.isShowInSubWindow) {
         dialogProperties.levelOrder = std::make_optional(controllerHandler->levelOrder);
     }
@@ -260,6 +393,38 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         };
     }
 
+    if (controllerHandler->onWillAppear) {
+        dialogProperties.onWillAppear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onWillAppear);
+            (*(controllerHandler->onWillAppear))(controllerHandler->userData);
+        };
+    }
+
+    if (controllerHandler->onDidAppear) {
+        dialogProperties.onDidAppear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onDidAppear);
+            (*(controllerHandler->onDidAppear))(controllerHandler->userData);
+        };
+    }
+
+    if (controllerHandler->onWillDisappear) {
+        dialogProperties.onWillDisappear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onWillDisappear);
+            (*(controllerHandler->onWillDisappear))(controllerHandler->userData);
+        };
+    }
+
+    if (controllerHandler->onDidDisappear) {
+        dialogProperties.onDidDisappear = [controllerHandler]() {
+            CHECK_NULL_VOID(controllerHandler);
+            CHECK_NULL_VOID(controllerHandler->onDidDisappear);
+            (*(controllerHandler->onDidDisappear))(controllerHandler->userData);
+        };
+    }
+
     if (controllerHandler->enableCustomAnimation && !dialogProperties.openAnimation.has_value()) {
         AnimationOption animation;
         dialogProperties.openAnimation = animation;
@@ -270,6 +435,112 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     }
 
     ParseDialogKeyboardAvoidDistance(dialogProperties, controllerHandler);
+    ParseDialogBorderWidth(dialogProperties, controllerHandler);
+    ParseDialogBorderColor(dialogProperties, controllerHandler);
+    ParseDialogBorderStyle(dialogProperties, controllerHandler);
+    ParseDialogWidth(dialogProperties, controllerHandler);
+    ParseDialogHeight(dialogProperties, controllerHandler);
+    ParseDialogShadowStyle(dialogProperties, controllerHandler);
+}
+
+PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties &dialogProps)
+{
+    PromptDialogAttr dialogAttr = {
+        .autoCancel = dialogProps.autoCancel, .customStyle = dialogProps.customStyle,
+        .customOnWillDismiss = dialogProps.onWillDismiss, .maskColor = dialogProps.maskColor,
+        .backgroundColor = dialogProps.backgroundColor, .borderRadius = dialogProps.borderRadius,
+        .showInSubWindow = dialogProps.isShowInSubWindow, .isModal = dialogProps.isModal,
+        .enableHoverMode = dialogProps.enableHoverMode, .customBuilder = dialogProps.customBuilder,
+        .customBuilderWithId = dialogProps.customBuilderWithId, .borderWidth = dialogProps.borderWidth,
+        .borderColor = dialogProps.borderColor, .borderStyle = dialogProps.borderStyle, .shadow = dialogProps.shadow,
+        .width = dialogProps.width, .height = dialogProps.height, .maskRect = dialogProps.maskRect,
+        .transitionEffect = dialogProps.transitionEffect, .contentNode = dialogProps.contentNode,
+        .onDidAppear = dialogProps.onDidAppear, .onDidDisappear = dialogProps.onDidDisappear,
+        .onWillAppear = dialogProps.onWillAppear, .onWillDisappear = dialogProps.onWillDisappear,
+        .keyboardAvoidMode = dialogProps.keyboardAvoidMode, .dialogCallback = dialogProps.dialogCallback,
+        .keyboardAvoidDistance = dialogProps.keyboardAvoidDistance,
+        .levelOrder = dialogProps.levelOrder,
+        .dialogLevelMode = dialogProps.dialogLevelMode,
+        .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
+        .isUserCreatedDialog = dialogProps.isUserCreatedDialog,
+        .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
+        .blurStyleOption = dialogProps.blurStyleOption,
+        .effectOption = dialogProps.effectOption,
+        .customCNode = dialogProps.customCNode
+    };
+#if defined(PREVIEW)
+    if (dialogAttr.showInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogAttr.showInSubWindow = false;
+    }
+#endif
+    dialogAttr.alignment = dialogProps.alignment;
+    dialogAttr.offset = dialogProps.offset;
+    if (dialogProps.hoverModeArea) {
+        dialogAttr.hoverModeArea = dialogProps.hoverModeArea;
+    }
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (dialogProps.backgroundBlurStyle) {
+            dialogAttr.backgroundBlurStyle = dialogProps.backgroundBlurStyle;
+        }
+    }
+    return dialogAttr;
+}
+
+void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name,
+    const RefPtr<NG::OverlayManager>& overlay)
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    if (overlay) {
+        overlayManager = overlay;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [task = std::move(task), weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+            auto overlayManager = weak.Upgrade();
+            task(overlayManager);
+        },
+        TaskExecutor::TaskType::UI, name);
+}
+
+bool ContainerIsService()
+{
+    auto containerId = Container::CurrentIdSafely();
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    return containerId >= MIN_PA_SERVICE_ID || containerId < 0;
+}
+
+void openCustomDialogWithNewPipeline(std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog IsCurrentUseNewPipeline.");
+    auto task = [callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "open custom dialog isShowInSubWindow %{public}d",
+            g_dialogProperties.isShowInSubWindow);
+        if (g_dialogProperties.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->OpenCustomDialogNG(g_dialogProperties, std::move(callback));
+            if (g_dialogProperties.isModal) {
+                TAG_LOGW(AceLogTag::ACE_OVERLAY, "temporary not support isShowInSubWindow and isModal");
+            }
+        } else {
+            overlayManager->OpenCustomDialog(g_dialogProperties, std::move(callback));
+        }
+    };
+    if (g_dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        NG::DialogManager::ShowInEmbeddedOverlay(
+            std::move(task), "ArkUIOverlayShowDialog", g_dialogProperties.dialogLevelUniqueId);
+    } else {
+        MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
+    }
 }
 
 ArkUI_Int32 SetDialogContent(ArkUIDialogHandle controllerHandler, ArkUINodeHandle contentNode)
@@ -462,13 +733,6 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle controllerHandler, ArkUI_Float64 lev
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
-{
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->focusable = focusable;
-    return ERROR_CODE_NO_ERROR;
-}
-
 ArkUI_Int32 RegisterOnWillAppearDialog(
     ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(void* userData))
 {
@@ -508,43 +772,213 @@ ArkUI_Int32 RegisterOnDidDisappearDialog(
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
 {
     CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
-    DialogProperties dialogProperties;
-    ParseDialogProperties(dialogProperties, handle);
-    dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
-    auto container = Container::CurrentSafelyWithCheck();
-    CHECK_NULL_RETURN(container, ERROR_CODE_PARAM_INVALID);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_PARAM_INVALID);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_PARAM_INVALID);
-    if (!dialogProperties.isShowInSubWindow && dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
-        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
-        if (embeddedOverlay) {
-            overlayManager = embeddedOverlay;
+    ParseDialogProperties(g_dialogProperties, handle);
+    g_dialogProperties.customCNode = reinterpret_cast<FrameNode*>(handle->contentHandle);
+    auto promptDialogAttr = ParseDialogPropertiesFromProps(g_dialogProperties);
+    if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            openCustomDialogWithNewPipeline(std::move(callback));
+        } else {
+            LOGW("not support old pipeline");
         }
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->OpenCustomDialog(promptDialogAttr, std::move(callback));
     }
-    overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
     return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
 {
-    auto container = Container::CurrentSafelyWithCheck();
-    CHECK_NULL_RETURN(container, ERROR_CODE_PARAM_INVALID);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_PARAM_INVALID);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_PARAM_INVALID);
-    auto dialogNode = NG::FrameNode::GetFrameNode(V2::DIALOG_ETS_TAG, dialogId);
-    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
-    if (currentOverlay) {
-        overlayManager = currentOverlay;
+    if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
+        CHECK_NULL_RETURN(delegate, ERROR_CODE_PARAM_INVALID);
+        delegate->CloseCustomDialog(dialogId);
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     }
-    overlayManager->CloseCustomDialog(dialogId);
     return ERROR_CODE_NO_ERROR;
 }
+
+ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
+{
+    CHECK_NULL_RETURN(handle, ERROR_CODE_PARAM_INVALID);
+    ParseDialogProperties(g_dialogProperties, handle);
+    auto promptDialogAttr = ParseDialogPropertiesFromProps(g_dialogProperties);
+    if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
+        g_dialogProperties.autoCancel = promptDialogAttr.autoCancel,
+        g_dialogProperties.maskColor = promptDialogAttr.maskColor, g_dialogProperties.isSysBlurStyle = false;
+        if (promptDialogAttr.alignment.has_value()) {
+            g_dialogProperties.alignment = promptDialogAttr.alignment.value();
+        }
+        if (promptDialogAttr.offset.has_value()) {
+            g_dialogProperties.offset = promptDialogAttr.offset.value();
+        }
+        auto node = g_dialogProperties.customCNode;
+        auto nodePtr = node.Upgrade();
+        CHECK_NULL_RETURN(nodePtr, ERROR_CODE_PARAM_INVALID);
+        auto context = nodePtr->GetContextWithCheck();
+        CHECK_NULL_RETURN(context, ERROR_CODE_PARAM_INVALID);
+        auto overlayManager = context->GetOverlayManager();
+        context->GetTaskExecutor()->PostTask(
+            [node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
+                overlayManager->UpdateCustomDialog(node, g_dialogProperties, std::move(callback));
+            },
+            TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->UpdateCustomDialogNG(
+            g_dialogProperties.customCNode, promptDialogAttr, std::move(callback));
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle controllerHandler, bool showInSubWindow)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->showInSubWindow = showInSubWindow;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle controllerHandler, ArkUI_Float32 top, ArkUI_Float32 right,
+    ArkUI_Float32 bottom, ArkUI_Float32 left, ArkUI_Int32 unit)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->borderWidthEdgeWidths =
+        new ArkUIBorderWidth({ .top = top, .right = right, .bottom = bottom, .left = left });
+    controllerHandler->borderWidthUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetDialogBorderColor(
+    ArkUIDialogHandle controllerHandler, ArkUI_Uint32 top, ArkUI_Uint32 right, ArkUI_Uint32 bottom, ArkUI_Uint32 left)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->borderColors =
+        new ArkUIBorderColor({ .top = top, .right = right, .bottom = bottom, .left = left });
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetDialogBorderStyle(
+    ArkUIDialogHandle controllerHandler, ArkUI_Int32 top, ArkUI_Int32 right, ArkUI_Int32 bottom, ArkUI_Int32 left)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->borderStyles =
+        new ArkUIBorderStyle({ .top = top, .right = right, .bottom = bottom, .left = left });
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetWidth(ArkUIDialogHandle controllerHandler, float width, ArkUI_Int32 unit)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->widthValue = width;
+    controllerHandler->widthUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetHeight(ArkUIDialogHandle controllerHandler, float height, ArkUI_Int32 unit)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->heightValue = height;
+    controllerHandler->heightUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetShadow(ArkUIDialogHandle controllerHandler, ArkUI_Int32 shadow)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->shadowStyle = static_cast<OHOS::Ace::ShadowStyle>(shadow);
+    return ERROR_CODE_NO_ERROR;
+}
+
+bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, false);
+    auto colorMode = container->GetColorMode();
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
+ArkUI_Int32 SetDialogCustomShadow(
+    ArkUIDialogHandle controllerHandler, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    if (length == NUM_1) {
+        Shadow shadow;
+        auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0].i32);
+        auto style = static_cast<ShadowStyle>(shadowStyle);
+        if (GetShadowFromTheme(style, shadow)) {
+            controllerHandler->customShadow = shadow;
+        }
+    }
+    if (length != NUM_7) {
+        return ERROR_CODE_NO_ERROR;
+    }
+    auto blurRadius = shadows[NUM_0].f32;
+    auto hasColorValue = static_cast<int32_t>(shadows[NUM_1].i32);
+    auto offsetX = shadows[NUM_2].f32;
+    auto offsetY = shadows[NUM_3].f32;
+    auto shadowType = shadows[NUM_4].i32;
+    auto color = static_cast<uint32_t>(shadows[NUM_5].u32);
+    auto isFilled = static_cast<uint32_t>(shadows[NUM_6].i32);
+    Shadow shadow;
+    shadow.SetBlurRadius(blurRadius);
+    shadow.SetOffsetX(offsetX);
+    shadow.SetOffsetY(offsetY);
+    if (hasColorValue == HAS_COLORSTRATEGY) {
+        shadow.SetShadowColorStrategy(static_cast<ShadowColorStrategy>(color));
+    } else if (hasColorValue == HAS_COLOR) {
+        shadow.SetColor(Color(color));
+    }
+    shadow.SetShadowType(static_cast<ShadowType>(shadowType));
+    shadow.SetIsFilled(static_cast<bool>(isFilled));
+    controllerHandler->customShadow = shadow;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetBackgroundBlurStyle(ArkUIDialogHandle controllerHandler, ArkUI_Int32 blurStyle)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->blurStyle = blurStyle;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetKeyboardAvoidMode(ArkUIDialogHandle controllerHandler, ArkUI_Int32 keyboardAvoidMode)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->keyboardAvoidMode = static_cast<OHOS::Ace::KeyboardAvoidMode>(keyboardAvoidMode);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 EnableHoverMode(ArkUIDialogHandle controllerHandler, bool enableHoverMode)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->enableHoverMode = enableHoverMode;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetHoverModeArea(ArkUIDialogHandle controllerHandler, ArkUI_Int32 hoverModeAreaType)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->hoverModeAreaType = static_cast<OHOS::Ace::HoverModeAreaType>(hoverModeAreaType);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->focusable = focusable;
+    return ERROR_CODE_NO_ERROR;
+}
+
 } // namespace OHOS::Ace::NG::ViewModel

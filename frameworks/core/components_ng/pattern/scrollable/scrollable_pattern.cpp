@@ -54,7 +54,9 @@ constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 constexpr double ARC_INITWIDTH_VAL = 4.0;
+#ifdef ARKUI_CIRCLE_FEATURE
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
+#endif
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -64,6 +66,12 @@ const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
+
+ScrollablePattern::ScrollablePattern() = default;
+
+ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
+    : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
+{}
 
 ScrollablePattern::~ScrollablePattern()
 {
@@ -4133,5 +4141,21 @@ void ScrollablePattern::SetOnHiddenChangeForParent()
         };
         navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
     }
+}
+
+bool ScrollablePattern::IsRestrictBoundary()
+{
+    return !scrollEffect_ || scrollEffect_->IsRestrictBoundary();
+}
+
+bool ScrollablePattern::IsScrollableSpringEffect() const
+{
+    CHECK_NULL_RETURN(scrollEffect_, false);
+    return scrollEffect_->IsSpringEffect();
+}
+
+const RefPtr<ScrollEdgeEffect>& ScrollablePattern::GetScrollEdgeEffect() const
+{
+    return scrollEffect_;
 }
 } // namespace OHOS::Ace::NG

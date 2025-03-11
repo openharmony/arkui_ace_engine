@@ -527,6 +527,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkHyperlink.ts @huawei
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImageAnimator.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImageSpan.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImage.ts @arkui_image
+frameworks/bridge/declarative_frontend/ark_component/src/ArkLazyGridLayout.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLine.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLinearIndicator.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItemGroup.ts @arkuiscroll
@@ -620,6 +621,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/image_animator_modifier.
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_modifier.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuiframework
+frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_grid_layout_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/line_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/linear_indicator_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_group_modifier.ts @arkuiscroll
@@ -849,6 +851,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_imag
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h @huawei_g_five
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_lazy_grid_layout_bridge.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_lazy_grid_layout_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.cpp @arkuiscroll
@@ -1128,6 +1132,8 @@ frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_builder.h @arkuist
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach_component.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h @arkuistatemgmt
+frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_linear_indicator_controller.cpp @arkuiscroll
@@ -2403,6 +2409,7 @@ frameworks/core/components_ng/pattern/hyperlink/ @huawei_g_five
 frameworks/core/components_ng/pattern/image_animator/ @arkui_image
 frameworks/core/components_ng/pattern/image/ @arkui_image
 frameworks/core/components_ng/pattern/indexer/ @arkuiscroll
+frameworks/core/components_ng/pattern/lazy_layout/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_indicator/ @arkuiscroll
 frameworks/core/components_ng/pattern/linear_layout/ @arkuilayout
 frameworks/core/components_ng/pattern/linear_split/ @arkuilayout
@@ -2748,6 +2755,8 @@ frameworks/core/interfaces/native/node/hyperlink_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/node/hyperlink_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/image_animator_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/image_animator_modifier.h @arkui_image
+frameworks/core/interfaces/native/node/lazy_grid_layout_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/node/lazy_grid_layout_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/line_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/line_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/linear_indicator_modifier.cpp @arkuiscroll
@@ -2965,6 +2974,7 @@ interfaces/native/node/resource.h @arkuiframework
 interfaces/native/node/styled_string.h @huawei_g_five
 interfaces/native/node/style_modifier.cpp @arkuiframework
 interfaces/native/node/style_modifier.h @arkuiframework
+interfaces/native/node/textpicker_option.cpp @arkui_image
 interfaces/native/node/waterflow_section_option.cpp @arkuiscroll
 interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @arkuievent
@@ -3118,6 +3128,7 @@ test/unittest/core/pattern/hyperlink/ @huawei_g_five
 test/unittest/core/pattern/image/ @arkui_image
 test/unittest/core/pattern/image_animator/ @arkui_image
 test/unittest/core/pattern/indexer/ @arkuiscroll
+test/unittest/core/pattern/lazy_layout/ @arkuiscroll
 test/unittest/core/pattern/linear_layout/ @arkuilayout
 test/unittest/core/pattern/linear_split/ @arkuilayout
 test/unittest/core/pattern/list/ @arkuiscroll

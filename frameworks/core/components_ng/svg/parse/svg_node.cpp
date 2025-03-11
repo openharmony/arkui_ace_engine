@@ -455,8 +455,12 @@ void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     canvas.Save();
     isDrawing_ = true;
     auto rsBounds = AsPath(lengthRule).GetBounds();
-    Rect boundingRect(rsBounds.GetLeft(), rsBounds.GetTop(), rsBounds.GetWidth(), rsBounds.GetHeight());
-    SvgCoordinateSystemContext svgCoordinateSystemContext(boundingRect, GetSvgContainerRect());
+    Rect containerRect(rsBounds.GetLeft(), rsBounds.GetTop(), rsBounds.GetWidth(), rsBounds.GetHeight());
+    // rect use rsBounds, other use lengthRule containerRect
+    if (LessOrEqual(rsBounds.GetWidth(), 0.0f) || LessOrEqual(rsBounds.GetHeight(), 0.0f)) {
+        containerRect = lengthRule.GetContainerRect();
+    }
+    SvgCoordinateSystemContext svgCoordinateSystemContext(containerRect, lengthRule.GetViewPort());
     TAG_LOGD(AceLogTag::ACE_IMAGE, "l:%{public}lf, t:%{public}lf, r:%{public}lf, b:%{public}lf, units:%{public}d",
         rsBounds.GetLeft(), rsBounds.GetTop(), rsBounds.GetRight(), rsBounds.GetBottom(),
         (int)lengthRule.GetLengthScaleUnit());
@@ -608,72 +612,134 @@ void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 
 void SvgNode::OnTransform(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
 {
-    Offset globalPivot = CalcGlobalPivot(attributes_.transformOrigin, lengthRule.GetBaseRect());
+    auto containerRect = lengthRule.GetContainerRect();
+    Offset globalPivot = CalcGlobalPivot(attributes_.transformOrigin, containerRect);
     auto matrix = (animateTransform_.empty()) ? NGSvgTransform::CreateMatrix4(attributes_.transformVec, globalPivot)
                                               : SvgTransform::CreateMatrixFromMap(animateTransform_);
+    auto svgContext = svgContext_.Upgrade();
+    if (svgContext != nullptr && !attributes_.href.empty() &&
+        lengthRule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
+        auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
+        if (refSvgNode != nullptr) {
+            auto scaleX = matrix.GetScaleX();
+            auto scaleY = matrix.GetScaleY();
+            matrix.SetScale(scaleX * containerRect.Width(), scaleY * containerRect.Height(), 1.0);
+        }
+    }
     canvas.ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
 }
 
-float SvgNode::GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType)
+float SvgNode::GetRegionLength(Dimension origin, const SvgLengthScaleRule& rule, SvgLengthType lengthType)
 {
+    float length = 0.0f;
     switch (lengthType) {
-        case SvgLengthType::HORIZONTAL: {
-            auto x = (boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
-                     ConvertDimensionToPx(origin, GetSvgContainerRect().Width()) :
-                     origin.Value() * boxMeasureRule.GetBaseRect().Width();
-            return x;
-        }
-        case SvgLengthType::VERTICAL: {
-            auto y = (boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
-                     ConvertDimensionToPx(origin, GetSvgContainerRect().Height()) :
-                     origin.Value() * boxMeasureRule.GetBaseRect().Height();
-            return y;
-        }
-        /*using the original definition, radius*/
-        case SvgLengthType::OTHER: {
-            auto width = boxMeasureRule.GetBaseRect().Width();
-            auto height = boxMeasureRule.GetBaseRect().Height();
+        case SvgLengthType::HORIZONTAL:
+            length = (rule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     ConvertDimensionToPx(origin, rule.GetViewPort().Width()) :
+                     origin.Value() * rule.GetContainerRect().Width();
+            break;
+        case SvgLengthType::VERTICAL:
+            length = (rule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     ConvertDimensionToPx(origin, rule.GetViewPort().Height()) :
+                     origin.Value() * rule.GetContainerRect().Height();
+            break;
+        case SvgLengthType::OTHER:
+            auto width = rule.GetContainerRect().Width();
+            auto height = rule.GetContainerRect().Height();
             auto baseLength = std::sqrt(width * width + height * height) / std::sqrt(2.0f);
-            return boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE ?
+            length = rule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE ?
                 ConvertDimensionToPx(origin, baseLength) : origin.Value() * baseLength;
-        }
+            break;
     }
-    return 0.0f;
+    return length;
 }
 
-float SvgNode::GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule,
+float SvgNode::GetRegionPosition(Dimension origin, const SvgLengthScaleRule& rule,
     SvgLengthType lengthType)
 {
+    auto position = 0.0f;
     switch (lengthType) {
-        case SvgLengthType::HORIZONTAL: {
-            auto x = (boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
-                     ConvertDimensionToPx(origin, GetSvgContainerRect().Width()) :
-                     origin.Value() * boxMeasureRule.GetBaseRect().Width() + boxMeasureRule.GetBaseRect().Left();
-            return x;
-        }
-        case SvgLengthType::VERTICAL: {
-            auto y = (boxMeasureRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
-                     ConvertDimensionToPx(origin, GetSvgContainerRect().Height()) :
-                     origin.Value() * boxMeasureRule.GetBaseRect().Height() + boxMeasureRule.GetBaseRect().Top();
-            return y;
-        }
+        case SvgLengthType::HORIZONTAL:
+            position = (rule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     ConvertDimensionToPx(origin, rule.GetViewPort().Width()) :
+                     origin.Value() * rule.GetContainerRect().Width() + rule.GetContainerRect().Left();
+            break;
+        case SvgLengthType::VERTICAL:
+            position = (rule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) ?
+                     ConvertDimensionToPx(origin, rule.GetViewPort().Height()) :
+                     origin.Value() * rule.GetContainerRect().Height() + rule.GetContainerRect().Top();
+            break;
+        default:
+            break;
+    }
+    return position;
+}
+
+float SvgNode::GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& rule,
+    SvgLengthType lengthType)
+{
+    float ContainerLength = 0.0f;
+    switch (lengthType) {
+        case SvgLengthType::HORIZONTAL:
+            ContainerLength = rule.GetContainerRect().Width();
+            break;
+        case SvgLengthType::VERTICAL:
+            ContainerLength = rule.GetContainerRect().Height();
+            break;
+        /*using the original definition, radius*/
+        case SvgLengthType::OTHER:
+            ContainerLength = std::min(rule.GetContainerRect().Width(), rule.GetContainerRect().Height());
+            break;
+    }
+    auto length = ConvertDimensionToPx(origin, rule.GetViewPort(), lengthType);
+    if (rule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
+        length *= ContainerLength;
+    }
+    return length;
+}
+
+float SvgNode::GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& rule,
+    SvgLengthType lengthType)
+{
+    float offset = 0.0f;
+    float ContainerLength = 0.0f;
+    switch (lengthType) {
+        case SvgLengthType::HORIZONTAL:
+            ContainerLength = rule.GetContainerRect().Width();
+            offset = rule.GetContainerRect().Left();
+            break;
+        case SvgLengthType::VERTICAL:
+            ContainerLength = rule.GetContainerRect().Height();
+            offset = rule.GetContainerRect().Top();
+            break;
         default:
             return 0.0f;
     }
+    auto position = ConvertDimensionToPx(origin, rule.GetViewPort(), lengthType);
+    if (rule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
+        position *= ContainerLength;
+        position += offset;
+    }
+    return position;
 }
 
 double SvgNode::ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const
 {
+    auto width = viewPort.Width();
+    auto height = viewPort.Height();
     switch (value.Unit()) {
         case DimensionUnit::PERCENT: {
             if (type == SvgLengthType::HORIZONTAL) {
-                return value.Value() * viewPort.Width();
+                return value.Value() * width;
             }
             if (type == SvgLengthType::VERTICAL) {
-                return value.Value() * viewPort.Height();
+                return value.Value() * height;
             }
             if (type == SvgLengthType::OTHER) {
-                return value.Value() * sqrt(viewPort.Width() * viewPort.Height());
+                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                    return value.Value() * sqrt(width * height);
+                }
+                return value.Value() * std::sqrt(width * width + height * height) / std::sqrt(2.0f);
             }
             return 0.0;
         }
@@ -909,4 +975,31 @@ Offset SvgNode::CalcGlobalPivot(const std::pair<Dimension, Dimension>& transform
     return Offset(x, y);
 }
 
+SvgLengthScaleRule SvgNode::TransformForCurrentOBB(RSCanvas& canvas,
+    const SvgCoordinateSystemContext& context, SvgLengthScaleUnit contentUnits, float offsetX, float offsetY)
+{
+    if (contentUnits == SvgLengthScaleUnit::USER_SPACE_ON_USE) {
+        return context.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    }
+    float scaleX = 0.0f;
+    float scaleY = 0.0f;
+    float translateX = 0.0f;
+    float translateY = 0.0f;
+    // create default rect to draw graphic
+    auto squareWH = std::min(context.GetContainerRect().Width(), context.GetContainerRect().Height());
+    Rect defaultRect(0, 0, squareWH, squareWH);
+    SvgLengthScaleRule ContentRule = SvgLengthScaleRule(defaultRect, context.GetViewPort(),
+        SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    
+    SvgPreserveAspectRatio preserveAspectRatio;
+    preserveAspectRatio.svgAlign = SvgAlign::ALIGN_NONE;
+    SvgAttributesParser::ComputeScale(defaultRect.GetSize(), context.GetContainerRect().GetSize(),
+        preserveAspectRatio, scaleX, scaleY);
+    SvgAttributesParser::ComputeTranslate(defaultRect.GetSize(), context.GetContainerRect().GetSize(), scaleX, scaleY,
+        preserveAspectRatio.svgAlign, translateX, translateY);
+    // scale the graphic content of the given element non-uniformly
+    canvas.Translate(translateX  + offsetX, translateY + offsetY);
+    canvas.Scale(scaleX, scaleY);
+    return ContentRule;
+}
 } // namespace OHOS::Ace::NG

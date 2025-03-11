@@ -48,10 +48,25 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/menu_property.h"
 #include "core/components_ng/property/overlay_property.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
 
+namespace OHOS::Rosen {
+class VisualEffect;
+class Filter;
+class BrightnessBlender;
+} // namespace OHOS::Rosen
+
+namespace OHOS::Ace {
+class ImageSourceInfo;
+class BasicShape;
+}
+
 namespace OHOS::Ace::NG {
+struct AttractionEffect;
+using TransitionFinishCallback = std::function<void(bool)>;
+
 struct OptionParam {
     std::string value;
     std::string icon;
@@ -374,6 +389,11 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static void BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
+    static void HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
+        PopupInfo& tipsInfo, bool showInSubWindow, int32_t instanceId);
+    static void AddHoverEventForTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
+        PopupInfo& tipsInfo, bool showInSubWindow);
     static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
     static bool GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
@@ -871,6 +891,7 @@ public:
     static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
+    static void SetPrivacySensitive(FrameNode* frameNode, bool flag);
 
 private:
     static void AddDragFrameNodeToManager();

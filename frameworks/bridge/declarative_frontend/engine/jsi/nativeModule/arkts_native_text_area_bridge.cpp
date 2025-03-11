@@ -1842,7 +1842,7 @@ ArkUINativeModuleValue TextAreaBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCa
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorder(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         SetBorderDash(runtimeCallInfo, vm, nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1903,7 +1903,7 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runt
         SetBorderWidthArrayByDimen(bottom, values, units, NUM_2);
         SetBorderWidthArrayByDimen(isRightToLeft ? right : left, values, units, NUM_3);
     } else {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
             ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
             ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);

@@ -54,7 +54,7 @@ OH_ArkUI_SurfaceHolder* XComponentPatternV2::GetSurfaceHolder()
 
 void XComponentPatternV2::OnAttachToFrameNode()
 {
-    if (nodeType_ ==  XComponentNodeType::CNODE) {
+    if (isCNode_) {
         XComponentPattern::OnAttachToFrameNode();
         return;
     }
@@ -67,8 +67,8 @@ void XComponentPatternV2::OnAttachToFrameNode()
 
 void XComponentPatternV2::OnAttachToMainTree()
 {
-    if (nodeType_ ==  XComponentNodeType::CNODE && !isLifecycleInterfaceCalled_ && !surfaceHolder_) {
-        usesSuperMethod_ = true;
+    UpdateUsesSuperMethod();
+    if (usesSuperMethod_) {
         XComponentPattern::OnAttachToMainTree();
         return;
     }
@@ -79,6 +79,7 @@ void XComponentPatternV2::OnAttachToMainTree()
 
 void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
+    UpdateUsesSuperMethod();
     if (usesSuperMethod_) {
         XComponentPattern::BeforeSyncGeometryProperties(config);
         return;
@@ -174,6 +175,7 @@ void XComponentPatternV2::OnSurfaceChanged(const RectF& surfaceRect)
 
 void XComponentPatternV2::OnDetachFromMainTree()
 {
+    UpdateUsesSuperMethod();
     if (usesSuperMethod_) {
         XComponentPattern::OnDetachFromMainTree();
         return;
@@ -379,7 +381,7 @@ void XComponentPatternV2::InitializeRenderContext()
 
 void XComponentPatternV2::OnModifyDone()
 {
-    if (nodeType_ ==  XComponentNodeType::CNODE) {
+    if (usesSuperMethod_) {
         XComponentPattern::OnModifyDone();
         return;
     }

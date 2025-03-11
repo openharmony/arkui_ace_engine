@@ -500,8 +500,6 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    int32_t GetTransformRotateRelativeToWindow(bool excludeSelf = false);
-
     RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
@@ -548,6 +546,9 @@ public:
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
 
     void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
+
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
 
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
@@ -1279,6 +1280,12 @@ public:
     void SetTopWindowBoundary(bool topWindowBoundary)
     {
         topWindowBoundary_ = topWindowBoundary;
+    }
+    bool CheckVisibleOrActive() override;
+
+    void SetNeedLazyLayout(bool value)
+    {
+        layoutProperty_->SetNeedLazyLayout(value);
     }
 
 protected:

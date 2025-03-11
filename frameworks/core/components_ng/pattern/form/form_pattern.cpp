@@ -87,11 +87,12 @@ public:
         auto formPattern_ = weakFormPattern_.Upgrade();
         CHECK_NULL_VOID(formPattern_);
         auto subContainer = formPattern_->GetSubContainer();
-        CHECK_NULL_VOID(subContainer);
-        auto formId = subContainer->GetRunningCardId();
-        TAG_LOGI(AceLogTag::ACE_FORM,
-            "formImage height: %{public}d, width: %{public}d, size:%{public}d, formId: %{public}" PRId64,
-            pixelMap->GetHeight(), pixelMap->GetWidth(), pixelMap->GetByteCount(), formId);
+        if (subContainer != nullptr && pixelMap != nullptr) {
+            auto formId = subContainer->GetRunningCardId();
+            TAG_LOGI(AceLogTag::ACE_FORM,
+                "formImage height: %{public}d, width: %{public}d, size:%{public}d, formId: %{public}" PRId64,
+                pixelMap->GetHeight(), pixelMap->GetWidth(), pixelMap->GetByteCount(), formId);
+        }
         formPattern_->OnSnapshot(pixelMap);
     }
 
@@ -518,9 +519,11 @@ RefPtr<FrameNode> FormPattern::CreateImageNode()
     CHECK_NULL_RETURN(formNode, nullptr);
     auto imageId = formNode->GetImageId();
     auto subContainer = GetSubContainer();
-    CHECK_NULL_RETURN(subContainer, nullptr);
-    auto formId = subContainer->GetRunningCardId();
-    TAG_LOGI(AceLogTag::ACE_FORM, "CreateImageNode imageId: %{public}d, formId: %{public}" PRId64, imageId, formId);
+    if (subContainer != nullptr) {
+        auto formId = subContainer->GetRunningCardId();
+        TAG_LOGI(AceLogTag::ACE_FORM, "CreateImageNode imageId: %{public}d, formId: %{public}" PRId64,
+            imageId, formId);
+    }
     RefPtr<FrameNode> imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId,
         AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(imageNode, nullptr);
@@ -650,7 +653,8 @@ void FormPattern::OnModifyDone()
     }
     // Convert DimensionUnit to DimensionUnit::PX
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnModifyDone, info.id: %{public}" PRId64, info.id);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "FormPattern::OnModifyDone, info.id: %{public}" PRId64 ", info.index: %{public}" PRId64, info.id, info.index);
     info.width = Dimension(width.ConvertToPx());
     info.height = Dimension(height.ConvertToPx());
     auto &&borderWidthProperty = layoutProperty->GetBorderWidthProperty();
@@ -661,8 +665,6 @@ void FormPattern::OnModifyDone()
     info.borderWidth = borderWidth;
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
-    info.obscuredMode = isFormObscured_;
-    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleProtected(info.bundleName, info.id));
     auto wantWrap = info.wantWrap;
     if (wantWrap) {
         bool isEnable = wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
@@ -704,18 +706,19 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     layoutProperty->UpdateRequestFormInfo(info);
 
     UpdateBackgroundColorWhenUnTrustForm();
-    info.obscuredMode = isFormObscured_;
-    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleProtected(info.bundleName, info.id));
     HandleFormComponent(info);
     return true;
 }
 
-void FormPattern::HandleFormComponent(const RequestFormInfo& info)
+void FormPattern::HandleFormComponent(RequestFormInfo& info)
 {
     ACE_FUNCTION_TRACE();
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
+        info.obscuredMode = isFormObscured_;
+        info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) ||
+            IsFormBundleProtected(info.bundleName, info.id));
         AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
@@ -822,12 +825,21 @@ void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFo
         }, "ArkUIAddFormComponentUI");
 }
 
+void FormPattern::SetParamForWantTask(const RequestFormInfo& info)
+{
+    PostBgTask([weak = WeakClaim(this), info] {
+        ACE_SCOPED_TRACE("ArkUISetParamForWant");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formManagerBridge_->SetParamForWant(info);
+        }, "ArkUISetParamForWant");
+}
+
 void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 {
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
-        std::lock_guard<std::mutex> lock(formManagerBridge_->GetRecycleMutex());
-        formManagerBridge_->SetParamForWant(info);
+        SetParamForWantTask(info);
 #endif
     }
     auto host = GetHost();
@@ -1955,12 +1967,13 @@ void FormPattern::RemoveFormChildNode(FormChildNodeType formChildNodeType)
     
     if (formChildNodeType == FormChildNodeType::FORM_STATIC_IMAGE_NODE) {
         auto formNode = DynamicCast<FormNode>(host);
-        CHECK_NULL_VOID(formNode);
-        auto imageId = formNode->GetImageId();
         auto subContainer = GetSubContainer();
-        CHECK_NULL_VOID(subContainer);
-        auto formId = subContainer->GetRunningCardId();
-        TAG_LOGI(AceLogTag::ACE_FORM, "RemoveImageNode imageId: %{public}d, formId: %{public}" PRId64, imageId, formId);
+        if (subContainer != nullptr && formNode != nullptr) {
+            auto imageId = formNode->GetImageId();
+            auto formId = subContainer->GetRunningCardId();
+            TAG_LOGI(AceLogTag::ACE_FORM, "RemoveImageNode imageId: %{public}d, formId: %{public}" PRId64,
+                imageId, formId);
+        }
     }
     host->RemoveChild(childNode);
     TAG_LOGI(AceLogTag::ACE_FORM, "Remove child node: %{public}d sucessfully.",

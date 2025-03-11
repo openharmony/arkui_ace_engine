@@ -180,6 +180,7 @@ private:
     float arrowHeight_ = Dimension(8.0_vp).ConvertToPx();
 
     // Get from RenderProp
+    bool isTips_ = false;
     bool useCustom_ = false;
     Placement arrowPlacement_ = Placement::BOTTOM;
     bool enableArrow_ = false;

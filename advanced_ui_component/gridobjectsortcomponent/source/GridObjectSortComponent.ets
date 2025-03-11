@@ -23,9 +23,8 @@ import {
 } from '@kit.ArkUI';
 import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { hilog } from '@kit.PerformanceAnalysisKit';
 import accessibility from '@ohos.accessibility';
-
+import hilog from '@ohos.hilog';
 
 //  declaring Constants
 const COL_IMAGE_TEXT = 3;
@@ -67,8 +66,6 @@ const ACCESSIBILITY_SELECTED_ITEM_DRAG_START: string =
   'gridobjectsortcomponent_accessibility_selected_item_drag_start';
 const ACCESSIBILITY_DOUBLE_CLICK: string =
   'gridobjectsortcomponent_accessibility_single_finger_double_click';
-const ACCESSIBILITY_COMPLETE_BUTTON: string =
-  'gridobjectsortcomponent_accessibility_complete_button';
 const ACCESSIBILITY_RESIDENT_AREA: string =
   'gridobjectsortcomponent_accessibility_resident_area_edit_state';
 const ACCESSIBILITY_SELECTED_ITEM_DESC: string = 'gridobjectsortcomponent_accessibility_selected_item_desc';
@@ -81,7 +78,6 @@ const ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC: string =
   'gridobjectsortcomponent_accessibility_unselected_text_item_desc';
 const ACCESSIBILITY_UNSELECTED_ITEM: string = 'gridobjectsortcomponent_accessibility_unselected_item';
 const ACCESSIBILITY_SELECTED_ITEM_DELETE: string = 'gridobjectsortcomponent_accessibility_selected_item_delete';
-const ACCESSIBILITY_HEADER_EDIT_BUTTON: string = 'gridobjectsortcomponent_accessibility_header_edit_button';
 const ACCESSIBILITY_SELECTED_ITEM_DRAG_MOVING: string =
   'gridobjectsortcomponent_accessibility_selected_item_drag_moving';
 const ACCESSIBILITY_DELETED: string = 'gridobjectsortcomponent_accessibility_deleted';
@@ -123,25 +119,6 @@ export enum GridObjectSortComponentType {
 interface PositionXY {
   x: number;
   y: number;
-}
-
-class MenuItem {
-  public value: Resource;
-  public symbolStyle: SymbolGlyphModifier;
-  public isEnabled: boolean;
-  public action: () => void;
-  public label: ResourceStr; // 适老化弹窗描述文字
-  accessibilityText?: ResourceStr;
-
-  constructor(value: Resource, symbolStyle: SymbolGlyphModifier,
-    enabled: boolean, accessibilityText: ResourceStr, action: () => void, label: ResourceStr) {
-    this.value = value;
-    this.symbolStyle = symbolStyle;
-    this.isEnabled = enabled;
-    this.action = action;
-    this.accessibilityText = accessibilityText;
-    this.label = label;
-  }
 }
 
 @Component
@@ -226,19 +203,8 @@ export struct GridObjectSortComponent {
   private touchDown: Resource = $r('sys.color.ohos_id_color_click_effect');
   private touchBorderRadius: Resource = $r('sys.float.ohos_id_corner_radius_clicked');
   private hoverBackgroundColor: Resource = $r('sys.color.ohos_id_color_hover');
-  private focusBorder: Resource = $r('sys.color.ohos_id_color_focused_outline');
   private imageText: boolean = false;
-  private menuItems: Array<MenuItem> = [
-    new MenuItem(
-      $r('sys.media.ohos_ic_public_edit'),
-      (new SymbolGlyphModifier($r('sys.symbol.square_and_pencil'))),
-      true,
-      this.getStringByResourceToken(ACCESSIBILITY_HEADER_EDIT_BUTTON),
-      () => {
-        this.goEdit();
-      },
-      this.getStringByResourceToken(ACCESSIBILITY_HEADER_EDIT_BUTTON))
-  ];
+
   onSave?: (select: GridObjectSortComponentItem[], unselect: GridObjectSortComponentItem[]) => void;
   onCancel?: () => void;
   isFollowingSystemFontScale: boolean = false;
@@ -981,7 +947,16 @@ export struct GridObjectSortComponent {
   HeaderTitleBuilder() {
     ComposeTitleBar({
       title: this.options.normalTitle || $r('sys.string.ohos_grid_edit_title_chanel'),
-      menuItems: this.menuItems,
+      menuItems: [{
+        value: $r('sys.media.ohos_ic_public_edit'),
+        symbolStyle: (new SymbolGlyphModifier($r('sys.symbol.square_and_pencil'))),
+        isEnabled: true,
+        label: $r('sys.string.gridobjectsortcomponent_accessibility_header_edit_button'),
+        accessibilityText: $r('sys.string.gridobjectsortcomponent_accessibility_header_edit_button'),
+        action: () => {
+          this.goEdit();
+        }
+      }]
     })
       .id(ADD_TITLE_BAR_ID)
       .visibility(!this.menuSwitch ? Visibility.Visible : Visibility.None)
@@ -1006,8 +981,8 @@ export struct GridObjectSortComponent {
       isSaveIconRequired: false,
       menuItems: [{
         value: $r('sys.symbol.checkmark'),
-        label: this.getStringByResourceToken(ACCESSIBILITY_COMPLETE_BUTTON),
-        accessibilityText: this.getStringByResourceToken(ACCESSIBILITY_COMPLETE_BUTTON),
+        label: $r('sys.string.gridobjectsortcomponent_accessibility_complete_button'),
+        accessibilityText: $r('sys.string.gridobjectsortcomponent_accessibility_complete_button'),
         action: () => {
           this.saveClick = true;
           this.onSaveEdit();
@@ -1909,7 +1884,7 @@ export struct GridObjectSortComponent {
       try {
         return getContext(this).resourceManager.getStringByNameSync(value, ...args);
       } catch (error) {
-        console.error(`Ace SegmentButton getAccessibilityDescription, error: ${error.toString()}`);
+        hilog.error(0x3900, 'Ace', `GridObjectSortComponent getStringByResourceToken, error: ${error.toString()}`);
       }
     }
     return '';
@@ -1928,13 +1903,17 @@ export struct GridObjectSortComponent {
       if (typeof resource === 'string') {
         resourceString = resource;
       } else {
-        resourceString = getContext().resourceManager.getStringSync(resource);
+        if (resource.id === -1 ) {
+          resourceString = getContext()?.resourceManager?.getStringByNameSync(resource.params?.[0].split('.').pop());
+        } else {
+          resourceString = getContext()?.resourceManager?.getStringSync(resource);
+        }
       }
       return resourceString;
     } catch (error) {
       let code: number = (error as BusinessError).code;
       let message: string = (error as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'Ace', `GridObjectSortComponent getAccessibilityText error, code: ${code}, message: ${message}`);
       return '';
     }
   }

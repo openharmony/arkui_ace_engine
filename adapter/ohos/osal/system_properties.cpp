@@ -183,7 +183,7 @@ bool IsFocusCanBeActive()
 
 bool IsCacheNavigationNodeEnable()
 {
-    return system::GetParameter("persist.ace.navigation.groupnode.cached", "false") == "true";
+    return system::GetParameter("persist.ace.navigation.groupnode.cached", "true") == "true";
 }
 
 bool IsHookModeEnabled()
@@ -474,7 +474,6 @@ std::string SystemProperties::releaseType_ = INVALID_PARAM;
 std::string SystemProperties::paramDeviceType_ = INVALID_PARAM;
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
 int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
-ACE_WEAK_SYM ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
@@ -932,6 +931,7 @@ void SystemProperties::OnFocusActiveChanged(const char* key, const char* value, 
         if (!focusCanBeActive) {
             auto container = reinterpret_cast<Platform::AceContainer*>(context);
             CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
             container->SetIsFocusActive(focusCanBeActive);
         }
         LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
@@ -1051,6 +1051,11 @@ double SystemProperties::GetSrollableFriction()
 double SystemProperties::GetScrollableDistance()
 {
     return scrollableDistance_;
+}
+
+bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
+{
+    return system::GetBoolParameter("web.debug.maximize_resize_optimize", true);
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()

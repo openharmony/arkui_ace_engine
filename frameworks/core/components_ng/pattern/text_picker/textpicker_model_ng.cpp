@@ -249,8 +249,6 @@ RefPtr<FrameNode> TextPickerModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
-    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
-    textPickerPattern->SetColumnsKind(TEXT);
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, textPickerNode);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>(textPickerNode->GetThemeScopeId());
@@ -965,6 +963,25 @@ void TextPickerModelNG::SetHasSelectAttr(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetHasSelectAttr(value);
 }
+
+void TextPickerModelNG::SetIsCascade(FrameNode* frameNode, bool isCascade)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    isCascade_ = isCascade;
+    textPickerPattern->SetIsCascade(isCascade_);
+}
+
+void TextPickerModelNG::SetColumnKind(FrameNode* frameNode, uint32_t columnKind)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    columnkind_ = columnKind;
+    textPickerPattern->SetColumnsKind(columnKind);
+}
+
 void TextPickerModelNG::SetNormalTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
@@ -1072,7 +1089,12 @@ void TextPickerModelNG::SetRange(FrameNode* frameNode, const std::vector<NG::Ran
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
         std::lock_guard<std::mutex> lock(showCountMutex_);
-        auto columnNode = CreateColumnNode(TEXT, showCount_);
+        RefPtr<FrameNode> columnNode = nullptr;
+        if (columnkind_ == TEXT) {
+            columnNode = CreateColumnNode(TEXT, showCount_);
+        } else if (columnkind_ == MIXTURE) {
+            columnNode = CreateColumnNode(MIXTURE, showCount_);
+        }
         auto stackNode = CreateStackNode();
         auto buttonNode = CreateButtonNode();
         auto columnBlendNode = CreateColumnNode();

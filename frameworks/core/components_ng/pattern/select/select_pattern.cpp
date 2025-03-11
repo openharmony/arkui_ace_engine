@@ -1443,6 +1443,16 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
 
+void SelectPattern::SetAvoidance(const Avoidance& avoidance)
+{
+    avoidance_ = avoidance;
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateSelectAvoidanceMode(avoidance.mode);
+}
+
 std::string SelectPattern::ProvideRestoreInfo()
 {
     auto jsonObj = JsonUtil::Create(true);

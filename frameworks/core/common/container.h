@@ -74,6 +74,8 @@ using DragEventCallBack = std::function<void(const DragPointerEvent&, const Drag
 using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
 
+class PipelineBase;
+
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
@@ -216,10 +218,7 @@ public:
 
     virtual FoldStatus GetCurrentFoldStatus();
 
-    virtual NG::SafeAreaInsets GetKeyboardSafeArea()
-    {
-        return {};
-    }
+    virtual NG::SafeAreaInsets GetKeyboardSafeArea();
 
     virtual std::string GetHapPath() const
     {
@@ -396,11 +395,7 @@ public:
         return container ? container->IsSubContainer() : false;
     }
 
-    Window* GetWindow() const
-    {
-        auto context = GetPipelineContext();
-        return context ? context->GetWindow() : nullptr;
-    }
+    Window* GetWindow() const;
 
     virtual uint64_t GetDisplayId() const
     {
@@ -563,57 +558,28 @@ public:
      *this interface is just use before api12(not include api12),after api12 when you judge version,use
      *LessThanAPITargetVersion(PlatformVersion version)
      */
-    static bool LessThanAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersion(PlatformVersion version);
 
     /*
      *this interface is just use before api12(not include api12),after api12 when you judge version,use
      *GreatOrEqualAPITargetVersion(PlatformVersion version)
      */
-    static bool GreatOrEqualAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
     /*
      *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
      */
-    static bool LessThanAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
-                             static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersionWithCheck(PlatformVersion version);
 
     /*
      *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
      */
-    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
-                             static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
 
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        if (!container) {
-            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-            return apiTargetVersion < static_cast<int32_t>(version);
-        }
+        CHECK_NULL_RETURN(container, false);
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion < static_cast<int32_t>(version);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#if !defined(PREVIEW)
+#ifndef PREVIEW
 #include <dlfcn.h>
 #endif
 
@@ -26,6 +26,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/ng/vector.h"
+#include "base/image/drawable_descriptor.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
@@ -54,6 +55,10 @@ constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
 constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
 constexpr uint32_t FIT_MATRIX = 16;
+constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
+constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
+constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
+constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
 } // namespace
 
 namespace OHOS::Ace {
@@ -210,11 +215,8 @@ void JSImage::SetImageMatrix(const JSCallbackInfo& args)
             ParseJsDouble(jsArray->GetValueAt(i), value);
             matrix[i] = static_cast<float>(value);
         }
-        Matrix4 setValue = Matrix4(
-            matrix[0], matrix[4], matrix[8], matrix[12],
-            matrix[1], matrix[5], matrix[9], matrix[13],
-            matrix[2], matrix[6], matrix[10], matrix[14],
-            matrix[3], matrix[7], matrix[11], matrix[15]);
+        Matrix4 setValue = Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9],
+            matrix[13], matrix[2], matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]);
         ImageModel::GetInstance()->SetImageMatrix(setValue);
     } else {
         SetDefaultImageMatrix();
@@ -230,11 +232,8 @@ void JSImage::SetDefaultImageMatrix()
     for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
         matrix[i] = 1.0f;
     }
-    Matrix4 setValue = Matrix4(
-        matrix[0], matrix[4], matrix[8], matrix[12],
-        matrix[1], matrix[5], matrix[9], matrix[13],
-        matrix[2], matrix[6], matrix[10], matrix[14],
-        matrix[3], matrix[7], matrix[11], matrix[15]);
+    Matrix4 setValue = Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]);
     ImageModel::GetInstance()->SetImageMatrix(setValue);
 }
 
@@ -318,39 +317,14 @@ void JSImage::Create(const JSCallbackInfo& info)
     CreateImage(info);
 }
 
-bool JSImage::CheckIsCard()
+void JSImage::CheckIsCard(std::string& src, const JSRef<JSVal>& imageInfo)
 {
+    bool isCard = false;
     auto container = Container::Current();
-    if (!container) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "Container is null in CreateImage.");
-        return false;
-    }
-    return container->IsFormRender() && !container->IsDynamicRender();
-}
-
-bool JSImage::CheckResetImage(const JSCallbackInfo& info)
-{
-    int32_t parseRes = -1;
-    if (info.Length() < 1 || !ParseJsInteger(info[0], parseRes)) {
-        return false;
-    }
-    ImageModel::GetInstance()->ResetImage();
-    return true;
-}
-
-void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
-{
-    bool isCard = CheckIsCard();
-
-    // Interim programme
-    std::string bundleName;
-    std::string moduleName;
-    std::string src;
-    auto imageInfo = info[0];
-    int32_t resId = 0;
-    bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId);
-    if (!srcValid && CheckResetImage(info)) {
-        return;
+    if (container) {
+        isCard = container->IsFormRender() && !container->IsDynamicRender();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "check is card, container is null");
     }
     if (isCard && imageInfo->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
@@ -359,43 +333,120 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
             src.clear();
         }
     }
+}
+
+// The image reset only when the param is ImageContent.Empty
+bool JSImage::CheckResetImage(const bool& srcValid, const JSCallbackInfo& info)
+{
+    if (!srcValid) {
+        int32_t parseRes = -1;
+        if (info.Length() < 1 || !ParseJsInteger(info[0], parseRes)) {
+            return false;
+        }
+        ImageModel::GetInstance()->ResetImage();
+        return true;
+    }
+    return false;
+}
+
+ImageType JSImage::ParseImageType(const JSRef<JSVal>& imageInfo)
+{
+    if (!imageInfo->IsObject()) {
+        return ImageType::BASE;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(imageInfo);
+    if (jsObj->IsUndefined()) {
+        return ImageType::BASE;
+    }
+    JSRef<JSVal> jsTypeName = jsObj->GetProperty("typeName");
+    if (!jsTypeName->IsString()) {
+        return ImageType::BASE;
+    }
+    auto typeName = jsTypeName->ToString();
+    if (typeName == DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::DRAWABLE;
+    } else if (typeName == LAYERED_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::LAYERED_DRAWABLE;
+    } else if (typeName == ANIMATED_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::ANIMATED_DRAWABLE;
+    } else if (typeName == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::PIXELMAP_DRAWABLE;
+    } else {
+        return ImageType::BASE;
+    }
+}
+
+void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
+{
+    std::string bundleName;
+    std::string moduleName;
+    std::string src;
+    auto imageInfo = info[0];
+    int32_t resId = 0;
+    bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId);
+    CHECK_EQUAL_VOID(CheckResetImage(srcValid, info), true);
+    CheckIsCard(src, imageInfo);
     RefPtr<PixelMap> pixmap = nullptr;
 
-    // input is PixelMap / Drawable
     if (!srcValid) {
-#if defined(PIXEL_MAP_SUPPORTED)
-        std::vector<RefPtr<PixelMap>> pixelMaps;
-        int32_t duration = -1;
-        int32_t iterations = 1;
-        if (IsDrawable(imageInfo)) {
+#ifdef PIXEL_MAP_SUPPORTED
+        auto type = ParseImageType(imageInfo);
+        if (type == ImageType::ANIMATED_DRAWABLE) {
+            std::vector<RefPtr<PixelMap>> pixelMaps;
+            int32_t duration = -1;
+            int32_t iterations = 1;
             if (GetPixelMapListFromAnimatedDrawable(imageInfo, pixelMaps, duration, iterations)) {
                 CreateImageAnimation(pixelMaps, duration, iterations);
                 return;
             }
+        } else if (type == ImageType::PIXELMAP_DRAWABLE) {
+            auto* address = UnwrapNapiValue(imageInfo);
+            auto drawable = DrawableDescriptor::CreateDrawable(address);
+            if (!drawable) {
+                return;
+            }
+            if (drawable->GetDrawableSrcType() == 1) {
+                pixmap = GetDrawablePixmap(imageInfo);
+            } else {
+                ImageModel::GetInstance()->Create(drawable);
+                ParseImageAIOptions(info);
+                return;
+            }
+        } else if (type == ImageType::LAYERED_DRAWABLE || type == ImageType::DRAWABLE) {
             pixmap = GetDrawablePixmap(imageInfo);
         } else {
             pixmap = CreatePixelMapFromNapiValue(imageInfo);
         }
 #endif
     }
-    ImageInfoConfig imageInfoConfig(
-        std::make_shared<std::string>(src), bundleName, moduleName, (resId == -1), isImageSpan);
-    ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
+    ImageInfoConfig config;
+    config.src = std::make_shared<std::string>(src);
+    config.bundleName = bundleName;
+    config.moduleName = moduleName;
+    config.isUriPureNumber = (resId == -1);
+    config.isImageSpan = isImageSpan;
+    ImageModel::GetInstance()->Create(config, pixmap);
+    ParseImageAIOptions(info);
+}
 
-    if (info.Length() > 1) {
-        auto options = info[1];
-        if (!options->IsObject()) {
-            return;
-        }
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        panda::Local<JsiValue> value = options.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
-        ImageModel::GetInstance()->SetImageAIOptions(optionsValue);
+void JSImage::ParseImageAIOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 1) {
+        return;
     }
+    auto options = info[1];
+    if (!options->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    panda::Local<JsiValue> value = options.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    ImageModel::GetInstance()->SetImageAIOptions(optionsValue);
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
@@ -930,7 +981,7 @@ void JSImage::JSBind(BindingTarget globalObj)
 
 void JSImage::JsSetDraggable(const JSCallbackInfo& info)
 {
-    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         draggable = info[0]->ToBoolean();
     }

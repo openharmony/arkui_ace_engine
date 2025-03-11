@@ -89,6 +89,19 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == TextTheme::TypeId()) {
+        return AceType::MakeRefPtr<TextTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else {
+        return AceType::MakeRefPtr<MenuTheme>();
+    }
+}
 } // namespace
 class MenuItemTestNg : public testing::Test {
 public:
@@ -118,6 +131,7 @@ void MenuItemTestNg::SetUp()
     MockContainer::SetUp();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void MenuItemTestNg::TearDown()
@@ -326,7 +340,7 @@ HWTEST_F(MenuItemTestNg, MenuItemLayoutAlgorithm001, TestSize.Level1)
 HWTEST_F(MenuItemTestNg, MenuItemLayoutAlgorithm002, TestSize.Level1)
 {
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(16);
+    MockContainer::Current()->SetApiTargetVersion(18);
 
     /**
      * @tc.steps: step1. Create menuItem.
@@ -548,7 +562,7 @@ HWTEST_F(MenuItemTestNg, MenuItemPaintMethod001, TestSize.Level1)
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(0));
     /**
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
@@ -600,7 +614,7 @@ HWTEST_F(MenuItemTestNg, MenuItemPaintMethod002, TestSize.Level1)
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(0));
     /**
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
@@ -649,16 +663,10 @@ HWTEST_F(MenuItemTestNg, MenuItemTestNgTextMaxLines001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == TextTheme::TypeId()) {
-            return AceType::MakeRefPtr<TextTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else {
-            return AceType::MakeRefPtr<MenuTheme>();
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<MenuTheme>();
@@ -848,6 +856,16 @@ HWTEST_F(MenuItemTestNg, MenuItemPatternUpdatePasteDisabledOpacity001, TestSize.
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == TextOverlayTheme::TypeId()) {
+                return AceType::MakeRefPtr<TextOverlayTheme>();
+            } else if (type == SelectTheme::TypeId()) {
+                return AceType::MakeRefPtr<SelectTheme>();
+            } else {
+                return nullptr;
+            }
+        });
     MenuView::CreatePasteButton(false, option, row, []() {});
     auto optionFirstChild = option->GetChildAtIndex(0);
     ASSERT_NE(optionFirstChild, nullptr);

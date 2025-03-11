@@ -71,6 +71,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.force = static_cast<float>(pointerItem.GetPressure());
     touchPoint.tiltX = pointerItem.GetTiltX();
     touchPoint.tiltY = pointerItem.GetTiltY();
+    touchPoint.rollAngle = pointerItem.GetAngle();
     touchPoint.sourceTool = GetSourceTool(pointerItem.GetToolType());
     touchPoint.originalId = pointerItem.GetOriginPointerId();
     touchPoint.width = pointerItem.GetWidth();
@@ -174,6 +175,7 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetForce(touchPoint.force)
         .SetTiltX(touchPoint.tiltX)
         .SetTiltY(touchPoint.tiltY)
+        .SetRollAngle(touchPoint.rollAngle)
         .SetSourceType(SourceType::NONE)
         .SetSourceTool(touchPoint.sourceTool)
         .SetOriginalId(touchPoint.originalId)

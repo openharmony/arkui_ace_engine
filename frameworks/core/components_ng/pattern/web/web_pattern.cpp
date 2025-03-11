@@ -55,6 +55,7 @@
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -344,6 +345,7 @@ constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 constexpr double ZOOMIN_PUBLIC_ERRAND = 0.4444;
 constexpr int32_t ZOOM_CONVERT_NUM = 10;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
+constexpr int32_t MIN_ACCESSIBILITY_FOCUS_SIZE = 2;
 
 constexpr int32_t PINCH_START_TYPE = 1;
 constexpr int32_t PINCH_UPDATE_TYPE = 3;
@@ -579,6 +581,7 @@ void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelecti
         return;
     }
     previewSelectionMenuMap_[key] = param;
+    TAG_LOGD(AceLogTag::ACE_WEB, "muneParam hapticFeedbackMode:%{public}d", param->menuParam.hapticFeedbackMode);
 }
 
 std::shared_ptr<WebPreviewSelectionMenuParam> WebPattern::GetPreviewSelectionMenuParams(
@@ -766,6 +769,7 @@ bool WebPattern::NeedSoftKeyboard() const
 void WebPattern::OnAttachToMainTree()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "OnAttachToMainTree WebId %{public}d", GetWebId());
+    isAttachedToMainTree_ = true;
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
@@ -774,6 +778,7 @@ void WebPattern::OnAttachToMainTree()
 void WebPattern::OnDetachFromMainTree()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "OnDetachFromMainTree WebId %{public}d", GetWebId());
+    isAttachedToMainTree_ = false;
     // report component is in background.
     delegate_->OnRenderToBackground();
 }
@@ -1913,7 +1918,7 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
-    if (IsPreviewImageNodeExist()) {
+    if (!IsPreviewImageNodeExist()) {
         StartVibraFeedback("longPress.light");
     }
     if (!isMouseEvent_) {
@@ -3749,6 +3754,14 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         }
         touchPointX = touchPoint.x;
         touchPointY = touchPoint.y;
+        if (info.GetSourceTool() == SourceTool::PEN &&
+            delegate_->SetFocusByPosition(touchPointX, touchPointY) &&
+            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(touchPointX, touchPointY)) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "stylus touch down is editable.");
+            isNeedInterceptedTouchEvent_ = true;
+            WebRequestFocus();
+            return;
+        }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
@@ -3763,6 +3776,10 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = true;
     UninitTouchEventListener();
+    if (isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN) {
+        isNeedInterceptedTouchEvent_ = false;
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -3798,6 +3815,7 @@ void WebPattern::OnMagnifierHandleMove(const RectF& handleRect, bool isFirst)
 
 void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 {
+    CHECK_EQUAL_VOID(isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN, true);
     if (isDragging_) {
         return;
     }
@@ -3855,6 +3873,10 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
     UninitTouchEventListener();
+    if (isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN) {
+        isNeedInterceptedTouchEvent_ = false;
+        return;
+    }
     if (IsRootNeedExportTexture()) {
         HandleTouchUp(info, false);
     }
@@ -4672,6 +4694,14 @@ void WebPattern::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleW
     visibleHeight = visibleInnerRect.Height();
 }
 
+void WebPattern::RestoreRenderFit()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreRenderFit, webId: %{public}d", GetWebId());
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
+    }
+}
+
 void WebPattern::AttachCustomKeyboard()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard AttachCustomKeyboard enter");
@@ -5217,6 +5247,10 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
 {
     CHECK_NULL_VOID(delegate_);
     TAG_LOGD(AceLogTag::ACE_WEB, "WindowSizeChangeReason type: %{public}d ", type);
+    if (type == WindowSizeChangeReason::MAXIMIZE) {
+        WindowMaximize();
+        return;
+    }
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (!isSmoothDragResizeEnabled) {
                 return;
@@ -5262,6 +5296,32 @@ void WebPattern::WindowDrag(int32_t width, int32_t height)
             }
             delegate_->SetDragResizePreSize(pre_height * ADJUST_RATIO, pre_width * ADJUST_RATIO);
         }
+    }
+}
+
+void WebPattern::WindowMaximize()
+{
+    if (!SystemProperties::GetWebDebugMaximizeResizeOptimize()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize not enabled");
+        return;
+    }
+    WebInfoType webInfoType = GetWebInfoType();
+    if (webInfoType != WebInfoType::TYPE_2IN1) {
+        return;
+    }
+    if (layoutMode_ != WebLayoutMode::NONE || renderMode_ != RenderMode::ASYNC_RENDER) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize not support");
+        return;
+    }
+    if (!isAttachedToMainTree_ || !isVisible_) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize, webId: %{public}d", GetWebId());
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(RenderFit::RESIZE_FILL);
+    }
+    if (delegate_) {
+        delegate_->MaximizeResize();
     }
 }
 
@@ -6175,7 +6235,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         return;
     }
     if (GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
-        if (rect.Width() <= 1 || rect.Height() <= 1) {
+        if (rect.Width() <= MIN_ACCESSIBILITY_FOCUS_SIZE || rect.Height() <= MIN_ACCESSIBILITY_FOCUS_SIZE) {
             renderContext->ResetAccessibilityFocusRect();
             renderContext->UpdateAccessibilityFocus(false);
         } else {

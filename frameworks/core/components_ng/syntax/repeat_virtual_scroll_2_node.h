@@ -121,7 +121,10 @@ public:
     // called from TS upon Repeat rerender
     // tell the Container to invalid its layout
     // incl re-layout of children start from startIndex
-    void RequestContainerReLayout(IndexType startIndex);
+    void RequestContainerReLayout(IndexType startIndex = INT_MIN);
+
+    // trigger FrameNode::NotifyChangeWithCount()
+    void NotifyContainerLayoutChange(int32_t startIndex, int32_t count, NG::UINode::NotificationType notificationType);
 
     /**
      * GetChildren re-assembles children_ and cleanup the L1 cache
@@ -190,6 +193,9 @@ public:
 
     // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
+
     void MoveData(int32_t from, int32_t to) override;
     void FireOnMove(int32_t from, int32_t to) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);

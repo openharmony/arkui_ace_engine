@@ -140,7 +140,7 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
-static bool g_isDynamicVsync = false;
+static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
@@ -1222,6 +1222,12 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             }
             SystemProperties::SetDeviceAccess(
                 resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
+        } else {
+            auto config = context->GetConfiguration();
+            if (config) {
+                auto configColorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+                colorMode = configColorMode == "dark" ? ColorMode::DARK : ColorMode::LIGHT;
+            }
         }
     }
 
@@ -1697,14 +1703,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 
         auto task = [] {
-            bool dynamicVsync = false;
             std::unordered_map<std::string, std::string> payload;
             std::unordered_map<std::string, std::string> reply;
             payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
             payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
-            dynamicVsync = g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
-            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", dynamicVsync);
-            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(dynamicVsync);
+            g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", g_isDynamicVsync.load());
+            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(g_isDynamicVsync);
         };
         BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
@@ -2261,7 +2266,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
     auto pipeline = container->GetPipelineContext();
     bool isSystemWindow = GetIsSystemWindow(container) &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         if (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow() || isSystemWindow) {
             avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
@@ -3349,7 +3354,7 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
 bool UIContentImpl::IfNeedTouchOutsideListener(const std::string& windowName)
 {
     return !StringUtils::StartWith(windowName, SUBWINDOW_TOAST_PREFIX) ||
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
@@ -4746,6 +4751,17 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
     UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
+    RegisterGetCurrentPageName(pipeline);
+}
+
+void UIContentImpl::RegisterGetCurrentPageName(RefPtr<PipelineBase> pipeline)
+{
+    auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_RETURN(pipeline, "");
+        return pipeline->GetCurrentPageNameCallback();
+    };
+    UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
 }
 
 bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)

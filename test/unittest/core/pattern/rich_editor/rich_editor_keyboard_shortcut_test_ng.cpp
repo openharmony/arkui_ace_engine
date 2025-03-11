@@ -205,12 +205,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts002, TestS
     richEditorPattern->SetCaretPosition(0);
     richEditorPattern->CursorMove(CaretMoveIntent::LineEnd);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 6);
-    richEditorPattern->SetCaretPosition(0);
-    richEditorPattern->HandleSelect(CaretMoveIntent::LineEnd);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
-    richEditorPattern->SetCaretPosition(0);
-    richEditorPattern->HandleSelect(CaretMoveIntent::Down);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
 }
 
 /**

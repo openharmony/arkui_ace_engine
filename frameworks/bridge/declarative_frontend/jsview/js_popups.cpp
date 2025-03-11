@@ -534,6 +534,103 @@ void ParseCustomPopupParam(
 
     ParsePopupCommonParam(info, popupObj, popupParam);
 }
+
+void ParseTipsParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& tipsParam)
+{
+    CHECK_NULL_VOID(tipsParam);
+    auto appearingTimeVal = tipsObj->GetProperty("appearingTime");
+    if (appearingTimeVal->IsNumber()) {
+        auto appearingTime = appearingTimeVal->ToNumber<int32_t>();
+        if (appearingTime >= 0) {
+            tipsParam->SetAppearingTime(appearingTime);
+        }
+    }
+
+    auto disappearingTimeVal = tipsObj->GetProperty("disappearingTime");
+    if (disappearingTimeVal->IsNumber()) {
+        auto disappearingTime = disappearingTimeVal->ToNumber<int32_t>();
+        if (disappearingTime >= 0) {
+            tipsParam->SetDisappearingTime(disappearingTime);
+        }
+    }
+
+    auto appearingTimeWithContinuousOperationVal = tipsObj->GetProperty("appearingTimeWithContinuousOperation");
+    if (appearingTimeWithContinuousOperationVal->IsNumber()) {
+        auto appearingTimeWithContinuousOperation = appearingTimeWithContinuousOperationVal->ToNumber<int32_t>();
+        if (appearingTimeWithContinuousOperation >= 0) {
+            tipsParam->SetAppearingTimeWithContinuousOperation(appearingTimeWithContinuousOperation);
+        }
+    }
+
+    auto disappearingTimeWithContinuousOperationVal = tipsObj->GetProperty("disappearingTimeWithContinuousOperation");
+    if (disappearingTimeWithContinuousOperationVal->IsNumber()) {
+        auto disappearingTimeWithContinuousOperation = disappearingTimeWithContinuousOperationVal->ToNumber<int32_t>();
+        if (disappearingTimeWithContinuousOperation >= 0) {
+            tipsParam->SetDisappearingTimeWithContinuousOperation(disappearingTimeWithContinuousOperation);
+        }
+    }
+
+    auto enableArrowValue = tipsObj->GetProperty("enableArrow");
+    if (enableArrowValue->IsBoolean()) {
+        tipsParam->SetEnableArrow(enableArrowValue->ToBoolean());
+    }
+    tipsParam->SetBlockEvent(false);
+    tipsParam->SetTipsFlag(true);
+}
+
+void ParseTipsArrowPositionParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& tipsParam)
+{
+    CalcDimension offset;
+    auto arrowPointPosition = tipsObj->GetProperty("arrowPointPosition");
+    if (arrowPointPosition->IsString()) {
+        char* pEnd = nullptr;
+        auto arrowString = arrowPointPosition->ToString();
+        std::strtod(arrowString.c_str(), &pEnd);
+        if (pEnd != nullptr) {
+            if (std::strcmp(pEnd, "Start") == 0) {
+                offset = ARROW_ZERO_PERCENT_VALUE;
+            }
+            if (std::strcmp(pEnd, "Center") == 0) {
+                offset = ARROW_HALF_PERCENT_VALUE;
+            }
+            if (std::strcmp(pEnd, "End") == 0) {
+                offset = ARROW_ONE_HUNDRED_PERCENT_VALUE;
+            }
+            if (tipsParam) {
+                tipsParam->SetArrowOffset(offset);
+            }
+        }
+    }
+}
+
+void ParseTipsArrowSizeParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& tipsParam)
+{
+    auto arrowWidthVal = tipsObj->GetProperty("arrowWidth");
+    if (!arrowWidthVal->IsNull()) {
+        bool setError = true;
+        CalcDimension arrowWidth;
+        if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth)) {
+            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
+                tipsParam->SetArrowWidth(arrowWidth);
+                setError = false;
+            }
+        }
+        tipsParam->SetErrorArrowWidth(setError);
+    }
+
+    auto arrowHeightVal = tipsObj->GetProperty("arrowHeight");
+    if (!arrowHeightVal->IsNull()) {
+        bool setError = true;
+        CalcDimension arrowHeight;
+        if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight)) {
+            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
+                tipsParam->SetArrowHeight(arrowHeight);
+                setError = false;
+            }
+        }
+        tipsParam->SetErrorArrowHeight(setError);
+    }
+}
 #endif
 
 uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& menuParam)
@@ -1091,6 +1188,25 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
+{
+    if (info.Length() < PARAMETER_LENGTH_SECOND || (!info[NUM_ZERO]->IsString() && !info[NUM_ZERO]->IsObject()) ||
+        !info[NUM_FIRST]->IsObject()) {
+        return;
+    }
+    auto tipsParam = AceType::MakeRefPtr<PopupParam>();
+    CHECK_NULL_VOID(tipsParam);
+    // Set message to tipsParam
+    tipsParam->SetMessage(info[0]->ToString());
+    // Set bindTipsOptions to tipsParam
+    auto tipsObj = JSRef<JSObject>::Cast(info[1]);
+    // Parse bindTipsOptions param
+    ParseTipsParam(tipsObj, tipsParam);
+    ParseTipsArrowPositionParam(tipsObj, tipsParam);
+    ParseTipsArrowSizeParam(tipsObj, tipsParam);
+    ViewAbstractModel::GetInstance()->BindTips(tipsParam);
+}
+
 void JSViewAbstract::SetPopupDismiss(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
@@ -1332,7 +1448,7 @@ bool JSViewAbstract::ParseSheetIsShow(const JSCallbackInfo& info, const std::str
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
         callback = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "changeEvent");
-        if (!callback && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (!callback && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             TAG_LOGD(AceLogTag::ACE_SHEET, "Try %{public}s another parsing", name.c_str());
             callback = JSViewPopups::ParseDoubleBindCallback(info, callbackObj, "$value");
         }

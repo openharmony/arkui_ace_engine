@@ -56,6 +56,59 @@ double Decoration::HorizontalSpaceOccupied(double dipScale) const
     return border_.HorizontalWidth(dipScale) + padding_.HorizontalInPx(dipScale);
 }
 
+void Decoration::SetGradient(
+    const Gradient& gradient, const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
+{
+    gradient_ = gradient;
+    if (callback) {
+        switch (gradient_.GetType()) {
+            case GradientType::LINEAR:
+                if (gradient_.GetLinearGradient().angle) {
+                    gradient_.GetLinearGradient().angle->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                break;
+            case GradientType::SWEEP:
+                if (gradient_.GetSweepGradient().centerX) {
+                    gradient_.GetSweepGradient().centerX->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                if (gradient_.GetSweepGradient().centerY) {
+                    gradient_.GetSweepGradient().centerY->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                if (gradient_.GetSweepGradient().startAngle) {
+                    gradient_.GetSweepGradient().startAngle->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                if (gradient_.GetSweepGradient().endAngle) {
+                    gradient_.GetSweepGradient().endAngle->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                if (gradient_.GetSweepGradient().rotation) {
+                    gradient_.GetSweepGradient().rotation->SetContextAndCallbackAfterFirstAssign(context, callback);
+                }
+                break;
+            case GradientType::RADIAL:
+                if (gradient_.GetRadialGradient().radialHorizontalSize) {
+                    gradient_.GetRadialGradient().radialHorizontalSize->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                if (gradient_.GetRadialGradient().radialVerticalSize) {
+                    gradient_.GetRadialGradient().radialVerticalSize->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                if (gradient_.GetRadialGradient().radialCenterX) {
+                    gradient_.GetRadialGradient().radialCenterX->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                if (gradient_.GetRadialGradient().radialCenterY) {
+                    gradient_.GetRadialGradient().radialCenterY->SetContextAndCallbackAfterFirstAssign(
+                        context, callback);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void Gradient::AddColor(const GradientColor& color)
 {
     colors_.push_back(color);

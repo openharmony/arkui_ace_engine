@@ -2016,8 +2016,8 @@ void ViewAbstract::BindPopup(
         }
         if (!showInSubWindow) {
             // erase popup when target node destroy
-            auto destructor = [id = targetNode->GetId()]() {
-                auto pipeline = NG::PipelineContext::GetCurrentContext();
+            auto destructor = [id = targetNode->GetId(), weak = AceType::WeakClaim(context)]() {
+                auto pipeline = weak.Upgrade();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
@@ -2083,6 +2083,116 @@ void ViewAbstract::BindPopup(
     } else {
         overlayManager->HidePopup(targetId, popupInfo);
     }
+}
+
+void ViewAbstract::BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_VOID(param);
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto context = targetNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto tipsInfo = overlayManager->GetPopupInfo(targetId);
+    auto showInSubWindow = param->IsShowInSubWindow();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+    if (subwindow) {
+        subwindow->GetPopupInfoNG(targetId, tipsInfo);
+    }
+    if (tipsInfo.popupNode) {
+        showInSubWindow = true;
+    }
+    HandleHoverTipsInfo(param, targetNode, tipsInfo, showInSubWindow, instanceId);
+}
+
+void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
+    PopupInfo& tipsInfo, bool showInSubWindow, int32_t instanceId)
+{
+    CHECK_NULL_VOID(param);
+    CHECK_NULL_VOID(targetNode);
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = tipsInfo.popupId;
+    auto popupNode = tipsInfo.popupNode;
+    RefPtr<BubblePattern> popupPattern;
+    tipsInfo.markNeedUpdate = true;
+    popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
+    if (popupNode) {
+        popupId = popupNode->GetId();
+    }
+    if (!showInSubWindow) {
+        auto destructor = [id = targetNode->GetId()]() {
+            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ErasePopup(id);
+            SubwindowManager::GetInstance()->HideSubWindowNG();
+        };
+        targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
+    } else {
+        auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            CHECK_NULL_VOID(subwindow);
+            auto overlayManager = subwindow->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->ErasePopup(id);
+            SubwindowManager::GetInstance()->HideSubWindowNG();
+        };
+        targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
+    }
+    tipsInfo.popupId = popupId;
+    tipsInfo.popupNode = popupNode;
+    tipsInfo.isBlockEvent = param->IsBlockEvent();
+    if (popupNode) {
+        popupNode->MarkModifyDone();
+    }
+    AddHoverEventForTips(param, targetNode, tipsInfo, showInSubWindow);
+}
+
+void ViewAbstract::AddHoverEventForTips(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, PopupInfo& tipsInfo, bool showInSubWindow)
+{
+    tipsInfo.disappearingTimeWithContinuousOperation = param->GetDisappearingTimeWithContinuousOperation();
+    tipsInfo.focusable = param->GetFocusable();
+    tipsInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    tipsInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
+    tipsInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
+    auto popupId = tipsInfo.popupId;
+    auto popupNode = tipsInfo.popupNode;
+    auto targetId = targetNode->GetId();
+    auto context = targetNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [targetNode, targetId, tipsInfo, param, overlayManager, showInSubWindow, popupId, popupNode](
+                         bool isHover) {
+        if (isHover) {
+            BubbleView::UpdatePopupParam(popupId, param, targetNode);
+            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            if (showInSubWindow) {
+                SubwindowManager::GetInstance()->ShowTipsNG(
+                    targetNode, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation());
+                return;
+            }
+            overlayManager->ShowTips(
+                targetId, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation());
+        } else {
+            if (showInSubWindow) {
+                SubwindowManager::GetInstance()->HideTipsNG(targetId, param->GetDisappearingTime());
+                return;
+            }
+            overlayManager->HideTips(targetId, tipsInfo, param->GetDisappearingTime());
+        }
+    };
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
 }
 
 RefPtr<OverlayManager> ViewAbstract::GetCurOverlayManager(const RefPtr<UINode>& node)
@@ -2363,7 +2473,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     menuPattern->SetCustomNode(node);
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
-    auto theme = pipelineContext->GetTheme<SelectTheme>();
+    auto theme = pipelineContext->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
     CHECK_NULL_RETURN(theme, ERROR_CODE_INTERNAL_ERROR);
     auto expandDisplay = theme->GetExpandDisplay();
     menuWrapperPattern->SetIsOpenMenu(true);
@@ -2462,7 +2572,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
 
@@ -2492,7 +2602,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter %{public}d", menuParam.type);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     auto pipelineContext = targetNode->GetContext();
@@ -3360,6 +3470,13 @@ void ViewAbstract::SetPrivacySensitive(bool flag)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(flag);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ViewAbstract::SetPrivacySensitive(FrameNode* frameNode, bool flag)
+{
     CHECK_NULL_VOID(frameNode);
     frameNode->SetPrivacySensitive(flag);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

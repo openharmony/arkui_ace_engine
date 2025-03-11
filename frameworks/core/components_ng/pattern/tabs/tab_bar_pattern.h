@@ -158,8 +158,8 @@ class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
 public:
-    TabBarPattern() = default;
-    ~TabBarPattern() override = default;
+    TabBarPattern();
+    ~TabBarPattern() override;
 
     bool IsAtomicNode() const override
     {

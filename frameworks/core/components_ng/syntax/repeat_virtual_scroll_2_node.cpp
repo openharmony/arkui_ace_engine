@@ -395,10 +395,11 @@ void RepeatVirtualScroll2Node::RequestContainerReLayout(IndexType fromRepeatItem
 
     children_.clear();
 
-    auto frameNode = GetParentFrameNode();
-    if (frameNode) {
+    if (fromRepeatItemIndex != INT_MIN) {
         // container children starting from index 0 need to be updated
-        frameNode->ChildrenUpdatedFrom(fromRepeatItemIndex + startIndex_);
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(fromRepeatItemIndex + startIndex_);
+        }
     }
 
     // do not call when visible items have not changed
@@ -406,6 +407,24 @@ void RepeatVirtualScroll2Node::RequestContainerReLayout(IndexType fromRepeatItem
 
     // do not call when visible items have not changed
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+void RepeatVirtualScroll2Node::NotifyContainerLayoutChange(int32_t index, int32_t count,
+    NG::UINode::NotificationType notificationType)
+{
+    TAG_LOGD(AceLogTag::ACE_REPEAT,
+        "NotifyContainerLayoutChange triggered by Repeat rerender: nodeId: %{public}d "
+        "index: %{public}d, count: %{public}d notificationType: %{public}d",
+        static_cast<int32_t>(GetId()), index, count, static_cast<int32_t>(notificationType));
+
+    int64_t accessibilityId = GetAccessibilityId();
+
+    children_.clear();
+
+    auto frameNode = GetParentFrameNode();
+    if (frameNode) {
+        frameNode->NotifyChange(index + startIndex_, count, accessibilityId, notificationType);
+    }
 }
 
 // called from container layout
@@ -678,6 +697,18 @@ void RepeatVirtualScroll2Node::SetOnMove(std::function<void(int32_t, int32_t)>&&
         InitAllChildrenDragManager(false);
     }
     onMoveEvent_ = onMove;
+}
+
+void RepeatVirtualScroll2Node::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+    std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+    std::function<void(int32_t)>&& onDrop)
+{
+    if (onMoveEvent_) {
+        onLongPressEvent_ = onLongPress;
+        onDragStartEvent_ = onDragStart;
+        onMoveThroughEvent_ = onMoveThrough;
+        onDropEvent_ = onDrop;
+    }
 }
 
 void RepeatVirtualScroll2Node::MoveData(int32_t from, int32_t to)

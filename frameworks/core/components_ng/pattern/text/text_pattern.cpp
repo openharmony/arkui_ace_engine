@@ -190,6 +190,17 @@ void TextPattern::InitSelection(const Offset& pos)
         selectionOffset.SetY(pManager_->GetHeight());
     }
     int32_t extend = pManager_->GetGlyphIndexByCoordinate(selectionOffset, true);
+    if (pManager_->GetParagraphs().size() > 1) {
+        // paragraph may contain only newlines, look forward for non-newlines characters.
+        auto selectRects = pManager_->GetRects(extend, extend + 1);
+        if (selectRects.size() == 1 && NearZero(selectRects.back().Width())) {
+            auto selectStr = GetSelectedText(extend, extend + 1);
+            while (selectStr == u"\n" && extend > 0) {
+                --extend;
+                selectStr = GetSelectedText(extend, extend + 1);
+            }
+        }
+    }
     int32_t start = 0;
     int32_t end = 0;
     if (!pManager_->GetWordBoundary(extend, start, end)) {
@@ -1364,7 +1375,7 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
         auto bottom = std::max(textSelector_.firstHandle.Bottom(), textSelector_.secondHandle.Bottom());
         auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
         auto left = textContentGlobalOffset.GetX();
-        auto right = textContentGlobalOffset.GetY() + contentRect_.Width();
+        auto right = textContentGlobalOffset.GetX() + contentRect_.Width();
         aiRect = RectT(left, top, right - left, bottom - top);
     } else {
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
@@ -2594,13 +2605,7 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
                     imageChildren.emplace_back(node);
                 }
             }
-            TextDragInfo info;
-            if (pattern->selectOverlay_->IsHandleVisible(true)) {
-                info.firstHandle = pattern->textSelector_.firstHandle;
-            }
-            if (pattern->selectOverlay_->IsHandleVisible(false)) {
-                info.secondHandle = pattern->textSelector_.secondHandle;
-            }
+            auto info = pattern->CreateTextDragInfo();
             pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren, info);
             auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
             if (textDragPattern) {
@@ -2613,6 +2618,29 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
+}
+
+TextDragInfo TextPattern::CreateTextDragInfo()
+{
+    TextDragInfo info;
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, info);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, info);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, info);
+    info.handleColor = theme->GetCaretColor();
+    info.selectedBackgroundColor = theme->GetSelectedColor();
+    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfos();
+    if (selectOverlayInfo.has_value()) {
+        if (selectOverlayInfo->firstHandle.isShow) {
+            info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
+        }
+        if (selectOverlayInfo->secondHandle.isShow) {
+            info.secondHandle =  selectOverlayInfo->secondHandle.paintRect;
+        }
+    }
+    return info;
 }
 
 const std::list<RefPtr<UINode>>& TextPattern::GetAllChildren() const
@@ -2675,6 +2703,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.lineBreakStrategy = static_cast<int32_t>(node->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
     textStyle.textShadows = node->GetTextShadowValue({});
     textStyle.textBackgroundStyle = node->GetTextBackgroundStyle();
+    textStyle.paragraphSpacing = node->GetParagraphSpacing();
     return textStyle;
 }
 

@@ -137,6 +137,7 @@ bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& add
 bool NavigationManager::CheckNodeNeedCache(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
+
     auto context = node->GetRenderContext();
     if ((context && context->GetAnimationsCount() != 0) || node->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         return false;
@@ -158,6 +159,15 @@ bool NavigationManager::CheckNodeNeedCache(const RefPtr<FrameNode>& node)
                 return false;
             }
             nodeStack.push(child);
+        }
+        auto overlayNode = curNode->GetOverlayNode();
+        if (overlayNode) {
+            auto overlayNodeContext = overlayNode->GetRenderContext();
+            if ((overlayNodeContext && overlayNodeContext->GetAnimationsCount() != 0) ||
+                overlayNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+                return false;
+            }
+            nodeStack.push(overlayNode);
         }
     }
     return true;
@@ -182,9 +192,10 @@ void NavigationManager::UpdatePreNavNodeRenderGroupProperty()
     UpdateAnimationCachedRenderGroup(preNavDestContentNode, state);
     preNodeAnimationCached_ = state;
     preNodeNeverSet_ = false;
-    TAG_LOGD(AceLogTag::ACE_NAVIGATION,
-        "Cache PreNavNode node(id=%{public}d name=%{public}s) childrenAnimationAndTagState=%{public}d",
-        preNavDestContentNode->GetId(), preNavDestContentNode->GetTag().c_str(), state);
+    auto preNavPattern = preNavNode_->GetPattern<NavDestinationPattern>();
+    auto name = preNavPattern == nullptr ? "NavBar" : preNavPattern->GetName();
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache PreNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
+        state ? "yes" : "no");
 }
 
 void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
@@ -196,9 +207,10 @@ void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
     UpdateAnimationCachedRenderGroup(curNavDestContentNode, state);
     curNodeAnimationCached_ = state;
     currentNodeNeverSet_ = false;
-    TAG_LOGD(AceLogTag::ACE_NAVIGATION,
-        "Cache CurNavNode node(id=%{public}d name=%{public}s) childrenAnimationAndTagState=%{public}d",
-        curNavDestContentNode->GetId(), curNavDestContentNode->GetTag().c_str(), state);
+    auto curNavPattern = curNavNode_->GetPattern<NavDestinationPattern>();
+    auto name = curNavPattern == nullptr ? "NavBar" : curNavPattern->GetName();
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache CurNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
+        state ? "yes" : "no");
 }
 
 void NavigationManager::ResetCurNavNodeRenderGroupProperty()
@@ -235,7 +247,7 @@ void NavigationManager::CacheNavigationNodeAnimation()
         UpdateCurNavNodeRenderGroupProperty();
     }
     // If the cached entry page changes again, cancel the previously marked entry page.
-    if (!currentNodeNeverSet_ && pipeline->GetIsRequestVsync()) {
+    if (!currentNodeNeverSet_) {
         ResetCurNavNodeRenderGroupProperty();
     }
 }
@@ -247,7 +259,7 @@ void NavigationManager::UpdateAnimationCachedRenderGroup(const RefPtr<FrameNode>
     TAG_LOGD(AceLogTag::ACE_NAVIGATION,
         "UpdateAnimationCachedRenderGroup node(id=%{public}d name=%{public}s), isSet=%{public}d", node->GetId(),
         node->GetTag().c_str(), isSet);
-    context->OnRenderGroupUpdate(isSet);
+    context->UpdateRenderGroup(isSet, false, false);
 }
 
 bool NavigationManager::AddRecoverableNavigation(std::string id, RefPtr<AceType> navigationNode)

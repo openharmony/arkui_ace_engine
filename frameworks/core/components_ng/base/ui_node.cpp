@@ -36,7 +36,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         nodeInfo_->codeCol = pos.second;
     }
     apiVersion_ = Container::GetCurrentApiTargetVersion();
-    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         depth_ = 1;
         hostPageId_ = INT32_MAX;
     }
@@ -448,7 +448,7 @@ void UINode::ResetParent()
 {
     parent_.Reset();
     depth_ = -1;
-    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         SetDepth(1);
         SetHostPageIdByParent(INT32_MAX);
     }
@@ -544,7 +544,7 @@ void UINode::DoAddChild(
         child->UpdateThemeScopeId(themeScopeId);
     }
     child->SetDepth(GetDepth() + 1);
-    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         child->SetHostPageIdByParent(hostPageId_);
     }
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
@@ -1027,6 +1027,9 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
             DumpInfo();
             DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
         }
+    }
+    if (!CheckVisibleOrActive()) {
+        return;
     }
     for (const auto& item : GetChildren()) {
         item->DumpTree(depth + 1, hasJson);
@@ -2070,7 +2073,7 @@ bool UINode::HasSkipNode()
 
 void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) || !child || !child->IsReusableNode()) {
+    if (LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) || !child || !child->IsReusableNode()) {
         return;
     }
     if (!IsInDestroying() && child->IsInDestroying()) {

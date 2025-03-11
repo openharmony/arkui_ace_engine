@@ -34,7 +34,6 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
@@ -1294,6 +1293,12 @@ public:
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+    }
+
+    void BindTips(const RefPtr<PopupParam>& param) override
+    {
+        auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ViewAbstract::BindTips(param, AceType::Claim(targetNode));
     }
 
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override

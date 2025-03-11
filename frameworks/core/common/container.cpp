@@ -15,20 +15,26 @@
 
 #include "core/common/container.h"
 
+#include <dirent.h>
+
 #include "core/common/ace_engine.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
 
-#include <dirent.h>
-
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
 int32_t Container::CurrentId()
 {
     return ContainerScope::CurrentId();
+}
+
+NG::SafeAreaInsets Container::GetKeyboardSafeArea()
+{
+    return {};
 }
 
 int32_t Container::SafelyId()
@@ -356,5 +362,39 @@ bool Container::CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
     auto executor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(executor, defaultRes);
     return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
+
+Window* Container::GetWindow() const
+{
+    auto context = GetPipelineContext();
+    return context ? context->GetWindow() : nullptr;
+}
+
+bool Container::LessThanAPIVersion(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 15
+               ? PipelineBase::GetCurrentContext() &&
+                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
+               : LessThanAPITargetVersion(version);
+}
+
+bool Container::GreatOrEqualAPIVersion(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 15
+               ? PipelineBase::GetCurrentContext() &&
+                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
+               : GreatOrEqualAPITargetVersion(version);
+}
+
+bool Container::LessThanAPIVersionWithCheck(PlatformVersion version)
+{
+    return PipelineBase::GetCurrentContextSafelyWithCheck() &&
+           PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() < static_cast<int32_t>(version);
+}
+
+bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
+{
+    return PipelineBase::GetCurrentContextSafelyWithCheck() &&
+           PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
 }
 } // namespace OHOS::Ace

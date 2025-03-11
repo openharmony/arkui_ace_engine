@@ -29,13 +29,8 @@ public:
     ~MockDragWindow() override = default;
 
     MOCK_METHOD1(DrawImage, void(void* skImage));
-#ifndef USE_GRAPHIC_TEXT_GINE
-    MOCK_METHOD3(DrawText,
-        void(std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText));
-#else
     MOCK_METHOD3(DrawText,
         void(std::shared_ptr<Rosen::Typography> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText));
-#endif
     MOCK_METHOD2(DrawTextNG, void(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern));
     MOCK_METHOD1(DrawPixelMap, void(const RefPtr<PixelMap>&));
     MOCK_METHOD1(DrawFrameNode, void(const RefPtr<NG::FrameNode>&));

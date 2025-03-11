@@ -815,7 +815,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     auto selectedDate = paramObj->GetProperty("selected");
     auto parseSelectedDate = ParseDate(selectedDate, true);
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto startDate = paramObj->GetProperty("start");
         auto endDate = paramObj->GetProperty("end");
         auto parseStartDate = ParseDate(startDate);

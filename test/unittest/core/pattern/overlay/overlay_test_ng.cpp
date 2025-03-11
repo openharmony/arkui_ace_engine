@@ -136,6 +136,30 @@ void OverlayTestNg::SetUpTestCase()
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == DragBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<DragBarTheme>();
+            } else if (type == IconTheme::TypeId()) {
+                return AceType::MakeRefPtr<IconTheme>();
+            } else if (type == DialogTheme::TypeId()) {
+                return AceType::MakeRefPtr<DialogTheme>();
+            } else if (type == PickerTheme::TypeId()) {
+                return AceType::MakeRefPtr<PickerTheme>();
+            } else if (type == SelectTheme::TypeId()) {
+                return AceType::MakeRefPtr<SelectTheme>();
+            } else if (type == MenuTheme::TypeId()) {
+                return AceType::MakeRefPtr<MenuTheme>();
+            } else if (type == ToastTheme::TypeId()) {
+                return AceType::MakeRefPtr<ToastTheme>();
+            } else if (type == SheetTheme::TypeId()) {
+                return AceType::MakeRefPtr<SheetTheme>();
+            } else if (type == TextTheme::TypeId()) {
+                return AceType::MakeRefPtr<TextTheme>();
+            } else {
+                return nullptr;
+            }
+        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 void OverlayTestNg::TearDownTestCase()
@@ -960,6 +984,142 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RemoveOverlayTest004
+ * @tc.desc: Test OverlayManager::RemoveOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, RemoveOverlayTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call HideAllPopups when ShowInSubwindow is false.
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowPopup(targetId, popupInfo);
+
+    /**
+     * @tc.steps: step3. create overlayManager and call removeOverlay when has one child.
+     * @tc.expected: removing overlay failed
+     */
+    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
+    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_TRUE(overlayManager->RemoveNonKeyboardOverlay(popupNode));
+}
+
+/**
+ * @tc.name: GetOverlayFrameNode001
+ * @tc.desc: Test OverlayManager::GetOverlayFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, GetOverlayFrameNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowPopup(targetId, popupInfo);
+
+    /**
+     * @tc.steps: step3. call GetOverlayFrameNode when has one child.
+     * @tc.expected: removing overlay failed
+     */
+    auto newNode = overlayManager->GetOverlayFrameNode();
+    EXPECT_EQ(newNode, nullptr);
+}
+
+/**
+ * @tc.name: GetOverlayFrameNode002
+ * @tc.desc: Test OverlayManager::GetOverlayFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, GetOverlayFrameNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create atomicservice node.
+     */
+    auto atom = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto menuBarRow = FrameNode::CreateFrameNode(V2::APP_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto stageNode = FrameNode::CreateFrameNode(
+    V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    atom->AddChild(stageNode);
+    atom->AddChild(menuBarRow);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetInstallationFree(1);
+
+    /**
+     * @tc.steps: step2. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    atom->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step3. showpopup node.
+     */
+    overlayManager->ShowPopup(targetId, popupInfo);
+
+    /**
+     * @tc.steps: step4. call GetOverlayFrameNode when has one child.
+     * @tc.expected: removing overlay failed
+     */
+    auto newNode = overlayManager->GetOverlayFrameNode();
+    EXPECT_EQ(newNode, nullptr);
+}
+
+/**
  * @tc.name: DialogTest001
  * @tc.desc: Test OverlayManager::ShowCustomDialog->CloseDialog.
  * @tc.type: FUNC
@@ -1544,6 +1704,213 @@ HWTEST_F(OverlayTestNg, DialogTest009, TestSize.Level1)
 
     overlayManager->OpenCustomDialog(dialogParam, callbackFunc);
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
+}
+
+/**
+ * @tc.name: DialogTest010
+ * @tc.desc: Test SetDialogMask->DismissDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and dialogProperties.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: DialogNode created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialog = overlayManager->SetDialogMask(dialogProperties);
+    auto dialogMapSize = overlayManager->dialogMap_.size();
+    EXPECT_EQ(dialogMapSize, 1);
+
+    /**
+     * @tc.steps: step3. test OverlayManager.GetDialog function.
+     * @tc.expected: overlayManager.dialog.id equal to GetDialog(dialogId).id.
+     */
+    int32_t dialogId = dialog->GetId();
+    auto dialogNode = overlayManager->GetDialog(dialogId);
+    CHECK_NULL_VOID(dialogNode);
+    EXPECT_EQ(dialogId, dialogNode->GetId());
+
+    /**
+     * @tc.steps4: Call DismissDialog function.
+     * @tc.expected: DismissDialog function is called.
+     */
+    ViewAbstract::DismissDialog();
+    EXPECT_EQ(overlayManager->dialogMap_.size(), dialogMapSize);
+}
+
+/**
+ * @tc.name: DialogTest011
+ * @tc.desc: Test OverlayManager::OpenCustomDialog->CloseCustomDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and dialogParam.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. create dialog content node.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.contentNode = contentNode;
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog for contentNode.
+     * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
+     */
+    overlayManager->OpenCustomDialog(dialogParam, nullptr);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+
+    /**
+     * @tc.steps: step4. call CloseCustomDialog for contentNode.
+     * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
+     */
+    overlayManager->CloseCustomDialog(contentNode, nullptr);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+}
+
+/**
+ * @tc.name: DialogTest012
+ * @tc.desc: Test OverlayManager::OpenCustomDialog(customBuilderWithId)->CloseCustomDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. create dialog content node.
+     */
+    int32_t newDialogId;
+    DialogProperties dialogParam;
+    dialogParam.customBuilderWithId = [&newDialogId](const int32_t dialogId) {
+        EXPECT_TRUE(dialogId > 0);
+        newDialogId = dialogId;
+    };
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog for contentNode.
+     * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
+     */
+    auto openCallbackFst = [](int32_t errorCode) {
+        EXPECT_NE(errorCode, ERROR_CODE_NO_ERROR);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackFst);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+
+    EXPECT_TRUE(newDialogId > 0);
+    overlayManager->CloseCustomDialog(newDialogId);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+}
+
+/**
+ * @tc.name: DialogTest013
+ * @tc.desc: Test OverlayManager::OpenCustomDialog(customBuilder)->CloseCustomDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. create dialog customBuilder.
+     */
+    DialogProperties dialogParam;
+    dialogParam.customBuilder = []() {};
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog for customBuilder.
+     * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
+     */
+    auto openCallbackFst = [](int32_t errorCode) {
+        EXPECT_NE(errorCode, ERROR_CODE_NO_ERROR);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackFst);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+
+    /**
+     * @tc.steps: step4. call OpenCustomDialog for contentNode again.
+     * @tc.expected: cannot open again and dialogMap_ is still 1.
+     */
+    auto openCallbackSnd = [](int32_t errorCode) {
+        EXPECT_NE(errorCode, ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackSnd);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+}
+
+/**
+ * @tc.name: DialogTest014
+ * @tc.desc: Test OverlayManager::OpenCustomDialog(customCNode)->CloseCustomDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. create dialog content node.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.customCNode = AceType::WeakClaim(AceType::RawPtr(contentNode));
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog for contentNode.
+     * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
+     */
+    auto openCallbackFst = [](int32_t errorCode) {
+        EXPECT_NE(errorCode, ERROR_CODE_NO_ERROR);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackFst);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
+    EXPECT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step4. call OpenCustomDialog for contentNode again.
+     * @tc.expected: cannot open again and dialogMap_ is still 1.
+     */
+    auto openCallbackSnd = [](int32_t errorCode) {
+        EXPECT_NE(errorCode, ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackSnd);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+
+    /**
+     * @tc.steps: step5. call CloseCustomDialog for contentNode.
+     * @tc.expected: CloseCustomDialog succeed.
+     */
+    auto closeCallbackSnd = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
+    };
+    overlayManager->CloseCustomDialog(contentNode, closeCallbackSnd);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 }
 
 /**

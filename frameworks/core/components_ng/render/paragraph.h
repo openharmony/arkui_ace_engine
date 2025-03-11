@@ -103,6 +103,11 @@ struct LeadingMargin {
         return size == other.size && pixmap == other.pixmap;
     }
 
+    bool IsValid()
+    {
+        return size.Width().IsValid() || size.Height().IsValid();
+    }
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -139,9 +144,11 @@ struct ParagraphStyle {
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;
     Dimension lineHeight;
-    bool halfLeading = false;
     Dimension indent;
+    bool halfLeading = false;
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
+    Dimension paragraphSpacing;
+    bool isEndAddParagraphSpacing = false;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -149,7 +156,8 @@ struct ParagraphStyle {
                fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
                leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
-               halfLeading == others.halfLeading && indent == others.indent;
+               halfLeading == others.halfLeading && indent == others.indent &&
+               paragraphSpacing == others.paragraphSpacing;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -173,6 +181,8 @@ struct ParagraphStyle {
         result += std::to_string(fontSize);
         result += ", indent: ";
         result += indent.ToString();
+        result += ", paragraphSpacing: ";
+        result += paragraphSpacing.ToString();
         return result;
     }
 };
@@ -284,6 +294,10 @@ public:
     virtual void TxtGetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) = 0;
+    virtual bool empty() const
+    {
+        return false;
+    };
 };
 } // namespace OHOS::Ace::NG
 

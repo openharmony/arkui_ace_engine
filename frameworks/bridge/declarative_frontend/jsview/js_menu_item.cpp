@@ -21,7 +21,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_item_theme.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
 
 namespace OHOS::Ace {
@@ -129,7 +128,6 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         }
         MenuItemModel::GetInstance()->Create(menuItemProps);
     }
-    JSMenuItemTheme::ApplyTheme();
 }
 
 void JSMenuItem::JSBind(BindingTarget globalObj)

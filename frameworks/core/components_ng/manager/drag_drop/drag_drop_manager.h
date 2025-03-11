@@ -21,10 +21,12 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/clipboard/clipboard.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
+#include "core/event/pointer_event.h"
 #include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace {
@@ -365,14 +367,27 @@ public:
         OffsetF originOffset;
         RefPtr<FrameNode> imageNode { nullptr };
         RefPtr<FrameNode> textNode { nullptr };
+        double finalDistanceX;
+        double finalDistanceY;
+        RefPtr<FrameNode> menuPreviewNode { nullptr };
+        RefPtr<FrameNode> relativeContainerNode { nullptr };
+        RectF dragPreviewRect;
+        RectF menuPreviewRect;
+        bool isMenuShow = false;
     } DragPreviewInfo;
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const DragPointerEvent& pointerEvent);
     void DragMoveAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager, Point point);
+    void DragMoveTransitionAnimation(const RefPtr<OverlayManager>& overlayManager,
+        const DragPreviewInfo& info, AnimationOption option, const Offset& newOffset);
     void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
-        const GestureEvent& event, const RefPtr<GestureEventHub>& gestureHub, bool isSubwindowOverlay = false);
+        const GestureEvent& event, const RefPtr<GestureEventHub>& gestureHub, PreparedInfoForDrag& data);
     void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
-        const OffsetF& gatherNodeCenter, Point point = { 1, 1 });
+        const OffsetF& gatherNodeCenter, PreparedInfoForDrag& data, Point point = { 1, 1 });
+    void SetDragStartAnimationOption(AnimationOption& option, int32_t containerId);
+    void DragAnimationCurve(RefPtr<Curve> curve);
+    void DragStartTransitionAnimation(
+        PreparedInfoForDrag& data, const Offset& newOffset, const DragPreviewInfo& info, AnimationOption option);
     void SetDragResult(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void SetDragBehavior(const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void ResetDragPreviewInfo()
@@ -422,6 +437,12 @@ public:
         isStartAnimationFinished_ = flag;
     }
 
+    bool GetStartAnimationStates()
+    {
+        animationStates_ = !animationStates_;
+        return animationStates_;
+    }
+
     static OffsetF GetTouchOffsetRelativeToSubwindow(int32_t containerId, int32_t x = 0, int32_t y = 0);
     static RectF GetMenuPreviewRect();
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
@@ -452,7 +473,8 @@ public:
     }
 
     void PushGatherPixelMap(const RefPtr<PixelMap>& pixelMap);
-    void GetGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth = 0.0f, float previewHeight = 0.0f);
+    void GetGatherPixelMap(DragDataCore& dragData, float scale, float previewWidth = 0.0f,
+        float previewHeight = 0.0f);
 
     const DragPointerEvent& GetDragDropPointerEvent() const
     {
@@ -524,7 +546,11 @@ public:
 
     void AddNewDragAnimation();
 
+    void AddNewDragStartAnimation();
+
     bool IsAllAnimationFinished();
+    
+    bool IsAllStartAnimationFinished();
 
     float GetCurrentDistance(float x, float y);
 
@@ -613,6 +639,13 @@ public:
         isReDragStart_ = isReDragStart;
     }
 
+    void SetDragStartAnimationRate(float rate)
+    {
+        dragStartAnimationRate_ = rate;
+    }
+    
+    bool CheckIsFolderSubwindowBoundary(float x, float y, int32_t instanceId);
+
     bool CheckIsUIExtensionBoundary(float x, float y, int32_t instanceId);
 
 private:
@@ -620,11 +653,15 @@ private:
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
     Offset CalcDragMoveOffset(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
+    Offset CalcContentTrationOffset(
+        const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
+    Offset CalculateNewOffset(
+        const RefPtr<FrameNode>& frameNode, const GestureEvent& event, bool isDragStartPending);
     bool UpdateDragMovePositionFinished(
         bool needDoDragMoveAnimate, bool isMenuShow, const Offset& newOffset, int32_t containerId);
     void UpdateDragPreviewScale();
     bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
-        DragPreviewInfo& dragPreviewInfo, const RefPtr<GestureEventHub>& gestureHub);
+        DragPreviewInfo& dragPreviewInfo, const RefPtr<GestureEventHub>& gestureHub, PreparedInfoForDrag& data);
     bool IsNeedDoDragMoveAnimate(const DragPointerEvent& pointerEvent);
     const RefPtr<NG::OverlayManager> GetDragAnimationOverlayManager(int32_t containerId);
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY,
@@ -660,6 +697,8 @@ private:
     int32_t GetWindowId();
     void AddItemDrag(const RefPtr<FrameNode>& frameNode, const RefPtr<EventHub>& eventHub);
     void RemoveItemDrag();
+    RectF GetFinalDragPreviewRect(const RefPtr<FrameNode>& imageNode, DragPreviewInfo& dragPreviewInfo,
+        const RefPtr<OverlayManager>& overlayManager);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -713,9 +752,12 @@ private:
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
+    float dragStartAnimationRate_ = 0.0f;
     int32_t badgeNumber_ = -1;
     int32_t currentAnimationCnt_ = 0;
     int32_t allAnimationCnt_ = 0;
+    int32_t currentStartAnimationCnt_ = 0;
+    int32_t allStartAnimationCnt_ = 0;
     bool isDragWithContextMenu_ = false;
     bool disableDefaultDropAnimation_ = false;
     Point dragDampStartPoint_ { 1, 1 };
@@ -731,6 +773,7 @@ private:
 
     Point dragMoveLastPoint_{};
     bool isStartAnimationFinished_{};
+    bool animationStates_ = true;
 };
 } // namespace OHOS::Ace::NG
 

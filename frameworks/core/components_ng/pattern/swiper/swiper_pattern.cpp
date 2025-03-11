@@ -63,7 +63,6 @@ namespace {
 constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
 constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
-constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
 constexpr float PX_EPSILON = 0.01f;
@@ -1143,6 +1142,16 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     PostIdleTask(GetHost());
     HandleTabsCachedMaxCount(startIndex_, endIndex_);
 
+    int32_t startIndex = startIndex_;
+    int32_t endIndex = endIndex_;
+    if (startIndex != prevStartIndex_ || endIndex != prevEndIndex_) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, startIndex, endIndex);
+    }
+    prevStartIndex_ = startIndex_;
+    prevEndIndex_ = endIndex_;
+
     if (!itemPosition_.empty()) {
         const auto& turnPageRateCallback = swiperController_->GetTurnPageRateCallback();
         auto firstItem = GetFirstItemInfoInVisibleArea();
@@ -1989,17 +1998,9 @@ int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex, bool isForceBackwar
             return targetIndex;
         }
         if (isForceBackward || currentIndex_ < targetIndex) {
-            if (IsHorizontalAndRightToLeft()) {
-                --targetIndex;
-            } else {
-                ++targetIndex;
-            }
+            ++targetIndex;
         } else {
-            if (IsHorizontalAndRightToLeft()) {
-                ++targetIndex;
-            } else {
-                --targetIndex;
-            }
+            --targetIndex;
         }
         if (!IsLoop() && (targetIndex < 0 || targetIndex >= TotalCount())) {
             return currentIndex_;
@@ -2503,7 +2504,8 @@ void SwiperPattern::InitIndicator()
             RemoveIndicatorNode();
             return;
         }
-        if (indicatorType == SwiperIndicatorType::DIGIT && lastSwiperIndicatorType_ == SwiperIndicatorType::DOT) {
+        if ((indicatorType == SwiperIndicatorType::DIGIT && lastSwiperIndicatorType_ == SwiperIndicatorType::DOT) ||
+            (indicatorType == SwiperIndicatorType::DOT && lastSwiperIndicatorType_ == SwiperIndicatorType::DIGIT)) {
             RemoveIndicatorNode();
             indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
                 [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
@@ -2650,7 +2652,7 @@ SwiperPattern::PanEventFunction SwiperPattern::ActionEndTask()
         auto mainDelta = pattern->IsHorizontalAndRightToLeft() ? -info.GetMainDelta() : info.GetMainDelta();
         pattern->HandleDragEnd(velocity, mainDelta);
         pattern->InitIndexCanChangeMap();
-        if (LessOrEqual(std::abs(velocity), NEW_MIN_TURN_PAGE_VELOCITY) &&
+        if (LessOrEqual(std::abs(velocity), pattern->newMinTurnPageVelocity_) &&
             std::abs(velocity) > MIN_DUMP_VELOCITY_THRESHOLD) {
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
@@ -3045,7 +3047,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     currentFirstIndex_ = currentPageStatus.second;
 
     groupTurnPageRate_ =
-        (IsSwipeByGroup() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+        (IsSwipeByGroup() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
         CalculateGroupTurnPageRate(additionalOffset) : 0.0f);
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
@@ -3140,7 +3142,7 @@ float SwiperPattern::CalculateGroupTurnPageRate(float additionalOffset)
 
 std::pair<int32_t, int32_t> SwiperPattern::CalculateStepAndItemCount() const
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return { RealTotalCount(), 1 };
     }
 
@@ -3473,7 +3475,7 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
         nextIndex = dragForward ? currentIndex_ - displayCount : currentIndex_ + displayCount;
     }
 
-    if (!onlyDistance && std::abs(velocity) > NEW_MIN_TURN_PAGE_VELOCITY && velocity != 0.0f) {
+    if (!onlyDistance && std::abs(velocity) > newMinTurnPageVelocity_ && velocity != 0.0f) {
         auto direction = GreatNotEqual(velocity, 0.0f);
         if (dragForward != direction || !dragThresholdFlag) {
             nextIndex = velocity > 0.0f ? nextIndex - displayCount : nextIndex + displayCount;
@@ -3510,9 +3512,10 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
     }
     // if direction is true, expected index to decrease by 1
     bool direction = Positive(velocity);
+
     bool overTurnPageVelocity =
         !onlyDistance && (std::abs(velocity) > (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
-                                                       ? NEW_MIN_TURN_PAGE_VELOCITY
+                                                       ? newMinTurnPageVelocity_
                                                        : MIN_TURN_PAGE_VELOCITY));
 
     auto firstIndex = firstItemInfo.first;
@@ -3551,7 +3554,7 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     auto dragThresholdFlag =
         direction ? dragDistance > firstItemLength / swiperProportion_ :
         firstItemInfoInVisibleArea.second.endPos < firstItemLength / swiperProportion_;
-    auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_MIN_TURN_PAGE_VELOCITY
+    auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? newMinTurnPageVelocity_
                                                                                            : MIN_TURN_PAGE_VELOCITY;
     if ((!onlyDistance && std::abs(velocity) > turnVelocity) || dragThresholdFlag) {
         nextIndex = direction ? firstIndex : firstItemInfoInVisibleArea.first + 1;
@@ -4491,7 +4494,8 @@ bool SwiperPattern::IsAtEnd() const
 
 bool SwiperPattern::AutoLinearIsOutOfBoundary(float mainOffset) const
 {
-    if (itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
+    // Check the scenario where all child nodes are within the window but isloop is true。
+    if (!IsLoop() || itemPosition_.empty() || static_cast<int32_t>(itemPosition_.size()) < TotalCount()) {
         return false;
     }
 
@@ -4811,7 +4815,7 @@ int32_t SwiperPattern::RealTotalCount() const
 
 int32_t SwiperPattern::DisplayIndicatorTotalCount() const
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return RealTotalCount();
     }
 
@@ -5714,7 +5718,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
             pipeline->FlushUITasks();
             pipeline->FlushMessages();
         }
-
+        FireSelectedEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         FireUnselectedEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         FireChangeEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         // lazyBuild feature.
@@ -6462,7 +6466,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
     bool releaseLeftTouchBottomStart = (currentIndex == totalCount - 1);
     bool releaseLeftTouchBottomEnd = (currentFirstIndex == 0);
     bool releaseRightTouchBottom = (currentFirstIndex == totalCount - 1);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && IsSwipeByGroup()) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSwipeByGroup()) {
         commTouchBottom = (currentFirstIndex >= totalCount - displayCount);
         releaseLeftTouchBottomStart = (currentIndex == totalCount - displayCount);
         releaseRightTouchBottom = (currentFirstIndex >= totalCount - displayCount);
@@ -6503,7 +6507,7 @@ void SwiperPattern::HandleTouchBottomLoop()
 
     bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
     bool releaseTouchBottom = (currentIndex == TotalCount() - 1);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && IsSwipeByGroup()) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSwipeByGroup()) {
         commTouchBottom = currentFirstIndex >= TotalCount() - GetDisplayCount();
         releaseTouchBottom = currentIndex >= TotalCount() - GetDisplayCount();
     }

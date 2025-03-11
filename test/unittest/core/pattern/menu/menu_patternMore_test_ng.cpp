@@ -100,6 +100,7 @@ void MenuPattern2TestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void MenuPattern2TestNg::TearDown()
@@ -493,5 +494,65 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount001, TestSize.Level1)
      */
     auto menuItem2 = menuPattern->GetIfElseMenuItem(innerMenuNode, true);
     ASSERT_EQ(menuItem2, menuItemNode);
+}
+
+/**
+ * @tc.name: UpdateBorderRadius001
+ * @tc.desc: Test UpdateBorderRadius.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(MenuPattern2TestNg, UpdateBorderRadius001, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
+     * ->menuItemNode
+     */
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode1);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    /**
+     * @tc.steps: step2. get InnerMenuPattern
+     */
+    auto menuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+
+    /**
+     * @tc.steps: step3. Call UpdateBorderRadius.
+     * @tc.expected: the function runs normally
+     */
+    BorderRadiusProperty borderRadius;
+    CalcDimension radiusDim(20.0f, DimensionUnit::VP);
+    borderRadius.SetRadius(radiusDim);
+    menuPattern->UpdateBorderRadius(innerMenuNode, borderRadius);
+
+    auto menuRenderContext = innerMenuNode->GetRenderContext();
+    ASSERT_NE(menuRenderContext, nullptr);
+    EXPECT_EQ(menuRenderContext->GetBorderRadius(), borderRadius);
 }
 } // namespace OHOS::Ace::NG

@@ -1799,7 +1799,7 @@ HWTEST_F(ViewAbstractTestNg, OpenMenu, TestSize.Level1)
     targetNodePipelineContext->SetThemeManager(themeManager);
     targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
 }
@@ -1838,7 +1838,7 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu, TestSize.Level1)
     targetNodePipelineContext->SetThemeManager(themeManager);
     targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     /**
      * @tc.expected: Return expected results.
      */
@@ -1887,7 +1887,7 @@ HWTEST_F(ViewAbstractTestNg, CloseMenu, TestSize.Level1)
     targetNodePipelineContext->SetThemeManager(themeManager);
     targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     /**
      * @tc.expected: Return expected results.
      */
@@ -1900,4 +1900,262 @@ HWTEST_F(ViewAbstractTestNg, CloseMenu, TestSize.Level1)
     overlayManager->menuMap_.clear();
     EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
 }
+
+/**
+ * @tc.name: FreezeUINodeById
+ * @tc.desc: Test FreezeUINodeById of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0037, TestSize.Level1)
+{
+    /**
+     * @tc.steps:  Create some FrameNode.
+     */
+    const std::string& id = "test_id";
+    auto targetNode =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() {
+                return AceType::MakeRefPtr<ButtonPattern>();
+            }
+        );
+     /**
+     * @tc.steps:  connect the FrameNode and id.
+     */
+    targetNode->UpdateInspectorId(id);
+
+    /**
+     * @tc.expected: call the function to freeze the node.
+     */
+    bool isFreeze = true;
+    ViewAbstract::FreezeUINodeById(id, isFreeze);
+
+    /**
+     * @tc.expected: verify the pipeline's property is set.
+     */
+    auto pipeline = targetNode->GetContext();
+    bool isOpenInvisibleFreeze = pipeline->IsOpenInvisibleFreeze();
+
+    EXPECT_EQ(isOpenInvisibleFreeze, true);
+    /**
+     * @tc.expected: verify the node's freeze state.
+     */
+    bool res = targetNode->IsFreeze();
+    EXPECT_EQ(res, isFreeze);
+}
+
+/**
+ * @tc.name: FreezeUINodeById
+ * @tc.desc: Test FreezeUINodeById of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0038, TestSize.Level1)
+{
+    /**
+     * @tc.steps:  Create some FrameNode.
+     */
+    const std::string& id = "test_id";
+    auto targetNode =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() {
+                return AceType::MakeRefPtr<ButtonPattern>();
+            }
+        );
+     /**
+     * @tc.steps:  connect the FrameNode and id.
+     */
+    targetNode->UpdateInspectorId(id);
+    /**
+     * @tc.steps:  set the FrameNode's  pipeline to null.
+     */
+    targetNode->context_ = nullptr;
+
+    /**
+     * @tc.expected: call the function to unfreeze the node.
+     */
+    bool isFreeze = false;
+    ViewAbstract::FreezeUINodeById(id, isFreeze);
+
+    /**
+     * @tc.expected: verify the pipeline's property is set.
+     */
+    auto pipeline = targetNode->GetContext();
+    bool isOpenInvisibleFreeze = pipeline->IsOpenInvisibleFreeze();
+    EXPECT_EQ(isOpenInvisibleFreeze, true);
+
+    /**
+     * @tc.expected: verify the node's freeze state.
+     */
+    bool res = targetNode->IsFreeze();
+    EXPECT_EQ(res, isFreeze);
+}
+
+/**
+ * @tc.name: FreezeUINodeById
+ * @tc.desc: Test FreezeUINodeById of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0039, TestSize.Level1)
+{
+     /**
+     * @tc.expected: use a non_existing node id.
+     */
+    const std::string& non_existing_id = "non_existing_id";
+    /**
+     * @tc.expected: call the function with the non_existing_id.
+     */
+    bool isFreeze = true;
+    ViewAbstract::FreezeUINodeById(non_existing_id, isFreeze);
+
+    auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(non_existing_id, true);
+    EXPECT_EQ(node, nullptr);
+}
+
+/**
+ * @tc.name: FreezeUINodeByUniqueId
+ * @tc.desc: Test FreezeUINodeByUniqueId of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0040, TestSize.Level1)
+{
+    /**
+     * @tc.steps:  Create some FrameNode.
+     */
+    const int32_t& uniqueId = 1111;
+    auto targetNode =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            uniqueId, []() {
+                return AceType::MakeRefPtr<ButtonPattern>();
+            }
+        );
+
+    /**
+     * @tc.expected: call the function to freeze the node.
+     */
+    bool isFreeze = true;
+    ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
+
+    /**
+     * @tc.expected: verify the pipeline's property is set.
+     */
+    auto pipeline = targetNode->GetContext();
+    bool isOpenInvisibleFreeze = pipeline->IsOpenInvisibleFreeze();
+
+    EXPECT_EQ(isOpenInvisibleFreeze, true);
+    /**
+     * @tc.expected: verify the node's freeze state.
+     */
+    bool res = targetNode->IsFreeze();
+    EXPECT_EQ(res, isFreeze);
+}
+
+/**
+ * @tc.name: FreezeUINodeByUniqueId
+ * @tc.desc: Test FreezeUINodeByUniqueId of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0041, TestSize.Level1)
+{
+    /**
+     * @tc.steps:  Create some FrameNode.
+     */
+    const int32_t& uniqueId = 222;
+    auto targetNode =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            uniqueId, []() {
+                return AceType::MakeRefPtr<ButtonPattern>();
+            }
+        );
+
+    /**
+     * @tc.steps:  set the FrameNode's  pipeline to null.
+     */
+    targetNode->context_ = nullptr;
+
+    /**
+     * @tc.expected: call the function to freeze the node.
+     */
+    bool isFreeze = false;
+    ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
+
+    /**
+     * @tc.expected: verify the pipeline's property is set.
+     */
+    auto pipeline = targetNode->GetContext();
+    bool isOpenInvisibleFreeze = pipeline->IsOpenInvisibleFreeze();
+
+    EXPECT_EQ(isOpenInvisibleFreeze, true);
+    /**
+     * @tc.expected: verify the node's freeze state.
+     */
+    bool res = targetNode->IsFreeze();
+    EXPECT_EQ(res, isFreeze);
+}
+
+/**
+ * @tc.name: FreezeUINodeByUniqueId
+ * @tc.desc: Test FreezeUINodeByUniqueId of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0042, TestSize.Level1)
+{
+     /**
+     * @tc.expected: use a non_existing node uniqueId.
+     */
+    const int32_t& non_existing_unique_id = 333;
+    /**
+     * @tc.expected: call the function with the non_existing_unique_id.
+     */
+    bool isFreeze = true;
+    ViewAbstract::FreezeUINodeByUniqueId(non_existing_unique_id, isFreeze);
+
+    auto node = ElementRegister::GetInstance()->GetNodeById(non_existing_unique_id);
+    EXPECT_EQ(node, nullptr);
+}
+
+/**
+ * @tc.name: SetPositionLocalizedEdges
+ * @tc.desc: Test SetPositionLocalizedEdges of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0043, TestSize.Level1)
+{
+    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+     /**
+     * @tc.expected: call the function to Update the layout property.
+     */
+    bool needLocalized = true;
+    ViewAbstract::SetPositionLocalizedEdges(needLocalized);
+
+    auto layoutProperty = targetNode->GetLayoutProperty();
+
+     /**
+     * @tc.expected: verify layout property is updated.
+     */
+    auto positionLocalizedEdges = layoutProperty->IsPositionLocalizedEdges();
+    EXPECT_EQ(positionLocalizedEdges, needLocalized);
+}
+
+/**
+ * @tc.name: SetPositionLocalizedEdges
+ * @tc.desc: Test SetPositionLocalizedEdges of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0044, TestSize.Level1)
+{
+    auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+     /**
+     * @tc.expected: call the function to Update the layout property.
+     */
+    bool needLocalized = false;
+    ViewAbstract::SetPositionLocalizedEdges(needLocalized);
+
+    auto layoutProperty = targetNode->GetLayoutProperty();
+
+     /**
+     * @tc.expected: verify layout property is updated.
+     */
+    auto positionLocalizedEdges = layoutProperty->IsPositionLocalizedEdges();
+    EXPECT_EQ(positionLocalizedEdges, needLocalized);
+}
+
 } // namespace OHOS::Ace::NG

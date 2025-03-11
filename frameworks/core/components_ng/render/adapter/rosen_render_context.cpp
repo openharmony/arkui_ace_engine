@@ -3950,6 +3950,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
     CHECK_NULL_VOID(node);
     std::list<RefPtr<FrameNode>> childrenList;
     auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
     node->GenerateOneDepthVisibleFrameWithTransition(childrenList);
     for (auto& child : childrenList) {
         auto rsChild = GetRsNodeByFrame(child);
@@ -4294,7 +4295,7 @@ void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyTyp
     CHECK_NULL_VOID(rsNode_);
     if (blendApplyType == BlendApplyType::FAST) {
         rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::FAST);
-    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER_ALPHA);
     } else {
         rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER);

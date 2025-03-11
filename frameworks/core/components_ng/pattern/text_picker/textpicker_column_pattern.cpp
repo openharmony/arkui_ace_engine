@@ -159,7 +159,7 @@ void TextPickerColumnPattern::OnModifyDone()
 
 void TextPickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     CHECK_NULL_VOID(host);
@@ -1011,11 +1011,16 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
 
     if (selectedMarkPaint_) {
-        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+        textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetSelectedColor().value_or(
+            pickerTheme->GetOptionStyle(true, true).GetTextColor()));
     } else {
-        textLayoutProperty->UpdateTextColor(
-            textPickerLayoutProperty->GetSelectedColor().value_or(
+        if (pickerTheme->IsCircleDial()) {
+            textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetColor().value_or(
                 pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+        } else {
+            textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetSelectedColor().value_or(
+                pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+        }
     }
 
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
@@ -1153,11 +1158,7 @@ void TextPickerColumnPattern::SetSelectColor(const RefPtr<TextLayoutProperty>& t
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, percent);
     if (selectedMarkPaint_ && isEqual) {
-        auto pipeline = GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_VOID(pickerTheme);
-        updateColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        updateColor = GetSelectedTextColor();
     }
 
     textLayoutProperty->UpdateTextColor(updateColor);
@@ -2166,6 +2167,30 @@ void TextPickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>&
 
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+}
+
+Color TextPickerColumnPattern::GetSelectedTextColor()
+{
+    Color selectColor(DEFAULT_SELECTED_FOCUS_TEXT_COLOR);
+
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, selectColor);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, selectColor);
+    selectColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, selectColor);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(blendNode, selectColor);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_RETURN(stackNode, selectColor);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_RETURN(parentNode, selectColor);
+    auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_RETURN(textPickerLayoutProperty, selectColor);
+
+    return textPickerLayoutProperty->GetSelectedColor().value_or(selectColor);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

@@ -83,6 +83,11 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/event/key_event.h"
 
+namespace OHOS::Ace::NG {
+constexpr uint32_t DEFAULT_GRID_SPAN = 1;
+constexpr int32_t DEFAULT_GRID_OFFSET = 0;
+}
+
 namespace OHOS::Ace {
 namespace {
 const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
@@ -311,6 +316,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
             break;
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
             previewOption.isMultiTiled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW):
+            previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
             break;
         default:
             break;
@@ -2198,7 +2206,7 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsSharedTransition", jsVal, checkList)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
         }
         return;
@@ -2206,7 +2214,7 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     // id
     auto id = jsVal->ToString();
     if (id.empty()) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
         }
         return;
@@ -5597,6 +5605,11 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         }
     }
 
+    auto sizeChangeEffect = obj->GetProperty("sizeChangeEffect");
+    if (sizeChangeEffect->IsNumber()) {
+        previewOption.sizeChangeEffect = static_cast<NG::DraggingSizeChangeEffect>(sizeChangeEffect->ToNumber<int>());
+    }
+
     JSViewAbstract::SetDragNumberBadge(info, previewOption);
 
     ParseDragInteractionOptions(info, previewOption);
@@ -6933,6 +6946,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("direction", &JSViewAbstract::SetDirection, opt);
 #ifndef WEARABLE_PRODUCT
     JSClass<JSViewAbstract>::StaticMethod("bindPopup", &JSViewAbstract::JsBindPopup);
+    JSClass<JSViewAbstract>::StaticMethod("bindTips", &JSViewAbstract::JsBindTips);
 #endif
 
     JSClass<JSViewAbstract>::StaticMethod("background", &JSViewAbstract::JsBackground);

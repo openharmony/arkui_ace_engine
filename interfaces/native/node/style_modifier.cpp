@@ -26,6 +26,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -9556,17 +9557,36 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE),
-        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_MULTI), item->value[NUM_0].i32)) {
+        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT), item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     bool isSingleRange = false;
     auto fullImpl = GetFullImpl();
-    if (!item->string) {
+    if (!item->string && !item->object) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    isSingleRange = item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE);
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(
-        node->uiNodeHandle, item->string, isSingleRange, item->value[NUM_0].i32);
+    if (item->object) {
+        if (item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_RANGE_CONTENT)) {
+            auto* TextPickerRangeContentArray = reinterpret_cast<ArkUITextPickerRangeContentArray>(item->object);
+            if (TextPickerRangeContentArray == nullptr) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerIconRangeStr(
+                node->uiNodeHandle, TextPickerRangeContentArray, isSingleRange, item->value[NUM_0].i32);
+        } else if (item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT)) {
+            auto TextCascadePickerRangeContentArray =
+                reinterpret_cast<ArkUITextCascadePickerRangeContentArray>(item->object);
+            if (TextCascadePickerRangeContentArray == nullptr) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextCascadePickRangeContent(
+                node->uiNodeHandle, TextCascadePickerRangeContentArray, item->value[NUM_0].i32);
+        }
+    } else if (item->string) {
+        isSingleRange = item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE);
+        fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(
+            node->uiNodeHandle, item->string, isSingleRange, item->value[NUM_0].i32);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 

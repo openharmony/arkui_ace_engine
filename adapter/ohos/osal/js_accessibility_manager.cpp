@@ -1388,7 +1388,7 @@ void UpdateElementInfoPageIdWithTreeId(Accessibility::AccessibilityElementInfo& 
 {
     int32_t pageId = info.GetPageId();
     if ((pageId >= MAX_PAGE_ID_WITH_SUB_TREE) || (pageId < 0)) {
-        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "pageId %{public}d cannot set tree id", pageId);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "pageId %{public}d cannot set tree id", pageId);
     } else {
         uint32_t unsignedPageId = static_cast<uint32_t>(pageId);
         uint32_t unsignedTreeId = static_cast<uint32_t>(treeId);
@@ -1914,13 +1914,6 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
         nodeInfo.SetRectInScreen(bounds);
     }
 }
-}
-
-Rect JsAccessibilityManager::GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node)
-{
-    auto rect = GetFinalRealRect(node);
-    Rect rectInfo(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    return rectInfo;
 }
 
 void JsAccessibilityManager::UpdateAccessibilityVisible(
@@ -2596,6 +2589,8 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetCurrentIndex(static_cast<int>(accessibilityEvent.currentItemIndex));
     eventInfo.SetItemCounts(static_cast<int>(accessibilityEvent.itemCount));
     eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
+    eventInfo.SetBeginIndex(accessibilityEvent.startIndex);
+    eventInfo.SetEndIndex(accessibilityEvent.endIndex);
 }
 } // namespace
 
@@ -3376,10 +3371,26 @@ int64_t JsAccessibilityManager::GetDelayTimeBeforeSendEvent(
     return 0;
 }
 
+bool JsAccessibilityManager::IsEventIgnoredByWorkMode(const AccessibilityEvent& accessibilityEvent)
+{
+    auto accessibilityWorkMode = GenerateAccessibilityWorkMode();
+    if (!accessibilityWorkMode.isTouchExplorationEnabled) {
+        switch (accessibilityEvent.type) {
+            case AccessibilityEventType::ELEMENT_INFO_CHANGE:
+            case AccessibilityEventType::TEXT_CHANGE:
+            case AccessibilityEventType::FOCUS:
+                return true;
+            default:
+                return false;
+        }
+    }
+    return false;
+}
+
 void JsAccessibilityManager::SendEventToAccessibilityWithNode(
     const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context)
 {
-    if (!IsSendAccessibilityEvent(accessibilityEvent)) {
+    if (IsEventIgnoredByWorkMode(accessibilityEvent) || !IsSendAccessibilityEvent(accessibilityEvent)) {
         return;
     }
     auto delayTime = GetDelayTimeBeforeSendEvent(accessibilityEvent, node);
@@ -3399,7 +3410,7 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNode(
 void JsAccessibilityManager::SendEventToAccessibilityWithNodeInner(
     const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context)
 {
-    ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
+    ACE_SCOPED_TRACE("SendAccessibilityAsyncEvent");
     CHECK_NULL_VOID(node);
     CHECK_NULL_VOID(context);
     int32_t windowId = static_cast<int32_t>(context->GetRealHostWindowId());
@@ -3464,7 +3475,7 @@ void GetRealEventWindowId(
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
-    if (!IsSendAccessibilityEvent(accessibilityEvent)) {
+    if (IsEventIgnoredByWorkMode(accessibilityEvent) || !IsSendAccessibilityEvent(accessibilityEvent)) {
         return;
     }
     auto delayTime = GetDelayTimeBeforeSendEvent(accessibilityEvent, nullptr);
@@ -7388,7 +7399,6 @@ void JsAccessibilityManager::TransferThirdProviderHoverEvent(
     config.sourceType = source;
     config.eventType = eventType;
     config.time = time;
-    config.hostNode = frameNode;
     config.context = ngPipeline;
     HandleAccessibilityHoverForThird(config);
 }
@@ -7436,5 +7446,65 @@ bool JsAccessibilityManager::IsScreenReaderEnabled()
     bool isEnabled = false;
     client->IsScreenReaderEnabled(isEnabled);
     return isEnabled;
+}
+
+int32_t JsAccessibilityManager::GetTransformDegreeRelativeToWindow(const RefPtr<NG::FrameNode>& node, bool excludeSelf)
+{
+    int32_t rotateDegree = 0;
+    auto context = node->GetRenderContext();
+    if (context && !excludeSelf) {
+        rotateDegree = context->GetRotateDegree();
+    }
+    auto parent = node->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        if (parent->IsWindowBoundary()) {
+            break;
+        }
+        auto contextParent = parent->GetRenderContext();
+        if (contextParent) {
+            rotateDegree += contextParent->GetRotateDegree();
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return rotateDegree %= FULL_ANGLE;
+}
+
+AccessibilityParentRectInfo JsAccessibilityManager::GetTransformRectInfoRelativeToWindow(
+    const RefPtr<NG::FrameNode>& node, const RefPtr<PipelineBase>& context)
+{
+    AccessibilityParentRectInfo rectInfo;
+    CHECK_NULL_RETURN(node, rectInfo);
+    CHECK_NULL_RETURN(context, rectInfo);
+    auto windowInfo = GenerateWindowInfo(node, context);
+    auto rectFinal = GetFinalRealRect(node);
+    RotateTransform rotateData;
+    RotateTransform windowRotateData = windowInfo.rotateTransform;
+    rotateData.rotateDegree = GetTransformDegreeRelativeToWindow(node);
+    AccessibilityRect rotateRect(rectFinal.GetX(), rectFinal.GetY(),
+        rectFinal.Width(), rectFinal.Height());
+    if (windowRotateData.rotateDegree) {
+        rotateRect.Rotate(windowRotateData.innerCenterX, windowRotateData.innerCenterY,
+            windowRotateData.rotateDegree);
+        rotateRect.ApplyTransformation(windowRotateData, windowInfo.scaleX, windowInfo.scaleY);
+        rotateData.rotateDegree += windowRotateData.rotateDegree;
+    } else {
+        RotateTransform roateDataTemp(0, windowInfo.left, windowInfo.top, 0, 0);
+        rotateRect.ApplyTransformation(roateDataTemp, windowInfo.scaleX, windowInfo.scaleY);
+    }
+    rectInfo.left = rotateRect.GetX();
+    rectInfo.top = rotateRect.GetY();
+    rectInfo.scaleX *= windowInfo.scaleX;
+    rectInfo.scaleY *= windowInfo.scaleY;
+    if (rotateData.rotateDegree) {
+        rotateData.centerX = static_cast<int32_t>(rotateRect.GetWidth()) * 0.5f + rotateRect.GetX();
+        rotateData.centerY = static_cast<int32_t>(rotateRect.GetHeight()) * 0.5f + rotateRect.GetY();
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, rectInfo);
+        auto rectOrigin = renderContext->GetPaintRectWithoutTransform();
+        rotateData.innerCenterX = rectOrigin.Width() * 0.5f;
+        rotateData.innerCenterY = rectOrigin.Height() * 0.5f;
+    }
+    rectInfo.rotateTransform = rotateData;
+    return rectInfo;
 }
 } // namespace OHOS::Ace::Framework

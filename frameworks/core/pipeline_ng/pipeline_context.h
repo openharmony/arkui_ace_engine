@@ -178,7 +178,7 @@ public:
     // remove schedule task by id.
     void RemoveScheduleTask(uint32_t id) override;
 
-    void GetCurrentPageNameCallback();
+    std::string GetCurrentPageNameCallback();
 
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false,
         bool isEventsPassThrough = false) override;
@@ -1277,7 +1277,7 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
-            if (nodeLeft->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+            if (nodeLeft->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
                 nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
                 return nodeLeft->IsOnMainTree();
             }

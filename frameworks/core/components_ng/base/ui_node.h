@@ -30,6 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/window_animation_config.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
@@ -908,6 +910,10 @@ public:
     }
 
     void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
+    virtual bool CheckVisibleOrActive()
+    {
+        return true;
+    }
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -992,6 +998,7 @@ protected:
      * @param id the accessibilityId of child.
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
+    const static std::set<std::string> layoutTags_;
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -1022,7 +1029,6 @@ private:
     bool isArkTsRenderNode_ = false;
     bool isTraversing_ = false;
     bool isAllowUseParentTheme_ = true;
-    const static std::set<std::string> layoutTags_;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;

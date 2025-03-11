@@ -119,6 +119,7 @@ void MenuAnimationTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MockContainer::SetUp();
 }
 
@@ -318,7 +319,7 @@ HWTEST_F(MenuAnimationTestNg, InitPreviewMenuAnimationInfo001, TestSize.Level1)
 
     auto pipeline = menuWrapperNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
 
     auto menuNode = menuWrapperPattern->GetMenu();
@@ -345,6 +346,36 @@ HWTEST_F(MenuAnimationTestNg, InitPreviewMenuAnimationInfo001, TestSize.Level1)
     menuPattern->previewMode_ = MenuPreviewMode::IMAGE;
     menuPattern->InitPreviewMenuAnimationInfo(menuTheme);
     EXPECT_TRUE(menuPattern->disappearOffset_.NonNegative());
+}
+
+/**
+ * @tc.name: InitPreviewMenuAnimationInfo002
+ * @tc.desc: Test InitPreviewMenuAnimationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuAnimationTestNg, InitPreviewMenuAnimationInfo002, TestSize.Level1)
+{
+    auto menuWrapperNode = GetImagePreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    auto pipeline = menuWrapperNode->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    ASSERT_NE(menuTheme, nullptr);
+
+    auto menuNode = menuWrapperPattern->GetMenu();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+
+    menuWrapperPattern->hasTransitionEffect_ = false;
+    menuPattern->isShowHoverImage_ = true;
+    menuPattern->previewMode_ = MenuPreviewMode::IMAGE;
+    menuPattern->InitPreviewMenuAnimationInfo(menuTheme);
+    EXPECT_EQ(menuPattern->disappearOffset_, menuPattern->endOffset_);
 }
 
 /**

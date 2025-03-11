@@ -29,6 +29,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/constant.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -1139,7 +1140,7 @@ void TextFieldPattern::ClearFocusStyle()
 
 void TextFieldPattern::ProcessAutoFillOnFocus()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 
@@ -2580,6 +2581,7 @@ void TextFieldPattern::InitDragDropCallBack()
         if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
             pattern->afterDragSelect_ = true;
         }
+        pattern->CloseKeyboard(true);
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 
@@ -2666,7 +2668,8 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(selectOverlay_);
     CHECK_NULL_VOID(multipleClickRecognizer_);
-    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) || !focusHub->IsFocusable()) {
+    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsValidClick(info)) ||
+        !focusHub->IsFocusable()) {
         return;
     }
     focusIndex_ = FocuseIndex::TEXT;
@@ -2690,7 +2693,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     selectOverlay_->SetUsingMouse(info.GetSourceDevice() == SourceType::MOUSE);
     lastClickTimeStamp_ = info.GetTimeStamp();
-    multipleClickRecognizer_->Start(info);
+    multipleClickRecognizer_->StartCounting(info);
     // register click event
     if (multipleClickRecognizer_->IsTripleClick()) {
         HandleTripleClickEvent(info);
@@ -3401,7 +3404,7 @@ void TextFieldPattern::OnModifyDone()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     SetIsEnableSubWindowMenu();
     isModifyDone_ = true;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         InitCancelButtonMouseEvent();
         InitPasswordButtonMouseEvent();
     }
@@ -4898,9 +4901,8 @@ void TextFieldPattern::NotifyImfFinishTextPreview()
         return;
     }
 #if defined(ENABLE_STANDARD_INPUT)
-    int32_t caretIndex = selectController_->GetCaretIndex();
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
-        u"", caretIndex, caretIndex);
+        u"", 0, 0);
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "notify imf that textfield exit textPreview");
 #endif
 }
@@ -8382,7 +8384,10 @@ void TextFieldPattern::CheckPasswordAreaState()
     }
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
     CHECK_NULL_VOID(passwordArea);
-    passwordArea->SetObscured(!showPasswordState.value());
+    if (!showPasswordState_.has_value() || showPasswordState_.value() != showPasswordState.value()) {
+        passwordArea->SetObscured(!showPasswordState.value());
+        showPasswordState_ = showPasswordState.value();
+    }
 }
 
 void TextFieldPattern::AfterLayoutProcessCleanResponse(
@@ -8625,7 +8630,7 @@ void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (focusIndex_ == FocuseIndex::CANCEL) {
         CHECK_NULL_VOID(cleanNodeResponseArea_);
         GetIconPaintRect(cleanNodeResponseArea_, paintRect);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             cleanNodeResponseArea_->CreateIconRect(paintRect, true);
             float cornerRadius = paintRect.GetRect().Width() / 2;
             paintRect.SetCornerRadius(cornerRadius);
@@ -8634,7 +8639,7 @@ void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         if (IsShowPasswordIcon()) {
             CHECK_NULL_VOID(responseArea_);
             GetIconPaintRect(responseArea_, paintRect);
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 responseArea_->CreateIconRect(paintRect, true);
             }
             float cornerRadius = paintRect.GetRect().Width() / 2;
@@ -9144,7 +9149,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     CHECK_NULL_VOID(layoutProperty);
     if (!hasPreviewText_) {
         auto fullStr = GetTextUtf16Value();
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && IsSelected()) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSelected()) {
             uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
             uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
             if (startIndex < fullStr.length() && endIndex <= fullStr.length()) {
@@ -10582,6 +10587,7 @@ void TextFieldPattern::ClearTextContent()
     if (contentController_->IsEmpty()) {
         return;
     }
+    showCountBorderStyle_ = false;
     InputCommandInfo inputCommandInfo;
     inputCommandInfo.deleteRange = { 0, contentController_->GetTextUtf16Value().length() };
     inputCommandInfo.insertOffset = 0;
@@ -10636,26 +10642,32 @@ void TextFieldPattern::InitCancelButtonMouseEvent()
     CHECK_NULL_VOID(imageTouchHub);
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(imageInputHub);
-    auto imageHoverTask = [weak = WeakClaim(this), cleanNodeResponseArea = cleanNodeResponseArea_](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnHover(isHover);
-            pattern->HandleButtonMouseEvent(cleanNodeResponseArea, isHover);
-        }
+    auto imageHoverTask = [weak = WeakClaim(this),
+        cleanNodeResponseAreaWeak = WeakPtr<TextInputResponseArea>(cleanNodeResponseArea_)](bool isHover) {
+            auto cleanNodeResponseArea = cleanNodeResponseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(cleanNodeResponseArea);
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->OnHover(isHover);
+                pattern->HandleButtonMouseEvent(cleanNodeResponseArea, isHover);
+            }
     };
     imageHoverEvent_ = MakeRefPtr<InputEvent>(std::move(imageHoverTask));
     imageInputHub->AddOnHoverEvent(imageHoverEvent_);
 
-    auto imageTouchTask = [weak = WeakClaim(this), cleanNodeResponseArea = cleanNodeResponseArea_](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto touchType = info.GetTouches().front().GetTouchType();
-        if (touchType == TouchType::DOWN) {
-            pattern->HandleCancelButtonTouchDown(cleanNodeResponseArea);
-        }
-        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            pattern->HandleCancelButtonTouchUp();
-        }
+    auto imageTouchTask = [weak = WeakClaim(this), cleanNodeResponseAreaWeak =
+        WeakPtr<TextInputResponseArea>(cleanNodeResponseArea_)](const TouchEventInfo& info) {
+            auto cleanNodeResponseArea = cleanNodeResponseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(cleanNodeResponseArea);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto touchType = info.GetTouches().front().GetTouchType();
+            if (touchType == TouchType::DOWN) {
+                pattern->HandleCancelButtonTouchDown(cleanNodeResponseArea);
+            }
+            if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+                pattern->HandleCancelButtonTouchUp();
+            }
     };
 
     imageTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(imageTouchTask));
@@ -10673,26 +10685,32 @@ void TextFieldPattern::InitPasswordButtonMouseEvent()
     CHECK_NULL_VOID(imageTouchHub);
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(imageInputHub);
-    auto imageHoverTask = [weak = WeakClaim(this), responseArea = responseArea_](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnHover(isHover);
-            pattern->HandleButtonMouseEvent(responseArea, isHover);
-        }
+    auto imageHoverTask =
+        [weak = WeakClaim(this), responseAreaWeak = WeakPtr<TextInputResponseArea>(responseArea_)](bool isHover) {
+            auto responseArea = responseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(responseArea);
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->OnHover(isHover);
+                pattern->HandleButtonMouseEvent(responseArea, isHover);
+            }
     };
     imageHoverEvent_ = MakeRefPtr<InputEvent>(std::move(imageHoverTask));
     imageInputHub->AddOnHoverEvent(imageHoverEvent_);
 
-    auto imageTouchTask = [weak = WeakClaim(this), responseArea = responseArea_](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto touchType = info.GetTouches().front().GetTouchType();
-        if (touchType == TouchType::DOWN) {
-            pattern->HandleCancelButtonTouchDown(responseArea);
-        }
-        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            pattern->HandleCancelButtonTouchUp();
-        }
+    auto imageTouchTask = [weak = WeakClaim(this), responseAreaWeak = WeakPtr<TextInputResponseArea>(responseArea_)]
+        (const TouchEventInfo& info) {
+            auto responseArea = responseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(responseArea);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto touchType = info.GetTouches().front().GetTouchType();
+            if (touchType == TouchType::DOWN) {
+                pattern->HandleCancelButtonTouchDown(responseArea);
+            }
+            if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+                pattern->HandleCancelButtonTouchUp();
+            }
     };
     imageTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(imageTouchTask));
     imageTouchHub->AddTouchEvent(imageTouchEvent_);

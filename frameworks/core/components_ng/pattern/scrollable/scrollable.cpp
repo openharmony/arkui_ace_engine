@@ -70,18 +70,16 @@ constexpr double ANGULAR_VELOCITY_FACTOR  = 0.001f;
 constexpr float ANGULAR_VELOCITY_SLOW = 0.07f;
 constexpr float ANGULAR_VELOCITY_MEDIUM = 0.2f;
 constexpr float ANGULAR_VELOCITY_FAST = 0.54f;
-constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 0.85f;
-constexpr float DISPLAY_CONTROL_RATIO_SLOW = 1.85f;
-constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 2.15f;
-constexpr float DISPLAY_CONTROL_RATIO_FAST = 1.35f;
+constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 1.19f;
+constexpr float DISPLAY_CONTROL_RATIO_SLOW = 1.87f;
+constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 1.67f;
+constexpr float DISPLAY_CONTROL_RATIO_FAST = 1.59f;
 constexpr float CROWN_SENSITIVITY_LOW = 0.8f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.00025f;
 
-constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
-constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
-constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
+constexpr float CROWN_START_FRICTION_VELOCITY_THRESHOLD = 6.0f;
 #else
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 #endif
@@ -226,14 +224,15 @@ void Scrollable::SetOnActionCancel()
         if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
         }
-        scroll->HandleDragEnd(info);
+        GestureEvent nullInfo;
+        scroll->HandleDragEnd(nullInfo);
         if (scroll->panActionEndEvents_.empty()) {
             scroll->isDragging_ = false;
             return;
         }
         std::for_each(scroll->panActionEndEvents_.begin(), scroll->panActionEndEvents_.end(),
-            [info](GestureEventFunc& event) {
-                auto gestureInfo = info;
+            [nullInfo](GestureEventFunc& event) {
+                auto gestureInfo = nullInfo;
                 event(gestureInfo);
             });
         scroll->isDragging_ = false;
@@ -314,16 +313,13 @@ void Scrollable::HandleCrownEvent(const CrownEvent& event, const OffsetF& center
 
     switch (event.action) {
         case CrownAction::BEGIN:
-            reachBoundary_ = false;
             crownEventNum_ = 0;
             TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->BEGIN]");
             HandleCrownActionBegin(event.timeStamp, mainDelta, info);
-            StartVibrateFeedback();
             break;
         case CrownAction::UPDATE:
             TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->UPDATE]");
             HandleCrownActionUpdate(event.timeStamp, mainDelta, info);
-            StartVibrateFeedback();
             break;
         case CrownAction::END:
             TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->END]");
@@ -350,6 +346,9 @@ void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainD
 
 void Scrollable::HandleCrownActionUpdate(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info)
 {
+    if (!isCrownEventDragging_) {
+        return;
+    }
     UpdateCrownVelocity(timeStamp, mainDelta, false);
     info.SetMainDelta(mainDelta);
     info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
@@ -358,6 +357,9 @@ void Scrollable::HandleCrownActionUpdate(const TimeStamp& timeStamp, double main
 
 void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info)
 {
+    if (!isCrownEventDragging_) {
+        return;
+    }
     if (NearZero(mainDelta)) {
         info.SetMainDelta(crownVelocityTracker_.GetMainAxisDeltaPos());
         info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
@@ -406,19 +408,6 @@ void Scrollable::HandleCrownActionCancel(GestureEvent& info)
     isDragging_ = false;
     isCrownDragging_ = false;
 }
-
-void Scrollable::StartVibrateFeedback()
-{
-    if (!GetCrownEventDragging()) {
-        return;
-    }
-    crownEventNum_ = (reachBoundary_ ? 0 : (crownEventNum_ + 1));
-    if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
-    } else if (reachBoundary_) {
-        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
-    }
-}
 #endif
 
 void Scrollable::SetAxis(Axis axis)
@@ -440,9 +429,9 @@ void Scrollable::SetAxis(Axis axis)
 #endif
 }
 
-void Scrollable::HandleTouchDown()
+void Scrollable::HandleTouchDown(bool fromcrown)
 {
-    if (!isCrownDragging_) {
+    if (!fromcrown) {
         isTouching_ = true;
     }
     // If animation still runs, first stop it.
@@ -561,7 +550,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         isCrownEventDragging_ = false;
     }
     if (isCrownEventDragging_) {
-        HandleTouchDown();
+        HandleTouchDown(true);
     }
 #endif
     currentVelocity_ = info.GetMainVelocity();
@@ -805,7 +794,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     if (dragEndCallback_) {
         dragEndCallback_();
     }
-    if (!isCrownDragging_) {
+    if (info.GetSourceDevice() != SourceType::CROWN) {
         isTouching_ = false;
     }
     SetDragStartPosition(0.0);
@@ -873,7 +862,11 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
         }
         return;
     }
-    if (NearZero(correctVelocity, START_FRICTION_VELOCITY_THRESHOLD)) {
+    float threshold = START_FRICTION_VELOCITY_THRESHOLD;
+#ifdef SUPPORT_DIGITAL_CROWN
+    threshold = isCrownEventDragging_ ? CROWN_START_FRICTION_VELOCITY_THRESHOLD : threshold;
+#endif
+    if (NearZero(correctVelocity, threshold)) {
         HandleScrollEnd(correctVelocity);
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
@@ -1740,5 +1733,11 @@ void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<Fram
         result.emplace_back(panRecognizerNG_);
         responseLinkResult.emplace_back(panRecognizerNG_);
     }
+}
+
+void Scrollable::SetMaxFlingVelocity(double max)
+{
+    double density = PipelineBase::GetCurrentDensity();
+    maxFlingVelocity_ = max * density;
 }
 } // namespace OHOS::Ace::NG

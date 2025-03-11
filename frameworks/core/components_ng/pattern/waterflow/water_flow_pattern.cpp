@@ -267,6 +267,10 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     bool indexChanged = itemRange_.first != layoutInfo_->FirstIdx() || itemRange_.second != layoutInfo_->endIndex_;
     auto onScrollIndex = eventHub->GetOnScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    if (indexChanged) {
+        host->OnAccessibilityEvent(
+            AccessibilityEventType::SCROLLING_EVENT, layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
+    }
     auto onReachStart = eventHub->GetOnReachStart();
     FireOnReachStart(onReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();
@@ -521,6 +525,7 @@ void WaterFlowPattern::ResetSections()
     }
     sections_.Reset();
     layoutInfo_->Reset();
+    sectionChangeStartPos_.clear();
     MarkDirtyNodeSelf();
 }
 

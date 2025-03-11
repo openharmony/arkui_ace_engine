@@ -454,7 +454,7 @@ class SubscribableMapSetHandler extends SubscribableHandler {
       return (): void => {
         if (target.size > 0) {
           target.forEach((_, prop) => {
-             ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString(), true);
+             ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString(), undefined, true);
           });
           target.clear();
           ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);

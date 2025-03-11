@@ -370,7 +370,7 @@ void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
         return;
     }
 
-    int argc = info.Length();
+    uint32_t argc = info.Length();
     if (argc > 1 && (info[0]->IsNumber() || info[0]->IsString())) {
         std::string viewId = info[0]->ToString();
         auto instance = AceType::MakeRefPtr<JSViewFullUpdate>(viewId, info.This(), JSRef<JSFunc>::Cast(renderFunc));
@@ -902,6 +902,9 @@ void JSViewPartialUpdate::RenderJSExecutionForPrebuild(int64_t deadline, bool& i
 
 void JSViewPartialUpdate::SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline)
 {
+    if (!jsViewFunction_) {
+        return;
+    }
     prebuildPhase_ = prebuildPhase;
     if (jsViewFunction_->ExecuteSetPrebuildPhase(prebuildPhase)) {
         NG::ViewStackProcessor::GetInstance()->SetIsPrebuilding(

@@ -90,7 +90,7 @@ private:
     static void CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
     static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
-        const MenuParam& menuParam, RefPtr<FrameNode> column);
+        const MenuParam& menuParam, RefPtr<FrameNode> column, const RefPtr<FrameNode>& targetNode);
     static void UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG

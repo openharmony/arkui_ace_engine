@@ -2075,6 +2075,7 @@ private:
     std::u16string callbackOldContent_;
     PreviewText callbackOldPreviewText_;
     bool isFilterChanged_ = false;
+    std::optional<bool> showPasswordState_;
 };
 } // namespace OHOS::Ace::NG
 

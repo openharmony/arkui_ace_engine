@@ -147,6 +147,9 @@ void DatePickerColumnPattern::OnModifyDone()
 
 void DatePickerColumnPattern::InitHapticController()
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());

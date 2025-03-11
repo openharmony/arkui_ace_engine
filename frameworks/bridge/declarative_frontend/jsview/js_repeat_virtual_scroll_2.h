@@ -30,9 +30,12 @@ public:
     static void RemoveNode(const JSCallbackInfo& info);
     static void SetInvalid(const JSCallbackInfo& info);
     static void RequestContainerReLayout(const JSCallbackInfo& info);
+    static void NotifyContainerLayoutChange(const JSCallbackInfo& info);
     static void UpdateL1Rid4Index(const JSCallbackInfo& info);
     
     static void OnMove(const JSCallbackInfo& info);
+    static void JsParseItemDragEventHandler(
+        const JsiExecutionContext& context, const JSRef<JSVal>& jsValue, int32_t repeatElmtId);
 };
 
 } // namespace OHOS::Ace::Framework

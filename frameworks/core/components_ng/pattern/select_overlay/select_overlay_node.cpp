@@ -290,7 +290,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
 
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -647,9 +647,11 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
     params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
         GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll), theme->GetSelectAllLabelInfo(),
         info->menuInfo.showCopyAll);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE),
             GetMenuCallbackWithContainerId(info->menuCallback.onTranslate), "", info->menuInfo.showTranslate);
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE),
             GetMenuCallbackWithContainerId(info->menuCallback.onShare), "", info->menuInfo.showShare);
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH),
@@ -2068,7 +2070,7 @@ void SelectOverlayNode::ShowCopyAll(float maxWidth, float& allocatedSize, std::s
 
 void SelectOverlayNode::ShowTranslate(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
 {
-    if (!IsShowOnTargetAPIVersion()) {
+    if (!IsShowTranslateOnTargetAPIVersion()) {
         isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
         return;
     }
@@ -2193,7 +2195,16 @@ void SelectOverlayNode::ShowCamera(float maxWidth, float& allocatedSize, std::sh
 bool SelectOverlayNode::IsShowOnTargetAPIVersion()
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return false;
+    }
+    return true;
+}
+
+bool SelectOverlayNode::IsShowTranslateOnTargetAPIVersion()
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         return false;
     }
     return true;
@@ -2310,11 +2321,13 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
         MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SELECT_ALL, BUTTON_COPY_ALL);
         systemItemParams.emplace_back(param);
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         if (info->menuInfo.showTranslate || info->isUsingMouse) {
             MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_TRANSLATE, BUTTON_TRANSLATE);
             systemItemParams.emplace_back(param);
         }
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (info->menuInfo.showShare || info->isUsingMouse) {
             MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SHARE, BUTTON_SHARE);
             systemItemParams.emplace_back(param);

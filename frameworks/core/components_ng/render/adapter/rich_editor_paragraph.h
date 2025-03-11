@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,16 +25,15 @@ class RichEditorParagraph : public TxtParagraph {
     DECLARE_ACE_TYPE(RichEditorParagraph, TxtParagraph)
 
 public:
-#ifndef USE_GRAPHIC_TEXT_GINE
-    RichEditorParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<txt::FontCollection> fontCollection)
-        : TxtParagraph(paraStyle, fontCollection) {}
-#else
     RichEditorParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
         : TxtParagraph(paraStyle, fontCollection) {}
-#endif
 
     void Layout(float width) override;
     float GetHeight() override;
+    bool IsEndAddParagraphSpacing() override
+    {
+        return true;
+    }
 
 private:
     float height_ = 0.0f;

@@ -260,7 +260,9 @@ public:
         const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset = 0) override;
     bool ExecuteExtensionActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
-    Rect GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node) override;
+    int32_t GetTransformDegreeRelativeToWindow(const RefPtr<NG::FrameNode>& node, bool excludeSelf = false);
+    AccessibilityParentRectInfo GetTransformRectInfoRelativeToWindow(
+        const RefPtr<NG::FrameNode>& node, const RefPtr<PipelineBase>& context) override;
 #ifdef WEB_SUPPORTED
     void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) override;
@@ -651,7 +653,7 @@ private:
         const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize);
     void CreateNodeInfoJson(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
         std::unique_ptr<JsonValue>& json, int32_t childSize);
-
+    bool IsEventIgnoredByWorkMode(const AccessibilityEvent& accessibilityEvent);
     void SendEventToAccessibilityWithNodeInner(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
     void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);

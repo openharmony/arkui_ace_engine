@@ -49,7 +49,6 @@ const std::set<std::string> FONT_WEIGHTS = { "normal", "bold", "lighter", "bolde
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
-constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
@@ -168,12 +167,7 @@ JSCanvasRenderer::JSCanvasRenderer()
     SetInstanceId(Container::CurrentIdSafely());
     density_ = PipelineBase::GetCurrentDensity();
     apiVersion_ = Container::GetCurrentApiTargetVersion();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
-        // The default value of the font size in canvas is 14px.
-        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
-    }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         isJudgeSpecialValue_ = true;
     }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
@@ -625,7 +619,7 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             info.GetDoubleArg(8, image.dHeight);
             // In higher versions, sx, sy, sWidth, sHeight are parsed in VP units
             // In lower versions, sx, sy, sWidth, sHeight are parsed in PX units
-            if (isImage || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (isImage || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 image.sx *= density;
                 image.sy *= density;
                 image.sWidth *= density;
@@ -1037,7 +1031,7 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
 {
     double limit = 0.0;
     if (info.GetDoubleArg(0, limit)) {
-        if (limit == 0 && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+        if (limit == 0 && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
             return;
         }
         renderingContext2DModel_->SetMiterLimit(limit);
@@ -1113,7 +1107,7 @@ void JSCanvasRenderer::JsSetShadowColor(const JSCallbackInfo& info)
     if (!info.GetStringArg(0, colorStr)) {
         return;
     }
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         if (!ProcessColorFromString(colorStr, color)) {
             return;
         }
@@ -1539,7 +1533,7 @@ std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
 void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
 {
     if (id >= 0 && id <= patternCount_) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
             renderingContext2DModel_->SetTransform(pattern_[id], transform);
         } else {
             pattern_[id]->SetScaleX(transform.scaleX);
@@ -1581,7 +1575,7 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
     std::string text;
     double density = GetDensity();
     bool isGetStr = info.GetStringArg(0, text);
-    if (!isGetStr && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (!isGetStr && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         if (info[0]->IsUndefined()) {
             text = "undefined";
             isGetStr = true;
@@ -1677,13 +1671,7 @@ void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ResetPaintState()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
-        // The default value of the font size in canvas is 14px.
-        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
-    } else {
-        paintState_ = PaintState();
-    }
+    paintState_ = PaintState();
     std::vector<PaintState>().swap(savePaintState_);
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;

@@ -553,6 +553,7 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
+        CHECK_NULL_VOID(!customKeyboardBuilder_ || !isCustomKeyboardAttached_);
 
         // lost focus in floating window mode
         auto windowMode = GetWindowMode();
@@ -619,6 +620,7 @@ public:
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
+    void HandleCurrentPositionParagraphInfo(float& lastLineTop, float& paragraphSpacing);
     bool IsCustomSpanInCaretPos(int32_t position, bool downStreamFirst);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
     void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
@@ -1197,7 +1199,10 @@ public:
     {
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
-        return pipelineContext->GetTheme<T>(GetThemeScopeId());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            return pipelineContext->GetTheme<T>(GetThemeScopeId());
+        }
+        return pipelineContext->GetTheme<T>();
     }
 
 protected:
@@ -1390,7 +1395,8 @@ private:
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
 
     void GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
-        std::optional<struct UpdateParagraphStyle>& spanParaStyle, const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
+        std::optional<struct UpdateParagraphStyle>& spanParaStyle, std::optional<std::u16string>& urlAddress,
+        const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
     void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::u16string& insertValue,
         int32_t textIndex, std::optional<TextStyle> textStyle, std::optional<struct UpdateParagraphStyle> paraStyle,
         std::optional<std::u16string> urlAddress = std::nullopt, bool isCreate = false, bool fixDel = true);
@@ -1480,6 +1486,7 @@ private:
     void CloseSystemMenu();
     void SetAccessibilityAction() override;
     void SetAccessibilityEditAction();
+    bool IsAccessibilityClick();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
     bool CheckTripClickEvent(GestureEvent& info);
@@ -1555,6 +1562,7 @@ private:
 #endif
     const bool isAPI14Plus;
     const bool isAPI16Plus;
+    const bool isAPI18Plus;
     bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;

@@ -42,7 +42,7 @@ declare class RepeatNative {
   static createNewChildStart(id: string): void;
   static createNewChildFinish(id: string): void;
   static afterAddChild(): void;
-  static onMove(handler: (from: number, to: number) => void);
+  static onMove(handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);
 }
 
 // Repeat.virtualScroll maps to C++ RepeatVirtualScrollNode 
@@ -62,7 +62,7 @@ declare class RepeatVirtualScrollNative {
   // invalidate caches in C++ side, trigger render if needed
   static updateRenderState(totalCount: number, visibleItemsChanged: boolean): void;
   // drag and drop
-  static onMove(handler: (from: number, to: number) => void);
+  static onMove(handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);
   static setCreateByTemplate(isCreatedByTemplate: boolean): void;
 }
 
@@ -86,7 +86,10 @@ declare class RepeatVirtualScroll2Native {
   static setInvalid(repeatelmtId: number, rid: number): void;
 
   // invalidate owning Container layout starting from Repeat child index
-  static requestContainerReLayout(repeatElmtId: number, totalCount: number, index: number): void;
+  static requestContainerReLayout(repeatElmtId: number, totalCount: number, index?: number): void;
+
+  static notifyContainerLayoutChange(repeatElmtId: number, totalCount: number,
+    index: number, count: number, notificationType: number): void;
 
   static updateL1Rid4Index(repeatElmtId: number,
     totalCount: number,
@@ -94,5 +97,5 @@ declare class RepeatVirtualScroll2Native {
     l1rid4index: Array<Array<number>>): void;
 
   // drag and drop
-  static onMove(repeatElmtId: number, handler: (from: number, to: number) => void);
+  static onMove(repeatElmtId: number, handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);
 }

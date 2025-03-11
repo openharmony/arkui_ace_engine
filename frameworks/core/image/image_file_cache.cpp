@@ -335,7 +335,7 @@ void ImageFileCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
 
 void ImageFileCache::ClearAllCacheFiles()
 {
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN  )) {
         return;
     }
     auto clearedFlag = StorageProxy::GetInstance()->GetStorage()->GetString("image.filecache.clear");

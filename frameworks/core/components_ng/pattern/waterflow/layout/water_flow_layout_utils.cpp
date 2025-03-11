@@ -123,6 +123,14 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(
     return itemConstraint;
 }
 
+LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(const ConstraintParams& params,
+    const ViewPosReference& posRef, const RefPtr<WaterFlowLayoutProperty>& props, const RefPtr<LayoutWrapper>& child)
+{
+    auto itemConstraint = CreateChildConstraint(params, props, child);
+    itemConstraint.viewPosRef = posRef;
+    return itemConstraint;
+}
+
 std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapper, Axis axis)
 {
     const auto& props = wrapper->GetLayoutProperty();

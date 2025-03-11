@@ -1593,6 +1593,14 @@ int WebDelegate::GetHitTestResult()
     return static_cast<int>(WebHitTestType::UNKNOWN);
 }
 
+bool WebDelegate::SetFocusByPosition(float x, float y)
+{
+    if (nweb_) {
+        return nweb_->SetFocusByPosition(x, y);
+    }
+    return false;
+}
+
 void WebDelegate::GetHitTestValue(HitTestResult& result)
 {
     if (nweb_) {
@@ -5146,7 +5154,8 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
         TaskExecutor::TaskType::JS, "ArkUIWebDownloadStart");
 }
 
-void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType)
+void WebDelegate::OnAccessibilityEvent(
+    int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument)
 {
     if (!accessibilityState_) {
         return;
@@ -5154,6 +5163,9 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
+    if (eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
+        event.textAnnouncedForAccessibility = argument;
+    }
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     auto accessibilityManager = context->GetAccessibilityManager();
@@ -7115,9 +7127,12 @@ void WebDelegate::JavaScriptOnDocumentEnd()
     }
 }
 
-bool WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
-    const std::map<std::string, std::string>& actionArguments)
+bool WebDelegate::ExecuteAction(
+    int64_t accessibilityId, AceAction action, const std::map<std::string, std::string>& actionArguments)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebDelegate::ExecuteAction, accessibilityId = %{public}" PRId64 ", action = %{public}d", accessibilityId,
+        static_cast<int32_t>(action));
     if (!accessibilityState_) {
         return false;
     }
@@ -7186,6 +7201,10 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByFocusMove(
     int64_t accessibilityId, int32_t direction)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebDelegate::GetAccessibilityNodeInfoByFocusMove, accessibilityId = %{public}" PRId64
+        ", direction = %{public}d",
+        accessibilityId, direction);
     CHECK_NULL_RETURN(nweb_, nullptr);
     if (!accessibilityState_) {
         return nullptr;
@@ -7801,5 +7820,20 @@ std::string WebDelegate::GetCurrentLanguage()
         return nweb_->GetCurrentLanguage();
     }
     return "";
+}
+
+void WebDelegate::MaximizeResize()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->MaximizeResize();
+    }
+}
+
+void WebDelegate::RestoreRenderFit()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->RestoreRenderFit();
 }
 } // namespace OHOS::Ace

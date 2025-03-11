@@ -62,9 +62,13 @@ public:
     void SetUp() override;
     void TearDown() override;
     bool InitOptionTestNg();
+    void InitTargetFrameNode();
     RefPtr<FrameNode> frameNode_;
     RefPtr<MenuItemPattern> optionPattern_;
     RefPtr<MenuItemAccessibilityProperty> optionAccessibilityProperty_;
+    RefPtr<FrameNode> targetFrameNode_;
+    int32_t targetId_ = 0;
+    std::string targetTag_ = "";
 
 protected:
     PaintWrapper* GetPaintWrapper(RefPtr<MenuItemPaintProperty> paintProperty);
@@ -87,11 +91,21 @@ void MenuItemPatternOptionTestNg::SetUpTestCase()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void MenuItemPatternOptionTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+}
+
+void MenuItemPatternOptionTestNg::InitTargetFrameNode()
+{
+    targetFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(targetFrameNode_, nullptr);
+    targetId_ = targetFrameNode_->GetId();
+    targetTag_ = targetFrameNode_->GetTag();
 }
 
 PaintWrapper* MenuItemPatternOptionTestNg::GetPaintWrapper(RefPtr<MenuItemPaintProperty> paintProperty)
@@ -502,6 +516,16 @@ HWTEST_F(MenuItemPatternOptionTestNg, CreatePasteButton001, TestSize.Level1)
             return nullptr;
         }
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
+            if (type == TextOverlayTheme::TypeId()) {
+                return AceType::MakeRefPtr<TextOverlayTheme>();
+            } else if (type == SelectTheme::TypeId()) {
+                return AceType::MakeRefPtr<SelectTheme>();
+            } else {
+                return nullptr;
+            }
+        });
     MenuView::CreatePasteButton(false, option, row, []() {});
     auto PasteButtonNode = option->GetChildAtIndex(0)->GetChildren();
     EXPECT_FALSE(PasteButtonNode.empty());
@@ -556,7 +580,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, PerformActionTest003, TestSize.Level1)
 {
     optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
     std::vector<SelectParam> params;
-    auto wrapperNode = MenuView::Create(params, 3, "");
+    auto wrapperNode = MenuView::Create(params, targetId_, targetTag_);
     ASSERT_NE(wrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);

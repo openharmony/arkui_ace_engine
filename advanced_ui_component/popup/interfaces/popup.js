@@ -22,7 +22,7 @@ const mediaquery = requireNapi('mediaquery');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 const componentUtils = requireNapi('arkui.componentUtils');
-const Configuration = requireNapi('arkui.modifier').Configuration;
+const Configuration = requireNapi('configuration');
 
 const o = 10003;
 const t = 10002;

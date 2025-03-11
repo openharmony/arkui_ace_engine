@@ -659,5 +659,8 @@ ACE_EXPORT extern const char ARC_INDEXER_ETS_TAG[];
 
 // Magnifier
 ACE_EXPORT extern const char MAGNIFIER_TAG[];
+
+// LinearLayout
+ACE_EXPORT extern const char LAZY_GRID_LAYOUT_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

@@ -1233,7 +1233,7 @@ HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
 HWTEST_F(SearchTestNg, Create002, TestSize.Level1)
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     SearchModelNG searchModelInstance;
     searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, EMPTY_VALUE);
     auto searchNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
@@ -1380,6 +1380,54 @@ HWTEST_F(SearchTestNg, Create004, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     TextCommonEvent event;
     eventHub->FireOnPasteWithEvent(u"", event);
+}
+
+/**
+* @tc.name: Create005
+* @tc.desc: check search modifier api available
+* @tc.type: FUNC
+*/
+HWTEST_F(SearchTestNg, Create005, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(99);
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, EMPTY_VALUE);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    searchModelInstance.CreateSearchNode(nodeId, u"", u"", "");
+    searchModelInstance.CreateSearchNode(nodeId, u"", u"", "");
+    auto searchNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = searchNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(searchNode, nullptr);
+    searchModelInstance.SetMaxFontScale(2.0);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetHasPreviewTextOption(true);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    ASSERT_NE(searchTheme, nullptr);
+    searchModelInstance.CreateTextField(searchNode, PLACEHOLDER_U16, EMPTY_VALUE_U16, true, searchTheme);
+    searchModelInstance.SetSearchButton("");
+    OHOS::Ace::NG::SearchModelNG::SetId(frameNode, "12345");
+    OHOS::Ace::NG::SearchModelNG::SetEnablePreviewText(frameNode, true);
+    OHOS::Ace::NG::SearchModelNG::GetSearchController(frameNode);
+    OHOS::Ace::NG::SearchModelNG::SetType(frameNode, TextInputType::NUMBER);
+    OHOS::Ace::NG::SearchModelNG::SetTextDecorationStyle(frameNode, Ace::TextDecorationStyle::DASHED);
+    OHOS::Ace::NG::SearchModelNG::SetTextDecorationColor(frameNode, Color::BLUE);
+    OHOS::Ace::NG::SearchModelNG::SetTextDecoration(frameNode, Ace::TextDecoration::UNDERLINE);
+    Font font;
+    OHOS::Ace::NG::SearchModelNG::SetTextFont(frameNode, font);
+    OHOS::Ace::NG::SearchModelNG::SetCopyOption(frameNode, CopyOptions::Local);
+    OHOS::Ace::NG::SearchModelNG::SetTextColor(frameNode, Color::BLUE);
+    OHOS::Ace::NG::SearchModelNG::SetSearchButtonFontColor(frameNode, Color::BLUE);
+    OHOS::Ace::NG::SearchModelNG::SetSearchButtonFontSize(frameNode, Dimension());
+    OHOS::Ace::NG::SearchModelNG::SetSearchButton(frameNode, "SEARCH");
+    OHOS::Ace::NG::SearchModelNG::SetSearchIconColor(frameNode, Color::BLUE);
+    OHOS::Ace::NG::SearchModelNG::SetSearchSrcPath(frameNode, "");
+    OHOS::Ace::NG::SearchModelNG::SetSearchIconSize(frameNode, Dimension());
+    OHOS::Ace::NG::SearchModelNG::SetPlaceholder(frameNode, "");
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

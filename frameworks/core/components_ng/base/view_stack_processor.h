@@ -25,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/state_style_manager.h"

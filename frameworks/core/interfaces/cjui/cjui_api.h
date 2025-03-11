@@ -2784,6 +2784,8 @@ struct CJUISelectModifier {
     void (*resetSelectDividerNull)(ArkUINodeHandle node);
     void (*setSelectDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetSelectDirection)(ArkUINodeHandle node);
+    void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 mode);
+    void (*resetAvoidance)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

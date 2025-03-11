@@ -650,4 +650,7 @@ const char ARC_INDEXER_ETS_TAG[] = "ArcAlphabetIndexer";
 
 // Magnifier
 const char MAGNIFIER_TAG[] = "Magnifier";
+
+// LazyVGridLayout
+const char LAZY_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 } // namespace OHOS::Ace::V2
