@@ -517,6 +517,7 @@ namespace Converter {
     template<> std::u16string Convert(const Ark_String& src);
     template<> std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
+    template<> std::vector<uint32_t> Convert(const Ark_Buffer& src);
 
     // NOT_SORTED_SECTION: Changing ordering can lead to build problem!
     template<> Dimension Convert(const Ark_String& src);

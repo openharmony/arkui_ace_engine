@@ -2092,4 +2092,18 @@ std::pair<Dimension, Dimension> Convert(const Ark_Position& src)
     auto y = Converter::OptConvert<Dimension>(src.y);
     return std::make_pair(x.has_value() ? x.value() : Dimension(), y.has_value() ? y.value() : Dimension());
 }
+
+template<>
+std::vector<uint32_t> Convert(const Ark_Buffer& src)
+{
+    std::vector<uint32_t> dataArray;
+    auto array = (src.data != nullptr) ? static_cast<uint32_t*>(src.data) : nullptr;
+    auto size = src.length / sizeof(uint32_t);
+    if (array && size > 0) {
+        for (int64_t idx = 0; idx < size; idx++) {
+            dataArray.push_back(array[idx]);
+        }
+    }
+    return dataArray;
+}
 } // namespace OHOS::Ace::NG::Converter
