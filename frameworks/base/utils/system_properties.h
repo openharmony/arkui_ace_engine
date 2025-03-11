@@ -578,6 +578,8 @@ public:
 
     static float GetDragStartPanDistanceThreshold();
 
+    static bool IsNeedSymbol();
+
     static bool IsSmallFoldProduct();
     
     static bool IsBigFoldProduct();
