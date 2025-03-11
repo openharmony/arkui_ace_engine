@@ -1185,6 +1185,57 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest070, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BaseUtilsTest071
+ * @tc.desc: invalid byte
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest071, TestSize.Level1)
+{
+    uint8_t invalid_byte[1] = {0x80};
+    size_t size = MUtf8ToUtf16Size(invalid_byte, 1);
+    EXPECT_EQ(size, 1);
+}
+
+/**
+ * @tc.name: BaseUtilsTest072
+ * @tc.desc: SingleByte String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest072, TestSize.Level1)
+{
+    uint8_t data[1] = {0x80};
+    auto result = ConvertMUtf8ToUtf16Pair(data, 1);
+    EXPECT_EQ(result.first, 0x80);
+    EXPECT_EQ(result.second, 1);
+}
+
+/**
+ * @tc.name: BaseUtilsTest073
+ * @tc.desc: 2Byte String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest073, TestSize.Level1)
+{
+    uint8_t data[2] = {0xE0, 0x80};
+    auto result = ConvertMUtf8ToUtf16Pair(data, 2);
+    EXPECT_EQ(result.first, 0xE0);
+    EXPECT_EQ(result.second, 1);
+}
+
+/**
+ * @tc.name: BaseUtilsTest074
+ * @tc.desc: 3Byte String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest074, TestSize.Level1)
+{
+    uint8_t data[3] = {0xF0, 0x80, 0x80};
+    auto result = ConvertMUtf8ToUtf16Pair(data, 3);
+    EXPECT_EQ(result.first, 0xF0);
+    EXPECT_EQ(result.second, 1);
+}
+
+/**
  * @tc.name: StringExpressionTest001
  * @tc.desc: InitMapping()
  * @tc.type: FUNC
