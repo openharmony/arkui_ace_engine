@@ -184,6 +184,10 @@ public:
     }
 };
 
+template<typename AccessorType, auto GetAccessorFunc>
+class StaticAccessorTest : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, void> {
+};
+
 MATCHER_P2(CompareArkLength, first, second, "Ark_Length compare")
 {
     return first->type == second->type &&

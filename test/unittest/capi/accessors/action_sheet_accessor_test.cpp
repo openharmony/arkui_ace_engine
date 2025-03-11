@@ -21,8 +21,8 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class ActionSheetAccessorTest : public AccessorTestBase<GENERATED_ArkUIActionSheetAccessor,
-    &GENERATED_ArkUIAccessors::getActionSheetAccessor, ActionSheetPeer> {
+class ActionSheetAccessorTest : public StaticAccessorTest<GENERATED_ArkUIActionSheetAccessor,
+    &GENERATED_ArkUIAccessors::getActionSheetAccessor> {
 };
 
 /**

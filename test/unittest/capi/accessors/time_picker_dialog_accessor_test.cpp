@@ -34,8 +34,8 @@ const PickerTime TEST_PICKER_TIME(23, 11, 58);
 using namespace testing;
 using namespace testing::ext;
 
-class TimePickerDialogAccessorTest : public AccessorTestBase<GENERATED_ArkUITimePickerDialogAccessor,
-    &GENERATED_ArkUIAccessors::getTimePickerDialogAccessor, TimePickerDialogPeer> {
+class TimePickerDialogAccessorTest : public StaticAccessorTest<GENERATED_ArkUITimePickerDialogAccessor,
+    &GENERATED_ArkUIAccessors::getTimePickerDialogAccessor> {
 };
 
 /**

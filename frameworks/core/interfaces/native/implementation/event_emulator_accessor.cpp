@@ -17,24 +17,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct EventEmulatorPeer {
-    virtual ~EventEmulatorPeer() = default;
-};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventEmulatorAccessor {
-void DestroyPeerImpl(Ark_EventEmulator peer)
-{
-    delete peer;
-}
-Ark_EventEmulator CtorImpl()
-{
-    return new EventEmulatorPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void EmitClickEventImpl(Ark_NativePointer node,
                         Ark_ClickEvent event)
 {
@@ -57,9 +41,6 @@ void EmitTextInputEventImpl(Ark_NativePointer node,
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()
 {
     static const GENERATED_ArkUIEventEmulatorAccessor EventEmulatorAccessorImpl {
-        EventEmulatorAccessor::DestroyPeerImpl,
-        EventEmulatorAccessor::CtorImpl,
-        EventEmulatorAccessor::GetFinalizerImpl,
         EventEmulatorAccessor::EmitClickEventImpl,
         EventEmulatorAccessor::EmitTextInputEventImpl,
     };

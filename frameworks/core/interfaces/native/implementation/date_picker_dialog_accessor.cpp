@@ -21,24 +21,8 @@
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "arkoala_api_generated.h"
 
-struct DatePickerDialogPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerDialogAccessor {
-void DestroyPeerImpl(Ark_DatePickerDialog peer)
-{
-    if (peer) {
-        delete peer;
-    }
-}
-Ark_DatePickerDialog CtorImpl()
-{
-    return new DatePickerDialogPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void BuildDialogPropertiesCallbacks(const Ark_DatePickerDialogOptions options, DialogProperties& dialogProps)
 {
     auto didAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidAppear);
@@ -217,15 +201,9 @@ void ShowImpl(const Opt_DatePickerDialogOptions* options)
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
 {
     static const GENERATED_ArkUIDatePickerDialogAccessor DatePickerDialogAccessorImpl {
-        DatePickerDialogAccessor::DestroyPeerImpl,
-        DatePickerDialogAccessor::CtorImpl,
-        DatePickerDialogAccessor::GetFinalizerImpl,
         DatePickerDialogAccessor::ShowImpl,
     };
     return &DatePickerDialogAccessorImpl;
 }
 
-struct DatePickerDialogPeer {
-    virtual ~DatePickerDialogPeer() = default;
-};
 }

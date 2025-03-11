@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "action_sheet_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -57,20 +56,6 @@ const DimensionOffset DEFAULT_OFFSET_TOP = DimensionOffset(0.0_vp, 40.0_vp);
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ActionSheetAccessor {
-void DestroyPeerImpl(Ark_ActionSheet peer)
-{
-    if (peer) {
-        delete peer;
-    }
-}
-Ark_ActionSheet CtorImpl()
-{
-    return new ActionSheetPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void CreateConfirmButton(DialogProperties& dialogProps, const Ark_ActionSheetOptions options)
 {
     auto confirmInfoOpt = Converter::OptConvert<Ark_ActionSheetButtonOptions>(options.confirm);
@@ -151,22 +136,16 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
         DialogProperties& dialogProps) {
         updateDialogProperties(dialogProps, *value);
     };
-    auto peer = static_cast<ActionSheetPeer *>(CtorImpl());
-    peer->sheetModel.ShowActionSheet(dialogProps);
+    OHOS::Ace::NG::ActionSheetModelNG sheetModel;
+    sheetModel.ShowActionSheet(dialogProps);
 }
 } // ActionSheetAccessor
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
 {
     static const GENERATED_ArkUIActionSheetAccessor ActionSheetAccessorImpl {
-        ActionSheetAccessor::DestroyPeerImpl,
-        ActionSheetAccessor::CtorImpl,
-        ActionSheetAccessor::GetFinalizerImpl,
         ActionSheetAccessor::ShowImpl,
     };
     return &ActionSheetAccessorImpl;
 }
 
-struct ActionSheetPeer {
-    virtual ~ActionSheetPeer() = default;
-};
 }

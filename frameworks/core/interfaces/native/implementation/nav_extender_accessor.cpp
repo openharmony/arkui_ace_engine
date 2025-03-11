@@ -17,25 +17,10 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
-#include "core/interfaces/native/implementation/nav_extender_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavExtenderAccessor {
-void DestroyPeerImpl(Ark_NavExtender peer)
-{
-    if (peer) {
-        delete peer;
-    }
-}
-Ark_NavExtender CtorImpl()
-{
-    return new NavExtenderPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                 const NavExtender_OnUpdateStack* callback)
 {
@@ -51,9 +36,6 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
 {
     static const GENERATED_ArkUINavExtenderAccessor NavExtenderAccessorImpl {
-        NavExtenderAccessor::DestroyPeerImpl,
-        NavExtenderAccessor::CtorImpl,
-        NavExtenderAccessor::GetFinalizerImpl,
         NavExtenderAccessor::SetUpdateStackCallbackImpl,
     };
     return &NavExtenderAccessorImpl;

@@ -31,19 +31,6 @@ namespace {
     constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 }
 namespace AnimationExtenderAccessor {
-void DestroyPeerImpl(Ark_AnimationExtender peer)
-{
-    LOGE("AnimationExtenderAccessor destructor is not implemented and not supported. Use static methods.");
-}
-Ark_AnimationExtender CtorImpl()
-{
-    LOGE("AnimationExtenderAccessor constructor is not implemented and not supported. Use static methods.");
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void SetClipRectImpl(Ark_NativePointer node,
                      Ark_Float32 x,
                      Ark_Float32 y,
@@ -184,9 +171,6 @@ void AnimationTranslateImpl(Ark_NativePointer node,
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
 {
     static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
-        AnimationExtenderAccessor::DestroyPeerImpl,
-        AnimationExtenderAccessor::CtorImpl,
-        AnimationExtenderAccessor::GetFinalizerImpl,
         AnimationExtenderAccessor::SetClipRectImpl,
         AnimationExtenderAccessor::OpenImplicitAnimationImpl,
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,
@@ -196,7 +180,4 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
     return &AnimationExtenderAccessorImpl;
 }
 
-struct AnimationExtenderPeer {
-    virtual ~AnimationExtenderPeer() = default;
-};
 }

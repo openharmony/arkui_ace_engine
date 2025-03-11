@@ -28,14 +28,8 @@ using namespace testing::ext;
 static const auto CONTEXT_ID = 123;
 
 class ComponentSnapshotAccessorTest :
-    public AccessorTestBase<GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor,
-    &GENERATED_ArkUIAccessors::getGlobalScope_ohos_arkui_componentSnapshotAccessor,
-    GlobalScope_ohos_arkui_componentSnapshotPeer> {
-public:
-    void SetUp(void) override
-    {
-        AccessorTestBase::SetUp();
-    }
+    public StaticAccessorTest<GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor,
+    &GENERATED_ArkUIAccessors::getGlobalScope_ohos_arkui_componentSnapshotAccessor> {
 };
 
 /**
