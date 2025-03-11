@@ -1323,10 +1323,6 @@ void PipelineContext::SetupRootElement()
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());
-    auto rootContext = rootNode_->GetRenderContext();
-    if (rootContext) {
-        rootContext->SetDrawNodeChangeCallback();
-    }
 }
 
 void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback)
