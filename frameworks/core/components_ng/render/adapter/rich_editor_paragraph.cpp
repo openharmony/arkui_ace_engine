@@ -25,6 +25,11 @@ RefPtr<Paragraph> Paragraph::CreateRichEditorParagraph(
     return AceType::MakeRefPtr<RichEditorParagraph>(paraStyle, sharedFontCollection);
 }
 
+Rosen::TextRectHeightStyle RichEditorParagraph::GetHeightStyle(bool needLineHighest)
+{
+    return needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT;
+}
+
 void RichEditorParagraph::Layout(float width)
 {
     CHECK_NULL_VOID(width != layoutWidth_);

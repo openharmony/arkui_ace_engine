@@ -388,7 +388,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         return false;
     }
     if (empty()) {
-        return HandleCaretWhenEmpty(result);
+        return HandleCaretWhenEmpty(result, needLineHighest);
     }
     if (static_cast<size_t>(extent) > GetParagraphLength()) {
         extent = static_cast<int32_t>(GetParagraphLength());
@@ -713,7 +713,12 @@ void TxtParagraph::HandleLeadingMargin(CaretMetricsF& result, LeadingMargin lead
     result.offset.SetX(leadingMargin.size.Width().ConvertToPx());
 }
 
-bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
+Rosen::TextRectHeightStyle TxtParagraph::GetHeightStyle(bool needLineHighest)
+{
+    return Rosen::TextRectHeightStyle::TIGHT;
+}
+
+bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest)
 {
     auto paragrah = GetParagraph();
     if (!paragrah || paragrah->GetLineCount() == 0) {
@@ -721,7 +726,7 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
     }
 
     result.offset.Reset();
-    auto boxes = paragrah->GetTextRectsByBoundary(0, 1, Rosen::TextRectHeightStyle::TIGHT,
+    auto boxes = paragrah->GetTextRectsByBoundary(0, 1, GetHeightStyle(needLineHighest),
         Rosen::TextRectWidthStyle::TIGHT);
     if (boxes.empty()) {
         result.height = paragrah->GetHeight();
