@@ -19,6 +19,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
 constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
+constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 constexpr float DEFAULT_COUNT = 2.0f;
 } // namespace
@@ -512,10 +513,63 @@ void IndicatorPattern::SwipeTo(std::optional<int32_t> mouseClickIndex)
     }
 }
 
+bool IndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto currentIndex = GetCurrentIndex();
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    float touchBottomRate = 0.0;
+    float touchOffset = 0.0;
+    auto offset = dragPoint - GetDragStartPoint();
+    touchOffset = GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    touchBottomRate = LessOrEqual(std::abs(touchOffset), INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx())
+                            ? touchOffset / INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE.ConvertToPx() : 1;
+    touchBottomRate_ = std::abs(touchBottomRate);
+    TouchBottomType touchBottomType = TouchBottomType::NONE;
+    if (currentIndex <= 0) {
+        if (IsHorizontalAndRightToLeft()) {
+            if (Positive(touchOffset)) {
+                touchBottomType = TouchBottomType::END;
+            }
+        } else {
+            if (NonPositive(touchOffset)) {
+                touchBottomType = TouchBottomType::START;
+            }
+        }
+    }
+    if (currentIndex >= RealTotalCount() - 1) {
+        if (IsHorizontalAndRightToLeft()) {
+            if (NonPositive(touchOffset)) {
+                touchBottomType = TouchBottomType::START;
+            }
+        } else {
+            if (Positive(touchOffset)) {
+                touchBottomType = TouchBottomType::END;
+            }
+        }
+    }
+    SetTouchBottomType(touchBottomType);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    return touchBottomType == TouchBottomType::NONE ? false : true;
+}
+
+void IndicatorPattern::HandleDragEnd(double dragVelocity)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    SetTouchBottomType(TouchBottomType::NONE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
 {
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::HandleLongDragUpdate(info);
+    }
+    if (CheckIsTouchBottom(info)) {
+        return;
     }
     float turnPageRate = 0.0;
     float turnPageRateOffset = 0.0;
