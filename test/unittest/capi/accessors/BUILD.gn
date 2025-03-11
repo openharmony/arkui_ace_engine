@@ -43,6 +43,7 @@ ace_unittest("capi_all_accessors_test") {
     "draw_modifier_accessor_test.cpp",
     "drawing_canvas_accessor_test.cpp",
     "drawing_rendering_context_accessor_test.cpp",
+    "ellipse_shape_accessor_test.cpp",
     "event_result_accessor_test.cpp",
     "event_target_info_accessor_test.cpp",
     "file_selector_param_accessor_test.cpp",
