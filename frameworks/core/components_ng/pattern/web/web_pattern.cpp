@@ -4098,7 +4098,7 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
 
 void WebPattern::HideMagnifier()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "HideMagnifier");
+    TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -4900,7 +4900,6 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
 
 void WebPattern::NotifyForNextTouchEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::NotifyForNextTouchEvent");
     CHECK_NULL_VOID(delegate_);
     delegate_->NotifyForNextTouchEvent();
 }
@@ -6546,8 +6545,8 @@ void WebPattern::OnShowAutofillPopupV2(
 
 void WebPattern::OnHideAutofillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup");
     if (!isShowAutofillPopup_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup isShowAutofillPopup_ is null");
         return;
     }
     auto host = GetHost();
