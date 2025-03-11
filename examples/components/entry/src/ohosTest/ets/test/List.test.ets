@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import DatePickerDialogBootcampTest from './DatePickerDialogBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  DatePickerDialogBootcampTest()
 }
