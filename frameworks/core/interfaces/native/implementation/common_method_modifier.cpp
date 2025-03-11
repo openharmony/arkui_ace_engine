@@ -2397,7 +2397,7 @@ void OnClick0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onClick = [callback = CallbackHelper(*value)](GestureEvent& info) {
         const auto event = Converter::ArkClickEventSync(info);
-        callback.Invoke(event.ArkValue());
+        callback.InvokeSync(event.ArkValue());
     };
     NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }
@@ -2411,7 +2411,7 @@ void OnClick1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(distanceThreshold);
     auto onEvent = [callback = CallbackHelper(*event)](GestureEvent& info) {
         const auto event = Converter::ArkClickEventSync(info);
-        callback.Invoke(event.ArkValue());
+        callback.InvokeSync(event.ArkValue());
     };
     auto convValue = Converter::Convert<float>(*distanceThreshold);
 
@@ -2435,7 +2435,7 @@ void OnHoverImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
         const auto event = Converter::ArkHoverEventSync(hoverInfo);
-        arkCallback.Invoke(arkIsHover, event.ArkValue());
+        arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
     ViewAbstract::SetOnHover(frameNode, std::move(onHover));
 }
@@ -2454,7 +2454,7 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
         auto event = Converter::ArkAccessibilityHoverEventSync(hoverInfo);
-        arkCallback.Invoke(arkIsHover, event.ArkValue());
+        arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
     ViewAbstract::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
@@ -2480,7 +2480,7 @@ void OnMouseImpl(Ark_NativePointer node,
     auto onMouse = [arkCallback = CallbackHelper(*value), node = weakNode](MouseInfo& mouseInfo) {
         PipelineContext::SetCallBackNode(node);
         const auto event = Converter::ArkMouseEventSync(mouseInfo);
-        arkCallback.Invoke(event.ArkValue());
+        arkCallback.InvokeSync(event.ArkValue());
     };
     ViewAbstract::SetOnMouse(frameNode, std::move(onMouse));
 }
@@ -2492,7 +2492,7 @@ void OnTouchImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onEvent = [callback = CallbackHelper(*value)](TouchEventInfo& info) {
         const auto event = Converter::ArkTouchEventSync(info);
-        callback.Invoke(event.ArkValue());
+        callback.InvokeSync(event.ArkValue());
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
@@ -2508,7 +2508,7 @@ void OnKeyEventImpl(Ark_NativePointer node,
         auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
             PipelineContext::SetCallBackNode(node);
             const auto event = Converter::ArkKeyEventSync(info);
-            arkCallback.Invoke(event.ArkValue());
+            arkCallback.InvokeSync(event.ArkValue());
             return false;
         };
         ViewAbstract::SetOnKeyEvent(frameNode, std::move(onKeyEvent));

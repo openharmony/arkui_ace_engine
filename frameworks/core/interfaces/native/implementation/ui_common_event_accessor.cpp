@@ -46,7 +46,7 @@ void SetOnClickImpl(Ark_UICommonEvent peer,
     if (arkOnClick) {
         onClick = [arkCallback = CallbackHelper(arkOnClick.value())](GestureEvent& info) {
             auto clickEvent = Converter::ArkClickEventSync(info);
-            arkCallback.Invoke(clickEvent.ArkValue());
+            arkCallback.InvokeSync(clickEvent.ArkValue());
         };
     }
     ViewAbstract::SetOnClick(rawPtr, std::move(onClick));
@@ -63,7 +63,7 @@ void SetOnTouchImpl(Ark_UICommonEvent peer,
     if (arkOnTouch) {
         onTouch = [arkCallback = CallbackHelper(arkOnTouch.value())](TouchEventInfo& info) {
             auto touchEvent = Converter::ArkTouchEventSync(info);
-            arkCallback.Invoke(touchEvent.ArkValue());
+            arkCallback.InvokeSync(touchEvent.ArkValue());
         };
     }
     ViewAbstract::SetOnTouch(rawPtr, std::move(onTouch));
@@ -149,7 +149,7 @@ void SetOnHoverImpl(Ark_UICommonEvent peer,
         onHover = [arkCallback = CallbackHelper(arkOnHover.value())](bool isHover, HoverInfo& info) {
             auto hoverEvent = Converter::ArkHoverEventSync(info);
             auto arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-            arkCallback.Invoke(arkIsHover, hoverEvent.ArkValue());
+            arkCallback.InvokeSync(arkIsHover, hoverEvent.ArkValue());
         };
     }
     ViewAbstract::SetOnHover(rawPtr, std::move(onHover));
@@ -166,7 +166,7 @@ void SetOnMouseImpl(Ark_UICommonEvent peer,
     if (arkOnMouse) {
         onMouse = [arkCallback = CallbackHelper(arkOnMouse.value())](MouseInfo& info) {
             auto mouseEvent = Converter::ArkMouseEventSync(info);
-            arkCallback.Invoke(mouseEvent.ArkValue());
+            arkCallback.InvokeSync(mouseEvent.ArkValue());
         };
     }
     ViewAbstract::SetOnMouse(rawPtr, std::move(onMouse));

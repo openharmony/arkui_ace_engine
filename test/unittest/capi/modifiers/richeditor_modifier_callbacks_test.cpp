@@ -425,7 +425,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnPasteTest, TestSize.Level1)
             helper.Invoke();
         }
     };
-    auto arkCallback = Converter::ArkValue<PasteEventCallback>(nullptr, testCallback, frameNode->GetId());
+    auto arkCallback = Converter::ArkValue<PasteEventCallback>(testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     modifier_->setOnPaste(node_, &arkCallback);
@@ -481,7 +481,9 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSubmitTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    auto onSubmitFunc = [](Ark_Int32 resourceId, Ark_EnterKeyType enterKeyType, const Ark_SubmitEvent event) {
+    auto onSubmitFunc = [](
+        Ark_VMContext, Ark_Int32 resourceId, Ark_EnterKeyType enterKeyType, const Ark_SubmitEvent event
+    ) {
         auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto submitEventInfo = peer->GetEventInfo();
@@ -665,7 +667,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
             helper.Invoke();
         }
     };
-    auto arkCallback = Converter::ArkValue<Callback_CutEvent_Void>(nullptr, testCallback, frameNode->GetId());
+    auto arkCallback = Converter::ArkValue<Callback_CutEvent_Void>(testCallback, frameNode->GetId());
     auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     modifier_->setOnCut(node_, &arkCallback);

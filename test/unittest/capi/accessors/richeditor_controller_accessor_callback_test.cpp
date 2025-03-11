@@ -133,7 +133,7 @@ public:
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClick, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event) {
+    auto onClick = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_ClickEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
@@ -175,7 +175,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClic
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLongPress, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onLongPress = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
+    auto onLongPress = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_GestureEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {
@@ -218,7 +218,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLong
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event) {
+    auto onClick = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_ClickEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
@@ -260,7 +260,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnLongPress, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onLongPress = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
+    auto onLongPress = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_GestureEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {

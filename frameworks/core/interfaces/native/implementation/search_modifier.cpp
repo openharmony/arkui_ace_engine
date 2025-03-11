@@ -305,7 +305,7 @@ void OnSubmit1Impl(Ark_NativePointer node,
         auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
         const auto event = Converter::ArkSubmitEventSync(info);
         auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
-        arkCallback.Invoke(arkStringValue, eventArkValue);
+        arkCallback.InvokeSync(arkStringValue, eventArkValue);
     };
     SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }

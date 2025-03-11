@@ -431,7 +431,9 @@ HWTEST_F(SearchModifierCallbackTest, setOnSubmit1Test, TestSize.Level1)
 
     static std::string testString;
     static std::string eventText;
-    auto onSubmitFunc = [](Ark_Int32 resourceId, const Ark_String searchContent, const Opt_SubmitEvent event) {
+    auto onSubmitFunc = [](
+        Ark_VMContext, Ark_Int32 resourceId, const Ark_String searchContent, const Opt_SubmitEvent event
+    ) {
         auto value = Converter::Convert<std::string>(searchContent);
         auto eventValue = Converter::OptConvert<Ark_SubmitEvent>(event);
         ASSERT_TRUE(eventValue);
