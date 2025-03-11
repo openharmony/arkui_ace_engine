@@ -216,6 +216,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Position& dst, const OffsetF& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
+    void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src);
     void AssignArkValue(Ark_RectResult& dst, const RectF& src);
     void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src);
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
@@ -268,6 +269,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src);
     void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data);
     void AssignArkValue(Ark_ViewportFit& dst, const ViewportFit& src);
+    void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemGroupIndex& src);
     void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src);
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);

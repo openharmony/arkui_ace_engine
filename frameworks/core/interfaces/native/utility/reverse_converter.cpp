@@ -143,6 +143,23 @@ void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
         ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
 }
 
+void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemGroupIndex& src)
+{
+    dst.index = ArkValue<Ark_Number>(src.index);
+    dst.itemGroupArea = src.area < 0 ?
+        ArkValue<Opt_ListItemGroupArea>(Ark_Empty{}) : ArkValue<Opt_ListItemGroupArea>(src.area);
+    dst.itemIndexInGroup = src.indexInGroup < 0 ?
+        ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
+}
+
+void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.Left());
+    dst.y = ArkValue<Ark_Number>(src.Top());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
+
 void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src)
 {
     dst.value0 = ArkValue<Ark_Length>(src.first);
