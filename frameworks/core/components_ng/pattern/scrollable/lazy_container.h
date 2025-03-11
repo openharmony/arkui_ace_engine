@@ -70,7 +70,7 @@ protected:
      * @brief Should call when layout data needs to be cleared and re-calculated
      * @param idx first item in viewport after reset
      */
-    void RequestReset(int32_t idx);
+    void RequestReset(int32_t idx, float extraOffset = 0.0f);
 
 private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;

@@ -493,7 +493,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     MarkSelectedItems();
 
     UpdateLayoutRange(info_.axis_, !isInitialized_);
-    RequestReset(info_.jumpForRecompose_);
+    RequestReset(info_.jumpForRecompose_, -info_.currentOffset_);
     info_.jumpForRecompose_ = EMPTY_JUMP_INDEX;
     isInitialized_ = true;
     if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {

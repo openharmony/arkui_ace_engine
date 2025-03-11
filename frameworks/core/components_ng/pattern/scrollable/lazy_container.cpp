@@ -75,10 +75,10 @@ void LazyContainer::RequestJump(int32_t idx, ScrollAlign align, float extraOffse
     }
 }
 
-void LazyContainer::RequestReset(int32_t idx)
+void LazyContainer::RequestReset(int32_t idx, float extraOffset)
 {
     if (adapter_ && idx >= 0) {
-        adapter_->PrepareReset(idx);
+        adapter_->PrepareReset(idx, extraOffset);
     }
 }
 
