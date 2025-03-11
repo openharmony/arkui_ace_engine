@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import SymbolSpanBootcampTest from './TextAndInput/SymbolSpanBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  SymbolSpanBootcampTest()
 }
