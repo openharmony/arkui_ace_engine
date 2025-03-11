@@ -214,6 +214,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     id(value: string): this;
     geometryTransition(id: string): this;
     bindPopup(show: boolean, popup: PopupOptions | CustomPopupOptions): this;
+    bindTips(message: TipsMessageType, options?: TipsOptions): this;
     bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this;
     bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this;
     bindContentCover(isShow: boolean, builder: CustomBuilder, type?: ModalTransition | ContentCoverOptions): this;

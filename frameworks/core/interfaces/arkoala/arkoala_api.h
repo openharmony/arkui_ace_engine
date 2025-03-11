@@ -652,6 +652,22 @@ struct ArkUIGeometryTransitionOptions {
     ArkUI_Int32 hierarchyStrategy;
 };
 
+struct ArkUIBindTipsOptionsTime {
+    ArkUI_Float32 appearingTime;
+    ArkUI_Float32 disappearingTime;
+    ArkUI_Float32 appearingTimeWithContinuousOperation;
+    ArkUI_Float32 disappearingTimeWithContinuousOperation;
+};
+
+struct ArkUIBindTipsOptionsArrow {
+    ArkUI_Bool enableArrow;
+    ArkUI_CharPtr arrowPointPosition;
+    ArkUI_Float64 arrowWidthValue;
+    ArkUI_Int32 arrowWidthUnit;
+    ArkUI_Float64 arrowHeightValue;
+    ArkUI_Int32 arrowHeightUnit;
+};
+
 struct ArkUIFlexOptions {
     ArkUI_Int32 direction;
     ArkUI_Int32 wrap;
@@ -2014,6 +2030,9 @@ struct ArkUICommonModifier {
     void (*setGeometryTransition)(
         ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options);
     void (*resetGeometryTransition)(ArkUINodeHandle node);
+    void (*setBindTips)(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptionsTime timeOptions,
+        ArkUIBindTipsOptionsArrow arrowOptions);
+    void (*resetBindTips)(ArkUINodeHandle node);
     void (*setPixelStretchEffect)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetPixelStretchEffect)(ArkUINodeHandle node);

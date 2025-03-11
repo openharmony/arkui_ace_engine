@@ -105,6 +105,9 @@ const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
+constexpr Dimension ARROW_ZERO_PERCENT = 0.0_pct;
+constexpr Dimension ARROW_HALF_PERCENT = 0.5_pct;
+constexpr Dimension ARROW_ONE_HUNDRED_PERCENT = 1.0_pct;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -2332,6 +2335,67 @@ void ResetGeometryTransition(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
+}
+
+void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptionsTime timeOptions,
+    ArkUIBindTipsOptionsArrow arrowOptions)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tipsParam = AceType::MakeRefPtr<PopupParam>();
+    std::string messageString = message;
+    tipsParam->SetMessage(messageString);
+    tipsParam->SetAppearingTime(timeOptions.appearingTime);
+    tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
+    tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
+    tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
+    tipsParam->SetEnableArrow(arrowOptions.enableArrow);
+    if (arrowOptions.arrowPointPosition) {
+        CalcDimension offset;
+        char* pEnd = nullptr;
+        std::strtod(arrowOptions.arrowPointPosition, &pEnd);
+        if (pEnd != nullptr) {
+            if (std::strcmp(pEnd, "Start") == 0) {
+                offset = ARROW_ZERO_PERCENT;
+            }
+            if (std::strcmp(pEnd, "Center") == 0) {
+                offset = ARROW_HALF_PERCENT;
+            }
+            if (std::strcmp(pEnd, "End") == 0) {
+                offset = ARROW_ONE_HUNDRED_PERCENT;
+            }
+            tipsParam->SetArrowOffset(offset);
+        }
+    }
+    CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
+    bool setArrowWidthError = true;
+    if (arrowOptions.arrowWidthValue > 0 &&
+        static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
+        tipsParam->SetArrowWidth(arrowWidth);
+        setArrowWidthError = false;
+    }
+    tipsParam->SetErrorArrowWidth(setArrowWidthError);
+    CalcDimension arrowHeight(arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
+    bool setArrowHeightError = true;
+    if (arrowOptions.arrowHeightValue > 0 &&
+        static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
+        tipsParam->SetArrowHeight(arrowHeight);
+        setArrowHeightError = false;
+    }
+    tipsParam->SetErrorArrowHeight(setArrowHeightError);
+    tipsParam->SetBlockEvent(false);
+    tipsParam->SetTipsFlag(true);
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode));
+}
+
+void ResetBindTips(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tipsParam = AceType::MakeRefPtr<PopupParam>();
+    tipsParam->SetBlockEvent(false);
+    tipsParam->SetTipsFlag(true);
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode));
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
@@ -7026,6 +7090,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetRotate = ResetRotate,
         .setGeometryTransition = SetGeometryTransition,
         .resetGeometryTransition = ResetGeometryTransition,
+        .setBindTips = SetBindTips,
+        .resetBindTips = ResetBindTips,
         .setPixelStretchEffect = SetPixelStretchEffect,
         .resetPixelStretchEffect = ResetPixelStretchEffect,
         .setLightUpEffect = SetLightUpEffect,
