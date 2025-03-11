@@ -218,7 +218,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveRedundantNavDestinationTest003, TestSi
 
 /*
  * @tc.name: RemoveJsChildImmediately001
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) = true
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately001, TestSize.Level1)
@@ -245,7 +245,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately001, TestSize.Level1
 
 /*
  * @tc.name: RemoveJsChildImmediately002
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) = false
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) = false
  *           Branch: if (preUseCustomTransition || !preNavdestination->CheckTransitionPop(preAnimationId)) = true
  *           Condition: preUseCustomTransition = true
  * @tc.type: FUNC
@@ -261,7 +261,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately002, TestSize.Level1
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = AceType::DynamicCast<MockContainer>(Container::Current());
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     container->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
@@ -274,7 +274,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately002, TestSize.Level1
 
 /*
  * @tc.name: RemoveJsChildImmediately003
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) = false
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) = false
  *           Branch: if (preUseCustomTransition || !preNavdestination->CheckTransitionPop(preAnimationId)) = true
  *           Condition: preUseCustomTransition = false, !preNavdestination->CheckTransitionPop(preAnimationId) = true
  * @tc.type: FUNC
@@ -290,7 +290,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately003, TestSize.Level1
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = AceType::DynamicCast<MockContainer>(Container::Current());
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     container->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
@@ -304,7 +304,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately003, TestSize.Level1
 
 /*
  * @tc.name: RemoveJsChildImmediately004
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) = false
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) = false
  *           Branch: if (preUseCustomTransition || !preNavdestination->CheckTransitionPop(preAnimationId)) = false
  *           Condition: preUseCustomTransition = false, !preNavdestination->CheckTransitionPop(preAnimationId) = false
  *           Branch: if (preNode->HasSkipNode()) = true
@@ -321,7 +321,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately004, TestSize.Level1
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = AceType::DynamicCast<MockContainer>(Container::Current());
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     container->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
@@ -340,7 +340,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately004, TestSize.Level1
 
 /*
  * @tc.name: RemoveJsChildImmediately005
- * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) = false
+ * @tc.desc: Branch: if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) = false
  *           Branch: if (preUseCustomTransition || !preNavdestination->CheckTransitionPop(preAnimationId)) = false
  *           Condition: preUseCustomTransition = false, !preNavdestination->CheckTransitionPop(preAnimationId) = false
  *           Branch: if (preNode->HasSkipNode()) = false
@@ -357,7 +357,7 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveJsChildImmediately005, TestSize.Level1
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = AceType::DynamicCast<MockContainer>(Container::Current());
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     container->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
