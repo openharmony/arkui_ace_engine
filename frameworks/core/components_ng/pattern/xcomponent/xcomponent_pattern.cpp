@@ -542,10 +542,10 @@ void XComponentPattern::OnRebuildFrame()
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    UninitializeAccessibility();
+    UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
-            HandleSurfaceDestroyed();
+            HandleSurfaceDestroyed(frameNode);
         }
         if (isNativeXComponent_) {
             OnNativeUnload(frameNode);
@@ -860,13 +860,12 @@ void XComponentPattern::InitializeAccessibility()
     }
 }
 
-void XComponentPattern::UninitializeAccessibility()
+void XComponentPattern::UninitializeAccessibility(FrameNode* frameNode)
 {
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "UninitializeAccessibility");
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int64_t accessibilityId = host->GetAccessibilityId();
-    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(frameNode);
+    int64_t accessibilityId = frameNode->GetAccessibilityId();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
@@ -1810,7 +1809,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
     }
 }
 
-void XComponentPattern::OnSurfaceDestroyed()
+void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
 {
     if (isNativeXComponent_) {
         CHECK_RUN_ON(UI);
@@ -1824,10 +1823,14 @@ void XComponentPattern::OnSurfaceDestroyed()
         ACE_SCOPED_TRACE("XComponent[%s] native OnSurfaceDestroyed", GetId().c_str());
         callback->OnSurfaceDestroyed(nativeXComponent_.get(), surface);
         nativeXComponentImpl_->SetSurface(nullptr);
-    } else {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<XComponentEventHub>();
+    } else if (isTypedNode_) {
+        RefPtr<FrameNode> host;
+        if (!frameNode) {
+            host = GetHost();
+            CHECK_NULL_VOID(host);
+            frameNode = Referenced::RawPtr(host);
+        }
+        auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
             ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
@@ -1872,13 +1875,13 @@ void XComponentPattern::HandleSurfaceCreated()
     OnSurfaceCreated();
 }
 
-void XComponentPattern::HandleSurfaceDestroyed()
+void XComponentPattern::HandleSurfaceDestroyed(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->ReleaseSurfaceBuffers();
     renderSurface_->UnregisterSurface();
     CHECK_NULL_VOID(xcomponentController_);
-    OnSurfaceDestroyed();
+    OnSurfaceDestroyed(frameNode);
     xcomponentController_->SetSurfaceId("");
 }
 

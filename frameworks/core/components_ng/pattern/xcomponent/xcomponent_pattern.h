@@ -302,7 +302,7 @@ public:
 
     // accessibility
     void InitializeAccessibility();
-    void UninitializeAccessibility();
+    void UninitializeAccessibility(FrameNode* frameNode);
     bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
     bool OnAccessibilityChildTreeDeregister();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
@@ -325,10 +325,10 @@ public:
     void StopImageAnalyzer();
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
-    void OnSurfaceDestroyed();
+    void OnSurfaceDestroyed(FrameNode* frameNode = nullptr);
     void SetRenderFit(RenderFit renderFit);
     void HandleSurfaceCreated();
-    void HandleSurfaceDestroyed();
+    void HandleSurfaceDestroyed(FrameNode* frameNode = nullptr);
     void ChangeSurfaceCallbackMode(SurfaceCallbackMode mode)
     {
         if (surfaceCallbackModeChangeEvent_) {
