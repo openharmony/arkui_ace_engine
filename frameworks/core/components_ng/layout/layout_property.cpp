@@ -17,6 +17,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/grid_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -133,6 +134,10 @@ void TruncateSafeAreaPadding(const std::optional<float>& range, std::optional<fl
     }
 }
 } // namespace
+
+LayoutProperty::LayoutProperty() = default;
+
+LayoutProperty::~LayoutProperty() = default;
 
 void LayoutProperty::Reset()
 {
@@ -383,14 +388,23 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
 
 std::pair<std::vector<std::string>, std::vector<std::string>> LayoutProperty::CalcToString(const CalcSize& calcSize)
 {
-    return std::pair<std::vector<std::string>, std::vector<std::string>>(
-        StringExpression::ConvertDal2Rpn(calcSize.Width()->CalcValue()),
-        StringExpression::ConvertDal2Rpn(calcSize.Height()->CalcValue()));
+    std::vector<std::string> widthString;
+    std::vector<std::string> heightString;
+    if (calcSize.Width().has_value() && !calcSize.Width()->CalcValue().empty()) {
+        widthString = StringExpression::ConvertDal2Rpn(calcSize.Width()->CalcValue());
+    }
+    if (calcSize.Height().has_value() && !calcSize.Height()->CalcValue().empty()) {
+        heightString = StringExpression::ConvertDal2Rpn(calcSize.Height()->CalcValue());
+    }
+    return std::pair<std::vector<std::string>, std::vector<std::string>>(widthString, heightString);
 }
 
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
+    if (!needLazyLayout_) {
+        layoutConstraint_->viewPosRef.reset();
+    }
     if (margin_) {
         marginResult_.reset();
         auto margin = CreateMargin();
@@ -654,6 +668,40 @@ void LayoutProperty::UpdateContentConstraint()
     ConstraintContentByPadding();
     ConstraintContentByBorder();
     ConstraintContentBySafeAreaPadding();
+    ConstraintViewPosRef();
+}
+
+void LayoutProperty::ConstraintViewPosRef()
+{
+    if (!needLazyLayout_ || !contentConstraint_->viewPosRef.has_value()) {
+        return;
+    }
+    auto& posRef = contentConstraint_->viewPosRef.value();
+    auto axis = posRef.axis;
+    float adjStart = 0.0f;
+    float adjEnd = 0.0f;
+    if (padding_) {
+        auto paddingF = ConvertToPaddingPropertyF(
+            *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+        adjStart = axis == Axis::HORIZONTAL ? paddingF.left.value_or(0) : paddingF.top.value_or(0);
+        adjEnd = axis == Axis::HORIZONTAL ? paddingF.right.value_or(0) : paddingF.bottom.value_or(0);
+    }
+    if (borderWidth_) {
+        auto border = ConvertToBorderWidthPropertyF(
+            *borderWidth_, contentConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+        adjStart += axis == Axis::HORIZONTAL ? border.leftDimen.value_or(0) : border.topDimen.value_or(0);
+        adjEnd += axis == Axis::HORIZONTAL ? border.rightDimen.value_or(0) : border.bottomDimen.value_or(0);
+    }
+    if (margin_) {
+        auto margin = CreateMargin();
+        adjStart += axis == Axis::HORIZONTAL ? margin.left.value_or(0) : margin.top.value_or(0);
+        adjEnd += axis == Axis::HORIZONTAL ? margin.right.value_or(0) : margin.bottom.value_or(0);
+    }
+    if (posRef.referenceEdge == ReferenceEdge::START) {
+        posRef.referencePos = posRef.referencePos + adjStart;
+    } else {
+        posRef.referencePos = posRef.referencePos - adjEnd;
+    }
 }
 
 void LayoutProperty::ConstraintContentByPadding()
@@ -1170,10 +1218,8 @@ void LayoutProperty::ResetCalcMinSize(bool resetWidth)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     if (resetWidth) {
         calcLayoutConstraint_->minSize.value().SetWidth(std::nullopt);
-        calcLayoutConstraint_->preMinSize.value().SetWidth(std::nullopt);
     } else {
         calcLayoutConstraint_->minSize.value().SetHeight(std::nullopt);
-        calcLayoutConstraint_->preMinSize.value().SetWidth(std::nullopt);
     }
 }
 
@@ -1189,10 +1235,8 @@ void LayoutProperty::ResetCalcMaxSize(bool resetWidth)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     if (resetWidth) {
         calcLayoutConstraint_->maxSize.value().SetWidth(std::nullopt);
-        calcLayoutConstraint_->preMaxSize.value().SetWidth(std::nullopt);
     } else {
         calcLayoutConstraint_->maxSize.value().SetHeight(std::nullopt);
-        calcLayoutConstraint_->preMaxSize.value().SetWidth(std::nullopt);
     }
 }
 
@@ -2021,5 +2065,10 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     borderImageProperty->SetEdgeOutset(BorderImageDirection::LEFT, leftOutset);
     borderImageProperty->SetEdgeOutset(BorderImageDirection::RIGHT, rightOutset);
     target->UpdateBorderImage(borderImageProperty);
+}
+
+RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
+{
+    return geometryTransition_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

@@ -1859,9 +1859,14 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
-        .customBuilderWithId = dialogAttr.customBuilderWithId, .borderWidth = dialogAttr.borderWidth,
+        .customBuilderWithId = dialogAttr.customBuilderWithId,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption,
+        .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
-        .width = dialogAttr.width, .height = dialogAttr.height, .maskRect = dialogAttr.maskRect,
+        .width = dialogAttr.width, .height = dialogAttr.height,
+        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
+        .maskRect = dialogAttr.maskRect,
         .transitionEffect = dialogAttr.transitionEffect, .dialogTransitionEffect = dialogAttr.dialogTransitionEffect,
         .maskTransitionEffect = dialogAttr.maskTransitionEffect, .contentNode = dialogAttr.contentNode,
         .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
@@ -1869,12 +1874,10 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
         .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
         .levelOrder = dialogAttr.levelOrder,
+        .focusable = dialogAttr.focusable,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
-        .blurStyleOption = dialogAttr.blurStyleOption,
-        .effectOption = dialogAttr.effectOption
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -2457,7 +2460,7 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
         callback();
         return;
     }
-    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
+    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
 }
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
@@ -3666,8 +3669,6 @@ std::unique_ptr<JsonValue> FrontendDelegateDeclarative::GetNavigationJsonInfo()
 }
 bool FrontendDelegateDeclarative::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     auto overlayManager = context->GetOverlayManager();
@@ -3676,8 +3677,6 @@ bool FrontendDelegateDeclarative::SetOverlayManagerOptions(const NG::OverlayMana
 };
 std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarative::GetOverlayManagerOptions()
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, std::nullopt);
     auto overlayManager = context->GetOverlayManager();

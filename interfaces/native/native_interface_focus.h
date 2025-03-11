@@ -29,6 +29,7 @@
  *
  * @library libace_ndk.z.so
  * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @kit ArkUI
  * @since 15
  */
 
@@ -110,3 +111,4 @@ void OH_ArkUI_FocusSetKeyProcessingMode(ArkUI_ContextHandle uiContext, ArkUI_Key
 #endif
 
 #endif // ARKUI_NATIVE_INTERFACE_FOCUS_H
+/** @} */

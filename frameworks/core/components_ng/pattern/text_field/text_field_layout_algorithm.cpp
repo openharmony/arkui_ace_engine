@@ -399,7 +399,7 @@ float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& c
     }
     auto counterWidth = contentWidth;
     auto maxParagraphWidth = paragraph_->GetMaxWidth();
-    if (IsNeedUpdateCounterWidth(contentConstraint, maxParagraphWidth, contentWidth)) {
+    if (autoWidth_ || IsNeedUpdateCounterWidth(contentConstraint, maxParagraphWidth, contentWidth)) {
         counterWidth = maxParagraphWidth;
     }
     CounterNodeMeasure(counterWidth, layoutWrapper);
@@ -684,8 +684,8 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
     bool isCustomFont = false;
     for (const auto& familyName : fontFamilies) {
         bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
-        if (!customFont) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "FontRegister failed id:%{public}d", frameNode->GetId());
+        if (customFont) {
+            isCustomFont = true;
         }
     }
     if (isCustomFont || fontManager->IsDefaultFontChanged()) {

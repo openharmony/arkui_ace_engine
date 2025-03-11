@@ -67,6 +67,18 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string TEXT_TAG = "text";
 
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == TextTheme::TypeId()) {
+        return AceType::MakeRefPtr<TextTheme>();
+    } else if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else {
+        return AceType::MakeRefPtr<MenuTheme>();
+    }
+}
 } // namespace
 class MenuViewTestNg : public testing::Test {
 public:
@@ -76,6 +88,7 @@ public:
     void TearDown() override;
     void InitMenuTestNg();
     void MockPipelineContextGetTheme();
+    void InitTargetFrameNode();
     int32_t GetNodeId();
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<FrameNode> wrapperNode_;
@@ -85,6 +98,9 @@ public:
     RefPtr<MenuItemPattern> menuItemPattern_;
     int32_t nodeId_ = 1;
     bool isSubMenuBuilded_ = false;
+    RefPtr<FrameNode> targetFrameNode_;
+    int32_t targetId_ = 0;
+    std::string targetTag_ = "";
 };
 
 void MenuViewTestNg::SetUpTestCase() {}
@@ -97,8 +113,10 @@ void MenuViewTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     InitMenuTestNg();
     isSubMenuBuilded_ = false;
+    InitTargetFrameNode();
 }
 
 void MenuViewTestNg::MockPipelineContextGetTheme()
@@ -106,16 +124,10 @@ void MenuViewTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == TextTheme::TypeId()) {
-            return AceType::MakeRefPtr<TextTheme>();
-        } else if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == SelectTheme::TypeId()) {
-            return AceType::MakeRefPtr<SelectTheme>();
-        } else {
-            return AceType::MakeRefPtr<MenuTheme>();
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 void MenuViewTestNg::TearDown()
@@ -181,6 +193,15 @@ void MenuViewTestNg::InitMenuTestNg()
     subMenuPattern->SetParentMenuItem(subMenuParent_);
 }
 
+void MenuViewTestNg::InitTargetFrameNode()
+{
+    targetFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(targetFrameNode_, nullptr);
+    targetId_ = targetFrameNode_->GetId();
+    targetTag_ = targetFrameNode_->GetTag();
+}
+
 /**
  * @tc.name: GetHasIcon001
  * @tc.desc: MenuView GetHasIcon.
@@ -208,7 +229,7 @@ HWTEST_F(MenuViewTestNg, GetHasIcon001, TestSize.Level1)
     optionParams.emplace_back(param3);
     optionParams.emplace_back(param4);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 3, "", MenuType::MENU, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

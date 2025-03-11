@@ -16,14 +16,21 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H
 
+#include <optional>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "core/components/common/layout/position_param.h"
+#include "core/components/common/properties/background_image.h"
+#include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/border_image.h"
+#include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/invert.h"
+#include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/blend_mode.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -147,7 +154,7 @@ struct BorderImageProperty {
         jsonBorderImage->Put(
             "outset", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->OutsetToString().c_str());
         jsonBorderImage->Put("repeat", REPEAT_MODE[static_cast<int>(
-            propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetRepeatMode())]);
+                          propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetRepeatMode())]);
         jsonBorderImage->Put("fill", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())
             ->GetNeedFillCenter() ? "true" : "false");
         json->PutExtAttr("borderImage", jsonBorderImage->ToString().c_str(), filter);

@@ -671,6 +671,8 @@ struct InspectorTreeParams {
     TreeParams params;
     InspectorConfig inspectorCfg;
     size_t size;
+    bool isAsync = false;
+    std::shared_ptr<Recorder::InspectorTreeCollector> collector;
 };
 
 void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
@@ -685,6 +687,10 @@ void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_
     auto tmpJson = JsonUtil::Create(true);
     InspectorFilter filter;
     parent->ToJsonValue(tmpJson, filter);
+    if (params.enableFullAttrs) {
+        jsonNode->PutRef(INSPECTOR_ATTRS, std::move(tmpJson));
+        return;
+    }
     jsonNode->Put(INSPECTOR_ATTR_ID, tmpJson->GetString(INSPECTOR_ATTR_ID).c_str());
 
     auto jsonObject = JsonUtil::Create(true);
@@ -759,11 +765,22 @@ bool CheckNodeRect(const RefPtr<FrameNode>& node, RectF& rect, bool isVisibleOnl
 
 void GetWebContentIfNeed(const RefPtr<FrameNode>& node, const InspectorTreeParams& funcParams)
 {
+    if (!funcParams.isAsync || !funcParams.collector) {
+        return;
+    }
 #if !defined(CROSS_PLATFORM) && defined(WEB_SUPPORTED)
     if (node->GetTag() == V2::WEB_ETS_TAG && funcParams.params.enableWeb && !funcParams.params.webContentJs.empty()) {
         auto pattern = node->GetPattern<WebPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->GetPageContentAsync(funcParams.params.webContentJs);
+        auto lambda = [webId = node->GetId(), collector = funcParams.collector](const std::string& result) {
+            std::string key = "Web_" + std::to_string(webId);
+            collector->GetJson()->Put(key.c_str(), result.c_str());
+            collector->DecreaseTaskNum();
+        };
+        funcParams.collector->IncreaseTaskNum();
+        if (!pattern->RunJavascriptAsync(funcParams.params.webContentJs, std::move(lambda))) {
+            funcParams.collector->DecreaseTaskNum();
+        }
     }
 #endif
 }
@@ -799,8 +816,7 @@ void GetSimplifiedInspectorChildren(const RefPtr<NG::UINode>& parent,
     funcParams.size += 1;
     GetWebContentIfNeed(node, funcParams);
     FillSimplifiedInspectorAttrs(parent, jsonNode, funcParams.params, funcParams.inspectorCfg);
-
-    std::list<RefPtr<NG::UINode>> children;
+    std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, funcParams.pageId);
     }
@@ -814,17 +830,13 @@ void GetSimplifiedInspectorChildren(const RefPtr<NG::UINode>& parent,
     }
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
-#endif
 
-std::string Inspector::GetSimplifiedInspector(int32_t containerId, const TreeParams& params, bool isSync)
+bool GetSimplifiedInspectorStep1(const std::unique_ptr<JsonValue>& jsonRoot, int32_t containerId,
+    RefPtr<PipelineContext>& context, RefPtr<FrameNode>& pageRootNode)
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspector start: container %{public}d", containerId);
-    auto& jsonRoot = Recorder::InspectorTreeCollector::Get().GetJson();
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
-
-    auto context = NG::PipelineContext::GetContextByContainerId(containerId);
-    CHECK_NULL_RETURN(context, jsonRoot->ToString());
+    context = NG::PipelineContext::GetContextByContainerId(containerId);
+    CHECK_NULL_RETURN(context, false);
     auto scale = context->GetViewScale();
     auto rootHeight = context->GetRootHeight();
     auto rootWidth = context->GetRootWidth();
@@ -833,13 +845,17 @@ std::string Inspector::GetSimplifiedInspector(int32_t containerId, const TreePar
     jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
     jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
 
-    auto pageRootNode = context->GetStageManager()->GetLastPage();
-    CHECK_NULL_RETURN(pageRootNode, jsonRoot->ToString());
+    pageRootNode = context->GetStageManager()->GetLastPage();
+    return pageRootNode != nullptr;
+}
 
+bool GetSimplifiedInspectorStep2(
+    const std::unique_ptr<JsonValue>& jsonRoot, const RefPtr<FrameNode>& pageRootNode, InspectorTreeParams& funcParams)
+{
     auto pagePattern = pageRootNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, jsonRoot->ToString());
+    CHECK_NULL_RETURN(pagePattern, false);
     auto pageInfo = pagePattern->GetPageInfo();
-    CHECK_NULL_RETURN(pageInfo, jsonRoot->ToString());
+    CHECK_NULL_RETURN(pageInfo, false);
     jsonRoot->Put(INSPECTOR_PAGE_URL, pageInfo->GetPageUrl().c_str());
     jsonRoot->Put(INSPECTOR_NAV_DST_NAME, Recorder::EventRecorder::Get().GetNavDstName().c_str());
 
@@ -853,7 +869,11 @@ std::string Inspector::GetSimplifiedInspector(int32_t containerId, const TreePar
         GetFrameNodeChildren(overlayNode, children, pageId);
     }
     auto jsonNodeArray = JsonUtil::CreateArray(true);
-    InspectorTreeParams funcParams = { pageId, true, params, { params.isContentOnly }, children.size() };
+
+    funcParams.pageId = pageId;
+    funcParams.isActive = true;
+    funcParams.size = children.size();
+    funcParams.inspectorCfg = { funcParams.params.isContentOnly };
     for (auto& uiNode : children) {
         GetSimplifiedInspectorChildren(uiNode, jsonNodeArray, funcParams);
     }
@@ -861,10 +881,51 @@ std::string Inspector::GetSimplifiedInspector(int32_t containerId, const TreePar
         jsonRoot->PutRef(INSPECTOR_CHILDREN, std::move(jsonNodeArray));
     }
     jsonRoot->Put(INSPECTOR_CHILDREN_COUNT, funcParams.size);
+    return true;
+}
+#endif
 
-    return isSync ? jsonRoot->ToString() : "{}";
+std::string Inspector::GetSimplifiedInspector(int32_t containerId, const TreeParams& params)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Inspector tree a: container %{public}d", containerId);
+    auto jsonRoot = JsonUtil::Create(true);
+    RefPtr<PipelineContext> context;
+    RefPtr<FrameNode> pageRootNode;
+    auto success = GetSimplifiedInspectorStep1(jsonRoot, containerId, context, pageRootNode);
+    if (!success) {
+        return jsonRoot->ToString();
+    }
+    InspectorTreeParams inspectorTreeParams;
+    inspectorTreeParams.params = params;
+    inspectorTreeParams.isAsync = false;
+    GetSimplifiedInspectorStep2(jsonRoot, pageRootNode, inspectorTreeParams);
+    return jsonRoot->ToString();
 #else
     return "{}";
+#endif
+}
+
+void Inspector::GetSimplifiedInspectorAsync(
+    int32_t containerId, const TreeParams& params, const std::shared_ptr<Recorder::InspectorTreeCollector>& collector)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Inspector tree a: container %{public}d", containerId);
+    collector->IncreaseTaskNum();
+    auto& jsonRoot = collector->GetJson();
+    RefPtr<PipelineContext> context;
+    RefPtr<FrameNode> pageRootNode;
+    auto success = GetSimplifiedInspectorStep1(jsonRoot, containerId, context, pageRootNode);
+    if (!success) {
+        collector->DecreaseTaskNum();
+        return;
+    }
+    InspectorTreeParams inspectorTreeParams;
+    inspectorTreeParams.params = params;
+    inspectorTreeParams.isAsync = true;
+    inspectorTreeParams.collector = collector;
+    GetSimplifiedInspectorStep2(jsonRoot, pageRootNode, inspectorTreeParams);
+    collector->DecreaseTaskNum();
 #endif
 }
 

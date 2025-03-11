@@ -368,7 +368,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
@@ -562,7 +561,6 @@ private:
     void OnBlurOnKeyboardHideModeUpdate(const int32_t mode);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
-    void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnMetaViewportUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool value);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);

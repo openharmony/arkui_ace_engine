@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
@@ -243,5 +244,498 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoTransitionTest004, TestSize.Level1)
     ASSERT_EQ(navDestination->DoTransition(NavigationOperation::REPLACE, true), INVALID_ANIMATION_ID);
     ASSERT_EQ(navDestination->DoTransition(NavigationOperation::REPLACE, false), INVALID_ANIMATION_ID);
     ASSERT_EQ(navigationNode->animationId_, 0);
+}
+
+/**
+ * @tc.name: DoSystemFadeTransition001
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = true;
+    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+
+    navDestinationNode->DoSystemFadeTransition(true);
+    EXPECT_TRUE(eventHub->enabled_);
+}
+
+/**
+ * @tc.name: DoSystemFadeTransition002
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = true, eventHub = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = false;
+    navDestinationNode->eventHub_ = nullptr;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    navDestinationNode->pattern_ = nullptr;
+
+    navDestinationNode->DoSystemFadeTransition(true);
+    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    navDestinationNode->pattern_ = navDestinationPattern;
+}
+
+/**
+ * @tc.name: DoSystemFadeTransition003
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = true
+ *           Condition: !canReused_ = true, eventHub = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition003, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = false;
+    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+
+    navDestinationNode->DoSystemFadeTransition(true);
+    EXPECT_FALSE(eventHub->enabled_);
+}
+
+/**
+ * @tc.name: DoSystemSlideTransition001
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = false
+ *           Branch: if ((operation == NavigationOperation::POP) ^ isEnter) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = true;
+    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->SetActualForegroundColor(Color::RED);
+
+    navDestinationNode->DoSystemSlideTransition(NavigationOperation::POP, true);
+    EXPECT_TRUE(eventHub->enabled_);
+    EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: DoSystemSlideTransition002
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = true, eventHub = false
+ *           Branch: if ((operation == NavigationOperation::POP) ^ isEnter) = true
+ *           Branch: if (!isEnter) = false
+ *           Branch: if (!isEnter) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = false;
+    navDestinationNode->eventHub_ = nullptr;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    navDestinationNode->pattern_ = nullptr;
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
+
+    navDestinationNode->DoSystemSlideTransition(NavigationOperation::PUSH, true);
+    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetX(), 0.0f);
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetY(), 0.0f);
+    navDestinationNode->pattern_ = navDestinationPattern;
+}
+
+/**
+ * @tc.name: DoSystemSlideTransition003
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = true
+ *           Condition: !canReused_ = true, eventHub = true
+ *           Branch: if ((operation == NavigationOperation::POP) ^ isEnter) = true
+ *           Branch: if (!isEnter) = true
+ *           Branch: if (!isEnter) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition003, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = false;
+    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
+    navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::SLIDE_RIGHT;
+    navDestinationNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 100.0f));
+
+    navDestinationNode->DoSystemSlideTransition(NavigationOperation::POP, false);
+    EXPECT_FALSE(eventHub->enabled_);
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetX(), 0.0f);
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: DoSystemEnterExplodeTransition001
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = false
+ *           Branch: if (operation == NavigationOperation::POP) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = true;
+    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->SetActualForegroundColor(Color::RED);
+
+    navDestinationNode->DoSystemEnterExplodeTransition(NavigationOperation::PUSH);
+    EXPECT_TRUE(eventHub->enabled_);
+    EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::RED);
+}
+
+/**
+ * @tc.name: DoSystemEnterExplodeTransition002
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = true, eventHub = false
+ *           Branch: if (operation == NavigationOperation::POP) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = false;
+    navDestinationNode->eventHub_ = nullptr;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    navDestinationNode->pattern_ = nullptr;
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->SetActualForegroundColor(Color::RED);
+
+    navDestinationNode->DoSystemEnterExplodeTransition(NavigationOperation::PUSH);
+    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::RED);
+    navDestinationNode->pattern_ = navDestinationPattern;
+}
+
+/**
+ * @tc.name: DoSystemEnterExplodeTransition003
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = true
+ *           Condition: !canReused_ = true, eventHub = true
+ *           Branch: if (operation == NavigationOperation::POP) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition003, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = false;
+    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->SetActualForegroundColor(Color::RED);
+
+    navDestinationNode->DoSystemEnterExplodeTransition(NavigationOperation::POP);
+    EXPECT_FALSE(eventHub->enabled_);
+    EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: DoSystemExitExplodeTransition001
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = false
+ *           Branch: if (operation == NavigationOperation::POP) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = true;
+    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->SetActualForegroundColor(Color::RED);
+
+    navDestinationNode->DoSystemExitExplodeTransition(NavigationOperation::PUSH);
+    EXPECT_TRUE(eventHub->enabled_);
+    EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: DoSystemExitExplodeTransition002
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = true, eventHub = false
+ *           Branch: if (operation == NavigationOperation::POP) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = false;
+    navDestinationNode->eventHub_ = nullptr;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    navDestinationNode->pattern_ = nullptr;
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->SetActualForegroundColor(Color::RED);
+
+    navDestinationNode->DoSystemExitExplodeTransition(NavigationOperation::POP);
+    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::RED);
+    navDestinationNode->pattern_ = navDestinationPattern;
+}
+
+/**
+ * @tc.name: DoSystemExitExplodeTransition003
+ * @tc.desc: Branch: if (!canReused_ && eventHub) = true
+ *           Condition: !canReused_ = true, eventHub = true
+ *           Branch: if (operation == NavigationOperation::POP) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition003, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = false;
+    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetEnabledInternal(true);
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->SetActualForegroundColor(Color::RED);
+
+    navDestinationNode->DoSystemExitExplodeTransition(NavigationOperation::PUSH);
+    EXPECT_FALSE(eventHub->enabled_);
+    EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: StartCustomTransitionAnimation001
+ * @tc.desc: Branch: if (!hasResetProperties && isEnter) = false
+ *           Condition: !hasResetProperties = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, StartCustomTransitionAnimation001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = true;
+    NavDestinationTransition navDestinationTransition;
+    navDestinationTransition.event = []() { };
+    navDestinationTransition.onTransitionEnd = []() { };
+    navDestinationTransition.duration = 100.0f;
+    navDestinationTransition.delay = 100.0f;
+    navDestinationTransition.curve = Curves::EASE_IN_OUT;
+    bool hasResetProperties = true;
+
+    navDestinationNode->StartCustomTransitionAnimation(navDestinationTransition, false, hasResetProperties, 100.0f);
+    EXPECT_TRUE(hasResetProperties);
+}
+
+/**
+ * @tc.name: StartCustomTransitionAnimation002
+ * @tc.desc: Branch: if (!hasResetProperties && isEnter) = false
+ *           Condition: !hasResetProperties = true, isEnter = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, StartCustomTransitionAnimation002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = true;
+    NavDestinationTransition navDestinationTransition;
+    navDestinationTransition.event = []() { };
+    navDestinationTransition.onTransitionEnd = []() { };
+    navDestinationTransition.duration = 100.0f;
+    navDestinationTransition.delay = 100.0f;
+    navDestinationTransition.curve = Curves::EASE_IN_OUT;
+    bool hasResetProperties = false;
+
+    navDestinationNode->StartCustomTransitionAnimation(navDestinationTransition, false, hasResetProperties, 100.0f);
+    EXPECT_FALSE(hasResetProperties);
+}
+
+/**
+ * @tc.name: StartCustomTransitionAnimation003
+ * @tc.desc: Branch: if (!hasResetProperties && isEnter) = true
+ *           Condition: !hasResetProperties = true, isEnter = true
+ *           Branch: if (navigation) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, StartCustomTransitionAnimation003, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->canReused_ = true;
+    NavDestinationTransition navDestinationTransition;
+    navDestinationTransition.event = []() { };
+    navDestinationTransition.onTransitionEnd = []() { };
+    navDestinationTransition.duration = 100.0f;
+    navDestinationTransition.delay = 100.0f;
+    navDestinationTransition.curve = Curves::EASE_IN_OUT;
+    bool hasResetProperties = false;
+
+    navDestinationNode->StartCustomTransitionAnimation(navDestinationTransition, true, hasResetProperties, 100.0f);
+    EXPECT_TRUE(hasResetProperties);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    EXPECT_EQ(navDestinationPattern->GetNavigationNode(), nullptr);
+}
+
+/**
+ * @tc.name: StartCustomTransitionAnimation004
+ * @tc.desc: Branch: if (!hasResetProperties && isEnter) = true
+ *           Condition: !hasResetProperties = true, isEnter = true
+ *           Branch: if (navigation) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, StartCustomTransitionAnimation004, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navDestinationPattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigationNode));
+    navDestinationNode->canReused_ = true;
+    NavDestinationTransition navDestinationTransition;
+    navDestinationTransition.event = []() { };
+    navDestinationTransition.onTransitionEnd = []() { };
+    navDestinationTransition.duration = 100.0f;
+    navDestinationTransition.delay = 100.0f;
+    navDestinationTransition.curve = Curves::EASE_IN_OUT;
+    bool hasResetProperties = false;
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
+
+    navDestinationNode->StartCustomTransitionAnimation(navDestinationTransition, true, hasResetProperties, 100.0f);
+    EXPECT_TRUE(hasResetProperties);
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetX(), 0.0f);
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: BuildTransitionFinishCallback001
+ * @tc.desc: Branch: if (!hasResetProperties && isEnter) = false
+ *           Condition: !hasResetProperties = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->SetIsOnAnimation(true);
+    navDestinationNode->SetCanReused(true);
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
+    navDestinationNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+
+    auto finish = navDestinationNode->BuildTransitionFinishCallback(false, nullptr);
+    finish();
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetX(), 100.0f);
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetY(), 60.0f);
+    EXPECT_FALSE(navDestinationNode->isOnAnimation_);
+}
+
+/**
+ * @tc.name: BuildTransitionFinishCallback002
+ * @tc.desc: Branch: if (extraOption) = true
+ *           Branch: if (animationId != navDestination->GetAnimationId()) = false
+ *           Branch: if (isSystemTransition) = true
+ *           Branch: if (!navDestination->GetCanReused()) = false
+ *           Branch: if (navDestination->HasStandardBefore()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navDestinationPattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigationNode));
+    navDestinationNode->index_ = 0;
+    navigationNode->lastStandardIndex_ = 1;
+    navDestinationNode->SetIsOnAnimation(true);
+    navDestinationNode->SetCanReused(true);
+    auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
+    ASSERT_NE(navDestinationRenderContext, nullptr);
+    navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
+    navDestinationNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+
+    bool extraOptionCalled = false;
+    auto extraOption = [&extraOptionCalled] () {
+        extraOptionCalled = true;
+    };
+    auto finish = navDestinationNode->BuildTransitionFinishCallback(true, extraOption);
+    finish();
+    EXPECT_TRUE(extraOptionCalled);
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetX(), 0.0f);
+    EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetY(), 0.0f);
+    EXPECT_EQ(navDestinationNode->GetLayoutProperty()->GetVisibility(), VisibleType::INVISIBLE);
+    EXPECT_FALSE(navDestinationNode->isOnAnimation_);
+}
+
+/**
+ * @tc.name: BuildTransitionFinishCallback003
+ * @tc.desc: Branch: if (animationId != navDestination->GetAnimationId()) = false
+ *           Branch: if (!navDestination->GetCanReused()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback003, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navDestinationPattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigationNode));
+    navDestinationNode->index_ = 0;
+    navigationNode->lastStandardIndex_ = 1;
+    navDestinationNode->SetCanReused(false);
+    navDestinationNode->SetIsOnAnimation(true);
+
+    auto finish = navDestinationNode->BuildTransitionFinishCallback(true, [] () {});
+    finish();
+    EXPECT_TRUE(navDestinationNode->isOnAnimation_);
 }
 } // namespace OHOS::Ace::NG

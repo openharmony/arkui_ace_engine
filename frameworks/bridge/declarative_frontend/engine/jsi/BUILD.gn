@@ -250,6 +250,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_image_span_bridge.cpp",
       "nativeModule/arkts_native_indicator_component_bridge.cpp",
+      "nativeModule/arkts_native_lazy_grid_layout_bridge.cpp",
       "nativeModule/arkts_native_line_bridge.cpp",
       "nativeModule/arkts_native_linear_indicator.cpp",
       "nativeModule/arkts_native_list_bridge.cpp",
@@ -306,6 +307,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_toggle_bridge.cpp",
       "nativeModule/arkts_native_utils_bridge.cpp",
       "nativeModule/arkts_native_video_bridge.cpp",
+      "nativeModule/arkts_native_web_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
     ]

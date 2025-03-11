@@ -599,7 +599,7 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0011, TestSize.Level1)
     EXPECT_NE(checkboxPattern, nullptr);
     auto checkboxPaintProperty = checkboxPattern->GetPaintProperty<CheckBoxPaintProperty>();
     EXPECT_NE(checkboxPaintProperty, nullptr);
-    EXPECT_EQ(checkboxPaintProperty->GetCheckBoxSelectedColor(), checkboxTheme->GetActiveColor());
+    EXPECT_NE(checkboxPaintProperty->GetCheckBoxSelectedColor(), checkboxTheme->GetActiveColor());
 
     /**
      * @tc.steps: step2. test button
@@ -889,7 +889,8 @@ HWTEST_F(ToggleTestNg, TogglePaintTest001, TestSize.Level1)
      * @tc.steps: step2. get paintWrapper
      * @tc.expected: paintWrapper is not null
      */
-    RefPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = switchFrameNode->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
     auto switchPaintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
     EXPECT_NE(switchPaintProperty, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();

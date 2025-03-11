@@ -39,6 +39,7 @@
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -167,6 +168,8 @@ HWTEST_F(OverlayManagerToastTestNg, ToastShowModeTest001, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_FALSE(overlayManager->toastMap_.empty());
+    overlayManager->ClearToast();
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
 }
 
 /**
@@ -541,5 +544,122 @@ HWTEST_F(OverlayManagerToastTestNg, ToastDumpInfoTest001, TestSize.Level1)
     pattern->SetToastInfo(info);
     pattern->DumpInfo();
     EXPECT_NE(DumpLog::GetInstance().description_.size(), 0);
+}
+
+/**
+ * @tc.name: FoldStatusChangedAnimation
+ * @tc.desc: Test FoldStatusChangedAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, FoldStatusChangedAnimation, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto layoutAlgorithm = toastPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    toastPattern->FoldStatusChangedAnimation();
+    EXPECT_FALSE(toastPattern->IsDefaultToast());
+}
+
+/**
+ * @tc.name: AdjustOffsetForKeyboard
+ * @tc.desc: Test AdjustOffsetForKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, AdjustOffsetForKeyboard, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto layoutAlgorithm = toastPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    Dimension offsetY = 100.0_vp;
+    double toastBottom = 100;
+    float textHeight = 100;
+    bool needResizeBottom = false;
+    toastPattern->AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight, needResizeBottom);
+    EXPECT_FALSE(toastPattern->IsDefaultToast());
+}
+
+/**
+ * @tc.name: GetTextLayoutConstraint
+ * @tc.desc: Test GetTextLayoutConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, GetTextLayoutConstraint, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<ToastLayoutAlgorithm>(toastPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(toastNode, geometryNode, toastNode->GetLayoutProperty());
+
+    
+    layoutAlgorithm->GetTextLayoutConstraint(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(toastPattern->IsDefaultToast());
+}
+
+/**
+ * @tc.name: DumpInfo
+ * @tc.desc: Test DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, DumpInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto layoutAlgorithm = toastPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    toastPattern->DumpInfo(json);
+    EXPECT_FALSE(toastPattern->IsDefaultToast());
 }
 } // namespace OHOS::Ace::NG

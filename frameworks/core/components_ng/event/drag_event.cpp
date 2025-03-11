@@ -76,6 +76,10 @@ DragEventActuator::DragEventActuator(
     const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance)
     : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers), distance_(distance)
 {
+    auto gestureHub = gestureEventHub_.Upgrade();
+    if (gestureHub && gestureHub->IsDragNewFwk()) {
+        return;
+    }
     if (fingers_ < PAN_FINGER) {
         fingers_ = PAN_FINGER;
     }
@@ -1039,40 +1043,6 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     imageContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
 }
 
-void DragEventActuator::CreatePreviewNode(
-    const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode, float dragPreviewScale)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pixelMap = frameNode->GetDragPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    auto center = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
-    auto frameOffset = OffsetF(center.GetX() - (pixelMap->GetWidth() / 2.0f),
-        center.GetY() - (pixelMap->GetHeight() / 2.0f));
-    imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() {return AceType::MakeRefPtr<ImagePattern>(); });
-    CHECK_NULL_VOID(imageNode);
-    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
-
-    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
-    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
-    auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    props->UpdateAutoResize(false);
-    props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    auto targetSize = CalcSize(NG::CalcLength(pixelMap->GetWidth()), NG::CalcLength(pixelMap->GetHeight()));
-    props->UpdateUserDefinedIdealSize(targetSize);
-
-    auto imagePattern = imageNode->GetPattern<ImagePattern>();
-    CHECK_NULL_VOID(imagePattern);
-    imagePattern->SetSyncLoad(true);
-
-    UpdatePreviewPositionAndScale(imageNode, frameOffset, dragPreviewScale);
-    UpdatePreviewAttr(frameNode, imageNode);
-    imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    imageNode->MarkModifyDone();
-    imageNode->SetLayoutDirtyMarked(true);
-    imageNode->SetActive(true);
-}
-
 void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)
 {
     if (imageNode->IsPreviewNeedScale()) {
@@ -1080,45 +1050,6 @@ void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdateTransformScale({ 1.0f, 1.0f });
         imageContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-    }
-}
-
-void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, const RefPtr<GestureEventHub>& gestureHub,
-    const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode, bool isDragPixelMap)
-{
-    CHECK_NULL_VOID(manager);
-    CHECK_NULL_VOID(imageNode);
-    CHECK_NULL_VOID(gestureHub);
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    columnNode->AddChild(imageNode);
-    auto hub = columnNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(hub);
-    hub->SetPixelMap(gestureHub->GetPixelMap());
-    if (textNode) {
-        columnNode->AddChild(textNode);
-    }
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        auto frameNode = gestureHub->GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto windowScene = manager->FindWindowScene(frameNode);
-        manager->MountPixelMapToWindowScene(columnNode, windowScene, isDragPixelMap);
-    } else {
-        manager->MountPixelMapToRootNode(columnNode, isDragPixelMap);
-    }
-    SetPreviewDefaultAnimateProperty(imageNode);
-    columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    columnNode->MarkModifyDone();
-    columnNode->SetActive(true);
-    auto renderContext = columnNode->GetRenderContext();
-    if (renderContext) {
-        renderContext->MarkUiFirstNode(false);
-        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
-    }
-    MarkDirtyNode(columnNode);
-    if (!isDragPixelMap) {
-        FlushSyncGeometryNodeTasks();
     }
 }
 
@@ -1460,9 +1391,11 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
         preDragStatus != PreDragStatus::ACTION_CANCELED_BEFORE_DRAG)
         || preDragStatus == PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION
         || preDragStatus == PreDragStatus::PREVIEW_LIFT_STARTED) {
-        auto nextPreDragStatus = static_cast<PreDragStatus>(static_cast<int32_t>(preDragStatus) + 1);
-        DragDropGlobalController::GetInstance().SetPreDragStatus(nextPreDragStatus);
-        onPreDragStatus = preDragStatus;
+        if (preDragStatus != PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+            auto nextPreDragStatus = static_cast<PreDragStatus>(static_cast<int32_t>(preDragStatus) + 1);
+            DragDropGlobalController::GetInstance().SetPreDragStatus(nextPreDragStatus);
+            onPreDragStatus = preDragStatus;
+        }
     }
     auto onPreDragFunc = eventHub->GetOnPreDrag();
     CHECK_NULL_VOID(onPreDragFunc);
@@ -1476,6 +1409,8 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
                 callback(onPreDragStatus);
             },
             TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
+    } else if (preDragStatus == PreDragStatus::PREPARING_FOR_DRAG_DETECTION) {
+        onPreDragFunc(preDragStatus);
     } else {
         onPreDragFunc(onPreDragStatus);
     }
@@ -2191,7 +2126,7 @@ std::optional<Shadow> DragEventActuator::GetDefaultShadow()
     CHECK_NULL_RETURN(pipelineContext, std::nullopt);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, std::nullopt);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = pipelineContext->GetColorMode();
     auto shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingSM, colorMode);
     shadow.SetIsFilled(true);
     return shadow;

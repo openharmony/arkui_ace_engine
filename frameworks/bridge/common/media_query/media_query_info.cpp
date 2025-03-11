@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -75,10 +76,10 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
     auto container = Container::Current();
     int32_t width = container ? container->GetViewWidth() : 0;
     int32_t height = container ? container->GetViewHeight() : 0;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline && pipeline->GetWindowManager() &&
         pipeline->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             width -= static_cast<int32_t>(2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
         }
         height -= static_cast<int32_t>(
@@ -94,7 +95,7 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
     json->Put("resolution", PipelineBase::GetCurrentDensity());
     json->Put("orientation", GetOrientation().c_str());
     json->Put("device-type", GetDeviceType().c_str());
-    json->Put("dark-mode", SystemProperties::GetColorMode() == ColorMode::DARK);
+    json->Put("dark-mode", PipelineBase::GetCurrentColorMode() == ColorMode::DARK);
     json->Put("api-version", StringUtils::StringToInt(SystemProperties::GetApiVersion()));
     return json;
 }

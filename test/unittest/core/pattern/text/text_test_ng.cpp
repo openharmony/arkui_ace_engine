@@ -21,6 +21,7 @@
 #include "ui/base/geometry/dimension.h"
 
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -33,6 +34,9 @@ const std::string IMAGE_VALUE = "image1";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
 const std::string TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime";
+const std::u16string NORMAL_URL = u"www.baidu.com";
+const std::u16string JUMP_LINK_HTTP = u"http://www.baidu.com";
+const std::u16string JUMP_LINK_HTTPS = u"https://www.baidu.com";
 constexpr uint32_t DEFAULT_NODE_ID = 0;
 constexpr uint32_t UKNOWN_VALUE = 0;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
@@ -495,6 +499,231 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
         EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
         EXPECT_EQ(pattern->textSelector_.GetTextEnd(), TEXT_SIZE_INT);
     }
+}
+
+/**
+ * @tc.name: OnWindowHide001
+ * @tc.desc: Test TextPattern OnWindowHide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnWindowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnWindowHide function.
+     */
+    (void)textPattern->GetOrCreateMagnifier();
+    (void)textPattern->CreateNodePaintMethod();
+    textPattern->OnWindowHide();
+    EXPECT_NE(textPattern->GetContentModifier(), nullptr);
+}
+
+/**
+ * @tc.name: OnWindowShow001
+ * @tc.desc: Test TextPattern OnWindowShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnWindowShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnWindowShow function.
+     */
+    (void)textPattern->CreateNodePaintMethod();
+    textPattern->OnWindowShow();
+    EXPECT_NE(textPattern->GetContentModifier(), nullptr);
+}
+
+/**
+ * @tc.name: InitUrlMouseEvent001
+ * @tc.desc: Test TextPattern InitUrlMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, InitUrlMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call InitUrlMouseEvent function.
+     */
+    textPattern->InitUrlMouseEvent();
+    EXPECT_TRUE(textPattern->urlMouseEventInitialized_);
+}
+
+/**
+ * @tc.name: URLOnHover001
+ * @tc.desc: Test TextPattern URLOnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, URLOnHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call URLOnHover function.
+     */
+    textPattern->CreateModifier();
+    textPattern->overlayMod_->SetSelectedForegroundColorAndRects({ { 5, 5, 5, 5 }, { 0, 0, 0, 0 } }, 1);
+    textPattern->URLOnHover(false);
+    EXPECT_TRUE(textPattern->overlayMod_->selectedUrlRects_.empty());
+}
+
+/**
+ * @tc.name: OnHover001
+ * @tc.desc: Test TextPattern OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnHover function.
+     */
+    textPattern->OnHover(true);
+    EXPECT_EQ(textPattern->currentMouseStyle_, MouseFormat::DEFAULT);
+    textPattern->OnHover(false);
+    EXPECT_EQ(textPattern->currentMouseStyle_, MouseFormat::DEFAULT);
+}
+
+/**
+ * @tc.name: CalcAIMenuPosition001
+ * @tc.desc: Test TextPattern CalcAIMenuPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CalcAIMenuPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call CalcAIMenuPosition function.
+     */
+    AISpan aiSpan;
+    bool calledCalculateHandleFunc = false;
+    CalculateHandleFunc calculateHandleFunc = [&calledCalculateHandleFunc]() {
+        calledCalculateHandleFunc = true;
+    };
+    textPattern->textSelector_.firstHandle = RectF(0, 0, 0, 0);
+    textPattern->textSelector_.secondHandle = RectF(1, 1, 5, 5);
+    textPattern->CalcAIMenuPosition(aiSpan, calculateHandleFunc);
+    EXPECT_TRUE(calledCalculateHandleFunc);
+}
+
+/**
+ * @tc.name: TryLinkJump001
+ * @tc.desc: Test TextPattern TryLinkJump.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TryLinkJump001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set link jump callback.
+     */
+    auto pipeline = textFrameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto linkJumpCallback = [](const std::string& link) {};
+    pipeline->SetLinkJumpCallback(linkJumpCallback);
+
+    /**
+     * @tc.steps: step3. get span node and span item.
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+    auto spanItem = spanNode->GetSpanItem();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. update spanNode content and call TryLinkJump funciton.
+     * jump link: "www.baidu.com"
+     */
+    spanNode->UpdateContent(NORMAL_URL);
+    EXPECT_FALSE(textPattern->TryLinkJump(spanItem));
+
+    // jump link: "http://www.baidu.com"
+    spanNode->UpdateContent(JUMP_LINK_HTTP);
+    EXPECT_TRUE(textPattern->TryLinkJump(spanItem));
+
+    // jump link: "https://www.baidu.com"
+    spanNode->UpdateContent(JUMP_LINK_HTTPS);
+    EXPECT_TRUE(textPattern->TryLinkJump(spanItem));
+}
+
+/**
+ * @tc.name: ActTextOnClick001
+ * @tc.desc: Test TextPattern ActTextOnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ActTextOnClick001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. create GestureEvent and call ActTextOnClick function.
+     */
+    GestureEvent info;
+    textPattern->SetOnClickEvent(nullptr);
+    textPattern->ActTextOnClick(info);
+    EXPECT_EQ(textPattern->onClick_, nullptr);
+
+    auto clickFunc = [](GestureEvent& info) {};
+    textPattern->SetOnClickEvent(clickFunc);
+    textPattern->ActTextOnClick(info);
+    EXPECT_NE(textPattern->onClick_, nullptr);
 }
 
 /**

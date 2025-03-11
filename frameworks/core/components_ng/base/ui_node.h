@@ -30,6 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/window_animation_config.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
@@ -205,6 +207,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     virtual void DumpTree(int32_t depth, bool hasJson = false);
+    void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
@@ -722,6 +725,11 @@ public:
         return instanceId_;
     }
 
+    static std::set<std::string> GetLayoutTags()
+    {
+        return layoutTags_;
+    }
+
     virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
     {
         for (const auto& child : GetChildren()) {
@@ -856,6 +864,9 @@ public:
     void setIsMoving(bool isMoving)
     {
         isMoving_ = isMoving;
+        for (auto& child : children_) {
+            child->setIsMoving(isMoving);
+        }
     }
 
     bool isCrossLanguageAttributeSetting() const
@@ -883,10 +894,10 @@ public:
         isDestroyingState_ = isDestroying;
     }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
-    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const
-    {
-        return apiVersion_ >= static_cast<int32_t>(version);
-    }
+
+    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const;
+
+    bool LessThanAPITargetVersion(PlatformVersion version) const;
 
     bool IsArkTsRenderNode() const
     {
@@ -899,6 +910,10 @@ public:
     }
 
     void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
+    virtual bool CheckVisibleOrActive()
+    {
+        return true;
+    }
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -983,6 +998,7 @@ protected:
      * @param id the accessibilityId of child.
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
+    const static std::set<std::string> layoutTags_;
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);

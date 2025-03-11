@@ -23,6 +23,7 @@
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
+enum class PanGestureState : int32_t;
 
 class PanRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PanRecognizer, MultiFingersRecognizer);
@@ -70,7 +71,6 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
-    void CheckCallbackState() override;
     void DumpVelocityInfo(int32_t fingerId);
 
     double GetDistance() const
@@ -82,6 +82,9 @@ public:
     {
         return direction_;
     }
+
+    void HandlePanGestureAccept(
+        const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback);
 
 private:
     class PanVelocity {
@@ -137,6 +140,7 @@ private:
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    void GetGestureEventHalfInfo(GestureEvent* info);
     GestureEvent GetGestureEventInfo();
 
     void OnResetStatus() override;

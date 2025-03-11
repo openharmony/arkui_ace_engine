@@ -690,6 +690,9 @@ int32_t OH_ArkUI_DragEvent_StartDataLoading(
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    if (!(dragEvent->isSuitGetData)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
     int32_t length = strlen(dragEvent->key);
     for (int32_t i = 0; i < length; i++) {
         key[i] = dragEvent->key[i];

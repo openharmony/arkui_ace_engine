@@ -2077,7 +2077,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0999, TestSize.Level1)
      * @tc.steps2: initialize parameters.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     ASSERT_NE(focusHub, nullptr);
     ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
     NonPointerEvent nonPointerEvent;
@@ -2108,11 +2108,16 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg01000, TestSize.Level1)
      * @tc.steps2: initialize parameters.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     ASSERT_NE(focusHub, nullptr);
     ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
 
     CrownEvent event;
+    EXPECT_FALSE(focusHub->HandleCrownEvent(event));
+
+    OnCrownCallbackFunc onCrownEventCallback = [](CrownEventInfo& info) {};
+    focusHub->SetOnCrownCallback(std::move(onCrownEventCallback));
+
     EXPECT_FALSE(focusHub->HandleCrownEvent(event));
 
     focusHub->currentFocus_ = true;
@@ -2138,7 +2143,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg01001, TestSize.Level1)
      * @tc.steps2: initialize parameters.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     ASSERT_NE(focusHub, nullptr);
     ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
 
@@ -2148,6 +2153,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg01001, TestSize.Level1)
     focusHub->currentFocus_ = true;
     auto focus = focusHub->IsCurrentFocus();
     EXPECT_EQ(focus, true);
+
+    OnCrownEventFunc onCrownEventsInternal = [](const CrownEvent& info) -> bool { return true;};
+    focusHub->SetOnCrownEventInternal(std::move(onCrownEventsInternal));
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(event));
 }
 #endif
 

@@ -1989,7 +1989,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(sheetNode, nullptr);
-    auto buttonNode = sheetNode->GetChildAtIndex(2);
+    auto buttonNode = sheetNode->GetChildAtIndex(1);
     ASSERT_NE(buttonNode, nullptr);
     auto iconNode = buttonNode->GetChildAtIndex(0);
     ASSERT_NE(iconNode, nullptr);
@@ -2009,7 +2009,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     sheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(sheetNode, nullptr);
-    buttonNode = sheetNode->GetChildAtIndex(2);
+    buttonNode = sheetNode->GetChildAtIndex(1);
     ASSERT_NE(buttonNode, nullptr);
     iconNode = buttonNode->GetChildAtIndex(0);
     ASSERT_NE(iconNode, nullptr);
@@ -2064,7 +2064,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, UpdateSheetRender001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(ShadowTheme::TypeId())).WillRepeatedly(Return(shadowTheme));
     overlayManager->UpdateSheetRender(sheetNode, sheetStyle, false);
     EXPECT_EQ(renderContext->GetBackShadow().has_value(), true);
-    Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingMD, SystemProperties::GetColorMode());
+    Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingMD, MockContainer::GetMockColorMode());
     EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
 

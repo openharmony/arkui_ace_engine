@@ -36,6 +36,7 @@ constexpr float DEFAULT_SIZE_18 = 18.0f;
 constexpr float DEFAULT_SIZE_24 = 24.0f;
 constexpr float DEFAULT_SIZE_32 = 32.0f;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
+constexpr int EXPECTED_UPDATE_INTERVAL_VALUE = 1000;
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 {
@@ -344,6 +345,7 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
     indicator->dimRight = ArkUI_OptionalFloat { 0, 0.0f };
     indicator->dimTop = ArkUI_OptionalFloat { 0, 0.0f };
     indicator->dimBottom = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->ignoreSizeValue = ArkUI_OptionalInt { 0, 0 };
     if (indicatorType == ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         indicator->itemWidth = ArkUI_OptionalFloat { 0, 0.0f };
         indicator->itemHeight = ArkUI_OptionalFloat { 0, 0.0f };
@@ -353,6 +355,7 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
         indicator->colorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->selectedColorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->maxDisplayCount = ArkUI_OptionalInt { 0, 0 };
+        indicator->dimSpace = ArkUI_OptionalFloat { 0, 8.0f };
     } else {
         return nullptr;
     }
@@ -525,6 +528,32 @@ int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indic
     return indicator->maxDisplayCount.value;
 }
 
+void OH_ArkUI_SwiperIndicator_SetIgnoreSizeOfBottom(ArkUI_SwiperIndicator* indicator, int32_t ignoreSize)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->ignoreSizeValue.isSet = 1;
+    indicator->ignoreSizeValue.value = ignoreSize;
+}
+
+int32_t OH_ArkUI_SwiperIndicator_GetIgnoreSizeOfBottom(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->ignoreSizeValue.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetSpace(ArkUI_SwiperIndicator* indicator, float space)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimSpace.isSet = 1;
+    indicator->dimSpace.value = space;
+}
+
+float OH_ArkUI_SwiperIndicator_GetSpace(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 8.0f);
+    return indicator->dimSpace.value;
+}
+
 ArkUI_SwiperDigitIndicator* OH_ArkUI_SwiperDigitIndicator_Create()
 {
     ArkUI_SwiperDigitIndicator* indicator = new ArkUI_SwiperDigitIndicator;
@@ -539,6 +568,7 @@ ArkUI_SwiperDigitIndicator* OH_ArkUI_SwiperDigitIndicator_Create()
     indicator->selectedFontSize = ArkUI_OptionalFloat { 0, 14.0f };
     indicator->fontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
     indicator->selectedFontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
+    indicator->ignoreSizeValue = ArkUI_OptionalInt {0, 0};
     return indicator;
 }
 
@@ -676,6 +706,19 @@ ArkUI_FontWeight OH_ArkUI_SwiperDigitIndicator_GetSelectedFontWeight(ArkUI_Swipe
 {
     CHECK_NULL_RETURN(indicator, static_cast<ArkUI_FontWeight>(0));
     return static_cast<ArkUI_FontWeight>(indicator->selectedFontWeight.value);
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetIgnoreSizeOfBottom(ArkUI_SwiperDigitIndicator* indicator, int32_t ignoreSize)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->ignoreSizeValue.isSet = 1;
+    indicator->ignoreSizeValue.value = ignoreSize;
+}
+
+int32_t OH_ArkUI_SwiperDigitIndicator_GetIgnoreSizeOfBottom(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->ignoreSizeValue.value;
 }
 
 ArkUI_SwiperArrowStyle* OH_ArkUI_SwiperArrowStyle_Create()
@@ -1111,6 +1154,9 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(ArkUI_Visible
     if (!option) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    if (value < 0) {
+        value = EXPECTED_UPDATE_INTERVAL_VALUE;
+    }
     option->expectedUpdateInterval = value;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -1120,8 +1166,9 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions
     if (!option || !value || !size) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (option->ratios.size() > *size) {
-        *size = static_cast<int32_t>(option->ratios.size());
+    int32_t ratiosSize = static_cast<int32_t>(option->ratios.size());
+    if (*size < ratiosSize) {
+        *size = ratiosSize;
         return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     int32_t index = 0;

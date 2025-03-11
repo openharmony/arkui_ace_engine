@@ -21,6 +21,7 @@
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -436,7 +437,7 @@ void MovingPhotoPattern::PrepareMediaPlayer()
         return;
     }
     if (layoutProperty->GetMovingPhotoUri().value() == uri_ &&
-        layoutProperty->GetVideoSource().value() == fd_) {
+        layoutProperty->GetVideoSource().value() == fd_.GetValue()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer source has not changed.");
         return;
     }
@@ -483,7 +484,7 @@ void MovingPhotoPattern::ResetMediaPlayer()
                 auto mediaPlayer = weak.Upgrade();
                 CHECK_NULL_VOID(mediaPlayer);
                 mediaPlayer->ResetMediaPlayer();
-                if (!mediaPlayer->SetSourceByFd(fd)) {
+                if (!mediaPlayer->SetSourceByFd(fd.GetValue())) {
                     TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer Async failed.");
                 }
             },
@@ -491,7 +492,7 @@ void MovingPhotoPattern::ResetMediaPlayer()
     } else {
         mediaPlayer_->ResetMediaPlayer();
         RegisterMediaPlayerEvent();
-        if (!mediaPlayer_->SetSourceByFd(fd_)) {
+        if (!mediaPlayer_->SetSourceByFd(fd_.GetValue())) {
             TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "set source for MediaPlayer failed.");
             auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask(
@@ -502,14 +503,13 @@ void MovingPhotoPattern::ResetMediaPlayer()
                     pattern->FireMediaPlayerError();
                 },
                 "ArkUIMovingPhotoResetMediaPlayer");
-            return;
         }
     }
 }
 
 void MovingPhotoPattern::RegisterMediaPlayerEvent()
 {
-    if (fd_ == -1 || !mediaPlayer_) {
+    if (fd_.GetValue() == -1 || !mediaPlayer_) {
         return;
     }
     ContainerScope scope(instanceId_);
@@ -1158,23 +1158,16 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     src.SetSrc(imageSrc);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
     UpdateImageNode();
-    if (fd_ > 0) {
-        close(fd_);
-    }
     fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_.GetValue(), host);
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-        autoAndRepeatLevel_ = PlaybackMode::NONE;
-        historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
         Pause();
-        StopAnimation();
     }
+    autoAndRepeatLevel_ = PlaybackMode::NONE;
+    historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     ResetMediaPlayer();
-    if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
-        autoAndRepeatLevel_ = PlaybackMode::AUTO;
-    }
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
         UpdateAnalyzerOverlay();
     }
@@ -1876,9 +1869,6 @@ MovingPhotoPattern::~MovingPhotoPattern()
     if (IsSupportImageAnalyzer()) {
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "~MovingPhotoPattern DestroyAnalyzerOverlay.");
         DestroyAnalyzerOverlay();
-    }
-    if (fd_ > 0) {
-        close(fd_);
     }
 }
 } // namespace OHOS::Ace::NG

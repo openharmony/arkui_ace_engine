@@ -327,7 +327,7 @@ bool ContentController::FilterWithAscii(std::u16string& result)
     if (errorText.empty()) {
         textChange = false;
     } else {
-        LOGI("FilterWithAscii Error text %{public}s", UtfUtils::Str16DebugToStr8(errorText).c_str());
+        LOGI("FilterWithAscii Error text size %{public}zu", UtfUtils::Str16DebugToStr8(errorText).size());
     }
     return textChange;
 }
@@ -423,6 +423,7 @@ std::u16string ContentController::GetValueBeforeIndex(int32_t index)
 
 std::u16string ContentController::GetValueAfterIndex(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(content_.length()));
     return content_.substr(index, content_.length() - index);
 }
 

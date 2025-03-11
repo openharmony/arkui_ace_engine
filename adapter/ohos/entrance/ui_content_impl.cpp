@@ -34,6 +34,7 @@
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"
+#include "resource_manager.h"
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
@@ -79,6 +80,7 @@
 #include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/thp_extra_manager_impl.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "base/geometry/rect.h"
@@ -138,7 +140,7 @@ const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
-static bool g_isDynamicVsync = false;
+static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
@@ -183,7 +185,9 @@ Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 
 bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
 {
-    if (!SystemProperties::GetNeedAvoidWindow()) {
+    // compatibleModeInPc needAvoidWindow
+    bool compatibleModeInPc = rsWindow->GetCompatibleModeInPc();
+    if (!SystemProperties::GetNeedAvoidWindow() && !compatibleModeInPc) {
         return false;
     }
 
@@ -363,7 +367,7 @@ bool ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
         if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
             safeAreaUpdated |= safeAreaManager->UpdateSystemSafeArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
-            safeAreaUpdated |= safeAreaManager->UpdateNavArea(ConvertAvoidArea(avoidArea.second));
+            safeAreaUpdated |= safeAreaManager->UpdateNavSafeArea(ConvertAvoidArea(avoidArea.second));
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
             safeAreaUpdated |= safeAreaManager->UpdateCutoutSafeArea(ConvertAvoidArea(avoidArea.second),
                 NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
@@ -508,7 +512,7 @@ private:
             return true;
         }
         // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
-        if (isRotate && !NearZero(lastKeyboardHeight) && !NearZero(keyboardRect.Height())) {
+        if ((textFieldManager->GetLaterAvoid() || isRotate) && !NearZero(lastKeyboardHeight)) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
                 "later avoid %{public}s %{public}f %{public}f",
                 lastRotation, keyboardRect.ToString().c_str(), positionY, height);
@@ -1195,6 +1199,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    ColorMode colorMode = ColorMode::LIGHT;
     if (context) {
         auto resourceManager = context->GetResourceManager();
         if (resourceManager != nullptr) {
@@ -1209,14 +1214,20 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
                     (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
             }
             if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
-                SystemProperties::SetColorMode(ColorMode::DARK);
+                colorMode = ColorMode::DARK;
                 LOGI("Set dark mode");
             } else {
-                SystemProperties::SetColorMode(ColorMode::LIGHT);
+                colorMode = ColorMode::LIGHT;
                 LOGI("Set light mode");
             }
             SystemProperties::SetDeviceAccess(
                 resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
+        } else {
+            auto config = context->GetConfiguration();
+            if (config) {
+                auto configColorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+                colorMode = configColorMode == "dark" ? ColorMode::DARK : ColorMode::LIGHT;
+            }
         }
     }
 
@@ -1386,6 +1397,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     container->SetUIContentType(uIContentType_);
     container->SetRegisterComponents(registerComponents_);
     container->SetIsFRSCardContainer(isFormRender_);
+    container->SetColorMode(colorMode);
     if (window_) {
         container->SetWindowName(window_->GetWindowName());
         container->SetWindowId(window_->GetWindowId());
@@ -1423,7 +1435,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
-    aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+    aceResCfg.SetColorMode(container->GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     aceResCfg.SetLanguage(AceApplicationInfo::GetInstance().GetLocaleTag());
     AddResConfigInfo(context, aceResCfg);
@@ -1515,6 +1527,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
+            pipeline->SetApiTargetVersion(container->GetApiTargetVersion());
         }
     } else {
         Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
@@ -1524,6 +1537,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
+            pipeline->SetApiTargetVersion(container->GetApiTargetVersion());
         }
     }
     if (runtime_ && !isFormRender_) { // ArkTSCard not support inherit local strorage from context
@@ -1578,7 +1592,6 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
-        SystemProperties::SetColorMode(ColorMode::LIGHT);
         return;
     }
 
@@ -1609,12 +1622,9 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     }
     TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
     auto colorMode = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    if (!colorMode.empty()) {
-        if (colorMode == "dark") {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-        }
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!colorMode.empty() && container) {
+        container->SetColorMode(colorMode == "dark" ? ColorMode::DARK : ColorMode::LIGHT);
     }
 
     auto string2float = [](const std::string& str) {
@@ -1693,14 +1703,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 
         auto task = [] {
-            bool dynamicVsync = false;
             std::unordered_map<std::string, std::string> payload;
             std::unordered_map<std::string, std::string> reply;
             payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
             payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
-            dynamicVsync = g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
-            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", dynamicVsync);
-            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(dynamicVsync);
+            g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", g_isDynamicVsync.load());
+            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(g_isDynamicVsync);
         };
         BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
@@ -1786,7 +1795,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // Initialize performance check parameters
     AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
-    SystemProperties::SetColorMode(ColorMode::LIGHT);
+    ColorMode colorMode = ColorMode::LIGHT;
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     auto resourceManager = context->GetResourceManager();
@@ -1801,18 +1810,14 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
                 (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
         }
-        if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-        }
+        colorMode =
+            resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? ColorMode::DARK : ColorMode::LIGHT;
         SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
         LOGI("[%{public}s][%{public}s][%{public}d]: SetLanguage: %{public}s, colorMode: %{public}s, "
              "deviceAccess: %{public}d",
             bundleName_.c_str(), moduleName_.c_str(), instanceId_,
-            AceApplicationInfo::GetInstance().GetLanguage().c_str(),
-            SystemProperties::GetColorMode() == ColorMode::DARK ? "dark" : "light",
+            AceApplicationInfo::GetInstance().GetLanguage().c_str(), colorMode == ColorMode::DARK ? "dark" : "light",
             SystemProperties::GetDeviceAccess());
     }
 
@@ -1975,6 +1980,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetParentToken(parentToken_);
+    container->SetColorMode(colorMode);
     if (!isCJFrontend) {
         container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context, info));
     }
@@ -2003,7 +2009,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
     aceResCfg.SetDensity(SystemProperties::GetResolution());
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
-    aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+    aceResCfg.SetColorMode(container->GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     aceResCfg.SetLanguage(AceApplicationInfo::GetInstance().GetLocaleTag());
     AddResConfigInfo(context, aceResCfg);
@@ -2153,6 +2159,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             }
         }
     }
+    pipeline->SetApiTargetVersion(container->GetApiTargetVersion());
     container->CheckAndSetFontFamily();
     SetFontScaleAndWeightScale(container, instanceId_);
     if (pipeline) {
@@ -2259,7 +2266,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
     auto pipeline = container->GetPipelineContext();
     bool isSystemWindow = GetIsSystemWindow(container) &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         if (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow() || isSystemWindow) {
             avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
@@ -2787,7 +2794,33 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
-    UpdateConfiguration(config);
+    CHECK_NULL_VOID(config);
+
+    RefPtr<ResourceAdapter> adapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager, instanceId_);
+    ResourceManager::GetInstance().UpdateResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->UpdateThemeManager(adapter);
+
+    StoreConfiguration(config);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    bool formFontUseDefault = isFormRender_ && !fontScaleFollowSystem_;
+    taskExecutor->PostTask(
+        [weakContainer = WeakPtr<Platform::AceContainer>(container), config, instanceId = instanceId_,
+            bundleName = bundleName_, moduleName = moduleName_, formFontUseDefault]() {
+            auto container = weakContainer.Upgrade();
+            CHECK_NULL_VOID(container);
+            Platform::ParsedConfig parsedConfig;
+            BuildParsedConfig(parsedConfig, config, formFontUseDefault);
+            container->UpdateConfiguration(parsedConfig, config->GetName(), true);
+            LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfiguration, name:%{public}s", instanceId,
+                bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfigurationWithResMgr");
 }
 
 void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
@@ -2883,12 +2916,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             container->UpdateResourceOrientation(modifyConfig.Orientation());
         }
     };
-    auto updateDisplayIdAndAreaTask = [container, context, rsWindow = window_]() {
-        if (!rsWindow) {
-            TAG_LOGE(AceLogTag::ACE_WINDOW, "Current container has invalid window data.");
-            return;
-        }
-        auto displayId = rsWindow->GetDisplayId();
+    auto updateDisplayIdAndAreaTask = [container, context, modifyConfig, UICONTENT_IMPL_HELPER(content)]() {
+        auto displayId = modifyConfig.DisplayId();
         if (displayId == DISPLAY_ID_INVALID) {
             TAG_LOGE(AceLogTag::ACE_WINDOW, "Invalid display id.");
             return;
@@ -2904,6 +2933,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 }
             }
         }
+        UICONTENT_IMPL_HELPER_GUARD(content, return);
+        UICONTENT_IMPL_PTR(content)->ChangeDisplayAvailableAreaListener(displayId);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         updateDensityTask(); // ensure density has been updated before load first page
@@ -2954,14 +2985,17 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         return;
     }
 
+    auto taskId = viewportConfigMgr_->MakeTaskId();
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
-                    isDynamicRender = isDynamicRender_, animationOpt, avoidAreas]() {
+                    isDynamicRender = isDynamicRender_, animationOpt, avoidAreas, taskId,
+                    viewportConfigMgr = viewportConfigMgr_]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
             UpdateSafeArea(pipelineContext, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+            pipelineContext->SetWindowSizeChangeReason(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason));
             TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
@@ -2996,6 +3030,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
+        viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
     };
     auto changeBrightnessTask = [container]() {
         auto pipelineContext = container->GetPipelineContext();
@@ -3013,10 +3048,13 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
         }
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
+        if (rsTransaction != nullptr) {
+            viewportConfigMgr_->CancelAllPromiseTaskLocked();
+        }
     } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
         // When avoidAreas need updating, the task shouldn't be cancelled.
-        viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
+        viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container, taskId,
             "ArkUIPromiseViewportConfig");
     } else {
         if (container->IsUIExtensionWindow()) {
@@ -3302,21 +3340,27 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
         if (resourceManager != nullptr) {
             resourceManager->GetResConfig(*resConfig);
             if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
-                SystemProperties::SetColorMode(ColorMode::DARK);
+                dialogContainer->SetColorMode(ColorMode::DARK);
             } else {
-                SystemProperties::SetColorMode(ColorMode::LIGHT);
+                dialogContainer->SetColorMode(ColorMode::LIGHT);
             }
         }
         auto aceResCfg = dialogContainer->GetResourceConfiguration();
         aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
         aceResCfg.SetDensity(SystemProperties::GetResolution());
         aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
-        aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+        aceResCfg.SetColorMode(dialogContainer->GetColorMode());
         aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
         aceResCfg.SetColorModeIsSetByApp(true);
         aceResCfg.SetLanguage(AceApplicationInfo::GetInstance().GetLocaleTag());
         dialogContainer->SetResourceConfiguration(aceResCfg);
     }
+}
+
+bool UIContentImpl::IfNeedTouchOutsideListener(const std::string& windowName)
+{
+    return !StringUtils::StartWith(windowName, SUBWINDOW_TOAST_PREFIX) ||
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
@@ -3408,7 +3452,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
-    if (!StringUtils::StartWith(window_->GetWindowName(), SUBWINDOW_TOAST_PREFIX)) {
+    if (IfNeedTouchOutsideListener(window_->GetWindowName())) {
         touchOutsideListener_ = new TouchOutsideListener(instanceId_);
         window_->RegisterTouchOutsideListener(touchOutsideListener_);
     }
@@ -4070,9 +4114,9 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const Cust
 Shadow UIContentImpl::GetPopupShadow()
 {
     Shadow shadow;
-    auto colorMode = SystemProperties::GetColorMode();
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, shadow);
+    auto colorMode = container->GetColorMode();
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, shadow);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
@@ -4713,6 +4757,17 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
     UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
+    RegisterGetCurrentPageName(pipeline);
+}
+
+void UIContentImpl::RegisterGetCurrentPageName(RefPtr<PipelineBase> pipeline)
+{
+    auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_RETURN(pipeline, "");
+        return pipeline->GetCurrentPageNameCallback();
+    };
+    UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
 }
 
 bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
@@ -4734,5 +4789,31 @@ bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uin
                 data, static_cast<Ace::NG::RSSubsystemId>(subSystemId));
         }, TaskExecutor::TaskType::UI, "ArkUISendUIExtProprty");
     return true;
+}
+
+void UIContentImpl::EnableContainerModalCustomGesture(bool enable)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, enable]() {
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            NG::ContainerModalPattern::EnableContainerModalCustomGesture(pipelineContext, enable);
+        },
+        TaskExecutor::TaskType::UI, "EnableContainerModalCustomGesture");
+}
+
+void UIContentImpl::ChangeDisplayAvailableAreaListener(uint64_t displayId)
+{
+    if (listenedDisplayId_ != displayId && availableAreaChangedListener_) {
+        auto& manager = Rosen::DisplayManager::GetInstance();
+        manager.UnregisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
+        listenedDisplayId_ = displayId;
+        manager.RegisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
+    }
 }
 } // namespace OHOS::Ace

@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -135,7 +136,9 @@ void SelectPattern::OnModifyDone()
     InitFocusEvent();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->GetBackgroundColor().has_value()) {
+    auto selectPaintProperty = host->GetPaintProperty<SelectPaintProperty>();
+    CHECK_NULL_VOID(selectPaintProperty);
+    if (selectPaintProperty->HasBackgroundColor()) {
         return;
     }
     auto context = host->GetContextRefPtr();
@@ -700,7 +703,7 @@ void SelectPattern::BuildChild()
     text_->SetInternal();
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
-    InitTextProps(textProps, theme);
+    InitTextProps(textProps);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         SystemProperties::IsNeedSymbol()) {
         spinner_ = FrameNode::GetOrCreateFrameNode(
@@ -1119,8 +1122,14 @@ void SelectPattern::UpdateText(int32_t index)
     selectValue_ = newSelected->GetText();
 }
 
-void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps, const RefPtr<SelectTheme>& theme)
+void SelectPattern::InitTextProps(const RefPtr<TextLayoutProperty>& textProps)
 {
+    auto select = GetHost();
+    CHECK_NULL_VOID(select);
+    auto* pipeline = select->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
     textProps->UpdateFontSize(theme->GetFontSize());
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateTextColor(theme->GetFontColor());
@@ -1432,6 +1441,16 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateAlignType(menuAlign.alignType);
     menuLayoutProps->UpdateOffset(menuAlign.offset);
+}
+
+void SelectPattern::SetAvoidance(const Avoidance& avoidance)
+{
+    avoidance_ = avoidance;
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateSelectAvoidanceMode(avoidance.mode);
 }
 
 std::string SelectPattern::ProvideRestoreInfo()
@@ -1746,7 +1765,7 @@ bool SelectPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     CHECK_NULL_RETURN(context, false);
     auto shadowTheme = context->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = context->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }
@@ -1757,6 +1776,18 @@ void SelectPattern::SetDivider(const SelectDivider& divider)
         auto props = option->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateDivider(divider);
+        auto optionPattern = option->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        auto frameNode = optionPattern->GetBottomDivider();
+        if (!frameNode) {
+            continue;
+        }
+        auto dividerProperty = frameNode->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(dividerProperty);
+        dividerProperty->UpdateStrokeWidth(divider.strokeWidth);
+        dividerProperty->UpdateDividerColor(divider.color);
+        dividerProperty->UpdateStartMargin(divider.startMargin);
+        dividerProperty->UpdateEndMargin(divider.endMargin);
     }
 }
 
@@ -1779,5 +1810,21 @@ void SelectPattern::ResetFontColor()
     context->UpdateForegroundColor(selectTheme->GetFontColor());
     context->UpdateForegroundColorFlag(false);
     context->ResetForegroundColorStrategy();
+}
+
+void SelectPattern::SetDividerMode(const std::optional<DividerMode>& mode)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    if (mode.has_value()) {
+        menuLayoutProps->UpdateItemDividerMode(mode.value());
+    } else {
+        menuLayoutProps->ResetItemDividerMode();
+    }
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->UpdateMenuItemDivider();
 }
 } // namespace OHOS::Ace::NG

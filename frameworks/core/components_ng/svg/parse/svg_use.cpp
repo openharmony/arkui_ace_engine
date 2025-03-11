@@ -59,12 +59,19 @@ RSRecordingPath SvgUse::AsPath(const SvgLengthScaleRule& lengthRule)
         LOGE("href is empty");
         return {};
     }
+    if (isDrawingPath_) {
+        LOGW("SvgUse::AsPath draw path is still in processing");
+        return RSRecordingPath();
+    }
+    isDrawingPath_ = true;
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_RETURN(refSvgNode, RSRecordingPath());
 
     AttributeScope scope(refSvgNode);
     refSvgNode->InheritAttr(attributes_);
-    return refSvgNode->AsPath(lengthRule);
+    auto path = refSvgNode->AsPath(lengthRule);
+    isDrawingPath_ = false;
+    return path;
 }
 
 void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
@@ -112,17 +119,22 @@ void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     if (attributes_.href.empty()) {
         return;
     }
+    // Create New coordinate system
+    SvgCoordinateSystemContext useContext(lengthRule.GetContainerRect(), lengthRule.GetViewPort());
+    auto useRule = useContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    useRule.SetUseFillColor(lengthRule.UseFillColor());
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_VOID(refSvgNode);
-    auto useX = GetMeasuredPosition(useAttr_.x, lengthRule, SvgLengthType::HORIZONTAL);
-    auto useY = GetMeasuredPosition(useAttr_.y, lengthRule, SvgLengthType::VERTICAL);
+    auto useX = GetRegionPosition(useAttr_.x, useRule, SvgLengthType::HORIZONTAL);
+    auto useY = GetRegionPosition(useAttr_.y, useRule, SvgLengthType::VERTICAL);
     if (!NearEqual(useX, 0.0) || !NearEqual(useY, 0.0)) {
         canvas.Translate(useX, useY);
     }
     AttributeScope scope(refSvgNode);
     refSvgNode->InheritAttr(attributes_);
     ApplyOpacity(canvas);
-    refSvgNode->Draw(canvas, lengthRule);
+
+    refSvgNode->Draw(canvas, useRule);
 }
 
 bool SvgUse::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)

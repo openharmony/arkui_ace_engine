@@ -723,6 +723,7 @@ HWTEST_F(RichEditorBaseTestTwoNg, RichEditorController021, TestSize.Level1)
     struct UpdateParagraphStyle paragraphStyle;
     paragraphStyle.wordBreak = WordBreak::NORMAL;
     paragraphStyle.textAlign = TextAlign::END;
+    paragraphStyle.paragraphSpacing = Dimension(10.0f, DimensionUnit::PX);
     options.paraStyle = paragraphStyle;
 
     /**
@@ -741,6 +742,7 @@ HWTEST_F(RichEditorBaseTestTwoNg, RichEditorController021, TestSize.Level1)
     auto textStyle = info.selection_.resultObjects.begin()->textStyle;
     EXPECT_EQ(textStyle.wordBreak, int(WordBreak::NORMAL));
     EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
+    EXPECT_EQ(textStyle.paragraphSpacing.value().Value(), 10.0f);
 }
 
 /**

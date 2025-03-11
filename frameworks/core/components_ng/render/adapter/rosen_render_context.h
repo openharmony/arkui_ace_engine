@@ -420,6 +420,7 @@ public:
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface(int width, int height) override;
     void SetMarkNodeGroup(bool isNodeGroup) override;
+    int32_t GetRotateDegree() override;
     void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint16_t flag = 0) override;
@@ -442,6 +443,8 @@ public:
     static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
     RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
     void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
+    void AddRsNodeForCapture();
+    void SetDrawNodeChangeCallback() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

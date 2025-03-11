@@ -19,8 +19,6 @@
 
 #include "gtest/gtest.h"
 #include "base/i18n/time_format.h"
-#include "core/components/theme/theme_attributes.h"
-#include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -28,12 +26,15 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/utils/time_util.h"
+#include "core/components/theme/theme_attributes.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/text_theme_wrapper.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/core/components/text/text_theme.h"
+#include "frameworks/core/components/text_clock/text_clock_theme.h"
+#include "frameworks/core/components_ng/pattern/text_clock/text_clock_theme_wrapper.h"
 #undef private
 #undef protected
 
@@ -214,7 +215,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = TestNG::CreateThemeConstants(THEME_PATTERN_TEXT);
-    auto theme = TextThemeWrapper::WrapperBuilder().Build(themeConstants);
+    auto theme = TextClockThemeWrapper::WrapperBuilder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     /**

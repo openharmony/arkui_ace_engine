@@ -86,7 +86,10 @@ void DragDropInitiatingStatePress::HandlePanOnReject()
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsGatherWithMenu()) {
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (manager->IsGatherWithMenu() || !params.hasGatherNode) {
         return;
     }
     auto preDragStatus = DragDropGlobalController::GetInstance().GetPreDragStatus();
@@ -138,7 +141,7 @@ void DragDropInitiatingStatePress::Init(int32_t currentState)
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (!params.isThumbnailCallbackTriggered) {
+    if (!params.isThumbnailCallbackTriggered && !gestureHub->GetTextDraggable()) {
         auto getPixelMapFinishCallback = [weak = AceType::WeakClaim(this)](
                                              RefPtr<PixelMap> pixelMap, bool immediately) {
             auto stateReady = weak.Upgrade();

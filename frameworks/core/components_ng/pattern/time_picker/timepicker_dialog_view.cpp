@@ -37,10 +37,10 @@ constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
-bool TimePickerDialogView::switchFlag_ = false;
-Dimension TimePickerDialogView::selectedTextStyleFont_ = 40.0_fp;
-Dimension TimePickerDialogView::normalTextStyleFont_ = 32.0_fp;
-Dimension TimePickerDialogView::disappearTextStyleFont_ = 28.0_fp;
+thread_local bool TimePickerDialogView::switchFlag_ = false;
+thread_local Dimension TimePickerDialogView::selectedTextStyleFont_ = 40.0_fp;
+thread_local Dimension TimePickerDialogView::normalTextStyleFont_ = 32.0_fp;
+thread_local Dimension TimePickerDialogView::disappearTextStyleFont_ = 28.0_fp;
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
     const TimePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
@@ -193,7 +193,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     buttonTitleNode->MountToParent(contentColumn);
     timePickerNode->MountToParent(contentColumn);
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         bool enableHaptic = settingData.isEnableHapticFeedback;
         timePickerRowPattern->SetIsEnableHaptic(enableHaptic);
         timePickerRowPattern->ColumnPatternInitHapticController();
@@ -307,7 +307,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonNextPrevLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -697,7 +697,7 @@ void TimePickerDialogView::UpdateButtonLayoutProperty(
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -791,7 +791,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);

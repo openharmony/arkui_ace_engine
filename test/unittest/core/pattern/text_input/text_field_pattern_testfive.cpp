@@ -902,7 +902,12 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetSelectionTest, TestSize
     content = u"Hello😊";
     includeStartHalf = false;
     includeEndHalf = false;
-    TextEmojiSubStringRange expected_5 = {2, 2147483647};
+    TextEmojiSubStringRange expected_5;
+    if (std::numeric_limits<long>::max() == INT32_MAX) {
+        expected_5 = {2, -2147483647};
+    } else {
+        expected_5 = {2, 2147483647};
+    }
 
     TextEmojiSubStringRange result_5 =
         TextEmojiProcessor::CalSubU16stringRange(index, length, content, includeStartHalf, includeEndHalf);
@@ -1040,5 +1045,30 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetSelectionTest, TestSize
     result = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(input);
 
     EXPECT_EQ(expected, result);
+}
+
+/**
+ * @tc.name: TextFieldControllerClearPreviewTextTest
+ * @tc.desc: test textfield controller ClearPreviewText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerClearPreviewTextTest, TestSize.Level0)
+{
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    PreviewTextInfo info = {
+        .text = u"abc",
+        .range = {0, 2}
+    };
+    pattern_->SetPreviewTextOperation(info);
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+
+    pattern_->textFieldController_->ClearPreviewText();
+    EXPECT_FALSE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
 }
 } // namespace OHOS::Ace::NG

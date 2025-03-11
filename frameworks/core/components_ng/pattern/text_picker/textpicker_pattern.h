@@ -120,13 +120,7 @@ public:
         if (value.empty()) {
             return;
         }
-        range_.clear();
-        for (size_t i = 0; i < value.size(); i++) {
-            RangeContent content;
-            content.icon_ = value[i].icon_;
-            content.text_ = value[i].text_;
-            range_.emplace_back(content);
-        }
+        range_ = value;
     }
 
     std::vector<NG::RangeContent> GetRange() const
@@ -585,6 +579,9 @@ private:
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
     void CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize);
+    RectF CalculatePaintRect(int32_t currentFocusIndex,
+        float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth);
+    void AdjustFocusBoxOffset(float& centerX, float& centerY);
     float CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize);
     int32_t CalculateIndex(RefPtr<FrameNode>& frameNode);
 

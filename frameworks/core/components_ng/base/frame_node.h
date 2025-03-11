@@ -376,7 +376,7 @@ public:
 
     bool HasVirtualNodeAccessibilityProperty() override
     {
-        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNodePtr()) {
+        if (accessibilityProperty_ && accessibilityProperty_->GetAccessibilityVirtualNode()) {
             return true;
         }
         return false;
@@ -548,6 +548,9 @@ public:
     void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
 
     void OnAccessibilityEvent(
+        AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
+
+    void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
     void OnAccessibilityEvent(
@@ -574,12 +577,7 @@ public:
         colorModeUpdateCallback_ = callback;
     }
 
-    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
-    {
-        std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
-        ndkColorModeUpdateCallback_ = callback;
-        colorMode_ = SystemProperties::GetColorMode();
-    }
+    void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback);
 
     void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
     {
@@ -1129,11 +1127,19 @@ public:
     }
 
     void SetDeleteRsNode(bool isDelete) {
-        isDeleteRsNode = isDelete;
+        isDeleteRsNode_ = isDelete;
     }
  
-    bool GetIsDelete() {
-        return isDeleteRsNode;
+    bool GetIsDelete() const {
+        return isDeleteRsNode_;
+    }
+
+    void SetPositionZ(bool hasPositionZ) {
+        hasPositionZ_ = hasPositionZ;
+    }
+ 
+    bool HasPositionZ() const {
+        return hasPositionZ_;
     }
 
     void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
@@ -1275,6 +1281,12 @@ public:
     {
         topWindowBoundary_ = topWindowBoundary;
     }
+    bool CheckVisibleOrActive() override;
+
+    void SetNeedLazyLayout(bool value)
+    {
+        layoutProperty_->SetNeedLazyLayout(value);
+    }
 
 protected:
     void DumpInfo() override;
@@ -1347,6 +1359,7 @@ private:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) override;
     void DumpOnSizeChangeInfo();
+    void DumpKeyboardShortcutInfo();
     bool CheckAutoSave() override;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1441,7 +1454,6 @@ private:
     std::shared_ptr<OffsetF> lastHostParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
-    const static std::set<std::string> layoutTags_;
     std::function<void()> removeCustomProperties_;
     std::function<std::string(const std::string& key)> getCustomProperty_;
     std::optional<RectF> viewPort_;
@@ -1514,7 +1526,8 @@ private:
     bool isUseTransitionAnimator_ = false;
 
     bool exposeInnerGestureFlag_ = false;
-    bool isDeleteRsNode = false;
+    bool isDeleteRsNode_ = false;
+    bool hasPositionZ_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

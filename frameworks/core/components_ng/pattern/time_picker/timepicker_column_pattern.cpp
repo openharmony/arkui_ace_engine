@@ -137,6 +137,7 @@ void TimePickerColumnPattern::OnModifyDone()
         SetOptionShiftDistance();
     }
     InitHapticController(host);
+    GetIsStartEndTimeDefined(host);
 }
 
 void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
@@ -172,6 +173,20 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
 void TimePickerColumnPattern::StopHaptic()
 {
     stopHaptic_ = true;
+}
+
+void TimePickerColumnPattern::GetIsStartEndTimeDefined(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    isStartEndTimeDefined_ = timePickerRowPattern->IsStartEndTimeDefined();
 }
 
 void TimePickerColumnPattern::RegisterWindowStateChangedCallback()
@@ -1210,7 +1225,9 @@ void TimePickerColumnPattern::SetOptionShiftDistance()
 
 void TimePickerColumnPattern::UpdateToss(double offsetY)
 {
+    isTossing_ = true;
     UpdateColumnChildPosition(offsetY);
+    isTossing_ = false;
 }
 
 void TimePickerColumnPattern::UpdateFinishToss(double offsetY)
@@ -1362,6 +1379,9 @@ bool TimePickerColumnPattern::CanMove(bool isDown) const
 {
     if (wheelModeEnabled_) {
         CHECK_NULL_RETURN(NotLoopOptions(), true);
+    }
+    if (isTossing_ && isStartEndTimeDefined_ && NotLoopOptions()) {
+        return true;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1713,7 +1733,7 @@ void TimePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
 
     TimePickerScrollDirection dir =
         GreatNotEqual(scrollDelta_, 0.0f) ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / MIDDLE_CHILD_INDEX;
+    auto middleIndex = static_cast<int32_t>(GetShowCount()) / MIDDLE_CHILD_INDEX;
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / MIDDLE_CHILD_INDEX;

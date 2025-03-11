@@ -37,6 +37,7 @@ protected:
     static SwiperParameters GetDotIndicatorInfo(const JSRef<JSObject>& obj);
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
     static std::optional<Dimension> ParseIndicatorDimension(const JSRef<JSVal>& value);
+    static std::optional<Dimension> ParseIndicatorBottom(const JSRef<JSVal>& bottomValue, bool hasIgnoreSize);
     static void GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters);
     static void SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
         const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme);

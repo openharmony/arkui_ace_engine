@@ -28,6 +28,13 @@ struct PaddingSize {
     double left;
 };
 
+struct BorderRadius {
+    double leftTop;
+    double rightTop;
+    double leftBottom;
+    double rightBottom;
+};
+
 enum SecCompType {
     UNKNOWN_SC_TYPE = 0,
     LOCATION_COMPONENT,
@@ -81,6 +88,7 @@ public:
     double fontSize_;
     double iconSize_;
     PaddingSize padding_;
+    BorderRadius borderRadius_;
     double textIconSpace_;
 
     // color
@@ -109,10 +117,13 @@ public:
     int32_t icon_;
     SecCompBackground bg_;
 
+    bool hasNonCompatileChange_ = false;
+    double blurRadius_ = 0.0;
     int32_t windowId_;
     uint64_t displayId_ = 0;
     int32_t nodeId_;
     CrossAxisState crossAxisState_ = CrossAxisState::STATE_INVALID;
+    bool isWearableDevice_ = false;
 };
 }  // namespace SecurityComponent
 }  // namespace Security

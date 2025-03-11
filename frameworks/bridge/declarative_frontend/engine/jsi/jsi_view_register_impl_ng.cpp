@@ -76,6 +76,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_indexer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
@@ -354,6 +355,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSStack::JSBind(globalObj);
     JSImage::JSBind(globalObj);
     JSLazyForEach::JSBind(globalObj);
+    JSLazyVGridLayout::JSBind(globalObj);
     JSList::JSBind(globalObj);
     JSListItem::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
@@ -609,7 +611,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRotationRecognizer::JSBind(globalObj);
 }
 
-void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
+void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runtime,
+    void* nativeEngine, const shared_ptr<JsValue> globalPtr)
 {
     JSCanvasGradient::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
@@ -621,6 +624,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSPath2D::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
+    JSMock::JSBind(globalObj, runtime, globalPtr);
 }
 
 } // namespace OHOS::Ace::Framework

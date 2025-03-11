@@ -78,6 +78,7 @@ public:
         const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode, float width, float height);
     static OffsetF GetPointRelativeToMainWindow(const Point& point);
     static void HandleOnDragEvent(const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
+    static bool IsTextCategoryComponent(const std::string& frameTag);
 
     // multi drag
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
@@ -99,6 +100,7 @@ public:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     static void RecordMenuWrapperNodeForDrag(int32_t targetId);
     static RefPtr<FrameNode> GetFrameNodeByInspectorId(const std::string& inspectorId);
+    static void TrySetDraggableStateAsync(const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
 
     // modifier
     static BorderRadiusProperty GetDragFrameNodeBorderRadius(const RefPtr<FrameNode>& frameNode);

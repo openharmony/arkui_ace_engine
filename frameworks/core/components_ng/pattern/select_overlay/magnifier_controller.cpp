@@ -270,7 +270,7 @@ void MagnifierController::InitMagnifierParams()
 
     Color outlineColor1 = textFieldTheme->GetGlassOutlinePrimaryColor();
     Color outlineColor2 = textFieldTheme->GetGlassOutlineSecondaryColor();
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
         outlineColor1 = outlineColor1.ChangeAlpha(0xCC); // 0xCC: 80%
         outlineColor2 = outlineColor2.ChangeAlpha(0xCC); // 0xCC: 80%
     } else {
@@ -306,9 +306,9 @@ void MagnifierController::CreateMagnifierChildNode()
     CHECK_NULL_VOID(textBasePattern);
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTINPUT_ETS_TAG, nodeId);
+    ACE_SCOPED_TRACE("Create[%s][self:%d]", V2::MAGNIFIER_TAG, nodeId);
     auto childNode = FrameNode::GetOrCreateFrameNode(V2::MAGNIFIER_TAG, nodeId,
-        [weak = WeakClaim(textBasePattern.GetRawPtr())]() {
+        [weak = WeakClaim(Referenced::RawPtr(textBasePattern))]() {
             auto textBase = weak.Upgrade();
             return AceType::MakeRefPtr<MagnifierPattern>(textBase);
         });

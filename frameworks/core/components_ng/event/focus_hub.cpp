@@ -97,9 +97,6 @@ RefPtr<FocusManager> FocusHub::GetFocusManager() const
     return focusManager;
 }
 
-FocusState::FocusState(const WeakPtr<EventHub>& eventHub, FocusType type) : eventHub_(eventHub), focusType_(type) {}
-FocusState::FocusState(const WeakPtr<FrameNode>& frameNode, FocusType type) : frameNode_(frameNode), focusType_(type) {}
-
 RefPtr<FrameNode> FocusState::GetFrameNode() const
 {
     auto frameNode = frameNode_.Upgrade();
@@ -386,9 +383,10 @@ void FocusHub::DumpFocusUie()
 
 bool FocusHub::RequestFocusImmediately(FocusReason focusReason)
 {
+    auto frameNode = GetFrameNode();
     TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d)
-        " RequestFocusImmediately",
-        GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
+        " RequestFocusImmediately isOnMainTree:%{public}d",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()), frameNode ? frameNode->IsOnMainTree() : -1);
     return RequestFocusImmediatelyInner(focusReason);
 }
 
@@ -1393,6 +1391,8 @@ void FocusHub::OnBlurNode()
         onBlurInternal_();
     }
     if (onBlurReasonInternal_) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) "trigger onBlurReasonInternal by %{public}d",
+            GetFrameName().c_str(), SEC_PARAM(GetFrameId()), blurReason_);
         onBlurReasonInternal_(blurReason_);
     }
     auto frameNode = GetFrameNode();

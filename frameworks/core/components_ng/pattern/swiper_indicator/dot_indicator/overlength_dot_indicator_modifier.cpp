@@ -19,7 +19,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
 constexpr float CENTER_BEZIER_CURVE_MASS = 0.0f;
 constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 0.2f;
@@ -35,6 +34,8 @@ constexpr int32_t THIRD_POINT_INDEX = 2;
 constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr float HALF_FLOAT = 0.5f;
+constexpr int32_t OVERLONG_SMALL_COUNT = 2;
+constexpr int32_t DOUBLE_INT = 2;
 } // namespace
 
 void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
@@ -55,7 +56,7 @@ void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.firstPointOpacity = firstPointOpacity_->Get();
     contentProperty.newPointOpacity = newPointOpacity_->Get();
 
-    PaintBackground(context, contentProperty);
+    PaintBackground(context, contentProperty, maxDisplayCount_, isBindIndicator_);
     PaintContent(context, contentProperty);
 }
 
@@ -524,7 +525,7 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const
     auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, true);
     auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, false);
 
-    float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    float itemSpacePx = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx());
     // calc new point current position
     animationStartCenterX_[maxDisplayCount_] =
         animationStartCenterX_[0] - animationStartIndicatorWidth_[0] - itemSpacePx;
@@ -570,7 +571,7 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
     auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, true);
     auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, false);
 
-    float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    float itemSpacePx = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx());
     // calc new point current position
     animationStartCenterX_[maxDisplayCount_] = animationStartCenterX_[maxDisplayCount_ - 1] +
                                                animationStartIndicatorWidth_[maxDisplayCount_ - 1] + itemSpacePx;
@@ -877,6 +878,36 @@ void OverlengthDotIndicatorModifier::CalcTargetOverlongStatus(int32_t currentPag
     }
 }
 
+float OverlengthDotIndicatorModifier::CalcRealPadding(
+    float unselectedIndicatorRadius, float selectedIndicatorRadius, OverlongType overlongType) const
+{
+    auto padding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+    if (!isBindIndicator_) {
+        return padding;
+    }
+
+    auto indicatorTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_RETURN(indicatorTheme, padding);
+    auto indicatorDotItemSpace = indicatorTheme->GetIndicatorDotItemSpace();
+    auto userItemWidth = unselectedIndicatorRadius * DOUBLE_INT;
+    auto userSelectedItemWidth = selectedIndicatorRadius * DOUBLE_INT;
+    auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (maxDisplayCount_ - 1);
+    auto allPointDiameterSum = userItemWidth * (maxDisplayCount_ - OVERLONG_SMALL_COUNT - 1) + userSelectedItemWidth +
+                               userItemWidth * SECOND_SMALLEST_POINT_RATIO + userItemWidth * SMALLEST_POINT_RATIO;
+
+    auto paddingSide = indicatorTheme->GetIndicatorPaddingDot();
+    auto indicatorPaddingSide = static_cast<float>(paddingSide.ConvertToPx());
+    auto maxContentWidth = indicatorPaddingSide + allPointDiameterSum + allPointSpaceSum + indicatorPaddingSide;
+    if (overlongType == OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT) {
+        allPointDiameterSum = userItemWidth * (maxDisplayCount_ - OVERLONG_SMALL_COUNT * DOUBLE_INT - 1) +
+                              userSelectedItemWidth + userItemWidth * SECOND_SMALLEST_POINT_RATIO * DOUBLE_INT +
+                              userItemWidth * SMALLEST_POINT_RATIO * DOUBLE_INT;
+    }
+
+    auto realContentWidth = indicatorPaddingSide + allPointDiameterSum + allPointSpaceSum + indicatorPaddingSide;
+    return padding + (maxContentWidth - realContentWidth) * HALF_FLOAT;
+}
+
 std::pair<LinearVector<float>, std::pair<float, float>> OverlengthDotIndicatorModifier::CalcIndicatorCenterX(
     const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType)
 {
@@ -893,13 +924,14 @@ std::pair<LinearVector<float>, std::pair<float, float>> OverlengthDotIndicatorMo
 
     LinearVector<float> indicatorCenterX(maxDisplayCount_ + 1);
     std::pair<float, float> longPointCenterX;
-    float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    float itemSpacePx = static_cast<float>(GetIndicatorDotItemSpace().ConvertToPx());
     auto leftFirstRadius = unselectedIndicatorRadius * SMALLEST_POINT_RATIO;
     auto leftSecondRadius = unselectedIndicatorRadius * SECOND_SMALLEST_POINT_RATIO;
     auto rightFirstRadius = unselectedIndicatorRadius * SMALLEST_POINT_RATIO;
     auto rightSecondRadius = unselectedIndicatorRadius * SECOND_SMALLEST_POINT_RATIO;
 
-    auto startIndicatorCenterX = normalMargin_.GetX() + static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+    auto realPadding = CalcRealPadding(unselectedIndicatorRadius, selectedIndicatorRadius, overlongType);
+    auto startIndicatorCenterX = normalMargin_.GetX() + realPadding;
     for (int32_t i = 0; i < maxDisplayCount_; i++) {
         if (i == LEFT_FIRST_POINT_INDEX) {
             if (i == selectedIndex) {

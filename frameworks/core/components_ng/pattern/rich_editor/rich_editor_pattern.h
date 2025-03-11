@@ -97,7 +97,7 @@ class OneStepDragController;
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
 
-enum class AutoScrollEvent { HANDLE, DRAG, MOUSE, NONE };
+enum class AutoScrollEvent { HANDLE, DRAG, MOUSE, NONE, CARET };
 enum class EdgeDetectionStrategy { OUT_BOUNDARY, IN_BOUNDARY, DISABLE };
 struct AutoScrollParam {
     AutoScrollEvent autoScrollEvent = AutoScrollEvent::NONE;
@@ -553,6 +553,7 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
+        CHECK_NULL_VOID(!customKeyboardBuilder_ || !isCustomKeyboardAttached_);
 
         // lost focus in floating window mode
         auto windowMode = GetWindowMode();
@@ -619,10 +620,12 @@ public:
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
+    void HandleCurrentPositionParagraphInfo(float& lastLineTop, float& paragraphSpacing);
     bool IsCustomSpanInCaretPos(int32_t position, bool downStreamFirst);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
     void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     void CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
+    void CopyTextSpanUrlStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     void CopyGestureOption(const RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position, bool needLeadingMargin = false);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
@@ -779,6 +782,7 @@ public:
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
+    void UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::optional<std::u16string>& urlAddressOpt);
     const std::u16string& GetPasteStr() const
     {
         return pasteStr_;
@@ -1187,7 +1191,7 @@ public:
     ColorMode GetDisplayColorMode()
     {
         auto colorMode = GetColorMode();
-        return colorMode == ColorMode::COLOR_MODE_UNDEFINED ? SystemProperties::GetColorMode() : colorMode;
+        return colorMode == ColorMode::COLOR_MODE_UNDEFINED ? Container::CurrentColorMode() : colorMode;
     }
 
     template<typename T>
@@ -1195,13 +1199,17 @@ public:
     {
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
-        return pipelineContext->GetTheme<T>(GetThemeScopeId());
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+            return pipelineContext->GetTheme<T>(GetThemeScopeId());
+        }
+        return pipelineContext->GetTheme<T>();
     }
 
 protected:
     bool CanStartAITask() override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
+    std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem) override;
 
 private:
     friend class RichEditorSelectOverlay;
@@ -1289,6 +1297,7 @@ private:
     void HandleTouchUpAfterLongPress();
     void HandleTouchCancelAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
+    void OnMoveCaretStart(int32_t fingerId);
     void UpdateCaretByTouchMove(const Offset& offset);
     void SetCaretTouchMoveOffset(const Offset& localOffset);
     RectF GetCaretBoundaryRect();
@@ -1386,16 +1395,17 @@ private:
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
 
     void GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
-        std::optional<struct UpdateParagraphStyle>& spanParaStyle, const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
+        std::optional<struct UpdateParagraphStyle>& spanParaStyle, std::optional<std::u16string>& urlAddress,
+        const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
     void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::u16string& insertValue,
         int32_t textIndex, std::optional<TextStyle> textStyle, std::optional<struct UpdateParagraphStyle> paraStyle,
-        bool isCreate = false, bool fixDel = true);
+        std::optional<std::u16string> urlAddress = std::nullopt, bool isCreate = false, bool fixDel = true);
     void GetReplacedSpanFission(RichEditorChangeValue& changeValue, int32_t& innerPosition, std::u16string& content,
         int32_t startSpanIndex, int32_t offsetInSpan, std::optional<TextStyle> textStyle,
-        std::optional<struct UpdateParagraphStyle> paraStyle);
+        std::optional<struct UpdateParagraphStyle> paraStyle, const std::optional<std::u16string>& urlAddress);
     void CreateSpanResult(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t spanIndex,
         int32_t offsetInSpan, int32_t endInSpan, std::u16string content, std::optional<TextStyle> textStyle,
-        std::optional<struct UpdateParagraphStyle> paraStyle);
+        std::optional<struct UpdateParagraphStyle> paraStyle, const std::optional<std::u16string>& urlAddress);
     void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
     void CalcInsertValueObj(TextInsertValueInfo& info, int textIndex, bool isCreate = false);
     void GetDeletedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t length,
@@ -1476,6 +1486,7 @@ private:
     void CloseSystemMenu();
     void SetAccessibilityAction() override;
     void SetAccessibilityEditAction();
+    bool IsAccessibilityClick();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
     bool CheckTripClickEvent(GestureEvent& info);
@@ -1550,6 +1561,8 @@ private:
     RefPtr<TextInputConnection> connection_ = nullptr;
 #endif
     const bool isAPI14Plus;
+    const bool isAPI16Plus;
+    const bool isAPI18Plus;
     bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;

@@ -147,7 +147,6 @@ public:
                 pattern->GetAttr<Dimension>("toolbar_item_focus_border_size_api_sixteen", 2.0_vp);
             theme->toolbarItemFocusBorderColor_ =
                 pattern->GetAttr<Color>("toolbar_item_focus_color_api_sixteen", Color(0x007dff));
-            theme->toolbarItemFontSize_ = pattern->GetAttr<Dimension>("toolbar_item_font_size_api_sixteen", 10.0_fp);
             theme->toolbarItemFontColor_ =
                 pattern->GetAttr<Color>("toolbar_item_font_color_api_sixteen", Color(0x66182431));
             theme->toolbarItemBorderRadiusValue_ =
@@ -166,6 +165,7 @@ public:
             theme->toolbarItemTopPadding_ = 2.0_vp;
             theme->toolbarItemLeftOrRightPadding_ = 2.0_vp;
             theme->toolbarItemBottomPadding_ = 2.0_vp;
+            theme->toolbarItemTextMaxLines_ = 1;
         }
 
         void SetNavigationTokenTheme(RefPtr<ThemeStyle> pattern, const RefPtr<NavigationBarTheme>& theme) const
@@ -456,10 +456,6 @@ public:
     {
         return toolbarIconSize_;
     }
-    const Dimension& GetToolbarHideTextIconSize() const
-    {
-        return toolbarHideTextIconSize_;
-    }
     const Color& GetToolbarActiveIconColor() const
     {
         return toolbarActiveIconColor_;
@@ -515,6 +511,10 @@ public:
     const Dimension& GetToolbarItemBottomPadding() const
     {
         return toolbarItemBottomPadding_;
+    }
+    const Dimension& GetToolbarItemIconHideTextTopPadding() const
+    {
+        return toolbarItemIconTopHideTextPadding_;
     }
     const Dimension& GetToolbarItemIconTopPadding() const
     {
@@ -784,7 +784,6 @@ private:
     double toolbarBgAlpha_ = 0.95;
     Color toolbarIconColor_;
     Dimension toolbarIconSize_ = 24.0_vp;
-    Dimension toolbarHideTextIconSize_ = 36.0_vp;
     Color toolbarActiveIconColor_;
     Color toolbarActiveTextColor_;
     uint32_t toolbarItemTextMaxLines_ = 2;
@@ -797,7 +796,8 @@ private:
     Dimension toolbarItemHeight_ = 56.0_vp;
     Dimension toolbarHeight_ = 56.0_vp;
     Dimension toolbarItemBottomPadding_ = 4.0_vp;
-    Dimension toolbarItemIconTopPadding_ = 4.0_vp;
+    Dimension toolbarItemIconTopPadding_ = 2.0_vp;
+    Dimension toolbarItemIconTopHideTextPadding_ = 8.0_vp;
     Dimension toolbarItemMargin_ = 4.0_vp;
     Dimension toolbarItemSpecialMargin_ = 0.0_vp;
     std::string moreMessage_ = "";

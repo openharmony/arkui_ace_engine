@@ -15,6 +15,8 @@
 #include "core/interfaces/native/node/button_modifier.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/core/components/button/button_theme.h"
 
@@ -127,7 +129,7 @@ void ResetButtonType(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_SIXTEEN);
     } else {
         ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);

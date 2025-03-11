@@ -14,7 +14,8 @@
  */
 
 #include "text_input_base.h"
-
+#include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {

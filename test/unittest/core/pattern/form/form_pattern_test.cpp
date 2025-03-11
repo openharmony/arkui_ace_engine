@@ -1353,7 +1353,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_033, TestSize.Level1)
 
     double cardWidth = pattern->cardInfo_.width.Value();
     double cardHeight = pattern->cardInfo_.height.Value();
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = MockContainer::GetMockColorMode();
     bool isDarkMode = colorMode == ColorMode::DARK;
     std::shared_ptr<FormSkeletonParams> params = std::make_shared<FormSkeletonParams>(cardWidth,
         cardHeight, dimension, dimensionHeight, isDarkMode);

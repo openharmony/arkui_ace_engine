@@ -64,8 +64,8 @@ std::pair<RefPtr<FrameNode>, std::list<RefPtr<FrameNode>>> DragAnimationHelperTe
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, nodeId,
         []() {return AceType::MakeRefPtr<GridPattern>(); });
-    ViewAbstract::SetWidth(frameNode.GetRawPtr(), CalcLength(GRID_WIDTH));
-    ViewAbstract::SetHeight(frameNode.GetRawPtr(), CalcLength(GRID_HEIGHT));
+    ViewAbstract::SetWidth(Referenced::RawPtr(frameNode), CalcLength(GRID_WIDTH));
+    ViewAbstract::SetHeight(Referenced::RawPtr(frameNode), CalcLength(GRID_HEIGHT));
     std::list<RefPtr<FrameNode>> childNodes;
 
     for (size_t i = 0; i < childCount; ++i) {
@@ -76,8 +76,8 @@ std::pair<RefPtr<FrameNode>, std::list<RefPtr<FrameNode>>> DragAnimationHelperTe
         if (!childNode) {
             continue;
         }
-        ViewAbstract::SetWidth(childNode.GetRawPtr(), CalcLength(ITEM_WIDTH));
-        ViewAbstract::SetHeight(childNode.GetRawPtr(), CalcLength(ITEM_HEIGHT));
+        ViewAbstract::SetWidth(Referenced::RawPtr(childNode), CalcLength(ITEM_WIDTH));
+        ViewAbstract::SetHeight(Referenced::RawPtr(childNode), CalcLength(ITEM_HEIGHT));
 
         auto gridItemPattern = childNode->GetPattern<GridItemPattern>();
         if (gridItemPattern) {

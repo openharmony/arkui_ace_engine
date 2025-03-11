@@ -81,8 +81,10 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void BubblePattern::OnModifyDone()
 {
-    if (SystemProperties::GetColorMode() != colorMode_ && !isCustomPopup_) {
-        colorMode_ = SystemProperties::GetColorMode();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (context->GetColorMode() != colorMode_ && !isCustomPopup_) {
+        colorMode_ = context->GetColorMode();
         UpdateBubbleText();
     }
     UpdateAgingTextSize();
@@ -810,7 +812,9 @@ void BubblePattern::OnColorConfigurationUpdate()
     if (isCustomPopup_) {
         return;
     }
-    colorMode_ = SystemProperties::GetColorMode();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    colorMode_ = context->GetColorMode();
     UpdateBubbleText();
 }
 

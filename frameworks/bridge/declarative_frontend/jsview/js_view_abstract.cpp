@@ -83,6 +83,11 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/event/key_event.h"
 
+namespace OHOS::Ace::NG {
+constexpr uint32_t DEFAULT_GRID_SPAN = 1;
+constexpr int32_t DEFAULT_GRID_OFFSET = 0;
+}
+
 namespace OHOS::Ace {
 namespace {
 const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
@@ -311,6 +316,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
             break;
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
             previewOption.isMultiTiled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW):
+            previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
             break;
         default:
             break;
@@ -1053,7 +1061,8 @@ RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj)
         }
         resObjParamsList.push_back(resObjParams);
     }
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(id, type, resObjParamsList, bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+        id, type, resObjParamsList, bundleName, moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
@@ -1061,7 +1070,7 @@ RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>&
 {
     auto bundleName = jsObj->GetPropertyValue<std::string>(static_cast<int32_t>(ArkUIIndex::BUNDLE_NAME), "");
     auto moduleName = jsObj->GetPropertyValue<std::string>(static_cast<int32_t>(ArkUIIndex::MODULE_NAME), "");
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
     return resourceObject;
 }
 
@@ -1089,7 +1098,7 @@ RefPtr<ResourceWrapper> CreateResourceWrapper()
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
         if (!resourceAdapter) {
             return nullptr;
         }
@@ -1196,9 +1205,9 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto animationOptionResult = std::make_shared<AnimationOption>(
-            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRender()));
+            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRenderExceptDynamicComponent()));
         // The maximum of the form-animation-playback duration value is 1000 ms.
-        if (pipelineContext->IsFormRender() && pipelineContext->IsFormAnimation()) {
+        if (pipelineContext->IsFormRenderExceptDynamicComponent() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
             // If the duration exceeds 1000ms, init it to 0 ms.
             if (formAnimationTimeInterval > DEFAULT_DURATION) {
@@ -2197,7 +2206,7 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsSharedTransition", jsVal, checkList)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
         }
         return;
@@ -2205,7 +2214,7 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     // id
     auto id = jsVal->ToString();
     if (id.empty()) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
         }
         return;
@@ -5596,6 +5605,11 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         }
     }
 
+    auto sizeChangeEffect = obj->GetProperty("sizeChangeEffect");
+    if (sizeChangeEffect->IsNumber()) {
+        previewOption.sizeChangeEffect = static_cast<NG::DraggingSizeChangeEffect>(sizeChangeEffect->ToNumber<int>());
+    }
+
     JSViewAbstract::SetDragNumberBadge(info, previewOption);
 
     ParseDragInteractionOptions(info, previewOption);
@@ -6932,6 +6946,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("direction", &JSViewAbstract::SetDirection, opt);
 #ifndef WEARABLE_PRODUCT
     JSClass<JSViewAbstract>::StaticMethod("bindPopup", &JSViewAbstract::JsBindPopup);
+    JSClass<JSViewAbstract>::StaticMethod("bindTips", &JSViewAbstract::JsBindTips);
 #endif
 
     JSClass<JSViewAbstract>::StaticMethod("background", &JSViewAbstract::JsBackground);
@@ -7033,6 +7048,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityUseSamePage", &JSViewAbstract::JsAccessibilityUseSamePage);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityScrollTriggerable",
                                           &JSViewAbstract::JsAccessibilityScrollTriggerable);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityFocusDrawLevel",
+                                          &JSViewAbstract::JsAccessibilityFocusDrawLevel);
 
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
@@ -7149,7 +7166,7 @@ void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
         auto jsDrawFunc = AceType::MakeRefPtr<JsFunction>(
             JSRef<JSObject>(jsDrawModifier), JSRef<JSFunc>::Cast(drawMethod));
 
-        return GetDrawCallback(jsDrawFunc, execCtx);
+        return GetDrawCallback(jsDrawFunc, execCtx, jsDrawModifier);
     };
 
     drawModifier->drawBehindFunc = getDrawModifierFunc("drawBehind");
@@ -7643,7 +7660,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
 
 bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
@@ -8387,6 +8404,9 @@ void JSViewAbstract::JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info
     if (expectedUpdateIntervalVal->IsNumber()) {
         JSViewAbstract::ParseJsInteger(expectedUpdateIntervalVal, expectedUpdateInterval);
     }
+    if (expectedUpdateInterval < 0) {
+        expectedUpdateInterval = DEFAULT_DURATION;
+    }
 
     RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -8981,12 +9001,14 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
 }
 
 std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback(
-    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx)
+    const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier)
 {
-    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx](
+    std::function<void(NG::DrawingContext & context)> drawCallback = [func = std::move(jsDraw), execCtx, modifier](
                                                                          NG::DrawingContext& context) -> void {
         JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-
+        if (modifier->IsEmpty()) {
+            return;
+        }
         JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
         objectTemplate->SetInternalFieldCount(1);
         JSRef<JSObject> contextObj = objectTemplate->NewInstance();

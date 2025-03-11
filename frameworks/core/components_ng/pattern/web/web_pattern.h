@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "ui/rs_surface_node.h"
+#include "core/components_ng/pattern/web/web_select_overlay.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -90,22 +91,11 @@ struct MouseClickInfo {
     TimeStamp start;
 };
 
-#ifdef OHOS_STANDARD_SYSTEM
 struct TouchInfo {
     double x = -1;
     double y = -1;
     int32_t id = -1;
 };
-
-struct TouchHandleState {
-    int32_t id = -1;
-    int32_t x = -1;
-    int32_t y = -1;
-    int32_t edge_height = 0;
-};
-
-enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
-#endif
 } // namespace
 
 enum class WebInfoType : int32_t {
@@ -496,7 +486,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
@@ -521,16 +510,6 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void OnContextMenuHide();
-    void QuickMenuIsNeedNewAvoid(
-        SelectOverlayInfo& selectInfo,
-        std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle);
-    RectF ComputeClippedSelectionBounds(
-        std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
-        bool& isNewAvoid);
     void OnQuickMenuDismissed();
     void HideHandleAndQuickMenuIfNecessary(bool hide, bool isScroll = false);
     void ChangeVisibilityOfQuickMenu();
@@ -555,24 +534,19 @@ public:
     void OnHideAutofillPopup();
     RefPtr<FrameNode> CreateDataListFrameNode(const OffsetF& offfset, const float height, const float width);
     void RemoveDataListNode();
-    void UpdateTouchHandleForOverlay(bool fromOverlay = false);
-    bool IsSelectOverlayDragging()
+    bool IsOverlayCreating()
     {
-        return selectOverlayDragging_;
+        return overlayCreating_;
     }
-    void SetSelectOverlayDragging(bool selectOverlayDragging)
+    void SetOverlayCreating(bool overlayCreating)
     {
-        selectOverlayDragging_ = selectOverlayDragging;
+        overlayCreating_ = overlayCreating;
     }
     void UpdateLocale();
     void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void SetSelectPopupMenuShowing(bool showing)
     {
         selectPopupMenuShowing_ = showing;
-    }
-    void SetCurrentStartHandleDragging(bool isStartHandle)
-    {
-        isCurrentStartHandleDragging_ = isStartHandle;
     }
     void ParseViewDataNumber(const std::string& key, int32_t value,
         RefPtr<PageNodeInfoWrap> node, RectT<float>& rect, float viewScale);
@@ -589,8 +563,6 @@ public:
     bool RequestAutoSave();
     bool UpdateAutoFillPopup();
     bool CloseAutoFillPopup();
-    void UpdateSelectHandleInfo();
-    bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     void UpdateOnFocusTextField(bool isFocus);
@@ -661,6 +633,7 @@ public:
     void OnTooltip(const std::string& tooltip);
     void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
+    void RestoreRenderFit();
     void OnPopupShow(bool show);
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
@@ -741,7 +714,7 @@ public:
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
     void RecordWebEvent(bool isInit = false) override;
-    void GetPageContentAsync(const std::string& jsCode);
+    bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
 
     bool IsPreviewImageNodeExist() const
     {
@@ -757,6 +730,8 @@ public:
     {
         return isNewDragStyle_;
     }
+
+    bool isNeedInterceptedTouchEvent_ = false;
 
     bool IsDragging() const
     {
@@ -774,10 +749,15 @@ public:
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
 
+    void UpdateImageOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
+    void PushOverlayInfo(float x, float y, int32_t id);
+    void WebOverlayRequestFocus();
+    
     std::string GetCurrentLanguage() override;
 
 private:
     friend class WebContextSelectOverlay;
+    friend class WebSelectOverlay;
 
     void GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffset, SizeF& previewSize);
     RefPtr<FrameNode> CreatePreviewImageFrameNode(bool isImage);
@@ -863,7 +843,7 @@ private:
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
     void WindowDrag(int32_t width, int32_t height);
-    void OnSmoothDragResizeEnabledUpdate(bool value);
+    void WindowMaximize();
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
@@ -889,7 +869,7 @@ private:
     void HandleDragEnd(int32_t x, int32_t y);
     void HandleDragCancel();
     void ClearDragData();
-    void SetFakeDragData();
+    void SetFakeDragData(const RefPtr<OHOS::Ace::DragEvent>& info);
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -925,6 +905,7 @@ private:
     void HandleOnDragDropLink(RefPtr<UnifiedData> aceData);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
+    void ResetDragStateValue();
     void InitTouchEventListener();
     void UninitTouchEventListener();
     void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
@@ -933,7 +914,6 @@ private:
     int32_t dropY_ = 0;
     int onDragMoveCnt = 0;
     bool isDragEndMenuShow_ = false;
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> dropParams_ = nullptr;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> curMoveInTime;
@@ -950,36 +930,11 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
-    RectF ChangeHandleHeight(
-        const std::shared_ptr<SelectOverlayInfo>& info, const GestureEvent& event, bool isFirst);
     void HandleTouchClickEventFromOverlay(const GestureEvent& info);
-    void OnSelectHandleStart(const GestureEvent& event, bool isFirst);
-    void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
-    void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
-
-    bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
-    void CheckHandles(SelectHandleInfo& handleInfo, const std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& handle);
-
     void SuggestionSelected(int32_t index);
-    void RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo);
     void InitializeAccessibility();
     void UninitializeAccessibility();
-#ifdef OHOS_STANDARD_SYSTEM
-    WebOverlayType GetTouchHandleOverlayType(
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
-#endif
-    void OnParentScrollStartOrEndCallback(bool isEnd);
-    void RegisterSelectOverlayParentScrollCallback(int32_t parentId, int32_t callbackId);
-    void StartListenSelectOverlayParentScroll(const RefPtr<FrameNode>& host);
-    void StopListenSelectOverlayParentScroll(const RefPtr<FrameNode>& host);
-    void RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
-        std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
-        std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
-    void RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo);
     void CloseSelectOverlay();
-    RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     void DelTouchOverlayInfoByTouchId(int32_t touchId);
     std::optional<OffsetF> GetCoordinatePoint();
     static void InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNode>>& options,
@@ -1101,13 +1056,9 @@ private:
     bool selectTemporarilyHidden_ = false;
     bool selectTemporarilyHiddenByScroll_ = false;
     bool nodeAttach_ = false;
-    ScrollableParentInfo scrollableParentInfo_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_ = nullptr;
+    RefPtr<WebSelectOverlay> webSelectOverlay_ = nullptr;
     RefPtr<WebPaintProperty> webPaintProperty_ = nullptr;
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
-    bool isQuickMenuMouseTrigger_ = false;
     RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> mouseClickQueue_;
@@ -1151,10 +1102,7 @@ private:
     RectF selectArea_;
     RectF cursorInfo_;
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
-    SelectMenuInfo selectMenuInfo_;
-    bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
-    bool isCurrentStartHandleDragging_ = false;
     std::list<TouchInfo> touchOverlayInfo_;
     bool isPopup_ = false;
     int32_t tooltipId_ = -1;
@@ -1193,6 +1141,8 @@ private:
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
+
+    bool isAttachedToMainTree_ = false;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);

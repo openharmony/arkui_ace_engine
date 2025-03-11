@@ -20,7 +20,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 // for indicator
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.4f;
 constexpr float LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
 constexpr float LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
@@ -66,6 +65,9 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
+    dotIndicatorModifier_->SetIndicatorDotItemSpace(
+        paintProperty->GetSpaceValue(swiperTheme->GetIndicatorDotItemSpace()));
+
     SizeF contentSize = geometryNode->GetFrameSize();
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * 0.5;
     dotIndicatorModifier_->SetCenterY(centerY_);
@@ -90,7 +92,7 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::CalCurrentIndex()
 {
-    totalItemCount_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+    totalItemCount_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
         totalItemCount_ : itemCount_;
     if (isHorizontalAndRightToLeft_) {
         if (isSwipeByGroup_) {
@@ -101,7 +103,7 @@ std::pair<int32_t, int32_t> DotIndicatorPaintMethod::CalCurrentIndex()
     }
     auto currentIndex = currentIndex_;
     auto currentIndexActual = currentIndexActual_;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isSwipeByGroup_ &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && isSwipeByGroup_ &&
         displayCount_ != 0) {
         currentIndex = currentIndex_ / displayCount_;
         currentIndexActual = currentIndexActual_ / displayCount_;
@@ -113,7 +115,7 @@ bool DotIndicatorPaintMethod::NeedBottomAnimation() const
 {
     auto currentIndexActual = currentIndexActual_;
     auto firstIndex = firstIndex_;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isSwipeByGroup_ &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && isSwipeByGroup_ &&
         displayCount_ != 0) {
         firstIndex /= displayCount_;
         currentIndexActual /= displayCount_;
@@ -223,9 +225,12 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
     itemHalfSizes.emplace_back(selectedItemWidth * HALF * indicatorScale);
     itemHalfSizes.emplace_back(selectedItemHeight * HALF * indicatorScale);
     Dimension paddingSide = indicatorTheme->GetIndicatorPaddingDot();
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(indicatorTheme->GetIndicatorDotItemSpace());
+        
     longPointCenterX_ =
         CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-            static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+            static_cast<float>(indicatorDotItemSpace.ConvertToPx()), currentIndex_);
     if (dotIndicatorModifier_->GetIsPressed()) {
         dotIndicatorModifier_->SetIsPressed(false);
         dotIndicatorModifier_->UpdateHoverAndPressConversionPaintProperty();
@@ -247,7 +252,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
 
-    PaintHoverIndicator(itemHalfSizes, paddingSide);
+    PaintHoverIndicator(itemHalfSizes, paddingSide, indicatorDotItemSpace);
 }
 
 int32_t DotIndicatorPaintMethod::CalculateMouseClickIndexOnRTL()
@@ -266,19 +271,20 @@ int32_t DotIndicatorPaintMethod::CalculateMouseClickIndexOnRTL()
     return mouseClickIndex;
 }
 
-void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide)
+void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide,
+    const Dimension& indicatorDotItemSpace)
 {
     CHECK_NULL_VOID(dotIndicatorModifier_);
     if (mouseClickIndex_) {
         if (currentIndex_ == totalItemCount_ - displayCount_ && !isLoop_ && mouseClickIndex_ > currentIndex_ &&
             mouseClickIndex_ < totalItemCount_) {
             longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+                static_cast<float>(indicatorDotItemSpace.ConvertToPx()), currentIndex_);
         } else {
             auto mouseClickIndex = isHorizontalAndRightToLeft_ ?
                 CalculateMouseClickIndexOnRTL() : mouseClickIndex_.value();
             longPointCenterX_ = CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex);
+                static_cast<float>(indicatorDotItemSpace.ConvertToPx()), mouseClickIndex);
         }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
             gestureState_, vectorBlackPointCenterX_, longPointCenterX_);
@@ -317,9 +323,11 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
     itemHalfSizes.emplace_back(selectedItemHalfWidth);
     itemHalfSizes.emplace_back(selectedItemHalfHeight);
     Dimension paddingSide = indicatorTheme->GetIndicatorPaddingDot();
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(indicatorTheme->GetIndicatorDotItemSpace());
     longPointCenterX_ =
         CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(paddingSide.ConvertToPx()),
-            static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+            static_cast<float>(indicatorDotItemSpace.ConvertToPx()), currentIndex_);
     if (dotIndicatorModifier_->GetIsPressed()) {
         dotIndicatorModifier_->UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
     } else if (dotIndicatorModifier_->GetIsHover()) {
@@ -332,7 +340,7 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
 }
 
 void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& itemHalfSizes,
-    const SizeF& frameSize, const int32_t displayCount)
+    const SizeF& frameSize, const int32_t displayCount, const Dimension& indicatorDotItemSpace, bool ignoreSize)
 {
     // diameter calculation
     auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
@@ -343,17 +351,19 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
     if (IsCustomSizeValue_) {
         allPointDiameterSum = itemWidth * static_cast<float>(displayCount - 1) + selectedItemWidth;
     }
-    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (displayCount - 1);
+    auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (displayCount - 1);
     auto indicatorTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(indicatorTheme);
     Dimension paddingSide = indicatorTheme->GetIndicatorPaddingDot();
     auto indicatorPaddingSide = static_cast<float>(paddingSide.ConvertToPx());
     auto contentWidth = indicatorPaddingSide + allPointDiameterSum + allPointSpaceSum + indicatorPaddingSide;
     auto indicatorHeightPadding = indicatorTheme->GetIndicatorBgHeight().ConvertToPx();
+
     auto contentHeight = indicatorHeightPadding + itemHeight + indicatorHeightPadding;
     if (selectedItemHeight > itemHeight) {
         contentHeight = indicatorHeightPadding + selectedItemHeight + indicatorHeightPadding;
     }
+
     float marginX = ((axis_ == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5;
     float marginY = ((axis_ == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - contentHeight) * 0.5;
     normalMargin_.SetX(marginX);
@@ -368,7 +378,7 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
     }
     float startCenterX = margin + padding;
     float endCenterX = margin + padding;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (isSwipeByGroup_ && displayCount_ != 0) {
             index /= displayCount_;
         }
@@ -384,7 +394,8 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
         if (IsCustomSizeValue_) {
             allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
         }
-        auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount_ - 1));
+        auto allPointSpaceSum = static_cast<float>(space * (itemCount_ - 1));
+        
         float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
         startCenterX = rectWidth - startCenterX;
         endCenterX = rectWidth - endCenterX;
@@ -418,17 +429,21 @@ std::tuple<std::pair<float, float>, LinearVector<float>> DotIndicatorPaintMethod
     itemHalfSizes.emplace_back(itemHeight * 0.5);
     itemHalfSizes.emplace_back(selectedItemWidth * 0.5);
     itemHalfSizes.emplace_back(selectedItemHeight * 0.5);
-    CalculateNormalMargin(itemHalfSizes, frameSize, itemCount_);
+
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(indicatorTheme->GetIndicatorDotItemSpace());
+    bool ignoreSize = paintProperty->GetIgnoreSizeValue(false);
+    CalculateNormalMargin(itemHalfSizes, frameSize, itemCount_, indicatorDotItemSpace, ignoreSize);
     Dimension paddingSide = indicatorTheme->GetIndicatorPaddingDot();
     auto longPointCenterX = CalculatePointCenterX(itemHalfSizes, normalMargin_.GetX(),
         static_cast<float>(paddingSide.ConvertToPx()),
-        static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+        static_cast<float>(indicatorDotItemSpace.ConvertToPx()), currentIndex_);
     return { longPointCenterX, itemHalfSizes };
 }
 
 std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
 {
-    auto actualTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+    auto actualTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
         isSwipeByGroup_ ? groupTurnPageRate_ : turnPageRate_;
     float blackPointCenterMoveRate = CubicCurve(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
         CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(actualTurnPageRate));
@@ -560,11 +575,12 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
     itemHalfSizes.emplace_back(selectedItemWidth * HALF * indicatorScale);
     itemHalfSizes.emplace_back(selectedItemHeight * HALF * indicatorScale);
     if (touchBottomType_ != TouchBottomType::NONE) {
+        Dimension indicatorDotItemSpace = paintProperty->GetSpaceValue(indicatorTheme->GetIndicatorDotItemSpace());
         float allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
         if (IsCustomSizeValue_) {
             allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
         }
-        float allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount_ - 1);
+        float allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (itemCount_ - 1);
         Dimension paddingSide = indicatorTheme->GetIndicatorPaddingDot();
         float padding = static_cast<float>(paddingSide.ConvertToPx());
         float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
@@ -572,7 +588,7 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
             rectWidth * (TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE - TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE * itemCount_);
         auto changeValue = (newRectWidth - rectWidth) * touchBottomRate_;
 
-        float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+        float space = static_cast<float>(indicatorDotItemSpace.ConvertToPx());
         if (itemCount_ > 1) {
             space = (rectWidth + changeValue - padding * 2 - allPointDiameterSum) / (itemCount_ - 1);
         }
@@ -592,7 +608,7 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndexOnRTL(int32_t index)
 {
     auto actualTurnPageRate = turnPageRate_;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
         isSwipeByGroup_ && !NearZero(groupTurnPageRate_)) {
         actualTurnPageRate = groupTurnPageRate_;
     }
@@ -631,7 +647,7 @@ std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetIndex(int32_t index)
     }
 
     auto actualTurnPageRate = turnPageRate_;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
         isSwipeByGroup_ && groupTurnPageRate_ != 0) {
         actualTurnPageRate = groupTurnPageRate_;
     }
@@ -688,7 +704,7 @@ std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetStartAndEndIndex(int32_t
         return { startCurrentIndex, endCurrentIndex };
     }
 
-    auto actualTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+    auto actualTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
         isSwipeByGroup_ ? groupTurnPageRate_ : turnPageRate_;
     if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE && Negative(actualTurnPageRate)) {
         if (std::abs(actualTurnPageRate) >= FIFTY_PERCENT) {
@@ -747,7 +763,7 @@ void DotIndicatorPaintMethod::AdjustPointCenterXForTouchBottom(StarAndEndPointCe
         return;
     }
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isSwipeByGroup_ && !isLoop_) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && isSwipeByGroup_ && !isLoop_) {
         return;
     }
 

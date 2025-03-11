@@ -244,6 +244,7 @@ public:
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
+    std::u16string urlAddress;
     std::function<void()> urlOnRelease;
     void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
     {
@@ -350,11 +351,13 @@ public:
     void UpdateTextColorWithoutCheck(Color color)
     {
         fontStyle->propTextColor = color;
+        MarkDirty();
     }
 
     void UpdateTextDecorationColorWithoutCheck(Color color)
     {
         fontStyle->propTextDecorationColor = color;
+        MarkDirty();
     }
 
 private:
@@ -514,6 +517,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();

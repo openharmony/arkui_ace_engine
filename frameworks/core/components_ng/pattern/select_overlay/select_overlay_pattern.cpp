@@ -867,4 +867,11 @@ void SelectOverlayPattern::OnColorConfigurationUpdate()
     host->UpdateSelectMenuBg();
     host->UpdateToolBar(true, true);
 }
+
+void SelectOverlayPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->UpdateToolBar(true, true);
+}
 } // namespace OHOS::Ace::NG

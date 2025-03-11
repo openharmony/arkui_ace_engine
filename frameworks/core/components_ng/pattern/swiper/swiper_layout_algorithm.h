@@ -371,6 +371,7 @@ private:
     void AdjustItemPositionOnCachedShow();
     void AdjustOffsetOnForward(float currentEndPos);
     void AdjustOffsetOnBackward(float currentStartPos);
+    float GetHeightForDigit(LayoutWrapper* layoutWrapper, float height) const;
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;

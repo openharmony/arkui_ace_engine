@@ -142,7 +142,7 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     auto windowName = IsMainWindow() ? session_->GetSessionInfo().bundleName_ : session_->GetWindowName();
     ACE_SCOPED_TRACE("OnDetachFromFrameNode[id:%d][self:%d][type:%d][name:%s]",
         session_->GetPersistentId(), frameNode->GetId(), session_->GetWindowType(), windowName.c_str());
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+    TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE,
         "OnDetachFromFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
         session_->GetPersistentId(), frameNode->GetId(), session_->GetWindowType(), windowName.c_str());
 }

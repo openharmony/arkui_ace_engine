@@ -97,6 +97,7 @@ public:
         bool isAsyncModalBinding = false, SessionType sessionType = SessionType::UI_EXTENSION_ABILITY);
     ~UIExtensionPattern() override;
 
+    void Initialize();
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
@@ -118,6 +119,10 @@ public:
     void RegisterWindowSceneVisibleChangeCallback(const RefPtr<Pattern>& windowScenePattern);
     void UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId);
     void OnWindowSceneVisibleChange(bool visible);
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void OnAttachContext(PipelineContext *context) override;
+    void OnDetachContext(PipelineContext *context) override;
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
@@ -313,6 +318,17 @@ private:
     void DispatchFocusState(bool focusState);
     void DispatchDisplayArea(bool isForce = false);
     void LogoutModalUIExtension();
+    bool IsMoving();
+    void UnRegisterEvent(int32_t instanceId);
+    void UnRegisterPipelineEvent(int32_t instanceId);
+    void UnRegisterPipelineEvent(
+        const RefPtr<PipelineContext>& pipeline, FrameNode* frameNode);
+    void UnRegisterUIExtensionManagerEvent(int32_t instanceId);
+    void RegisterEvent(int32_t instanceId);
+    void RegisterPipelineEvent(int32_t instanceId);
+    void RegisterPipelineEvent(const RefPtr<PipelineContext>& pipeline);
+    void RegisterUIExtensionManagerEvent(int32_t instanceId);
+    void UpdateSessionInstanceId(int32_t instanceId);
 
     void RegisterVisibleAreaChange();
     void MountPlaceholderNode(PlaceholderType type);
@@ -385,6 +401,7 @@ private:
     bool isTransferringCaller_ = false;
     bool isVisible_ = true;
     bool isModal_ = false;
+    bool hasInitialize_ = false;
     bool isAsyncModalBinding_ = false;
     PlaceholderType curPlaceholderType_ = PlaceholderType::NONE;
     bool isFoldStatusChanged_ = false;
@@ -395,6 +412,7 @@ private:
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
     bool isKeyAsync_ = false;
+    bool hasDetachContext_ = false;
     // Whether to send the focus to the UIExtension
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;

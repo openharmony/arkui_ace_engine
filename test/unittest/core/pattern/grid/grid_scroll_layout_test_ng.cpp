@@ -40,7 +40,7 @@ void GridScrollLayoutTestNg::UpdateLayoutInfo()
 {
     GetGrid();
     ViewStackProcessor::GetInstance()->Finish();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     pattern_->info_.lineHeightMap_[0] = ITEM_MAIN_SIZE;
     pattern_->info_.gridMatrix_[0][0] = 0;
     pattern_->info_.gridMatrix_[0][1] = 1;
@@ -414,7 +414,7 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateGridMatrix001, TestSize.Level1)
      * @tc.expected: Scroll to the correct position,lineHeightMap_ size is 25
      */
     pattern_->ScrollToIndex(99, true, ScrollAlign::END);
-    EXPECT_TRUE(IsEqual<int32_t>(pattern_->info_.lineHeightMap_.size(), 25));
+    EXPECT_TRUE(IsEqual(pattern_->info_.lineHeightMap_.size(), 25));
 }
 
 /**
@@ -2005,5 +2005,43 @@ HWTEST_F(GridScrollLayoutTestNg, CachedCount003, TestSize.Level1)
     auto cacheEnd = algo->CalculateEndCachedCount(option, 2);
     EXPECT_EQ(cacheStart, 0);
     EXPECT_EQ(cacheEnd, 2);
+}
+
+HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest001, TestSize.Level1) {
+    // Arrange
+    auto pattern = AceType::MakeRefPtr<GridPattern>();
+    pattern->info_.lastMainSize_ = 100.0f;
+    pattern->info_.contentEndPadding_ = 10.0f;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 10;
+    pattern->info_.childrenCount_ = 11;
+    pattern->info_.totalHeightOfItemsInView_ = 90.0f;
+    pattern->info_.currentOffset_ = 50.0f;
+    pattern->info_.offsetEnd_ = false;
+
+    // Act
+    bool result = pattern->IsFadingBottom();
+
+    // Assert
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest002, TestSize.Level1) {
+    // Arrange
+    auto pattern = AceType::MakeRefPtr<GridPattern>();
+    pattern->info_.lastMainSize_ = 100.0f;
+    pattern->info_.contentEndPadding_ = 10.0f;
+    pattern->info_.startIndex_ = 0;
+    pattern->info_.endIndex_ = 10;
+    pattern->info_.childrenCount_ = 11;
+    pattern->info_.totalHeightOfItemsInView_ = 110.0f;
+    pattern->info_.currentOffset_ = 50.0f;
+    pattern->info_.offsetEnd_ = true;
+
+    // Act
+    bool result = pattern->IsFadingBottom();
+
+    // Assert
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

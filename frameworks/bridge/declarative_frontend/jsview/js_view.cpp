@@ -95,7 +95,7 @@ void JSView::JSBind(BindingTarget object)
     JSViewFullUpdate::JSBind(object);
 }
 
-void JSView::RenderJSExecution(int64_t deadline, bool& isTimeout)
+void JSView::RenderJSExecution()
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (!jsViewFunction_) {
@@ -251,8 +251,7 @@ RefPtr<AceType> JSViewFullUpdate::InternalRender()
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     needsUpdate_ = false;
-    bool isTimeout = false;
-    RenderJSExecution(0, isTimeout);
+    RenderJSExecution();
     CleanUpAbandonedChild();
     jsViewFunction_->Destroy();
     return ViewStackModel::GetInstance()->Finish();
@@ -371,7 +370,7 @@ void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
         return;
     }
 
-    int argc = info.Length();
+    uint32_t argc = info.Length();
     if (argc > 1 && (info[0]->IsNumber() || info[0]->IsString())) {
         std::string viewId = info[0]->ToString();
         auto instance = AceType::MakeRefPtr<JSViewFullUpdate>(viewId, info.This(), JSRef<JSFunc>::Cast(renderFunc));
@@ -568,14 +567,11 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, nullptr);
         ContainerScope scope(jsView->GetInstanceId());
-        if (!jsView->isFirstRender_ && jsView->prebuildPhase_ == PrebuildPhase::PREBUILD_DONE) {
+        if (!jsView->isFirstRender_ && jsView->prebuildPhase_ != PrebuildPhase::EXECUTE_PREBUILD_CMD) {
             return nullptr;
         }
         jsView->isFirstRender_ = false;
         auto res = jsView->InitialRender(deadline, isTimeout);
-        if (!isTimeout) {
-            jsView->SetPrebuildPhase(PrebuildPhase::PREBUILD_DONE);
-        }
         return res;
     };
 
@@ -852,6 +848,7 @@ void JSViewPartialUpdate::PrebuildComponentsInMultiFrame(int64_t deadline, bool&
         prebuildComponentCmds.pop();
     }
     isTimeout = false;
+    SetPrebuildPhase(PrebuildPhase::PREBUILD_DONE);
     ACE_BUILD_TRACE_END()
 }
 
@@ -867,7 +864,7 @@ void JSViewPartialUpdate::DoRenderJSExecution(int64_t deadline, bool& isTimeout)
     PrebuildComponentsInMultiFrame(deadline, isTimeout);
 }
 
-void JSViewPartialUpdate::RenderJSExecution(int64_t deadline, bool& isTimeout)
+void JSViewPartialUpdate::RenderJSExecutionForPrebuild(int64_t deadline, bool& isTimeout)
 {
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;
     if (!jsViewFunction_) {
@@ -905,18 +902,27 @@ void JSViewPartialUpdate::RenderJSExecution(int64_t deadline, bool& isTimeout)
 
 void JSViewPartialUpdate::SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline)
 {
+    if (!jsViewFunction_) {
+        return;
+    }
     prebuildPhase_ = prebuildPhase;
-    NG::ViewStackProcessor::GetInstance()->SetIsPrebuildingAndDeadline(
-        prebuildPhase == PrebuildPhase::BUILD_PREBUILD_CMD, deadline);
-    jsViewFunction_->ExecuteSetPrebuildPhase(prebuildPhase);
+    if (jsViewFunction_->ExecuteSetPrebuildPhase(prebuildPhase)) {
+        NG::ViewStackProcessor::GetInstance()->SetIsPrebuilding(
+            prebuildPhase == PrebuildPhase::BUILD_PREBUILD_CMD);
+    }
 }
 
 RefPtr<AceType> JSViewPartialUpdate::InitialRender(int64_t deadline, bool& isTimeout)
 {
     needsUpdate_ = false;
-    RenderJSExecution(deadline, isTimeout);
-    if (isTimeout) {
-        return nullptr;
+    // When the pipeline is in OnIdle stage, deadline > 0, represents the expected end time of this frame
+    if (deadline > 0 || prebuildPhase_ == PrebuildPhase::EXECUTE_PREBUILD_CMD) {
+        RenderJSExecutionForPrebuild(deadline, isTimeout);
+        if (isTimeout) {
+            return nullptr;
+        }
+    } else {
+        RenderJSExecution();
     }
     return ViewStackModel::GetInstance()->Finish();
 }
@@ -959,7 +965,7 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
 
     if (info[0]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-        auto* view = JSView::GetNativeView(object);
+        auto view = object->Unwrap<JSView>();
         if (view == nullptr) {
             LOGE("View is null");
             return;

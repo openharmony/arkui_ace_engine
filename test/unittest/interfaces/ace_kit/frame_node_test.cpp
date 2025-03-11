@@ -17,6 +17,7 @@
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "test/unittest/interfaces/ace_kit/mock/mock_ace_kit_pattern.h"
 #include "test/unittest/interfaces/ace_kit/mock/mock_ace_kit_property.h"
+#include "ui/properties/dirty_flag.h"
 #include "ui/view/frame_node.h"
 #include "ui/view_factory/abstract_view_factory.h"
 
@@ -100,5 +101,73 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest003, TestSize.Level1)
     EXPECT_EQ(popAceNode->GetTag(), tag);
     EXPECT_EQ(popAceNode->GetId(), id);
     EXPECT_FALSE(frameNodeImpl->GetAceNode());
+}
+
+/**
+ * @tc.name: FrameNodeTestTest004
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest004, TestSize.Level1)
+{
+    const std::string tag = "TEST4";
+    const int32_t id = 4;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+    auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
+    ASSERT_TRUE(frameNodeImpl);
+
+    frameNode->AddChild(nullptr);
+    EXPECT_EQ(frameNode->GetChildren().size(), 0);
+
+    const std::string childTag = "TEST4_CHILD";
+    const int32_t childId = 4;
+    auto mockPatternChild = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNodeChild = AbstractViewFactory::CreateFrameNode(childTag, childId, mockPatternChild);
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->AddChild(frameNodeChild);
+    EXPECT_EQ(frameNode->GetChildren().size(), 1);
+
+    frameNode->RemoveChild(frameNodeChild);
+    EXPECT_EQ(frameNode->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: FrameNodeTestTest005
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest005, TestSize.Level1)
+{
+    const std::string tag = "TEST5";
+    const int32_t id = 5;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+    auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
+    ASSERT_TRUE(frameNodeImpl);
+
+    LayoutConstraintInfo constraint { .maxWidth = 100.0f, .maxHeight = 100.0f };
+    frameNode->Measure(constraint);
+    auto* aceNode = frameNodeImpl->GetAceNodePtr();
+    ASSERT_TRUE(aceNode);
+    EXPECT_TRUE(aceNode->IsActive());
+    auto geometryNode = aceNode->GetGeometryNode();
+    auto parentConstraint = geometryNode->GetParentLayoutConstraint();
+    EXPECT_TRUE(NearEqual(parentConstraint.value().maxSize.Width(), constraint.maxWidth));
+    EXPECT_TRUE(NearEqual(parentConstraint.value().maxSize.Height(), constraint.maxHeight));
+
+    frameNode->Layout();
+    auto layoutProperty = aceNode->GetLayoutProperty();
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    EXPECT_TRUE(NearEqual(layoutConstraint.value().maxSize.Width(), constraint.maxWidth));
+    EXPECT_TRUE(NearEqual(layoutConstraint.value().maxSize.Height(), constraint.maxHeight));
+
+    auto propertyChangeFlag = layoutProperty->GetPropertyChangeFlag();
+    EXPECT_EQ(propertyChangeFlag, NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT);
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag(),
+        NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_LAYOUT | NG::PROPERTY_UPDATE_MEASURE_SELF);
 }
 } // namespace OHOS::Ace

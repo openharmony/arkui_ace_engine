@@ -131,6 +131,9 @@ constexpr const char* DES_FIELD = "__NavdestinationField__";
 // font scale
 constexpr float STANDARD_FONT_SCALE = 1.0f;
 
+
+constexpr uint32_t BAR_ITEM_MARGIN_NUM = 2;
+
 enum class NavToolbarItemStatus {
     NORMAL = 0,
     DISABLED,
@@ -278,6 +281,7 @@ struct NavDestinationTransition {
 
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(
     NavigationOperation operation, bool isEnter)>;
+using NavDestinationOnNewParamCallback = std::function<void(napi_value param)>;
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

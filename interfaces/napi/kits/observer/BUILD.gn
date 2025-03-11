@@ -42,7 +42,10 @@ template("napi_observer_static") {
       deps += [ config.libace_target ]
     }
 
-    deps += [ "../utils:napi_utils_static_${platform}" ]
+    deps += [
+      "$ace_root/build:libace",
+      "../utils:napi_utils_static_${platform}",
+    ]
 
     if (is_arkui_x) {
       deps += [ "$ace_root/frameworks/core:ace_container_scope_static" ]

@@ -59,6 +59,21 @@ void ArcListTestNg::TearDown()
     ClearOldNodes(); // Each testcase will create new arc_list at begin
 }
 
+void ArcListTestNg::FlushUITasks(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
+
 void ArcListTestNg::GetList()
 {
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -230,7 +245,7 @@ std::function<void()> ArcListTestNg::GetDefaultHeaderBuilder()
 void ArcListTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
     pattern_->UpdateCurrentOffset(offset, source);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 float ArcListTestNg::GetInterval()
@@ -245,7 +260,7 @@ void ArcListTestNg::ScrollUp(float itemNumber)
     float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
     float offset = (itemMainLength + GetInterval()) * itemNumber;
     pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void ArcListTestNg::ScrollDown(float itemNumber)
@@ -254,25 +269,25 @@ void ArcListTestNg::ScrollDown(float itemNumber)
     float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
     float offset = -(itemMainLength + GetInterval()) * itemNumber + itemMainLength / 2.f;
     pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void ArcListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
     pattern_->ScrollToEdge(scrollEdgeType, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void ArcListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     pattern_->ScrollToIndex(index, smooth, align);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     if (smooth) {
         float targetPos = 0.0f;
         if (!NearZero(targetPos)) {
             float endValue = pattern_->GetFinalPosition();
             pattern_->ScrollTo(endValue);
-            FlushLayoutTask(frameNode_);
+            FlushUITasks(frameNode_);
         }
     }
 }
@@ -298,7 +313,7 @@ void ArcListTestNg::HandleDragUpdate(int32_t index, float mainDelta)
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, index);
     itemPattern->HandleDragUpdate(info);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void ArcListTestNg::HandleDragEnd(int32_t index, float mainVelocity)
@@ -312,7 +327,7 @@ void ArcListTestNg::HandleDragEnd(int32_t index, float mainVelocity)
     double position = itemPattern->springMotion_->GetEndValue();
     itemPattern->UpdatePostion(position - itemPattern->curOffset_);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void ArcListTestNg::ScrollSnapForEqualHeightItem(float offset, float velocity)
@@ -338,7 +353,7 @@ void ArcListTestNg::ScrollSnapForEqualHeightItem(float offset, float velocity)
     info.SetMainVelocity(velocity);
     info.SetMainDelta(offset);
     pattern_->scrollableEvent_->GetScrollable()->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 
     // Lift finger and end Arc_list sliding.
     info.SetMainVelocity(0.0);
@@ -347,14 +362,14 @@ void ArcListTestNg::ScrollSnapForEqualHeightItem(float offset, float velocity)
     pattern_->scrollableEvent_->GetScrollable()->lastMainDelta_ = 0.0;
     pattern_->scrollableEvent_->GetScrollable()->HandleDragEnd(info);
     pattern_->scrollableEvent_->GetScrollable()->isDragging_ = false;
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 
     if (pattern_->scrollableEvent_->GetScrollable()->IsSpringMotionRunning()) {
         // If current position is out of boundary, trig spring motion.
         float endValue = pattern_->scrollableEvent_->GetScrollable()->GetFinalPosition();
         pattern_->scrollableEvent_->GetScrollable()->ProcessSpringMotion(endValue);
         pattern_->scrollableEvent_->GetScrollable()->StopSpringAnimation();
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
 
     pattern_->scrollableEvent_->GetScrollable()->StopScrollable();
@@ -363,20 +378,20 @@ void ArcListTestNg::ScrollSnapForEqualHeightItem(float offset, float velocity)
 void ArcListTestNg::ScrollSnap(float offset, float velocity)
 {
     pattern_->OnScrollCallback(offset, velocity);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     // StartScrollSnapMotion, for condition that equal item height
     float endValue = pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
     pattern_->ScrollBy(-endValue);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     // UpdateScrollSnapEndWithOffset, for condition that different item height
     endValue -= pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
     pattern_->ScrollBy(endValue);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 AssertionResult ArcListTestNg::IsEqualTotalOffset(float expectOffset)
 {
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     return IsEqual(pattern_->GetTotalOffset(), expectOffset);
 }
 
@@ -385,7 +400,7 @@ AssertionResult ArcListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollA
     // After every call to ScrollToIndex(), reset currentDelta_
     float startOffset = pattern_->GetTotalOffset();
     pattern_->ScrollToIndex(index, smooth, align);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     if (smooth) {
         // Because can not get targetPos, use source code
         float targetPos = 0.0f;
@@ -395,12 +410,12 @@ AssertionResult ArcListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollA
             float totalHeight = pattern_->GetTotalHeight();
             finalPosition = std::clamp(finalPosition, 0.f, totalHeight); // limit scrollDistance
             pattern_->ScrollTo(finalPosition);
-            FlushLayoutTask(frameNode_);
+            FlushUITasks(frameNode_);
         }
     }
     float currentOffset = pattern_->GetTotalOffset();
     pattern_->ScrollTo(startOffset); // reset offset before return
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     return IsEqual(currentOffset, expectOffset);
 }
 
@@ -433,6 +448,16 @@ int32_t ArcListTestNg::findFocusNodeIndex(RefPtr<FocusHub>& focusNode)
 void ArcListTestNg::ScrollTo(float position)
 {
     pattern_->ScrollTo(position);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
+}
+
+void ArcListTestNg::SetChildrenMainSize(
+    const RefPtr<FrameNode>& frameNode, int32_t startIndex, const std::vector<float>& newChildrenSize)
+{
+    int32_t size = static_cast<int32_t>(newChildrenSize.size());
+    for (int32_t index = 0; index < size; index++) {
+        auto child = GetChildFrameNode(frameNode, index + startIndex);
+        ViewAbstract::SetHeight(AceType::RawPtr(child), CalcLength(newChildrenSize[index]));
+    }
 }
 } // namespace OHOS::Ace::NG

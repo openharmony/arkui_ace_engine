@@ -116,6 +116,9 @@ public:
     virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
     virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager) {};
     virtual void GetWebViewLanguage() {};
+    virtual void RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback) {};
+    virtual void GetCurrentPageName() {};
+    virtual void SendCurrentPageName(const std::string result) {};
     virtual void SendCurrentLanguage(std::string result) {};
     virtual void SaveProcessId(std::string key, int32_t id) {};
     virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
@@ -148,6 +151,7 @@ protected:
     std::string baseInfo_;
     std::shared_ptr<UiTranslateManager> translateManager_ = nullptr;
     static std::shared_mutex translateManagerMutex_;
+    std::function<std::string()> pipelineContextPageNameCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

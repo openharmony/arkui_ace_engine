@@ -68,7 +68,7 @@ void RichEditorLayoutAlgorithm::HandleParagraphCache()
         std::uintptr_t hash = 0;
         bool needReLayout = false;
         for (const auto& child : group) {
-            std::uintptr_t intValue = reinterpret_cast<std::uintptr_t>(child.GetRawPtr());
+            std::uintptr_t intValue = reinterpret_cast<std::uintptr_t>(Referenced::RawPtr(child));
             hash ^= intValue;
             needReLayout |= child->needReLayout;
             child->needReLayout = false;
@@ -83,7 +83,7 @@ std::uintptr_t RichEditorLayoutAlgorithm::Hash(const std::list<RefPtr<SpanItem>>
 {
     std::uintptr_t hash = 0;
     for (const auto& child : spanGroup) {
-        hash ^= reinterpret_cast<std::uintptr_t>(child.GetRawPtr());
+        hash ^= reinterpret_cast<std::uintptr_t>(Referenced::RawPtr(child));
     }
     return hash;
 }

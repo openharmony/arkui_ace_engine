@@ -54,7 +54,9 @@ constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 constexpr double ARC_INITWIDTH_VAL = 4.0;
+#ifdef ARKUI_CIRCLE_FEATURE
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
+#endif
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -64,6 +66,12 @@ const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
+
+ScrollablePattern::ScrollablePattern() = default;
+
+ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
+    : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
+{}
 
 ScrollablePattern::~ScrollablePattern()
 {
@@ -1240,8 +1248,15 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
 {
 #ifdef ARKUI_CIRCLE_FEATURE
-    if (isRoundScroll_) {
-        return AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+    if (isRoundScroll_ && scrollBar_) {
+        auto arcScrollBarOverlayModifier = AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar_);
+        if (arcScrollBar) {
+            arcScrollBarOverlayModifier->SetPositionMode(arcScrollBar->GetPositionMode());
+            arcScrollBarOverlayModifier->SetArcRect(arcScrollBar->GetArcActiveRect());
+            arcScrollBarOverlayModifier->SetBackgroundArcRect(arcScrollBar->GetArcBarRect());
+        }
+        return arcScrollBarOverlayModifier;
     }
 #endif
     return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
@@ -1706,7 +1721,8 @@ void ScrollablePattern::HandleDragStart(const GestureEvent& info)
     mouseOffsetX -= info.GetOffsetX();
     mouseOffsetY -= info.GetOffsetY();
     SuggestOpIncGroup(true);
-    if (!IsItemSelected(mouseOffsetX, mouseOffsetY)) {
+    if (!IsItemSelected(static_cast<float>(info.GetGlobalLocation().GetX()) - info.GetOffsetX(),
+        static_cast<float>(info.GetGlobalLocation().GetY()) - info.GetOffsetY())) {
         ClearMultiSelect();
         ClearInvisibleItemsSelectedStatus();
         mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
@@ -4125,5 +4141,21 @@ void ScrollablePattern::SetOnHiddenChangeForParent()
         };
         navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
     }
+}
+
+bool ScrollablePattern::IsRestrictBoundary()
+{
+    return !scrollEffect_ || scrollEffect_->IsRestrictBoundary();
+}
+
+bool ScrollablePattern::IsScrollableSpringEffect() const
+{
+    CHECK_NULL_RETURN(scrollEffect_, false);
+    return scrollEffect_->IsSpringEffect();
+}
+
+const RefPtr<ScrollEdgeEffect>& ScrollablePattern::GetScrollEdgeEffect() const
+{
+    return scrollEffect_;
 }
 } // namespace OHOS::Ace::NG

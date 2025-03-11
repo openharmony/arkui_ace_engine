@@ -474,6 +474,7 @@ public:
     static void JsAccessibilityDefaultFocus(const JSCallbackInfo& info);
     static void JsAccessibilityUseSamePage(const JSCallbackInfo& info);
     static void JsAccessibilityScrollTriggerable(const JSCallbackInfo& info);
+    static void JsAccessibilityFocusDrawLevel(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
@@ -500,6 +501,7 @@ public:
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
+    static void JsBindTips(const JSCallbackInfo& info);
     static void SetPopupDismiss(
         const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
     static PopupOnWillDismiss ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
@@ -680,7 +682,7 @@ public:
     static void SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static void SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
-        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
+        const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx, JSRef<JSObject> modifier);
 
     static RefPtr<NG::ChainedTransitionEffect> ParseNapiChainedTransition(
         const JSRef<JSObject>& object, const JSExecutionContext& context);

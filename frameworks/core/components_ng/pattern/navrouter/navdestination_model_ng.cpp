@@ -424,7 +424,8 @@ void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
 
 void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
     const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-    const std::vector<std::string>& nameList)
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+    const std::string& backButtonAccessibilityText)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -441,6 +442,14 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<N
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    if (userDefinedAccessibilityText) {
+        NavigationTitleUtil::SetAccessibility(backButtonNode, backButtonAccessibilityText);
+    } else {
+        std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+        NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+    }
 }
 
 void NavDestinationModelNG::SetSubtitle(const std::string& subtitle)
@@ -679,6 +688,17 @@ void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
     navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
 }
 
+void NavDestinationModelNG::SetMenuOptions(NavigationMenuOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetMenuOptions(std::move(opt));
+}
+
 void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -897,6 +917,16 @@ void NavDestinationModelNG::SetToolBarOptions(NavigationToolbarOptions&& opt)
         AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(navDestinationGroupNode);
     NavigationToolbarUtil::SetToolbarOptions(navDestinationGroupNode, std::move(opt));
+}
+
+void NavDestinationModelNG::SetToolbarMorebuttonOptions(MoreButtonOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetToolbarMoreButtonOptions(navDestinationGroupNode, std::move(opt));
 }
 
 void NavDestinationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)
@@ -1147,5 +1177,14 @@ void NavDestinationModelNG::SetCustomTransition(NG::NavDestinationTransitionDele
     auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
     CHECK_NULL_VOID(node);
     node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
+}
+
+void NavDestinationModelNG::SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNewParam(std::move(onNewParamCallback));
 }
 } // namespace OHOS::Ace::NG

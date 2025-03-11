@@ -26,6 +26,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -8312,6 +8313,8 @@ int32_t SetSwiperDigitIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem
             indicatorProp.fontWeight = ArkUIOptionalUint { indicator->fontWeight.isSet, indicator->fontWeight.value };
             indicatorProp.selectedFontWeight =
                 ArkUIOptionalUint { indicator->selectedFontWeight.isSet, indicator->selectedFontWeight.value };
+            indicatorProp.ignoreSizeValue = ArkUIOptionalInt { indicator->ignoreSizeValue.isSet,
+                indicator->ignoreSizeValue.value };
         } else {
             return ERROR_CODE_PARAM_INVALID;
         }
@@ -8345,6 +8348,8 @@ int32_t SetSwiperIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     indicatorProp.dimTop = ArkUIOptionalFloat { indicator->dimTop.isSet, indicator->dimTop.value };
     indicatorProp.dimRight = ArkUIOptionalFloat { indicator->dimRight.isSet, indicator->dimRight.value };
     indicatorProp.dimBottom = ArkUIOptionalFloat { indicator->dimBottom.isSet, indicator->dimBottom.value };
+    indicatorProp.ignoreSizeValue = ArkUIOptionalInt { indicator->ignoreSizeValue.isSet,
+        indicator->ignoreSizeValue.value };
     if (indicator->type == ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         indicatorProp.type = ArkUISwiperIndicatorType::DOT;
         indicatorProp.itemWidth = ArkUIOptionalFloat { indicator->itemWidth.isSet, indicator->itemWidth.value };
@@ -8359,6 +8364,8 @@ int32_t SetSwiperIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             ArkUIOptionalUint { indicator->selectedColorValue.isSet, indicator->selectedColorValue.value };
         indicatorProp.maxDisplayCount =
         ArkUIOptionalInt { indicator->maxDisplayCount.isSet, indicator->maxDisplayCount.value };
+        indicatorProp.dimSpace =
+            ArkUIOptionalFloat { indicator->dimSpace.isSet, indicator->dimSpace.value };
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -9550,17 +9557,36 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE),
-        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_MULTI), item->value[NUM_0].i32)) {
+        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT), item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     bool isSingleRange = false;
     auto fullImpl = GetFullImpl();
-    if (!item->string) {
+    if (!item->string && !item->object) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    isSingleRange = item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE);
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(
-        node->uiNodeHandle, item->string, isSingleRange, item->value[NUM_0].i32);
+    if (item->object) {
+        if (item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_RANGE_CONTENT)) {
+            auto* TextPickerRangeContentArray = reinterpret_cast<ArkUITextPickerRangeContentArray>(item->object);
+            if (TextPickerRangeContentArray == nullptr) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerIconRangeStr(
+                node->uiNodeHandle, TextPickerRangeContentArray, isSingleRange, item->value[NUM_0].i32);
+        } else if (item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT)) {
+            auto TextCascadePickerRangeContentArray =
+                reinterpret_cast<ArkUITextCascadePickerRangeContentArray>(item->object);
+            if (TextCascadePickerRangeContentArray == nullptr) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextCascadePickRangeContent(
+                node->uiNodeHandle, TextCascadePickerRangeContentArray, item->value[NUM_0].i32);
+        }
+    } else if (item->string) {
+        isSingleRange = item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE);
+        fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(
+            node->uiNodeHandle, item->string, isSingleRange, item->value[NUM_0].i32);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -13730,7 +13756,7 @@ const ArkUI_AttributeItem* GetWaterFlowNodeAdapter(ArkUI_NodeHandle node)
 int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != 1) {
+    if (item->size < NUM_1) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
@@ -13738,6 +13764,11 @@ int32_t SetWaterFlowCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         return ERROR_CODE_PARAM_INVALID;
     }
     GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setCachedCount(node->uiNodeHandle, item->value[0].i32);
+    ArkUI_Bool isShown = DEFAULT_FALSE;
+    if (item->size > NUM_1 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
+        isShown = item->value[1].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setShowCached(node->uiNodeHandle, isShown);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -13745,14 +13776,16 @@ void ResetWaterFlowCachedCount(ArkUI_NodeHandle node)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetCachedCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetShowCached(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetWaterFlowCachedCount(ArkUI_NodeHandle node)
 {
     ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getCachedCount(node->uiNodeHandle);
+    ArkUI_Int32 isShown = GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getShowCached(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
+    g_numberValues[1].i32 = isShown;
     return &g_attributeItem;
 }
 

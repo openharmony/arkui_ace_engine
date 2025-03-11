@@ -422,7 +422,7 @@ void FfiOHOSAceFrameworkSetEmitterProperties(VectorNativeEmitterPropertyHandle v
     std::vector<EmitterProperty> dataArray;
     for (size_t i = 0; i < nativeEmitterPropertiesVec.size(); ++i) {
         EmitterProperty tmp;
-        tmp.index = nativeEmitterPropertiesVec[i].index;
+        tmp.index = static_cast<uint32_t>(nativeEmitterPropertiesVec[i].index);
         if (nativeEmitterPropertiesVec[i].is_mitRate_set) {
             tmp.emitRate = nativeEmitterPropertiesVec[i].emitRate;
         } else {

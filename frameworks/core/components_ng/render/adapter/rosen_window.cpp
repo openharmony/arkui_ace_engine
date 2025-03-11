@@ -37,33 +37,9 @@ constexpr float PREVIEW_REFRESH_RATE = 30.0f;
 
 namespace OHOS::Ace::NG {
 
-static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositionZ)
-{
-    if (!SystemProperties::GetContainerDeleteFlag()) {
-        return;
-    }
-
-    CHECK_NULL_VOID(rsNode);
-    auto uiNode = ElementRegister::GetInstance()->GetUINodeById(rsNode->GetFrameNodeId());
-
-    CHECK_NULL_VOID(uiNode);
-    if (isPositionZ) {
-        auto pipeline = uiNode->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->AddPositionZNode(rsNode->GetFrameNodeId());
-        return;
-    }
-
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
-    if (frameNode && frameNode->GetRenderContext()) {
-        frameNode->GetRenderContext()->AddNodeToRsTree();
-    }
-}
-
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
-    Rosen::RSNode::SetDrawNodeChangeCallback(DrawNodeChangeCallback);
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
         auto taskExecutor = weakTask.Upgrade();
@@ -112,20 +88,16 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
                 task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
         },
         id);
+}
+
+void RosenWindow::Init()
+{
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
         self->RequestFrame();
     });
-}
-
-void RosenWindow::Init()
-{
-    CHECK_NULL_VOID(rsWindow_);
-    auto surfaceNode = rsWindow_->GetSurfaceNode();
-    if (rsUIDirector_ && surfaceNode) {
-        rsUIDirector_->SetRSSurfaceNode(surfaceNode);
-    }
 }
 
 void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)

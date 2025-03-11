@@ -71,11 +71,13 @@ public:
             indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
             indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
 
-            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
                 swiperPattern->DisplayIndicatorTotalCount() : swiperPattern->TotalCount();
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
                                 : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(indicatorDisplayCount);
+            indicatorLayoutAlgorithm->SetMaxDisplayCount(maxDisplayCount);
+            indicatorLayoutAlgorithm->SetIsBindIndicator(swiperPattern->IsBindIndicator());
             return indicatorLayoutAlgorithm;
         } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
             auto indicatorLayoutAlgorithm = MakeRefPtr<CircleDotIndicatorLayoutAlgorithm>();
@@ -119,9 +121,9 @@ public:
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
-        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+        auto currentTurnPageRate = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
             swiperLayoutProperty->GetSwipeByGroup().value_or(false) ?
-            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate();
+            swiperPattern->CalculateGroupTurnPageRate(0.0f) : swiperPattern->CalcCurrentTurnPageRate(true);
         paintMethod->SetTouchBottomPageRate(currentTurnPageRate);
         paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
         mouseClickIndex_ = std::nullopt;
@@ -137,6 +139,7 @@ public:
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
         paintMethod->SetItemCount(swiperPattern->RealTotalCount());
+        paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
         paintMethod->SetGestureState(swiperPattern->GetGestureState());
         paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
         paintMethod->SetTouchBottomTypeLoop(swiperPattern->GetTouchBottomTypeLoop());

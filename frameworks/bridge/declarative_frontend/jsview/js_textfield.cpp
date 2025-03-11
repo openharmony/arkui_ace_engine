@@ -1629,10 +1629,10 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     auto iconSizeProp = iconParam->GetProperty("size");
     if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize)) {
         if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
-            iconSize = theme->GetIconSize();
+            iconSize = theme->GetCancelIconSize();
         }
     } else {
-        iconSize = theme->GetIconSize();
+        iconSize = theme->GetCancelIconSize();
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     SetCancelIconColorAndIconSrc(iconParam);
@@ -1642,12 +1642,12 @@ void JSTextField::SetCancelDefaultIcon()
 {
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
         TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
     } else {
         TextFieldModel::GetInstance()->SetCancelIconColor(Color());
     }
-    TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+    TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetCancelIconSize());
     TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
     TextFieldModel::GetInstance()->SetCancelSymbolIcon(nullptr);
     TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
@@ -1700,7 +1700,7 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
         // svg need not default color, otherwise multi color svg will render fault
         return;
     }
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
         TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
     } else {
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);

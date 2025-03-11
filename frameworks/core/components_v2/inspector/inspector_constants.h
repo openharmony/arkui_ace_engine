@@ -461,6 +461,7 @@ ACE_EXPORT extern const char MENU_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char MENU_ITEM_GROUP_ETS_TAG[];
 ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[];
 ACE_EXPORT extern const char MENU_PREVIEW_ETS_TAG[];
+ACE_EXPORT extern const char MENU_DIVIDER_TAG[];
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
@@ -658,5 +659,8 @@ ACE_EXPORT extern const char ARC_INDEXER_ETS_TAG[];
 
 // Magnifier
 ACE_EXPORT extern const char MAGNIFIER_TAG[];
+
+// LinearLayout
+ACE_EXPORT extern const char LAZY_GRID_LAYOUT_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

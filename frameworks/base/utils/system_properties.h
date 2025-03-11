@@ -480,18 +480,6 @@ public:
         return mnc_;
     }
 
-    static void SetColorMode(ColorMode colorMode)
-    {
-        if (colorMode_ != colorMode) {
-            colorMode_ = colorMode;
-        }
-    }
-
-    static ColorMode GetColorMode()
-    {
-        return colorMode_;
-    }
-
     static void SetDeviceAccess(bool isDeviceAccess)
     {
         isDeviceAccess_ = isDeviceAccess;
@@ -690,6 +678,8 @@ public:
 
     static double GetScrollableDistance();
 
+    static bool GetWebDebugMaximizeResizeOptimize();
+
     static bool IsNeedResampleTouchPoints();
 
     static bool GetAsyncInitializeEnabled()
@@ -745,7 +735,6 @@ private:
     static std::string paramDeviceType_;
     static int32_t mcc_;
     static int32_t mnc_;
-    static ColorMode colorMode_;
     static ScreenShape screenShape_;
     static LongScreenType LongScreen_;
     static bool unZipHap_;

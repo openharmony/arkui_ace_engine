@@ -804,20 +804,20 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
 
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::RTL);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::RTL);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
+        content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
@@ -880,7 +880,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     LayoutConstraintF contentConstraint;
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyle, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyle, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 
     textStyle.SetAdaptTextSize(Dimension(100, DimensionUnit::PERCENT),
         Dimension(10, DimensionUnit::PERCENT), Dimension(10, DimensionUnit::PERCENT));
@@ -889,13 +889,13 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     contentConstraint.maxSize.SetHeight(-1.0);
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyle, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyle, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 
     contentConstraint.maxSize.SetWidth(1.0);
     contentConstraint.maxSize.SetHeight(1.0);
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyle, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyle, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 
     TextStyle textStyleFP;
     textStyleFP.SetAdaptTextSize(Dimension(100, DimensionUnit::FP),
@@ -903,7 +903,7 @@ HWTEST_F(TextTestFiveNg, AdaptMinFontSize001, TestSize.Level1)
     textStyleFP.SetFontSize(Dimension(10, DimensionUnit::FP));
 
     EXPECT_EQ(textAdaptFontSizer->AdaptMinFontSize(
-        textStyleFP, content, stepUnit, contentConstraint, layoutWrapper.GetRawPtr()), true);
+        textStyleFP, content, stepUnit, contentConstraint, Referenced::RawPtr(layoutWrapper)), true);
 }
 
 /**

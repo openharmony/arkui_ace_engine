@@ -220,7 +220,7 @@ void RosenFontLoader::LoadFromResource(
             if (!fontLoader || !context) {
                 return;
             }
-            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, context->GetInstanceId());
             RefPtr<ResourceAdapter> resourceAdapter = nullptr;
             RefPtr<ThemeConstants> themeConstants = nullptr;
             if (SystemProperties::GetResourceDecoupling()) {

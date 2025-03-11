@@ -550,32 +550,32 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign003, TestSize.Level1)
      * @tc.steps: step4. Drag end with velocity and over the edge
      * @tc.expected: Align center
      */
-    DragAction(frameNode_, startOffset, -100, -1000);
+    DragAction(frameNode_, startOffset, -100, -500);
+    EXPECT_TRUE(TickPosition(-310.0f));
     EXPECT_TRUE(TickPosition(-560.0f));
-    EXPECT_TRUE(TickPosition(-760.0f));
 
     /**
      * @tc.steps: step5. Scroll Up, the delta less than half of ITEM_MAIN_SIZE
      * @tc.expected: Align item not change
      */
     DragAction(frameNode_, startOffset, 50, velocity);
-    EXPECT_TRUE(TickPosition(-735.0f));
-    EXPECT_TRUE(TickPosition(-760.0f));
+    EXPECT_TRUE(TickPosition(-535.0f));
+    EXPECT_TRUE(TickPosition(-560.0f));
 
     /**
      * @tc.steps: step6. Scroll Up, the delta greater than half of ITEM_MAIN_SIZE
      * @tc.expected: The item(index:4) align to start
      */
     DragAction(frameNode_, startOffset, 51, velocity);
-    EXPECT_TRUE(TickPosition(-684.5f));
-    EXPECT_TRUE(TickPosition(-660.0f));
+    EXPECT_TRUE(TickPosition(-484.5f));
+    EXPECT_TRUE(TickPosition(-460.0f));
 
     /**
      * @tc.steps: step7. Drag end with velocity and over the edge
      * @tc.expected: Align center
      */
-    DragAction(frameNode_, startOffset, 100, 1000);
-    EXPECT_TRUE(TickPosition(-60.0f));
+    DragAction(frameNode_, startOffset, 100, 500);
+    EXPECT_TRUE(TickPosition(-110.0f));
     EXPECT_TRUE(TickPosition(140.0f));
 }
 
@@ -1018,6 +1018,102 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollSnapAlign015
+ * @tc.desc: Test if SnapEndPos has changed while the snap animation is in progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ScrollSnapAlign015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign::START
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+
+    /**
+     * @tc.steps: step2. StartSnapAnimation with 500 offset.
+     * @tc.expected: Start snap Animation.
+     */
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = -500.f,
+        .animationVelocity = -0.f,
+        .snapDirection = SnapDirection::NONE,
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    MockAnimationManager::GetInstance().SetTicks(3);
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
+    EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+
+    /**
+     * @tc.steps: step3. Check if SnapEndPos has changed while the snap animation is in progress.
+     * @tc.expected: Not start snap Animation.
+     */
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+}
+
+/**
+ * @tc.name: ScrollSnapAlign016
+ * @tc.desc: Test if SnapEndPos has changed while the snap animation is in progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ScrollSnapAlign016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign::START
+     * @tc.expected: Set the list is layout from the end.
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    model.SetStackFromEnd(true);
+    CreateListItems(15);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 1100.0f);
+
+    /**
+     * @tc.steps: step2. StartSnapAnimation with 500 offset.
+     * @tc.expected: Start snap Animation.
+     */
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = 600.f,
+        .animationVelocity = -0.f,
+        .snapDirection = SnapDirection::NONE,
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    MockAnimationManager::GetInstance().SetTicks(3);
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
+    EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+
+    /**
+     * @tc.steps: step3. Check if SnapEndPos has changed while the snap animation is in progress.
+     * @tc.expected: Not start snap Animation.
+     */
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+}
+
+/**
  * @tc.name: StartSnapAnimation001
  * @tc.desc: Test start snap align by mouse wheel.
  * @tc.type: FUNC
@@ -1036,7 +1132,7 @@ HWTEST_F(ListEventTestNg, StartSnapAnimation001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Trigger the snapAnimation by mouse wheel.
-     * @tc.expected: the target index is correct.
+     * @tc.expected: The target index is correct.
      */
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
     SnapAnimationOptions snapAnimationOptions = {
@@ -1112,6 +1208,62 @@ HWTEST_F(ListEventTestNg, StartSnapAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartSnapAnimation002
+ * @tc.desc: Test start snap align by mouse wheel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, StartSnapAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the list with space.
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    model.SetSpace(Dimension(40.f));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    CreateListItems(5);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Make the list scroll to the end.
+     * @tc.expected: The position of list is correct.
+     */
+    DragStart(frameNode_, Offset());
+    DragUpdate(-260.f);
+    EXPECT_TRUE(TickPosition(-260.0f));
+    EXPECT_EQ(pattern_->startIndex_, 2);
+
+    /**
+     * @tc.steps: step3. Trigger the snapAnimation by mouse wheel.
+     * @tc.expected: The target index is correct.
+     */
+    EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = -50.f,
+        .animationVelocity = -500.f,
+        .snapDirection = SnapDirection::NONE,
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
+    EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
+
+    /**
+     * @tc.steps: step4. Trigger the snapAnimation with the forward direction.
+     * @tc.expected: The target index is correct.
+     */
+    snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
+    snapAnimationOptions.snapDelta = 50.f;
+    snapAnimationOptions.animationVelocity = 500.f;
+    auto itemPosition = pattern_->GetItemPosition();
+    auto isAligned = GreatOrEqual(itemPosition[2].startPos, pattern_->contentStartOffset_);
+    EXPECT_TRUE(isAligned);
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 1);
+}
+
+/**
  * @tc.name: EndSnapAnimation001
  * @tc.desc: Test end snap align by mouse wheel.
  * @tc.type: FUNC
@@ -1130,7 +1282,7 @@ HWTEST_F(ListEventTestNg, EndSnapAnimation001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Trigger the snapAnimation by mouse wheel.
-     * @tc.expected: the target index is correct.
+     * @tc.expected: The target index is correct.
      */
     EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
     SnapAnimationOptions snapAnimationOptions = {
@@ -1177,6 +1329,60 @@ HWTEST_F(ListEventTestNg, EndSnapAnimation001, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
     EXPECT_EQ(pattern_->lastSnapTargetIndex_, 2);
+}
+
+/**
+ * @tc.name: EndSnapAnimation002
+ * @tc.desc: Test start snap align by mouse wheel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, EndSnapAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the list with space.
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
+    model.SetSpace(Dimension(40.f));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    CreateListItems(5);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Make the list at the top.
+     * @tc.expected: The position of list is correct.
+     */
+    EXPECT_EQ(pattern_->startIndex_, 0);
+    EXPECT_EQ(pattern_->endIndex_, 2);
+
+    /**
+     * @tc.steps: step3. Trigger the snapAnimation by mouse wheel.
+     * @tc.expected: The target index is correct.
+     */
+    EXPECT_FALSE(pattern_->lastSnapTargetIndex_.has_value());
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = -50.f,
+        .animationVelocity = -500.f,
+        .snapDirection = SnapDirection::NONE,
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
+    EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
+
+    /**
+     * @tc.steps: step4. Trigger the snapAnimation with the backward direction.
+     * @tc.expected: The target index is correct.
+     */
+    snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
+    snapAnimationOptions.snapDelta = -50.f;
+    snapAnimationOptions.animationVelocity = -500.f;
+    auto itemPosition = pattern_->GetItemPosition();
+    auto isAligned = LessOrEqual(itemPosition[2].endPos, pattern_->contentMainSize_ - pattern_->contentEndOffset_);
+    EXPECT_TRUE(isAligned);
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_TRUE(pattern_->lastSnapTargetIndex_.has_value());
+    EXPECT_EQ(pattern_->lastSnapTargetIndex_.value(), 3);
 }
 
 /**

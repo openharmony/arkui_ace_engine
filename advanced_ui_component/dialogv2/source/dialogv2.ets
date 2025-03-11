@@ -265,8 +265,12 @@ export struct TipsDialogV2 {
           maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE,
           maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE
         })
-        .borderColor(this.imageBorderColor?.color)
-        .borderWidth(toLengthString(this.imageBorderWidth))
+        .outline({
+          width: `${lengthMetricsToPX(this.imageBorderWidth)}px`,
+          radius: `${lengthMetricsToPX(LengthMetrics.resource($r('sys.float.corner_radius_level6'))) +
+          lengthMetricsToPX(this.imageBorderWidth)}px`,
+          color: this.imageBorderColor?.color
+        })
     }
     .width('100%')
   }
@@ -517,6 +521,7 @@ export struct SelectDialogV2 {
                       .focusable(false)
                       .accessibilityLevel('no')
                       .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
+                      .radioStyle({ uncheckedBorderColor: Color.Transparent })
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -1794,4 +1799,24 @@ function toLengthString(value?: LengthMetrics): string | undefined {
   }
   return lengthString;
 }
+
+function lengthMetricsToPX(value?: LengthMetrics): number {
+  if (!value) {
+    return 0;
+  }
+  const length: number = value.value;
+  switch (value.unit) {
+    case LengthUnit.PX:
+      return length;
+    case LengthUnit.FP:
+      return fp2px(length);
+    case LengthUnit.LPX:
+      return lpx2px(length);
+    case LengthUnit.VP:
+      return vp2px(length);
+    default:
+      return 0;
+  }
+}
+
 export declare interface PopoverDialogV2Options extends CustomPopupOptions {}

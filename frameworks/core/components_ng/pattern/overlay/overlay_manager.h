@@ -61,6 +61,7 @@ struct PopupInfo {
     OffsetF targetOffset;
     bool focusable = false;
     bool isAvoidKeyboard = false;
+    int32_t disappearingTimeWithContinuousOperation = 700;
 };
 
 struct GatherNodeChildInfo {
@@ -96,6 +97,7 @@ struct CustomKeyboardOffsetInfo {
     float inAniStartOffset = 0.0f;
     float outAniEndOffset = 0.0f;
 };
+
 struct OverlayManagerInfo {
     bool renderRootOverlay = true;
 };
@@ -114,7 +116,12 @@ public:
     RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
     void ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
+    void HideTips(int32_t targetId, const PopupInfo& tipsInfo, int32_t disappearingTime);
+    void ShowTips(int32_t targetId, const PopupInfo& tipsInfo, int32_t appearingTime,
+        int32_t appearingTimeWithContinuousOperation);
     void ErasePopup(int32_t targetId);
+    void EraseTipsInfo(int32_t targetId);
+    PopupInfo GetTipsInfo(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
     void SetPopupHotAreas(RefPtr<FrameNode> popupNode);
@@ -168,6 +175,12 @@ public:
     void CleanPopupInSubWindow();
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
+    void UpdatePreviousDisappearingTime(int32_t targetId);
+    void UpdateTipsEnterAndLeaveInfo(int32_t targetId);
+    void UpdateTipsEnterAndLeaveInfoBool(int32_t targetId);
+    bool GetBoolFromTipsEnterAndLeaveInfo(int32_t targetId, int32_t times);
+    int32_t GetTipsEnterAndLeaveInfo(int32_t targetId);
+    void EraseTipsEnterAndLeaveInfo(int32_t targetId, int32_t times);
 
     void ClearToastInSubwindow();
     void ClearToast();
@@ -255,7 +268,6 @@ public:
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
-    bool RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper, int32_t instanceId);
     bool RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay);
 
     void RegisterOnHideDialog(std::function<void()> callback)
@@ -318,6 +330,8 @@ public:
     RefPtr<FrameNode> GetPixelMapContentNodeForSubwindow() const;
 
     RefPtr<FrameNode> GetDragPixelMapContentNode() const;
+
+    RefPtr<FrameNode> GetRelativeContainerNode() const;
 
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
@@ -685,7 +699,7 @@ public:
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
     static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
-    bool isCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
+    bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
     static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode);
 
 private:
@@ -769,10 +783,10 @@ private:
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
     bool IsContextMenuBindedOnOrigNode();
-    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
-    void OpenDialogAnimation(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
+    void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
-    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
+    void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
     void CloseDialogMatchTransition(const RefPtr<FrameNode>& node);
     void SetContainerButtonEnable(bool isEnabled);
 
@@ -800,7 +814,7 @@ private:
     RefPtr<FrameNode> GetPrevOverlayNodeWithOrder(std::optional<double> levelOrder);
     RefPtr<FrameNode> GetBottomOrderFirstNode(std::optional<double> levelOrder);
     RefPtr<FrameNode> GetBottomOrderFirstOverlayNode(std::optional<double> levelOrder);
-    bool IsNeedChangeFocus(std::optional<double> levelOrder);
+    bool IsNeedChangeFocus(std::optional<double> levelOrder, bool focusable = true);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);
     bool DialogInMapHoldingFocus();
@@ -819,6 +833,7 @@ private:
     bool RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& overlay,
         const RefPtr<UINode>& rootNode);
     bool UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo);
+    void UpdateTipsInfo(int32_t targetId, const PopupInfo& popupInfo);
     void PlayDefaultModalIn(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
@@ -883,6 +898,8 @@ private:
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
+    std::unordered_map<int32_t, std::list<std::pair<int32_t, bool>>> tipsEnterAndLeaveInfoMap_;
+    std::list<std::pair<int32_t, NG::PopupInfo>> tipsInfoList_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> dialogMap_;

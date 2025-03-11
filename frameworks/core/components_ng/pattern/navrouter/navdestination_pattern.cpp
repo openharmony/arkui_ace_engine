@@ -389,7 +389,7 @@ void NavDestinationPattern::DumpInfo()
 bool NavDestinationPattern::OverlayOnBackPressed()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    if (overlayManager_->isCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
+    if (overlayManager_->IsCurrentNodeProcessRemoveOverlay(GetHost(), false)) {
         return overlayManager_->RemoveOverlay(true);
     }
     return false;

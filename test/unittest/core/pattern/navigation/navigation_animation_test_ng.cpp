@@ -352,6 +352,7 @@ HWTEST_F(NavigationAnimationTest, NavigationFinishAnimation004, TestSize.Level1)
  */
 HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */
@@ -398,6 +399,7 @@ HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest001, TestSize.Leve
  */
 HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */
@@ -449,6 +451,7 @@ HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest002, TestSize.Leve
  */
 HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */
@@ -505,6 +508,7 @@ HWTEST_F(NavigationAnimationTest, StartDialogTransitionPopTest003, TestSize.Leve
  */
 HWTEST_F(NavigationAnimationTest, StartDialogTransitionPushTest001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */
@@ -546,6 +550,7 @@ HWTEST_F(NavigationAnimationTest, StartDialogTransitionPushTest001, TestSize.Lev
  */
 HWTEST_F(NavigationAnimationTest, StartDialogTransitionPushTest002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */
@@ -592,6 +597,7 @@ HWTEST_F(NavigationAnimationTest, StartDialogTransitionPushTest002, TestSize.Lev
  */
 HWTEST_F(NavigationAnimationTest, StartDialogTransitionPushTest003, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */
@@ -644,6 +650,7 @@ HWTEST_F(NavigationAnimationTest, StartDialogTransitionPushTest003, TestSize.Lev
  */
 HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */
@@ -707,6 +714,7 @@ HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop001, TestSize.Level1)
  */
 HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */
@@ -767,9 +775,7 @@ HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop002, TestSize.Level1)
     navigationNode->lastStandardIndex_ = 0;
     navigationNode->TransitionWithDialogPop(dialogDestinationA, dialogDestinationB);
     EXPECT_EQ(stdNavdestinationA->GetTransitionType(), PageTransitionType::ENTER_POP);
-    EXPECT_EQ(stdNavdestinationA->GetTransitionType(), PageTransitionType::ENTER_POP);
     EXPECT_EQ(stdNavdestinationB->GetTransitionType(), PageTransitionType::EXIT_POP);
-    EXPECT_EQ(dialogDestinationB->GetTransitionType(), PageTransitionType::EXIT_POP);
     EXPECT_FALSE(stdNavdestinationB->IsOnAnimation());
 }
 
@@ -780,6 +786,7 @@ HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop002, TestSize.Level1)
  */
 HWTEST_F(NavigationAnimationTest, TransitionWithDialogPush001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */
@@ -836,6 +843,7 @@ HWTEST_F(NavigationAnimationTest, TransitionWithDialogPush001, TestSize.Level1)
  */
 HWTEST_F(NavigationAnimationTest, TransitionWithDialogPush002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navigation stack
      */

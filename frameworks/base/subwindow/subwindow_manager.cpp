@@ -16,6 +16,7 @@
 #include "base/subwindow/subwindow_manager.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/select/select_theme.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -102,6 +103,20 @@ int32_t SubwindowManager::GetSubContainerId(int32_t parentContainerId)
     return -1;
 }
 
+const std::vector<int32_t> SubwindowManager::GetAllSubContainerId(int32_t parentContainerId)
+{
+    std::lock_guard<std::mutex> lock(parentMutex_);
+    std::vector<int32_t> subContainerId;
+    subContainerId.reserve(parentContainerMap_.size());
+    for (auto it = parentContainerMap_.begin(); it != parentContainerMap_.end(); it++) {
+        if (it->second == parentContainerId) {
+            subContainerId.push_back(it->first);
+        }
+    }
+
+    return subContainerId;
+}
+
 void SubwindowManager::AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow)
 {
     if (!subwindow) {
@@ -128,6 +143,7 @@ void SubwindowManager::OnDestroyContainer(int32_t subInstanceId)
     }
 
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "remove subwindow from map, subInstanceId is %{public}d", subInstanceId);
+    RemoveParentContainerId(subInstanceId);
     std::lock_guard<std::mutex> lock(instanceSubwindowMutex_);
     instanceSubwindowMap_.erase(subInstanceId);
 }
@@ -413,6 +429,10 @@ void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, cons
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
+    if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show popup ng again");
+        return;
+    }
 
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
@@ -447,6 +467,10 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show popup enter");
     auto containerId = Container::CurrentId();
+    if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show popup again");
+        return;
+    }
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -465,6 +489,40 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
             subwindow->ShowPopup(newComponent, disableTouchEvent);
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup");
+}
+
+void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
+    int32_t appearingTime, int32_t appearingTimeWithContinuousOperation)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+
+    auto manager = SubwindowManager::GetInstance();
+    CHECK_NULL_VOID(manager);
+    auto subwindow = manager->GetSubwindow(containerId);
+    if (!IsSubwindowExist(subwindow)) {
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+        manager->AddSubwindow(containerId, subwindow);
+    }
+    subwindow->ShowTipsNG(targetNode->GetId(), popupInfo, appearingTime, appearingTimeWithContinuousOperation);
+}
+
+void SubwindowManager::HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId)
+{
+    RefPtr<Subwindow> subwindow;
+    if (instanceId != -1) {
+        // get the subwindow which overlay node in, not current
+        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+    if (subwindow) {
+        subwindow->HideTipsNG(targetId, disappearingTime);
+    }
 }
 
 bool SubwindowManager::CancelPopup(const std::string& id)
@@ -984,6 +1042,7 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId
         }
         subwindow->SetToastWindowType(windowType);
         subwindow->SetMainWindowId(mainWindowId);
+        subwindow->InitContainer();
         AddToastSubwindow(containerId, subwindow);
     }
     return subwindow;
@@ -1279,7 +1338,7 @@ void SubwindowManager::ClearToastInSystemSubwindow()
         }
     }
     RefPtr<Subwindow> subwindow;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (containerId != -1 && containerId < MIN_SUBCONTAINER_ID) {
             subwindow = GetSystemToastWindow(containerId);
         }
@@ -1294,6 +1353,7 @@ void SubwindowManager::ClearToastInSystemSubwindow()
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when clear system toast");
     }
 }
+
 void SubwindowManager::OnUIExtensionWindowSizeChange(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason)
 {
     auto container = Container::GetContainer(instanceId);
@@ -1301,14 +1361,18 @@ void SubwindowManager::OnUIExtensionWindowSizeChange(int32_t instanceId, Rect wi
     if (!container->IsUIExtensionWindow() || uiExtensionWindowRect_ == windowRect) {
         return;
     }
-    auto subContainer = Container::GetContainer(GetSubContainerId(instanceId));
-    CHECK_NULL_VOID(subContainer);
-    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->OnUIExtensionWindowSizeChange();
     uiExtensionWindowRect_ = windowRect;
+
+    auto allSubcontainerId = GetAllSubContainerId(instanceId);
+    std::for_each(allSubcontainerId.begin(), allSubcontainerId.end(), [](int32_t subContainerId) {
+        auto subContainer = Container::GetContainer(subContainerId);
+        CHECK_NULL_VOID(subContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->OnUIExtensionWindowSizeChange();
+    });
 }
 
 void SubwindowManager::FlushSubWindowUITasks(int32_t instanceId)
@@ -1623,5 +1687,14 @@ const std::vector<RefPtr<Subwindow>> SubwindowManager::GetSortSubwindow(int32_t 
         return first->GetSubwindowId() > second->GetSubwindowId();
     });
     return sortSubwindow;
+}
+
+bool SubwindowManager::GetIsExpandDisplay()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    return theme->GetExpandDisplay();
 }
 } // namespace OHOS::Ace

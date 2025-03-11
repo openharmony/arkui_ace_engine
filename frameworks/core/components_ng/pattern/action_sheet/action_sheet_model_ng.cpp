@@ -14,6 +14,7 @@
  */
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 
@@ -25,6 +26,22 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
 #ifndef ARKUI_WEARABLE
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
+
+    auto isSubContainer = container->IsSubContainer();
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    if (!expandDisplay && isSubContainer && arg.isShowInSubWindow) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not show actionSheet in subwindow");
+        return;
+    }
+
+    auto currentId = Container::CurrentId();
+    if (expandDisplay && isSubContainer) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
+    }
+    ContainerScope scope(currentId);
+
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);

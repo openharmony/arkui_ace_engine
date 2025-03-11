@@ -242,12 +242,12 @@ void GetToastBackgroundBlurStyle(napi_env env,
 
 bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
-    auto colorMode = SystemProperties::GetColorMode();
     if (shadowStyle == ShadowStyle::None) {
         return true;
     }
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(container, false);
+    auto colorMode = container->GetColorMode();
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
@@ -699,6 +699,7 @@ struct PromptAsyncContext {
     napi_value dialogLevelModeApi = nullptr;
     napi_value dialogLevelUniqueId = nullptr;
     napi_value dialogImmersiveModeApi = nullptr;
+    napi_value focusableApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -1399,6 +1400,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "levelMode", &asyncContext->dialogLevelModeApi);
     napi_get_named_property(env, argv[index], "levelUniqueId", &asyncContext->dialogLevelUniqueId);
     napi_get_named_property(env, argv[index], "immersiveMode", &asyncContext->dialogImmersiveModeApi);
+    napi_get_named_property(env, argv[index], "focusable", &asyncContext->focusableApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
 }
@@ -2219,6 +2221,19 @@ std::function<void(const int32_t& dialogId)> GetCustomBuilderWithId(
     return builder;
 }
 
+bool GetFocusableParam(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    bool focusable = true;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->focusableApi, &valueType);
+    if (valueType != napi_boolean) {
+        return focusable;
+    }
+
+    napi_get_value_bool(env, asyncContext->focusableApi, &focusable);
+    return focusable;
+}
+
 PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss)
 {
@@ -2285,7 +2300,8 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .levelOrder = GetLevelOrderParam(env, asyncContext),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogImmersiveMode
+        .dialogImmersiveMode = dialogImmersiveMode,
+        .focusable = GetFocusableParam(env, asyncContext),
     };
     return promptDialogAttr;
 }
@@ -2562,6 +2578,7 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     napi_get_named_property(env, arg, "levelMode", &asyncContext->dialogLevelModeApi);
     napi_get_named_property(env, arg, "levelUniqueId", &asyncContext->dialogLevelUniqueId);
     napi_get_named_property(env, arg, "immersiveMode", &asyncContext->dialogImmersiveModeApi);
+    napi_get_named_property(env, arg, "focusable", &asyncContext->focusableApi);
 
     ParseBaseDialogOptionsEvent(env, arg, asyncContext);
 }

@@ -96,6 +96,7 @@ public:
     void TearDown() override;
     void InitMenuTestNg();
     void InitMenuItemTestNg();
+    void InitTargetFrameNode();
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
@@ -104,6 +105,9 @@ public:
     RefPtr<FrameNode> menuItemFrameNode_;
     RefPtr<MenuItemPattern> menuItemPattern_;
     RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
+    RefPtr<FrameNode> targetFrameNode_;
+    int32_t targetId_ = 0;
+    std::string targetTag_ = "";
 };
 
 void MenuPatternTestNg::SetUpTestCase()
@@ -122,6 +126,8 @@ void MenuPatternTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    InitTargetFrameNode();
 }
 
 void MenuPatternTestNg::TearDown()
@@ -158,6 +164,15 @@ void MenuPatternTestNg::InitMenuItemTestNg()
 
     menuItemAccessibilityProperty_ = menuItemFrameNode_->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
     ASSERT_NE(menuItemAccessibilityProperty_, nullptr);
+}
+
+void MenuPatternTestNg::InitTargetFrameNode()
+{
+    targetFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(targetFrameNode_, nullptr);
+    targetId_ = targetFrameNode_->GetId();
+    targetTag_ = targetFrameNode_->GetTag();
 }
 
 PaintWrapper* MenuPatternTestNg::GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty)
@@ -1302,7 +1317,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg078, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     std::vector<SelectParam> selectParam = { { "content1", "icon1" }, { "content2", "" },
     { "", "icon3" }, { "", "" } };
-    auto wrapperNode = MenuView::Create(selectParam, TARGET_ID, EMPTY_TEXT);
+    auto wrapperNode = MenuView::Create(selectParam, targetId_, targetTag_);
     ASSERT_NE(wrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
@@ -1311,7 +1326,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg078, TestSize.Level1)
     ASSERT_NE(menuPattern, nullptr);
     ASSERT_EQ(menuPattern->GetOptions().size(), 4);
     menuPattern->OnColorConfigurationUpdate();
-    EXPECT_EQ(menuNode->needCallChildrenUpdate_, false);
+    EXPECT_EQ(menuNode->needCallChildrenUpdate_, true);
 }
 
 /**
@@ -1326,7 +1341,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg079, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     int32_t setApiVersion = 11;
     int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
@@ -1470,7 +1485,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg083, TestSize.Level1)
     optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -1612,7 +1627,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTest089, TestSize.Level1)
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     selectTheme->optionNormalWidth_ = 100.0_vp;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
-
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -1623,5 +1638,81 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTest089, TestSize.Level1)
     ASSERT_NE(menuPattern, nullptr);
     auto width = menuPattern->GetSelectMenuWidthFromTheme();
     EXPECT_EQ(width, 108);
+}
+
+/**
+ * @tc.name: MenuPatternTest090
+ * @tc.desc: Test SetActiveSetting OnThemeScopeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTest090, TestSize.Level1)
+{
+    MenuModelNG menuModelInstance;
+    MenuItemModelNG menuItemModelInstance;
+    menuModelInstance.Create();
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    itemOption.startIcon = ImageSourceInfo(IMAGE_SRC_URL);
+    menuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto menuItemLayoutProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuItemLayoutProperty, nullptr);
+    itemPattern->OnModifyDone();
+    itemNode->MountToParent(menuNode);
+    itemNode->OnMountToParentDone();
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    auto labelNode = itemPattern->GetLabelNode();
+    ASSERT_NE(labelNode, nullptr);
+
+    // Verify SetActiveSetting
+    menuPattern->SetActiveSetting(true);
+    EXPECT_TRUE(menuPattern->activeSetting_);
+    menuPattern->SetActiveSetting(false);
+    EXPECT_FALSE(menuPattern->activeSetting_);
+
+    // Verify OnThemeScopeUpdate.
+    EXPECT_FALSE(menuPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId()));
+
+    menuModelInstance.SetFontColor(Referenced::RawPtr(menuNode), Color::RED);
+    EXPECT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    EXPECT_FALSE(menuPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId()));
+    EXPECT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+
+    std::optional<Color> color;
+    menuModelInstance.SetFontColor(Referenced::RawPtr(menuNode), color);
+    EXPECT_FALSE(layoutProperty->GetFontColor().has_value());
+    EXPECT_FALSE(menuPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId()));
+    EXPECT_FALSE(layoutProperty->GetFontColor().has_value());
+
+    menuModelInstance.SetFontColor(Referenced::RawPtr(menuNode), Color::RED);
+    EXPECT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    menuPattern->SetActiveSetting(false);
+    EXPECT_FALSE(menuPattern->activeSetting_);
+    EXPECT_FALSE(menuPattern->OnThemeScopeUpdate(menuNode->GetThemeScopeId()));
+
+    EXPECT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_NE(layoutProperty->GetFontColor().value(), Color::RED);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>(menuNode->GetThemeScopeId());
+    ASSERT_NE(menuTheme, nullptr);
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), menuTheme->GetFontColor());
 }
 } // namespace OHOS::Ace::NG

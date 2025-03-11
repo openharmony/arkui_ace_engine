@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 #define private public
+#define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"

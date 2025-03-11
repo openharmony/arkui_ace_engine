@@ -286,15 +286,15 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
     };
     DialogProperties dialogProperties = {
         .autoCancel = options.autoCancel,
-        .isShowInSubWindow = options.showInSubWindow,
-        .isModal = options.isModal,
         .maskColor = Color(ColorAlphaAdapt(options.maskColor)),
         .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
-        .isSysBlurStyle = false,
+        .isShowInSubWindow = options.showInSubWindow,
+        .isModal = options.isModal,
         .enableHoverMode = options.enableHoverMode,
-        .transitionEffect = chainedEffect,
+        .isSysBlurStyle = false,
         .shadow = shadow,
         .hoverModeArea = HoverModeAreaType(options.hoverModeArea),
+        .transitionEffect = chainedEffect
     };
     SetBorder(dialogProperties, options);
     SetShape(dialogProperties, options);

@@ -37,10 +37,10 @@ constexpr double PICKER_ANGULAR_VELOCITY_FACTOR = 0.001f;
 constexpr float PICKER_ANGULAR_VELOCITY_SLOW = 0.07f;
 constexpr float PICKER_ANGULAR_VELOCITY_MEDIUM = 0.2f;
 constexpr float PICKER_ANGULAR_VELOCITY_FAST = 0.54f;
-constexpr float PICKER_DISPLAY_CONTROL_RATIO_VERY_SLOW = 4.83f;
-constexpr float PICKER_DISPLAY_CONTROL_RATIO_SLOW = 2.51f;
-constexpr float PICKER_DISPLAY_CONTROL_RATIO_MEDIUM = 4.47f;
-constexpr float PICKER_DISPLAY_CONTROL_RATIO_FAST = 2.22f;
+constexpr float PICKER_DISPLAY_CONTROL_RATIO_VERY_SLOW = 1.19f;
+constexpr float PICKER_DISPLAY_CONTROL_RATIO_SLOW = 1.51f;
+constexpr float PICKER_DISPLAY_CONTROL_RATIO_MEDIUM = 1.48f;
+constexpr float PICKER_DISPLAY_CONTROL_RATIO_FAST = 1.33f;
 constexpr float PICKER_CROWN_SENSITIVITY_LOW = 0.8f;
 constexpr float PICKER_CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float PICKER_CROWN_SENSITIVITY_HIGH = 1.2f;
@@ -50,6 +50,7 @@ constexpr int32_t DEFAULT_CROWNSENSITIVITY = 1;
 constexpr int32_t INVALID_SELECTED_COLUMN_INDEX = -1;
 constexpr int32_t CROWN_SENSITIVITY_MIN = 0;
 constexpr int32_t CROWN_SENSITIVITY_MAX = 2;
+constexpr uint32_t DEFAULT_SELECTED_FOCUS_TEXT_COLOR = 0xff5EA1FF;
 
 struct PickerTextStyle {
     std::optional<Color> textColor;

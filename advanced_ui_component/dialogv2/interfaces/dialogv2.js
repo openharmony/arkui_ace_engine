@@ -396,8 +396,12 @@ export class TipsDialogV2 extends ViewV2 {
         maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE,
         maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE
       });
-      Image.borderColor(this.imageBorderColor?.color);
-      Image.borderWidth(toLengthString(this.imageBorderWidth));
+      Image.outline({
+        width: `${lengthMetricsToPX(this.imageBorderWidth)}px`,
+        radius: `${lengthMetricsToPX(LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level6'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" })) +
+        lengthMetricsToPX(this.imageBorderWidth)}px`,
+        color: this.imageBorderColor?.color
+      });
     }, Image);
     Column.pop();
   }
@@ -914,6 +918,7 @@ export class SelectDialogV2 extends ViewV2 {
               Radio.focusable(false);
               Radio.accessibilityLevel('no');
               Radio.visibility(this.selectedIndex === b23 ? Visibility.Visible : Visibility.Hidden);
+              Radio.radioStyle({ uncheckedBorderColor: Color.Transparent });
               Radio.onFocus(() => {
                 this.isFocus = true;
                 this.currentFocusIndex = b23;
@@ -2989,5 +2994,23 @@ function toLengthString(a) {
       break;
   }
   return c;
+}
+function lengthMetricsToPX(value) {
+  if (!value) {
+    return 0;
+  }
+  const length = value.value;
+  switch (value.unit) {
+    case LengthUnit.PX:
+      return length;
+    case LengthUnit.FP:
+      return fp2px(length);
+    case LengthUnit.LPX:
+      return lpx2px(length);
+    case LengthUnit.VP:
+      return vp2px(length);
+    default:
+      return 0;
+  }
 }
 export default { TipsDialogV2, ConfirmDialogV2, SelectDialogV2, AlertDialogV2, LoadingDialogV2, CustomContentDialogV2, PopoverDialogV2, AdvancedDialogV2Button };

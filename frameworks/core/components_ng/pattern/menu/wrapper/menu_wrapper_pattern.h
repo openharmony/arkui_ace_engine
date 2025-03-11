@@ -257,26 +257,6 @@ public:
         return isShowHoverImagePreviewStartDrag_;
     }
 
-    void SetOnMenuDisappear(bool isDisappear)
-    {
-        onMenuDisappear_ = isDisappear;
-    }
-
-    bool GetOnMenuDisappear() const
-    {
-        return onMenuDisappear_;
-    }
-
-    void SetOnPreviewDisappear(bool isDisappear)
-    {
-        onPreviewDisappear_ = isDisappear;
-    }
-
-    bool GetOnPreviewDisappear() const
-    {
-        return onPreviewDisappear_;
-    }
-
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
 
     void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
@@ -411,7 +391,28 @@ public:
         return dumpInfo_;
     }
 
-    void SetDumpInfo(const MenuDumpInfo& dumpInfo);
+    void SetDumpInfo(const MenuDumpInfo& dumpInfo)
+    {
+        dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
+        dumpInfo_.menuType = dumpInfo.menuType;
+        dumpInfo_.enableArrow = dumpInfo.enableArrow;
+        dumpInfo_.targetNode = dumpInfo.targetNode;
+        dumpInfo_.targetOffset = dumpInfo.targetOffset;
+        dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
+        dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
+        dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
+        dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
+        dumpInfo_.top = dumpInfo.top;
+        dumpInfo_.bottom = dumpInfo.bottom;
+        dumpInfo_.left = dumpInfo.left;
+        dumpInfo_.right = dumpInfo.right;
+        dumpInfo_.globalLocation = dumpInfo.globalLocation;
+        dumpInfo_.originPlacement = dumpInfo.originPlacement;
+        dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
+        dumpInfo_.finalPosition = dumpInfo.finalPosition;
+        dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
+    }
 
     bool GetHasCustomRadius() const
     {
@@ -468,31 +469,6 @@ public:
     bool HasStackSubMenu();
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
-    void StopPreviewMenuAnimation();
-    void GetPreviewRenderContexts(RefPtr<RenderContext>& previewPositionContext,
-        RefPtr<RenderContext>& previewScaleContext, RefPtr<RenderContext>& previewDisappearContext);
-    void AnimatePreviewMenu(RefPtr<RenderContext> previewPositionContext, RefPtr<RenderContext> previewScaleContext,
-        RefPtr<RenderContext> menuContext, RefPtr<RenderContext> previewDisappearContext);
-
-    void SetAnimationPreviewScale(float scale)
-    {
-        animationInfo_.previewScale = scale;
-    }
-
-    void SetAnimationMenuScale(float scale)
-    {
-        animationInfo_.menuScale = scale;
-    }
-
-    void SetAnimationPreviewOffset(OffsetF offset)
-    {
-        animationInfo_.previewOffset = offset;
-    }
-
-    void SetAnimationMenuOffset(OffsetF offset)
-    {
-        animationInfo_.menuOffset = offset;
-    }
 
     void SetAnimationClipRate(float rate)
     {
@@ -608,14 +584,15 @@ private:
     void ChangeTouchItem(const TouchEventInfo& info, TouchType touchType);
     void ChangeCurMenuItemBgColor();
     void ClearLastMenuItem();
-    RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
-    RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
+    bool GetInnerMenu(RefPtr<UINode>& innerMenuNode, const PointF& position);
+    RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const PointF& position);
     bool IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
-    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
+    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const PointF& position);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
+    bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
@@ -637,8 +614,6 @@ private:
     bool isShowHoverImage_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
-    bool onMenuDisappear_ = false;
-    bool onPreviewDisappear_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;

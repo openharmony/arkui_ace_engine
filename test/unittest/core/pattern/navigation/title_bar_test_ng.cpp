@@ -1317,7 +1317,9 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern017, TestSize.Level1)
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
     NavigationTitlebarOptions opt;
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     titleBarPattern->SetTitlebarOptions(std::move(opt));
 }
 

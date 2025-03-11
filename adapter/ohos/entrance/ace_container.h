@@ -577,7 +577,7 @@ public:
     void ProcessColorModeUpdate(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
-        const ParsedConfig& parsedConfig, const std::string& configuration);
+        const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel = false);
     void UpdateConfigurationSyncForAll(
         const ParsedConfig& parsedConfig, const std::string& configuration);
 
@@ -768,7 +768,7 @@ public:
     }
 
     void UpdateResourceOrientation(int32_t orientation);
-    void UpdateResourceDensity(double density);
+    void UpdateResourceDensity(double density, bool isUpdateResConfig);
     void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override

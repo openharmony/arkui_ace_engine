@@ -72,19 +72,22 @@ public:
     void GetTabs();
     TabsModelNG CreateTabs(BarPosition barPosition = BarPosition::START, int32_t index = 0);
     TabContentModelNG CreateTabContent();
+    TabContentModelNG CreateTabContentWithDeepRender(std::function<void()>&& deepRenderFunc);
     void CreateTabContents(int32_t itemNumber = TABCONTENT_NUMBER);
     void CreateTabContentsWithBuilder(int32_t itemNumber = TABCONTENT_NUMBER);
     void CreateTabsDone(TabsModelNG model);
     TabBarBuilderFunc TabBarItemBuilder();
     void CreateTabContentTabBarStyle(TabBarStyle tabBarStyle);
     void CreateTabContentTabBarStyleWithBuilder(TabBarStyle tabBarStyle);
-    void SwipeToWithoutAnimation(int32_t index);
-    void HandleClick(Offset offset, int32_t index);
+    void ChangeIndex(int32_t index);
+    void HandleClick(int32_t index);
     void HandleMouseEvent(MouseAction action, Offset location);
     void HandleHoverEvent(bool isHover);
     GestureEvent CreateDragInfo(bool moveDirection);
-    AssertionResult CurrentIndex(int32_t expectIndex);
+    void MockPaintRect(const RefPtr<FrameNode>& frameNode);
     RefPtr<TabBarModifier> OnDraw();
+    AssertionResult CurrentIndex(int32_t expectIndex);
+    AssertionResult VerifyBackgroundColor(int32_t itemIndex, Color expectColor);
 
     RefPtr<TabsNode> frameNode_;
     RefPtr<TabsPattern> pattern_;

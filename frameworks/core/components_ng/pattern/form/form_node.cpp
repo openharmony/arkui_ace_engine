@@ -421,4 +421,12 @@ void FormNode::ClearAccessibilityChildTreeRegisterFlag()
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     accessibilityChildTreeCallback_->OnClearRegisterFlag();
 }
+
+int32_t FormNode::GetImageId()
+{
+    if (!imageId_.has_value()) {
+        imageId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    return imageId_.value();
+}
 } // namespace OHOS::Ace::NG

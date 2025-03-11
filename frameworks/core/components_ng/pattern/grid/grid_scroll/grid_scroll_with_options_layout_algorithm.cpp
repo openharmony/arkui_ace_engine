@@ -61,8 +61,7 @@ void GridScrollWithOptionsLayoutAlgorithm::AdjustRowColSpan(
     }
 }
 
-void GridScrollWithOptionsLayoutAlgorithm::LargeItemLineHeight(
-    const RefPtr<LayoutWrapper>& itemWrapper, bool& /* hasNormalItem */)
+void GridScrollWithOptionsLayoutAlgorithm::LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper)
 {
     auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
     auto itemMainSize = GetMainAxisSize(itemSize, info_.axis_);

@@ -1466,6 +1466,27 @@ void SwiperLayoutAlgorithm::MeasureArrow(
     arrowWrapper->Measure(indicatorLayoutConstraint);
 }
 
+float SwiperLayoutAlgorithm::GetHeightForDigit(LayoutWrapper* layoutWrapper, float height) const
+{
+    CHECK_NULL_RETURN(layoutWrapper, height);
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(swiperLayoutProperty, height);
+    auto indicatorType = swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT);
+    if (indicatorType == SwiperIndicatorType::DIGIT) {
+        auto indicatorWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_INDICATOR_ETS_TAG);
+        CHECK_NULL_RETURN(indicatorWrapper, height);
+        auto frameNode = indicatorWrapper->GetHostNode();
+        CHECK_NULL_RETURN(frameNode, height);
+        auto indicatorlayoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+        CHECK_NULL_RETURN(indicatorlayoutProperty, height);
+        auto ignoreSize = indicatorlayoutProperty->GetIgnoreSize();
+        if (ignoreSize.has_value() && ignoreSize.value() == true) {
+            return 0.0f;
+        }
+    }
+    return height;
+}
+
 void SwiperLayoutAlgorithm::ArrowLayout(
     LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper, const PaddingPropertyF padding) const
 {
@@ -1516,8 +1537,9 @@ void SwiperLayoutAlgorithm::ArrowLayout(
             if (indicatorPaintProperty->GetIsCustomSizeValue(false)) {
                 allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
             }
+            auto indicatorDotItemSpace = indicatorPaintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
             auto allPointSpaceSum =
-                static_cast<float>(theme->GetIndicatorDotItemSpace().ConvertToPx()) * (itemCount - 1);
+                static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (itemCount - 1);
             auto indicatorWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
             normalArrowMargin = ((axis == Axis::HORIZONTAL ? indicatorFrameSize.Width() : indicatorFrameSize.Height()) -
                                     indicatorWidth) * 0.5f;
@@ -1553,7 +1575,9 @@ void SwiperLayoutAlgorithm::ArrowLayout(
             arrowOffset.GetX() + arrowFrameSize.Width(), swiperFrameSize.Width() - padding.right.value_or(0.0f))) {
             arrowOffset.SetX(swiperFrameSize.Width() - arrowFrameSize.Width() - padding.right.value_or(0.0f));
         }
-        arrowOffset.SetY(indicatorFrameRect.Top() + (indicatorFrameSize.Height() - arrowFrameSize.Height()) * 0.5f);
+        auto offsetY = indicatorFrameRect.Top() +
+            (indicatorFrameSize.Height() - GetHeightForDigit(layoutWrapper, arrowFrameSize.Height())) * 0.5f;
+        arrowOffset.SetY(offsetY);
     } else if (axis == Axis::HORIZONTAL && !isShowIndicatorArrow) {
         startPoint = isLeftArrow
                          ? swiperIndicatorTheme->GetArrowHorizontalMargin().ConvertToPx() + padding.left.value_or(0.0f)
@@ -1580,7 +1604,10 @@ void SwiperLayoutAlgorithm::ArrowLayout(
                     : (indicatorFrameRect.Bottom() + padding.bottom.value_or(0.0f) +
                           swiperIndicatorTheme->GetArrowScale().ConvertToPx() - indicatorPadding - normalArrowMargin);
         }
-        arrowOffset.SetX(indicatorFrameRect.Left() + (indicatorFrameSize.Width() - arrowFrameSize.Width()) * 0.5f);
+        auto offsetX = indicatorFrameRect.Left() +
+            (indicatorFrameSize.Width() - GetHeightForDigit(layoutWrapper, arrowFrameSize.Width())) * 0.5f;
+
+        arrowOffset.SetX(offsetX);
         arrowOffset.SetY(startPoint);
         if (isLeftArrow && !NonNegative(arrowOffset.GetY() - padding.top.value_or(0.0f))) {
             arrowOffset.SetY(padding.top.value_or(0.0f));

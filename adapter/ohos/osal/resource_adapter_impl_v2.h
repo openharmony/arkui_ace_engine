@@ -32,6 +32,7 @@ class ResourceAdapterImplV2 : public ResourceAdapter {
 public:
     ResourceAdapterImplV2() = default;
     explicit ResourceAdapterImplV2(std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
+    ResourceAdapterImplV2(std::shared_ptr<Global::Resource::ResourceManager> resourceManager, int32_t instanceId);
     ResourceAdapterImplV2(
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager, const ResourceInfo& resourceInfo);
     ~ResourceAdapterImplV2() override = default;

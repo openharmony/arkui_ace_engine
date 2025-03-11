@@ -471,9 +471,7 @@ public:
 
     void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node);
 
-    RefPtr<UINode> GetAccessibilityVirtualNode();
-
-    NG::UINode* GetAccessibilityVirtualNodePtr();
+    const RefPtr<UINode>& GetAccessibilityVirtualNode() const;
 
     bool HasAccessibilityVirtualNode() const;
 
@@ -647,6 +645,8 @@ public:
     bool HasUserScrollTriggerable();
     bool IsUserScrollTriggerable();
     void ResetUserScrollTriggerable();
+    void SetFocusDrawLevel(int32_t drawLevel);
+    int32_t GetFocusDrawLevel();
 
 private:
     // node should be not-null
@@ -748,6 +748,7 @@ protected:
     std::optional<int32_t> rangeMaxValue_;
     std::optional<int32_t> rangeCurrentValue_;
     std::optional<std::string> textValue_;
+    FocusDrawLevel focusDrawLevel_ = FocusDrawLevel::SELF;
 };
 } // namespace OHOS::Ace::NG
 

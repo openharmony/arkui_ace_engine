@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;

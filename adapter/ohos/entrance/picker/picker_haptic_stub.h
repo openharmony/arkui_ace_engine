@@ -21,12 +21,30 @@
 namespace OHOS::Ace::NG {
 class PickerAudioHapticStub : public IPickerAudioHaptic {
 public:
+    enum class ThreadStatus {
+        NONE,
+        START,
+        READY,
+        PLAYING,
+        PLAY_ONCE,
+        HANDLE_DELTA,
+    };
     PickerAudioHapticStub() = default;
     ~PickerAudioHapticStub() = default;
-    void Play(size_t speed) {}
-    void PlayOnce() {}
+    void Play(size_t speed)
+    {
+        playThreadStatus_ = ThreadStatus::PLAYING;
+    }
+    void PlayOnce()
+    {
+        playThreadStatus_ = ThreadStatus::PLAY_ONCE;
+    }
     void Stop() {}
-    void HandleDelta(double dy) {}
+    void HandleDelta(double dy)
+    {
+        playThreadStatus_ = ThreadStatus::HANDLE_DELTA;
+    }
+    ThreadStatus playThreadStatus_ = ThreadStatus::NONE;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_STUB_H

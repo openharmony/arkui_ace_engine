@@ -108,15 +108,13 @@ public:
             theme->symbolIconColor_ = pattern->GetAttr<Color>("search_symbol_icon_color", Color());
             theme->symbolIconHeight_ = pattern->GetAttr<Dimension>("search_symbol_icon_height", 16.0_fp);
             theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-                theme->searchIconColor_ = pattern->GetAttr<Color>("icon_color", Color());
-                theme->symbolIconColor_ = pattern->GetAttr<Color>("icon_color", Color());
-                theme->searchDividerColor_ = pattern->GetAttr<Color>("search_divider_color_API16", Color(0x0c182431));
+            theme->buttonFontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 theme->searchButtonSpace_ = pattern->GetAttr<Dimension>("search_button_space_API16", 4.0_vp);
                 theme->dividerSideSpace_ = pattern->GetAttr<Dimension>("search_button_space_API16", 4.0_vp);
                 theme->searchButtonTextPadding_ = pattern->
                     GetAttr<Dimension>("search_button_text_padding_API16", 12.0_vp);
-                theme->fontSize_ = pattern->GetAttr<Dimension>("search_font_size_API16", 14.0_fp);
+                theme->buttonFontSize_ = pattern->GetAttr<Dimension>("search_font_size_API16", 14.0_fp);
             }
         }
     };
@@ -161,6 +159,11 @@ public:
     const Dimension& GetFontSize() const
     {
         return fontSize_;
+    }
+
+    const Dimension& GetButtonFontSize() const
+    {
+        return buttonFontSize_;
     }
 
     const Dimension& GetIconSize() const
@@ -368,6 +371,7 @@ private:
     Color focusBgColor_;
     bool needFocusBox_ = false;
     Dimension searchFocusPadding_;
+    Dimension buttonFontSize_;
 };
 
 } // namespace OHOS::Ace

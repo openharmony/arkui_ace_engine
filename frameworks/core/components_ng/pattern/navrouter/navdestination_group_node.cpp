@@ -60,6 +60,14 @@ const char* TransitionTypeToString(NavigationSystemTransitionType type)
             return "NavigationSystemTransitionType.TITLE";
         case NavigationSystemTransitionType::CONTENT:
             return "NavigationSystemTransitionType.CONTENT";
+        case NavigationSystemTransitionType::FADE:
+            return "NavigationSystemTransitionType.FADE";
+        case NavigationSystemTransitionType::EXPLODE:
+            return "NavigationSystemTransitionType.EXPLODE";
+        case NavigationSystemTransitionType::SLIDE_RIGHT:
+            return "NavigationSystemTransitionType.SLIDE_RIGHT";
+        case NavigationSystemTransitionType::SLIDE_BOTTOM:
+            return "NavigationSystemTransitionType.SLIDE_BOTTOM";
         default:
             return "NavigationSystemTransitionType.DEFAULT";
     }
@@ -875,7 +883,9 @@ int32_t NavDestinationGroupNode::DoCustomTransition(NavigationOperation operatio
             longestAnimationDuration = transition.duration + transition.delay;
         }
     }
-    if (longestAnimationDuration == INT32_MIN) {
+    if (longestAnimationDuration != INT32_MIN) {
+        SetIsOnAnimation(true);
+    } else {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "navDestination custom transition array is empty!");
     }
     auto pipeline = GetContext();
@@ -903,7 +913,6 @@ void NavDestinationGroupNode::StartCustomTransitionAnimation(NavDestinationTrans
             // do necessary system-side tasks
             auto navDestination = weak.Upgrade();
             CHECK_NULL_VOID(navDestination);
-            navDestination->SetIsOnAnimation(true);
             if (!hasResetProperties && isEnter) {
                 auto pattern = navDestination->GetPattern<NavDestinationPattern>();
                 CHECK_NULL_VOID(pattern);
@@ -1000,5 +1009,12 @@ void NavDestinationGroupNode::ResetCustomTransitionAnimationProperties()
     renderContext->UpdateTranslateInXY({ 0.0f, 0.0f });
     renderContext->SetOpacity(userSetOpacity_);
     renderContext->SetActualForegroundColor(Color::TRANSPARENT);
+}
+
+RefPtr<UINode> NavDestinationGroupNode::GetNavigationNode()
+{
+    auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(navDestinationPattern, nullptr);
+    return navDestinationPattern->GetNavigationNode();
 }
 } // namespace OHOS::Ace::NG

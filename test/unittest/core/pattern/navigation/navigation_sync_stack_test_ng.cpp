@@ -1044,4 +1044,113 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg021, TestSize.Level
     ASSERT_NE(navDestinationPattern, nullptr);
     ASSERT_NE(navDestinationPattern->GetName(), moveToName);
 }
+
+/**
+ * @tc.name: GetFromCacheNodeTest
+ * @tc.desc: no branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, GetFromCacheNodeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationNode and Stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. add Node to cacheNode
+     */
+    auto navNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestination", 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navNode->nodeId_ = 11;
+    mockNavPathStack->cacheNodes_.emplace_back(std::make_pair("pageA", navNode));
+    
+    auto navNode2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestination", 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navNode2->nodeId_ = 22;
+    mockNavPathStack->cacheNodes_.emplace_back(std::make_pair("pageB", navNode2));
+    
+    auto navNode3 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestination", 102, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navNode3->nodeId_ = 33;
+    mockNavPathStack->cacheNodes_.emplace_back(std::make_pair("pageC", navNode3));
+    
+    /**
+     * @tc.steps: step3. test GetFromCacheNode
+     */
+    auto tmp = mockNavPathStack->GetFromCacheNode(11);
+    RefPtr<UINode> retNode = nullptr;
+    if (tmp) {
+        retNode = tmp.value().second;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(retNode);
+    ASSERT_EQ(navNode, navDestination);
+    
+    auto ret = mockNavPathStack->GetFromCacheNode(12);
+    ASSERT_EQ(ret, std::nullopt);
+}
+
+/**
+ * @tc.name: AddCacheNode
+ * @tc.desc: branch if(name.empty() || uiNode == nullptr)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, AddCacheNodeTest1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationNode and Stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. test addCacheNode
+     */
+    mockNavPathStack->AddCacheNode("null", nullptr);
+    ASSERT_EQ(mockNavPathStack->cacheNodes_.empty(), true);
+}
+
+/**
+ * @tc.name: AddCacheNode
+ * @tc.desc: branch if (navDestination)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, AddCacheNodeTest2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create NavigationNode and Stack
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. test addCacheNode
+     */
+    auto navNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestination", 104, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navNode->nodeId_ = 11;
+    ASSERT_EQ(navNode->IsCacheNode(), false);
+    mockNavPathStack->AddCacheNode("pageA", navNode);
+    ASSERT_NE(mockNavPathStack->cacheNodes_.empty(), true);
+    ASSERT_NE(navNode->IsCacheNode(), true);
+}
 } // namespace OHOS::Ace::NG

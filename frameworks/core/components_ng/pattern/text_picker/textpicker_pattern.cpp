@@ -39,9 +39,12 @@ namespace {
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 constexpr uint32_t RATE = 2;
-const Dimension DIALOG_INTERVAL = 24.0_vp;
-const Dimension FOCUS_INTERVAL = 2.0_vp;
-const Dimension LINE_WIDTH = 1.5_vp;
+const Dimension OFFSET = 3.5_vp;
+const Dimension OFFSET_LENGTH = 5.5_vp;
+const Dimension DIALOG_OFFSET = 1.0_vp;
+const Dimension DIALOG_OFFSET_LENGTH = 1.0_vp;
+constexpr uint32_t HALF = 2;
+const Dimension FOCUS_WIDTH = 2.0_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
 } // namespace
@@ -440,7 +443,7 @@ void TextPickerPattern::CalcLeftTotalColumnWidth(
 
 void TextPickerPattern::ColumnPatternInitHapticController()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     if (!isHapticChanged_) {
@@ -814,10 +817,22 @@ void TextPickerPattern::InitDisabled()
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto opacity = curOpacity_;
     if (!enabled_) {
-        renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        renderContext->UpdateOpacity(curOpacity_);
+        opacity *= DISABLE_ALPHA;
+        renderContext->UpdateOpacity(opacity);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        renderContext->UpdateOpacity(opacity);
+    }
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        for (const auto& child : host->GetChildren()) {
+            auto stackNode = DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(stackNode);
+            auto renderContext = stackNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateOpacity(opacity);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -1061,6 +1076,36 @@ void TextPickerPattern::SetFocusCornerRadius(RoundRect& paintRect)
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
 }
 
+RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
+    float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth)
+{
+    if (!GetIsShowInDialog()) {
+        paintRectHeight = paintRectHeight - OFFSET_LENGTH.ConvertToPx();
+        centerY = centerY + OFFSET.ConvertToPx();
+        paintRectWidth = columnWidth - FOCUS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+        centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
+        AdjustFocusBoxOffset(centerX, centerY);
+    } else {
+        paintRectHeight = paintRectHeight - DIALOG_OFFSET.ConvertToPx();
+        centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
+        paintRectWidth = columnWidth - FOCUS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+        centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
+    }
+    return RectF(centerX, centerY, paintRectWidth, paintRectHeight);
+}
+
+void TextPickerPattern::AdjustFocusBoxOffset(float& centerX, float& centerY)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (geometryNode->GetPadding()) {
+        centerX += geometryNode->GetPadding()->left.value_or(0.0);
+        centerY += geometryNode->GetPadding()->top.value_or(0.0);
+    }
+}
+
 void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
@@ -1069,10 +1114,9 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (childSize == 0) {
         return;
     }
-
-    auto leftTotalColumnWidth = 0.0f;
-    CalcLeftTotalColumnWidth(host, leftTotalColumnWidth, childSize);
     if (useButtonFocusArea_) {
+        auto leftTotalColumnWidth = 0.0f;
+        CalcLeftTotalColumnWidth(host, leftTotalColumnWidth, childSize);
         return GetInnerFocusButtonPaintRect(paintRect, leftTotalColumnWidth);
     }
     auto columnNode = GetColumnNode();
@@ -1088,20 +1132,25 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerChild = DynamicCast<FrameNode>(blendChild->GetLastChild());
     CHECK_NULL_VOID(pickerChild);
     auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetPaddingSize();
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
-
-    float paintRectWidth = columnWidth - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
-    float paintRectHeight = dividerSpacing - FOCUS_INTERVAL.ConvertToPx() * RATE - LINE_WIDTH.ConvertToPx() * RATE;
-    auto centerX = leftTotalColumnWidth + FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
-    auto centerY = (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE +
-        FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
-
-    if (GetIsShowInDialog()) {
-        paintRectWidth -= DIALOG_INTERVAL.ConvertToPx() * RATE;
-        centerX += DIALOG_INTERVAL.ConvertToPx();
+    auto pickerThemeWidth = dividerSpacing * RATE;
+    auto currentFocusIndex = focusKeyID_;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        currentFocusIndex = childSize - 1 - focusKeyID_;
     }
-
-    paintRect.SetRect(RectF(centerX, centerY, paintRectWidth, paintRectHeight));
+    auto centerX = (frameSize.Width() / childSize - pickerThemeWidth) / RATE +
+                   columnNode->GetGeometryNode()->GetFrameRect().Width() * currentFocusIndex +
+                   PRESS_INTERVAL.ConvertToPx() * RATE;
+    auto centerY = (frameSize.Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
+    float paintRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
+    float paintRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
+    auto focusPaintRect = CalculatePaintRect(currentFocusIndex,
+        centerX, centerY, paintRectWidth, paintRectHeight, columnWidth);
+    paintRect.SetRect(focusPaintRect);
     SetFocusCornerRadius(paintRect);
 }
 

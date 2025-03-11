@@ -32,6 +32,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -686,9 +687,13 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     if (GreatNotEqual(keyboardHeight, 0)) {
+        auto wrapperHeight =  container->IsSceneBoardEnabled() ? wrapperSize_.Height() - keyboardHeight :
+            wrapperSize_.Height() - keyboardHeight - marginBottom_;
+        wrapperSize_.SetHeight(wrapperHeight);
         marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
-        wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
     } else if (showInSubWindow) {
         auto currentContext = bubbleNode->GetContextRefPtr();
         CHECK_NULL_VOID(currentContext);
@@ -696,8 +701,10 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
         CHECK_NULL_VOID(currentSafeAreaManager);
         auto currentKeyboardHeight = currentSafeAreaManager->GetKeyboardInset().Length();
         if (GreatNotEqual(currentKeyboardHeight, 0)) {
+            auto wrapperHeight =  container->IsSceneBoardEnabled() ? wrapperSize_.Height() - currentKeyboardHeight :
+                wrapperSize_.Height() - currentKeyboardHeight - marginBottom_;
+            wrapperSize_.SetHeight(wrapperHeight);
             marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
-            wrapperSize_.SetHeight(wrapperSize_.Height() - currentKeyboardHeight);
         }
     }
 }
@@ -1513,9 +1520,11 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         targetSize_ = geometryNode->GetFrameSize();
         targetOffset_ = targetNode->GetPaintRectOffset();
     }
-    auto pipelineContext = GetMainPipelineContext(layoutWrapper);
+
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    auto pipelineContext = expandDisplay ? targetNode->GetContextRefPtr() : GetMainPipelineContext(layoutWrapper);
     CHECK_NULL_VOID(pipelineContext);
-    
+
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s",
         targetOffset_.ToString().c_str(), targetSize_.ToString().c_str());
     // Show in SubWindow

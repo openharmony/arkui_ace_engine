@@ -52,7 +52,6 @@ const Dimension LINE_WIDTH = 1.5_vp;
 const int32_t RATE = 2;
 const PickerTime START_DEFAULT_TIME = PickerTime(0, 0, 0);
 const PickerTime END_DEFAULT_TIME = PickerTime(23, 59, 59);
-const int32_t WRONG_INDEX = -1;
 const uint32_t INDEX_AM_0 = 0;
 const uint32_t INDEX_PM_1 = 1;
 const uint32_t INDEX_HOUR_STRAT = 0;
@@ -378,10 +377,22 @@ void TimePickerRowPattern::InitDisabled()
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto opacity = curOpacity_;
     if (!enabled_) {
-        renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        renderContext->UpdateOpacity(curOpacity_);
+        opacity *= DISABLE_ALPHA;
+        renderContext->UpdateOpacity(opacity);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        renderContext->UpdateOpacity(opacity);
+    }
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        for (const auto& child : host->GetChildren()) {
+            auto stackNode = DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(stackNode);
+            auto renderContext = stackNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateOpacity(opacity);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -833,8 +844,8 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>&
     if (!GetHour24() && tag == amPmColumn) {
         // update Hour column option after changing ampm column
         // and set corresponding new index based on old value
-        auto newIndex = GetOptionsIndex(hourColumn, oldHourValue_);
-        if (newIndex == WRONG_INDEX) {
+        uint32_t newIndex = INDEX_HOUR_STRAT;
+        if (!GetOptionsIndex(hourColumn, oldHourValue_, newIndex)) {
             auto uintOldHour = StringUtils::StringToUint(oldHourValue_);
             if (((IsAmJudgeByAmPmColumn(amPmColumn) && uintOldHour == AM_PM_HOUR_12) ? INDEX_HOUR_STRAT : uintOldHour) <
                 startTime_.GetHour()) {
@@ -855,8 +866,8 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>&
     }
     MinuteChangeBuildTimeRange(currentHourOf24);
     if (tag != minuteColumn) {
-        auto newIndex = GetOptionsIndex(minuteColumn, oldMinuteValue_);
-        if (newIndex == WRONG_INDEX) {
+        uint32_t newIndex = INDEX_MINUTE_STRAT;
+        if (!GetOptionsIndex(minuteColumn, oldMinuteValue_, newIndex)) {
             if (StringUtils::StringToUint(oldMinuteValue_) < startTime_.GetMinute()) {
                 newIndex = INDEX_MINUTE_STRAT;
             } else {
@@ -961,21 +972,13 @@ void TimePickerRowPattern::Hour12ChangeBuildTimeRange()
 
 void TimePickerRowPattern::MinuteChangeBuildTimeRange(uint32_t hourOf24)
 {
-    uint32_t startTimeMinute = (startTime_.GetHour() == hourOf24) ? startTime_.GetMinute() : INDEX_MINUTE_STRAT;
-    uint32_t endTimeMinute = (endTime_.GetHour() == hourOf24) ? endTime_.GetMinute() : INDEX_MINUTE_END;
-
+    uint32_t startMinute = (hourOf24 == startTime_.GetHour()) ? startTime_.GetMinute() : INDEX_MINUTE_STRAT;
+    uint32_t endMinute = (hourOf24 == endTime_.GetHour()) ? endTime_.GetMinute() : INDEX_MINUTE_END;
     auto minuteColumn = allChildNode_["minute"].Upgrade();
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
     optionsTotalCount_[minuteColumn] = 0;
-    uint32_t startMinute = 0;
-    uint32_t endMinute = 59;
-    if (hourOf24 == startTime_.GetHour()) {
-        startMinute = startTimeMinute;
-    } else if (hourOf24 == endTime_.GetHour()) {
-        endMinute = endTimeMinute;
-    }
     uint32_t index = 0;
     for (uint32_t minute = startMinute; minute <= endMinute; minute++) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
@@ -1242,19 +1245,21 @@ const std::string& TimePickerRowPattern::GetOptionsValue(const RefPtr<FrameNode>
     return options_[frameNode][optionIndex];
 }
 
-int32_t TimePickerRowPattern::GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value)
+bool TimePickerRowPattern::GetOptionsIndex(
+    const RefPtr<FrameNode>& frameNode, const std::string& value, uint32_t& columnIndex)
 {
-    auto columnIndex = WRONG_INDEX;
-    CHECK_NULL_RETURN(frameNode, columnIndex);
+    CHECK_NULL_RETURN(frameNode, false);
+    bool result = false;
     auto columnFound = options_.find(frameNode);
     if (columnFound != options_.end()) {
         for (const auto& option : columnFound->second) {
             if (option.second == value) {
                 columnIndex = option.first;
+                result = true;
             }
         }
     }
-    return columnIndex;
+    return result;
 }
 
 std::string TimePickerRowPattern::GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode)

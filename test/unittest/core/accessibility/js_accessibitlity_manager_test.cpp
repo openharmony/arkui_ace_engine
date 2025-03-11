@@ -1181,4 +1181,49 @@ HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible02, TestSize.L
         }
     }
 }
+
+/**
+ * @tc.name: JsAccessibilityManager024
+ * @tc.desc: RegisterGetParentRectHandler
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager024, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    /**
+    * @tc.steps: step2. test RegisterGetParentRectHandler
+    */
+    jsAccessibilityManager->uecRectInfo_.isChanged = false;
+    jsAccessibilityManager->RegisterGetParentRectHandler();
+    EXPECT_NE(jsAccessibilityManager->getParentRectHandlerNew_, nullptr);
+}
+
+/**
+* @tc.name: JsAccessibilityManager025
+* @tc.desc: GetTransformRectInfoRelativeToWindow
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager025, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        "frameNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. test GetTransformRectInfoRelativeToWindow
+     */
+    auto rectInfo = jsAccessibilityManager->GetTransformRectInfoRelativeToWindow(frameNode, context);
+    EXPECT_EQ(rectInfo.left, 100);
+    EXPECT_EQ(rectInfo.top, 200);
+}
 } // namespace OHOS::Ace::NG

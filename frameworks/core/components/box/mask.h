@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace {
 
+class RenderNode;
 enum class MaskImageType {
     NONE = 0,
     SVG,

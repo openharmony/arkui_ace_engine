@@ -449,6 +449,11 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(customTitleNode);
     customTitleNode->FireAppTitleCallback(title);
 
+    // call setTitle() callback for backButton bar
+    auto controllButtonRow = GetCustomButtonNode();
+    CHECK_NULL_VOID(controllButtonRow);
+    controllButtonRow->FireAppTitleCallback(title);
+
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
     customFloatingTitleNode->FireAppTitleCallback(title);
@@ -799,20 +804,23 @@ void ContainerModalPattern::InitLayoutProperty()
     buttonsRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
 
-    InitTitleRowLayoutProperty(GetCustomTitleRow());
-    InitTitleRowLayoutProperty(GetFloatingTitleRow());
+    InitTitleRowLayoutProperty(GetCustomTitleRow(), false);
+    InitTitleRowLayoutProperty(GetFloatingTitleRow(), true);
     InitButtonsLayoutProperty();
 
     containerModal->MarkModifyDone();
 }
 
-void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow)
+void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow, bool isFloating)
 {
     CHECK_NULL_VOID(titleRow);
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
+    auto rowHeight = CONTAINER_TITLE_HEIGHT;
+    if (!isFloating) {
+        rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
+    }
     titleRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(rowHeight)));
     titleRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
@@ -832,10 +840,10 @@ void ContainerModalPattern::InitAllTitleRowLayoutProperty()
     CHECK_NULL_VOID(customTitleRow);
     auto floatingTitleRow = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleRow);
-    InitTitleRowLayoutProperty(customTitleRow);
+    InitTitleRowLayoutProperty(customTitleRow, false);
     customTitleRow->MarkModifyDone();
     customTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    InitTitleRowLayoutProperty(floatingTitleRow);
+    InitTitleRowLayoutProperty(floatingTitleRow, true);
     floatingTitleRow->MarkModifyDone();
     floatingTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
@@ -861,12 +869,16 @@ void ContainerModalPattern::InitColumnTouchTestFunc()
     auto column = GetColumnNode();
     CHECK_NULL_VOID(column);
     auto eventHub = column->GetOrCreateGestureEventHub();
-    auto func = [](const std::vector<TouchTestInfo>& touchInfo) -> TouchResult {
+    bool defaultResEnable = enableContainerModalCustomGesture_;
+    auto func = [defaultResEnable](const std::vector<TouchTestInfo>& touchInfo) -> TouchResult {
         TouchResult touchRes;
         TouchResult defaultRes;
         touchRes.strategy = TouchTestStrategy::FORWARD_COMPETITION;
         defaultRes.strategy = TouchTestStrategy::DEFAULT;
         defaultRes.id = "";
+        if (defaultResEnable) {
+            return defaultRes;
+        }
         for (auto info : touchInfo) {
             if (info.id.compare(CONTAINER_MODAL_STACK_ID) == 0) {
                 touchRes.id = info.id;
@@ -999,5 +1011,21 @@ void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimens
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(height)));
     row->MarkModifyDone();
     row->MarkDirtyNode();
+}
+
+void ContainerModalPattern::EnableContainerModalCustomGesture(RefPtr<PipelineContext> pipeline, bool enable)
+{
+    CHECK_NULL_VOID(pipeline);
+    if (!pipeline || pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetEnableContainerModalCustomGesture(enable);
+    containerPattern->InitColumnTouchTestFunc();
 }
 } // namespace OHOS::Ace::NG

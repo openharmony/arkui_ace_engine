@@ -16,8 +16,10 @@
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
 #include "base/utils/system_properties.h"
+#include "core/common/ace_engine.h"
 #include "core/common/ai/text_translation_adapter.h"
 #include "core/common/share/text_share_adapter.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -869,7 +871,7 @@ void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(
         manager->HideOptionMenu(true);
         return;
     }
-    if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG) {
+    if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG && !GetIsHandleDragging()) {
         manager->ShowOptionMenu();
         return;
     }
@@ -1188,9 +1190,15 @@ bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (renderContext->GetClipEdge().value_or(false)) {
+            auto isOverTheParentBottom = GreatNotEqual(contentRect.Top(), parentContentRect.Bottom());
             contentRect = contentRect.IntersectRectT(parentContentRect);
+            if (isOverTheParentBottom) {
+                contentRect.SetTop(parentContentRect.Bottom());
+            }
         }
         contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
+        contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
+        contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
@@ -1559,6 +1567,17 @@ void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason
 {
     auto host = GetOwner();
     CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto container = AceEngine::Get().GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto isExpandDisplay = selectTheme->GetExpandDisplay();
+    auto isFreeMultiWindow = container->IsFreeMultiWindow();
+    if (!isFreeMultiWindow && !isExpandDisplay) {
+        return;
+    }
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     if (overlayManager->IsRightClickSubWindowMenu()) {

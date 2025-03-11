@@ -150,7 +150,7 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  if (Utils.isApiVersionEQAbove(16)) {
+  if (Utils.isApiVersionEQAbove(18)) {
     return false;
   }
   return (stageValue.bundleName === value.bundleName) &&
@@ -3072,6 +3072,71 @@ class FlexBasisModifier extends ModifierWithKey<number | string> {
   }
 }
 
+class BindTipsModifier extends ModifierWithKey<ArkBindTipsOptions> {
+  constructor(value: ArkBindTipsOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('bindTips');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBindTips(node);
+    } else {
+      if (this.value.message === undefined) {
+        return;
+      }
+      getUINativeModule().common.setBindTips(
+        node,
+        this.value.message,
+        this.value.options?.appearingTime,
+        this.value.options?.disappearingTime,
+        this.value.options?.appearingTimeWithContinuousOperation,
+        this.value.options?.disappearingTimeWithContinuousOperation,
+        this.value.options?.enableArrow,
+        this.value.options?.arrowPointPosition,
+        this.value.options?.arrowWidth,
+        this.value.options?.arrowHeight
+      );
+    }
+  }
+  checkObjectDiff(): boolean {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.message, this.value.message) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.appearingTime,
+        this.value.options.appearingTime
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.disappearingTime,
+        this.value.options.disappearingTime
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.appearingTimeWithContinuousOperation,
+        this.value.options.appearingTimeWithContinuousOperation
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.disappearingTimeWithContinuousOperation,
+        this.value.options.disappearingTimeWithContinuousOperation
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.enableArrow,
+        this.value.options.enableArrow
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.arrowPointPosition,
+        this.value.options.arrowPointPosition
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.arrowWidth,
+        this.value.options.arrowWidth
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.arrowHeight,
+        this.value.options.arrowHeight
+      )
+    );
+  }
+}
+
 class LayoutWeightModifier extends ModifierWithKey<number | string> {
   constructor(value: number | string) {
     super(value);
@@ -3211,6 +3276,20 @@ class AccessibilityScrollTriggerableModifier extends ModifierWithKey<boolean> {
       getUINativeModule().common.resetAccessibilityScrollTriggerable(node);
     } else {
       getUINativeModule().common.setAccessibilityScrollTriggerable(node, this.value);
+    }
+  }
+}
+
+class AccessibilityFocusDrawLevelModifier extends ModifierWithKey<FocusDrawLevel> {
+  constructor(value: FocusDrawLevel) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityFocusDrawLevel');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityFocusDrawLevel(node);
+    } else {
+      getUINativeModule().common.setAccessibilityFocusDrawLevel(node, this.value);
     }
   }
 }
@@ -3669,6 +3748,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (typeof value === 'object') {
       arkDragPreviewOptions.mode = value.mode;
       arkDragPreviewOptions.numberBadge = value.numberBadge;
+      arkDragPreviewOptions.sizeChangeEffect = value.sizeChangeEffect;
     }
     if (typeof options === 'object') {
       arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
@@ -4733,6 +4813,14 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
+  bindTips(message: TipsMessageType, options?: TipsOptions): this {
+    let arkBindTipsOptions = new ArkBindTipsOptions();
+    arkBindTipsOptions.message = message;
+    arkBindTipsOptions.options = options;
+    modifierWithKey(this._modifiersWithKeys, BindTipsModifier.identity, BindTipsModifier, arkBindTipsOptions);
+    return this;
+  }
+
   bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this {
     let arkBindMenu = new ArkBindMenu();
     arkBindMenu.content = content;
@@ -4826,20 +4914,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   accessibilityText(value: string): this {
-    if (typeof value === 'string') {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, value);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, value);
     return this;
   }
 
   accessibilityDescription(value: string): this {
-    if (typeof value !== 'string') {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, undefined);
-    } else {
-      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, value);
     return this;
   }
 

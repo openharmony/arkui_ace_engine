@@ -32,7 +32,6 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "base/view_data/hint_to_type_wrap.h"
-#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -43,18 +42,12 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
-#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -76,9 +69,6 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
-#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
-#include "core/components_ng/property/property.h"
-#include "core/components/theme/app_theme.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -596,14 +586,7 @@ public:
 
     float GetVerticalPaddingAndBorderSum() const;
 
-    double GetPercentReferenceWidth() const
-    {
-        auto host = GetHost();
-        if (host && host->GetGeometryNode() && host->GetGeometryNode()->GetParentLayoutConstraint().has_value()) {
-            return host->GetGeometryNode()->GetParentLayoutConstraint()->percentReference.Width();
-        }
-        return 0.0f;
-    }
+    double GetPercentReferenceWidth() const;
 
     BorderWidthProperty GetBorderWidthProperty() const;
     float GetBorderLeft(BorderWidthProperty border) const;
@@ -719,22 +702,9 @@ public:
         imeShown_ = keyboardShown;
 #endif
     }
-    void NotifyKeyboardClosedByUser() override
-    {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosedByUser");
-        isKeyboardClosedByUser_ = true;
-        FocusHub::LostFocusToViewRoot();
-        isKeyboardClosedByUser_ = false;
-    }
+    void NotifyKeyboardClosedByUser() override;
 
-    void NotifyKeyboardClosed() override
-    {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
-        CHECK_NULL_VOID(IsStopEditWhenCloseKeyboard()); // false when specified product
-        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
-            FocusHub::LostFocusToViewRoot();
-        }
-    }
+    void NotifyKeyboardClosed() override;
 
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
@@ -925,23 +895,9 @@ public:
         return dragContents_;
     }
 
-    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
-    {
-        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(context);
-        auto dragDropManager = context->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    }
+    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode);
 
-    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
-    {
-        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(context);
-        auto dragDropManager = context->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->RemoveDragFrameNode(frameNode->GetId());
-    }
+    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode);
 
     bool IsDragging() const
     {
@@ -950,23 +906,7 @@ public:
 
     bool BetweenSelectedPosition(GestureEvent& info);
 
-    bool BetweenSelectedPosition(const Offset& globalOffset) override
-    {
-        if (!IsSelected()) {
-            return false;
-        }
-        auto localOffset = ConvertGlobalToLocalOffset(globalOffset);
-        auto offsetX = IsTextArea() ? contentRect_.GetX() : textRect_.GetX();
-        auto offsetY = IsTextArea() ? textRect_.GetY() : contentRect_.GetY();
-        Offset offset = localOffset - Offset(offsetX, offsetY);
-        for (const auto& rect : selectController_->GetSelectedRects()) {
-            bool isInRange = rect.IsInRegion({ offset.GetX(), offset.GetY() });
-            if (isInRange) {
-                return true;
-            }
-        }
-        return false;
-    }
+    bool BetweenSelectedPosition(const Offset& globalOffset) override;
 
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
@@ -1080,17 +1020,7 @@ public:
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
-    void SetUnitNode(const RefPtr<NG::UINode>& unitNode)
-    {
-        if (unitNode_ && responseArea_) {
-            // clear old node
-            auto unitResponseArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
-            CHECK_NULL_VOID(unitResponseArea);
-            unitResponseArea->ClearArea();
-            responseArea_ = nullptr;
-        }
-        unitNode_ = unitNode;
-    }
+    void SetUnitNode(const RefPtr<NG::UINode>& unitNode);
     void AddCounterNode();
     void SetShowError();
 
@@ -1210,55 +1140,9 @@ public:
 
     void EditingValueFilterChange();
 
-    void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
-    {
-        if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
-            // close customKeyboard and request system keyboard
-            CloseCustomKeyboard();
-            customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
-            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
-            StartTwinkling();
-            return;
-        }
-        if (!customKeyboardBuilder_ && keyboardBuilder) {
-            // close system keyboard and request custom keyboard
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-            if (imeShown_) {
-                CloseKeyboard(true);
-                customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
-                RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
-                StartTwinkling();
-                return;
-            }
-#endif
-        }
-        customKeyboardBuilder_ = keyboardBuilder;
-    }
+    void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder);
 
-    void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder)
-    {
-        if (customKeyboard_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
-            // close customKeyboard and request system keyboard
-            CloseCustomKeyboard();
-            customKeyboard_ = keyboardBuilder; // refresh current keyboard
-            RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
-            StartTwinkling();
-            return;
-        }
-        if (!customKeyboard_ && keyboardBuilder) {
-            // close system keyboard and request custom keyboard
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-            if (imeShown_) {
-                CloseKeyboard(true);
-                customKeyboard_ = keyboardBuilder; // refresh current keyboard
-                RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::CUSTOM_KEYBOARD);
-                StartTwinkling();
-                return;
-            }
-#endif
-        }
-        customKeyboard_ = keyboardBuilder;
-    }
+    void SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder);
 
     bool HasCustomKeyboard() const
     {
@@ -1673,7 +1557,6 @@ public:
     {
         isFilterChanged_ = isFilterChanged;
     }
-    float GetFontSizePx();
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1788,6 +1671,7 @@ private:
     void CursorMoveOnClick(const Offset& offset);
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
+    void CancelDelayProcessOverlay();
     void ProcessOverlayAfterLayout(const OffsetF& prevOffset);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
@@ -1974,14 +1858,7 @@ private:
     void UpdateSelectionAndHandleVisibility();
     void ResetFirstClickAfterGetFocus();
     void ProcessAutoFillOnFocus();
-    bool IsStopEditWhenCloseKeyboard()
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, true);
-        auto context = host->GetContext();
-        CHECK_NULL_RETURN(context, true);
-        return !(context->GetIsFocusActive() && independentControlKeyboard_);
-    }
+    bool IsStopEditWhenCloseKeyboard();
     void SetIsEnableSubWindowMenu();
 
     RectF frameRect_;
@@ -2198,6 +2075,7 @@ private:
     std::u16string callbackOldContent_;
     PreviewText callbackOldPreviewText_;
     bool isFilterChanged_ = false;
+    std::optional<bool> showPasswordState_;
 };
 } // namespace OHOS::Ace::NG
 

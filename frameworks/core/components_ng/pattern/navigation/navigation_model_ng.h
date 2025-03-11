@@ -43,7 +43,8 @@ public:
     void SetHideTitleBar(bool hideTitleBar, bool animated = false) override;
     void SetHideNavBar(bool hideNavBar) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
-        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList) override;
+        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
+        bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar, bool animated = false) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
@@ -54,7 +55,9 @@ public:
     void SetToolbarOptions(NavigationToolbarOptions&& opt) override;
     void SetHideItemText(bool isHideItemText) override;
     void SetEnableToolBarAdaptation(bool enable) override;
+    void SetToolbarMorebuttonOptions(MoreButtonOptions&& opt) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
+    void SetMenuOptions(NG::NavigationMenuOptions&& opt) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) override;

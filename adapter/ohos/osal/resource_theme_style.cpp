@@ -78,6 +78,7 @@ static const std::unordered_set<std::string> stringAttrs = {
     "multiple_dialog_display",
     "menu_expand_display",
     "popup_double_border_enable",
+    "tips_double_border_enable",
     "dialog_expand_display",
     "show_password_directly",
     "textfield_show_handle",

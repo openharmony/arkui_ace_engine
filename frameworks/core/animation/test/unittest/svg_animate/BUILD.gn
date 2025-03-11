@@ -189,6 +189,7 @@ ohos_unittest("SvgAnimateTest") {
     "$ace_root/frameworks/base/geometry/transform_util.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/log/dump_log.cpp",
+    "$ace_root/frameworks/base/log/dump_recorder.cpp",
     "$ace_root/frameworks/base/memory/memory_monitor.cpp",
     "$ace_root/frameworks/base/thread/background_task_executor.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",

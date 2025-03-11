@@ -17,6 +17,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -622,5 +623,104 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem001, TestSize.Level1)
     ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 16)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 20)->IsActive());
+}
+
+/**
+ * @tc.name: LayoutCachedItem002
+ * @tc.desc: Change dataSource when overScroll at top.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, LayoutCachedItem002, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(1);
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetCachedCount(3, true);
+    CreateFixedItems(40);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(400.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 400);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 400);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 0);
+
+    // remove the last child.
+    frameNode_->RemoveChildAtIndex(39);
+    frameNode_->ChildrenUpdatedFrom(39);
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 463.02078);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 463.020782);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 0);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 0);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 2), 100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 4), 200);
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+}
+
+/**
+ * @tc.name: ShowCache007
+ * @tc.desc: change dataSource when overScroll at bottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, ShowCache007, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(1, true);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(7);
+    CreateDone();
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 6);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+
+    UpdateCurrentOffset(-300.0f);
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 4);
+    EXPECT_EQ(pattern_->info_.endIndex_, 5);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 3);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 3);
+    decltype(pattern_->info_.gridMatrix_) cmp = { {2, { {0, 2}, {1, 3} }}, {3, { {0, 4}, {1, 5} }} };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, cmp);
+
+    // FillNewLineForward in syncPreload.
+    UpdateCurrentOffset(100.0f);
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
+    EXPECT_EQ(pattern_->info_.endIndex_, 5);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 2);
+    cmp = { {0, { {0, 0}, {1, 1} }}, {1, { {0, 2}, {1, 3} }}, {2, { {0, 4}, {1, 5} }} };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, cmp);
 }
 } // namespace OHOS::Ace::NG

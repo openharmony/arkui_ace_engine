@@ -22,6 +22,7 @@ ace_unittest("tabs_test_ng") {
     "tab_bar_pattern_test_ng.cpp",
     "tab_bar_test_ng.cpp",
     "tab_bar_universal_attributes_test_ng.cpp",
+    "tabs_accessibility_test_ng.cpp",
     "tabs_attr_test_ng.cpp",
     "tabs_common_test_ng.cpp",
     "tabs_event_test_ng.cpp",

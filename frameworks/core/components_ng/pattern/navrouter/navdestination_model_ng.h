@@ -29,7 +29,8 @@ public:
     void SetTitle(const std::string& title, bool hasSubTitle) override;
     void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, const std::string& src,
-        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList) override;
+        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
+        bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
@@ -49,6 +50,7 @@ public:
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
     void SetHideItemText(bool isHideItemText) override;
     void SetToolBarOptions(NavigationToolbarOptions&& opt) override;
+    void SetToolbarMorebuttonOptions(MoreButtonOptions&& opt) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
@@ -65,6 +67,7 @@ public:
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
+    void SetMenuOptions(NavigationMenuOptions&& opt) override;
     void SetBackgroundColor(const Color& color, bool isVaild = true) override;
     void SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
@@ -93,6 +96,7 @@ public:
     static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden);
     static void SetCustomBackButtonNode(FrameNode* frameNode, FrameNode* backButtonNode);
     void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) override;
+    void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

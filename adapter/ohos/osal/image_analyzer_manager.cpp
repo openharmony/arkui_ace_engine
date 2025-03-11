@@ -17,6 +17,7 @@
 
 #include "core/common/ai/image_analyzer_adapter.h"
 #include "core/common/ai/image_analyzer_mgr.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 

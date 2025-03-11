@@ -17,7 +17,8 @@ import display from '@ohos.display';
 import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node'
-import { SymbolGlyphModifier } from '@kit.ArkUI';
+import componentUtils from '@ohos.arkui.componentUtils';
+import { SymbolGlyphModifier, Configuration } from '@kit.ArkUI';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -66,6 +67,7 @@ interface CloseButtonTheme {
   backgroundColor: ResourceColor;
   symbolStyle: SymbolGlyphModifier;
   symbolSize: number;
+  accessibilityMessage: Resource;
 }
 
 interface WindowsTheme {
@@ -159,7 +161,8 @@ export const defaultTheme: PopupTheme = {
     fillColor: $r('sys.color.icon_secondary'),
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
-    symbolSize: 18
+    symbolSize: 18,
+    accessibilityMessage: $r('sys.string.off_used_for_accessibility_text')
   },
 };
 
@@ -538,7 +541,7 @@ export struct PopupComponent {
       this.beforeScreenStatus = this.currentScreenStatus
       return scrollMaxHeight;
     }
-    scrollMaxHeight = this.applyHeight
+    scrollMaxHeight = px2vp(componentUtils.getRectangleById('applyContent').size?.height)
     scrollMaxHeight -= this.titleHeight
     scrollMaxHeight -= this.buttonHeight
     scrollMaxHeight -= this.theme.windows.padding.top.value
@@ -708,22 +711,24 @@ export struct PopupComponent {
               .fontSize(this.getTitleFontSize())
               .fontColor(this.getTitleFontColor())
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
+              .textAlign(Configuration.getLocale().dir === 'rtl' ? TextAlign.End : TextAlign.Start)
             if (this.showClose || this.showClose === void (0)) {
               Button() {
-               SymbolGlyph()
+                SymbolGlyph()
                   .fontColor([this.getCloseButtonFillColor()])
                   .fontSize(this.getCloseButtonSymbolSize())
                   .direction(this.popupDirection)
                   .attributeModifier(this.theme.closeButton.symbolStyle)
                   .focusable(true)
                   .draggable(false)
-                  }
+              }
               .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
               .height(this.getCloseButtonHeight())
               .padding(this.getCloseButtonPadding())
               .backgroundColor(this.closeButtonBackgroundColor)
               .flexShrink(0)
+              .accessibilityText(this.theme.closeButton.accessibilityMessage)
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
@@ -764,6 +769,7 @@ export struct PopupComponent {
           .scrollable(ScrollDirection.Vertical)
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
           .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: false })
+
           Flex({ wrap: FlexWrap.Wrap }) {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
               Button() {
@@ -884,6 +890,7 @@ export struct PopupComponent {
               .padding(this.getCloseButtonPadding())
               .backgroundColor(this.closeButtonBackgroundColor)
               .flexShrink(0)
+              .accessibilityText(this.theme.closeButton.accessibilityMessage)
               .onHover((isHover: boolean) => {
                 if (isHover) {
                   this.closeButtonBackgroundColor = this.getCloseButtonHoverColor()
@@ -986,6 +993,7 @@ export struct PopupComponent {
     .padding(this.getWindowsPadding())
     .constraintSize(this.applySizeOptions)
     .constraintSize(this.getApplyMaxSize())
+    .key('applyContent')
     .onAreaChange((_, rect) => {
       this.applyHeight = rect.height as number
     })

@@ -1872,7 +1872,24 @@ struct CJUIWebModifier {
     void (*setWebOptions)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setWebSrcResources)(ArkUINodeHandle node, ArkUI_Int32 id, ArkUI_Int32 type, ArkUI_CharPtr name,
         ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
-    void (*setWebMixedMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setJavaScriptAccess)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetJavaScriptAccess)(ArkUINodeHandle node);
+    void (*setFileAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetFileAccessEnabled)(ArkUINodeHandle node);
+    void (*setDomStorageAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetDomStorageAccessEnabled)(ArkUINodeHandle node);
+    void (*setMixedMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetMixedMode)(ArkUINodeHandle node);
+    void (*setZoomAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetZoomAccessEnabled)(ArkUINodeHandle node);
+    void (*setCacheMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetCacheMode)(ArkUINodeHandle node);
+    void (*setDarkMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDarkMode)(ArkUINodeHandle node);
+    void (*setMultiWindowAccessEnabled)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetMultiWindowAccessEnabled)(ArkUINodeHandle node);
+    void (*setAllowWindowOpenMethod)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAllowWindowOpenMethod)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {
@@ -2767,6 +2784,8 @@ struct CJUISelectModifier {
     void (*resetSelectDividerNull)(ArkUINodeHandle node);
     void (*setSelectDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetSelectDirection)(ArkUINodeHandle node);
+    void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 mode);
+    void (*resetAvoidance)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

@@ -270,18 +270,18 @@ bool DynamicPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     auto& node = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(node, false);
     auto size = node->GetContentSize();
-    float density = 1.0f;
-    int32_t orientation = 0;
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
-        orientation = static_cast<int32_t>(defaultDisplay->GetOrientation());
-    }
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
+    float density = pipeline->GetDensity();
+    int32_t orientation = 0;
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (container) {
+        orientation = static_cast<int32_t>(container->GetOrientation());
+    }
+
     auto animationOption = pipeline->GetSyncAnimationOption();
     auto parentGlobalOffset = dirty->GetParentGlobalOffsetWithSafeArea(true, true) +
         dirty->GetFrameRectWithSafeArea(true).GetOffset();
@@ -341,7 +341,7 @@ void DynamicPattern::OnDetachContext(PipelineContext *context)
 {
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
-    PLATFORM_LOGI("OnAttachContext instanceId: %{public}d.", instanceId);
+    PLATFORM_LOGI("OnDetachContext instanceId: %{public}d.", instanceId);
     UnRegisterPipelineEvent(instanceId);
 }
 

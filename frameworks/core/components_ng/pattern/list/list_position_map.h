@@ -510,6 +510,26 @@ public:
         }
         return { endIndex, rowHeight };
     }
+
+    void ReversePosMap()
+    {
+        totalHeight_ = 0.0f;
+        float curRowHeight = posMap_.begin()->second.mainSize;
+        std::map<int32_t, PositionInfo> posMap;
+        for (int32_t index = totalItemCount_ - 1; index >= 0; --index) {
+            auto posIndex = totalItemCount_ - index - 1;
+            posMap[posIndex] = {totalHeight_, posMap_[posIndex].mainSize};
+            if (index > 0 && !NearEqual(posMap_[index].mainPos, posMap_[index - 1].mainPos)) {
+                curRowHeight = std::max(posMap_[posIndex].mainSize, curRowHeight);
+                totalHeight_ += (curRowHeight + space_);
+                curRowHeight = 0.0f;
+            } else {
+                curRowHeight = std::max(posMap_[posIndex].mainSize, curRowHeight);
+            }
+        }
+        posMap_ = std::move(posMap);
+        totalHeight_ += curRowHeight;
+    }
 protected:
     RefPtr<ListChildrenMainSize> childrenSize_;
     ListChangeFlag dirty_ = LIST_NO_CHANGE;

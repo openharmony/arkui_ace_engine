@@ -52,6 +52,7 @@ public:
     static void SetSpace(const JSCallbackInfo& info);
     static void SetArrowPosition(const JSCallbackInfo& info);
     static void SetMenuAlign(const JSCallbackInfo& info);
+    static void SetAvoidance(const JSCallbackInfo& info);
     static void SetOptionWidth(const JSCallbackInfo& info);
     static void SetOptionHeight(const JSCallbackInfo& info);
     static void SetOptionWidthFitTrigger(const JSCallbackInfo& info);
@@ -62,6 +63,7 @@ public:
     static void SetControlSize(const JSCallbackInfo& info);
     static void SetDirection(const std::string& dir);
     static void BackgroundColor(const JSCallbackInfo& info);
+    static void SetDividerStyle(const JSCallbackInfo& info);
 
     static void ParseFontSize(const JSRef<JSVal>& jsValue, SelectFontType type);
     static void ParseFontWeight(const JSRef<JSVal>& jsValue, SelectFontType type);

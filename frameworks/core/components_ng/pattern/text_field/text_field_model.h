@@ -191,6 +191,7 @@ public:
     virtual int32_t AddText(std::u16string text, int32_t offset) { return 0; }
     virtual void DeleteText(int32_t start, int32_t end) {}
     virtual SelectionInfo GetSelection() { return {}; }
+    virtual void ClearPreviewText() {}
 
     void SetGetCaretIndex(std::function<int32_t()>&& setGetCaretIndex)
     {
@@ -239,7 +240,7 @@ public:
                 auto nextChar = value.substr(i, 1);
                 auto mapTuple = escapeMap.find(nextChar);
                 if (mapTuple == escapeMap.end()) {
-                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\%{private}s failed", nextChar.c_str());
+                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\ failed");
                     return false;
                 }
                 ch = mapTuple->second;

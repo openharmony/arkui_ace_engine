@@ -1060,14 +1060,9 @@ void AccessibilityProperty::SaveAccessibilityVirtualNode(const RefPtr<UINode>& n
     accessibilityVirtualNode_ = node;
 }
 
-RefPtr<UINode> AccessibilityProperty::GetAccessibilityVirtualNode()
+const RefPtr<UINode>& AccessibilityProperty::GetAccessibilityVirtualNode() const
 {
     return accessibilityVirtualNode_;
-}
-
-NG::UINode* AccessibilityProperty::GetAccessibilityVirtualNodePtr()
-{
-    return Referenced::RawPtr(accessibilityVirtualNode_);
 }
 
 bool AccessibilityProperty::HasAccessibilityVirtualNode() const
@@ -1277,6 +1272,16 @@ void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
 {
     // true means node consume barrierfree hover event prior to brothers
     accessibilityHoverPriority_ = hoverPriority;
+}
+
+void AccessibilityProperty::SetFocusDrawLevel(int32_t drawLevel)
+{
+    focusDrawLevel_ = static_cast<FocusDrawLevel>(drawLevel);
+}
+
+int32_t AccessibilityProperty::GetFocusDrawLevel()
+{
+    return static_cast<int32_t>(focusDrawLevel_);
 }
 
 } // namespace OHOS::Ace::NG

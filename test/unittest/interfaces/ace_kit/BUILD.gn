@@ -25,6 +25,7 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
     "$ace_root/test/mock/adapter/mock_system_bar_style_ohos.cpp",
+    "$ace_root/test/mock/adapter/mock_ui_session_manager.cpp",
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
@@ -83,6 +84,7 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_utils.cpp",
     "$ace_root/test/mock/core/package/mock_package_event_proxy.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_utils.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",
@@ -153,6 +155,7 @@ ohos_unittest("ace_kit_test") {
 
   sources += [
     "abstract_view_factory_test.cpp",
+    "box_layout_algorithm_test.cpp",
     "content_modifier_test.cpp",
     "frame_node_test.cpp",
     "view_stack_processor_test.cpp",

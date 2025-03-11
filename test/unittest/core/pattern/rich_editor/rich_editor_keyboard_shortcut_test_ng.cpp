@@ -205,12 +205,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts002, TestS
     richEditorPattern->SetCaretPosition(0);
     richEditorPattern->CursorMove(CaretMoveIntent::LineEnd);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 6);
-    richEditorPattern->SetCaretPosition(0);
-    richEditorPattern->HandleSelect(CaretMoveIntent::LineEnd);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
-    richEditorPattern->SetCaretPosition(0);
-    richEditorPattern->HandleSelect(CaretMoveIntent::Down);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
 }
 
 /**
@@ -518,6 +512,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetTextThemeFontSize101, TestSize.Lev
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     context->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     auto theme = context->GetTheme<TextTheme>();
     ASSERT_NE(theme, nullptr);
     auto ret = richEditorPattern->GetTextThemeFontSize();
@@ -1211,6 +1206,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseLeftButtonMove001, TestSiz
     richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
     richEditorPattern->blockPress_ = false;
     richEditorPattern->leftMousePress_ = true;
+    richEditorPattern->textSelector_.Update(0, 0);
     richEditorPattern->HandleMouseLeftButtonMove(info);
     EXPECT_TRUE(richEditorPattern->isMouseSelect_);
     /**

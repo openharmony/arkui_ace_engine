@@ -100,9 +100,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     CHECK_NULL_RETURN(pattern, dialog);
     pattern->SetDialogProperties(param);
 
-    auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
-    if ((isSubWindow && dialogLayoutProp->GetIsModal().value_or(true)) ||
-        !dialogLayoutProp->GetIsModal().value_or(true)) {
+    if (dialogLayoutProp->GetShowInSubWindowValue(false) || !dialogLayoutProp->GetIsModal().value_or(true)) {
         dialogContext->UpdateBackgroundColor(Color(0x00000000));
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
@@ -110,6 +108,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     if (dialogLayoutProp->GetIsScenceBoardDialog().value_or(false)) {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
+    SetDialogAccessibilityHoverConsume(dialog);
     // set onCancel callback
     auto hub = dialog->GetEventHub<DialogEventHub>();
     CHECK_NULL_RETURN(hub, dialog);
@@ -144,6 +143,26 @@ std::string DialogView::GetDialogTag(const DialogProperties& param)
             break;
     }
     return tag;
+}
+
+void DialogView::SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dialog)
+{
+    auto dialogAccessibilityProperty = dialog->GetAccessibilityProperty<DialogAccessibilityProperty>();
+    CHECK_NULL_VOID(dialogAccessibilityProperty);
+    dialogAccessibilityProperty->SetAccessibilityHoverConsume(
+        [weak = AceType::WeakClaim(AceType::RawPtr(dialog))](const NG::PointF& point) {
+            auto dialogNode = weak.Upgrade();
+            CHECK_NULL_RETURN(dialogNode, true);
+            auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
+            CHECK_NULL_RETURN(dialogLayoutProp, true);
+            auto pattern = dialogNode->GetPattern<DialogPattern>();
+            CHECK_NULL_RETURN(pattern, true);
+            if (!dialogLayoutProp->GetIsModal().value_or(true) ||
+                (dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow())) {
+                return false;
+            }
+            return true;
+        });
 }
 
 } // namespace OHOS::Ace::NG

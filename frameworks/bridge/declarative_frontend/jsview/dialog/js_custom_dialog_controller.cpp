@@ -100,6 +100,15 @@ void ParseCustomDialogLevelOrder(DialogProperties& properties, JSRef<JSObject> o
     properties.levelOrder = std::make_optional(order);
 }
 
+void ParseCustomDialogFocusable(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto focusableValue = obj->GetProperty("focusable");
+    if (!focusableValue->IsBoolean()) {
+        return;
+    }
+    properties.focusable = focusableValue->ToBoolean();
+}
+
 static std::atomic<int32_t> controllerId = 0;
 void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 {
@@ -314,6 +323,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 
         // Parse levelOrder.
         ParseCustomDialogLevelOrder(instance->dialogProperties_, constructorArg);
+        ParseCustomDialogFocusable(instance->dialogProperties_, constructorArg);
 
         instance->dialogProperties_.controllerId = controllerId.fetch_add(1, std::memory_order_relaxed);
         JSViewAbstract::SetDialogProperties(constructorArg, instance->dialogProperties_);

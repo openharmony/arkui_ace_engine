@@ -31,7 +31,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -41,6 +40,7 @@
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 namespace OHOS::Ace::NG {
@@ -73,6 +73,10 @@ const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
 const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
 } // namespace
+
+TabBarPattern::TabBarPattern() = default;
+
+TabBarPattern::~TabBarPattern() = default;
 
 void TabBarPattern::SetController(const RefPtr<SwiperController>& controller)
 {

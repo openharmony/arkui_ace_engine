@@ -15,26 +15,12 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
-#include <cerrno>
-#include <fstream>
-#include <functional>
-#include <memory>
-#include <regex>
-
-#include "ability_context.h"
-#include "ability_info.h"
 #include "auto_fill_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "js_native_api.h"
-#include "pointer_event.h"
 #include "scene_board_judgement.h"
-#include "ui/base/utils/utils.h"
 #include "ui/rs_surface_node.h"
 #include "ui_extension_context.h"
-#include "window_manager.h"
-#include "wm/wm_common.h"
 
-#include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
@@ -48,45 +34,20 @@
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "adapter/ohos/osal/window_utils.h"
 #include "base/i18n/localization.h"
-#include "base/json/json_util.h"
-#include "base/log/ace_trace.h"
-#include "base/log/dump_log.h"
-#include "base/log/event_report.h"
-#include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
-#include "base/log/log.h"
-#include "base/log/log_wrapper.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/task_dependency_manager.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/device_config.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
 #include "bridge/card_frontend/card_frontend.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "bridge/js_frontend/js_frontend.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
-#include "core/common/asset_manager_impl.h"
-#include "core/common/container.h"
-#include "core/common/container_consts.h"
-#include "core/common/container_scope.h"
-#include "core/common/platform_window.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/window.h"
-#include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -126,6 +87,7 @@ const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
 const std::string ASSET_LIBARCH_PATH = "/lib/arm";
 #endif
+const std::string THEME_JSON = "theme_config.json";
 
 #ifndef NG_BUILD
 constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
@@ -139,6 +101,30 @@ constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_
 const char* GetDeclarativeSharedLibrary()
 {
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
+}
+
+void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const RefPtr<PipelineBase>& pipelineContext)
+{
+    std::string themeJsonContent;
+    bool loadThemeJsonFlag = OHOS::Ace::Framework::GetAssetContentImpl(assetManager, THEME_JSON, themeJsonContent);
+    if (loadThemeJsonFlag) {
+        auto themeRootJson = JsonUtil::ParseJsonString(themeJsonContent);
+        if (themeRootJson) {
+            auto systemThemeId = themeRootJson->GetInt("systemTheme", -1);
+            if (systemThemeId != -1) {
+                auto themeManager = pipelineContext->GetThemeManager();
+                themeManager->LoadSystemTheme(systemThemeId);
+                auto checkTheme = themeManager->GetSystemTheme();
+                LOGI("get systemTheme id from json success, systemTheme id = %{public}d", checkTheme);
+            } else {
+                LOGW("get systemTheme id from json failed, not a number");
+            }
+        } else {
+            LOGW("get systemTheme id from json failed, parse theme json file failed");
+        }
+    } else {
+        LOGW("get systemTheme id from json failed, %{public}s not found", THEME_JSON.c_str());
+    }
 }
 
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
@@ -155,12 +141,12 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         bundleName = abilityInfo->bundleName;
         moduleName = abilityInfo->moduleName;
     }
-
+    int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     if (context && context->GetResourceManager()) {
         resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
-    } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName)) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName);
+    } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, instanceId)) {
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId);
     }
 
     if (resourceAdapter == nullptr) {
@@ -171,6 +157,7 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     ThemeConstants::InitDeviceType();
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     pipelineContext->SetThemeManager(themeManager);
+    LoadSystemThemeFromJson(assetManager, pipelineContext);
     themeManager->SetColorScheme(colorScheme);
     themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
@@ -181,9 +168,10 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
 
     auto defaultBundleName = "";
     auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter, true);
+    ResourceManager::GetInstance().AddResourceAdapter(
+        defaultBundleName, defaultModuleName, instanceId, resourceAdapter, true);
     if (!bundleName.empty() && !moduleName.empty()) {
-        ResourceManager::GetInstance().RegisterMainResourceAdapter(bundleName, moduleName, resourceAdapter);
+        ResourceManager::GetInstance().RegisterMainResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter);
     }
 }
 
@@ -1301,6 +1289,7 @@ void AceContainer::SetView(const RefPtr<AceView>& view, double density, int32_t 
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    window->Init();
 #else
     auto platformWindow = PlatformWindow::Create(view);
     CHECK_NULL_VOID(platformWindow);
@@ -1326,6 +1315,7 @@ UIContentErrorCode AceContainer::SetViewNew(
         container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+        window->Init();
         container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
 
@@ -1446,7 +1436,8 @@ public:
     virtual ~FillRequestCallback() = default;
     void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
     {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, pageUrl=[%{private}s]", viewData.pageUrl.c_str());
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called OnFillRequestSuccess, pageUrl=[%{private}zu]",
+            viewData.pageUrl.size());
         ProcessOnFinish();
         auto pipelineContext = pipelineContext_.Upgrade();
         CHECK_NULL_VOID(pipelineContext);
@@ -2077,7 +2068,7 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
         DumpLog::GetInstance().Print(
             1, "RTL: " + std::string(AceApplicationInfo::GetInstance().IsRightToLeft() ? "true" : "false"));
         DumpLog::GetInstance().Print(
-            1, "ColorMode: " + std::string(SystemProperties::GetColorMode() == ColorMode::DARK ? "Dark" : "Light"));
+            1, "ColorMode: " + std::string(GetColorMode() == ColorMode::DARK ? "Dark" : "Light"));
         DumpLog::GetInstance().Print(1,
             "DeviceOrientation: " + std::string(SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE
                                                     ? "Landscape"
@@ -2275,7 +2266,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
         UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
-        pipeline->SaveTranslateManager(uiTranslateManager);
+        if (pipeline) {
+            pipeline->SaveTranslateManager(uiTranslateManager);
+        } else {
+            LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
+        }
     } else {
         LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
@@ -2288,7 +2283,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
-    pipeline->SaveTranslateManager(uiTranslateManager);
+    if (pipeline) {
+        pipeline->SaveTranslateManager(uiTranslateManager);
+    } else {
+        LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
+    }
 #endif
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
@@ -2532,6 +2531,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         auto uiExtManager = ngPipeline->GetUIExtensionManager();
         CHECK_NULL_VOID(uiExtManager);
         uiExtManager->SendPageModeRequestToHost(ngPipeline);
+        auto accessibilityManager = ngPipeline->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->RegisterUIExtGetPageModeCallback(uiExtManager);
     }
 }
 
@@ -2832,7 +2834,7 @@ void AceContainer::ReleaseResourceAdapter()
         std::string bundleName;
         std::string moduleName;
         DecodeBundleAndModule(encode, bundleName, moduleName);
-        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
+        ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, instanceId_);
     }
     resAdapterRecord_.clear();
 
@@ -2841,7 +2843,7 @@ void AceContainer::ReleaseResourceAdapter()
         if (runtimeContext) {
             auto bundleName = runtimeContext->GetBundleName();
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
-            ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
+            ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, instanceId_);
         }
     }
 }
@@ -2924,17 +2926,18 @@ void AceContainer::ProcessColorModeUpdate(
     // clear cache of ark theme instances when configuration updates
     NG::TokenThemeStorage::GetInstance()->CacheClear();
     if (parsedConfig.colorMode == "dark") {
-        SystemProperties::SetColorMode(ColorMode::DARK);
+        SetColorMode(ColorMode::DARK);
         SetColorScheme(ColorScheme::SCHEME_DARK);
         resConfig.SetColorMode(ColorMode::DARK);
     } else {
-        SystemProperties::SetColorMode(ColorMode::LIGHT);
+        SetColorMode(ColorMode::LIGHT);
         SetColorScheme(ColorScheme::SCHEME_LIGHT);
         resConfig.SetColorMode(ColorMode::LIGHT);
     }
 }
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
 {
     if (!parsedConfig.IsValid()) {
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
@@ -2952,9 +2955,11 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
-    themeManager->UpdateConfig(resConfig);
-    if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, !parsedConfig.themeTag.empty());
+    if (!abilityLevel) {
+        themeManager->UpdateConfig(resConfig);
+        if (SystemProperties::GetResourceDecoupling()) {
+            ResourceManager::GetInstance().UpdateResourceConfig(resConfig, !parsedConfig.themeTag.empty());
+        }
     }
     themeManager->LoadResourceThemes();
     auto front = GetFrontend();
@@ -3403,13 +3408,20 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     MMI::PointerEvent::PointerItem pointerItem;
     auto iter = currentEvents_.find(dragPointerEvent.pointerId);
     if (iter == currentEvents_.end()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find PointerEvent, pointerId: %{public}d.", dragPointerEvent.pointerId);
         return false;
     }
 
     auto currentPointerEvent = iter->second;
     CHECK_NULL_RETURN(currentPointerEvent, false);
     dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
-    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem) || !pointerItem.IsPressed()) {
+    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem)) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find pointerItem, pointerId: %{public}d.", dragPointerEvent.pointerId);
+        return false;
+    }
+    if (!pointerItem.IsPressed()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Current pointer is not pressed, pointerId: %{public}d.",
+            dragPointerEvent.pointerId);
         return false;
     }
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
@@ -3463,6 +3475,8 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
     }
     dragPointerEvent.displayX = pointerItem.GetDisplayX();
     dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    dragPointerEvent.windowX = pointerItem.GetWindowX();
+    dragPointerEvent.windowY = pointerItem.GetWindowY();
     return true;
 }
 
@@ -3703,9 +3717,7 @@ void AceContainer::NotifyDensityUpdate(double density)
     if (frontend) {
         frontend->FlushReload();
     }
-    if (fullUpdate) {
-        UpdateResourceDensity(density);
-    }
+    UpdateResourceDensity(density, fullUpdate);
     ConfigurationChange configurationChange { .dpiUpdate = true };
     pipelineContext_->FlushReload(configurationChange, fullUpdate);
 }
@@ -3730,24 +3742,24 @@ void AceContainer::RenderLayoutBoundary(bool isDebugBoundary)
 void AceContainer::AddWatchSystemParameter()
 {
     auto task = [weak = WeakClaim(this)] {
-        auto weakPtr = weak.Upgrade();
-        CHECK_NULL_VOID(weakPtr);
-        auto container = static_cast<void*>(weakPtr.GetRawPtr());
+        auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
+        auto rawPtr = static_cast<void*>(Referenced::RawPtr(container));
+        CHECK_NULL_VOID(rawPtr);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_TRACE_LAYOUT_KEY, container, SystemProperties::EnableSystemParameterTraceLayoutCallback);
+            ENABLE_TRACE_LAYOUT_KEY, rawPtr, SystemProperties::EnableSystemParameterTraceLayoutCallback);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_TRACE_INPUTEVENT_KEY, container, SystemProperties::EnableSystemParameterTraceInputEventCallback);
-        SystemProperties::AddWatchSystemParameter(ENABLE_SECURITY_DEVELOPERMODE_KEY, container,
+            ENABLE_TRACE_INPUTEVENT_KEY, rawPtr, SystemProperties::EnableSystemParameterTraceInputEventCallback);
+        SystemProperties::AddWatchSystemParameter(ENABLE_SECURITY_DEVELOPERMODE_KEY, rawPtr,
             SystemProperties::EnableSystemParameterSecurityDevelopermodeCallback);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_DEBUG_STATEMGR_KEY, container, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
+            ENABLE_DEBUG_STATEMGR_KEY, rawPtr, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_DEBUG_BOUNDARY_KEY, container, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
-        SystemProperties::AddWatchSystemParameter(ENABLE_PERFORMANCE_MONITOR_KEY, container,
+            ENABLE_DEBUG_BOUNDARY_KEY, rawPtr, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+        SystemProperties::AddWatchSystemParameter(ENABLE_PERFORMANCE_MONITOR_KEY, rawPtr,
             SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
         SystemProperties::AddWatchSystemParameter(
-            IS_FOCUS_ACTIVE_KEY, container, SystemProperties::OnFocusActiveChanged);
+            IS_FOCUS_ACTIVE_KEY, rawPtr, SystemProperties::OnFocusActiveChanged);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
@@ -3780,14 +3792,14 @@ void AceContainer::UpdateResourceOrientation(int32_t orientation)
     SetResourceConfiguration(resConfig);
 }
 
-void AceContainer::UpdateResourceDensity(double density)
+void AceContainer::UpdateResourceDensity(double density, bool isUpdateResConfig)
 {
     auto resConfig = GetResourceConfiguration();
     resConfig.SetDensity(density);
-    if (SystemProperties::GetResourceDecoupling()) {
+    SetResourceConfiguration(resConfig);
+    if (SystemProperties::GetResourceDecoupling() && isUpdateResConfig) {
         ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
     }
-    SetResourceConfiguration(resConfig);
 }
 
 void AceContainer::RegisterUIExtDataConsumer()

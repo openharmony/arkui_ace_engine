@@ -740,7 +740,9 @@ void ContainerModalPatternEnhance::SetColorConfigurationUpdate()
     TAG_LOGI(AceLogTag::ACE_APPBAR, "SetColorConfigurationUpdate");
     auto customButtonNode = GetCustomButtonNode();
     CHECK_NULL_VOID(customButtonNode);
-    auto isDark = SystemProperties::GetColorMode() == ColorMode::DARK;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto isDark = context->GetColorMode() == ColorMode::DARK;
     TAG_LOGI(AceLogTag::ACE_APPBAR, "SetColorConfigurationUpdate isDark = %{public}d", isDark);
     customButtonNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION, isDark);
 }
@@ -917,9 +919,11 @@ bool ContainerModalPatternEnhance::GetContainerModalComponentRect(RectF& contain
 
 void ContainerModalPatternEnhance::CallMenuWidthChange(int32_t resId)
 {
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
     std::string text = "";
     if (SystemProperties::GetResourceDecoupling()) {
-        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter(context->GetInstanceId());
         text = resAdapter->GetString(resId);
     }
     if (text.empty()) {

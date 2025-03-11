@@ -527,9 +527,9 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest024, TestSize.Level1)
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     // constrcuct params
     RefPtr<PixelMap> ret = rosenRenderContext->GetThumbnailPixelMap(false);
-    EXPECT_EQ(ret.GetRawPtr() == nullptr, true);
+    EXPECT_EQ(Referenced::RawPtr(ret) == nullptr, true);
     RefPtr<PixelMap> ret2 = rosenRenderContext->GetThumbnailPixelMap(true);
-    EXPECT_EQ(ret.GetRawPtr() == nullptr, true);
+    EXPECT_EQ(Referenced::RawPtr(ret) == nullptr, true);
 }
 
 /**

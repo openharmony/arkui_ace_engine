@@ -29,6 +29,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/common/display_info.h"
 
 namespace OHOS::Ace {
 constexpr int32_t INSTANCE_ID_BIT = 24;
@@ -83,6 +84,7 @@ public:
     void RemoveParentContainerId(int32_t containerId);
     int32_t GetParentContainerId(int32_t containerId);
     int32_t GetSubContainerId(int32_t parentContainerId);
+    const std::vector<int32_t> GetAllSubContainerId(int32_t parentContainerId);
 
     void AddSubwindow(int32_t instanceId, RefPtr<Subwindow>);
     void RemoveSubwindow(int32_t instanceId, SubwindowType windowType);
@@ -117,6 +119,9 @@ public:
     void ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
+    void ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+        int32_t appearingTimeWithContinuousOperation);
+    void HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
@@ -206,6 +211,7 @@ public:
     void DeleteSelectOverlayHotAreas(const int32_t instanceId, int32_t nodeId);
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
     void OnDestroyContainer(int32_t subInstanceId);
+    bool GetIsExpandDisplay();
     const RefPtr<Subwindow> GetSubwindowByType(int32_t instanceId, SubwindowType windowType);
     void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow);
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);

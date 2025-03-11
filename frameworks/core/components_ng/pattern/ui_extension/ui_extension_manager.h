@@ -167,6 +167,7 @@ public:
 
     void NotifyWindowMode(Rosen::WindowMode mode);
 
+    void SendPageModeToProvider(const int32_t nodeId, const std::string& pageMode);
     void SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline);
     void TransferAccessibilityRectInfo();
     void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);

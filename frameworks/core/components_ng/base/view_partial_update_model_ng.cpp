@@ -109,16 +109,16 @@ bool ViewPartialUpdateModelNG::AllowReusableV2Descendant(const WeakPtr<AceType>&
 {
     // check if this @ReusbaleV2 @ComponentV2 instance is inside RepeatVirtualScroll
     // and created within a .template builder function
-    auto weak = AceType::DynamicCast<NG::CustomNode>(viewNode);
+    // cast to UINode as here viewNode can be instance of CustomMeasureLayoutNode
+    auto weak = AceType::DynamicCast<NG::UINode>(viewNode);
     RefPtr<UINode> node = weak.Upgrade();
     CHECK_NULL_RETURN(node, false);
 
-    node = node->GetParent();
-    while (node && (node->GetTag() != V2::JS_VIEW_ETS_TAG)) {
-        if (AceType::DynamicCast<RepeatVirtualScrollNode>(node) != nullptr) {
+    while (node->GetParent() && (node->GetParent()->GetTag() != V2::JS_VIEW_ETS_TAG)) {
+        if (AceType::DynamicCast<RepeatVirtualScrollNode>(node->GetParent()) != nullptr) {
             break;
         }
-        if (AceType::DynamicCast<RepeatVirtualScroll2Node>(node) != nullptr) {
+        if (AceType::DynamicCast<RepeatVirtualScroll2Node>(node->GetParent()) != nullptr) {
             break;
         }
         node = node->GetParent();

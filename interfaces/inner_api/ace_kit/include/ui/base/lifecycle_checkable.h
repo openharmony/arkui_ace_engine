@@ -29,6 +29,7 @@ public:
     public:
         PtrHolder(T* ptr) : ptr_(ptr)
         {
+            ptr_->lastStack_ = &ptr;
             ++ptr_->usingCount_;
         }
         ~PtrHolder()
@@ -50,6 +51,7 @@ protected:
 
 private:
     std::atomic_int usingCount_ = 0;
+    std::atomic<void*> lastStack_ = nullptr;
 };
 } // namespace OHOS::Ace
 

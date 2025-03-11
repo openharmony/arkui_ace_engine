@@ -124,8 +124,6 @@ CustomPaintPaintMethod::CustomPaintPaintMethod()
     apiVersion_ = Container::GetCurrentApiTargetVersion();
     // The default value of the font size in canvas is 14px.
     SetMeasureFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetMeasureTextAlign(TextAlign::START);
 }
 
 bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const std::string& filterParam)
@@ -521,7 +519,7 @@ void CustomPaintPaintMethod::DrawImageInternal(const Ace::CanvasImage& info, con
     }
     if (HasShadow()) {
         bool isSupported = (info.flag == DrawImageType::THREE_PARAMS) &&
-            (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+            (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
         auto width = info.dx + (isSupported ? image->GetWidth() : info.dWidth);
         auto height = info.dy + (isSupported ? image->GetHeight() : info.dHeight);
         RSRect rsRect = RSRect(info.dx, info.dy, width, height);
@@ -730,7 +728,7 @@ void CustomPaintPaintMethod::Fill(const RefPtr<CanvasPath2D>& path)
     ParsePath2D(path);
     Path2DFill();
     rsPath2d_.Reset();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         isPath2dChanged_ = false;
     }
 }
@@ -797,7 +795,7 @@ void CustomPaintPaintMethod::Stroke(const RefPtr<CanvasPath2D>& path)
     ParsePath2D(path);
     Path2DStroke();
     rsPath2d_.Reset();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         isPath2dChanged_ = false;
     }
 }
@@ -842,7 +840,7 @@ void CustomPaintPaintMethod::Clip(const RefPtr<CanvasPath2D>& path)
     ParsePath2D(path);
     Path2DClip();
     rsPath2d_.Reset();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         isPath2dChanged_ = false;
     }
 }
@@ -856,7 +854,7 @@ void CustomPaintPaintMethod::Path2DClip()
 void CustomPaintPaintMethod::BeginPath()
 {
     rsPath_.Reset();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         isPathChanged_ = false;
     }
 }
@@ -1564,7 +1562,7 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1594,7 +1592,7 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1625,7 +1623,7 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1670,7 +1668,7 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1699,7 +1697,7 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1726,7 +1724,7 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
     matrix[18] = percentNum;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1750,7 +1748,7 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -1775,7 +1773,7 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
     matrix[18] = 1;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         colorMatrix_.PostConcat(colorMatrix);
     } else {
         colorMatrix_.PreConcat(colorMatrix);
@@ -2000,8 +1998,6 @@ void CustomPaintPaintMethod::ResetMeasureTextState()
     measureTextState_ = PaintState();
     // The default value of the font size in canvas is 14px.
     SetMeasureFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetMeasureTextAlign(TextAlign::START);
 }
 
 void CustomPaintPaintMethod::RotateMatrix(double angle)
@@ -2062,8 +2058,6 @@ void CustomPaintPaintMethod::ResetStates()
     state_.globalState = GlobalPaintState();
     // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetDefaultTextAlign();
     state_.shadow = Shadow();
     imageBrush_ = RSBrush();
     rsPath_.Reset();
@@ -2076,7 +2070,7 @@ void CustomPaintPaintMethod::ResetStates()
     colorMatrix_ = RSColorMatrix();
     colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
     blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         isPathChanged_ = false;
         isPath2dChanged_ = false;
     }
@@ -2128,7 +2122,7 @@ TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, 
 {
 #ifndef ACE_UNITTEST
     PaintState paintState =
-        (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) ? measureTextState_ : state;
+        (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) ? measureTextState_ : state;
     TextMetrics textMetrics;
     RSParagraphStyle style;
     style.textAlign = Constants::ConvertTxtTextAlign(paintState.GetTextAlign());

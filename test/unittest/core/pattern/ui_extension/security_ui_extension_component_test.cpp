@@ -1309,4 +1309,43 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, RegisterEventProxyFlagCallback, Tes
     EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 1);
 #endif
 }
+
+/**
+* @tc.name: SecurityUIExtensionComponentTestNg
+* @tc.desc: Test the method of pattern GetAccessibilityRectInfo
+* @tc.type: FUNC
+*/
+HWTEST_F(SecurityUIExtensionComponentTestNg, GetAccessibilityRectInfo, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+    * @tc.steps: step1. construct a UIExtensionComponent Node
+    */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+ 
+    /**
+      * @tc.steps: step2. test RegisterEventProxyFlagCallback
+    */
+    auto rectInfo = pattern->GetAccessibilityRectInfo();
+    EXPECT_EQ(rectInfo.left, 0);
+    pattern->TransferAccessibilityRectInfo(true);
+    pattern->TransferAccessibilityRectInfo(false);
+
+    bool isAncestorNodeGeometryChange = false;
+    bool isAncestorNodeTransformChange = false;
+    FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
+    pattern->OnFrameNodeChanged(flag);
+    isAncestorNodeGeometryChange = pattern->IsAncestorNodeGeometryChange(flag);
+    isAncestorNodeTransformChange = pattern->IsAncestorNodeTransformChange(flag);
+    ASSERT_TRUE(isAncestorNodeGeometryChange);
+    ASSERT_FALSE(isAncestorNodeTransformChange);
+#endif
+}
 } //namespace OHOS::Ace::NG

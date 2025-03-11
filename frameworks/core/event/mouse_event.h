@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/memory/ace_type.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -113,8 +114,10 @@ struct MouseEvent final : public PointerEvent {
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
     std::vector<MouseEvent> history;
+    WeakPtr<NG::FrameNode> node;
     bool isInjected = false;
     bool isPrivacyMode = false;
+    bool isMockWindowTransFlag = false;
 
     Offset GetOffset() const
     {

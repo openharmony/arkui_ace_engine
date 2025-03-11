@@ -178,6 +178,8 @@ public:
     // remove schedule task by id.
     void RemoveScheduleTask(uint32_t id) override;
 
+    std::string GetCurrentPageNameCallback();
+
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false,
         bool isEventsPassThrough = false) override;
 
@@ -214,7 +216,19 @@ public:
     // Do mouse event actively.
     void FlushMouseEvent();
 
+    void HandleTouchHoverOut(const TouchEvent& point);
+
     void FlushMouseEventVoluntarily();
+
+    void FlushMouseEventForHover();
+
+    void FlushMouseEventInVsync();
+
+    void SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo) override;
+
+    void SetWindowSizeChangeReason(WindowSizeChangeReason reason) override;
+
+    void SetIsTransFlag(bool result);
 
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
     void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
@@ -954,11 +968,13 @@ public:
         localColorMode_ = localColorModeValue;
     }
 
-    ColorMode GetLocalColorMode() const
+    ColorMode GetLocalColorMode() const // ColorMode for WithTheme
     {
         ColorMode colorMode = static_cast<ColorMode>(localColorMode_.load());
         return colorMode;
     }
+
+    ColorMode GetColorMode() const;
 
     void SetIsFreezeFlushMessage(bool isFreezeFlushMessage)
     {
@@ -1167,6 +1183,8 @@ protected:
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
+    void OnDumpRecorderStart(const std::vector<std::string>& params) const;
+    void TriggerFrameDumpFuncIfExist() const;
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
@@ -1259,7 +1277,7 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
-            if (nodeLeft->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+            if (nodeLeft->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
                 nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
                 return nodeLeft->IsOnMainTree();
             }
@@ -1314,6 +1332,9 @@ private:
 
     int32_t curFocusNodeId_ = -1;
 
+    bool isTransFlag_ = false;
+    OHOS::Ace::WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    SourceType lastSourceType_ = SourceType::NONE;
     bool preIsHalfFoldHoverStatus_ = false;
     bool isHoverModeChanged_ = false;
 
@@ -1422,6 +1443,7 @@ private:
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
+    ColorMode colorMode_ = ColorMode::LIGHT;
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;

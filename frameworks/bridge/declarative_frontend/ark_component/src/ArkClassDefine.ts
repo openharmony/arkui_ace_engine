@@ -361,6 +361,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkBindTipsOptions {
+  message: ResourceStr | StyledString | undefined;
+  options: TipsOptions | undefined;
+  constructor() {
+    this.message = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkBindTipsOptions): boolean {
+    return (this.options === another.options) && (this.options === another.options);
+  }
+}
+
 class ArkChainMode {
   direction: Axis | undefined;
   style: ChainStyle | undefined;
@@ -1086,7 +1098,7 @@ class ArkDotIndicator extends DotIndicator {
   leftValue: Length | undefined;
   topValue: Length | undefined;
   rightValue: Length | undefined;
-  bottomValue: Length | undefined;
+  bottomValue: Length | LengthMetrics | undefined;
   itemWidthValue: Length | undefined;
   itemHeightValue: Length | undefined;
   selectedItemWidthValue: Length | undefined;
@@ -1095,6 +1107,9 @@ class ArkDotIndicator extends DotIndicator {
   colorValue: ResourceColor | undefined;
   selectedColorValue: ResourceColor | undefined;
   maxDisplayCountValue: ResourceColor | undefined;
+  spaceValue: LengthMetrics | undefined;
+  ignoreSizeValue: boolean | undefined;
+  setIgnoreSizeValue : boolean;
 
   constructor() {
     super();
@@ -1111,6 +1126,9 @@ class ArkDotIndicator extends DotIndicator {
     this.colorValue = undefined;
     this.selectedColorValue = undefined;
     this.maxDisplayCountValue = undefined;
+    this.spaceValue = undefined;
+    this.ignoreSizeValue = undefined;
+    this.setIgnoreSizeValue = undefined;
   }
 
   isEqual(another: ArkDotIndicator): boolean {
@@ -1127,7 +1145,10 @@ class ArkDotIndicator extends DotIndicator {
       this.maskValue === another.maskValue &&
       this.colorValue === another.colorValue &&
       this.selectedColorValue === another.selectedColorValue &&
-      this.maxDisplayCountValue === another.maxDisplayCountValue
+      this.maxDisplayCountValue === another.maxDisplayCountValue &&
+      this.spaceValue === another.spaceValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue &&
+      this.setIgnoreSizeValue === another.setIgnoreSizeValue
     );
   }
 }
@@ -1137,11 +1158,13 @@ class ArkDigitIndicator extends DigitIndicator {
   leftValue: Length | undefined;
   topValue: Length | undefined;
   rightValue: Length | undefined;
-  bottomValue: Length | undefined;
+  bottomValue: Length | LengthMetrics | undefined;
   fontColorValue: ResourceColor | undefined;
   selectedFontColorValue: ResourceColor | undefined;
   digitFontValue: ArkDigitFont | undefined;
   selectedDigitFontValue: ArkDigitFont | undefined;
+  ignoreSizeValue: boolean | undefined;
+  setIgnoreSizeValue : boolean;
 
   constructor() {
     super();
@@ -1154,6 +1177,8 @@ class ArkDigitIndicator extends DigitIndicator {
     this.selectedFontColorValue = undefined;
     this.digitFontValue = undefined;
     this.selectedDigitFontValue = undefined;
+    this.ignoreSizeValue = undefined;
+    this.setIgnoreSizeValue = undefined;
   }
 
   isEqual(another: ArkDigitIndicator): boolean {
@@ -1164,7 +1189,9 @@ class ArkDigitIndicator extends DigitIndicator {
       this.rightValue === another.rightValue &&
       this.bottomValue === another.bottomValue &&
       this.digitFontValue === another.digitFontValue &&
-      this.selectedDigitFontValue === another.selectedDigitFontValue
+      this.selectedDigitFontValue === another.selectedDigitFontValue &&
+      this.ignoreSizeValue === another.ignoreSizeValue &&
+      this.setIgnoreSizeValue === another.setIgnoreSizeValue
     );
   }
 }
@@ -1449,6 +1476,7 @@ class TextDataDetectorConfig {
 
 class ArkDragPreviewOptions {
   mode: DragPreviewMode | Array<DragPreviewMode> | undefined;
+  sizeChangeEffect: DraggingSizeChangeEffect | undefined;
   numberBadge: boolean | number | undefined;
   isMultiSelectionEnabled: boolean | undefined;
   defaultAnimationBeforeLifting: boolean | undefined;
@@ -1459,6 +1487,7 @@ class ArkDragPreviewOptions {
   constructor() {
     this.mode = undefined;
     this.numberBadge = undefined;
+    this.sizeChangeEffect = undefined;
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
@@ -1470,6 +1499,7 @@ class ArkDragPreviewOptions {
     return (
       this.mode === another.mode &&
       this.numberBadge === another.numberBadge &&
+      this.sizeChangeEffect === another.sizeChangeEffect &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting && 
       this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&

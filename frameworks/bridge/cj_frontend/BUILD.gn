@@ -87,6 +87,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/base/cj_base_ffi.cpp",
       "interfaces/cj_ffi/cj_action_sheet_ffi.cpp",
       "interfaces/cj_ffi/cj_alert_dialog_ffi.cpp",
+      "interfaces/cj_ffi/cj_alert_dialog_ffi_v2.cpp",
       "interfaces/cj_ffi/cj_alphabet_indexer_ffi.cpp",
       "interfaces/cj_ffi/cj_animate_param_ffi.cpp",
       "interfaces/cj_ffi/cj_badge_ffi.cpp",

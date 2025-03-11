@@ -540,7 +540,7 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
      */
     int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(
-        static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)); // 16 means min platformVersion.
+        static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)); // 16 means min platformVersion.
 
     textStyle.SetFontSize(FONT_SIZE_VALUE);
     multipleAlgorithm->InheritParentTextStyle(textStyle);
@@ -597,7 +597,7 @@ HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
 
     int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(
-        static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)); // 16 means min platformVersion.
+        static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)); // 16 means min platformVersion.
 
     textLayoutAlgorithm->BuildParagraph(
         textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));

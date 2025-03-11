@@ -56,7 +56,7 @@ void UpdateSymbolBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    auto iconSize = barItemNode->IsHideText() ? theme->GetToolbarHideTextIconSize() : theme->GetToolbarIconSize();
+    auto iconSize = theme->GetToolbarIconSize();
     if (symbol != nullptr) {
         // symbol -> symbol
         auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
@@ -89,7 +89,7 @@ void UpdateImageBarButton(const RefPtr<BarItemNode>& barItemNode, const RefPtr<F
 {
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    auto iconSize = barItemNode->IsHideText() ? theme->GetToolbarHideTextIconSize() : theme->GetToolbarIconSize();
+    auto iconSize = theme->GetToolbarIconSize();
     if (symbol != nullptr) {
         // image -> symbol
         barItemNode->RemoveChild(iconNode);

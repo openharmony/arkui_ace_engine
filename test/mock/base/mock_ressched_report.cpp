@@ -22,6 +22,9 @@ ResSchedReport& ResSchedReport::GetInstance()
     return instance;
 }
 
+ResSchedReport::ResSchedReport()
+{}
+
 void ResSchedReport::ResSchedDataReport(
     const char* /* name */, const std::unordered_map<std::string, std::string>& /* param */)
 {
@@ -33,6 +36,10 @@ void ResSchedReport::ResSchedDataReport(
 {}
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent) {}
+
+void ResSchedReport::HandlePageTransition(const std::string& fromPage,
+    const std::string& toPage, const std::string& mode)
+{}
 
 ResSchedReportScope::ResSchedReportScope(
     const std::string& name, const std::unordered_map<std::string, std::string>& param)

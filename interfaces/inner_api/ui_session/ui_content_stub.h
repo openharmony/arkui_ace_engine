@@ -48,6 +48,7 @@ private:
     int32_t StartWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendTranslateResultInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendTranslateResultStrInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetCurrentPageNameInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t EndWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };

@@ -216,14 +216,6 @@ public:
         measureTextState_.SetTextAlign(align);
     }
 
-    void SetDefaultTextAlign()
-    {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-            // The default value of TextAlign is TextAlign::START.
-            SetTextAlign(TextAlign::START);
-        }
-    }
-
     void SetTextBaseline(TextBaseline baseline)
     {
         state_.fillState.SetTextBaseline(baseline);
@@ -271,15 +263,20 @@ public:
         state_.strokeState.SetFontSize(size);
     }
 
+    void SetMeasureFontSize(const Dimension& size)
+    {
+        measureTextState_.SetFontSize(size);
+    }
+
     void SetLetterSpacing(const Dimension& letterSpacing)
     {
         state_.fillState.SetLetterSpacing(letterSpacing);
         state_.strokeState.SetLetterSpacing(letterSpacing);
     }
 
-    void SetMeasureFontSize(const Dimension& size)
+    void SetMeasureLetterSpacing(const Dimension& letterSpacing)
     {
-        measureTextState_.SetFontSize(size);
+        measureTextState_.SetLetterSpacing(letterSpacing);
     }
 
     void SetFontStyle(OHOS::Ace::FontStyle style)
@@ -414,7 +411,7 @@ protected:
 
     RSBitmapFormat GetBitmapFormat()
     {
-        if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+        if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
             return RSBitmapFormat { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_PREMUL };
         } else {
             return RSBitmapFormat { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };

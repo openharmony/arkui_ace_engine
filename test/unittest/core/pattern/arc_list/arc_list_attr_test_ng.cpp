@@ -942,6 +942,116 @@ HWTEST_F(ArcListAttrTestNg, GetOneItemSnapPosByFinalPos002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetOneItemSnapPosByFinalPos003
+ * @tc.desc: Test ArcListPattern::GetOneItemSnapPosByFinalPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, GetOneItemSnapPosByFinalPos003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItemsWithSize(ARC_ITEM_COUNT2, SizeT<Dimension>(FILL_LENGTH, Dimension(70.f)));
+    CreateDone();
+
+    ListItemGroupLayoutInfo info;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    pattern_->itemPosition_[1] = itemInfo;
+
+    float mainPos = 20.0;
+    float finalPos = 10.0;
+    float snapPos = 0.0;
+    pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
+    EXPECT_NE(pattern_->scrollStartMidIndex_, -1);
+
+    LayoutConstraintF parentConstraint;
+    SizeF size(400.0, 400.0);
+    parentConstraint.UpdateMaxSizeWithCheck(size);
+    layoutProperty_->UpdateLayoutConstraint(parentConstraint);
+    layoutProperty_->UpdateSpace(Dimension(1000.0));
+    layoutProperty_->contentConstraint_ = parentConstraint;
+    pattern_->GetOneItemSnapPosByFinalPos(mainPos, finalPos, snapPos);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
+ * @tc.name: GetOneItemSnapPosByFinalPos004
+ * @tc.desc: Test ArcListPattern::GetOneItemSnapPosByFinalPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, GetOneItemSnapPosByFinalPos004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItemsWithSize(ARC_ITEM_COUNT2, SizeT<Dimension>(FILL_LENGTH, Dimension(70.f)));
+    CreateDone();
+
+    ListItemGroupLayoutInfo info;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    itemInfo.startPos = 500.f;
+    itemInfo.endPos = 1000.f;
+    pattern_->itemPosition_[1] = itemInfo;
+
+    float mainPos = 100.f;
+    float finalPos = 50.f;
+    float snapPos = 0.f;
+    pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
+    EXPECT_NE(pattern_->scrollStartMidIndex_, -1);
+
+    pattern_->scrollStartMidIndex_ = 1;
+    LayoutConstraintF parentConstraint;
+    SizeF size(400.f, 400.f);
+    parentConstraint.UpdateMaxSizeWithCheck(size);
+    layoutProperty_->UpdateLayoutConstraint(parentConstraint);
+    layoutProperty_->UpdateSpace(Dimension(1000.f));
+    layoutProperty_->contentConstraint_ = parentConstraint;
+    pattern_->GetOneItemSnapPosByFinalPos(mainPos, finalPos, snapPos);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
+ * @tc.name: GetOneItemSnapPosByFinalPos005
+ * @tc.desc: Test ArcListPattern::GetOneItemSnapPosByFinalPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, GetOneItemSnapPosByFinalPos005, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItemsWithSize(ARC_ITEM_COUNT2, SizeT<Dimension>(FILL_LENGTH, Dimension(70.f)));
+    CreateDone();
+
+    ListItemGroupLayoutInfo info;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    itemInfo.startPos = 500.0;
+    itemInfo.endPos = 1000.0;
+    pattern_->itemPosition_[1] = itemInfo;
+
+    float mainPos = 100.0;
+    float finalPos = 50.0;
+    float snapPos = 0.0;
+    pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
+    EXPECT_NE(pattern_->scrollStartMidIndex_, -1);
+
+    LayoutConstraintF parentConstraint;
+    SizeF size(400.0, 400.0);
+    parentConstraint.UpdateMaxSizeWithCheck(size);
+    layoutProperty_->UpdateLayoutConstraint(parentConstraint);
+    layoutProperty_->UpdateSpace(Dimension(1000.0));
+    layoutProperty_->contentConstraint_ = parentConstraint;
+
+    auto totalCnt = pattern_->GetHost()->GetTotalChildCount() - pattern_->itemStartIndex_;
+    pattern_->itemStartIndex_ = -1;
+    pattern_->GetOneItemSnapPosByFinalPos(mainPos, finalPos, snapPos);
+    EXPECT_EQ(totalCnt, 2);
+}
+
+/**
  * @tc.name: GetScrollIndexAbility001
  * @tc.desc: Test ArcListPattern::GetScrollIndexAbility
  * @tc.type: FUNC
@@ -1016,6 +1126,80 @@ HWTEST_F(ArcListAttrTestNg, GetItemSnapPosition002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetItemSnapPosition003
+ * @tc.desc: Test ArcListPattern::GetItemSnapPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, GetItemSnapPosition003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+
+    float itemHeight = 70.f;
+    // Create list item height less than ARC_LIST_ITEM_SNAP_SIZE(72.5).
+    CreateListItemsWithSize(DEFAULT_ITEM_COUNT, SizeT<Dimension>(FILL_LENGTH, Dimension(itemHeight)));
+    CreateDone();
+
+    ListItemGroupLayoutInfo info;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    pattern_->itemPosition_[1] = itemInfo;
+
+    ItemSnapInfo snapInfo;
+    for (int32_t i = 0; i < DEFAULT_ITEM_COUNT; ++i) {
+        pattern_->GetItemSnapPosition(i, snapInfo);
+        EXPECT_EQ(snapInfo.snapLow, 0);
+        EXPECT_EQ(snapInfo.snapHigh, 0);
+        EXPECT_EQ(snapInfo.moveThreshold, 0);
+    }
+}
+
+/**
+ * @tc.name: GetItemSnapPosition004
+ * @tc.desc: Test ArcListPattern::GetItemSnapPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, GetItemSnapPosition004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewAbstract::SetWidth(CalcLength(LIST_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
+
+    float itemHeight = 70.f;
+    CreateListItemsWithSize(DEFAULT_ITEM_COUNT, SizeT<Dimension>(FILL_LENGTH, Dimension(itemHeight)));
+    CreateDone();
+
+    ListItemGroupLayoutInfo info;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    pattern_->itemPosition_[0] = itemInfo;
+    pattern_->itemStartIndex_ = 0;
+
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto wrapper = host->GetOrCreateChildByIndex(0, false);
+    ASSERT_NE(wrapper, nullptr);
+
+    auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(host->GetLayoutProperty());
+    ASSERT_NE(listLayoutProperty, false);
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+
+    auto geometryNode = wrapper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize({200, 300});
+    float mainSize = geometryNode->GetMarginFrameSize().MainSize(axis);
+
+    ItemSnapInfo snapInfo;
+    pattern_->GetItemSnapPosition(0, snapInfo);
+    EXPECT_EQ(mainSize, 300);
+}
+
+/**
  * @tc.name: ToJsonValue001
  * @tc.desc: Test ArcListPattern::ToJsonValue
  * @tc.type: FUNC
@@ -1042,6 +1226,72 @@ HWTEST_F(ArcListAttrTestNg, ToJsonValue001, TestSize.Level1)
     pattern_->ToJsonValue(json, filter2);
     EXPECT_EQ(json->GetString("digitalCrownSensitivity"), "CrownSensitivity.MEDIUM");
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: ToJsonValue002
+ * @tc.desc: Test ArcListPattern::ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ToJsonValue002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter2;
+    pattern_->crownSensitivity_ = CrownSensitivity::LOW;
+
+    pattern_->ToJsonValue(json, filter2);
+    EXPECT_EQ(json->GetString("digitalCrownSensitivity"), "CrownSensitivity.LOW");
+}
+
+/**
+ * @tc.name: ToJsonValue003
+ * @tc.desc: Test ArcListPattern::ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ToJsonValue003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter2;
+    pattern_->crownSensitivity_ = CrownSensitivity::HIGH;
+
+    pattern_->ToJsonValue(json, filter2);
+    EXPECT_EQ(json->GetString("digitalCrownSensitivity"), "CrownSensitivity.HIGH");
+}
+
+/**
+ * @tc.name: ToJsonValue004
+ * @tc.desc: Test ArcListPattern::ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, ToJsonValue004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter2;
+    pattern_->crownSensitivity_ = CrownSensitivity::HIGH;
+
+    ListItemGroupLayoutInfo info;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    pattern_->itemPosition_[1] = itemInfo;
+
+    pattern_->ToJsonValue(json, filter2);
+    EXPECT_EQ(json->GetString("digitalCrownSensitivity"), "CrownSensitivity.HIGH");
+}
+#endif
 
 /**
  * @tc.name: EdgeEffectOption001
@@ -1141,7 +1391,7 @@ HWTEST_F(ArcListAttrTestNg, FadingEdge002, TestSize.Level1)
      * @tc.expected: startMainPos_ >= 0 and endMainPos_ > contentMainSize_
      */
     pattern_->ScrollTo(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->startMainPos_, 150.f);
     EXPECT_EQ(pattern_->endMainPos_, 480.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), -150.f);
@@ -1151,7 +1401,7 @@ HWTEST_F(ArcListAttrTestNg, FadingEdge002, TestSize.Level1)
      * @tc.expected: startMainPos_ < 0
      */
     pattern_->ScrollTo(50);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->startMainPos_, -50.f);
     EXPECT_EQ(pattern_->endMainPos_, 500.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);

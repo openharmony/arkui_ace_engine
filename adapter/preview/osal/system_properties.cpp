@@ -71,11 +71,13 @@ std::string SystemProperties::releaseType_ = UNDEFINED_PARAM;
 std::string SystemProperties::paramDeviceType_ = UNDEFINED_PARAM;
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
 int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
-ColorMode SystemProperties::colorMode_ = ColorMode::LIGHT;
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::windowAnimationEnabled_ = false;
+bool SystemProperties::debugEnabled_ = false;
+DebugFlags SystemProperties::debugFlags_ = 0;
+bool SystemProperties::layoutDetectEnabled_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
 bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
@@ -213,12 +215,12 @@ bool SystemProperties::IsScoringEnabled(const std::string& name)
 
 bool SystemProperties::GetDebugEnabled()
 {
-    return false;
+    return debugEnabled_;
 }
 
 bool SystemProperties::GetLayoutDetectEnabled()
 {
-    return false;
+    return layoutDetectEnabled_;
 }
 
 std::string SystemProperties::GetLanguage()
@@ -383,7 +385,7 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 
 bool SystemProperties::GetContainerDeleteFlag()
 {
-    return false;
+    return true;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

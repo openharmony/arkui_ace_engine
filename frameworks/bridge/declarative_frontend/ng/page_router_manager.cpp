@@ -291,10 +291,14 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     CleanPageOverlay();
     UpdateSrcPage();
     if (target.routerMode == RouterMode::SINGLE) {
-        auto PageInfoByUrl = FindPageInStackByRouteName(target.url);
-        if (PageInfoByUrl.second) {
+        auto pageInfoByUrl = FindPageInStackByRouteName(target.url);
+        if (pageInfoByUrl.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(PageInfoByUrl.first, PageInfoByUrl.second, target, true);
+            auto pagePattern = pageInfoByUrl.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(target.params);
+            }
+            MovePageToFront(pageInfoByUrl.first, pageInfoByUrl.second, target, true);
             return;
         }
         auto index = FindPageInRestoreStack(target.url);
@@ -1148,6 +1152,10 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
@@ -1221,6 +1229,10 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
@@ -1247,6 +1259,10 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(target.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
             return;
         }
@@ -2112,6 +2128,11 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         }
         if (pageInfo.first == popIndex) {
             // replace top self in SINGLE mode, do nothing.
+            CHECK_NULL_VOID(pageInfo.second);
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             return;
         }
         if (pageInfo.second) {
@@ -2125,6 +2146,10 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 #endif
             popIndex = popIndex - 1;
             findPage = true;
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
         } else {
             auto index = FindPageInRestoreStack(info.url);
             if (index != INVALID_PAGE_INDEX) {

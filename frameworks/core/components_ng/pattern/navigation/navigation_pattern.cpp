@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/ressched/ressched_report.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -725,6 +726,8 @@ void NavigationPattern::UpdateNavPathList()
     CHECK_NULL_VOID(navigationStack_);
     auto pathNames = navigationStack_->GetAllPathName();
     auto indexes = navigationStack_->GetAllPathIndex();
+    topFromSingletonMoved_ = navigationStack_->IsTopFromSingletonMoved();
+    navigationStack_->ResetSingletonMoved();
     navigationStack_->InitNavPathIndex(pathNames);
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
     NavPathList navPathList;
@@ -839,7 +842,9 @@ void NavigationPattern::RefreshNavDestination()
     isBackPage_ = newTopNavPath.has_value() ?
         navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
 #endif
-    std::string navDestinationName = "";
+    if (topFromSingletonMoved_) {
+        FireOnNewParam(newTopNavPath.has_value() ? newTopNavPath->second : nullptr);
+    }
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preLastStandardIndex);
 
     // close keyboard
@@ -864,9 +869,7 @@ void NavigationPattern::RefreshNavDestination()
         firstNavDesNode->MarkModifyDone();
     }
 
-    if (newTopNavPath.has_value()) {
-        navDestinationName = newTopNavPath->first;
-    }
+    std::string navDestinationName = newTopNavPath.has_value() ? newTopNavPath->first : "";
     pipeline->AddPredictTask([weak = WeakClaim(this), weakNode = WeakPtr<FrameNode>(hostNode),
         navDestinationName](int64_t deadline, bool canUseLongPredictTask) {
             auto navigationPattern = weak.Upgrade();
@@ -1706,6 +1709,31 @@ int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex,
 
 bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node)
 {
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    do {
+        if (parentNode_.Upgrade() || !host) {
+            break;
+        }
+        auto context = host->GetContext();
+        // Avoid the loading problem of atomicservice on the home page
+        if ((context && !context->GetInstallationFree()) || !context) {
+            break;
+        }
+        RefPtr<UINode> parentCustomNode;
+        auto curNode = host->GetParent();
+        while (curNode) {
+            auto curTag = curNode->GetTag();
+            if (curTag == V2::JS_VIEW_ETS_TAG) {
+                parentCustomNode = curNode;
+                break;
+            }
+            curNode = curNode->GetParent();
+        }
+        auto pattern = host->GetPattern<NavigationPattern>();
+        if (pattern && parentCustomNode) {
+            pattern->SetParentCustomNode(parentCustomNode);
+        }
+    } while (false);
     bool isCreate = navigationStack_->CreateNodeByIndex(index, parentNode_, node);
     if (node) {
         node->SetFreeze(true, true);
@@ -2157,17 +2185,17 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     hostNode->SetIsOnAnimation(false);
-    if (preTopNavDestination) {
-        preTopNavDestination->SetIsOnAnimation(false);
-    }
-    if (newTopNavDestination) {
-        newTopNavDestination->SetIsOnAnimation(false);
-    }
     auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
     hostNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     do {
         if (replaceValue != 0) {
+            if (preTopNavDestination) {
+                preTopNavDestination->SetIsOnAnimation(false);
+            }
+            if (newTopNavDestination) {
+                newTopNavDestination->SetIsOnAnimation(false);
+            }
             hostNode->DealNavigationExit(preTopNavDestination, preTopNavDestination == nullptr);
             navigationStack_->UpdateReplaceValue(0);
             break;
@@ -2178,6 +2206,10 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             if (preNodeTransitionType != PageTransitionType::EXIT_POP) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");
                 return;
+            }
+            preTopNavDestination->SetIsOnAnimation(false);
+            if (newTopNavDestination && newTopNavDestination->GetTransitionType() == PageTransitionType::ENTER_POP) {
+                newTopNavDestination->SetIsOnAnimation(false);
             }
             auto preDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
             CHECK_NULL_VOID(preDestinationPattern);
@@ -2207,9 +2239,15 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
                 node = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
                 CHECK_NULL_VOID(node);
             }
+            if (newTopNavDestination && newTopNavDestination->GetTransitionType() == PageTransitionType::ENTER_PUSH) {
+                newTopNavDestination->SetIsOnAnimation(false);
+            }
             if (preNodeTransitionType != PageTransitionType::EXIT_PUSH) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");
                 return;
+            }
+            if (preTopNavDestination) {
+                preTopNavDestination->SetIsOnAnimation(false);
             }
             // recover event hub
             auto eventHub = node->GetEventHub<EventHub>();
@@ -2633,12 +2671,14 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         navigationMode_, isNotNeedAnimation);
 #endif
 
+    std::string fromNavDestinationName = "";
+    std::string toNavDestinationName = "";
     if (preDestination) {
         fromPathInfo = preDestination->GetNavDestinationPathInfo();
         auto preDestinationPattern = preDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(preDestinationPattern);
-        auto navDestinationName = preDestinationPattern->GetName();
-        fromPathInfo += ", navDesitinationName: " + navDestinationName;
+        fromNavDestinationName = preDestinationPattern->GetName();
+        fromPathInfo += ", navDesitinationName: " + fromNavDestinationName;
         if ((isPopPage || preDestination->NeedRemoveInPush()) && isNotNeedAnimation) {
             /**
              * when transition without animation, 'pop' and 'push with remove' need to post
@@ -2653,12 +2693,13 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         toPathInfo = topDestination->GetNavDestinationPathInfo();
         auto topDestinationPattern = topDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(topDestinationPattern);
-        auto navDestinationName = topDestinationPattern->GetName();
-        toPathInfo += ", navDesitinationName: " + navDestinationName;
+        toNavDestinationName = topDestinationPattern->GetName();
+        toPathInfo += ", navDesitinationName: " + toNavDestinationName;
     } else {
         toPathInfo = hostNode->GetNavigationPathInfo();
     }
     ACE_SCOPED_TRACE_COMMERCIAL("NavDestination Page from %s to %s", fromPathInfo.c_str(), toPathInfo.c_str());
+    ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation");
 
     // fire onWillHide
     if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {
@@ -3496,5 +3537,19 @@ void NavigationPattern::FireNavigationLifecycle(const RefPtr<UINode>& uiNode, Na
                 NavigationGroupNode::GetNavDestinationNode(navigationStack->Get())), lifecycle, reason);
         }
     }
+}
+
+void NavigationPattern::FireOnNewParam(const RefPtr<UINode>& uiNode)
+{
+    CHECK_NULL_VOID(uiNode);
+    auto navDestination = DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
+    CHECK_NULL_VOID(navDestination);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto navPathInfo = navDestinationPattern->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnNewParam(navPathInfo->GetParamObj());
 }
 } // namespace OHOS::Ace::NG

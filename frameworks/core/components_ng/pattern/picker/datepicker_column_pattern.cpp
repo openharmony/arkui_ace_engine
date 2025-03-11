@@ -147,6 +147,9 @@ void DatePickerColumnPattern::OnModifyDone()
 
 void DatePickerColumnPattern::InitHapticController()
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
@@ -1697,7 +1700,7 @@ void DatePickerColumnPattern::HandleCrownEndEvent(const CrownEvent& event)
     }
     DatePickerScrollDirection dir =
         GreatNotEqual(scrollDelta_, 0.0f) ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / 2;
+    auto middleIndex = static_cast<int32_t>(GetShowCount()) / 2;
     auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / 2;

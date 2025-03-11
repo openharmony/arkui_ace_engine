@@ -78,6 +78,9 @@ public:
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) override;
+    void ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+        int32_t appearingTimeWithContinuousOperation) override;
+    void HideTipsNG(int32_t targetId, int32_t disappearingTime) override;
     void HidePopupNG(int32_t targetId) override;
     void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;
     bool CancelPopup(const std::string& id) override;
@@ -276,6 +279,7 @@ private:
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
     std::unordered_map<int32_t, std::function<void(bool)>> freeMultiWindowSwitchCallbackMap_;
     NG::RectF windowRect_;
+    std::mutex eventRunnerMutex_;
     MenuWindowState attachState_ = MenuWindowState::DEFAULT;
     MenuWindowState detachState_ = MenuWindowState::DEFAULT;
 };

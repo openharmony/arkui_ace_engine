@@ -227,7 +227,7 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
 bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const std::string& bundleName,
     const std::string& moduleName)
 {
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {

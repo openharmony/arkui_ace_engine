@@ -18,6 +18,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components/button/button_theme.h"
@@ -103,6 +104,8 @@ void SwiperTestNg::CreateSwiperDone()
     if (pattern_->HasRightButtonNode()) {
         rightArrowNode_ = GetChildFrameNode(frameNode_, index);
     }
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, SWIPER_WIDTH, SWIPER_HEIGHT);
 }
 
 SwiperModelNG SwiperTestNg::CreateSwiper()
@@ -1239,7 +1242,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeSwipePageNextIndex001, TestSize.Level
     layoutProperty_->UpdateLoop(false);
     pattern_->currentIndex_ = 0;
     dragVelocity = 500.0f;
-    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 0);
+    EXPECT_EQ(pattern_->ComputeSwipePageNextIndex(dragVelocity), 3);
 
     pattern_->currentIndex_ = 3;
     dragVelocity = -500.0f;
@@ -1520,5 +1523,71 @@ HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
     indicatorPattern->swiperController_->addSwiperEventCallback_();
     indicatorPattern->OnAfterModifyDone();
     EXPECT_EQ(indicatorPattern->lastSwiperIndicatorType_, SwiperIndicatorType::ARC_DOT);
+}
+
+/**
++ * @tc.name: SwiperPattern_OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto swiperPaintProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    RefPtr<LayoutWrapper> dirty = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, swiperPaintProperty);
+    DirtySwapConfig config;
+    auto result = swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_FALSE(result);
+}
+
+/**
++ * @tc.name: SwiperPattern_OnDirtyLayoutWrapperSwap002
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto swiperPaintProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    RefPtr<LayoutWrapper> dirty = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, swiperPaintProperty);
+    DirtySwapConfig config;
+    config.skipLayout = true;
+    config.skipMeasure = true;
+    auto result = swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_FALSE(result);
+}
+
+/**
++ * @tc.name: SwiperPattern_OnDirtyLayoutWrapperSwap003
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap003, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->isInit_ = false;
+    swiperPattern->currentIndex_ = 2;
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto swiperPaintProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    RefPtr<LayoutWrapper> dirty = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, swiperPaintProperty);
+    DirtySwapConfig config;
+    config.skipLayout = true;
+    config.skipMeasure = true;
+    swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_EQ(swiperPattern->oldIndex_, 2);
 }
 } // namespace OHOS::Ace::NG

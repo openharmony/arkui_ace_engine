@@ -54,6 +54,7 @@ template("ace_core_interfaces_native_node") {
       "node/grid_row_modifier.cpp",
       "node/hyperlink_modifier.cpp",
       "node/image_animator_modifier.cpp",
+      "node/lazy_grid_layout_modifier.cpp",
       "node/line_modifier.cpp",
       "node/linear_indicator_modifier.cpp",
       "node/marquee_modifier.cpp",
@@ -129,6 +130,10 @@ template("ace_core_interfaces_native_node") {
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      sources += [ "node/web_modifier.cpp" ]
+    }
     if (is_arkui_x) {
       deps += [
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",

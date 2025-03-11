@@ -366,7 +366,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     SystemProperties::InitDeviceInfo(deviceWidth_, deviceHeight_,
         deviceConfig_.orientation == DeviceOrientation::PORTRAIT ? 0 : 1, deviceConfig_.density, isRound_);
     SystemProperties::InitDeviceType(deviceConfig_.deviceType);
-    SystemProperties::SetColorMode(deviceConfig_.colorMode);
     LOGI("CreateContainer with JSDECLARATIVE frontend, set MinPlatformVersion to %{public}d", compatibleVersion_);
     AceContainer::CreateContainer(instanceId_, FrontendType::DECLARATIVE_JS, useNewPipeline_);
     auto container = AceContainer::GetContainerInstance(instanceId_);
@@ -375,6 +374,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     container->SetIsFRSCardContainer(false);
     container->SetBundleName(bundleName_);
     container->SetModuleName(moduleName_);
+    container->SetColorMode(deviceConfig_.colorMode);
     LOGI("Save bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
@@ -388,7 +388,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     config.SetDeviceType(SystemProperties::GetDeviceType());
     config.SetOrientation(SystemProperties::GetDeviceOrientation());
     config.SetDensity(SystemProperties::GetResolution());
-    config.SetColorMode(SystemProperties::GetColorMode());
+    config.SetColorMode(container->GetColorMode());
     config.SetFontRatio(deviceConfig_.fontRatio);
     container->SetResourceConfiguration(config);
     container->SetPageProfile(pageProfile_);

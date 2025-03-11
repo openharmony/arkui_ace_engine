@@ -1176,11 +1176,6 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
 }
 
-void WebPattern::OnSmoothDragResizeEnabledUpdate(bool value)
-{
-    // cross platform is not support now;
-}
-
 void WebPattern::OnRootLayerChanged(int width, int height)
 {
     // cross platform is not support now;

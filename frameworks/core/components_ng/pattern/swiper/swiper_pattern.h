@@ -47,13 +47,11 @@
 #include "core/event/crown_event.h"
 #endif
 namespace OHOS::Ace::NG {
-namespace {
 enum class GestureStatus {
     INIT = 0,
     START,
     END,
 };
-} // namespace
 
 enum class PageFlipMode {
     CONTINUOUS = 0,
@@ -65,6 +63,7 @@ constexpr SwiperHoverFlag HOVER_NONE = 0;
 constexpr SwiperHoverFlag HOVER_SWIPER = 1;
 constexpr SwiperHoverFlag HOVER_INDICATOR = 1 << 1;
 constexpr SwiperHoverFlag HOVER_ARROW = 1 << 2;
+constexpr int32_t NEW_STYLE_MIN_TURN_PAGE_VELOCITY = 780;
 
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
@@ -151,10 +150,7 @@ public:
         return currentFirstIndex_;
     }
 
-    int32_t GetCurrentIndex()
-    {
-        return GetLoopIndex(currentIndex_);
-    }
+    int32_t GetCurrentIndex(bool original = false);
 
     float GetTurnPageRate() const
     {
@@ -597,6 +593,7 @@ public:
     }
 
     RefPtr<Curve> GetCurveIncludeMotion();
+    RefPtr<Curve> GetIndicatorHeadCurve() const;
     float GetMotionVelocity()
     {
         return motionVelocity_;
@@ -624,6 +621,7 @@ public:
     void CheckMarkForIndicatorBoundary();
     bool IsHorizontalAndRightToLeft() const;
     TextDirection GetNonAutoLayoutDirection() const;
+    void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
     void FireWillHideEvent(int32_t willHideIndex) const;
     void FireWillShowEvent(int32_t willShowIndex) const;
     void SetOnHiddenChangeForParent();
@@ -755,7 +753,7 @@ public:
     bool NeedFastAnimation() const;
     bool IsInFastAnimation() const;
 
-    float CalcCurrentTurnPageRate() const;
+    float CalcCurrentTurnPageRate(bool isTouchBottom = false) const;
     int32_t GetFirstIndexInVisibleArea() const;
     float CalculateGroupTurnPageRate(float additionalOffset);
 
@@ -815,10 +813,12 @@ protected:
 
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     int32_t currentIndex_ = 0;
+    std::optional<int32_t> fastCurrentIndex_;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
     std::optional<int32_t> targetIndex_;
     float swiperProportion_ = 2.0f;
+    int32_t newMinTurnPageVelocity_ = NEW_STYLE_MIN_TURN_PAGE_VELOCITY;
     int32_t propertyAnimationIndex_ = -1;
 
     bool hasTabsAncestor_ = false;
@@ -935,9 +935,8 @@ private:
     void FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex);
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
-    void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
     void HandleSwiperCustomAnimation(float offset);
-    void CalculateAndUpdateItemInfo(float offset);
+    void CalculateAndUpdateItemInfo(float offset = 0.0f);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
     void UpdateTabBarAnimationDuration(int32_t index);
 
@@ -1099,7 +1098,7 @@ private:
     void CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
-    std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
+    std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset, bool isTouchBottom = false) const;
 
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
@@ -1221,6 +1220,7 @@ private:
     void UpdateItemsLatestSwitched();
     void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
     void PostIdleTaskToCleanTabContent();
+    std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
 
     friend class SwiperHelper;
 
@@ -1257,6 +1257,8 @@ private:
     int32_t endIndex_ = 0;
     int32_t oldIndex_ = 0;
     int32_t nextIndex_ = 0;
+    int32_t prevStartIndex_ = 0;
+    int32_t prevEndIndex_ = 0;
 
     PanDirection panDirection_;
 

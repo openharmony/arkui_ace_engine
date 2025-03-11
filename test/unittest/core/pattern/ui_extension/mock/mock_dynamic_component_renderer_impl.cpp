@@ -69,8 +69,7 @@ void DynamicComponentRendererImpl::TransferAccessibilityChildTreeDeregister() {}
 void DynamicComponentRendererImpl::TransferAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info) {}
 
-void DynamicComponentRendererImpl::SetUIContentJsContext(
-    const std::shared_ptr<Framework::JsValue>& jsContext) {}
+void DynamicComponentRendererImpl::SetUIContentJsContext() {}
 
 void DynamicComponentRendererImpl::TransferFocusState(bool isFocus) {}
 

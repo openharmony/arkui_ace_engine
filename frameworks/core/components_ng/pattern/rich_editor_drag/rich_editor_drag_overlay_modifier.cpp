@@ -385,7 +385,11 @@ Color RichEditorDragOverlayModifier::GetDragBackgroundColor(const Color& default
     CHECK_NULL_RETURN(host, defaultColor);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, defaultColor);
-    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>(hostPattern->GetThemeScopeId());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>(hostPattern->GetThemeScopeId());
+        CHECK_NULL_RETURN(richEditorTheme, defaultColor);
+    }
+    auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, defaultColor);
     return richEditorTheme->GetDragBackgroundColor();
 }

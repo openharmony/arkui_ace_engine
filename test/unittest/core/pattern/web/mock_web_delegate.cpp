@@ -582,7 +582,9 @@ std::string WebDelegate::GetCustomScheme()
 }
 void WebDelegate::SurfaceOcclusionCallback(float visibleRatio) {}
 void WebDelegate::ratioStrToFloat(const std::string& str) {}
+void WebDelegate::ratioStrToFloatV2(const std::string& str) {}
 void WebDelegate::RegisterSurfaceOcclusionChangeFun() {}
+void WebDelegate::SetPartitionPoints(std::vector<float>& partition) {}
 void WebDelegate::RegisterAvoidAreaChangeListener(int32_t) {}
 class NWebAutoFillCallbackImpl : public OHOS::NWeb::NWebMessageValueCallback {
 public:
@@ -772,7 +774,9 @@ bool WebDelegate::OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& i
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {}
-void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType) {}
+void WebDelegate::OnAccessibilityEvent(
+    int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument)
+{}
 void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId) {}
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId) {}
 void WebDelegate::TextBlurReportByBlurEvent(int64_t accessibilityId) {}
@@ -880,7 +884,7 @@ void WebDelegate::WebHandleTouchpadFlingEvent(
 {}
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY) {}
 void WebDelegate::WebHandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY,
-    const std::vector<int32_t>& pressedCodes)
+    const std::vector<int32_t>& pressedCodes, const int32_t source)
 {}
 bool WebDelegate::OnKeyEvent(int32_t keyCode, int32_t keyAction)
 {
@@ -1031,11 +1035,12 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset) {}
 void WebDelegate::SetTouchEventInfo(
     std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent, TouchEventInfo& touchEventInfo)
 {}
-void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) {}
+
 bool WebDelegate::GetIsSmoothDragResizeEnabled()
 {
     return false;
 }
+void WebDelegate::MaximizeResize() {}
 void WebDelegate::DragResize(
     const double& width, const double& height, const double& pre_height, const double& pre_width)
 {}
@@ -1214,8 +1219,15 @@ bool WebDelegate::IsActivePolicyDisable()
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled) {}
+bool WebDelegate::SetFocusByPosition(float x, float y)
+{
+    return false;
+}
 std::string WebDelegate::GetCurrentLanguage()
 {
     return "";
 }
+void WebDelegate::RegisterWebWindowFocusChangedListener() {}
+void WebDelegate::UnRegisterWebWindowFocusChangedListener() {}
+void WebDelegate::OnDragAttach() {}
 } // namespace OHOS::Ace
