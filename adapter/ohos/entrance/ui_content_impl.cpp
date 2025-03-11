@@ -694,7 +694,7 @@ public:
                 context->OnFoldStatusChanged(aceFoldStatus);
                 if (SystemProperties::IsSuperFoldDisplayDevice()) {
                     SubwindowManager::GetInstance()->HideMenuNG(false);
-                    SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
+                    SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId, true);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged");
@@ -766,7 +766,7 @@ public:
             [instanceId = instanceId_, targetId = targetId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
                 SubwindowManager::GetInstance()->ClearMenuNG(instanceId, targetId, true, true);
-                SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
+                SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId, false);
             },
             TaskExecutor::TaskType::UI, "ArkUITouchOutsideSubwindowClear");
     }
