@@ -66,29 +66,34 @@ RefPtr<FrameNode> MenuWrapperPattern::GetShowedSubMenu()
     return DynamicCast<FrameNode>(host->GetLastChild());
 }
 
-RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
+bool MenuWrapperPattern::GetInnerMenu(RefPtr<UINode>& innerMenuNode, const PointF& position)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, RectF());
-    auto outterMenuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_RETURN(outterMenuNode, RectF());
-    auto menuZone = outterMenuNode->GetGeometryNode()->GetFrameRect();
-    innerMenuNode = GetMenuChild(outterMenuNode);
-    CHECK_NULL_RETURN(innerMenuNode, RectF());
-    auto subMenuNode = GetShowedSubMenu();
-    if (subMenuNode) {
-        innerMenuNode = subMenuNode;
-        auto scrollNode = DynamicCast<FrameNode>(innerMenuNode->GetChildAtIndex(0));
-        CHECK_NULL_RETURN(scrollNode, RectF());
-        innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
-        CHECK_NULL_RETURN(innerMenuNode, RectF());
-        auto offset = DynamicCast<FrameNode>(innerMenuNode)->GetOffsetRelativeToWindow();
-        menuZone.SetOffset(offset);
+    CHECK_NULL_RETURN(host, false);
+    auto children = host->GetChildren();
+    CHECK_NULL_RETURN(!children.empty(), false);
+     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+         auto& child = *iter;
+         if (!child || child->GetTag() != V2::MENU_ETS_TAG) {
+             continue;
+         }
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(frameNode, false);
+        auto menuPattern = frameNode->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, false);
+        auto subMenuNode = menuPattern->GetShowedSubMenu();
+        innerMenuNode = subMenuNode ? subMenuNode : menuPattern->GetFirstInnerMenu();
+        if (!innerMenuNode) {
+            innerMenuNode = child;
+        }
+        auto geometryNode = frameNode->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        return CheckPointInMenuZone(frameNode, position);
     }
-    return menuZone;
+    return false;
 }
 
-RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position)
+RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const PointF& position)
 {
     CHECK_NULL_RETURN(menuNode, nullptr);
     RefPtr<FrameNode> menuItem = nullptr;
@@ -102,11 +107,7 @@ RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& 
             menuItem = FindTouchedMenuItem(child, position);
         }
         if (menuItem) {
-            auto menuItemOffset = menuItem->GetPaintRectOffset(false, true);
-            auto menuItemSize = menuItem->GetGeometryNode()->GetFrameSize();
-            auto menuItemZone =
-                RectF(menuItemOffset.GetX(), menuItemOffset.GetY(), menuItemSize.Width(), menuItemSize.Height());
-            if (menuItemZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            if (CheckPointInMenuZone(menuItem, position)) {
                 break;
             } else {
                 menuItem = nullptr;
@@ -122,16 +123,16 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     auto touch = info.GetChangedTouches().front();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto position = OffsetF(
+    auto position = PointF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
     position -= host->GetPaintRectOffset();
     RefPtr<UINode> innerMenuNode = nullptr;
-    auto menuZone = GetMenuZone(innerMenuNode);
+    auto isInRegion = GetInnerMenu(innerMenuNode, position);
     CHECK_NULL_VOID(innerMenuNode);
 
     ClearLastMenuItem();
     // get menuNode's touch region
-    if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+    if (isInRegion) {
         currentTouchItem_ = FindTouchedMenuItem(innerMenuNode, position);
         ChangeCurMenuItemBgColor();
         lastTouchItem_ = currentTouchItem_;
@@ -406,9 +407,8 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto position = OffsetF(
+    auto position = PointF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
-    position -= host->GetPaintRectOffset(false, true);
     auto children = host->GetChildren();
     if (touch.GetTouchType() == TouchType::DOWN) {
         // Record the latest touch finger ID. If other fingers are pressed, the latest one prevails
@@ -423,7 +423,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             CHECK_NULL_VOID(menuWrapperChildNode);
             // get menuWrapperChildNode's touch region
             auto menuWrapperChildZone = menuWrapperChildNode->GetGeometryNode()->GetFrameRect();
-            if (menuWrapperChildZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            if (CheckPointInMenuZone(menuWrapperChildNode, position)) {
                 currentTouchItem_ = FindTouchedMenuItem(menuWrapperChildNode, position);
                 ChangeCurMenuItemBgColor();
                 return;
@@ -469,15 +469,14 @@ void MenuWrapperPattern::ChangeTouchItem(const TouchEventInfo& info, TouchType t
 }
 
 void MenuWrapperPattern::HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu,
-    const OffsetF& position)
+    const PointF& position)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto mainMenu = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(mainMenu);
-    auto mainMenuZone = mainMenu->GetGeometryNode()->GetFrameRect();
     bool isFindTargetId = false;
-    if (mainMenuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+    if (CheckPointInMenuZone(mainMenu, position)) {
         isFindTargetId = true;
     }
     if (menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu()) {
@@ -840,5 +839,14 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("DefaultPlacement: " + dumpInfo_.defaultPlacement);
     DumpLog::GetInstance().AddDesc("FinalPosition: " + dumpInfo_.finalPosition.ToString());
     DumpLog::GetInstance().AddDesc("FinalPlacement: " + dumpInfo_.finalPlacement);
+}
+
+bool MenuWrapperPattern::CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto childOffset = node->GetPaintRectOffset(false, true);
+    auto childSize = node->GetPaintRectWithTransform();
+    auto menuZone = RectF(childOffset.GetX(), childOffset.GetY(), childSize.Width(), childSize.Height());
+    return menuZone.IsInRegion(point);
 }
 } // namespace OHOS::Ace::NG
