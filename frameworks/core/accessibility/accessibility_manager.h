@@ -311,6 +311,11 @@ public:
 
     virtual void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) {}
 
+    virtual void UpdateAccessibilityNextFocusIdMap(int32_t containerId,
+                                                   const std::string& nextFocusInspectorKey, int64_t preAccessibilityId)
+    {
+    }
+
     bool IsRegister()
     {
         return isReg_;
