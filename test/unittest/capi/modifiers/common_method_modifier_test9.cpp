@@ -386,11 +386,9 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onHoverFunc = [](
-        Ark_VMContext, const Ark_Int32 resourceId, const Ark_Boolean isHover, const Ark_HoverEvent event
-    ) {
-        ASSERT_NE(event, nullptr);
-        auto peer = event;
+    auto onHoverFunc = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_Boolean isHover,
+            const Ark_HoverEvent peer) {
+        ASSERT_NE(peer, nullptr);
         auto hoverEventInfo = peer->GetEventInfo();
         ASSERT_NE(hoverEventInfo, nullptr);
         EXPECT_EQ(hoverEventInfo->GetType(), expectedType);

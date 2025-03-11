@@ -370,10 +370,8 @@ struct CheckEvent {
 HWTEST_F(SaveButtonModifierTest, setOnClickTest, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto checkCallback = [](
-        Ark_VMContext, const Ark_Int32 resourceId, const Ark_ClickEvent event, const Ark_SaveButtonOnClickResult result
-    ) {
-        auto peer = event;
+    auto checkCallback = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_ClickEvent peer,
+            const Ark_SaveButtonOnClickResult result) {
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
