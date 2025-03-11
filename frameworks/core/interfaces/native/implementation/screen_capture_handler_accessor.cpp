@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -36,11 +37,10 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetOriginImpl(Ark_ScreenCaptureHandler peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetOrigin();
-    // value need to be returned
-    LOGE("ScreenCaptureHandlerAccessor::GetOriginImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetOrigin();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 void GrantImpl(Ark_ScreenCaptureHandler peer,
                const Ark_ScreenCaptureConfig* config)
