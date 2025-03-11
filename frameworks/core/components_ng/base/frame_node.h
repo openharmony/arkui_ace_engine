@@ -798,7 +798,11 @@ public:
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
 
-    void FrameRateDurationsStatistics(SceneStatus status, int32_t expectedRate, const std::string& scene);
+    void FrameRateDurationsStatisticsStart(const std::string &scene);
+
+    void FrameRateDurationsStatisticsRunning(int32_t expectedRate, const std::string &scene);
+
+    void FrameRateDurationsStatisticsEnd(const std::string &scene);
  
     void AddFrameRateDuration(int32_t frameRate, int32_t duration);
  
