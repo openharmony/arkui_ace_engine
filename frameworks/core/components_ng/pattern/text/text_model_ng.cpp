@@ -17,7 +17,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
-#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -25,7 +24,7 @@
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 
 namespace OHOS::Ace::NG {
 

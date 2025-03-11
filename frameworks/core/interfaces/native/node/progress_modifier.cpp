@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components/select/select_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_PROGRESS_VALUE = 0;

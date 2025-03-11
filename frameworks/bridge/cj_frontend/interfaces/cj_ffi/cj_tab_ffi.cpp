@@ -19,6 +19,7 @@
 #include "cj_view_abstract_ffi.h"
 
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 

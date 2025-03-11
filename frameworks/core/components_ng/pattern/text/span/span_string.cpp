@@ -21,6 +21,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/text/text_emoji_processor.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 
 namespace OHOS::Ace {
 

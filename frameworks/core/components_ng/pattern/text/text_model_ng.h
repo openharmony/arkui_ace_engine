@@ -20,8 +20,6 @@
 #include <string>
 
 #include "interfaces/native/node/styled_string.h"
-
-#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace::NG {

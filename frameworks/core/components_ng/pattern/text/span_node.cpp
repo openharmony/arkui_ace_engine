@@ -23,21 +23,13 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
-#include "core/common/font_manager.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/paragraph.h"
-#include "core/pipeline/pipeline_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/text/text_emoji_processor.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1347,5 +1339,106 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("SymbolEffect",
             spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
     }
+}
+
+void SpanNode::UpdateContent(const uint32_t& unicode)
+{
+    spanItem_->spanItemType = SpanItemType::SYMBOL;
+    if (spanItem_->unicode == unicode) {
+        return;
+    }
+    spanItem_->unicode = unicode;
+    spanItem_->MarkDirty();
+    RequestTextFlushDirty(true);
+}
+
+void SpanNode::UpdateContent(const std::u16string& content)
+{
+    if (spanItem_->content == content) {
+        return;
+    }
+    spanItem_->content = content;
+    spanItem_->MarkDirty();
+    RequestTextFlushDirty(true);
+}
+
+void SpanNode::UpdateColorByResourceId()
+{
+    spanItem_->fontStyle->UpdateColorByResourceId();
+    if (spanItem_->backgroundStyle) {
+        spanItem_->backgroundStyle->UpdateColorByResourceId();
+    }
+}
+
+void SpanNode::UpdateSpanTextColor(Color color)
+{
+    if (!spanItem_->fontStyle) {
+        spanItem_->fontStyle = std::make_unique<FontStyle>();
+    }
+    if (spanItem_->fontStyle->CheckTextColor(color)) {
+        return;
+    }
+    spanItem_->fontStyle->UpdateTextColor(color);
+    auto parent = GetParent();
+    CHECK_NULL_VOID(parent);
+    if (!spanItem_->UpdateSpanTextColor(color)) {
+        RequestTextFlushDirty();
+    }
+}
+
+RefPtr<PlaceholderSpanNode> PlaceholderSpanNode::GetOrCreateSpanNode(
+    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+{
+    auto frameNode = GetFrameNode(tag, nodeId);
+    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<PlaceholderSpanNode>(frameNode));
+    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+    auto placeholderSpanNode = AceType::MakeRefPtr<PlaceholderSpanNode>(tag, nodeId, pattern);
+    placeholderSpanNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(placeholderSpanNode);
+    return placeholderSpanNode;
+}
+
+RefPtr<CustomSpanNode> CustomSpanNode::CreateFrameNode(int32_t nodeId)
+{
+    auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
+    customSpanNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(customSpanNode);
+    customSpanNode->customSpanItem_->isFrameNode = true;
+    return customSpanNode;
+}
+
+RefPtr<CustomSpanNode> CustomSpanNode::GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
+{
+    auto frameNode = GetFrameNode(tag, nodeId);
+    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<CustomSpanNode>(frameNode));
+    auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
+    customSpanNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(customSpanNode);
+    customSpanNode->customSpanItem_->isFrameNode = true;
+    return customSpanNode;
+}
+
+RefPtr<ImageSpanNode> ImageSpanNode::GetOrCreateSpanNode(
+    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+{
+    auto frameNode = GetFrameNode(tag, nodeId);
+    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<ImageSpanNode>(frameNode));
+    auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
+    auto imageSpanNode = AceType::MakeRefPtr<ImageSpanNode>(tag, nodeId, pattern);
+    imageSpanNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(imageSpanNode);
+    return imageSpanNode;
+}
+
+RefPtr<ContainerSpanNode> ContainerSpanNode::GetOrCreateSpanNode(int32_t nodeId)
+{
+    auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<ContainerSpanNode>(nodeId);
+    if (spanNode) {
+        spanNode->SetHasTextBackgroundStyle(false);
+        return spanNode;
+    }
+    spanNode = MakeRefPtr<ContainerSpanNode>(nodeId);
+    ElementRegister::GetInstance()->AddUINode(spanNode);
+    return spanNode;
 }
 } // namespace OHOS::Ace::NG

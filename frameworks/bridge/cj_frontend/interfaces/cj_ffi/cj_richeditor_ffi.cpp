@@ -14,10 +14,12 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_richeditor_ffi.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 #include "cj_lambda.h"
 #include "securec.h"
+
+#include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

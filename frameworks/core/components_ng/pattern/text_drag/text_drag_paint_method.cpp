@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components/text/text_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr float CONSTANT_DOUBLE = 2.0f;

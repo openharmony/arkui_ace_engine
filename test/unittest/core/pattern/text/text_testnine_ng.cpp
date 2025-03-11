@@ -17,6 +17,8 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "text_base.h"
 
+#include "core/components_ng/pattern/text/text_select_overlay.h"
+
 namespace OHOS::Ace::NG {
 
 class TextTestNineNg : public TextBases {

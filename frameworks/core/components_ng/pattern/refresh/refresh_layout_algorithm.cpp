@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 
+#include "core/common/container.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
 
 namespace OHOS::Ace::NG {

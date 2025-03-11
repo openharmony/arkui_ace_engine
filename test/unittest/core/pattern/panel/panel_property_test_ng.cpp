@@ -23,6 +23,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
+#include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;

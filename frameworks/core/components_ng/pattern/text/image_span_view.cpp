@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 void ImageSpanView::SetObjectFit(ImageFit value)

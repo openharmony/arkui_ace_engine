@@ -21,8 +21,9 @@
 #include "core/common/share/text_share_adapter.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1592,5 +1593,24 @@ void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Hide selectoverlay subwindow menu on window size change.");
         }
     }
+}
+
+void BaseTextSelectOverlay::OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
+{
+    selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback_;
+    selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick_;
+    auto textRange = [weak = GetHostTextBase()](int32_t& start, int32_t& end) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetSelectIndex(start, end);
+    };
+    selectInfo.onCreateCallback.textRangeCallback = textRange;
+}
+
+std::optional<SelectOverlayInfo> BaseTextSelectOverlay::GetSelectOverlayInfos()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
+    return manager->GetSelectOverlayInfo();
 }
 } // namespace OHOS::Ace::NG

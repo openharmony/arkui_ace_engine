@@ -15,6 +15,7 @@
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

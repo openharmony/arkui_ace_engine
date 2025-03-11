@@ -21,14 +21,11 @@
 #include <string>
 #include <unordered_map>
 
-#include "interfaces/inner_api/ace/ai/data_detector_interface.h"
-
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "core/common/ai/data_detector_adapter.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
@@ -36,27 +33,18 @@
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/text/base_text_select_overlay.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_controller.h"
-#include "core/components_ng/pattern/text/text_event_hub.h"
-#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
-#include "core/components_ng/pattern/text/text_paint_method.h"
-#include "core/components_ng/pattern/text/text_select_overlay.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
-#include "core/components_ng/property/property.h"
-#include "core/event/ace_events.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -64,6 +52,9 @@ constexpr int32_t MAX_SIZE_OF_LOG = 2000;
 }
 
 class InspectorFilter;
+class TextLayoutAlgorithm;
+class TextEventHub;
+class TextSelectOverlay;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
@@ -83,12 +74,7 @@ class TextPattern : public virtual Pattern,
     DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier);
 
 public:
-    TextPattern()
-    {
-        selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
-        pManager_ = AceType::MakeRefPtr<ParagraphManager>();
-        ResetOriginCaretPosition();
-    }
+    TextPattern();
 
     ~TextPattern() override;
 
@@ -104,26 +90,14 @@ public:
         return MakeRefPtr<TextLayoutProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-        if (textLayoutProperty &&
-            textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
-            return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_, true);
-        } else {
-            return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_);
-        }
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<TextAccessibilityProperty>();
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<TextEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
     virtual bool IsDragging() const
     {
@@ -254,33 +228,8 @@ public:
     {
         return dataDetectorAdapter_->textDetectResult_;
     }
-    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
-    {
-        dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
-        dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
-        dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
-        dataDetectorAdapter_->entityDecorationType_ = textDetectConfig.entityDecorationType;
-        dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
-        dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
-        auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
-        dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
-        if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
-        }
-    }
-    void ModifyAISpanStyle(TextStyle& aiSpanStyle)
-    {
-        TextDetectConfig textDetectConfig;
-        aiSpanStyle.SetTextColor(dataDetectorAdapter_->entityColor_.value_or(textDetectConfig.entityColor));
-        aiSpanStyle.SetTextDecoration(
-            dataDetectorAdapter_->entityDecorationType_.value_or(textDetectConfig.entityDecorationType));
-        aiSpanStyle.SetTextDecorationColor(
-            dataDetectorAdapter_->entityDecorationColor_.value_or(textDetectConfig.entityColor));
-        aiSpanStyle.SetTextDecorationStyle(
-            dataDetectorAdapter_->entityDecorationStyle_.value_or(textDetectConfig.entityDecorationStyle));
-    }
+    void SetTextDetectConfig(const TextDetectConfig& textDetectConfig);
+    void ModifyAISpanStyle(TextStyle& aiSpanStyle);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -607,14 +556,7 @@ public:
         return selectedType_.has_value() && oldSelectedType_ != selectedType_.value();
     }
 
-    bool CheckSelectedTypeChange()
-    {
-        auto changed = IsSelectedTypeChange();
-        if (changed) {
-            oldSelectedType_ = selectedType_.value();
-        }
-        return changed;
-    }
+    bool CheckSelectedTypeChange();
 
     bool IsUsingMouse()
     {
@@ -690,15 +632,9 @@ public:
     void OnSelectionMenuOptionsUpdate(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     
-    void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
-    {
-        selectOverlay_->OnCreateMenuCallbackUpdate(std::move(onCreateMenuCallback));
-    }
+    void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback);
 
-    void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
-    {
-        selectOverlay_->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
-    }
+    void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick);
     
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
@@ -712,13 +648,7 @@ public:
         paintInfo_ = area + paintOffset.ToString();
     }
 
-    void DumpRecord(const std::string& record, bool stateChange = false)
-    {
-        if (stateChange || frameRecord_.length() > MAX_SIZE_OF_LOG) {
-            frameRecord_.clear();
-        }
-        frameRecord_.append("[" + record + "]");
-    }
+    void DumpRecord(const std::string& record, bool stateChange = false);
 
     void LogForFormRender(const std::string& logTag);
 
@@ -775,13 +705,7 @@ public:
         afterLayoutCallback_ = std::nullopt;
     }
 
-    RefPtr<MagnifierController> GetOrCreateMagnifier()
-    {
-        if (!magnifierController_) {
-            magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
-        }
-        return magnifierController_;
-    }
+    RefPtr<MagnifierController> GetOrCreateMagnifier();
 
     std::string GetCaretColor() const;
     std::string GetSelectedBackgroundColor() const;

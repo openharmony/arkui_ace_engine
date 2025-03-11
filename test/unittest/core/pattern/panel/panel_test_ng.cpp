@@ -36,8 +36,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
 #include "core/components_ng/pattern/panel/drag_bar_pattern.h"
+#include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
+#include "core/components_ng/pattern/panel/close_icon_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;

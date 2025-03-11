@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 
+#include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;

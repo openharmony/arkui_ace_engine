@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 using namespace OHOS::Security;

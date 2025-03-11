@@ -24,13 +24,10 @@
 #include "core/components_ng/manager/select_content_overlay/select_overlay_callback.h"
 #include "core/components_ng/manager/select_content_overlay/select_overlay_holder.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
-#include "core/components_ng/pattern/text/text_menu_extension.h"
-#include "core/event/ace_events.h"
-#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
+class SelectContentOverlayManager;
 struct OverlayRequest {
     bool menuIsShow = true;
     bool hideHandle = false;
@@ -242,17 +239,7 @@ public:
     bool CheckUnsupportedTransformMatrix(const RefPtr<RenderContext> context, bool checkScale);
     bool CheckSwitchToMode(HandleLevelMode mode) override;
 
-    void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
-    {
-        selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback_;
-        selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick_;
-        auto textRange = [weak = GetHostTextBase()](int32_t& start, int32_t& end) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->GetSelectIndex(start, end);
-        };
-        selectInfo.onCreateCallback.textRangeCallback = textRange;
-    }
+    void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo);
     bool GetClipHandleViewPort(RectF& rect);
     bool CalculateClippedRect(RectF& rect);
     void MarkOverlayDirty();
@@ -296,12 +283,7 @@ public:
         isHostNodeEnableSubWindowMenu_ = enable;
     }
 
-    std::optional<SelectOverlayInfo> GetSelectOverlayInfos()
-    {
-        auto manager = GetManager<SelectContentOverlayManager>();
-        CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
-        return manager->GetSelectOverlayInfo();
-    }
+    std::optional<SelectOverlayInfo> GetSelectOverlayInfos();
 
 protected:
     RectF MergeSelectedBoxes(

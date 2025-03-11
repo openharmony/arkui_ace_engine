@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 

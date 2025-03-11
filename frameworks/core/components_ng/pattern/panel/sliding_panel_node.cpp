@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/panel/sliding_panel_node.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,4 +33,27 @@ void SlidingPanelNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot
     }
 }
 
+int32_t SlidingPanelNode::GetColumnId()
+{
+    if (!columnId_.has_value()) {
+        columnId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    return columnId_.value();
+}
+
+int32_t SlidingPanelNode::GetDragBarId()
+{
+    if (!dragBarId_.has_value()) {
+        dragBarId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    return dragBarId_.value();
+}
+
+int32_t SlidingPanelNode::GetContentId()
+{
+    if (!contentId_.has_value()) {
+        contentId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    return contentId_.value();
+}
 } // namespace OHOS::Ace::NG

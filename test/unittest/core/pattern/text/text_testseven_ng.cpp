@@ -20,6 +20,9 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/common/clipboard/mock_clip_board.h"
 
+#include "core/components_ng/pattern/text/span/tlv_util.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 class TextMockClipboardImpl : public MockClipboardImpl {
