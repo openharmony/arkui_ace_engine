@@ -68,12 +68,17 @@ export struct BindContentCoverBootcamp {
   @State transitionAnimationExpectedFrameRateRangeExpected: number = 60;
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
+  scroller: Scroller = new Scroller();
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   //compEvent
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -93,6 +98,7 @@ export struct BindContentCoverBootcamp {
       }
     }, 200)
   }
+
   build() {
     NavDestination() {
       Drawer({
@@ -236,7 +242,7 @@ export struct BindContentCoverBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
 
         RadioBlock({
@@ -489,7 +495,7 @@ export struct BindContentCoverBootcamp {
         })
 
       }
-    }.height('50%')
+    }.height('50%').id('scroll')
 
   }
 }

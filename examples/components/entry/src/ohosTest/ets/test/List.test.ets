@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import BindContentCoverBootcampTest from './BindContentCoverBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  BindContentCoverBootcampTest();
 }
