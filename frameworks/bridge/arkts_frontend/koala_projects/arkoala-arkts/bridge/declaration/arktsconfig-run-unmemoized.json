@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "package": "@ohos/arkui",
+        "outDir": "build/unmemoized/abc",
+        "baseUrl": "./build/unmemoized/src",
+        "paths": {
+            "@koalaui/runtime": ["../../../../../../incremental/runtime/build/unmemoized/src"],
+            "@koalaui/common": ["../../../../../../incremental/common/src"],
+            "@koalaui/compat": ["../../../../../../incremental/compat/src/arkts"]
+        }
+    },
+    "include": ["build/unmemoized/src/**/*.ts", "build/unmemoized/src/*.ts"],
+    "references": [
+    ]
+}

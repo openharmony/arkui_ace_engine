@@ -31,7 +31,8 @@
             "#arkcompat": [
                 "../../arkoala/arkui-common/build/unmemoized/src/arkts"
             ],
-            "#arkstate": ["../../arkoala/arkui-common/build/unmemoized/src"]
+            "#arkstate": ["../../arkoala/arkui-common/build/unmemoized/src"],
+            "@ohos/arkui": ["../../bridge/implementation/build/unmemoized/src"]
         }
     },
     "include": [

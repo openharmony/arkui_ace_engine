@@ -50,6 +50,8 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./ArkScrollInterfaces"
 import { ScrollState } from "./ArkListInterfaces"
 import { AccessibilityHoverEvent } from "./ArkAccessibilityHoverEventMaterialized"
+export { PointLightStyle, LightSource } from "@ohos/arkui"
+
 export interface ComponentOptions {
     freezeWhenInactive: boolean;
 }
@@ -930,7 +932,7 @@ export interface CommonMethod<T> {
 export interface CommonAttribute extends CommonMethod<CommonAttribute> {
 }
 export type CommonInterface = () => CommonAttribute;
-export type CustomBuilder = 
+export type CustomBuilder =
 /** @memo */
 () => void;
 export interface OverlayOptions {
@@ -1088,18 +1090,18 @@ export interface BackgroundBrightnessOptions {
     rate: number;
     lightUpDegree: number;
 }
-export interface PointLightStyle {
-    lightSource?: LightSource;
-    illuminated?: IlluminatedType;
-    bloom?: number;
-}
-export interface LightSource {
-    positionX: Dimension;
-    positionY: Dimension;
-    positionZ: Dimension;
-    intensity: number;
-    color?: ResourceColor;
-}
+// export interface PointLightStyle {
+//     lightSource?: LightSource;
+//     illuminated?: IlluminatedType;
+//     bloom?: number;
+// }
+// export interface LightSource {
+//     positionX: Dimension;
+//     positionY: Dimension;
+//     positionZ: Dimension;
+//     intensity: number;
+//     color?: ResourceColor;
+// }
 export interface KeyframeAnimateParam {
     delay?: number;
     iterations?: number;

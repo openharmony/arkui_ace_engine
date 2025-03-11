@@ -45,9 +45,11 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./ArkGestureInterfaces"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-export interface ColumnOptions {
-    space?: string | number;
-}
+import { ColumnOptions } from "@ohos/arkui"
+export { ColumnOptions } from "@ohos/arkui"
+// export interface ColumnOptions {
+//     space?: string | number;
+// }
 export type ColumnInterface = (options?: ColumnOptions) => ColumnAttribute;
 export interface ColumnAttribute extends CommonMethod<ColumnAttribute> {
     alignItems: HorizontalAlign;
