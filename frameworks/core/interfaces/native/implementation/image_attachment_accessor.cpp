@@ -34,11 +34,23 @@ Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
+Ark_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
+{
+    return {};
+}
 Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
 Ark_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
+{
+    return {};
+}
+Ark_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
+{
+    return {};
+}
+Ark_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
@@ -50,8 +62,11 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
         ImageAttachmentAccessor::CtorImpl,
         ImageAttachmentAccessor::GetFinalizerImpl,
         ImageAttachmentAccessor::GetValueImpl,
+        ImageAttachmentAccessor::GetSizeImpl,
         ImageAttachmentAccessor::GetVerticalAlignImpl,
         ImageAttachmentAccessor::GetObjectFitImpl,
+        ImageAttachmentAccessor::GetLayoutStyleImpl,
+        ImageAttachmentAccessor::GetColorFilterImpl,
     };
     return &ImageAttachmentAccessorImpl;
 }

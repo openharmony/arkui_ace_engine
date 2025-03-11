@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ActionSheetAccessor {
-void DestroyPeerImpl(Ark_ActionSheet peer)
-{
-}
-Ark_ActionSheet CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void ShowImpl(const Ark_ActionSheetOptions* value)
 {
 }
@@ -37,9 +26,6 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
 {
     static const GENERATED_ArkUIActionSheetAccessor ActionSheetAccessorImpl {
-        ActionSheetAccessor::DestroyPeerImpl,
-        ActionSheetAccessor::CtorImpl,
-        ActionSheetAccessor::GetFinalizerImpl,
         ActionSheetAccessor::ShowImpl,
     };
     return &ActionSheetAccessorImpl;

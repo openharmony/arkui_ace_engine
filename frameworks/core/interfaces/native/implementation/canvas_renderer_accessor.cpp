@@ -272,6 +272,10 @@ void RestoreLayerImpl(Ark_CanvasRenderer peer)
 void ResetImpl(Ark_CanvasRenderer peer)
 {
 }
+Ark_Union_LengthMetrics_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
+{
+    return {};
+}
 void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
                           const Ark_Union_LengthMetrics_String* letterSpacing)
 {
@@ -292,9 +296,17 @@ void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
                                      const Ark_String* globalCompositeOperation)
 {
 }
+Ark_Union_String_Number_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+{
+    return {};
+}
 void SetFillStyleImpl(Ark_CanvasRenderer peer,
                       const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
 {
+}
+Ark_Union_String_Number_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+{
+    return {};
 }
 void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
                         const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
@@ -478,12 +490,15 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
         CanvasRendererAccessor::SaveLayerImpl,
         CanvasRendererAccessor::RestoreLayerImpl,
         CanvasRendererAccessor::ResetImpl,
+        CanvasRendererAccessor::GetLetterSpacingImpl,
         CanvasRendererAccessor::SetLetterSpacingImpl,
         CanvasRendererAccessor::GetGlobalAlphaImpl,
         CanvasRendererAccessor::SetGlobalAlphaImpl,
         CanvasRendererAccessor::GetGlobalCompositeOperationImpl,
         CanvasRendererAccessor::SetGlobalCompositeOperationImpl,
+        CanvasRendererAccessor::GetFillStyleImpl,
         CanvasRendererAccessor::SetFillStyleImpl,
+        CanvasRendererAccessor::GetStrokeStyleImpl,
         CanvasRendererAccessor::SetStrokeStyleImpl,
         CanvasRendererAccessor::GetFilterImpl,
         CanvasRendererAccessor::SetFilterImpl,

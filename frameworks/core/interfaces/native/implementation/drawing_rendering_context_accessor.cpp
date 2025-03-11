@@ -33,6 +33,10 @@ Ark_NativePointer GetFinalizerImpl()
 void InvalidateImpl(Ark_DrawingRenderingContext peer)
 {
 }
+Ark_Size GetSizeImpl(Ark_DrawingRenderingContext peer)
+{
+    return {};
+}
 Ark_DrawingCanvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
 {
     return {};
@@ -45,6 +49,7 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
         DrawingRenderingContextAccessor::CtorImpl,
         DrawingRenderingContextAccessor::GetFinalizerImpl,
         DrawingRenderingContextAccessor::InvalidateImpl,
+        DrawingRenderingContextAccessor::GetSizeImpl,
         DrawingRenderingContextAccessor::GetCanvasImpl,
     };
     return &DrawingRenderingContextAccessorImpl;

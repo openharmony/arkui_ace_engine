@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SystemOpsAccessor {
-void DestroyPeerImpl(Ark_SystemOps peer)
-{
-}
-Ark_SystemOps CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 Ark_NativePointer StartFrameImpl()
 {
     return {};
@@ -52,9 +41,6 @@ void RestoreInstanceIdImpl()
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
     static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
-        SystemOpsAccessor::DestroyPeerImpl,
-        SystemOpsAccessor::CtorImpl,
-        SystemOpsAccessor::GetFinalizerImpl,
         SystemOpsAccessor::StartFrameImpl,
         SystemOpsAccessor::EndFrameImpl,
         SystemOpsAccessor::SyncInstanceIdImpl,

@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerDialogAccessor {
-void DestroyPeerImpl(Ark_TextPickerDialog peer)
-{
-}
-Ark_TextPickerDialog CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
 }
@@ -37,9 +26,6 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
 const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
 {
     static const GENERATED_ArkUITextPickerDialogAccessor TextPickerDialogAccessorImpl {
-        TextPickerDialogAccessor::DestroyPeerImpl,
-        TextPickerDialogAccessor::CtorImpl,
-        TextPickerDialogAccessor::GetFinalizerImpl,
         TextPickerDialogAccessor::ShowImpl,
     };
     return &TextPickerDialogAccessorImpl;

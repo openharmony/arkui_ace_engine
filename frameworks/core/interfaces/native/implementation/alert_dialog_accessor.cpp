@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlertDialogAccessor {
-void DestroyPeerImpl(Ark_AlertDialog peer)
-{
-}
-Ark_AlertDialog CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void ShowImpl(const Ark_Type_AlertDialog_show_value* value)
 {
 }
@@ -37,9 +26,6 @@ void ShowImpl(const Ark_Type_AlertDialog_show_value* value)
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor()
 {
     static const GENERATED_ArkUIAlertDialogAccessor AlertDialogAccessorImpl {
-        AlertDialogAccessor::DestroyPeerImpl,
-        AlertDialogAccessor::CtorImpl,
-        AlertDialogAccessor::GetFinalizerImpl,
         AlertDialogAccessor::ShowImpl,
     };
     return &AlertDialogAccessorImpl;

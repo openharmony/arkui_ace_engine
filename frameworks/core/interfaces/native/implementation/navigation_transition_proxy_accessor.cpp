@@ -40,9 +40,17 @@ void UpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
                           const Ark_Number* progress)
 {
 }
+Ark_NavContentInfo GetFromImpl(Ark_NavigationTransitionProxy peer)
+{
+    return {};
+}
 void SetFromImpl(Ark_NavigationTransitionProxy peer,
                  const Ark_NavContentInfo* from)
 {
+}
+Ark_NavContentInfo GetToImpl(Ark_NavigationTransitionProxy peer)
+{
+    return {};
 }
 void SetToImpl(Ark_NavigationTransitionProxy peer,
                const Ark_NavContentInfo* to)
@@ -66,7 +74,9 @@ const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionP
         NavigationTransitionProxyAccessor::FinishTransitionImpl,
         NavigationTransitionProxyAccessor::CancelTransitionImpl,
         NavigationTransitionProxyAccessor::UpdateTransitionImpl,
+        NavigationTransitionProxyAccessor::GetFromImpl,
         NavigationTransitionProxyAccessor::SetFromImpl,
+        NavigationTransitionProxyAccessor::GetToImpl,
         NavigationTransitionProxyAccessor::SetToImpl,
         NavigationTransitionProxyAccessor::GetIsInteractiveImpl,
         NavigationTransitionProxyAccessor::SetIsInteractiveImpl,

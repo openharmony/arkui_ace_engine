@@ -41,6 +41,10 @@ void SetNameImpl(Ark_NavPathInfo peer,
                  const Ark_String* name)
 {
 }
+Ark_CustomObject GetParamImpl(Ark_NavPathInfo peer)
+{
+    return {};
+}
 void SetParamImpl(Ark_NavPathInfo peer,
                   const Ark_CustomObject* param)
 {
@@ -70,6 +74,7 @@ const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor()
         NavPathInfoAccessor::GetFinalizerImpl,
         NavPathInfoAccessor::GetNameImpl,
         NavPathInfoAccessor::SetNameImpl,
+        NavPathInfoAccessor::GetParamImpl,
         NavPathInfoAccessor::SetParamImpl,
         NavPathInfoAccessor::GetOnPopImpl,
         NavPathInfoAccessor::SetOnPopImpl,

@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AnimationExtenderAccessor {
-void DestroyPeerImpl(Ark_AnimationExtender peer)
-{
-}
-Ark_AnimationExtender CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void SetClipRectImpl(Ark_NativePointer node,
                      Ark_Float32 x,
                      Ark_Float32 y,
@@ -70,9 +59,6 @@ void AnimationTranslateImpl(Ark_NativePointer node,
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
 {
     static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
-        AnimationExtenderAccessor::DestroyPeerImpl,
-        AnimationExtenderAccessor::CtorImpl,
-        AnimationExtenderAccessor::GetFinalizerImpl,
         AnimationExtenderAccessor::SetClipRectImpl,
         AnimationExtenderAccessor::OpenImplicitAnimationImpl,
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,

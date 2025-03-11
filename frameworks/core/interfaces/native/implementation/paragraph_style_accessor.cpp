@@ -50,6 +50,10 @@ Ark_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
+Ark_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
+{
+    return {};
+}
 } // ParagraphStyleAccessor
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
 {
@@ -62,6 +66,7 @@ const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
         ParagraphStyleAccessor::GetMaxLinesImpl,
         ParagraphStyleAccessor::GetOverflowImpl,
         ParagraphStyleAccessor::GetWordBreakImpl,
+        ParagraphStyleAccessor::GetLeadingMarginImpl,
     };
     return &ParagraphStyleAccessorImpl;
 }

@@ -23,9 +23,6 @@ namespace LazyForEachOpsAccessor {
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
     static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
-        LazyForEachOpsAccessor::DestroyPeerImpl,
-        LazyForEachOpsAccessor::CtorImpl,
-        LazyForEachOpsAccessor::GetFinalizerImpl,
         LazyForEachOpsAccessor::NeedMoreElementsImpl,
         LazyForEachOpsAccessor::OnRangeUpdateImpl,
         LazyForEachOpsAccessor::SetCurrentIndexImpl,

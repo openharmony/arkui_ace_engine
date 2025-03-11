@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventEmulatorAccessor {
-void DestroyPeerImpl(Ark_EventEmulator peer)
-{
-}
-Ark_EventEmulator CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void EmitTextInputEventImpl(Ark_NativePointer node,
                             const Ark_String* text)
 {
@@ -43,9 +32,6 @@ void EmitTextInputEventImpl(Ark_NativePointer node,
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()
 {
     static const GENERATED_ArkUIEventEmulatorAccessor EventEmulatorAccessorImpl {
-        EventEmulatorAccessor::DestroyPeerImpl,
-        EventEmulatorAccessor::CtorImpl,
-        EventEmulatorAccessor::GetFinalizerImpl,
         EventEmulatorAccessor::EmitClickEventImpl,
         EventEmulatorAccessor::EmitTextInputEventImpl,
     };

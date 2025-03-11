@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerDialogAccessor {
-void DestroyPeerImpl(Ark_DatePickerDialog peer)
-{
-}
-Ark_DatePickerDialog CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void ShowImpl(const Opt_DatePickerDialogOptions* options)
 {
 }
@@ -37,9 +26,6 @@ void ShowImpl(const Opt_DatePickerDialogOptions* options)
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
 {
     static const GENERATED_ArkUIDatePickerDialogAccessor DatePickerDialogAccessorImpl {
-        DatePickerDialogAccessor::DestroyPeerImpl,
-        DatePickerDialogAccessor::CtorImpl,
-        DatePickerDialogAccessor::GetFinalizerImpl,
         DatePickerDialogAccessor::ShowImpl,
     };
     return &DatePickerDialogAccessorImpl;
