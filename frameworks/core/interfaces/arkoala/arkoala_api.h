@@ -2367,8 +2367,6 @@ struct ArkUICommonModifier {
     ArkUI_CharPtr (*getAccessibilityRole)(ArkUINodeHandle node);
     void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut);
     void (*resetFocusScopeId)(ArkUINodeHandle node);
-    void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
-    void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
     void (*setFocusScopePriority)(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority);
     void (*resetFocusScopePriority)(ArkUINodeHandle node);
     void (*setPixelRound)(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length);
@@ -2414,6 +2412,8 @@ struct ArkUICommonModifier {
         ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval);
     void (*setPrivacySensitive)(ArkUINodeHandle node, ArkUI_Int32 sensitive);
     void (*resetPrivacySensitive)(ArkUINodeHandle node);
+    void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
+    void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
 };
 
 struct ArkUICommonShapeModifier {
