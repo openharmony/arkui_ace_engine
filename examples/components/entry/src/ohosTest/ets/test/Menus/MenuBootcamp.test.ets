@@ -54,7 +54,7 @@ export default function MenuBootcampTest() {
         await driver.delayMs(4500);
 
 
-        let scrollSearch: Component = await driver.findComponent(ON.text('菜单/menu'))
+        let scrollSearch: Component = await driver.findComponent(ON.text('菜单/Menu'))
         await scrollSearch.click()
         await driver.delayMs(2500);
 
