@@ -327,7 +327,7 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (!child.second) {
         return nullptr;
     }
-    auto greatOrEqualApi18 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+    auto greatOrEqualApi18 = GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     child.second->UpdateThemeScopeId(GetThemeScopeId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
