@@ -1341,11 +1341,11 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg018, TestSize.Level1)
     ASSERT_NE(subMenuPattern, nullptr);
     subMenuPattern->SetParentMenuItem(subMenuParent);
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
-    menuItemPattern->FindTouchedEmbeddedMenuItem(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    menuItemPattern->FindTouchedEmbeddedMenuItem(PointF(MENU_OFFSET_X, MENU_OFFSET_Y));
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
     menuItemPattern->isExpanded_ = true;
     menuItemPattern->embeddedMenu_ = mainMenu;
-    menuItemPattern->FindTouchedEmbeddedMenuItem(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    menuItemPattern->FindTouchedEmbeddedMenuItem(PointF(MENU_OFFSET_X, MENU_OFFSET_Y));
 }
 
 /**
