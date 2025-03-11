@@ -1916,13 +1916,6 @@ void SetRectInScreen(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo
 }
 }
 
-Rect JsAccessibilityManager::GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node)
-{
-    auto rect = GetFinalRealRect(node);
-    Rect rectInfo(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    return rectInfo;
-}
-
 void JsAccessibilityManager::UpdateAccessibilityVisible(
     const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
@@ -7453,5 +7446,65 @@ bool JsAccessibilityManager::IsScreenReaderEnabled()
     bool isEnabled = false;
     client->IsScreenReaderEnabled(isEnabled);
     return isEnabled;
+}
+
+int32_t JsAccessibilityManager::GetTransformDegreeRelativeToWindow(const RefPtr<NG::FrameNode>& node, bool excludeSelf)
+{
+    int32_t rotateDegree = 0;
+    auto context = node->GetRenderContext();
+    if (context && !excludeSelf) {
+        rotateDegree = context->GetRotateDegree();
+    }
+    auto parent = node->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        if (parent->IsWindowBoundary()) {
+            break;
+        }
+        auto contextParent = parent->GetRenderContext();
+        if (contextParent) {
+            rotateDegree += contextParent->GetRotateDegree();
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return rotateDegree %= FULL_ANGLE;
+}
+
+AccessibilityParentRectInfo JsAccessibilityManager::GetTransformRectInfoRelativeToWindow(
+    const RefPtr<NG::FrameNode>& node, const RefPtr<PipelineBase>& context)
+{
+    AccessibilityParentRectInfo rectInfo;
+    CHECK_NULL_RETURN(node, rectInfo);
+    CHECK_NULL_RETURN(context, rectInfo);
+    auto windowInfo = GenerateWindowInfo(node, context);
+    auto rectFinal = GetFinalRealRect(node);
+    RotateTransform rotateData;
+    RotateTransform windowRotateData = windowInfo.rotateTransform;
+    rotateData.rotateDegree = GetTransformDegreeRelativeToWindow(node);
+    AccessibilityRect rotateRect(rectFinal.GetX(), rectFinal.GetY(),
+        rectFinal.Width(), rectFinal.Height());
+    if (windowRotateData.rotateDegree) {
+        rotateRect.Rotate(windowRotateData.innerCenterX, windowRotateData.innerCenterY,
+            windowRotateData.rotateDegree);
+        rotateRect.ApplyTransformation(windowRotateData, windowInfo.scaleX, windowInfo.scaleY);
+        rotateData.rotateDegree += windowRotateData.rotateDegree;
+    } else {
+        RotateTransform roateDataTemp(0, windowInfo.left, windowInfo.top, 0, 0);
+        rotateRect.ApplyTransformation(roateDataTemp, windowInfo.scaleX, windowInfo.scaleY);
+    }
+    rectInfo.left = rotateRect.GetX();
+    rectInfo.top = rotateRect.GetY();
+    rectInfo.scaleX *= windowInfo.scaleX;
+    rectInfo.scaleY *= windowInfo.scaleY;
+    if (rotateData.rotateDegree) {
+        rotateData.centerX = static_cast<int32_t>(rotateRect.GetWidth()) * 0.5f + rotateRect.GetX();
+        rotateData.centerY = static_cast<int32_t>(rotateRect.GetHeight()) * 0.5f + rotateRect.GetY();
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, rectInfo);
+        auto rectOrigin = renderContext->GetPaintRectWithoutTransform();
+        rotateData.innerCenterX = rectOrigin.Width() * 0.5f;
+        rotateData.innerCenterY = rectOrigin.Height() * 0.5f;
+    }
+    rectInfo.rotateTransform = rotateData;
+    return rectInfo;
 }
 } // namespace OHOS::Ace::Framework
