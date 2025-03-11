@@ -421,7 +421,6 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             auto menuWrapperChildNode = DynamicCast<FrameNode>(*child);
             CHECK_NULL_VOID(menuWrapperChildNode);
             // get menuWrapperChildNode's touch region
-            auto menuWrapperChildZone = menuWrapperChildNode->GetGeometryNode()->GetFrameRect();
             if (CheckPointInMenuZone(menuWrapperChildNode, position)) {
                 currentTouchItem_ = FindTouchedMenuItem(menuWrapperChildNode, position);
                 ChangeCurMenuItemBgColor();
