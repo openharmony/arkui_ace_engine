@@ -72,11 +72,11 @@ bool MenuWrapperPattern::GetInnerMenu(RefPtr<UINode>& innerMenuNode, const Point
     CHECK_NULL_RETURN(host, false);
     auto children = host->GetChildren();
     CHECK_NULL_RETURN(!children.empty(), false);
-     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-         auto& child = *iter;
-         if (!child || child->GetTag() != V2::MENU_ETS_TAG) {
-             continue;
-         }
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        if (!child || child->GetTag() != V2::MENU_ETS_TAG) {
+            continue;
+        }
         auto frameNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_RETURN(frameNode, false);
         auto menuPattern = frameNode->GetPattern<MenuPattern>();
@@ -125,7 +125,6 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto position = PointF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
-    position -= host->GetPaintRectOffset();
     RefPtr<UINode> innerMenuNode = nullptr;
     auto isInRegion = GetInnerMenu(innerMenuNode, position);
     CHECK_NULL_VOID(innerMenuNode);
