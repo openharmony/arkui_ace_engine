@@ -512,7 +512,7 @@ private:
             return true;
         }
         // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
-        if (isRotate && !NearZero(lastKeyboardHeight) && !NearZero(keyboardRect.Height())) {
+        if ((textFieldManager->GetLaterAvoid() || isRotate) && !NearZero(lastKeyboardHeight)) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
                 "later avoid %{public}s %{public}f %{public}f",
                 lastRotation, keyboardRect.ToString().c_str(), positionY, height);
