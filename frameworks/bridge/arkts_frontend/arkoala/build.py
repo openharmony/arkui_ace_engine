@@ -39,6 +39,8 @@ def main(argv):
     node_path = os.path.abspath(argv[3])
     output_target_path = os.path.abspath(argv[4])
     check_install_path = os.path.join(project_path, "arkoala-arkts", "node_modules")
+    check_bin_path = os.path.join(check_install_path, ".bin")
+    check_fast_arktsc = os.path.join(check_bin_path, "fast-arktsc")
     dist_path = os.path.join(build_path, "dist")
     logfile = os.path.join(dist_path, "koala_build.log")
     target_cmd = "arkoala:abc"
@@ -94,7 +96,14 @@ def main(argv):
             f.write("\n")
             f.write("arkola node_modules directory exists, skip install\n")
             f.close()
-    
+
+    if not os.path.exists(check_fast_arktsc):
+        print(f"fast-arktsc not found!")
+        with open(logfile, "a+") as f:
+            f.write("\n")
+            f.write("fast-arktsc not found!\n")
+            f.close()
+
     # Run build arkoala
     try:
         ret = subprocess.run(["npm", "run", target_cmd, "--verbose"], capture_output=True, env = env, text=True, check=True)
@@ -106,7 +115,9 @@ def main(argv):
     except subprocess.CalledProcessError as e:
         with open(logfile, "a+") as f:
             f.write("\n")
+            f.write("build log: "+ e.stdout + "\n")
             f.write("error message: "+ e.stderr + "\n")
+            print(f"build log:\n {ret.stdout}")
             print(f"error message: {e.stderr}")
             f.close()
     # restore old env
