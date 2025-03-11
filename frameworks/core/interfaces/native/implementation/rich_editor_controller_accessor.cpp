@@ -175,21 +175,21 @@ UserGestureOptions Convert(const Ark_RichEditorGesture& src)
     if (arkOnClickOpt) {
         result.onClick = [callback = CallbackHelper(arkOnClickOpt.value())](OHOS::Ace::GestureEvent& info) {
             const auto event = Converter::ArkClickEventSync(info);
-            callback.Invoke(event.ArkValue());
+            callback.InvokeSync(event.ArkValue());
         };
     }
     const auto arkOnLongPressOpt = Converter::OptConvert<Callback_GestureEvent_Void>(src.onLongPress);
     if (arkOnLongPressOpt) {
         result.onLongPress = [callback = CallbackHelper(arkOnLongPressOpt.value())](OHOS::Ace::GestureEvent& info) {
             const auto event = Converter::ArkGestureEventSync(info);
-            callback.Invoke(event.ArkValue());
+            callback.InvokeSync(event.ArkValue());
         };
     }
     const auto arkDoubleClickOpt = Converter::OptConvert<Callback_GestureEvent_Void>(src.onDoubleClick);
     if (arkDoubleClickOpt) {
         result.onDoubleClick = [callback = CallbackHelper(arkDoubleClickOpt.value())](OHOS::Ace::GestureEvent& info) {
             const auto event = Converter::ArkGestureEventSync(info);
-            callback.Invoke(event.ArkValue());
+            callback.InvokeSync(event.ArkValue());
         };
     }
     return result;
@@ -202,7 +202,7 @@ UserMouseOptions Convert(const ::OnHoverCallback& src)
     result.onHover = [callback = CallbackHelper(src)](bool isHover, HoverInfo& info) {
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
             const auto event = Converter::ArkHoverEventSync(info);
-        callback.Invoke(arkIsHover, event.ArkValue());
+        callback.InvokeSync(arkIsHover, event.ArkValue());
     };
     return result;
 }

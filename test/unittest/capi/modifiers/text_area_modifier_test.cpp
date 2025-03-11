@@ -615,7 +615,9 @@ HWTEST_F(TextAreaModifierTest, setOnSubmit1Test, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    auto onSubmitFunc = [](Ark_Int32 resourceId, const Ark_EnterKeyType enterKeyType, const Opt_SubmitEvent event) {
+    auto onSubmitFunc = [](
+        Ark_VMContext, Ark_Int32 resourceId, const Ark_EnterKeyType enterKeyType, const Opt_SubmitEvent event
+    ) {
         auto eventValue = Converter::OptConvert<Ark_SubmitEvent>(event);
         ASSERT_TRUE(eventValue);
         auto peer = eventValue.value();

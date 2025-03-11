@@ -113,7 +113,7 @@ void OnClickImpl(Ark_NativePointer node,
         const auto event = Converter::ArkClickEventSync(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
         auto error = Converter::ArkValue<Opt_BusinessError>();
-        arkCallback.Invoke(event.ArkValue(), arkResult, error);
+        arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
 
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
