@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import SymbolGlyphBootcampTest from './TextAndInput/SymbolGlyphBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  SymbolGlyphBootcampTest()
 }
