@@ -376,8 +376,9 @@ HWTEST_F(LocationButtonModifierTest, setOnClickTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto checkCallback = [](
-        const Ark_Int32 resourceId, const Ark_ClickEvent event,
-        const Ark_LocationButtonOnClickResult result) {
+        Ark_VMContext, const Ark_Int32 resourceId, const Ark_ClickEvent event,
+        const Ark_LocationButtonOnClickResult result
+    ) {
             auto peer = event;
             ASSERT_NE(peer, nullptr);
             auto accessor = GeneratedModifier::GetClickEventAccessor();

@@ -386,7 +386,9 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onHoverFunc = [](const Ark_Int32 resourceId, const Ark_Boolean isHover, const Ark_HoverEvent event) {
+    auto onHoverFunc = [](
+        Ark_VMContext, const Ark_Int32 resourceId, const Ark_Boolean isHover, const Ark_HoverEvent event
+    ) {
         ASSERT_NE(event, nullptr);
         auto peer = event;
         auto hoverEventInfo = peer->GetEventInfo();
@@ -446,7 +448,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onAccessibilityHoverFunc = [](const Ark_Int32 resourceId,
+    auto onAccessibilityHoverFunc = [](Ark_VMContext, const Ark_Int32 resourceId,
                           const Ark_Boolean isHover,
                           const Ark_AccessibilityHoverEvent peer) {
         auto info = peer ? peer->GetEventInfo() : nullptr;
@@ -499,19 +501,11 @@ HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onMouseFunc = [](const Ark_Int32 resourceId,
-                                const Ark_MouseEvent event) {
+    auto onMouseFunc = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_MouseEvent event) {
         checkEvent = { .nodeId = resourceId };
     };
 
-    Callback_MouseEvent_Void callBackValue = {
-        .resource = Ark_CallbackResource {
-            .resourceId = frameNode->GetId(),
-            .hold = nullptr,
-            .release = nullptr
-        },
-        .call = onMouseFunc
-    };
+    auto callBackValue = Converter::ArkValue<Callback_MouseEvent_Void>(onMouseFunc, frameNode->GetId());
 
     auto test = [this, &callBackValue, eventHub, frameNode]() {
         checkEvent = std::nullopt;
@@ -598,7 +592,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onTouchFunc = [](const Ark_Int32 resourceId, const Ark_TouchEvent parameter) {
+    auto onTouchFunc = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_TouchEvent parameter) {
         ASSERT_NE(parameter, nullptr);
         auto peer = parameter;
         auto touchEventInfo = peer->GetEventInfo();

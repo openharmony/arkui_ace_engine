@@ -39,7 +39,7 @@ Ark_GestureStyle CtorImpl(const Opt_GestureStyleInterface* value)
     if (onClickOpt) {
         auto onClick = [arkCallback = CallbackHelper(*onClickOpt)](GestureEvent& info) -> void {
             const auto event = Converter::ArkClickEventSync(info);
-            arkCallback.Invoke(event.ArkValue());
+            arkCallback.InvokeSync(event.ArkValue());
         };
         gestureInfo.onClick = std::move(onClick);
     }
@@ -47,7 +47,7 @@ Ark_GestureStyle CtorImpl(const Opt_GestureStyleInterface* value)
     if (onLongClickOpt) {
         auto onLongClick = [arkCallback = CallbackHelper(*onLongClickOpt)](GestureEvent& info) -> void {
             const auto event = Converter::ArkGestureEventSync(info);
-            arkCallback.Invoke(event.ArkValue());
+            arkCallback.InvokeSync(event.ArkValue());
         };
         gestureInfo.onLongPress = std::move(onLongClick);
     }

@@ -253,7 +253,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick0Test, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
+    auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event) {
         auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
@@ -300,7 +300,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnClick1Test, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
-    auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
+    auto onClick = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event) {
         auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetClickEventAccessor();
@@ -398,7 +398,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyEventTest, TestSize.Level1)
     };
     static const int32_t expectedResId = 123;
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_KeyEvent event) {
+    auto checkCallback = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_KeyEvent event) {
         auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
