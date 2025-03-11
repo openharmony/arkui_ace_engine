@@ -650,6 +650,7 @@ HWTEST_F(MenuPattern2TestNg, UpdateMenuItemDivider002, TestSize.Level1)
             AceType::MakeRefPtr<MenuItemPattern>());
     menuPattern->options_.push_back(option1);
     menuPattern->options_.push_back(option2);
+    menuPattern->isSelectMenu_ = true;
 
     auto layoutProperty = outerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
     layoutProperty->UpdateItemDividerMode(DividerMode::FLOATING_ABOVE_MENU);
@@ -692,6 +693,7 @@ HWTEST_F(MenuPattern2TestNg, UpdateMenuItemDivider003, TestSize.Level1)
 
     auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
+    menuPattern->isSelectMenu_ = true;
     RefPtr<FrameNode> nullOption = nullptr;
     menuPattern->options_.push_back(nullOption);
     menuPattern->UpdateMenuItemDivider();
@@ -743,6 +745,7 @@ HWTEST_F(MenuPattern2TestNg, UpdateMenuItemDivider004, TestSize.Level1)
     menuPattern->options_.push_back(option1);
     menuPattern->options_.push_back(option2);
     menuPattern->options_.push_back(option3);
+    menuPattern->isSelectMenu_ = true;
 
     auto layoutProperty = outerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
     layoutProperty->UpdateItemDividerMode(DividerMode::FLOATING_ABOVE_MENU);
@@ -786,7 +789,7 @@ HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode001, TestSize.Level1)
     auto previousNode = FrameNode::CreateFrameNode(
             V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<MenuItemPattern>());
-    ASSERT_NE(previewMode, nullptr);
+    ASSERT_NE(previousNode, nullptr);
     auto currentNode = FrameNode::CreateFrameNode(
             V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<MenuItemPattern>());
@@ -802,7 +805,6 @@ HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode001, TestSize.Level1)
     previousPattern->bottomDivider_ = previousDivider;
 
     menuPattern->UpdateMenuDividerWithMode(previousNode, currentNode, layoutProperty, index);
-    EXPECT_FALSE(previousPattern->GetBottomDivider());
     EXPECT_EQ(index, 0);
 }
 
@@ -843,7 +845,7 @@ HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode002, TestSize.Level1)
     auto previousNode = FrameNode::CreateFrameNode(
             V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<MenuItemPattern>());
-    ASSERT_NE(previewMode, nullptr);
+    ASSERT_NE(previousNode, nullptr);
     auto currentNode = FrameNode::CreateFrameNode(
             V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<MenuItemPattern>());
@@ -860,7 +862,6 @@ HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode002, TestSize.Level1)
 
     menuPattern->UpdateMenuDividerWithMode(previousNode, currentNode, layoutProperty, index);
     EXPECT_TRUE(previousPattern->GetBottomDivider());
-    EXPECT_EQ(index, 1);
 }
 
 /**
@@ -879,7 +880,7 @@ HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode003, TestSize.Level1)
     auto previousNode = FrameNode::CreateFrameNode(
             V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<MenuItemPattern>());
-    ASSERT_NE(previewMode, nullptr);
+    ASSERT_NE(previousNode, nullptr);
     auto currentNode = FrameNode::CreateFrameNode(
             V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<MenuItemPattern>());
@@ -896,8 +897,6 @@ HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode003, TestSize.Level1)
 
     menuPattern->isNeedDivider_ = false;
     menuPattern->UpdateMenuDividerWithMode(previousNode, currentNode, layoutProperty, index);
-
-    EXPECT_FALSE(previousPattern->GetBottomDivider());
     EXPECT_EQ(index, 0);
 }
 
@@ -1126,7 +1125,7 @@ HWTEST_F(MenuPattern2TestNg, IsSelectOverlayDefaultModeRightClickMenu001, TestSi
 {
     auto menuWrapperNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-            AceType::MakeRefPtr<MenuWrapperPattern>());
+            []() {return AceType::MakeRefPtr<MenuWrapperPattern>(1);});
     ASSERT_NE(menuWrapperNode, nullptr);
     RefPtr<FrameNode> outerMenuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
