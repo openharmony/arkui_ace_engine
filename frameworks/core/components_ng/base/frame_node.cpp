@@ -4267,7 +4267,7 @@ void FrameNode::FrameRateDurationsStatisticsRunning(int32_t expectedRate, const 
     calFrameRate_ = expectedRate;
 }
 
-void FrameNOde::FrameRateDurationsStatisticsEnd(const std::string &scene)
+void FrameNode::FrameRateDurationsStatisticsEnd(const std::string &scene)
 {
     int32_t endTime = GetSysTimestamp();
     int32_t duration = endTime - calTime_;
