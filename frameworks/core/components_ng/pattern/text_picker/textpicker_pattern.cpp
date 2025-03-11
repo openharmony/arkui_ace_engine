@@ -1703,7 +1703,10 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size, RefPtr<FrameNode>&
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto version10OrLarger = context->GetMinPlatformVersion() > 9;
-    pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
+    if (!(minSize.Width() == 0 && minSize.Height() == 0 &&
+        stackLayoutConstraint->maxSize.Width() == 0 && stackLayoutConstraint->maxSize.Height() == 0)) {
+            pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
+    }
 
     if (isNeedAdaptForAging && GetIsShowInDialog()) {
         size.SetWidth(pickerContentSize.Width());
@@ -1810,5 +1813,30 @@ void TextPickerPattern::SetDisableTextStyleAnimation(bool isDisableTextStyleAnim
         CHECK_NULL_VOID(pickerColumnPattern);
         pickerColumnPattern->SetDisableTextStyleAnimation(isDisableTextStyleAnimation);
     }
+}
+
+std::string TextPickerPattern::GetTextPickerRange() const
+{
+    std::string result;
+    if (isSingleRange_) {
+        for (auto range : range_) {
+            result.append(range.text_ + ";");
+        }
+        if (result.length() > 0) {
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
+        }
+    } else {
+        for (auto option : cascadeOriginptions_) {
+            for (auto range : option.rangeResult) {
+                result.append(range + ",");
+            }
+            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
+            result.append(";");
+        }
+        if (result.length() > 0) {
+            result = result.substr(0, result.length() - 1);
+        }
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG
