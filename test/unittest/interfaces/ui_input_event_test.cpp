@@ -1098,4 +1098,442 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetPressedTimeByIndex006, TestS
     auto result = OH_ArkUI_PointerEvent_GetPressedTimeByIndex(event.get(), 0);
     EXPECT_EQ(result, 0);
 }
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetTouchAreaWidth
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetTouchAreaWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetTouchAreaWidth, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetTouchAreaWidth(nullptr, 0);
+    EXPECT_EQ(result, 0);
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetTouchAreaWidth(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetTouchAreaWidth(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 0);
+
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    touchEvent->touchPointSize = 0;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetTouchAreaWidth(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 0);
+
+    touchEvent->touchPointSize = 2;
+    ArkUITouchPoint touchPointes[2];
+    touchPointes[1].contactAreaWidth = 1.0;
+    touchEvent->touchPointes = touchPointes;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetTouchAreaWidth(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetTouchAreaHeight
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetTouchAreaHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetTouchAreaHeight, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetTouchAreaHeight(nullptr, 0);
+    EXPECT_EQ(result, 0);
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetTouchAreaHeight(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetTouchAreaHeight(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 0);
+
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    touchEvent->touchPointSize = 0;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetTouchAreaHeight(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 0);
+
+    touchEvent->touchPointSize = 2;
+    ArkUITouchPoint touchPointes[2];
+    touchPointes[1].contactAreaHeight = 1.0;
+    touchEvent->touchPointes = touchPointes;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetTouchAreaHeight(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetChangedPointerId
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetChangedPointerId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetChangedPointerId, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetChangedPointerId(nullptr, 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetChangedPointerId(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetChangedPointerId(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    touchEvent->touchPointSize = 0;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetChangedPointerId(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistorySize
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistorySize
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistorySize, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistorySize(nullptr);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistorySize(uiInputEvent.get());
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistorySize(uiInputEvent.get());
+    EXPECT_EQ(result, 0);
+
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 1;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistorySize(uiInputEvent.get());
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryEventTime
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryEventTime
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryEventTime, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryEventTime(nullptr, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistoryEventTime(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    events[1].timeStamp = 1;
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 2;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryEventTime(uiInputEvent.get(), 1);
+    EXPECT_EQ(result, 1);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryEventTime(uiInputEvent.get(), -1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryEventTime(uiInputEvent.get(), 10);
+    EXPECT_EQ(result, 0);
+
+    touchEvent->historyEvents = nullptr;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryEventTime(uiInputEvent.get(), 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryEventTime(uiInputEvent.get(), 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryPointerCount
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryPointerCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryPointerCount, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryPointerCount(nullptr, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistoryPointerCount(uiInputEvent.get(), 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    events[1].touchPointSize = 1;
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 2;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryPointerCount(uiInputEvent.get(), 1);
+    EXPECT_EQ(result, 1);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryPointerCount(uiInputEvent.get(), -1);
+    EXPECT_EQ(result, 0);
+
+    result = OH_ArkUI_PointerEvent_GetHistoryPointerCount(uiInputEvent.get(), 10);
+    EXPECT_EQ(result, 0);
+
+    touchEvent->historyEvents = nullptr;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryPointerCount(uiInputEvent.get(), 1);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryPointerCount(uiInputEvent.get(), 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryPointerId
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryPointerId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryPointerId, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryPointerId(nullptr, 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistoryPointerId(uiInputEvent.get(), 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    ArkUITouchPoint pointes[2];
+    events[1].touchPointSize = 2;
+    pointes[1].id = 20;
+    events[1].touchPointes = pointes;
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 2;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryPointerId(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 20);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryPointerId(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryX
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryX, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryX(nullptr, 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistoryX(uiInputEvent.get(), 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    ArkUITouchPoint pointes[2];
+    events[1].touchPointSize = 2;
+    pointes[1].nodeX = 20;
+    events[1].touchPointes = pointes;
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 2;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 20);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryY
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryY, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryY(nullptr, 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistoryY(uiInputEvent.get(), 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    ArkUITouchPoint pointes[2];
+    events[1].touchPointSize = 2;
+    pointes[1].nodeY = 20;
+    events[1].touchPointes = pointes;
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 2;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 20);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryWindowX
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryWindowX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryWindowX, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryWindowX(nullptr, 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowX(uiInputEvent.get(), 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    ArkUITouchPoint pointes[2];
+    events[1].touchPointSize = 2;
+    pointes[1].windowX = 20;
+    events[1].touchPointes = pointes;
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 2;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 20);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryWindowY
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryWindowY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryWindowY, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryWindowY(nullptr, 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowY(uiInputEvent.get(), 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    ArkUITouchPoint pointes[2];
+    events[1].touchPointSize = 2;
+    pointes[1].windowY = 20;
+    events[1].touchPointes = pointes;
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 2;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 20);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryWindowY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryDisplayX
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryDisplayX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryDisplayX, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryDisplayX(nullptr, 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayX(uiInputEvent.get(), 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    ArkUITouchPoint pointes[2];
+    events[1].touchPointSize = 2;
+    pointes[1].screenX = 20;
+    events[1].touchPointes = pointes;
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 2;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 20);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayX(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetHistoryDisplayY
+ * @tc.desc: test OH_ArkUI_PointerEvent_GetHistoryDisplayY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryDisplayY, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    auto result = OH_ArkUI_PointerEvent_GetHistoryDisplayY(nullptr, 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayY(uiInputEvent.get(), 0, 0);
+    EXPECT_EQ(result, 0);
+
+    uiInputEvent->eventTypeId = C_TOUCH_EVENT_ID;
+    auto touchEvent = std::make_unique<ArkUITouchEvent>();
+    ArkUIHistoryTouchEvent events[2];
+    ArkUITouchPoint pointes[2];
+    events[1].touchPointSize = 2;
+    pointes[1].screenY = 20;
+    events[1].touchPointes = pointes;
+    touchEvent->historyEvents = events;
+    touchEvent->historySize = 2;
+    uiInputEvent->inputEvent = touchEvent.get();
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 20);
+
+    uiInputEvent->inputEvent = nullptr;
+    result = OH_ArkUI_PointerEvent_GetHistoryDisplayY(uiInputEvent.get(), 1, 1);
+    EXPECT_EQ(result, 0);
+}
 } // namespace OHOS::Ace
