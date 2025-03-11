@@ -150,7 +150,7 @@ void UpdateBackgroundImagePosition(const Align& align, BackgroundImagePosition& 
     }
 }
 
-void SetPopupParams(CJBindPopupParams bindPopupParams, const RefPtr<PopupParam>& popupParam)
+void SetPopupParams(CJBindPopupParamsV2 bindPopupParams, const RefPtr<PopupParam>& popupParam)
 {
     popupParam->SetMessage(bindPopupParams.message);
     popupParam->SetPlacement(bindPopupParams.placementOnTop ? Placement::TOP : Placement::BOTTOM);
@@ -202,6 +202,49 @@ void SetPopupParams(CJBindPopupParams bindPopupParams, const RefPtr<PopupParam>&
 }
 
 void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
+    const std::function<void(bool)>& onStateChangeFunc, const std::function<void()>& primaryActionFunc,
+    const std::function<void()>& secondaryActionFunc)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(isShow);
+    popupParam->SetMessage(bindPopupParams.message);
+    popupParam->SetPlacement(bindPopupParams.placementOnTop ? Placement::TOP : Placement::BOTTOM);
+    auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
+        auto paramData = JsonUtil::ParseJsonString(param);
+        onStateChangeFunc(paramData->GetBool("isVisible"));
+    };
+    popupParam->SetOnStateChange(onStateChangeCallback);
+    std::string primaryString = bindPopupParams.primaryValue;
+    if (!primaryString.empty()) {
+        ButtonProperties propertiesPrimary;
+        propertiesPrimary.value = primaryString;
+        auto touchPrimaryCallback = [primaryActionFunc](TouchEventInfo&) {
+            primaryActionFunc();
+        };
+        auto onNewClick = [primaryActionFunc](const GestureEvent& info) -> void { primaryActionFunc(); };
+        propertiesPrimary.touchFunc = touchPrimaryCallback;
+        propertiesPrimary.action = AceType::MakeRefPtr<NG::ClickEvent>(onNewClick);
+        propertiesPrimary.showButton = true;
+        popupParam->SetPrimaryButtonProperties(propertiesPrimary);
+    }
+
+    std::string secondaryString = bindPopupParams.secondaryValue;
+    if (!secondaryString.empty()) {
+        ButtonProperties propertiesSecondary;
+        propertiesSecondary.value = secondaryString;
+        auto touchSecondaryCallback = [secondaryActionFunc](TouchEventInfo&) {
+            secondaryActionFunc();
+        };
+        auto onNewClick = [secondaryActionFunc](const GestureEvent& info) -> void { secondaryActionFunc(); };
+        propertiesSecondary.touchFunc = touchSecondaryCallback;
+        propertiesSecondary.action = AceType::MakeRefPtr<NG::ClickEvent>(onNewClick);
+        propertiesSecondary.showButton = true;
+        popupParam->SetSecondaryButtonProperties(propertiesSecondary);
+    }
+    ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
+}
+
+void DealBindPopupParamsV2(bool isShow, const CJBindPopupParamsV2& bindPopupParams,
     const std::function<void(bool)>& onStateChangeFunc, const std::function<void()>& primaryActionFunc,
     const std::function<void()>& secondaryActionFunc)
 {
@@ -1682,6 +1725,21 @@ void FfiOHOSAceFrameworkViewAbstractBindPopup(bool isShow, CJBindPopupParams bin
     DealBindPopupParams(isShow, bindPopupParams, onStateChangeFunc, primaryActionFunc, secondaryActionFunc);
 }
 
+void FfiOHOSAceFrameworkViewAbstractBindPopupV2(bool isShow, CJBindPopupParamsV2 bindPopupParams)
+{
+    std::function<void(bool)> onStateChangeFunc = (reinterpret_cast<int64_t>(bindPopupParams.onStateChange) == 0)
+                                                      ? ([](bool) -> void {})
+                                                      : CJLambda::Create(bindPopupParams.onStateChange);
+    std::function<void()> primaryActionFunc = (reinterpret_cast<int64_t>(bindPopupParams.primaryAction) == 0)
+                                                  ? ([]() -> void {})
+                                                  : CJLambda::Create(bindPopupParams.primaryAction);
+    std::function<void()> secondaryActionFunc = (reinterpret_cast<int64_t>(bindPopupParams.secondaryAction) == 0)
+                                                    ? ([]() -> void {})
+                                                    : CJLambda::Create(bindPopupParams.secondaryAction);
+
+    DealBindPopupParamsV2(isShow, bindPopupParams, onStateChangeFunc, primaryActionFunc, secondaryActionFunc);
+}
+
 void FfiOHOSAceFrameworkViewAbstractKeyShortcut(
     std::string& value, int32_t* keysArray, int64_t size, void (*callback)(void))
 {
@@ -1725,7 +1783,7 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     FfiOHOSAceFrameworkViewAbstractKeyShortcut(keyValue, keysArray, size, callback);
 }
 
-void SetCustomPopupParams(CJBindCustomPopup& value, const RefPtr<PopupParam>& popupParam)
+void SetCustomPopupParams(CJBindCustomPopupV2& value, const RefPtr<PopupParam>& popupParam)
 {
     popupParam->SetPlacement(static_cast<Placement>(value.placement));
     popupParam->SetMaskColor(Color(value.maskColor));
@@ -1774,7 +1832,7 @@ void SetCustomPopupParams(CJBindCustomPopup& value, const RefPtr<PopupParam>& po
     }
 }
 
-void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
+void FfiOHOSAceFrameworkViewAbstractBindCustomPopupV2(CJBindCustomPopupV2 value)
 {
     std::function<void(bool)> onStateChangeFunc = (reinterpret_cast<int64_t>(value.onStateChange) == 0)
                                                       ? ([](bool) -> void {})
@@ -1802,6 +1860,38 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
             popupParam->SetTransitionEffects(nativeTransitionEffect->effect);
         }
     }
+    if (popupParam->IsShow()) {
+        auto builderFunc = CJLambda::Create(value.builder);
+        RefPtr<AceType> customNode;
+        {
+            ViewStackModel::GetInstance()->NewScope();
+            builderFunc();
+            customNode = ViewStackModel::GetInstance()->Finish();
+        }
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
+    } else {
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
+    }
+}
+
+void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
+{
+    std::function<void(bool)> onStateChangeFunc =
+        (reinterpret_cast<int64_t>(value.onStateChange) == 0) ?
+        ([](bool) -> void {}) : CJLambda::Create(value.onStateChange);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(value.isShow);
+    popupParam->SetUseCustomComponent(true);
+    popupParam->SetPlacement(static_cast<Placement>(value.placement));
+    popupParam->SetMaskColor(Color(value.maskColor));
+    popupParam->SetBackgroundColor(Color(value.backgroundColor));
+    popupParam->SetEnableArrow(value.enableArrow);
+    popupParam->SetHasAction(!value.autoCancel);
+    auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
+        auto paramData = JsonUtil::ParseJsonString(param);
+        onStateChangeFunc(paramData->GetBool("isVisible"));
+    };
+    popupParam->SetOnStateChange(onStateChangeCallback);
     if (popupParam->IsShow()) {
         auto builderFunc = CJLambda::Create(value.builder);
         RefPtr<AceType> customNode;

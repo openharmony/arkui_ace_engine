@@ -165,7 +165,7 @@ struct CJDatePickerResult {
     uint32_t index;
 };
 
-struct CJImageComplete {
+struct CJImageCompleteV2 {
     double width;
     double height;
     double componentWidth;
@@ -177,10 +177,23 @@ struct CJImageComplete {
     double contentOffsetY;
 };
 
-struct CJImageError {
+struct CJImageComplete {
+    double width;
+    double height;
+    double componentWidth;
+    double componentHeight;
+    int32_t loadingStatus;
+};
+
+struct CJImageErrorV2 {
     double componentWidth;
     double componentHeight;
     const char* message;
+};
+
+struct CJImageError {
+    double componentWidth;
+    double componentHeight;
 };
 
 struct CJPosition {
@@ -257,7 +270,7 @@ struct CJFingerInfo {
     double localY;
 };
 
-struct CJGestureEvent {
+struct CJGestureEventV2 {
     int64_t timestamp;
     CJEventTarget* target;
     bool repeat;
@@ -282,6 +295,22 @@ struct CJGestureEvent {
     float axisVertical;
     int64_t deviceId;
     const OHOS::Ace::BaseEventInfo* baseEventInfoPtr;
+};
+
+struct CJGestureEvent {
+    int64_t timestamp;
+    CJEventTarget* target;
+    bool repeat;
+    CJFingerInfo* fingerList;
+    int32_t fingerListSize;
+    int32_t source;
+    double offsetX;
+    double offsetY;
+    double scale;
+    double pinchCenterX;
+    double pinchCenterY;
+    double angle;
+    double speed;
 };
 
 struct CJDragInfo {
