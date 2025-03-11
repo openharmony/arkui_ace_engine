@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import ActionSheetBootcampTest from './ActionSheetBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  ActionSheetBootcampTest();
 }
