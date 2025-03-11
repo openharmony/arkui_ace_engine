@@ -84,12 +84,24 @@ void CheckAndSendHoverEnterByAncestor(const RefPtr<NG::FrameNode>& ancestor)
         ancestor->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
     }
 }
+
+bool IsTouchExplorationEnabled(const RefPtr<FrameNode>& root)
+{
+    CHECK_NULL_RETURN(root, true);
+    auto pipeline = root->GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto jsAccessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_RETURN(jsAccessibilityManager, true);
+    auto accessibilityWorkMode = jsAccessibilityManager->GenerateAccessibilityWorkMode();
+    return accessibilityWorkMode.isTouchExplorationEnabled;
+}
 }
 
 void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const MouseEvent& event)
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         event.sourceType != SourceType::MOUSE) {
         return;
     }
@@ -115,6 +127,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         event.sourceType == SourceType::MOUSE) {
         return;
     }
@@ -147,6 +160,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         eventType < 0 || eventType >= static_cast<int32_t>(AccessibilityHoverEventType::Count)) {
         return;
     }
