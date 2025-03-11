@@ -6046,15 +6046,14 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
     CHECK_NULL_RETURN(safeAreaManager, keyboardOffsetInfo);
     if (safeAreaManager->IsAtomicService()) {
         for (const auto& child : rootNode->GetChildren()) {
-            if (child->GetTag() != V2::ATOMIC_SERVICE_ETS_TAG) {
-                continue;
+            if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+                auto childNd = AceType::DynamicCast<FrameNode>(rootNode);
+                CHECK_NULL_RETURN(childNd, keyboardOffsetInfo);
+                auto childGeo = childNd->GetGeometryNode();
+                CHECK_NULL_RETURN(childGeo, keyboardOffsetInfo);
+                pageHeight = childGeo->GetFrameSize().Height();
+                finalOffset = pageHeight - keyboardHeight;
             }
-            auto childNd = AceType::DynamicCast<FrameNode>(rootNode);
-            CHECK_NULL_RETURN(childNd, keyboardOffsetInfo);
-            auto childGeo = childNd->GetGeometryNode();
-            CHECK_NULL_RETURN(childGeo, keyboardOffsetInfo);
-            pageHeight = childGeo->GetFrameSize().Height();
-            finalOffset = pageHeight - keyboardHeight;
         }
     } else if (rootNode->GetTag() == V2::STACK_ETS_TAG) {
         auto rootNd = AceType::DynamicCast<FrameNode>(rootNode);
@@ -6073,6 +6072,10 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
     keyboardOffsetInfo.finalOffset = finalOffset;
     keyboardOffsetInfo.inAniStartOffset = pageHeight;
     keyboardOffsetInfo.outAniEndOffset = finalOffset + keyboardHeight;
+    auto container = Container::Current();
+    if (container && safeAreaManager->GetSystemSafeArea().bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
+        keyboardOffsetInfo.finalOffset -= safeAreaManager->GetSystemSafeArea().bottom_.start - pageHeight;
+    }
     return keyboardOffsetInfo;
 }
 
