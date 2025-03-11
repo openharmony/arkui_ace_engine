@@ -542,7 +542,8 @@ HWTEST_F(KeyEventAccessorTest, setStopPropagationInvalidTest, TestSize.Level1)
     auto event = [](const Ark_Int32 resourceId) {
         FAIL();
     };
-    auto someCallback = Converter::ArkValue<Callback_Void>(event, 0);
+    constexpr Ark_Int32 contextId = 123;
+    auto someCallback = Converter::ArkValue<Callback_Void>(event, contextId);
     const std::vector<std::tuple<KeyEventPeer*, const Callback_Void*>> TEST_PLAN {
         { nullptr, nullptr },
         { nullptr, &someCallback },

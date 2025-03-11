@@ -149,7 +149,7 @@ public:
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClick, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event) {
+    auto onClick = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_ClickEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
@@ -192,7 +192,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnClic
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnDoubleClick, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onDoubleClick = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
+    auto onDoubleClick = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_GestureEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {
@@ -236,7 +236,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnDoub
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestGestureOnLongPress, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onLongPress = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
+    auto onLongPress = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_GestureEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {
@@ -286,7 +286,9 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestOnHover, Test
         SourceType deviceType;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto onHoverFunc = [](const Ark_Int32 resourceId, const Ark_Boolean isHover, const Ark_HoverEvent event) {
+    auto onHoverFunc = [](
+        Ark_VMContext, const Ark_Int32 resourceId, const Ark_Boolean isHover, const Ark_HoverEvent event
+    ) {
         ASSERT_NE(event, nullptr);
         auto peer = event;
         auto hoverEventInfo = peer->GetEventInfo();
@@ -331,7 +333,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addImageSpanTestOnHover, Test
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onClick = [](Ark_Int32 nodeId, const Ark_ClickEvent event) {
+    auto onClick = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_ClickEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
@@ -374,7 +376,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnClick
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnDoubleClick, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onDoubleClick = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
+    auto onDoubleClick = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_GestureEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {
@@ -418,7 +420,7 @@ HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnDoubl
 HWTEST_F(RichEditorControllerAccessorCallbackTest, addTextSpanTestGestureOnLongPress, TestSize.Level1)
 {
     static std::optional<CheckEvent> checkEvent;
-    auto onLongPress = [](Ark_Int32 nodeId, const Ark_GestureEvent event) {
+    auto onLongPress = [](Ark_VMContext, Ark_Int32 nodeId, const Ark_GestureEvent event) {
         auto peer = event;
         auto accessor = GeneratedModifier::GetGestureEventAccessor();
         checkEvent = {
