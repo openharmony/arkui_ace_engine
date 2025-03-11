@@ -1165,6 +1165,8 @@ public:
         }
     }
 
+    bool SetFocusByPosition(float x, float y);
+
     void StartVibraFeedback(const std::string& vibratorType);
 
     RefPtr<TaskExecutor> GetTaskExecutor() const
