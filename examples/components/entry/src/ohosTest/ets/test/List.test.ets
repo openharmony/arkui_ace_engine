@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import ChipGroupBootcampTest from './InformationDisplay/ChipGroupBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  ChipGroupBootcampTest();
 }
