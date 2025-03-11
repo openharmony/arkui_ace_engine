@@ -141,6 +141,13 @@ public:
         peer_ = nullptr;
     }
 
+    template<typename Theme>
+    static void SetupTheme()
+    {
+        auto theme = typename Theme::Builder().Build(themeConstants_);
+        EXPECT_CALL(*themeManager_, GetTheme(Theme::TypeId())).WillRepeatedly(testing::Return(theme));
+    }
+
 protected:
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_;
     inline static const GENERATED_ArkUIAccessors *accessors_;
