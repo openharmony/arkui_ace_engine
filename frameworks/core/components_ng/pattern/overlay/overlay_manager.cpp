@@ -2034,7 +2034,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     RemoveFilter();
 }
 
-RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo)
+RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo,
+    bool isForceClear)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide popup without animation enter");
     popupMap_[targetId] = popupInfo;
@@ -2047,7 +2048,7 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
     auto bubbleRenderProp = popupInfo.popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_RETURN(bubbleRenderProp, nullptr);
     auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
-    if (!autoCancel) {
+    if (!autoCancel && !isForceClear) {
         return nullptr;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -2577,7 +2578,7 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
     }
 }
 
-void OverlayManager::CleanPopupInSubWindow()
+void OverlayManager::CleanPopupInSubWindow(bool isForceClear)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean popup insubwindow enter");
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -2595,7 +2596,7 @@ void OverlayManager::CleanPopupInSubWindow()
                 continue;
             }
             popupInfo.markNeedUpdate = true;
-            auto removeNode = HidePopupWithoutAnimation(target, popupInfo);
+            auto removeNode = HidePopupWithoutAnimation(target, popupInfo, isForceClear);
             if (removeNode) {
                 targetList.emplace_back(target);
             }
@@ -2607,7 +2608,7 @@ void OverlayManager::CleanPopupInSubWindow()
         CHECK_NULL_VOID(removeNode);
         auto bubblePattern = removeNode->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(bubblePattern);
-        if (bubblePattern->HasOnWillDismiss()) {
+        if (bubblePattern->HasOnWillDismiss() && !isForceClear) {
             SetDismissPopupId(target);
             bubblePattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
         } else {
