@@ -19,6 +19,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/templates_parser.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 

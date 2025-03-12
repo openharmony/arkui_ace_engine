@@ -269,12 +269,12 @@ public:
 
     void StartAnimation()
     {
-        status_ = Animator::Status::RUNNING;
+        status_ = AnimatorStatus::RUNNING;
     }
 
     void StopAnimation()
     {
-        status_ = Animator::Status::STOPPED;
+        status_ = AnimatorStatus::STOPPED;
         OnAnimatedModifyDone();
     }
 
@@ -300,12 +300,7 @@ public:
 
     bool AllowVisibleAreaCheck() const override;
 
-    void OnInActive() override
-    {
-        if (status_ == Animator::Status::RUNNING) {
-            animator_->Pause();
-        }
-    }
+    void OnInActive() override;
 
     void OnActive() override;
 
@@ -572,7 +567,7 @@ private:
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;
-    Animator::Status status_ = Animator::Status::IDLE;
+    AnimatorStatus status_ = AnimatorStatus::IDLE;
     int32_t durationTotal_ = 0;
     int32_t nowImageIndex_ = 0;
     uint64_t repeatCallbackId_ = 0;

@@ -26,6 +26,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
