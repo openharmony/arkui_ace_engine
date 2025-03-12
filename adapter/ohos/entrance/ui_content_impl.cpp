@@ -57,6 +57,7 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
+#include "render_service_client/core/transaction/rs_sync_transaction_controller.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
@@ -2845,10 +2846,152 @@ void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::Ap
         instanceId_, bundleName_.c_str(), moduleName_.c_str(), config->GetName().c_str());
 }
 
+void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (context) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameAnimateEndCallback");
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+            context->GetRootElement()->GetRenderContext());
+        rosenRenderContext->AddKeyFrameAnimateEndCallback(callback);
+    }
+}
+
+void UIContentImpl::AddKeyFrameCanvasNodeCallback(const std::function<
+    void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+        std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameCanvasNodeCallback");
+    addNodeCallback_ = callback;
+}
+
+void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (context) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameCanvasNode.");
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+            context->GetRootElement()->GetRenderContext());
+        rosenRenderContext->LinkCanvasNodeToRootNode(context->GetRootElement());
+    }
+}
+
+void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
+    OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "CacheAnimateInfo.");
+    cachedAnimateFlag_.store(true);
+    cachedConfig_ = config;
+    cachedReason_ = reason;
+    cachedRsTransaction_ = rsTransaction;
+    cachedAvoidAreas_ = avoidAreas;
+}
+
+void UIContentImpl::ExecKeyFrameCachedAnimateAction()
+{
+    if (cachedAnimateFlag_.load()) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "ExecKeyFrameCachedAnimateAction.");
+        UpdateViewportConfig(cachedConfig_, cachedReason_, cachedRsTransaction_, cachedAvoidAreas_);
+        cachedAnimateFlag_.store(false);
+    }
+}
+
+void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
+{
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW, "context is null.");
+        return;
+    }
+    if (canvasNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "canvasNode already exist.");
+        return;
+    }
+    if (auto transactionController =  Rosen::RSSyncTransactionController::GetInstance()) {
+        transactionController->OpenSyncTransaction();
+        auto rsTransaction = transactionController->GetRSTransaction();
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+            context->GetRootElement()->GetRenderContext());
+        canvasNode_ = rosenRenderContext->GetCanvasNode();
+        if (addNodeCallback_ && canvasNode_) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
+            addNodeCallback_(canvasNode_, rsTransaction);
+        }
+        transactionController->CloseSyncTransaction();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_WINDOW, "transactionController is null.");
+        return;
+    }
+    std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
+    if (callbackCachedAnimation) {
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+            context->GetRootElement()->GetRenderContext());
+        rosenRenderContext->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
+    }
+}
+
+bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
+    OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    if (!config.GetKeyFrameConfig().enableKeyFrame_) {
+        return false;
+    }
+
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    if (!container) {
+        return true;
+    }
+    auto pipelineContext = container->GetPipelineContext();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    if (!context) {
+        return true;
+    }
+
+    bool animateRes = true;
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+        context->GetRootElement()->GetRenderContext());
+    switch (reason) {
+        case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
+            KeyFrameDragStartPolicy(context);
+            return true;
+        case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
+            canvasNode_ = nullptr;
+        case OHOS::Rosen::WindowSizeChangeReason::DRAG:
+            animateRes = rosenRenderContext->SetCanvasNodeOpacityAnimation(
+                config.GetKeyFrameConfig().animationDuration_,
+                config.GetKeyFrameConfig().animationDelay_,
+                reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
+            if (!animateRes) {
+                CacheAnimateInfo(config, reason, rsTransaction, avoidAreas);
+                return true;
+            }
+            return false;
+        default:
+            return true;
+    }
+    return false;
+}
+
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
+    if (KeyFrameActionPolicy(config, reason, rsTransaction, avoidAreas)) {
+        return;
+    }
+
     if (SystemProperties::GetWindowRectResizeEnabled()) {
         PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
             bundleName_);
