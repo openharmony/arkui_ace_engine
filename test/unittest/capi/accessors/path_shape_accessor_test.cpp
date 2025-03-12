@@ -42,31 +42,12 @@ namespace Converter {
 class PathShapeAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIPathShapeAccessor,
     &GENERATED_ArkUIAccessors::getPathShapeAccessor, PathShapePeer> {
 public:
-    static void SetUpTestCase()
-    {
-        AccessorTestCtorBase::SetUpTestCase();
-        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
-        themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-        EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
-            .WillRepeatedly(testing::Return(themeConstants_));
-        themeConstants_->LoadTheme(0);
-    }
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        themeManager_ = nullptr;
-        themeConstants_ = nullptr;
-    }
     void *CreatePeerInstance() override
     {
         PathShapeOptions pathShapeOptions{};
         auto options = Converter::ArkValue<Opt_PathShapeOptions>(pathShapeOptions);
         return accessor_->ctor(&options);
     }
-private:
-    inline static RefPtr<MockThemeManager> themeManager_;
-    inline static RefPtr<ThemeConstants> themeConstants_;
 };
  
 /**

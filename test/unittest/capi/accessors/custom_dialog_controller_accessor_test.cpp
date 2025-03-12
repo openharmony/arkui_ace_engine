@@ -233,7 +233,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, offsetTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : OFFSET_TEST_PLAN) {
         offset.dx = value;
-        offset.dy = Converter::ArkValue<Ark_Length>(0);
+        offset.dy = Converter::ArkValue<Ark_Length>(0._px);
         options.offset = Converter::ArkValue<Opt_Offset>(offset);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);
@@ -245,7 +245,7 @@ HWTEST_F(CustomDialogControllerAccessorTest, offsetTest, TestSize.Level1)
 
     for (const auto& [value, expectVal] : OFFSET_TEST_PLAN) {
         offset.dy = value;
-        offset.dx = Converter::ArkValue<Ark_Length>(0);
+        offset.dx = Converter::ArkValue<Ark_Length>(0._px);
         options.offset = Converter::ArkValue<Opt_Offset>(offset);
         peer_ = reinterpret_cast<CustomDialogControllerPeer *>(accessor_->ctor(&options));
         peerImpl = reinterpret_cast<GeneratedModifier::CustomDialogControllerPeerImpl *>(peer_);

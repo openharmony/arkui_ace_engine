@@ -57,27 +57,11 @@ const std::vector<std::tuple<std::string, Ark_Buffer, std::string>> responseBuff
 class WebResourceResponseAccessorTest : public AccessorTestBase<GENERATED_ArkUIWebResourceResponseAccessor,
     &GENERATED_ArkUIAccessors::getWebResourceResponseAccessor, WebResourceResponsePeer> {
 public:
-    static void SetUpTestCase()
-    {
-        AccessorTestBase::SetUpTestCase();
-        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
-        themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-        EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
-            .WillRepeatedly(testing::Return(themeConstants_));
-        themeConstants_->LoadTheme(0);
-    }
     void SetUp() override
     {
         AccessorTestBase::SetUp();
         peer_->handler = Referenced::MakeRefPtr<WebResponse>();
         ASSERT_NE(peer_->handler, nullptr);
-    }
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        themeManager_ = nullptr;
-        themeConstants_ = nullptr;
     }
 
 private:
