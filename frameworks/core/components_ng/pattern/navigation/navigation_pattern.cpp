@@ -332,7 +332,6 @@ void NavigationPattern::OnModifyDone()
 
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     if (opts) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation SafArea expand as %{public}s", opts->ToString().c_str());
         uint8_t ignoreExpandKeyboard = 0x11;
         SafeAreaExpandOpts optsExceptKeyboard = { .type = opts->type & ignoreExpandKeyboard,
             .edges = opts->edges };

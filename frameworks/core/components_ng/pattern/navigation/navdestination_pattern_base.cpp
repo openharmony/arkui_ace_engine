@@ -392,8 +392,6 @@ void NavDestinationPatternBase::ExpandContentSafeAreaIfNeeded()
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
     if (opts && contentNode) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s SafeArea expand as %{public}s",
-            hostNode->GetTag().c_str(), opts->ToString().c_str());
         contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
         contentNode->MarkModifyDone();
     }

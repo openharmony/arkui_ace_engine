@@ -488,10 +488,6 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             return true;
         }
         auto children = node->GetChildren();
-        if (children.size() != 1) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-                "router map is invalid, child size is not one: %{public}zu", children.size());
-        }
         node = children.front();
     }
     return false;

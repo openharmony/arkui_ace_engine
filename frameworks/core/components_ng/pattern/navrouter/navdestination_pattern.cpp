@@ -214,8 +214,6 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
     }
     if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set dialog background color: %{public}s",
-            renderContext->GetBackgroundColor()->ColorToString().c_str());
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -227,8 +225,6 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         return;
     }
     renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Default background color: %{public}s",
-        renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
 void NavDestinationPattern::MountTitleBar(
