@@ -3762,9 +3762,6 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
         }
     }
-    if (!touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
-        WebRequestFocus();
-    }
 }
 
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
@@ -6815,11 +6812,6 @@ void WebPattern::UnregisterWebComponentClickCallback()
     webComponentClickCallback_ = nullptr;
     textBlurAccessibilityEnable_ = false;
     SetAccessibilityState(false);
-}
-
-void WebPattern::RequestFocus()
-{
-    WebRequestFocus();
 }
 
 bool WebPattern::IsCurrentFocus()
