@@ -234,6 +234,10 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         XComponentModel::GetInstance()->SetSoPath(soPath);
     }
     ParseImageAIOptions(aiOptions);
+
+    if (options.xcomponentType == XComponentType::SURFACE && options.screenId.has_value()) {
+        XComponentModel::GetInstance()->SetScreenId(options.screenId.value());
+    }
 }
 
 void JSXComponent::ExtractInfoToXComponentOptions(
@@ -244,6 +248,7 @@ void JSXComponent::ExtractInfoToXComponentOptions(
     auto type = paramObject->GetProperty("type");
     auto libraryNameValue = paramObject->GetProperty("libraryname");
     auto controller = paramObject->GetProperty("controller");
+    auto screenIdValue = paramObject->GetProperty("screenId");
 
     if (id->IsString()) {
         options.id = id->ToString();
@@ -259,6 +264,9 @@ void JSXComponent::ExtractInfoToXComponentOptions(
         options.xcomponentType = ConvertToXComponentType(type->ToString());
     } else if (type->IsNumber()) {
         options.xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
+    }
+    if (screenIdValue->IsNumber()) {
+        options.screenId = screenIdValue->ToNumber<uint64_t>();
     }
 }
 
