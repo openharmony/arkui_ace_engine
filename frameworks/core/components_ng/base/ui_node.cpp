@@ -1766,10 +1766,7 @@ bool UINode::GetIsRootBuilderNode() const
 void UINode::CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
     std::list<int32_t>& reservedElmtId, bool isEntry)
 {
-    ContainerScope scope(instanceId_);
-    auto container = Container::Current();
-    auto greatOrEqualApi13 =
-        container && container->GetApiTargetVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    auto greatOrEqualApi13 = GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
         bool needByTransition = child->IsDisappearing();
         if (greatOrEqualApi13) {
@@ -1807,7 +1804,7 @@ void UINode::CollectReservedChildren(std::list<int32_t>& reservedElmtId)
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
-    auto greatOrEqualApi13 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
+    auto greatOrEqualApi13 = GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
         bool needByTransition = child->IsDisappearing();
         if (greatOrEqualApi13) {
