@@ -76,9 +76,9 @@ void UIDisplaySync::OnFrame()
                      GetId(), static_cast<int32_t>(uiObjectType_), data_->timestamp_, data_->targetTimestamp_,
                      data_->rateRange_->min_, data_->rateRange_->max_, data_->rateRange_->preferred_,
                      drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
-    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Type[%{public}d] FrameRateRange[%{public}d, %{public}d, %{public}d],"
-        " DrawFPS[%{public}d] VSyncRate[%{public}d] Rate[%{public}d] noSkip[%{public}d]",
-        static_cast<int32_t>(uiObjectType_), data_->rateRange_->min_, data_->rateRange_->max_,
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Id[%{public}" PRIu64 "] Type[%{public}d] FrameRateRange[%{public}d, "
+        "%{public}d, %{public}d], DrawFPS[%{public}d] VSyncRate[%{public}d] Rate[%{public}d] noSkip[%{public}d]",
+        GetId(), static_cast<int32_t>(uiObjectType_), data_->rateRange_->min_, data_->rateRange_->max_,
         data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
     if (data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
