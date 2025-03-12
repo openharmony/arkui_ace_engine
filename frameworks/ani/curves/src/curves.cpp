@@ -25,6 +25,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/base/utils/utils.h"
+#include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/core/common/container.h"
 #include "frameworks/core/common/container_scope.cpp"
@@ -33,8 +34,7 @@
 #include "test/mock/interfaces/mock_ace_forward_compatibility.cpp"
 namespace {
 struct CurvesObj {
-    std::function<ani_float(ani_env*, ani_object, ani_float)> interpolate;
-    std::function<ani_float(ani_env*, ani_object, ani_float)> curveCustomFunc;
+    std::function<ani_double(ani_env*, ani_object, ani_double)> interpolate;
     std::string curveString;
     int32_t pageId;
 };
@@ -55,7 +55,6 @@ typedef enum Curve {
     Friction = 12,
 } Curve;
 
-static CurvesObj* g_initCurve = nullptr;
 }
 
 OHOS::Ace::RefPtr<OHOS::Ace::Framework::JsAcePage> GetStagingPage(int32_t instanceId)
@@ -168,34 +167,23 @@ std::string GetCurvesInitInternalMap(int curveType)
     auto curveString = OHOS::Ace::Framework::CreateCurve(curveMap[curveType]);
     return curveString->ToString();
 }
-static CurvesObj* GetCurvesObj()
+
+static CurvesObj* unwrapp(ani_env *env, ani_object object)
 {
-    if (g_initCurve != nullptr) {
-        return g_initCurve;
+    ani_long curvesObj;
+    if (ANI_OK != env->Object_GetFieldByName_Long(object, "nativeContext", &curvesObj)) {
+        return nullptr;
     }
-    g_initCurve = new CurvesObj();
-    return g_initCurve;
+    return reinterpret_cast<CurvesObj*>(curvesObj);
 }
 
 static ani_double Interpolate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_double fraction)
 {
-    auto curveObject = GetCurvesObj();
-
+    auto curveObject = unwrapp(env, object);
     auto curveString = curveObject->curveString;
-    auto curveObjFunc = curveObject->curveCustomFunc;
-
     float time = static_cast<float>(fraction);
     time = std::clamp(time, 0.0f, 1.0f);
-    std::string curveStringStr(curveString);
-    auto animationCurve = OHOS::Ace::Framework::CreateCurve(curveStringStr, false);
-    if (curveObjFunc) {
-        std::function<float(float)> customCallBack = [func = curveObjFunc, id = OHOS::Ace::Container::CurrentId(),
-            env, object](float time) -> float {
-            OHOS::Ace::ContainerScope scope(id);
-            return func(env, object, time);
-        };
-        animationCurve = OHOS::Ace::Framework::CreateCurve(customCallBack);
-    }
+    auto animationCurve = OHOS::Ace::Framework::CreateCurve(curveString, false);
     if (!animationCurve) {
         return 0.0;
     }
@@ -226,7 +214,7 @@ static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
         return nullptr;
     }
 
-    CurvesObj* cubicBezierCurve = GetCurvesObj();
+    CurvesObj* cubicBezierCurve = new CurvesObj();
     cubicBezierCurve->interpolate = Interpolate;
     std::string curveString = GetCubicBezierCurveString(x1, y1, x2, y2);
 
@@ -262,7 +250,7 @@ static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
 static ani_object SpringMotion([[maybe_unused]] ani_env *env,
     ani_object response, ani_object dampingFraction, ani_object overlapDuration)
 {
-    CurvesObj* springMotion = GetCurvesObj();
+    CurvesObj* springMotion = new CurvesObj();
     springMotion->interpolate = Interpolate;
     static const char *className = "L@ohos/curves/curves/Curves;";
     ani_class cls;
@@ -328,7 +316,7 @@ static ani_object InitCurve([[maybe_unused]] ani_env* env, ani_enum_item enumIte
         std::cerr << "get ctor Failed'" << className << "'" << std::endl;
         return nullptr;
     }
-    CurvesObj* curvesInitInternal = GetCurvesObj();
+    CurvesObj* curvesInitInternal = new CurvesObj();
     curvesInitInternal->interpolate = Interpolate;
     curvesInitInternal->curveString = curveString;
     ani_string curveAniStr {};
@@ -373,7 +361,7 @@ static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
         return nullptr;
     }
 
-    CurvesObj* interpolatingCurve = GetCurvesObj();
+    CurvesObj* interpolatingCurve = new CurvesObj();
     interpolatingCurve->interpolate = Interpolate;
     if (OHOS::Ace::LessOrEqual(mass, 0)) {
         mass = 1.0;
@@ -438,7 +426,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    GetCurvesObj();
     static const char *classNameCurves = "L@ohos/curves/curves/Curves;";
     ani_class clsCurves;
     if (ANI_OK != env->FindClass(classNameCurves, &clsCurves)) {
