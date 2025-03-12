@@ -6896,9 +6896,7 @@ void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootN
 {
     if (canvasNode_ && rootNode) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-            rootNode->GetRenderContext());
-        canvasNode_->SetLinkedRootNodeId(rosenRenderContext->GetNodeId());
+        canvasNode_->SetLinkedRootNodeId(rootNode->GetRenderContext()->GetNodeId());
         Rosen::RSTransaction::FlushImplicitTransaction();
     }
 }
