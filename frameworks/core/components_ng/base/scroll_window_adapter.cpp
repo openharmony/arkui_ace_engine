@@ -26,10 +26,10 @@
 
 namespace OHOS::Ace::NG {
 
-void ScrollWindowAdapter::PrepareReset(int32_t idx)
+void ScrollWindowAdapter::PrepareReset(int32_t idx, float extraOffset)
 {
     markIndex_ = idx;
-    jumpPending_ = std::make_unique<PendingJump>(idx, ScrollAlign::START, 0.0f);
+    jumpPending_ = std::make_unique<PendingJump>(idx, ScrollAlign::START, extraOffset);
     fillAlgorithm_->MarkJump();
     RequestRecompose(idx);
 }

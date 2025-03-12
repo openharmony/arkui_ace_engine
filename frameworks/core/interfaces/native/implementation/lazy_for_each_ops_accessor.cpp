@@ -90,10 +90,12 @@ void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, 
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (startIdx >= 0) {
-        frameNode->NotifyChange(startIdx, changeCnt, -1, LazyForEachNode::NotificationType::START_CHANGE_POSITION);
+        frameNode->ChildrenUpdatedFrom(startIdx);
     }
     if (endIdx >= 0) {
-        frameNode->NotifyChange(endIdx, changeCnt, -1, LazyForEachNode::NotificationType::END_CHANGE_POSITION);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->NotifyDataChange(endIdx, changeCnt);
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }

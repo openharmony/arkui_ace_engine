@@ -43,7 +43,7 @@ public:
 
     void UpdateViewport(const SizeF& size, Axis axis);
 
-    void PrepareReset(int32_t idx);
+    void PrepareReset(int32_t idx, float extraOffset = 0.0f);
     void PrepareJump(int32_t idx, ScrollAlign align = ScrollAlign::START, float extraOffset = 0.0f);
     /**
      * @return true if underlying items are ready
