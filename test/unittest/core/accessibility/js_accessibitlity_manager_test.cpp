@@ -1226,4 +1226,49 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager025, TestSize.Level1)
     EXPECT_EQ(rectInfo.left, 100);
     EXPECT_EQ(rectInfo.top, 200);
 }
+
+/**
+* @tc.name: JsAccessibilityManager026
+* @tc.desc: GetTransformRectInfoRelativeToWindow
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager026, TestSize.Level1) {
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    auto result = jsAccessibilityManager->GetTransformRectInfoRelativeToWindow(nullptr, context);
+    // Verify that the result is default constructed when node is null
+    EXPECT_EQ(result.left, 0);
+    EXPECT_EQ(result.top, 0);
+    EXPECT_EQ(result.scaleX, 1.0f);  // Assuming default scaleX is 1.0
+    EXPECT_EQ(result.scaleY, 1.0f);  // Assuming default scaleY is 1.0
+}
+
+/**
+* @tc.name: JsAccessibilityManager027
+* @tc.desc: GetTransformRectInfoRelativeToWindow
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager027, TestSize.Level1) {
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        "frameNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto result = jsAccessibilityManager->GetTransformRectInfoRelativeToWindow(frameNode, nullptr);
+    
+    // Verify that the result is default constructed when context is null
+    EXPECT_EQ(result.left, 0);
+    EXPECT_EQ(result.top, 0);
+    EXPECT_EQ(result.scaleX, 1.0f);  
+    EXPECT_EQ(result.scaleY, 1.0f);  
+}
 } // namespace OHOS::Ace::NG
