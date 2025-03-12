@@ -45,7 +45,7 @@ private:
     ~WindowSceneLayoutManager() = default;
     void Init();
     void TraverseTree(const RefPtr<FrameNode>& rootNode, TraverseResult& res,
-        bool isAncestorRecent, bool isAncestorDirty, bool notSyncPosition);
+        bool isParentRecent, bool isParentDirty, bool isParentNotSyncPosition);
     void FillWindowSceneInfo(const RefPtr<FrameNode>& node, TraverseResult& res, bool isAncestorRecent,
         bool notSyncPosition);
     bool IsNodeVisible(const RefPtr<FrameNode>& node);
