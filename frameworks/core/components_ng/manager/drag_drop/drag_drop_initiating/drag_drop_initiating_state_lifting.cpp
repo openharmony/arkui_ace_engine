@@ -54,10 +54,16 @@ void DragDropInitiatingStateLifting::HandleOnDragStart(RefPtr<FrameNode> frameNo
     if (!CheckStatusForPanActionBegin(frameNode, info)) {
         return;
     }
+    dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->GetTextDraggable()) {
+        HandleTextDragStart(frameNode, info);
+        return;
+    }
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
     auto params = machine->GetDragDropInitiatingParams();
-    dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
     DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(frameNode->GetId());
     if (info.GetSourceDevice() != SourceType::MOUSE) {
         HideEventColumn();
@@ -69,8 +75,6 @@ void DragDropInitiatingStateLifting::HandleOnDragStart(RefPtr<FrameNode> frameNo
         HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
         UpdateDragPreviewOptionFromModifier();
     }
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     auto gestureEvent = info;
     gestureHub->HandleOnDragStart(gestureEvent);
 }
