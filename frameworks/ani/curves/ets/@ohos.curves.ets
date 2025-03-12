@@ -43,6 +43,13 @@ export default namespace curves {
     }
     class Curves implements ICurve
     {
+        private  nativeContext:long = 0;
+    
+        constructor(context:long) {
+            if(this.nativeContext == 0){
+                this.nativeContext = context;
+            }
+        }
         public native interpolate(fraction: number): number;
     }
 }

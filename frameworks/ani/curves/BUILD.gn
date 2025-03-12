@@ -36,7 +36,7 @@ generate_static_abc("curves") {
   base_url = "./ets"
   files = [ "./ets/@ohos.curves.ets" ]
   is_boot_abc = "True"
-  device_dst_file = "system/framework/curves.abc"
+  device_dst_file = "/system/framework/curves.abc"
 }
 
 ohos_prebuilt_etc("curves_etc") {
