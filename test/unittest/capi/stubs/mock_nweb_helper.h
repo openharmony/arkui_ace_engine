@@ -32,6 +32,7 @@ public:
     }
     bool InitAndRun(bool from_ark = true)
     {
+        init_ = true;
         return true;
     }
     void SetBundlePath(const std::string& path)
@@ -42,11 +43,20 @@ public:
     {
         return mapNWeb_[nweb_id];
     }
+    void SetNWeb(int32_t nweb_id, std::shared_ptr<NWeb> nweb)
+    {
+        mapNWeb_[nweb_id] = nweb;
+    }
+    bool IsInited()
+    {
+        return init_;
+    }
 
 private:
-    NWebHelper() = default;
+    NWebHelper() : init_(false) {}
 
 private:
+    bool init_;
     std::string bundlePath_;
     std::unordered_map<int32_t, std::shared_ptr<NWeb>> mapNWeb_;
 };
