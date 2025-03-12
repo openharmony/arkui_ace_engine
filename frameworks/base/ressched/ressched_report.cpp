@@ -354,9 +354,9 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSlide_ = true;
     }
-    static unint64_t lastTime = 0;
+    static uint64_t lastTime = 0;
     auto now = std::chrono::system_clock::now();
-    unint64_t curMs = static_cast<unint64_t>(
+    uint64_t curMs = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
     if (curMs - lastTime >= TIME_INTERVAL) {
         lastTime = curMs;
