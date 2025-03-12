@@ -757,7 +757,7 @@ HWTEST_F(MenuItemTestOneNg, InitPadding001, TestSize.Level1)
     padding.bottom = CalcLength(3.0f, DimensionUnit::PX);
     menuItemLayoutAlgorithm_->InitPadding(props, layoutConstraint);
 
-    MockContainer::Current()->SetApiTargetVersion(backApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -783,9 +783,9 @@ HWTEST_F(MenuItemTestOneNg, MeasureClickableArea001, TestSize.Level1)
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
     menuItemLayoutAlgorithm_->userSetPadding_ = true;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper(itemNode, geometryNode, itemNode->GetLayoutProperty());
     menuItemLayoutAlgorithm_->MeasureClickableArea(&layoutWrapper);
-    MockContainer::Current()->SetApiTargetVersion(backApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
     menuItemLayoutAlgorithm_->MeasureClickableArea(&layoutWrapper);
 }
 } // namespace OHOS::Ace::NG

@@ -1174,7 +1174,7 @@ HWTEST_F(MenuPattern2TestNg, UpdateShowScale001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
-    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET, "", TYPE);
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
     ASSERT_NE(menuPattern, nullptr);
     MenuPreviewPattern menuPreviewPattern;
     menuPreviewPattern.hasPreviewTransitionEffect_ = true;
