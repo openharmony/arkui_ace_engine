@@ -23,6 +23,7 @@
 #include "render_service_base/include/render/rs_mask.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
+#include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 #include "render_service_client/core/ui/rs_canvas_drawing_node.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
@@ -6819,5 +6820,94 @@ void RosenRenderContext::DumpSimplifyStagingProperties(std::unique_ptr<JsonValue
             json->Put("TransformAlpha", std::to_string(arkAlpha.value()).c_str());
         }
     }
+}
+
+void RosenRenderContext::FreezeCanvasNode(bool freezeFlag)
+{
+    if (canvasNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "FreezeCanvasNode. %{public}d", freezeFlag);
+        canvasNode_->SetFreeze(freezeFlag);
+    }
+}
+
+void RosenRenderContext::RemoveCanvasNode()
+{
+    if (canvasNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveCanvasNode.");
+        canvasNode_->RemoveFromTree();
+        canvasNode_ = nullptr;
+    }
+}
+
+bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd)
+{
+    static bool animationFlag = false;
+    if (animationFlag) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "animationFlag is true.");
+        return false;
+    }
+    if (!canvasNode_) {
+        return true;
+    }
+    const int32_t maxTime = 2000;
+    const int32_t defaultTime = 100;
+    if (duration <= 0 || duration > maxTime) {
+        duration = defaultTime;
+    }
+    if (delay <= 0 || delay > maxTime) {
+        delay = defaultTime;
+    }
+
+    FreezeCanvasNode(true);
+    Rosen::RSTransaction::FlushImplicitTransaction();
+    
+    AnimationOption option;
+    option.SetDuration(duration);
+    option.SetDelay(delay);
+    option.SetCurve(Curves::EASE_OUT);
+    AnimationUtils::Animate(option,
+        [this]() {
+            if (canvasNode_) {
+                animationFlag = true;
+                canvasNode_->SetAlpha(0.0f);
+            }
+        },
+        [this, isDragEnd]() {
+            if (canvasNode_) {
+                canvasNode_->SetAlpha(1.0f);
+            }
+            FreezeCanvasNode(false);
+            if (isDragEnd) {
+                RemoveCanvasNode();
+            }
+            if (callbackAnimateEnd_) {
+                callbackAnimateEnd_();
+            }
+            Rosen::RSTransaction::FlushImplicitTransaction();
+            animationFlag = false;
+            if (callbackCachedAnimateAction_) {
+                callbackCachedAnimateAction_();
+            }
+        });
+        return true;
+}
+
+void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<Rosen::RSCanvasNode>& rootNode)
+{
+    if (canvasNode_ && rootNode) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
+        canvasNode_->SetLinkedRootNodeId(rootNode->GetRenderContext()->GetNodeId());
+        Rosen::RSTransaction::FlushImplicitTransaction();
+    }
+}
+
+std::shared_ptr<Rosen::RSCanvasNode> RosenRenderContext::GetCanvasNode()
+{
+    if (!canvasNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSCanvasNode.");
+        canvasNode_ = Rosen::RSCanvasNode::Create();
+        Rosen::RSTransaction::FlushImplicitTransaction();
+    }
+    return canvasNode_;
 }
 } // namespace OHOS::Ace::NG

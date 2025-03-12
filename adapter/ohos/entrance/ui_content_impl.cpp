@@ -2856,7 +2856,9 @@ void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& c
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     if (context) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameAnimateEndCallback");
-        context->AddKeyFrameAnimateEndCallback(callback);
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+            context->GetRootElement()->GetRenderContext());
+        rosenRenderContext->AddKeyFrameAnimateEndCallback(callback);
     }
 }
 
@@ -2877,7 +2879,9 @@ void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvas
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     if (context) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameCanvasNode.");
-        context->LinkCanvasNodeToRootNode(canvasNode);
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+            context->GetRootElement()->GetRenderContext());
+        rosenRenderContext->LinkCanvasNodeToRootNode(context->GetRootElement());
     }
 }
 
@@ -2916,7 +2920,9 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
     if (auto transactionController =  Rosen::RSSyncTransactionController::GetInstance()) {
         transactionController->OpenSyncTransaction();
         auto rsTransaction = transactionController->GetRSTransaction();
-        canvasNode_ = context->GetCanvasNode();
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+            context->GetRootElement()->GetRenderContext());
+        canvasNode_ = rosenRenderContext->GetCanvasNode();
         if (addNodeCallback_ && canvasNode_) {
             TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
             addNodeCallback_(canvasNode_, rsTransaction);
@@ -2926,9 +2932,11 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         TAG_LOGE(AceLogTag::ACE_WINDOW, "transactionController is null.");
         return;
     }
-    std::function<void()> callbackCachedAnimation =  std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
+    std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
     if (callbackCachedAnimation) {
-        context->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+            context->GetRootElement()->GetRenderContext());
+        rosenRenderContext->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
     }
 }
 
@@ -2953,7 +2961,8 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     }
 
     bool animateRes = true;
-    std::function<void()> callbackCachedAnimation =  nullptr;
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+        context->GetRootElement()->GetRenderContext());
     switch (reason) {
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
             KeyFrameDragStartPolicy(context);
@@ -2961,8 +2970,10 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
             canvasNode_ = nullptr;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
-            animateRes = context->SetCanvasNodeOpacityAnimation(config.GetKeyFrameConfig().animationDuration_,
-            config.GetKeyFrameConfig().animationDelay_, reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
+            animateRes = rosenRenderContext->SetCanvasNodeOpacityAnimation(
+                config.GetKeyFrameConfig().animationDuration_,
+                config.GetKeyFrameConfig().animationDelay_,
+                reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
             if (!animateRes) {
                 CacheAnimateInfo(config, reason, rsTransaction, avoidAreas);
                 return true;
