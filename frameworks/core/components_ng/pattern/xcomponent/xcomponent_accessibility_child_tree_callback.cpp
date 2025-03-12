@@ -24,18 +24,11 @@ bool XComponentAccessibilityChildTreeCallback::OnRegister(
     uint32_t windowId, int32_t treeId)
 {
     auto pattern = weakPattern_.Upgrade();
-    if (pattern == nullptr) {
-        return false;
-    }
-
-    if (isReg_) {
-        return true;
-    }
-
+    CHECK_NULL_RETURN(pattern, false);
+    CHECK_EQUAL_RETURN(isReg_, true, true);
     if (!pattern->OnAccessibilityChildTreeRegister(windowId, treeId)) {
         return false;
     }
-
     pattern->SetAccessibilityState(true);
     isReg_ = true;
     return true;
@@ -44,18 +37,11 @@ bool XComponentAccessibilityChildTreeCallback::OnRegister(
 bool XComponentAccessibilityChildTreeCallback::OnDeregister()
 {
     auto pattern = weakPattern_.Upgrade();
-    if (pattern == nullptr) {
-        return false;
-    }
-
-    if (!isReg_) {
-        return true;
-    }
-
+    CHECK_NULL_RETURN(pattern, false);
+    CHECK_EQUAL_RETURN(isReg_, false, true);
     if (!pattern->OnAccessibilityChildTreeDeregister()) {
         return false;
     }
-
     pattern->SetAccessibilityState(false);
     isReg_ = false;
     return true;
@@ -65,10 +51,7 @@ bool XComponentAccessibilityChildTreeCallback::OnSetChildTree(
     int32_t childWindowId, int32_t childTreeId)
 {
     auto pattern = weakPattern_.Upgrade();
-    if (pattern == nullptr) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN(pattern, false);
     pattern->OnSetAccessibilityChildTree(childWindowId, childTreeId);
     return true;
 }
@@ -91,10 +74,7 @@ bool XComponentAccessibilityChildTreeCallback::OnDumpChildInfo(
 void XComponentAccessibilityChildTreeCallback::OnClearRegisterFlag()
 {
     auto pattern = weakPattern_.Upgrade();
-    if (pattern == nullptr) {
-        return;
-    }
-
+    CHECK_NULL_VOID(pattern);
     isReg_ = false;
 }
 } // namespace OHOS::Ace::NG
