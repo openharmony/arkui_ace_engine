@@ -451,6 +451,8 @@ public:
 
     void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
+    void OnAccessibilityDetachFromMainTree();
+
     bool IsMatchAccessibilityResponseRegion(bool isAccessibilityVirtualNode);
 
     bool IsAccessibilityCompInResponseRegion(const RectF& rect, const RectF& origRect);

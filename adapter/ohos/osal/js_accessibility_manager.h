@@ -358,6 +358,9 @@ public:
 
     bool IsScreenReaderEnabled() override;
 
+    void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) override;
+    void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) override;
+
     void SetFocusMoveResultWithNode(
         const WeakPtr<NG::FrameNode>& hostNode,
         AccessibilityElementOperatorCallback& callback,

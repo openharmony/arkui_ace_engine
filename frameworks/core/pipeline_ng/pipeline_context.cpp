@@ -902,6 +902,10 @@ void PipelineContext::HandleSpecialContainerNode()
         if (overlayNode && overlayNode->GetRenderContext()) {
             overlayNode->GetRenderContext()->SetDrawNode();
         }
+        auto accessibilityFocusPaintNode = parentNode->GetFocusPaintNode();
+        if (accessibilityFocusPaintNode && accessibilityFocusPaintNode->GetRenderContext()) {
+            accessibilityFocusPaintNode->GetRenderContext()->SetDrawNode();
+        }
     }
     ClearPositionZNodes();
 }
