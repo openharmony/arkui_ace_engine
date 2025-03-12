@@ -134,6 +134,12 @@ static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositi
     }
 }
 
+bool SetDrawNodeChangeCallback()
+{
+    Rosen::RSNode::SetDrawNodeChangeCallback(DrawNodeChangeCallback);
+    return true;
+}
+
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
     static const LinearEnumMapNode<RenderFit, Rosen::Gravity> gravityMap[] = {
@@ -224,6 +230,8 @@ T GetAnimatablePropertyStagingValue(std::shared_ptr<ModifierName>& modifier)
 }
 } // namespace
 
+bool RosenRenderContext::initDrawNodeChangeCallback_ = SetDrawNodeChangeCallback();
+
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
     if (dimension.Unit() == DimensionUnit::PERCENT) {
@@ -263,11 +271,6 @@ void RosenRenderContext::DetachModifiers()
     if (pipeline) {
         pipeline->RequestFrame();
     }
-}
-
-void RosenRenderContext::SetDrawNodeChangeCallback()
-{
-    Rosen::RSNode::SetDrawNodeChangeCallback(DrawNodeChangeCallback);
 }
 
 void RosenRenderContext::StartRecording()

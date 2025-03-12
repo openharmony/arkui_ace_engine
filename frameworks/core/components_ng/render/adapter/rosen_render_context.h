@@ -444,7 +444,7 @@ public:
     RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
     void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
     void AddRsNodeForCapture();
-    void SetDrawNodeChangeCallback() override;
+    static bool initDrawNodeChangeCallback_;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
