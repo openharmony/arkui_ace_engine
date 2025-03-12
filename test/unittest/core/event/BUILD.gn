@@ -145,6 +145,10 @@ ace_unittest("input_event_test_ng") {
   type = "new"
   module_output = "events"
   sources = [ "input_event_test_ng.cpp" ]
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
 }
 
 ace_unittest("focus_box_test_ng") {

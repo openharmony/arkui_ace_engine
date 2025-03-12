@@ -293,4 +293,73 @@ HWTEST_F(InputEventTestNg, InputEventTest009, TestSize.Level1)
     inputEventHub->axisEventActuator_->OnCollectAxisEvent(COORDINATE_OFFSET, getEventTargetImpl, Result);
     EXPECT_NE(inputEventHub, nullptr);
 }
+
+/**
+ * @tc.name: OnCollectPenHoverEventTest001
+ * @tc.desc: test InputEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectPenHoverEventTest001, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    inputEventHub->hoverEventActuator_ =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+
+    TouchTestResult hoverResult;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    inputEventHub->hoverEventActuator_->OnCollectPenHoverEvent(
+        COORDINATE_OFFSET, getEventTargetImpl, hoverResult, frameNode);
+    EXPECT_NE(inputEventHub, nullptr);
+}
+
+/**
+ * @tc.name: OnCollectPenHoverEventTest002
+ * @tc.desc: test InputEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventTestNg, OnCollectPenHoverEventTest002, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto hoverEventActuator =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    OnHoverFunc onHoverEventFunc;
+    inputEventHub->SetJSFrameNodeOnHoverEvent(std::move(onHoverEventFunc));
+
+    TouchTestResult hoverResult;
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    OnMouseEventFunc onHoverEventFunc1 = [](MouseInfo& info) {};
+    std::list<RefPtr<InputEvent>> inputEvents = {AceType::MakeRefPtr<InputEvent>(std::move(onHoverEventFunc1))};
+    hoverEventActuator->inputEvents_ = inputEvents;
+    hoverEventActuator->OnCollectPenHoverEvent(COORDINATE_OFFSET, getEventTargetImpl, hoverResult, frameNode);
+
+    OnMouseEventFunc onAxis = [](MouseInfo& info) {};
+    auto onAxisEvent = AceType::MakeRefPtr<InputEvent>(std::move(onAxis));
+    hoverEventActuator->userCallback_ = onAxisEvent;
+    OnMouseEventFunc onAxis2 = [](MouseInfo& info) {};
+    auto onAxisEvent2 = AceType::MakeRefPtr<InputEvent>(std::move(onAxis2));
+    hoverEventActuator->userJSFrameNodeCallback_ = onAxisEvent2;
+    hoverEventActuator->OnCollectPenHoverEvent(COORDINATE_OFFSET, getEventTargetImpl, hoverResult, frameNode);
+
+    HoverInfo hover;
+    hoverEventActuator->penHoverEventTarget_->onPenHoverEventCallback_(true, hover);
+    hoverEventActuator->userCallback_ = nullptr;
+    hoverEventActuator->userJSFrameNodeCallback_ = nullptr;
+    hoverEventActuator->penHoverEventTarget_->onPenHoverEventCallback_(true, hover);
+
+    hoverEventActuator->inputEvents_.pop_back();
+    hoverEventActuator->OnCollectPenHoverEvent(COORDINATE_OFFSET, getEventTargetImpl, hoverResult, frameNode);
+
+    hoverEventActuator->userJSFrameNodeCallback_ = onAxisEvent2;
+    hoverEventActuator->OnCollectPenHoverEvent(COORDINATE_OFFSET, getEventTargetImpl, hoverResult, frameNode);
+    
+    EXPECT_NE(inputEventHub, nullptr);
+}
+
+
 } // namespace OHOS::Ace::NG
