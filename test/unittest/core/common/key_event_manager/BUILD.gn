@@ -16,7 +16,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("key_event_manager_test") {
-  module_out_path = "$basic_test_output_path/common"
+  module_out_path = "$basic_test_output_path"
 
   include_dirs = [ "$ace_root/frameworks/core/components_ng/pattern" ]
   cflags = [
