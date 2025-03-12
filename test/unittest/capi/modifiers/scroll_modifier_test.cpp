@@ -1345,7 +1345,7 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
         Ark_OffsetResult retVal;
         retVal.xOffset = xOffset;
         retVal.yOffset = yOffset;
-        CallbackHelper(continuation).Invoke(retVal);
+        CallbackHelper(continuation).InvokeSync(retVal);
     };
 
     auto id = Converter::ArkValue<Ark_Int32>(123);
