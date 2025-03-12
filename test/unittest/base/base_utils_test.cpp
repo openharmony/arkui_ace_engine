@@ -1191,8 +1191,8 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest070, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest071, TestSize.Level1)
 {
-    uint8_t invalid_byte[1] = {0x80};
-    size_t size = MUtf8ToUtf16Size(invalid_byte, 1);
+    uint8_t invalidByte[1] = {0x80};
+    size_t size = MUtf8ToUtf16Size(invalidByte, 1);
     EXPECT_EQ(size, 1);
 }
 
