@@ -6,7 +6,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to in writing, softwareGetArkUINodeModifiers()->getFormComponentModifier();->resetModuleName(nativeNode);
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -121,7 +121,7 @@ ArkUINativeModuleValue FormComponentBridge::ResetModuleName(ArkUIRuntimeCallInfo
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getFormComponentModifier();->resetModuleName(nativeNode);
+    GetArkUINodeModifiers()->getFormComponentModifier()->resetModuleName(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
