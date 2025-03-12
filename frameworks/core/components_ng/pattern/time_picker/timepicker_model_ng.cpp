@@ -400,6 +400,11 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     }
     if (value.textColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor, value.textColor.value());
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+        CHECK_NULL_VOID(timePickerPattern);
+        timePickerPattern->SetSelectedTextColorAlreadySet();
     } else {
         ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetSelectedTextStyle);
     }
@@ -639,6 +644,14 @@ void TimePickerModelNG::SetSelectedTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedColor,
         value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);
+    if (value.textColor.has_value()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+        CHECK_NULL_VOID(timePickerPattern);
+        timePickerPattern->SetSelectedTextColorAlreadySet();
+    }
+
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedWeight,
         value.fontWeight.value_or(selectedStyle.GetFontWeight()), frameNode);

@@ -2980,4 +2980,22 @@ void DatePickerPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
 #endif
 }
 
+void DatePickerPattern::SetSelectedTextColorAlreadySet()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto&& children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetSelectedTextColorAlreadySet();
+    }
+}
+
 } // namespace OHOS::Ace::NG

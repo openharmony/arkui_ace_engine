@@ -520,7 +520,7 @@ public:
     }
 
     void ColumnPatternInitHapticController();
-
+    void SetSelectedTextColorAlreadySet();
 private:
     void OnModifyDone() override;
     void InitCrownAndKeyEvent();

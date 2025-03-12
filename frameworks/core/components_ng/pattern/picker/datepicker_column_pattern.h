@@ -281,6 +281,11 @@ public:
         clickBreak_ = value;
     }
 
+    void SetSelectedTextColorAlreadySet()
+    {
+        selectedTextColorAlreadySet_ = true;
+    }
+
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void InitHapticController();
     void StopHaptic();
@@ -439,6 +444,7 @@ private:
     PickerColumnPatternCircleUtils<DatePickerColumnPattern> *circleUtils_ = nullptr;
     std::string selectedColumnId_ = "";
     std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
+    bool selectedTextColorAlreadySet_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
     bool isCrownEventEnded_ = true;
     int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;

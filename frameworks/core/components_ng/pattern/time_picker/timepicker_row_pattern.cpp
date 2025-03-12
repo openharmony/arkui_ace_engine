@@ -2234,4 +2234,19 @@ bool TimePickerRowPattern::NeedAdaptForAging()
     }
     return false;
 }
+
+void TimePickerRowPattern::SetSelectedTextColorAlreadySet()
+{
+    UpdateAllChildNode();
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (columnNode) {
+            auto pattern = columnNode->GetPattern<TimePickerColumnPattern>();
+            if (pattern) {
+                pattern->SetSelectedTextColorAlreadySet();
+            }
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

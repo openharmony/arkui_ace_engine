@@ -766,6 +766,7 @@ public:
     void ColumnPatternStopHaptic();
 
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    void SetSelectedTextColorAlreadySet();
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
