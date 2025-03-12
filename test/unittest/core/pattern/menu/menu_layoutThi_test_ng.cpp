@@ -107,19 +107,6 @@ constexpr float MENU_SIZE_HEIGHT_NEW = 100.0f;
 constexpr float SELECT_POSITION_X = -50.0f;
 constexpr float TWENTY = 20.0f;
 const std::string MENU_TAG = "menu";
-
-RefPtr<Theme> GetTheme(ThemeType type)
-{
-    if (type == TextTheme::TypeId()) {
-        return AceType::MakeRefPtr<TextTheme>();
-    } else if (type == IconTheme::TypeId()) {
-        return AceType::MakeRefPtr<IconTheme>();
-    } else if (type == SelectTheme::TypeId()) {
-        return AceType::MakeRefPtr<SelectTheme>();
-    } else {
-        return AceType::MakeRefPtr<MenuTheme>();
-    }
-}
 } // namespace
 
 class MenuLayout3TestNg : public testing::Test {
@@ -157,7 +144,6 @@ void MenuLayout3TestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void MenuLayout3TestNg::TearDown()
@@ -177,10 +163,16 @@ void MenuLayout3TestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        return GetTheme(type);
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
     });
-    EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 RefPtr<FrameNode> MenuLayout3TestNg::CreateTargetNodeWithMainTree()
@@ -324,7 +316,7 @@ HWTEST_F(MenuLayout3TestNg, ModifyPreviewMenuPlacement001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(menuTheme));
+
     menuAlgorithm->ModifyPreviewMenuPlacement(AceType::RawPtr(menuNode));
     EXPECT_EQ(menuAlgorithm->GetPlacement(), Placement::RIGHT_TOP);
 }
@@ -582,10 +574,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     MenuParam menuParam;
 
     // create menuWrapperNode to get main menu
-    auto targetNode = CreateTargetNodeWithMainTree();
-    ASSERT_NE(targetNode, nullptr);
-    auto menuWrapperNode =
-        MenuView::Create(std::move(optionParams), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -646,10 +635,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
     MenuParam menuParam;
 
     // create menuWrapperNode to get main menu
-    auto targetNode = CreateTargetNodeWithMainTree();
-    ASSERT_NE(targetNode, nullptr);
-    auto menuWrapperNode =
-        MenuView::Create(std::move(optionParams), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -713,10 +699,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg051, TestSize.Level1)
     MenuParam menuParam;
 
     // create menuWrapperNode to get main menu
-    auto targetNode = CreateTargetNodeWithMainTree();
-    ASSERT_NE(targetNode, nullptr);
-    auto menuWrapperNode =
-        MenuView::Create(std::move(optionParams), targetNode->GetId(), targetNode->GetTag(), MenuType::MENU, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
