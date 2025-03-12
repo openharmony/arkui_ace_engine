@@ -46,13 +46,6 @@ public:
         node = nullptr;
     }
 
-    template<typename Theme>
-    static void SetupTheme()
-    {
-        auto theme = typename Theme::Builder().Build(themeConstants_);
-        EXPECT_CALL(*themeManager_, GetTheme(Theme::TypeId())).WillRepeatedly(testing::Return(theme));
-    }
-
     static void SetUpTestCase()
     {
         AccessorTestBase::SetUpTestCase();
@@ -62,7 +55,7 @@ public:
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
             .WillRepeatedly(testing::Return(themeConstants_));
-        SetupTheme<NavigationBarTheme>();
+        AccessorTestBase::SetupTheme<NavigationBarTheme>();
         themeConstants_->LoadTheme(0);
         MockThemeStyle::GetInstance()->SetAttributes({});
         auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
