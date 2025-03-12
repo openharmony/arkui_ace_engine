@@ -57,6 +57,7 @@ public:
     ~CanvasRendererPeerImpl() override = default;
 
     void TriggerBeginPathImpl();
+    void TriggerDrawImageImpl(const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& info);
     void TriggerStroke0Impl();
     void TriggerRestoreImpl();
     void TriggerSaveImpl();

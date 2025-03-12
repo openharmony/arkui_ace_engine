@@ -92,6 +92,7 @@ void ImageBitmapPeer::OnImageDataReady()
     CHECK_NULL_VOID(loadingCtx_);
     width = loadingCtx_->GetImageSize().Width();
     height = loadingCtx_->GetImageSize().Height();
+    loadingCtx_->MakeCanvasImageIfNeed(loadingCtx_->GetImageSize(), true, ImageFit::NONE);
 }
 
 void ImageBitmapPeer::OnImageLoadSuccess()

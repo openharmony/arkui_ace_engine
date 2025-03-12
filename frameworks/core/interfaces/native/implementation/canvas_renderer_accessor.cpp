@@ -35,6 +35,8 @@ const auto SIZE_LIMIT_MIN = 0.0;
 const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0XFF000000;
 const auto EMPTY_STRING = "";
 const auto FILL_RULE_EVEN_ODD = "evenodd";
 const auto DIR_AUTO = "auto";
@@ -92,6 +94,14 @@ std::optional<double> ConvertDimension(
         },
         []() {});
     return dst;
+}
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
 }
 } // namespace
 namespace Converter {
@@ -195,6 +205,29 @@ void DrawImage0Impl(Ark_CanvasRenderer peer,
 {
     LOGE("ARKOALA CanvasRendererAccessor::DrawImage0Impl where Ark_Union_ImageBitmap_PixelMap "
         " includes Ark_PixelMap which is partially implemented.");
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    if (!(peerImpl && image && dx && dy)) {
+        LOGE("ARKOALA CanvasRendererAccessor::DrawImage0Impl Error Parameters");
+        return;
+    }
+    Ace::CanvasImage info {
+        .flag = 0,
+        .dx = static_cast<double>(Converter::Convert<float>(*dx)),
+        .dy = static_cast<double>(Converter::Convert<float>(*dy)),
+    };
+    Converter::VisitUnion(
+        *image,
+        [peerImpl, info](const Ark_ImageBitmap& value) {
+            ImageBitmapPeer* imageBitmapPeer = reinterpret_cast<ImageBitmapPeer*>(value);
+            if (imageBitmapPeer) {
+                peerImpl->TriggerDrawImageImpl(imageBitmapPeer->GetPixelMap(), info);
+            }
+        },
+        [](const Ark_PixelMap& value) {
+            LOGE("ARKOALA CanvasRendererAccessor::DrawImage0Impl PixelMap is not implemented");
+        },
+        []() {}
+    );
 }
 void DrawImage1Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
@@ -205,6 +238,31 @@ void DrawImage1Impl(Ark_CanvasRenderer peer,
 {
     LOGE("ARKOALA CanvasRendererAccessor::DrawImage1Impl where Ark_Union_ImageBitmap_PixelMap "
         " includes Ark_PixelMap which is partially implemented.");
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    if (!(peerImpl && image && dx && dy && dw && dh)) {
+        LOGE("ARKOALA CanvasRendererAccessor::DrawImage1Impl Error Parameters");
+        return;
+    }
+    Ace::CanvasImage info {
+        .flag = 1,
+        .dx = static_cast<double>(Converter::Convert<float>(*dx)),
+        .dy = static_cast<double>(Converter::Convert<float>(*dy)),
+        .dWidth = static_cast<double>(Converter::Convert<float>(*dw)),
+        .dHeight = static_cast<double>(Converter::Convert<float>(*dh)),
+    };
+    Converter::VisitUnion(
+        *image,
+        [peerImpl, info](const Ark_ImageBitmap& value) {
+            ImageBitmapPeer* imageBitmapPeer = reinterpret_cast<ImageBitmapPeer*>(value);
+            if (imageBitmapPeer) {
+                peerImpl->TriggerDrawImageImpl(imageBitmapPeer->GetPixelMap(), info);
+            }
+        },
+        [](const Ark_PixelMap& value) {
+            LOGE("ARKOALA CanvasRendererAccessor::DrawImage1Impl PixelMap is not implemented");
+        },
+        []() {}
+    );
 }
 void DrawImage2Impl(Ark_CanvasRenderer peer,
                     const Ark_Union_ImageBitmap_PixelMap* image,
@@ -219,6 +277,35 @@ void DrawImage2Impl(Ark_CanvasRenderer peer,
 {
     LOGE("ARKOALA CanvasRendererAccessor::DrawImage2Impl where Ark_Union_ImageBitmap_PixelMap "
         " includes Ark_PixelMap which is partially implemented.");
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    if (!(peerImpl && image && sx && sy && sw && sh && dx && dy && dw && dh)) {
+        LOGE("ARKOALA CanvasRendererAccessor::DrawImage2Impl Error Parameters");
+        return;
+    }
+    Ace::CanvasImage info {
+        .flag = 2,
+        .sx = static_cast<double>(Converter::Convert<float>(*sx)),
+        .sy = static_cast<double>(Converter::Convert<float>(*sy)),
+        .sWidth = static_cast<double>(Converter::Convert<float>(*sw)),
+        .sHeight = static_cast<double>(Converter::Convert<float>(*sh)),
+        .dx = static_cast<double>(Converter::Convert<float>(*dx)),
+        .dy = static_cast<double>(Converter::Convert<float>(*dy)),
+        .dWidth = static_cast<double>(Converter::Convert<float>(*dw)),
+        .dHeight = static_cast<double>(Converter::Convert<float>(*dh)),
+    };
+    Converter::VisitUnion(
+        *image,
+        [peerImpl, info](const Ark_ImageBitmap& value) {
+            ImageBitmapPeer* imageBitmapPeer = reinterpret_cast<ImageBitmapPeer*>(value);
+            if (imageBitmapPeer) {
+                peerImpl->TriggerDrawImageImpl(imageBitmapPeer->GetPixelMap(), info);
+            }
+        },
+        [](const Ark_PixelMap& value) {
+            LOGE("ARKOALA CanvasRendererAccessor::DrawImage2Impl PixelMap is not implemented");
+        },
+        []() {}
+    );
 }
 void BeginPathImpl(Ark_CanvasRenderer peer)
 {
@@ -347,7 +434,7 @@ Opt_CanvasPattern CreatePatternImpl(Ark_CanvasRenderer peer,
     auto pixelMap = bitmap->GetPixelMap();
     pattern->SetPixelMap(pixelMap);
 #endif
-    peerImpl->patterns[peerImpl->patternCount];
+    peerImpl->patterns[peerImpl->patternCount] = pattern;
     auto peerPattern = GetCanvasPatternAccessor()->ctor();
     CHECK_NULL_RETURN(peerPattern, invalid);
     peerPattern->SetCanvasRenderer(AceType::WeakClaim(peerImpl));
@@ -706,7 +793,9 @@ Ark_TextMetrics MeasureTextImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_RETURN(text, {});
     auto content = Converter::Convert<std::string>(*text);
     auto opt = peerImpl->GetTextMetrics(content);
-    CHECK_NULL_RETURN(opt, {});
+    if (opt.has_value()) {
+        return Converter::ArkValue<Ark_TextMetrics>(opt.value());
+    }
     LOGE("ARKOALA CanvasRendererAccessor::MeasureTextImpl return type Ark_NativePointer "
          "should be replaced with an accessor type for TextMetrics.");
     return {};
@@ -984,6 +1073,36 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(fillStyle);
     LOGE("ARKOALA CanvasRendererAccessor::SetStrokeStyleImpl input Union includes same type members");
+    Converter::VisitUnion(
+        *fillStyle,
+        [peerImpl](const Ark_String& value) {
+            auto colorStr = Converter::Convert<std::string>(value);
+            Color color;
+            if (Color::ParseColorString(colorStr, color)) {
+                peerImpl->TriggerSetFillStyleImpl(color);
+            }
+        },
+        [peerImpl](const Ark_Number& value) {
+            auto colorNum = Converter::Convert<uint32_t>(value);
+            peerImpl->TriggerSetFillStyleImpl(Color(ColorAlphaAdapt(colorNum)));
+        },
+        [peerImpl](const Ark_CanvasGradient& value) {
+            auto gradientPeer = reinterpret_cast<CanvasGradientPeer*>(value);
+            if (gradientPeer) {
+                auto gradient = gradientPeer->GetGradient();
+                peerImpl->TriggerSetFillStyleImpl(gradient);
+            }
+        },
+        [peerImpl](const Ark_CanvasPattern& value) {
+            auto canvasPatternPeer = reinterpret_cast<CanvasPatternPeer*>(value);
+            if (canvasPatternPeer) {
+                int32_t patternId = canvasPatternPeer->GetId();
+                auto pattern = peerImpl->patterns[patternId];
+                peerImpl->TriggerSetFillStyleImpl(pattern);
+            }
+        },
+        []() {}
+    );
 }
 void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
                         const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
@@ -993,6 +1112,36 @@ void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(strokeStyle);
     LOGE("ARKOALA CanvasRendererAccessor::SetStrokeStyleImpl input Union includes same type members");
+    Converter::VisitUnion(
+        *strokeStyle,
+        [peerImpl](const Ark_String& value) {
+            auto colorStr = Converter::Convert<std::string>(value);
+            Color color;
+            if (Color::ParseColorString(colorStr, color)) {
+                peerImpl->TriggerSetStrokeStyleImpl(color);
+            }
+        },
+        [peerImpl](const Ark_Number& value) {
+            auto colorNum = Converter::Convert<uint32_t>(value);
+            peerImpl->TriggerSetStrokeStyleImpl(Color(ColorAlphaAdapt(colorNum)));
+        },
+        [peerImpl](const Ark_CanvasGradient& value) {
+            auto gradientPeer = reinterpret_cast<CanvasGradientPeer*>(value);
+            if (gradientPeer) {
+                auto gradient = gradientPeer->GetGradient();
+                peerImpl->TriggerSetStrokeStyleImpl(gradient);
+            }
+        },
+        [peerImpl](const Ark_CanvasPattern& value) {
+            auto canvasPatternPeer = reinterpret_cast<CanvasPatternPeer*>(value);
+            if (canvasPatternPeer) {
+                int32_t patternId = canvasPatternPeer->GetId();
+                auto pattern = peerImpl->patterns[patternId];
+                peerImpl->TriggerSetStrokeStyleImpl(pattern);
+            }
+        },
+        []() {}
+    );
 }
 Ark_String GetFilterImpl(Ark_CanvasRenderer peer)
 {

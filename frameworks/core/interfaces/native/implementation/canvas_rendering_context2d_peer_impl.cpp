@@ -197,11 +197,12 @@ double CanvasRenderingContext2DPeerImpl::TriggerGetWidth()
     return PipelineBase::Px2VpWithCurrentDensity(pattern_->GetWidth());
 }
 
-void CanvasRenderingContext2DPeerImpl::ToDataURL(const std::string& type, float& quality)
+std::string CanvasRenderingContext2DPeerImpl::ToDataURL(const std::string& type, float& quality)
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetWidth pattern not bound to component.");
+        return "";
     }
-    pattern_->ToDataURL(type, quality);
+    return pattern_->ToDataURL(type, quality);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
