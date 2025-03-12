@@ -2235,7 +2235,7 @@ bool TimePickerRowPattern::NeedAdaptForAging()
     return false;
 }
 
-void TimePickerRowPattern::SetSelectedTextColorAlreadySet()
+void TimePickerRowPattern::UpdateUserSetSelectColor()
 {
     UpdateAllChildNode();
     for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
@@ -2243,7 +2243,7 @@ void TimePickerRowPattern::SetSelectedTextColorAlreadySet()
         if (columnNode) {
             auto pattern = columnNode->GetPattern<TimePickerColumnPattern>();
             if (pattern) {
-                pattern->SetSelectedTextColorAlreadySet();
+                pattern->UpdateUserSetSelectColor();
             }
         }
     }

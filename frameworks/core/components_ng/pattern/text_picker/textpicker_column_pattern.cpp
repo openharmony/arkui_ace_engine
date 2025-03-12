@@ -1010,7 +1010,7 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
 
-    if (pickerTheme->IsCircleDial() && !selectedTextColorAlreadySet_) {
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
         if (selectedMarkPaint_) {
             textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
         } else {
@@ -1155,7 +1155,7 @@ void TextPickerColumnPattern::SetSelectColor(const RefPtr<TextLayoutProperty>& t
 {
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, percent);
-    if (selectedMarkPaint_ && isEqual && !selectedTextColorAlreadySet_) {
+    if (selectedMarkPaint_ && isEqual && !isUserSetSelectColor_) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();

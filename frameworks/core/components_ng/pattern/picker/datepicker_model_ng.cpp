@@ -550,7 +550,7 @@ void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
         CHECK_NULL_VOID(frameNode);
         auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_VOID(datePickerPattern);
-        datePickerPattern->SetSelectedTextColorAlreadySet();
+        datePickerPattern->UpdateUserSetSelectColor();
     } else {
         ResetDataPickerTextStyleColor(frameNode, &DataPickerRowLayoutProperty::GetSelectedTextStyle);
     }
@@ -831,7 +831,7 @@ void DatePickerModelNG::SetSelectedTextStyle(
         CHECK_NULL_VOID(frameNode);
         auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_VOID(datePickerPattern);
-        datePickerPattern->SetSelectedTextColorAlreadySet();
+        datePickerPattern->UpdateUserSetSelectColor();
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);

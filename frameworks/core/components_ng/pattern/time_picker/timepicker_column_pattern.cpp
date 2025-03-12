@@ -591,7 +591,7 @@ void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    if (pickerTheme->IsCircleDial() && !selectedTextColorAlreadySet_) {
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
         if (selectedMarkPaint_) {
             textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
         } else {
@@ -1651,8 +1651,7 @@ void TimePickerColumnPattern::GetAnimationColor(uint32_t index, uint32_t showCou
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    if (pickerTheme->IsCircleDial() && (index == (showCount / PICKER_SELECT_AVERAGE)) &&
-        !selectedTextColorAlreadySet_) {
+    if (pickerTheme->IsCircleDial() && (index == (showCount / PICKER_SELECT_AVERAGE)) && !isUserSetSelectColor_) {
         if (selectedMarkPaint_) {
             color = pickerTheme->GetOptionStyle(true, true).GetTextColor();
         } else {

@@ -423,7 +423,7 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
 
         auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
         CHECK_NULL_VOID(textPickerPattern);
-        textPickerPattern->SetSelectedTextColorAlreadySet();
+        textPickerPattern->UpdateUserSetSelectColor();
     } else {
         ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetSelectedTextStyle);
     }
@@ -1030,7 +1030,7 @@ void TextPickerModelNG::SetSelectedTextStyle(
     if (value.textColor.has_value()) {
         auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
         CHECK_NULL_VOID(textPickerPattern);
-        textPickerPattern->SetSelectedTextColorAlreadySet();
+        textPickerPattern->UpdateUserSetSelectColor();
     }
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(

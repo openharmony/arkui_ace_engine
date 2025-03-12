@@ -404,7 +404,7 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
         CHECK_NULL_VOID(frameNode);
         auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
         CHECK_NULL_VOID(timePickerPattern);
-        timePickerPattern->SetSelectedTextColorAlreadySet();
+        timePickerPattern->UpdateUserSetSelectColor();
     } else {
         ResetTimePickerTextStyleColor(frameNode, &TimePickerLayoutProperty::GetSelectedTextStyle);
     }
@@ -649,7 +649,7 @@ void TimePickerModelNG::SetSelectedTextStyle(
         CHECK_NULL_VOID(frameNode);
         auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
         CHECK_NULL_VOID(timePickerPattern);
-        timePickerPattern->SetSelectedTextColorAlreadySet();
+        timePickerPattern->UpdateUserSetSelectColor();
     }
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(

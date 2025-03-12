@@ -648,7 +648,7 @@ public:
     void ColumnPatternStopHaptic();
     void SetDigitalCrownSensitivity(int32_t crownSensitivity);
     bool IsStartEndTimeDefined();
-    void SetSelectedTextColorAlreadySet();
+    void UpdateUserSetSelectColor();
 private:
     void SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
         const std::string &id, bool focus, const std::function<void(const std::string&)>& call);

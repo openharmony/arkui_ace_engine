@@ -1812,7 +1812,7 @@ void TextPickerPattern::SetDisableTextStyleAnimation(bool isDisableTextStyleAnim
     }
 }
 
-void TextPickerPattern::SetSelectedTextColorAlreadySet()
+void TextPickerPattern::UpdateUserSetSelectColor()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1826,7 +1826,7 @@ void TextPickerPattern::SetSelectedTextColorAlreadySet()
         CHECK_NULL_VOID(childNode);
         auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_VOID(pickerColumnPattern);
-        pickerColumnPattern->SetSelectedTextColorAlreadySet();
+        pickerColumnPattern->UpdateUserSetSelectColor();
     }
 }
 } // namespace OHOS::Ace::NG

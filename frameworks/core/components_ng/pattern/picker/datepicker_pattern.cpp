@@ -2980,7 +2980,7 @@ void DatePickerPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
 #endif
 }
 
-void DatePickerPattern::SetSelectedTextColorAlreadySet()
+void DatePickerPattern::UpdateUserSetSelectColor()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2994,7 +2994,7 @@ void DatePickerPattern::SetSelectedTextColorAlreadySet()
         CHECK_NULL_VOID(childNode);
         auto pickerColumnPattern = childNode->GetPattern<DatePickerColumnPattern>();
         CHECK_NULL_VOID(pickerColumnPattern);
-        pickerColumnPattern->SetSelectedTextColorAlreadySet();
+        pickerColumnPattern->UpdateUserSetSelectColor();
     }
 }
 

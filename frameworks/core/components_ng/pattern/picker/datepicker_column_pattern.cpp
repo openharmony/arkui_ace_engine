@@ -711,7 +711,7 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 {
     UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    if (pickerTheme->IsCircleDial() && !selectedTextColorAlreadySet_) {
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
         if (selectedMarkPaint_) {
             textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
         } else {
@@ -883,7 +883,7 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
-    if (selectedMarkPaint_ && (index == (showCount / PICKER_SELECT_AVERAGE)) && !selectedTextColorAlreadySet_) {
+    if (selectedMarkPaint_ && (index == (showCount / PICKER_SELECT_AVERAGE)) && !isUserSetSelectColor_) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();

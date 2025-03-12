@@ -344,9 +344,9 @@ public:
         enterSelectedAreaEventCallback_ = value;
     }
 
-    void SetSelectedTextColorAlreadySet()
+    void UpdateUserSetSelectColor()
     {
-        selectedTextColorAlreadySet_ = true;
+        isUserSetSelectColor_ = true;
     }
 
     void SetSelectedMarkListener(const std::function<void(const std::string& selectedColumnId)>& listener);
@@ -505,7 +505,7 @@ private:
     std::string selectedColumnId_ = "";
     bool selectedMarkPaint_ = false;
     std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
-    bool selectedTextColorAlreadySet_ = false;
+    bool isUserSetSelectColor_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
     bool isCrownEventEnded_ = true;
     int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;

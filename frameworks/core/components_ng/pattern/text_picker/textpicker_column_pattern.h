@@ -401,9 +401,9 @@ public:
         return isHover_;
     }
 
-    void SetSelectedTextColorAlreadySet(void)
+    void UpdateUserSetSelectColor(void)
     {
-        selectedTextColorAlreadySet_ = true;
+        isUserSetSelectColor_ = true;
     }
 
     int32_t GetOverScrollDeltaIndex() const;
@@ -627,7 +627,7 @@ private:
     PickerColumnPatternCircleUtils<TextPickerColumnPattern> *circleUtils_ = nullptr;
     int32_t selectedColumnId_ = -1;
     std::function<void(int& selectedColumnId)> focusedListerner_ = nullptr;
-    bool selectedTextColorAlreadySet_ = false;
+    bool isUserSetSelectColor_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
     bool isCrownEventEnded_ = true;
     int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
