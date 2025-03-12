@@ -123,6 +123,11 @@ config("ace_unittest_config") {
   if (ace_engine_feature_enable_split_mode) {
     defines += [ "ENABLE_SPLIT_MODE" ]
   }
+
+  if (capi_asan) {
+    cflags_cc += [ "-fsanitize=address" ]
+    ldflags += [ "-fsanitize=address" ]
+  }
 }
 
 # ace unittest log
