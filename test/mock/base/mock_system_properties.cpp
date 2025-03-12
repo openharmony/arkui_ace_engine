@@ -55,6 +55,7 @@ bool SystemProperties::debugEnabled_ = false;
 DebugFlags SystemProperties::debugFlags_ = 0;
 bool SystemProperties::containerDeleteFlag_ = false;
 bool SystemProperties::layoutDetectEnabled_ = false;
+ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
