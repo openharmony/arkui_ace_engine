@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_VIEW_GRID_LAZY_LAYOUT_INFO_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_VIEW_GRID_LAZY_LAYOUT_INFO_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_INFO_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_INFO_H
 
 #include <climits>
 #include <cstdint>
 #include <map>
+#include <optional>
 
 #include "base/geometry/axis.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,11 +37,6 @@ struct GridItemMainPos {
     int32_t laneIdx = 0;
     float startPos = 0.0f;
     float endPos = 0.0f;
-};
-
-struct AdjustRefPos {
-    float start = 0.0f;
-    float end = 0.0f;
 };
 
 class ACE_EXPORT LazyGridLayoutInfo : public AceType {
@@ -75,6 +73,7 @@ private:
     int32_t updatedStart_ = INT_MAX;
     int32_t updatedEnd_ = -1;
     float estimateItemSize_ = -1.0f;
+    AdjustOffset adjustOffset_ {};
 
     // cache
     float layoutedStart_ = 0.0f;
@@ -92,4 +91,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_VIEW_GRID_LAZY_LAYOUT_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PROPERTY_H
