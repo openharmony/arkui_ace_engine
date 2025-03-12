@@ -519,7 +519,7 @@ void CustomPaintPaintMethod::DrawImageInternal(const Ace::CanvasImage& info, con
     }
     if (HasShadow()) {
         bool isSupported = (info.flag == DrawImageType::THREE_PARAMS) &&
-            (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+            (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
         auto width = info.dx + (isSupported ? image->GetWidth() : info.dWidth);
         auto height = info.dy + (isSupported ? image->GetHeight() : info.dHeight);
         RSRect rsRect = RSRect(info.dx, info.dy, width, height);
@@ -2122,7 +2122,7 @@ TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, 
 {
 #ifndef ACE_UNITTEST
     PaintState paintState =
-        (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) ? measureTextState_ : state;
+        (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) ? measureTextState_ : state;
     TextMetrics textMetrics;
     RSParagraphStyle style;
     style.textAlign = Constants::ConvertTxtTextAlign(paintState.GetTextAlign());
