@@ -64,6 +64,10 @@ void ViewAbstractModelNG::BindMenuGesture(
         showMenu = [params, weakTarget, menuParam](GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
+            if (NG::ViewAbstractModelNG::CheckSkipMenuShow(targetNode)) {
+                TAG_LOGI(AceLogTag::ACE_MENU, "skip menu show with params %{public}d", targetNode->GetId());
+                return;
+            }
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             StartVirator(menuParam, true);
@@ -73,6 +77,10 @@ void ViewAbstractModelNG::BindMenuGesture(
         showMenu = [builderFunc = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
+            if (NG::ViewAbstractModelNG::CheckSkipMenuShow(targetNode)) {
+                TAG_LOGI(AceLogTag::ACE_MENU, "skip menu show with builder %{public}d", targetNode->GetId());
+                return;
+            }
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             StartVirator(menuParam, true);
@@ -85,6 +93,69 @@ void ViewAbstractModelNG::BindMenuGesture(
     }
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(showMenu));
+    BindMenuTouch(targetNode, gestureHub);
+}
+
+void ViewAbstractModelNG::BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub)
+{
+    CHECK_NULL_VOID(targetNode);
+    auto weakTarget = AceType::WeakClaim(targetNode);
+    auto touchCallback = [weakTarget](const TouchEventInfo& info) {
+        auto targetNode = weakTarget.Upgrade();
+        CHECK_NULL_VOID(targetNode);
+        const auto& touches = info.GetTouches();
+        CHECK_EQUAL_VOID(touches.empty(), true);
+        auto touchType = touches.front().GetTouchType();
+        auto targetId = targetNode->GetId();
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        CHECK_NULL_VOID(subwindow);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto subwindowPipline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(subwindowPipline);
+        auto subwindowOverlay = subwindowPipline->GetOverlayManager();
+        CHECK_NULL_VOID(subwindowOverlay);
+        if (touchType == TouchType::DOWN) {
+            auto wrapperNode = subwindowOverlay->GetMenuNode(targetId);
+            CHECK_NULL_VOID(wrapperNode);
+            auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(wrapperPattern);
+            if (wrapperPattern->IsShow() || wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+                TAG_LOGI(AceLogTag::ACE_MENU, "skip menu show, target %{public}d", targetId);
+                subwindowOverlay->SkipMenuShow(targetId);
+            }
+        } else if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) &&
+                   subwindowOverlay->CheckSkipMenuShow(targetId)) {
+            auto weakOverlay = AceType::WeakClaim(AceType::RawPtr(subwindowOverlay));
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            TAG_LOGI(AceLogTag::ACE_MENU, "post resume menu show task, target %{public}d", targetId);
+            taskExecutor->PostTask(
+                [weakOverlay, targetId]() mutable {
+                    TAG_LOGI(AceLogTag::ACE_MENU, "execute resume menu show, target %{public}d", targetId);
+                    auto subwindowOverlay = weakOverlay.Upgrade();
+                    CHECK_NULL_VOID(subwindowOverlay);
+                    subwindowOverlay->ResumeMenuShow(targetId);
+                }, TaskExecutor::TaskType::PLATFORM, "ArkUIResumeMenuShow");
+        }
+    };
+    gestrueHub->RegisterMenuOnTouch(touchCallback);
+}
+
+bool ViewAbstractModelNG::CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    CHECK_NULL_RETURN(subwindow, false);
+    auto childContainerId = subwindow->GetChildContainerId();
+    auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+    CHECK_NULL_RETURN(childContainer, false);
+    auto subwindowPipline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(subwindowPipline, false);
+    auto subwindowOverlay = subwindowPipline->GetOverlayManager();
+    CHECK_NULL_RETURN(subwindowOverlay, false);
+    return subwindowOverlay->CheckSkipMenuShow(targetNode->GetId());
 }
 
 bool ViewAbstractModelNG::CheckMenuIsShow(
