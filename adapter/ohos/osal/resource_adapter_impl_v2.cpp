@@ -189,10 +189,12 @@ bool LocaleDiff(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig
     if ((!oldLocaleInfo && newLocaleInfo) || (oldLocaleInfo && !newLocaleInfo)) {
         return true;
     }
-    if (!StringUtils::CStringEqual(oldLocaleInfo->getLanguage(), newLocaleInfo->getLanguage()) ||
-        !StringUtils::CStringEqual(oldLocaleInfo->getScript(), newLocaleInfo->getScript()) ||
-        !StringUtils::CStringEqual(oldLocaleInfo->getCountry(), newLocaleInfo->getCountry())) {
-        return true;
+    if (oldLocaleInfo && newLocaleInfo) {
+        if (!StringUtils::CStringEqual(oldLocaleInfo->getLanguage(), newLocaleInfo->getLanguage()) ||
+            !StringUtils::CStringEqual(oldLocaleInfo->getScript(), newLocaleInfo->getScript()) ||
+            !StringUtils::CStringEqual(oldLocaleInfo->getCountry(), newLocaleInfo->getCountry())) {
+            return true;
+        }
     }
     auto oldPreferredLocaleInfo = oldResConfig->GetPreferredLocaleInfo();
     auto newPreferredLocaleInfo = newResConfig->GetPreferredLocaleInfo();
