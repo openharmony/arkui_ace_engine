@@ -1492,6 +1492,9 @@ void ArcSwiperPattern::HandleCrownEvent(const CrownEvent& event, const OffsetF& 
 void ArcSwiperPattern::HandleCrownActionBegin(double degree, double mainDelta,
     GestureEvent& info)
 {
+    if (IsPropertyAnimationRunning() || IsTranslateAnimationRunning()) {
+        return;
+    }
     accumulativeCrownPx_.Reset();
     UpdateCrownVelocity(degree, mainDelta);
     info.SetMainDelta(mainDelta);
@@ -1515,9 +1518,6 @@ void ArcSwiperPattern::HandleCrownActionUpdate(double degree, double mainDelta,
         return;
     }
     if (!isDragging_) {
-        if (IsPropertyAnimationRunning() || IsTranslateAnimationRunning()) {
-            return;
-        }
         HandleCrownActionBegin(degree, mainDelta, info);
         return;
     }
