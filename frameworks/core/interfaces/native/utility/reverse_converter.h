@@ -669,7 +669,6 @@ namespace OHOS::Ace::NG::Converter {
         }
         ~SyncEvent()
         {
-            peer_->SetEventInfo(nullptr);
         }
 
         Ark_Type ArkValue() const

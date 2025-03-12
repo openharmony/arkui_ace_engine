@@ -145,7 +145,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& st
 
     auto families = style.GetFontFamilies();
     if (!families.empty()) {
-        dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(families[0]);
+        dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(families[0], ctx);
     }
 
     Converter::TextDecorationStruct decoration;

@@ -867,7 +867,8 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     }
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    static const char* PANEL_TYPE[] = { "PanelType.Minibar", "PanelType.Foldable", "PanelType.Temporary" };
+    static const char* PANEL_TYPE[] = { "PanelType.Minibar", "PanelType.Foldable", "PanelType.Temporary",
+        "PanelType.CUSTOM" };
     json->PutExtAttr("type",
         PANEL_TYPE[static_cast<int32_t>(layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR))], filter);
     static const char* PANEL_MODE[] = { "PanelMode.Mini", "PanelMode.Half", "PanelMode.Full" };
