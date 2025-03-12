@@ -28,6 +28,7 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
@@ -43,14 +44,13 @@
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -530,7 +530,8 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
                 childItemNode->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(accessibilityProperty);
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
+        } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
+            ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
             auto nodesSet = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(nodesSet);
             UpdateMenuItemChildren(nodesSet);

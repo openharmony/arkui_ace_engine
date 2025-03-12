@@ -20,7 +20,6 @@
 #include "core/components/declaration/common/declaration_constants.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
