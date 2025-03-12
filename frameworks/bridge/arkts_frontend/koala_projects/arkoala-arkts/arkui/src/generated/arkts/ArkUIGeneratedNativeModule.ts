@@ -3359,6 +3359,16 @@ export class ArkUIGeneratedNativeModule {
     native static _PixelMap_getIsStrideAlignment(ptr: KPointer): boolean
     @ani.unsafe.Quick
     native static _NavExtender_setUpdateStackCallback(peer: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NavExtender_syncStack(peer: KPointer): void
+    @ani.unsafe.Direct
+    native static _NavExtender_checkNeedCreate(navigation: KPointer, index: KInt): boolean
+    @ani.unsafe.Direct
+    native static _NavExtender_navigationCreate(peer: KInt, flag: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _NavExtender_setNavigationOptions(navigation: KPointer, stack: KPointer): void
+    @ani.unsafe.Direct
+    native static _NavExtender_setNavDestinationNode(peer: KPointer, index: KInt, node: KPointer): void
     @ani.unsafe.Quick
     native static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void
     @ani.unsafe.Quick

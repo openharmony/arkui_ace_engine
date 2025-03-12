@@ -517,7 +517,7 @@ declare interface PixelMap {
     writeBufferToPixels(src: ArrayBuffer): void;
 }
 declare type CustomNodeBuilder = ((parentNode: number|bigint) => number|bigint);
-declare type NavExtender_OnUpdateStack = ((value: string) => void);
+declare type NavExtender_OnUpdateStack = (() => void);
 declare class NavExtender {
 }
 declare interface Point {

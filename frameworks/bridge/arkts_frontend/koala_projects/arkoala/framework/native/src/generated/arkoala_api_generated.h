@@ -10390,8 +10390,8 @@ typedef struct Opt_ClickEvent {
 } Opt_ClickEvent;
 typedef struct NavExtender_OnUpdateStack {
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_String value);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String value);
+    void (*call)(const Ark_Int32 resourceId);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId);
 } NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
@@ -19672,6 +19672,16 @@ typedef struct GENERATED_ArkUIPixelMapAccessor {
 typedef struct GENERATED_ArkUINavExtenderAccessor {
     void (*setUpdateStackCallback)(Ark_NavPathStack peer,
                                    const NavExtender_OnUpdateStack* callback);
+    void (*syncStack)(Ark_NavPathStack peer);
+    Ark_Boolean (*checkNeedCreate)(Ark_NativePointer navigation,
+                                   Ark_Int32 index);
+    Ark_NativePointer (*navigationCreate)(Ark_Int32 peer,
+                                          Ark_Int32 flag);
+    void (*setNavigationOptions)(Ark_NativePointer navigation,
+                                 Ark_NavPathStack stack);
+    void (*setNavDestinationNode)(Ark_NavPathStack peer,
+                                  Ark_Int32 index,
+                                  Ark_NativePointer node);
 } GENERATED_ArkUINavExtenderAccessor;
 
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
