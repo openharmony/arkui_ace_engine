@@ -4064,6 +4064,9 @@ void TextFieldPattern::InitPanEvent()
             host->IsDraggable() && pattern->IsPressSelectedBox()) {
             return GestureJudgeResult::REJECT;
         }
+        if (pattern->GetCancelButtonTouchInfo()) {
+            return GestureJudgeResult::REJECT;
+        }
         return GestureJudgeResult::CONTINUE;
     });
 }
@@ -10743,6 +10746,7 @@ void TextFieldPattern::HandleCancelButtonTouchDown(const RefPtr<TextInputRespons
     roundRectVector.push_back(mouseRect);
     CHECK_NULL_VOID(textFieldOverlayModifier_);
     textFieldOverlayModifier_->SetHoverColorAndRects(roundRectVector, touchColor.GetValue());
+    cancelButtonTouched_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -10752,6 +10756,7 @@ void TextFieldPattern::HandleCancelButtonTouchUp()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(textFieldOverlayModifier_);
     textFieldOverlayModifier_->ClearHoverColorAndRects();
+    cancelButtonTouched_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
