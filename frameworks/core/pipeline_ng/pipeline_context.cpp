@@ -66,10 +66,6 @@
 #include "component_test/pipeline_status.h"
 #endif // COMPONENT_TEST_ENABLED
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_canvas_node.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
-#endif
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;

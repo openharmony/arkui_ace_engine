@@ -67,10 +67,6 @@ class UIContext;
 class UIContextImpl;
 }
 
-namespace OHOS::Rosen {
-class RSCanvasNode;
-}
-
 namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
