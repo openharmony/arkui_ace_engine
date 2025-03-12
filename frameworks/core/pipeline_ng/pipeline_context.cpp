@@ -2826,7 +2826,7 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
             formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
-        if (dragDropManager_ && dragDropManager_->IsDragging()) {
+        if (dragDropManager_ && dragDropManager_->IsDragging() && dragDropManager_->IsSameDraggingPointer(point.id)) {
             auto pointerEvent = DragPointerEvent(scalePoint.x, scalePoint.y, scalePoint.screenX, scalePoint.screenY);
             dragDropManager_->DoDragMoveAnimate(pointerEvent);
         }
