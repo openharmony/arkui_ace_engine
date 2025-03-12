@@ -14513,6 +14513,56 @@ bool CheckIfAttributeLegal(ArkUI_NodeHandle node, int32_t type)
     return true;
 }
 
+int32_t SetSliderPrefix(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    auto sliderNodeHandle = reinterpret_cast<ArkUI_NodeHandle>(item->object);
+
+    ArkUISliderCustomContentOptions option;
+    option.accessibilityText = "";
+    option.accessibilityDescription = "";
+    option.accessibilityLevel = "";
+    option.accessibilityGroup = false;
+
+    fullImpl->getNodeModifiers()->getSliderModifier()->setPrefix(
+        node->uiNodeHandle, sliderNodeHandle->uiNodeHandle, &option);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetSliderSuffix(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->object) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    auto sliderNodeHandle = reinterpret_cast<ArkUI_NodeHandle>(item->object);
+
+    ArkUISliderCustomContentOptions option;
+    option.accessibilityText = "";
+    option.accessibilityDescription = "";
+    option.accessibilityLevel = "";
+    option.accessibilityGroup = false;
+
+    fullImpl->getNodeModifiers()->getSliderModifier()->setSuffix(
+        node->uiNodeHandle, sliderNodeHandle->uiNodeHandle, &option);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetSliderPrefix(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getSliderModifier()->resetPrefix(node->uiNodeHandle);
+}
+
+void ResetSliderSuffix(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getSliderModifier()->resetSuffix(node->uiNodeHandle);
+}
+
 using Setter = int32_t(ArkUI_NodeHandle node, const ArkUI_AttributeItem* value);
 using Getter = const ArkUI_AttributeItem*(ArkUI_NodeHandle node);
 using Resetter = void(ArkUI_NodeHandle node);
@@ -15484,6 +15534,8 @@ int32_t SetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetSliderStyle,
         SetSliderTrackThickness,
         SetSliderEnableHapticFeedback,
+        SetSliderPrefix,
+        SetSliderSuffix,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -15535,6 +15587,8 @@ void ResetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSliderStyle,
         ResetSliderTrackThickness,
         ResetSliderEnableHapticFeedback,
+        ResetSliderPrefix,
+        ResetSliderSuffix,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);

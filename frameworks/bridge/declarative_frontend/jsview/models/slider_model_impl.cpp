@@ -133,6 +133,8 @@ void SliderModelImpl::SetBlockImage(
 {}
 void SliderModelImpl::SetBlockShape(const RefPtr<BasicShape>& value) {}
 void SliderModelImpl::SetStepSize(const Dimension& value) {}
+void SliderModelImpl::SetPrefix(const RefPtr<NG::UINode>& content, const NG::SliderPrefixOptions& options) {}
+void SliderModelImpl::SetSuffix(const RefPtr<NG::UINode>& content, const NG::SliderSuffixOptions& options) {}
 void SliderModelImpl::SetOnChange(std::function<void(float, int32_t)>&& eventOnChange)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();

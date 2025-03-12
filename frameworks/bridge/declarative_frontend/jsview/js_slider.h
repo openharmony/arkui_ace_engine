@@ -60,6 +60,8 @@ public:
     static void OnChange(const JSCallbackInfo& info);
     static void SetValidSlideRange(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static void SetPrefix(const JSCallbackInfo& args);
+    static void SetSuffix(const JSCallbackInfo& args);
 
 private:
     static void ResetBlockStyle();

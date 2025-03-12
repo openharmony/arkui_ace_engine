@@ -241,6 +241,29 @@ public:
         return { blockCenterX, blockCenterY };
     }
 
+    PointF GetBlockBackStart()
+    {
+        auto backStart = backStart_->Get();
+        return { backStart.GetX(), backStart.GetY() };
+    }
+
+    PointF GetBlockBackEnd()
+    {
+        auto backEnd = backEnd_->Get();
+        return { backEnd.GetX(), backEnd.GetY() };
+    }
+
+    PointF GetStepsLength()
+    {
+        return stepsLength_;
+    }
+
+    RSRect GetTrackRectPosition()
+    {
+        auto rect = GetTrackRect();
+        return rect;
+    }
+
     float GetTrackThickness() const
     {
         return trackThickness_->Get();
@@ -292,6 +315,11 @@ public:
         }
     }
 
+    void SetHasEnds(bool hasEnds)
+    {
+        hasEnds_ = hasEnds;
+    }
+
     const std::vector<PointF>& GetStepPointVec() const
     {
         return stepPointVec_;
@@ -300,6 +328,17 @@ public:
     {
         host_ = host;
     }
+
+    void RegisterStepPointCallback(std::function<void()>&& callback)
+    {
+        StepPointCallback_ = std::move(callback);
+    }
+
+    std::function<void()>& GetStepPointCallback()
+    {
+        return StepPointCallback_;
+    }
+    void DrawStepPoint(float x, float y, int32_t index, RSCanvas& canvas, int32_t numberOfSteps);
 
 private:
     void InitializeShapeProperty();
@@ -317,6 +356,7 @@ private:
     void SetBlockClip(DrawingContext& context);
     void StopSelectAnimation();
     void StopCircleCenterAnimation();
+    void UpdateSliderEndsPosition();
 
 private:
     std::function<void(float)> updateImageCenterX_;
@@ -376,6 +416,7 @@ private:
         RSPath path;
     } markerPenAndPath;
 
+    PointF stepsLength_;
     OffsetF targetSelectEnd_;
     PointF targetCenter_;
     bool isVisible_ = true;
@@ -391,6 +432,8 @@ private:
     RefPtr<BasicShape> shape_;
     std::vector<PointF> stepPointVec_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderContentModifier);
+    std::function<void()> StepPointCallback_;
+    bool hasEnds_ = false;
 };
 
 } // namespace OHOS::Ace::NG

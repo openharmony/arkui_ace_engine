@@ -99,6 +99,7 @@ const PointF POINTF_START_DIFFX { 20.0f, 10.0f };
 const PointF POINTF_END_DIFFX { 10.0f, 20.0f };
 const PointF POINTF_START_DIFFY { 10.0f, 20.0f };
 const PointF POINTF_END_DIFFY { 20.0f, 10.0f };
+const uint32_t STEP_INDEX = 0;
 const PointF SELECT_START { 10.0f, 10.0f };
 const PointF SELECT_END { 20.0f, 20.0f };
 const PointF POINTF_CENTER { 15.0f, 15.0f };
@@ -1480,7 +1481,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest006, TestSize.Level1
      * @tc.steps: step2. Set step points virtual node property.
      */
     sliderPattern->SetStepPointAccessibilityVirtualNode(
-        frameNode, CONTAINER_SIZE, POINTF_START, SLIDER_MODEL_NG_BLOCK_IMAGE);
+        frameNode, CONTAINER_SIZE, POINTF_START, SLIDER_MODEL_NG_BLOCK_IMAGE, STEP_INDEX);
     auto pointNodeProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(pointNodeProperty, nullptr);
     auto expectSize = CalcSize(CalcLength(CONTAINER_SIZE.Width()), CalcLength(CONTAINER_SIZE.Height()));
