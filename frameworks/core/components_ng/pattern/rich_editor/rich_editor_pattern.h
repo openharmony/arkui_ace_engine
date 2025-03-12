@@ -1199,7 +1199,7 @@ public:
     {
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        if (isAPI20Plus) {
             return pipelineContext->GetTheme<T>(GetThemeScopeId());
         }
         return pipelineContext->GetTheme<T>();
@@ -1563,6 +1563,7 @@ private:
     const bool isAPI14Plus;
     const bool isAPI16Plus;
     const bool isAPI18Plus;
+    const bool isAPI20Plus;
     bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
