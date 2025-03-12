@@ -1205,6 +1205,16 @@ public:
         return pipelineContext->GetTheme<T>();
     }
 
+    const std::map<int32_t, AISpan>& GetAISpanMap() override
+    {
+        auto& aiSpanMap = dataDetectorAdapter_->aiSpanMap_;
+        if (aiSpanMap != lastAISpanMap_) {
+            paragraphCache_.Clear();
+            lastAISpanMap_ = aiSpanMap;
+        }
+        return aiSpanMap;
+    }
+
 protected:
     bool CanStartAITask() override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
@@ -1692,6 +1702,7 @@ private:
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
     LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
+    std::map<int32_t, AISpan> lastAISpanMap_;
 };
 } // namespace OHOS::Ace::NG
 
