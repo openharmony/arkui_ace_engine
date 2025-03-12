@@ -3253,7 +3253,9 @@ void WebPattern::OnModifyDone()
             popupRenderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
             popupRenderSurface_->SetRenderContext(renderContextForPopupSurface_);
             renderContext->AddChild(renderContextForSurface_, 0);
-            renderContext->AddChild(renderContextForPopupSurface_, 1);
+            if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+                renderContext->AddChild(renderContextForPopupSurface_, 1);
+            }
             popupRenderSurface_->InitSurface();
             popupRenderSurface_->SetTransformHint(rotation_);
             popupRenderSurface_->UpdateSurfaceConfig();
@@ -4098,7 +4100,7 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
 
 void WebPattern::HideMagnifier()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "HideMagnifier");
+    TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -4900,7 +4902,6 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
 
 void WebPattern::NotifyForNextTouchEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::NotifyForNextTouchEvent");
     CHECK_NULL_VOID(delegate_);
     delegate_->NotifyForNextTouchEvent();
 }
@@ -6546,8 +6547,8 @@ void WebPattern::OnShowAutofillPopupV2(
 
 void WebPattern::OnHideAutofillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup");
     if (!isShowAutofillPopup_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup isShowAutofillPopup_ is null");
         return;
     }
     auto host = GetHost();
@@ -6849,7 +6850,9 @@ void WebPattern::OnRebuildFrame()
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContext->AddChild(renderContextForSurface_, 0);
     CHECK_NULL_VOID(renderContextForPopupSurface_);
-    renderContext->AddChild(renderContextForPopupSurface_, 1);
+    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        renderContext->AddChild(renderContextForPopupSurface_, 1);
+    }
 }
 
 void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,

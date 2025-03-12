@@ -406,7 +406,7 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool in
     }
 }
 
-void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
+void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId, bool isForceClear)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear popup in subwindow enter");
     RefPtr<Subwindow> subwindow;
@@ -417,7 +417,7 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
         subwindow = GetCurrentWindow();
     }
     if (subwindow) {
-        subwindow->ClearPopupNG();
+        subwindow->ClearPopupNG(isForceClear);
     }
 }
 

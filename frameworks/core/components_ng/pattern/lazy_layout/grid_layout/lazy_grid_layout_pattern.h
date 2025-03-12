@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_VIEW_GRID_LAZY_LAYOUT_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_VIEW_GRID_LAZY_LAYOUT_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
@@ -26,8 +26,8 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT LazyGridLayoutPattern : public Pattern {
-    DECLARE_ACE_TYPE(LazyGridLayoutPattern, Pattern);
+class ACE_EXPORT LazyGridLayoutPattern : public LazyLayoutPattern {
+    DECLARE_ACE_TYPE(LazyGridLayoutPattern, LazyLayoutPattern);
 
 public:
     explicit LazyGridLayoutPattern()
@@ -62,6 +62,11 @@ public:
     }
 
     void OnAttachToMainTree() override;
+
+    AdjustOffset GetAdjustOffset() const override
+    {
+        return layoutInfo_->adjustOffset_;
+    }
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -77,4 +82,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_VIEW_GRID_LAZY_LAYOUT_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LAZY_LAYOUT_LAZY_GRID_LAYOUT_PATTERN_H

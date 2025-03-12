@@ -1277,8 +1277,7 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
-            if (nodeLeft->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
-                nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
+            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
                 return nodeLeft->IsOnMainTree();
             }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {

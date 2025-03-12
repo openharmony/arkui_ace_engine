@@ -22,9 +22,11 @@
 namespace OHOS::Ace::NG {
 void LazyGridLayoutInfo::EstimateItemSize()
 {
-    float totalSize = posMap_.rbegin()->second.endPos + spaceWidth_ - posMap_.begin()->second.startPos;
-    int32_t totalCount = (posMap_.rbegin()->first + 1 - posMap_.begin()->first) / lanes_;
-    estimateItemSize_ = totalSize / totalCount - spaceWidth_;
+    if (!posMap_.empty()) {
+        float totalSize = posMap_.rbegin()->second.endPos + spaceWidth_ - posMap_.begin()->second.startPos;
+        int32_t totalCount = (posMap_.rbegin()->first + 1 - posMap_.begin()->first) / lanes_;
+        estimateItemSize_ = totalSize / totalCount - spaceWidth_;
+    }
 }
 
 float LazyGridLayoutInfo::UpdatePosMapStart()
@@ -131,17 +133,19 @@ float LazyGridLayoutInfo::UpdateSpaceStart()
 
 void LazyGridLayoutInfo::UpdatePosMap()
 {
-    AdjustRefPos adjust;
     float prevTotalMainSize_ = totalMainSize_;
     if (!Positive(estimateItemSize_)) {
         EstimateItemSize();
     }
     if (updatedStart_ < INT_MAX) {
-        adjust.start = UpdatePosMapStart();
+        adjustOffset_.start = UpdatePosMapStart();
         UpdatePosMapEnd();
-        adjust.end = totalMainSize_ - prevTotalMainSize_ - adjust.start;
+        adjustOffset_.end = totalMainSize_ - prevTotalMainSize_ - adjustOffset_.start;
         updatedStart_ = INT_MAX;
         updatedEnd_ = -1;
+    } else {
+        adjustOffset_.start = 0.0f;
+        adjustOffset_.end = 0.0f;
     }
 }
 
@@ -153,6 +157,8 @@ void LazyGridLayoutInfo::SetSpace(float space)
         for (auto it = posMap_.begin(); it != posMap_.end(); it++) {
             UpdatePosWithIter(it, prevIndex, prevPos);
         }
+        updatedStart_ = INT_MAX;
+        updatedEnd_ = -1;
     }
     spaceWidth_ = space;
 }

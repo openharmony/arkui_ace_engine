@@ -1284,4 +1284,13 @@ int32_t AccessibilityProperty::GetFocusDrawLevel()
     return static_cast<int32_t>(focusDrawLevel_);
 }
 
+void AccessibilityProperty::SetAccessibilityZIndex(const int32_t& accessibilityZIndex)
+{
+    accessibilityZIndex_ = accessibilityZIndex;
+}
+
+int32_t AccessibilityProperty::GetAccessibilityZIndex() const
+{
+    return accessibilityZIndex_;
+}
 } // namespace OHOS::Ace::NG

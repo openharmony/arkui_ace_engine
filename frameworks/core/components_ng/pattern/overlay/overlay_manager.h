@@ -100,6 +100,7 @@ struct CustomKeyboardOffsetInfo {
 
 struct OverlayManagerInfo {
     bool renderRootOverlay = true;
+    bool enableBackPressedEvent = false;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -113,7 +114,8 @@ public:
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo, bool isEraseFromMap = false);
-    RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
+    RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo,
+        bool isForceClear = false);
     void ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void HideTips(int32_t targetId, const PopupInfo& tipsInfo, int32_t disappearingTime);
@@ -172,7 +174,7 @@ public:
     void CleanMenuInSubWindow(int32_t targetId);
     void CleanPreviewInSubWindow();
     void CleanHoverImagePreviewInSubWindow(const RefPtr<FrameNode>& flexNode);
-    void CleanPopupInSubWindow();
+    void CleanPopupInSubWindow(bool isForceClear = false);
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
     void UpdatePreviousDisappearingTime(int32_t targetId);
@@ -893,6 +895,7 @@ private:
     void SetDragNodeNeedClean();
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
+    int32_t RemoveOverlayManagerNode();
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;

@@ -520,6 +520,7 @@ public:
     }
 
     void ColumnPatternInitHapticController();
+    void UpdateUserSetSelectColor();
     std::string GetTextPickerRange() const;
     inline void SetSingleRange(bool isSingleRange)
     {

@@ -2007,6 +2007,42 @@ HWTEST_F(GridScrollLayoutTestNg, CachedCount003, TestSize.Level1)
     EXPECT_EQ(cacheEnd, 2);
 }
 
+/**
+ * @tc.name: Test Calculate CacheCount
+ * @tc.desc: Test Calculate CacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, CachedCount004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 50 };
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startMainLineIndex_ = 1;
+    pattern_->info_.endMainLineIndex_ = 3;
+    pattern_->info_.startIndex_ = 9;
+    pattern_->info_.endIndex_ = 17;
+    pattern_->info_.gridMatrix_  = {
+        { 1, { { 0, 9 }, { 1, 10 }, { 2, 11 } } },
+        { 2, { { 0, 12 }, { 1, 13 }, { 2, 14 } } },
+        { 3, { { 0, 15 }, { 1, 16 }, { 2, 17 } } },
+    };
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto algo =
+        AceType::DynamicCast<GridScrollWithOptionsLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    auto cacheStart = algo->CalculateStartCachedCount(option, 2);
+    auto cacheEnd = algo->CalculateEndCachedCount(option, 2);
+    EXPECT_EQ(cacheStart, 6);
+    EXPECT_EQ(cacheEnd, 6);
+}
+
 HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest001, TestSize.Level1) {
     // Arrange
     auto pattern = AceType::MakeRefPtr<GridPattern>();

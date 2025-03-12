@@ -7110,37 +7110,31 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
         }
 
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(weak->weakRef.Upgrade());
-        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-        const auto& extensionHandler = frameNode->GetExtensionHandler();
-        if (extensionHandler) {
-            extensionHandler->InvalidateRender();
-            auto renderContext = frameNode->GetRenderContext();
-            CHECK_NULL_RETURN(renderContext, panda::JSValueRef::Undefined(vm));
-            renderContext->RequestNextFrame();
-        } else {
-            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+        if (frameNode) {
+            const auto& extensionHandler = frameNode->GetExtensionHandler();
+            if (extensionHandler) {
+                extensionHandler->InvalidateRender();
+            } else {
+                frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+            }
         }
 
         return panda::JSValueRef::Undefined(vm);
     };
-
     auto jsInvalidate = JSRef<JSFunc>::New<FunctionCallback>(invalidate);
+    if (frameNode) {
+        const auto& extensionHandler = frameNode->GetExtensionHandler();
+        if (extensionHandler) {
+            extensionHandler->InvalidateRender();
+        } else {
+            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+        }
+    }
     auto vm = jsInvalidate->GetEcmaVM();
     auto* weak = new NG::NativeWeakRef(static_cast<AceType*>(frameNode));
     jsInvalidate->GetHandle()->SetNativePointerFieldCount(vm, 1);
     jsInvalidate->GetHandle()->SetNativePointerField(vm, 0, weak, &NG::DestructorInterceptor<NG::NativeWeakRef>);
     jsDrawModifier->SetPropertyObject("invalidate", jsInvalidate);
-
-    CHECK_NULL_VOID(frameNode);
-    const auto& extensionHandler = frameNode->GetExtensionHandler();
-    if (extensionHandler) {
-        extensionHandler->InvalidateRender();
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->RequestNextFrame();
-    } else {
-        frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
-    }
 }
 
 void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)

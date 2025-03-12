@@ -41,7 +41,9 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateGridItemConstraint(contentIdealSize, childLayoutConstraint);
     totalMainSize_ = layoutInfo_->totalMainSize_;
 
-    if (totalItemCount_ == 0) {
+    if (layoutInfo_->deadline_) {
+        return;
+    } else if (totalItemCount_ == 0) {
         layoutInfo_->posMap_.clear();
         layoutInfo_->startIndex_ = -1;
         layoutInfo_->endIndex_ = -1;
@@ -99,6 +101,18 @@ void LazyGridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     LayoutGridItems(layoutWrapper, crossSize, paddingOffset);
     LayoutCachedItems(layoutWrapper, crossSize, paddingOffset);
+}
+
+int32_t LazyGridLayoutAlgorithm::LanesFloor(int32_t index) const
+{
+    int32_t tempIndex = std::min(index, totalItemCount_ - 1);
+    return lanes_ <= 1 ? tempIndex : (tempIndex - tempIndex % lanes_);
+}
+
+int32_t LazyGridLayoutAlgorithm::LanesCeil(int32_t index) const
+{
+    int32_t tempIndex = lanes_ <= 1 ? index : (index - index % lanes_ + lanes_ - 1);
+    return std::min(tempIndex, totalItemCount_ - 1);
 }
 
 void LazyGridLayoutAlgorithm::UpdateGap(const RefPtr<LazyGridLayoutProperty>& layoutProperty,
@@ -254,6 +268,12 @@ void LazyGridLayoutAlgorithm::MeasureGridItemLazy(LayoutWrapper* layoutWrapper)
     }
     CheckRecycle();
     layoutInfo_->UpdatePosMap();
+    float delta = forwardLayout_ ? layoutInfo_->adjustOffset_.start : layoutInfo_->adjustOffset_.end;
+    referencePos_ += delta;
+    startPos_ += delta;
+    endPos_ += delta;
+    cacheStartPos_ += delta;
+    cacheEndPos_ += delta;
     totalMainSize_ = layoutInfo_->totalMainSize_;
 }
 
@@ -285,7 +305,7 @@ void LazyGridLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
         ++nextIt;
     }
     if (LessOrEqual(it->second.startPos - spaceWidth_, startPos_)) {
-        index = std::min(it->first, totalItemCount_ - 1);
+        index = LanesFloor(it->first);
         pos = it->second.startPos;
         return;
     }
@@ -295,7 +315,7 @@ void LazyGridLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
     }
     --rit;
     pos = rit->second.startPos;
-    index = rit->first;
+    index = LanesFloor(it->first);
 }
 
 void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
@@ -327,7 +347,7 @@ void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
         ++nextIt;
     }
     if (GreatOrEqual(rit->second.endPos + spaceWidth_, endPos_)) {
-        index = std::min(rit->first, totalItemCount_ - 1);
+        index = LanesCeil(it->first);
         pos = rit->second.endPos;
         return;
     }
@@ -335,7 +355,7 @@ void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
         ++it;
     }
     --it;
-    index = it->first;
+    index = LanesCeil(it->first);
     pos = it->second.endPos;
 }
 
@@ -560,7 +580,7 @@ void LazyGridLayoutAlgorithm::LayoutCachedItemsBackward(LayoutWrapper* layoutWra
         layoutedStart_ = totalMainSize_;
         cachedStartIndex_ = totalItemCount_;
     } else {
-        cachedStartIndex_ = layoutInfo_->startIndex_;
+        cachedStartIndex_ = layoutInfo_->startIndex_ - spaceWidth_;
         auto iter = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
         if (iter == layoutInfo_->posMap_.end()) {
             TAG_LOGE(AceLogTag::ACE_LAZY_GRID, "find start index error:%{public}d", layoutInfo_->endIndex_);
@@ -609,7 +629,7 @@ void LazyGridLayoutAlgorithm::PredictLayoutForward(LayoutWrapper* layoutWrapper,
     auto deadline = layoutInfo_->deadline_.value();
     float mainSize = iter->second.endPos - currPos;
     bool needFix = false;
-    while (currIndex < totalItemCount_ - 1 && LessNotEqual(layoutedEnd, cacheEndPos_)) {
+    while (currIndex < totalItemCount_ - 1 && LessNotEqual(layoutedEnd, layoutInfo_->cacheEndPos_)) {
         if (GetSysTimestamp() > deadline) {
             break;
         }
@@ -661,7 +681,7 @@ void LazyGridLayoutAlgorithm::PredictLayoutBackward(LayoutWrapper* layoutWrapper
     auto deadline = layoutInfo_->deadline_.value();
     float mainSize = currPos - iter->second.startPos;
     bool needFix = false;
-    while (currIndex > 0 && (GreatNotEqual(layoutedStart, cacheStartPos_))) {
+    while (currIndex > 0 && (GreatNotEqual(layoutedStart, layoutInfo_->cacheStartPos_))) {
         if (GetSysTimestamp() > deadline) {
             break;
         }

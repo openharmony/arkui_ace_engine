@@ -444,7 +444,24 @@ public:
     RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
     void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
     void AddRsNodeForCapture();
-    void SetDrawNodeChangeCallback() override;
+    static bool initDrawNodeChangeCallback_;
+
+    void FreezeCanvasNode(bool freezeFlag = false);
+    void RemoveCanvasNode();
+    void CheckAnimationParametersValid(int32_t& animationParam);
+    bool SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
+    void LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode);
+    std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode();
+
+    void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
+    {
+        callbackAnimateEnd_ =  callback;
+    }
+
+    void AddKeyFrameCachedAnimateActionCallback(const std::function<void()>& callback)
+    {
+        callbackCachedAnimateAction_ = callback;
+    }
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -753,6 +770,10 @@ protected:
     std::unique_ptr<RectF> contentClip_;
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
+
+    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_;
+    std::function<void()> callbackAnimateEnd_ = nullptr;
+    std::function<void()> callbackCachedAnimateAction_ = nullptr;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

@@ -648,6 +648,10 @@ public:
     void SetFocusDrawLevel(int32_t drawLevel);
     int32_t GetFocusDrawLevel();
 
+
+    void SetAccessibilityZIndex(const int32_t& accessibilityZIndex);
+    int32_t GetAccessibilityZIndex() const;
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -749,6 +753,9 @@ protected:
     std::optional<int32_t> rangeCurrentValue_;
     std::optional<std::string> textValue_;
     FocusDrawLevel focusDrawLevel_ = FocusDrawLevel::SELF;
+    // used to modify the hierarchical relation ship between sibling nodes the same level in barrierfree tree
+    // only affects the barrierfree tree presentation, does not affect the zindex in barrierfree hover
+    int32_t accessibilityZIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

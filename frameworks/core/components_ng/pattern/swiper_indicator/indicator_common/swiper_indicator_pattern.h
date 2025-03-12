@@ -78,6 +78,7 @@ public:
                                 : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(indicatorDisplayCount);
             indicatorLayoutAlgorithm->SetMaxDisplayCount(maxDisplayCount);
             indicatorLayoutAlgorithm->SetIsBindIndicator(swiperPattern->IsBindIndicator());
+            indicatorLayoutAlgorithm->SetIndicatorInteractive(swiperPattern->IsIndicatorInteractive());
             return indicatorLayoutAlgorithm;
         } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
             auto indicatorLayoutAlgorithm = MakeRefPtr<CircleDotIndicatorLayoutAlgorithm>();
@@ -271,7 +272,7 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
     void HandleDragStart(const GestureEvent& info);
-    void HandleDragEnd(double dragVelocity);
+    virtual void HandleDragEnd(double dragVelocity);
     void GetMouseClickIndex();
     void UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
@@ -402,6 +403,11 @@ protected:
     const TouchBottomType& GetTouchBottomType() const
     {
         return touchBottomType_;
+    }
+
+    void SetTouchBottomType(TouchBottomType touchBottomType)
+    {
+        touchBottomType_ = touchBottomType;
     }
 
     const RefPtr<DotIndicatorModifier>& GetDotIndicatorModifier() const

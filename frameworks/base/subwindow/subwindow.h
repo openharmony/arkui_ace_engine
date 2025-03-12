@@ -94,6 +94,7 @@ public:
     virtual void ClearMenu() {};
     virtual void ClearMenuNG(int32_t targetId = -1, bool inWindow = true, bool showAnimation = false) = 0;
     virtual void ClearPopupNG() = 0;
+    virtual void ClearPopupNG(bool isForceClear) {}
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNGWithNode(

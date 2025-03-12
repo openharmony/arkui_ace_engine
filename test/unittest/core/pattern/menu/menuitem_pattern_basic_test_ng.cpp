@@ -67,6 +67,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
+constexpr int32_t NODE_ID_ONE = 1;
+constexpr int32_t NODE_ID_TWO = 2;
 constexpr MenuType TYPE = MenuType::MENU;
 const std::string EMPTY_TEXT = "";
 const std::string TEXT_TAG = "text";
@@ -1333,6 +1335,61 @@ HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg031, TestSize.Lev
 
     menuItemModelInstance.SetFontColor(Color::RED);
     menuItemModelInstance.SetLabelFontColor(Color::RED);
+    EXPECT_TRUE(itemPattern->OnThemeScopeUpdate(itemNode->GetThemeScopeId()));
+}
+
+/**
+ * @tc.name: MenuItemPatternBasicTestNg032
+ * @tc.desc: Verify OnThemeScopeUpdate SetLabelActiveSetting false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg032, TestSize.Level1)
+{
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    auto itemNode =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, NODE_ID_ONE, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(itemNode, nullptr);
+    itemNode->MountToParent(menuNode);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    itemPattern->SetLabelActiveSetting(false);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+    itemProperty->UpdateLabelFontColor(Color::WHITE);
+
+    EXPECT_TRUE(itemPattern->OnThemeScopeUpdate(itemNode->GetThemeScopeId()));
+    auto pipeline = itemNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>(itemNode->GetThemeScopeId());
+    ASSERT_NE(menuTheme, nullptr);
+    EXPECT_EQ(itemProperty->GetLabelFontColor(), menuTheme->GetLabelColor());
+}
+
+/**
+ * @tc.name: MenuItemPatternBasicTestNg033
+ * @tc.desc: Verify OnThemeScopeUpdate startIcon not null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternBasicTestNg, MenuItemPatternBasicTestNg033, TestSize.Level1)
+{
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    auto itemNode =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, NODE_ID_ONE, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(itemNode, nullptr);
+    itemNode->MountToParent(menuNode);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, NODE_ID_TWO, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    itemPattern->startIcon_ = textNode;
     EXPECT_TRUE(itemPattern->OnThemeScopeUpdate(itemNode->GetThemeScopeId()));
 }
 } // namespace OHOS::Ace::NG

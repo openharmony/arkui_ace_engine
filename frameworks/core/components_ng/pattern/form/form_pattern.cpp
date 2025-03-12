@@ -1773,8 +1773,8 @@ void FormPattern::OnActionEvent(const std::string& action)
         }
     }
 
-    isManuallyClick_ = false;
     if ("router" == type) {
+        isManuallyClick_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
@@ -2063,6 +2063,7 @@ void FormPattern::DelayResetManuallyClickFlag()
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     std::string nodeIdStr = std::to_string(host->GetId());
+    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
     executor->PostDelayedTask(
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();

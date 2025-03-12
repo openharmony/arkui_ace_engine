@@ -354,6 +354,8 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         };
         itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
             { itemCrossSize->second, mainSize_, axis_ }, ref, layoutProperty, itemWrapper));
+        auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(itemWrapper);
+        layoutInfo_->currentOffset_ -= adjustOffset.start;
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
         auto item = layoutInfo_->items_[0][position.crossIndex].find(currentIndex);

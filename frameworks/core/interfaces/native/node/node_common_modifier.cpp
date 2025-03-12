@@ -5945,17 +5945,6 @@ void SetSystemBarEffect(ArkUINodeHandle node, ArkUI_Bool enable)
     ViewAbstract::SetSystemBarEffect(frameNode, enable);
 }
 
-void FreezeUINodeById(ArkUI_CharPtr id, ArkUI_Bool isFreeze)
-{
-    std::string idStr(id);
-    ViewAbstract::FreezeUINodeById(idStr, isFreeze);
-}
-
-void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
-{
-    ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
-}
-
 ArkUI_Int32 GetAccessibilityID(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6992,6 +6981,18 @@ void SetOnVisibleAreaApproximateChange(
     };
     ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, onEvent, ratioList, interval);
 }
+
+void FreezeUINodeById(ArkUI_CharPtr id, ArkUI_Bool isFreeze)
+{
+    std::string idStr(id);
+    ViewAbstract::FreezeUINodeById(idStr, isFreeze);
+}
+
+void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
+{
+    ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -7373,8 +7374,6 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetLayoutRect = ResetLayoutRect,
         .getFocusOnTouch = GetFocusOnTouch,
         .setSystemBarEffect = SetSystemBarEffect,
-        .freezeUINodeById = FreezeUINodeById,
-        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
         .getAccessibilityID = GetAccessibilityID,
         .setAccessibilityState = SetAccessibilityState,
         .getAccessibilityState = GetAccessibilityState,
@@ -7431,6 +7430,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .setOnVisibleAreaApproximateChange = SetOnVisibleAreaApproximateChange,
         .setPrivacySensitive = SetPrivacySensitve,
         .resetPrivacySensitive = ResetPrivacySensitve,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -7794,8 +7795,6 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetLayoutRect = ResetLayoutRect,
         .getFocusOnTouch = GetFocusOnTouch,
         .setSystemBarEffect = SetSystemBarEffect,
-        .freezeUINodeById = FreezeUINodeById,
-        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
         .getAccessibilityID = GetAccessibilityID,
         .setAccessibilityState = SetAccessibilityState,
         .getAccessibilityState = GetAccessibilityState,
@@ -7820,6 +7819,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .setTransition = SetTransition,
         .setDragPreview = SetDragPreview,
         .resetDragPreview = ResetDragPreview,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -22,6 +22,19 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+namespace {
+constexpr const char* SWIPE_STATE_COLLAPSED = "collapsed";
+constexpr const char* SWIPE_STATE_EXPANDED = "expanded";
+constexpr const char* SWIPE_STATE_DISABLED = "disabled";
+
+constexpr const char* AXIS_VERTICAL = "vertical";
+constexpr const char* AXIS_HORIZONTAL = "horizontal";
+constexpr const char* AXIS_FREE = "free";
+constexpr const char* AXIS_NONE = "none";
+} // namespace
+#endif
+
 bool ListItemAccessibilityProperty::IsSelected() const
 {
     auto frameNode = host_.Upgrade();
@@ -70,32 +83,36 @@ void ListItemAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElem
     std::string stateStr;
     switch (listItemPattern->GetSwipeActionState()) {
         case SwipeActionState::COLLAPSED:
-            stateStr = "collapsed";
+            stateStr = SWIPE_STATE_COLLAPSED;
             break;
         case SwipeActionState::EXPANDED:
-            stateStr = "expanded";
+            stateStr = SWIPE_STATE_EXPANDED;
             break;
         case SwipeActionState::ACTIONING:
+            break;
+        default:
             break;
     }
 
     if (!listItemPattern->HasStartNode() && !listItemPattern->HasEndNode()) {
-        stateStr = "disabled";
+        stateStr = SWIPE_STATE_DISABLED;
     }
 
     std::string axisStr;
     switch (listItemPattern->GetAxis()) {
         case Axis::VERTICAL:
-            axisStr = "vertical";
+            axisStr = AXIS_VERTICAL;
             break;
         case Axis::HORIZONTAL:
-            axisStr = "horizontal";
+            axisStr = AXIS_HORIZONTAL;
             break;
         case Axis::FREE:
-            axisStr = "free";
+            axisStr = AXIS_FREE;
             break;
         case Axis::NONE:
-            axisStr = "none";
+            axisStr = AXIS_NONE;
+            break;
+        default:
             break;
     }
     extraElementInfo.SetExtraElementInfo("expandedState", stateStr);
