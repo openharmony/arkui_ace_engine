@@ -748,7 +748,7 @@ public:
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);
-    std::string GetFontFamilyName(std::string path);
+    std::vector<std::string> GetFontFamilyName(const std::string& path);
     bool endsWith(std::string str, std::string suffix);
 
 private:
