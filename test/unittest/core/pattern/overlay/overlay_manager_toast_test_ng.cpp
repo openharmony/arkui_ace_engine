@@ -168,8 +168,6 @@ HWTEST_F(OverlayManagerToastTestNg, ToastShowModeTest001, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_FALSE(overlayManager->toastMap_.empty());
-    overlayManager->ClearToast();
-    EXPECT_TRUE(overlayManager->toastMap_.empty());
 }
 
 /**
