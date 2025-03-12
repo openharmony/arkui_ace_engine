@@ -729,6 +729,7 @@ void RichEditorPattern::UpdateSelectionAndHandleVisibility()
             selectOverlay_->ProcessOverlay({.menuIsShow = false, .animation = false});
         }
     }
+    FireOnSelectionChange(start, end, true);
 }
 
 void RichEditorPattern::HandleSelectOverlayOnLayoutSwap()
