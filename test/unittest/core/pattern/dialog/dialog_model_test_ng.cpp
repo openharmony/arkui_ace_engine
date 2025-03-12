@@ -685,6 +685,14 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg017, TestSize.Level1)
      */
     pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
     EXPECT_NE(stageManager->stageNode_, nullptr);
+    /**
+     * @tc.steps: step4. Call OnDetachFromFrameNode.
+     * @tc.expected: Check the stageNode_.
+     */
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    pattern->UpdateFoldDisplayModeChangedCallbackId(1);
+    pattern->UpdateHoverModeChangedCallbackId(1);
+    EXPECT_NE(stageManager->stageNode_, nullptr);
 }
 
 /**
