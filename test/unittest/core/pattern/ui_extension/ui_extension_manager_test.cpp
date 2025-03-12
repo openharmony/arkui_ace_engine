@@ -515,4 +515,103 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager008, TestSize.Level1)
     ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
     #endif
 }
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager009, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    uiExtensionManager->RecycleExtensionId(0);
+    uiExtensionManager->RecycleExtensionId(11);
+    int32_t nodeId = 1;
+    ASSERT_TRUE(uiExtensionManager->IsShowPlaceholder(nodeId));
+    WeakPtr<UIExtensionPattern> platformPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    int32_t nodeIdTwo = 2;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPatternTwo);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    auto config = std::make_shared<ViewportConfig>(1080, 1920, 2.0f);
+    uiExtensionManager->UpdateSessionViewportConfig(*config);
+
+    auto info = sptr<Rosen::OccupiedAreaChangeInfo>(new Rosen::OccupiedAreaChangeInfo());
+    info->rect_.height_ = 0;
+    auto sessionWrapper = WeakPtr<SessionWrapper>();
+    uiExtensionManager->sessionWrapper_ = sessionWrapper;
+    bool result = uiExtensionManager->NotifyOccupiedAreaChangeInfo(info);
+    EXPECT_FALSE(result);
+
+    uiExtensionManager->RemoveDestroyedUIExtension(nodeId);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+    uiExtensionManager->RemoveDestroyedUIExtension(nodeIdTwo);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 0);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 0);
+    #endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager010, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    WeakPtr<UIExtensionPattern> platformPattern;
+    int32_t nodeId = 1;
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    uiExtensionManager->AddAliveUIExtension(nodeId, platformPattern);
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 1);
+    WeakPtr<UIExtensionPattern> platformPatternTwo;
+    int32_t nodeIdTwo = 2;
+    uiExtensionManager->AddAliveUIExtension(nodeIdTwo, platformPattern);
+    uiExtensionManager->NotifyUECProviderIfNeedded();
+    ASSERT_EQ(uiExtensionManager->aliveUIExtensions_.size(), 2);
+
+    auto mode = Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
+    uiExtensionManager->NotifyWindowMode(mode);
+    std::string pageMode = "normal";
+    uiExtensionManager->SendPageModeToProvider(nodeId, pageMode);
+    int32_t nodeIdZero = 0;
+    uiExtensionManager->SendPageModeToProvider(nodeIdZero, pageMode);
+    uiExtensionManager->SendPageModeRequestToHost(MockPipelineContext::pipeline_);
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+    AAFwk::Want data;
+    data.SetParam("requestPageMode", std::string("yes"));
+    RSSubsystemId subSystemId = RSSubsystemId::WM_UIEXT;
+    uiExtensionManager->UpdateWMSUIExtProperty(code, data, subSystemId);
+    ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 0);
+    uiExtensionManager->TriggerBusinessDataSend(code);
+    uiExtensionManager->UnRegisterBusinessDataSendCallback(code);
+    ASSERT_EQ(uiExtensionManager->businessDataSendCallbacks_.size(), 0);
+
+    WeakPtr<SecurityUIExtensionPattern> securityUIExtensionPattern;
+    uiExtensionManager->AddAliveUIExtension(nodeId, securityUIExtensionPattern);
+    ASSERT_EQ(uiExtensionManager->aliveSecurityUIExtensions_.size(), 1);
+    uiExtensionManager->TransferAccessibilityRectInfo();
+    #endif
+}
+
+HWTEST_F(UIExtensionManagerNg, UIExtensionManager011, TestSize.Level1)
+{
+    #ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
+    ASSERT_NE(uiExtensionManager, nullptr);
+
+    MockContainer::container_->SetIsUIExtensionWindow(true);
+    uiExtensionManager->RegisterListenerIfNeeded();
+    ASSERT_EQ(uiExtensionManager->hasRegisterListener_, true);
+
+    uiExtensionManager->RegisterListenerIfNeeded();
+    uiExtensionManager->UnregisterListenerIfNeeded();
+    ASSERT_EQ(uiExtensionManager->hasRegisterListener_, false);
+
+    MockContainer::container_->SetIsUIExtensionWindow(false);
+    uiExtensionManager->hasRegisterListener_ = true;
+    uiExtensionManager->UnregisterListenerIfNeeded();
+    ASSERT_EQ(uiExtensionManager->hasRegisterListener_, true);
+    #endif
+}
 }
