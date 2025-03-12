@@ -6839,6 +6839,15 @@ void RosenRenderContext::RemoveCanvasNode()
     }
 }
 
+void RosenRenderContext::ChechAnimationParametersValid(int32_t& animationParam)
+{
+    const int32_t maxTime = 2000;
+    const int32_t defaultTime = 100;
+    if (animationParam <= 0 || animationParam > maxTime) {
+        animationParam = defaultTime;
+    }
+}
+
 bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd)
 {
     static bool animationFlag = false;
@@ -6849,18 +6858,13 @@ bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t
     if (!canvasNode_) {
         return true;
     }
-    const int32_t maxTime = 2000;
-    const int32_t defaultTime = 100;
-    if (duration <= 0 || duration > maxTime) {
-        duration = defaultTime;
-    }
-    if (delay <= 0 || delay > maxTime) {
-        delay = defaultTime;
-    }
 
     FreezeCanvasNode(true);
+    canvasNode_->SetAlpha(1.0f);
     Rosen::RSTransaction::FlushImplicitTransaction();
-    
+
+    ChechAnimationParametersValid(duration);
+    ChechAnimationParametersValid(delay);
     AnimationOption option;
     option.SetDuration(duration);
     option.SetDelay(delay);
