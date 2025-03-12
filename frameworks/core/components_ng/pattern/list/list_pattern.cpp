@@ -2724,7 +2724,7 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
-    RequestReset(startIndex);
+    RequestReset(startIndex, contentStartOffset_);
 }
 
 void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)

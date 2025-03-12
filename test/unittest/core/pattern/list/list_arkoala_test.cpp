@@ -131,15 +131,12 @@ HWTEST_F(ListArkoalaTest, Reset001, TestSize.Level1)
     EXPECT_EQ(lazy_.GetRange(), std::pair(50, 64));
     EXPECT_EQ(pattern_->GetStartIndex(), 50);
 
-    frameNode_->NotifyChange(40, 0, -1, LazyForEachNode::NotificationType::START_CHANGE_POSITION);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-
-    frameNode_->NotifyChange(52, 0, -1, LazyForEachNode::NotificationType::START_CHANGE_POSITION);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    lazy_.NormalModeUpdate(50, nullptr);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 64));
-    FlushLayoutTask(frameNode_);
+    UpdateCurrentOffset(-30.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 52), 170.0f);
+    pattern_->NotifyDataChange(52, -1);
+    UpdateCurrentOffset(-100.0f);
+    IncrementAndLayout(__LINE__);
+    EXPECT_EQ(GetChildY(frameNode_, 52), 70.0f);
 }
 
 /**

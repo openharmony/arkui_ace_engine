@@ -192,6 +192,7 @@ void WaterFlowLayoutSW::CheckReset()
             info_->maxHeight_ = 0.0f;
             info_->ClearDataFrom(updateIdx, mainGaps_);
         }
+        info_->jumpForRecompose_ = info_->startIndex_;
     }
 
     const bool childDirty = props_->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
