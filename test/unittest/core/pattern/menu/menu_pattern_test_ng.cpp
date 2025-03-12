@@ -83,6 +83,7 @@ constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
+constexpr float MENU_FONT_SIZE = 25.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr double DIP_SCALE = 1.5;
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
@@ -1714,5 +1715,25 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTest090, TestSize.Level1)
     auto menuTheme = pipeline->GetTheme<SelectTheme>(menuNode->GetThemeScopeId());
     ASSERT_NE(menuTheme, nullptr);
     EXPECT_EQ(layoutProperty->GetFontColor().value(), menuTheme->GetFontColor());
+}
+
+/**
+ * @tc.name: MenuPatternTest091
+ * @tc.desc: Test SetFontColor nullopt.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTest091, TestSize.Level1)
+{
+    MenuModelNG menuModelInstance;
+    menuModelInstance.Create();
+    menuModelInstance.SetFontSize(Dimension(MENU_FONT_SIZE));
+    menuModelInstance.SetFontColor(std::nullopt);
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetFontColor().has_value());
 }
 } // namespace OHOS::Ace::NG
