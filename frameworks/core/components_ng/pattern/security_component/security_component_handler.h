@@ -43,6 +43,8 @@ public:
     static int32_t ReportSecurityComponentClickEvent(int32_t& scId,
         RefPtr<FrameNode>& node, const KeyEvent& event,
         Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
+    static bool InitButtonInfoValue(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+        const Security::SecurityComponent::SecCompType& scType, std::string& message);
     static bool InitButtonInfo(std::string& componentInfo,
         RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompType& scType, std::string& message);
     static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);

@@ -123,6 +123,8 @@ public:
     uint64_t displayId_ = 0;
     int32_t nodeId_;
     CrossAxisState crossAxisState_ = CrossAxisState::STATE_INVALID;
+    bool isIconExceeded_ = false;
+    bool isBorderCovered_ = false;
     bool isWearableDevice_ = false;
 };
 }  // namespace SecurityComponent
