@@ -39,9 +39,7 @@ ArkUINativeModuleValue FormComponentBridge::ResetVisibility(ArkUIRuntimeCallInfo
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeModifiers = GetArkUINodeModifiers()->getFormComponentModifier();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->resetFormVisibility(nativeNode);
+    GetArkUINodeModifiers()->getFormComponentModifier()->resetFormVisibility(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
