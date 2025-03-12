@@ -656,7 +656,7 @@ export struct PopupComponent {
     }
     if (this.maxWidth !== undefined) {
       if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
-        maxWidthSize = px2vp(this.maxWidth);
+        maxWidthSize = this.maxWidth;
       } else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
         maxWidthSize = POPUP_DEFAULT_MAXWIDTH
       } else {
