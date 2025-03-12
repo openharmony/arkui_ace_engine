@@ -85,8 +85,8 @@ const std::string TEST_VALUE_STR = testValues[0];
 using namespace testing;
 using namespace testing::ext;
 
-class TextPickerDialogAccessorTest : public AccessorTestBase<GENERATED_ArkUITextPickerDialogAccessor,
-    &GENERATED_ArkUIAccessors::getTextPickerDialogAccessor, TextPickerDialogPeer> {
+class TextPickerDialogAccessorTest : public StaticAccessorTest<GENERATED_ArkUITextPickerDialogAccessor,
+    &GENERATED_ArkUIAccessors::getTextPickerDialogAccessor> {
 };
 
 /**

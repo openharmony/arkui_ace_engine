@@ -24,24 +24,8 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
-struct TimePickerDialogPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerDialogAccessor {
-void DestroyPeerImpl(Ark_TimePickerDialog peer)
-{
-    if (peer) {
-        delete peer;
-    }
-}
-Ark_TimePickerDialog CtorImpl()
-{
-    return new TimePickerDialogPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void BuildDialogPropertiesCallbacks(const Ark_TimePickerDialogOptions options, DialogProperties& dialogProps)
 {
     auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
@@ -192,9 +176,6 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
 const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
 {
     static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
-        TimePickerDialogAccessor::DestroyPeerImpl,
-        TimePickerDialogAccessor::CtorImpl,
-        TimePickerDialogAccessor::GetFinalizerImpl,
         TimePickerDialogAccessor::ShowImpl,
     };
     return &TimePickerDialogAccessorImpl;

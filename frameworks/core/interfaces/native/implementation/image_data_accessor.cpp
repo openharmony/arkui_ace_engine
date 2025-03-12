@@ -32,6 +32,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Ark_Buffer GetDataImpl(Ark_ImageData peer)
+{
+    return {};
+}
 Ark_Number GetHeightImpl(Ark_ImageData peer)
 {
     return {};
@@ -47,6 +51,7 @@ const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor()
         ImageDataAccessor::DestroyPeerImpl,
         ImageDataAccessor::CtorImpl,
         ImageDataAccessor::GetFinalizerImpl,
+        ImageDataAccessor::GetDataImpl,
         ImageDataAccessor::GetHeightImpl,
         ImageDataAccessor::GetWidthImpl,
     };

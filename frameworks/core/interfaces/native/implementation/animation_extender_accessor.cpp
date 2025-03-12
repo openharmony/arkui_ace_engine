@@ -19,29 +19,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AnimationExtenderAccessor {
-void DestroyPeerImpl(Ark_AnimationExtender peer)
-{
-}
-Ark_AnimationExtender CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-void SetClipRectImpl(Ark_NativePointer peer,
-                     const Ark_Float32 left,
-                     const Ark_Float32 top,
-                     const Ark_Float32 right,
-                     const Ark_Float32 bottom)
-{
-}
-void OpenImplicitAnimationImpl(Ark_NativePointer peer,
-                               const Ark_AnimateParam* param)
-{
-}
-void CloseImplicitAnimationImpl(Ark_NativePointer node)
+void SetClipRectImpl(Ark_NativePointer node,
+                     Ark_Float32 x,
+                     Ark_Float32 y,
+                     Ark_Float32 width,
+                     Ark_Float32 height)
 {
 }
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
@@ -62,9 +44,6 @@ void AnimationTranslateImpl(Ark_NativePointer node,
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
 {
     static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
-        AnimationExtenderAccessor::DestroyPeerImpl,
-        AnimationExtenderAccessor::CtorImpl,
-        AnimationExtenderAccessor::GetFinalizerImpl,
         AnimationExtenderAccessor::SetClipRectImpl,
         AnimationExtenderAccessor::OpenImplicitAnimationImpl,
         AnimationExtenderAccessor::CloseImplicitAnimationImpl,

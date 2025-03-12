@@ -149,6 +149,10 @@ void SetStopPropagationImpl(Ark_KeyEvent peer,
 {
     LOGW("ARKOALA KeyEventAccessor::SetStopPropagation doesn't have sense.");
 }
+Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
+{
+    return {};
+}
 void SetIntentionCodeImpl(Ark_KeyEvent peer,
                           const Ark_IntentionCode* intentionCode)
 {
@@ -191,6 +195,7 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::SetTimestampImpl,
         KeyEventAccessor::GetStopPropagationImpl,
         KeyEventAccessor::SetStopPropagationImpl,
+        KeyEventAccessor::GetIntentionCodeImpl,
         KeyEventAccessor::SetIntentionCodeImpl,
         KeyEventAccessor::GetUnicodeImpl,
         KeyEventAccessor::SetUnicodeImpl,

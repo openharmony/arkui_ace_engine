@@ -80,6 +80,10 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
     return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
+Ark_EventTarget GetTargetImpl(Ark_BaseEvent peer)
+{
+    return {};
+}
 void SetTargetImpl(Ark_BaseEvent peer,
                    const Ark_EventTarget* target)
 {
@@ -223,6 +227,7 @@ const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
         BaseEventAccessor::CtorImpl,
         BaseEventAccessor::GetFinalizerImpl,
         BaseEventAccessor::GetModifierKeyStateImpl,
+        BaseEventAccessor::GetTargetImpl,
         BaseEventAccessor::SetTargetImpl,
         BaseEventAccessor::GetTimestampImpl,
         BaseEventAccessor::SetTimestampImpl,

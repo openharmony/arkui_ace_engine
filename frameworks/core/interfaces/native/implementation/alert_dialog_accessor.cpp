@@ -14,16 +14,16 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "alert_dialog_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
-struct Ark_DialogPropsForUpdate {
+struct DialogPropsForUpdate {
     Opt_DialogAlignment alignment;
     Opt_Boolean autoCancel;
     Opt_BlurStyle backgroundBlurStyle;
@@ -120,21 +120,7 @@ ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlertDialogAccessor {
-void DestroyPeerImpl(Ark_AlertDialog peer)
-{
-    if (peer) {
-        delete peer;
-    }
-}
-Ark_AlertDialog CtorImpl()
-{
-    return new AlertDialogPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_DialogPropsForUpdate props)
+void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const DialogPropsForUpdate props)
 {
     dialogProps.title = Converter::OptConvert<std::string>(props.title).value_or("");
     dialogProps.subtitle = Converter::OptConvert<std::string>(props.subtitle).value_or("");
@@ -156,7 +142,7 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_Dial
         dialogProps.transitionEffect = *transition;
     }
 }
-DialogProperties CreateDialogProperties(const Ark_DialogPropsForUpdate props)
+DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
 {
     DialogProperties dialogProps { .type = DialogType::ALERT_DIALOG };
     UpdateDynamicDialogProperties(dialogProps, props);
@@ -186,7 +172,7 @@ DialogProperties CreateDialogProperties(const Ark_DialogPropsForUpdate props)
     };
     return dialogProps;
 }
-Ark_DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm params)
+DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm params)
 {
     return {
         .alignment = params.alignment,
@@ -236,8 +222,8 @@ void ShowWithConfirm(const Ark_AlertDialogParamWithConfirm params)
         updateButtons(dialogProps, params);
     };
 
-    auto peer = static_cast<AlertDialogPeer *>(CtorImpl());
-    peer->model.SetShowDialog(dialogProps);
+    OHOS::Ace::NG::AlertDialogModelNG model;
+    model.SetShowDialog(dialogProps);
 }
 void UpdateButtons(DialogProperties& dialogProps, const Ark_AlertDialogParamWithButtons params)
 {
@@ -252,7 +238,7 @@ void UpdateButtons(DialogProperties& dialogProps, const Ark_AlertDialogParamWith
         dialogProps.buttons.emplace_back(secondaryButton);
     }
 }
-Ark_DialogPropsForUpdate GetPropsWithButtons(const Ark_AlertDialogParamWithButtons params)
+DialogPropsForUpdate GetPropsWithButtons(const Ark_AlertDialogParamWithButtons params)
 {
     return {
         .alignment = params.alignment,
@@ -293,8 +279,8 @@ void ShowWithButtons(const Ark_AlertDialogParamWithButtons params)
         updateButtons(dialogProps, params);
     };
 
-    auto peer = static_cast<AlertDialogPeer *>(CtorImpl());
-    peer->model.SetShowDialog(dialogProps);
+    OHOS::Ace::NG::AlertDialogModelNG model;
+    model.SetShowDialog(dialogProps);
 }
 void UpdateOptionsButtons(DialogProperties& dialogProps, const Ark_AlertDialogParamWithOptions params)
 {
@@ -308,7 +294,7 @@ void UpdateOptionsButtons(DialogProperties& dialogProps, const Ark_AlertDialogPa
     dialogProps.buttonDirection =
         Converter::OptConvert<DialogButtonDirection>(params.buttonDirection).value_or(dialogProps.buttonDirection);
 }
-Ark_DialogPropsForUpdate GetPropsWithOptions(const Ark_AlertDialogParamWithOptions params)
+DialogPropsForUpdate GetPropsWithOptions(const Ark_AlertDialogParamWithOptions params)
 {
     return {
         .alignment = params.alignment,
@@ -349,8 +335,8 @@ void ShowWithOptions(const Ark_AlertDialogParamWithOptions params)
         updateButtons(dialogProps, params);
     };
 
-    auto peer = static_cast<AlertDialogPeer *>(CtorImpl());
-    peer->model.SetShowDialog(dialogProps);
+    OHOS::Ace::NG::AlertDialogModelNG model;
+    model.SetShowDialog(dialogProps);
 }
 void ShowImpl(const Ark_Type_AlertDialog_show_value* value)
 {
@@ -373,9 +359,6 @@ void ShowImpl(const Ark_Type_AlertDialog_show_value* value)
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor()
 {
     static const GENERATED_ArkUIAlertDialogAccessor AlertDialogAccessorImpl {
-        AlertDialogAccessor::DestroyPeerImpl,
-        AlertDialogAccessor::CtorImpl,
-        AlertDialogAccessor::GetFinalizerImpl,
         AlertDialogAccessor::ShowImpl,
     };
     return &AlertDialogAccessorImpl;

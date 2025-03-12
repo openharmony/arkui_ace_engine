@@ -24,24 +24,8 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
-struct TextPickerDialogPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextPickerDialogAccessor {
-void DestroyPeerImpl(Ark_TextPickerDialog peer)
-{
-    if (peer) {
-        delete peer;
-    }
-}
-Ark_TextPickerDialog CtorImpl()
-{
-    return new TextPickerDialogPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void BuildDialogPropertiesCallbacks(const Ark_TextPickerDialogOptions options, DialogProperties& dialogProps)
 {
     auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
@@ -276,7 +260,6 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
         arkCallback.Invoke(textPickerRes);
     };
 }
-
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
@@ -316,9 +299,6 @@ void ShowImpl(const Opt_TextPickerDialogOptions* options)
 const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor()
 {
     static const GENERATED_ArkUITextPickerDialogAccessor TextPickerDialogAccessorImpl {
-        TextPickerDialogAccessor::DestroyPeerImpl,
-        TextPickerDialogAccessor::CtorImpl,
-        TextPickerDialogAccessor::GetFinalizerImpl,
         TextPickerDialogAccessor::ShowImpl,
     };
     return &TextPickerDialogAccessorImpl;

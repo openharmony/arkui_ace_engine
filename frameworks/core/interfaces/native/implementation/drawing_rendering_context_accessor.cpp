@@ -60,6 +60,10 @@ void InvalidateImpl(Ark_DrawingRenderingContext peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerInvalidate();
 }
+Ark_Size GetSizeImpl(Ark_DrawingRenderingContext peer)
+{
+    return {};
+}
 Ark_DrawingCanvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
 {
     return {};
@@ -72,6 +76,7 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
         DrawingRenderingContextAccessor::CtorImpl,
         DrawingRenderingContextAccessor::GetFinalizerImpl,
         DrawingRenderingContextAccessor::InvalidateImpl,
+        DrawingRenderingContextAccessor::GetSizeImpl,
         DrawingRenderingContextAccessor::GetCanvasImpl,
     };
     return &DrawingRenderingContextAccessorImpl;

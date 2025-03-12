@@ -30,6 +30,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Ark_ResourceColor GetFontColorImpl(Ark_TextStyle_styled_string peer)
+{
+    return {};
+}
 Ark_String GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
@@ -53,6 +57,7 @@ const GENERATED_ArkUITextStyle_styled_stringAccessor* GetTextStyle_styled_string
         TextStyle_styled_stringAccessor::DestroyPeerImpl,
         TextStyle_styled_stringAccessor::CtorImpl,
         TextStyle_styled_stringAccessor::GetFinalizerImpl,
+        TextStyle_styled_stringAccessor::GetFontColorImpl,
         TextStyle_styled_stringAccessor::GetFontFamilyImpl,
         TextStyle_styled_stringAccessor::GetFontSizeImpl,
         TextStyle_styled_stringAccessor::GetFontWeightImpl,
