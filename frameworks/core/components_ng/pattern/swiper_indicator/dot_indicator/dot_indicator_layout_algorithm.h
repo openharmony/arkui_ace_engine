@@ -65,6 +65,11 @@ public:
         isBindIndicator_ = isBindIndicator;
     }
 
+    void SetIndicatorInteractive(bool indicatorInteractive)
+    {
+        indicatorInteractive_ = indicatorInteractive;
+    }
+
 private:
     static double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     SizeF CalcIndicatorFrameSize(LayoutWrapper* layoutWrapper, float indicatorWidth, float indicatorHeight);
@@ -76,6 +81,7 @@ private:
     bool isHoverOrPress_ = false;
     bool isSingle_ = false;
     bool isBindIndicator_ = false;
+    bool indicatorInteractive_ = true;
     PointF hoverPoint_;
     int32_t indicatorDisplayCount_ = 0;
     int32_t maxDisplayCount_ = 0;
