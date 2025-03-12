@@ -553,7 +553,7 @@ void Animator::Cancel()
         return;
     }
     if (status_ == Status::IDLE) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "Already in idle, do not need cancel again. id: %{public}d", controllerId_);
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "Already in idle, do not need cancel again. id: %{public}d", controllerId_);
         return;
     }
     status_ = Status::IDLE;
