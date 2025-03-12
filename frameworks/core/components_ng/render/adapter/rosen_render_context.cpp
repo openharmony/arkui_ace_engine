@@ -6839,7 +6839,7 @@ void RosenRenderContext::RemoveCanvasNode()
     }
 }
 
-void RosenRenderContext::ChechAnimationParametersValid(int32_t& animationParam)
+void RosenRenderContext::CheckAnimationParametersValid(int32_t& animationParam)
 {
     const int32_t maxTime = 2000;
     const int32_t defaultTime = 100;
@@ -6863,8 +6863,8 @@ bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t
     canvasNode_->SetAlpha(1.0f);
     Rosen::RSTransaction::FlushImplicitTransaction();
 
-    ChechAnimationParametersValid(duration);
-    ChechAnimationParametersValid(delay);
+    CheckAnimationParametersValid(duration);
+    CheckAnimationParametersValid(delay);
     AnimationOption option;
     option.SetDuration(duration);
     option.SetDelay(delay);

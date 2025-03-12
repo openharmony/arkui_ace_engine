@@ -448,7 +448,7 @@ public:
 
     void FreezeCanvasNode(bool freezeFlag = false);
     void RemoveCanvasNode();
-    void ChechAnimationParametersValid(int32_t& animationParam);
+    void CheckAnimationParametersValid(int32_t& animationParam);
     bool SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
     void LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode);
     std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode();
