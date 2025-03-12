@@ -117,6 +117,7 @@ ace_unittest("capi_all_accessors_test") {
     "web_resource_error_accessor_test.cpp",
     "web_resource_request_accessor_test.cpp",
     "web_resource_response_accessor_test.cpp",
+    "webview_controller_accessor_test.cpp",
   ]
   extra_deps = []
   extra_deps += [
