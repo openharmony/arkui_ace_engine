@@ -42,8 +42,9 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetTagImpl(Ark_GestureRecognizer peer)
 {
-    LOGE("ARKOALA GestureRecognizerAccessor.GetTagImpl -> Incorrect return value!");
-    return {};
+    CHECK_NULL_RETURN(peer && peer->GetRecognizer(), {});
+    auto resOpt = peer->GetRecognizer()->GetGestureInfo()->GetTag();
+    return Converter::ArkValue<Ark_String>(resOpt.value_or(""), Converter::FC);
 }
 Ark_GestureControl_GestureType GetTypeImpl(Ark_GestureRecognizer peer)
 {
