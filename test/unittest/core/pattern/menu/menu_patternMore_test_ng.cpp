@@ -73,6 +73,9 @@ constexpr MenuType TYPE = MenuType::MENU;
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
+constexpr float OFFSET_FIRST = 20.0f;
+constexpr float OFFSET_SECOND = 5.0f;
+constexpr float PAN_MAX_VELOCITY = 2000.0f;
 } // namespace
 class MenuPattern2TestNg : public testing::Test {
 public:
@@ -1141,5 +1144,42 @@ HWTEST_F(MenuPattern2TestNg, IsSelectOverlayDefaultModeRightClickMenu001, TestSi
 
     bool res = menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
     EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name:  HandleDragEnd001
+ * @tc.desc: Test  HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, HandleDragEnd001, TestSize.Level1)
+{
+    auto menuPreviewPattern = AceType::MakeRefPtr<MenuPreviewPattern>();
+    ASSERT_NE(menuPreviewPattern, nullptr);
+    menuPreviewPattern->HandleDragEnd(OFFSET_FIRST, OFFSET_FIRST, PAN_MAX_VELOCITY);
+    menuPreviewPattern->HandleDragEnd(OFFSET_SECOND, OFFSET_FIRST, PAN_MAX_VELOCITY);
+    menuPreviewPattern->HandleDragEnd(OFFSET_FIRST, OFFSET_SECOND, 3000.0f);
+}
+
+/**
+ * @tc.name:  UpdateShowScale001
+ * @tc.desc: Test  UpdateShowScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateShowScale001, TestSize.Level1)
+{
+    auto menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto menuRenderContext = menuNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
+    ASSERT_NE(menuPattern, nullptr);
+    MenuPreviewPattern menuPreviewPattern;
+    menuPreviewPattern.hasPreviewTransitionEffect_ = true;
+    menuPreviewPattern.UpdateShowScale(menuRenderContext, menuTheme, menuPattern);
+    RefPtr<MenuPattern> nullMenuPattern;
+    menuPreviewPattern.UpdateShowScale(menuRenderContext, menuTheme, nullMenuPattern);
 }
 } // namespace OHOS::Ace::NG
