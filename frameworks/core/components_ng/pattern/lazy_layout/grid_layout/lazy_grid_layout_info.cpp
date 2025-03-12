@@ -171,6 +171,20 @@ void LazyGridLayoutInfo::SetLanes(int32_t lanes)
     lanes_ = lanes;
 }
 
+void LazyGridLayoutInfo::SetTotalItemCount(int32_t count)
+{
+    totalItemCount_ = count;
+    auto it = posMap_.upper_bound(count - 1);
+    posMap_.erase(it, posMap_.end());
+    if (count == 0) {
+        updatedStart_ = INT_MAX;
+        updatedEnd_ = -1;
+        startIndex_ = -1;
+        endIndex_ = -1;
+        totalMainSize_ = 0.0f;
+    }
+}
+
 void LazyGridLayoutInfo::SetPosMap(int32_t index, const GridItemMainPos& pos)
 {
     posMap_[index] = pos;
