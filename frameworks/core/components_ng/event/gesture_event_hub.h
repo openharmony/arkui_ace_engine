@@ -297,7 +297,7 @@ public:
     void HandleOnDragCancel();
     void StartLongPressActionForWeb();
     void CancelDragForWeb();
-    void StartDragTaskForWeb();
+    bool StartDragTaskForWeb();
     void ResetDragActionForWeb();
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
