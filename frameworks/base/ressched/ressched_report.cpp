@@ -40,6 +40,7 @@ constexpr int32_t KEY_DOWN_EVENT = 1;
 constexpr int32_t KEY_UP_EVENT = 2;
 constexpr int32_t SLIDE_OFF_EVENT = 0;
 constexpr int32_t SLIDE_DETECTING = 2;
+constexpr int32_t MOVE_DETECTING = 7;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
 constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
 constexpr int32_t MOVE_DETECTING = 7;
