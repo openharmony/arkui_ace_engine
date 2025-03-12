@@ -26,11 +26,11 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-Ark_Color g_fontColor = ARK_COLOR_BLUE;
-std::string g_fontFamily = "Arial";
-Dimension g_fontSize = 55._px;
-std::string g_fontWeight = "200";
-Ace::FontStyle g_fontSyle = Ace::FontStyle::ITALIC;
+const Ark_Color g_fontColor = ARK_COLOR_BLUE;
+const std::string g_fontFamily = "Arial";
+const Dimension g_fontSize = 55._px;
+const std::string g_fontWeight = "200";
+const Ace::FontStyle g_fontSyle = Ace::FontStyle::ITALIC;
 } // namespace
 
 class TextStyleStyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITextStyle_styled_stringAccessor,
@@ -80,9 +80,7 @@ public:
 HWTEST_F(TextStyleStyledStringAccessorTest, emptyOptionsTest, TestSize.Level1)
 {
     // finalize base peer
-    auto finalyzer = reinterpret_cast<void (*)(TextStyle_styled_stringPeer*)>(
-        accessors_->getTextStyle_styled_stringAccessor()->getFinalizer());
-    finalyzer(peer_);
+    finalyzer_(peer_);
 
     // create new peer
     peer_ = accessor_->ctor(nullptr);
@@ -91,7 +89,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, emptyOptionsTest, TestSize.Level1)
     EXPECT_EQ(static_cast<Ace::FontWeight>(Converter::Convert<int32_t>(accessor_->getFontWeight(peer_))),
         Ace::FontWeight::W100);
     std::optional<Ace::FontStyle> fontStyleOpt = Converter::OptConvert<Ace::FontStyle>(accessor_->getFontStyle(peer_));
-    EXPECT_TRUE(fontStyleOpt.has_value());
+    ASSERT_TRUE(fontStyleOpt.has_value());
     EXPECT_EQ(fontStyleOpt.value(), Ace::FontStyle::NORMAL);
 }
 
@@ -138,7 +136,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontStyleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontStyle, nullptr);
     std::optional<Ace::FontStyle> fontStyleOpt = Converter::OptConvert<Ace::FontStyle>(accessor_->getFontStyle(peer_));
-    EXPECT_TRUE(fontStyleOpt.has_value());
+    ASSERT_TRUE(fontStyleOpt.has_value());
     EXPECT_EQ(fontStyleOpt.value(), g_fontSyle);
 }
 
