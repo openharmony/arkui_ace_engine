@@ -140,7 +140,8 @@ RichEditorPattern::RichEditorPattern() :
     isAPI14Plus(true),
 #endif
     isAPI16Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)),
-    isAPI18Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))
+    isAPI18Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)),
+    isAPI20Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY))
 {
     selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(WeakClaim(this));
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
@@ -2449,7 +2450,7 @@ std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int3
 SelectionInfo RichEditorPattern::GetSpansInfoByRange(int32_t start, int32_t end)
 {
     auto selectionInfo = GetSpansInfo(start, end , GetSpansMethod::GETSPANS);
-    CHECK_NULL_RETURN(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN), selectionInfo);
+    CHECK_NULL_RETURN(isAPI20Plus, selectionInfo);
     auto& resultObjects = selectionInfo.GetSelectionRef().resultObjects;
     for (auto& resObj : resultObjects) {
         CHECK_NULL_CONTINUE(resObj.type == SelectSpanType::TYPESPAN);
@@ -5502,7 +5503,7 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
     bool allowImeInput = isIME ? BeforeIMEInsertValue(text) : true;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d, needReplacePreviewText=%{public}d",
         allowContentChange, allowImeInput, previewTextRecord_.needReplacePreviewText);
-    bool allowPreviewText = previewTextRecord_.needReplacePreviewText || (previewTextRecord_.needReplaceText && !isAPI18Plus);
+    bool allowPreviewText = previewTextRecord_.needReplacePreviewText || (previewTextRecord_.needReplaceText && !isAPI20Plus);
     CHECK_NULL_VOID((allowContentChange && allowImeInput) || allowPreviewText);
     ProcessInsertValueMore(text, record, operationType, changeValue, preRecord);
 }
@@ -5980,7 +5981,7 @@ std::u16string RichEditorPattern::DeleteForwardOperation(int32_t length)
     int32_t currentPosition = caretPosition_;
     if (currentPosition == GetTextContentLength()) {
         info.SetLength(0);
-        DoDeleteActions(currentPosition, 0, info);
+        IF_TRUE(isAPI20Plus, DoDeleteActions(currentPosition, 0, info));
         return deleteText;
     }
     info.SetLength(length);
@@ -7415,7 +7416,7 @@ void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
     }
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     auto position = paragraphs_.GetIndex(textOffset);
-    IF_TRUE(isAPI18Plus && (GetTextContentLength() == 0), position = 0);
+    IF_TRUE(isAPI20Plus && (GetTextContentLength() == 0), position = 0);
     UpdateSelector(textSelector_.baseOffset, position);
     if (!isFirstMouseSelect_) {
         AdjustCursorPosition(position);
@@ -7870,15 +7871,8 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
     if (copyResultObjects.empty()) {
         return;
     }
-    // If the API version is greater or equal than 18, add records to clipboard in forward order
-    if (isAPI18Plus) {
-        for (auto resultObj = copyResultObjects.begin(); resultObj != copyResultObjects.end(); ++resultObj) {
-            ProcessResultObject(pasteData, *resultObj);
-        }
-    } else {
-        for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
-            ProcessResultObject(pasteData, *resultObj);
-        }
+    for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
+        ProcessResultObject(pasteData, *resultObj);
     }
     clipboard_->SetData(pasteData, copyOption_);
 }
