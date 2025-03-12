@@ -137,8 +137,9 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_VOID(forEach);
-    forEach->FireOnLongPress(GetIndex());
+    if (forEach && info.GetSourceTool() != SourceTool::MOUSE) {
+        forEach->FireOnLongPress(GetIndex());
+    }
     if (renderContext->HasTransformScale()) {
         prevScale_ = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
     } else {
@@ -373,6 +374,9 @@ void ListItemDragManager::HandleScrollCallback()
         return;
     }
     HandleSwapAnimation(from, to);
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
+    forEach->FireOnMoveThrough(fromIndex_, to);
 }
 
 void ListItemDragManager::SetPosition(const OffsetF& offset)
@@ -409,12 +413,12 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     HandleAutoScroll(from, point, frameRect);
 
     int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
-    auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_VOID(forEach);
     if (to == from) {
         return;
     }
     HandleSwapAnimation(from, to);
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
     forEach->FireOnMoveThrough(fromIndex_, to);
 }
 
