@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
@@ -1534,12 +1533,12 @@ export class ChipComponent extends ViewPU {
     let themeChipNode = this.theme.chipNode;
     if (this.getChipActive()) {
       currentColor =
-        this.chipNodeOnFocus && !this.isSetActiveChipBgColor()
+        (this.chipNodeOnFocus || this.isHover) && !this.isSetActiveChipBgColor()
           ? themeChipNode.focusActivatedBgColor
           : (this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor);
     } else {
       currentColor =
-        this.chipNodeOnFocus && !this.isSetNormalChipBgColor()
+        (this.chipNodeOnFocus || this.isHover) && !this.isSetNormalChipBgColor()
           ? themeChipNode.focusBgColor
           : (this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor);
     }
@@ -1869,21 +1868,11 @@ export class ChipComponent extends ViewPU {
       Button.accessibilitySelected(this.getAccessibilitySelected());
       Button.onFocus(() => {
         this.chipNodeOnFocus = true;
-        if (this.isSuffixIconFocusStyleCustomized) {
-          this.chipScale = {
-            x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
-            y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
-          };
-        }
+        this.chipZoomIn();
       });
       Button.onBlur(() => {
         this.chipNodeOnFocus = false;
-        if (this.isSuffixIconFocusStyleCustomized) {
-          this.chipScale = {
-            x: 1,
-            y: 1,
-          };
-        }
+        this.chipZoomOut();
       });
       Button.onTouch(event => {
         this.handleTouch(event);
@@ -1891,12 +1880,16 @@ export class ChipComponent extends ViewPU {
       Button.onHover(isHover => {
         if (isHover) {
           this.isShowPressedBackGroundColor = true;
+          this.isHover = true;
+          this.chipZoomIn();
         } else {
           if (!this.isShowPressedBackGroundColor && isHover) {
             this.isShowPressedBackGroundColor = true;
           } else {
             this.isShowPressedBackGroundColor = false;
           }
+          this.isHover = false;
+          this.chipZoomOut();
         }
       });
       Button.onKeyEvent(event => {
@@ -1999,6 +1992,7 @@ export class ChipComponent extends ViewPU {
             Button.padding(0);
             Button.stateEffect(false);
             Button.focusable(!this.isSuffixIconFocusStyleCustomized);
+            Button.hoverEffect(!this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
@@ -2045,6 +2039,7 @@ export class ChipComponent extends ViewPU {
               this.onClicked();
             });
             Button.focusable(this.getSuffixIconFocusable());
+            Button.hoverEffect(!this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.getSuffixIconSrc());
@@ -2084,6 +2079,7 @@ export class ChipComponent extends ViewPU {
               this.deleteChipNodeAnimate();
             });
             Button.focusable(!this.isSuffixIconFocusStyleCustomized);
+            Button.hoverEffect(!this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create({
@@ -2109,6 +2105,22 @@ export class ChipComponent extends ViewPU {
     If.pop();
     Row.pop();
     Button.pop();
+  }
+  chipZoomOut() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: 1,
+        y: 1,
+      };
+    }
+  }
+  chipZoomIn() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
+        y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
+      };
+    }
   }
   getSuffixSymbolAccessibilityLevel() {
     if (this.getChipActive()) {
