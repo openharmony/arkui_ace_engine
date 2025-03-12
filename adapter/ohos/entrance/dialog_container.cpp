@@ -300,6 +300,7 @@ void DialogContainer::SetView(
     CHECK_NULL_VOID(taskExecutor);
 
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    window->Init();
 #else
     auto platformWindow = PlatformWindow::Create(view);
     CHECK_NULL_VOID(platformWindow);
@@ -319,6 +320,7 @@ void DialogContainer::SetViewNew(
     CHECK_NULL_VOID(taskExecutor);
 
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    window->Init();
     container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId());
 #endif
 }
