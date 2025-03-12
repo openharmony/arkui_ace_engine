@@ -649,6 +649,7 @@ void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
     json->PutExtAttr("hdrBrightness", std::to_string(hdrBrightness_).c_str(), filter);
     json->PutExtAttr("enableTransparentLayer", isTransparentLayer_ ? "true" : "false", filter);
+    json->PutExtAttr("screenId", screenId_.has_value() ? std::to_string(screenId_.value()).c_str() : "", filter);
     if (type_ == XComponentType::SURFACE) {
         json->PutExtAttr("renderFit", XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
     }
@@ -726,6 +727,8 @@ void XComponentPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("hdrBrightness: ").append(std::to_string(hdrBrightness_).c_str()));
     DumpLog::GetInstance().AddDesc(
         std::string("enableTransparentLayer: ").append(isTransparentLayer_ ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("screenId: ").append(screenId_.has_value() ? std::to_string(screenId_.value()).c_str() : ""));
     if (renderSurface_) {
         renderSurface_->DumpInfo();
     }
@@ -1866,7 +1869,7 @@ void XComponentPattern::HandleSurfaceCreated()
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->RegisterSurface();
-    surfaceId_ = renderSurface_->GetUniqueId();
+    surfaceId_ = screenId_.has_value() ? "" : renderSurface_->GetUniqueId();
     CHECK_NULL_VOID(xcomponentController_);
     xcomponentController_->SetSurfaceId(surfaceId_);
     OnSurfaceCreated();
@@ -2149,6 +2152,14 @@ void XComponentPattern::SetRenderFit(RenderFit renderFit)
 {
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetRenderFit(renderFit);
+}
+
+void XComponentPattern::SetScreenId(uint64_t screenId)
+{
+    screenId_ = screenId;
+    renderContextForSurface_->SetScreenId(screenId);
+    surfaceId_ = "";
+    xcomponentController_->SetSurfaceId(surfaceId_);
 }
 
 void XComponentPattern::EnableSecure(bool isSecure)

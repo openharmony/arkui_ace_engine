@@ -301,6 +301,7 @@ public:
     virtual void SetSecurityLayer(bool isSecure) {}
     virtual void SetHDRBrightness(float hdrBrightness) {}
     virtual void SetTransparentLayer(bool isTransparentLayer) {}
+    virtual void SetScreenId(uint64_t screenId) {}
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(
         const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())
