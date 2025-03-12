@@ -237,11 +237,11 @@ class ObserveV2 {
    * This cleanUpDeadReferences() function gets called from UINodeRegisterProxy.uiNodeCleanUpIdleTask()
    *
    */
-  public cleanUpDeadReferences(): void {
+  public cleanUpDeadReferences(maxTimeInMs: number): void {
     this.cleanUpId2CmpDeadReferences();
     this.cleanUpId2TargetsDeadReferences();
     // time slot is the max time until the next VSync (optimistic)
-    this.runIdleTasks(1000 / 60);
+    this.runIdleTasks(maxTimeInMs);
   }
 
   // runs idleTasks until empty or maxExecutionTimeMs is reached
