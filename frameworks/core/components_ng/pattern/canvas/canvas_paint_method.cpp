@@ -146,7 +146,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         CHECK_NULL_VOID(tempPixelMap);
         RSRect rec;
         if (canvasImage.flag == DrawImageType::THREE_PARAMS &&
-            apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+            apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
             rec = RSRect(canvasImage.dx, canvasImage.dy,
                 canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
         } else {

@@ -1031,7 +1031,7 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
 {
     double limit = 0.0;
     if (info.GetDoubleArg(0, limit)) {
-        if (limit == 0 && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (limit == 0 && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
             return;
         }
         renderingContext2DModel_->SetMiterLimit(limit);
@@ -1107,7 +1107,7 @@ void JSCanvasRenderer::JsSetShadowColor(const JSCallbackInfo& info)
     if (!info.GetStringArg(0, colorStr)) {
         return;
     }
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         if (!ProcessColorFromString(colorStr, color)) {
             return;
         }
@@ -1575,7 +1575,7 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
     std::string text;
     double density = GetDensity();
     bool isGetStr = info.GetStringArg(0, text);
-    if (!isGetStr && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (!isGetStr && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         if (info[0]->IsUndefined()) {
             text = "undefined";
             isGetStr = true;
