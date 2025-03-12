@@ -884,8 +884,20 @@ public:
     }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
 
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     bool GreatOrEqualAPITargetVersion(PlatformVersion version) const;
 
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     bool LessThanAPITargetVersion(PlatformVersion version) const;
 
     bool IsArkTsRenderNode() const
