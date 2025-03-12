@@ -816,4 +816,31 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg052, TestSize.Level1)
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), previewOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(OFFSET_SECOND, OFFSET_SECOND));
 }
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg053
+ * @tc.desc: Verify CheckHorizontalLayoutPreviewOffsetX
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg053, TestSize.Level1)
+{
+    auto layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    auto previewGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    float ret = layoutAlgorithm->CheckHorizontalLayoutPreviewOffsetX(previewGeometryNode, menuGeometryNode, 0.0f);
+    EXPECT_EQ(ret, 0.0f);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg054
+ * @tc.desc: Verify UpdatePropArrowOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg054, TestSize.Level1)
+{
+    auto layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    layoutAlgorithm->placement_ = Placement::NONE;
+    layoutAlgorithm->UpdatePropArrowOffset();
+    EXPECT_EQ(layoutAlgorithm->propArrowOffset_.value_, 0.0);
+}
 } // namespace OHOS::Ace::NG
