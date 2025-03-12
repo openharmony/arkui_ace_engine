@@ -1842,7 +1842,7 @@ ArkUINativeModuleValue TextAreaBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCa
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorder(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         SetBorderDash(runtimeCallInfo, vm, nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);

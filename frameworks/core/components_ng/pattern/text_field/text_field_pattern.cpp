@@ -9162,7 +9162,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     CHECK_NULL_VOID(layoutProperty);
     if (!hasPreviewText_) {
         auto fullStr = GetTextUtf16Value();
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSelected()) {
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && IsSelected()) {
             uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
             uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
             if (startIndex < fullStr.length() && endIndex <= fullStr.length()) {
