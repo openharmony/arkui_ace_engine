@@ -6892,11 +6892,13 @@ bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t
         return true;
 }
 
-void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<Rosen::RSCanvasNode>& rootNode)
+void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode)
 {
     if (canvasNode_ && rootNode) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
-        canvasNode_->SetLinkedRootNodeId(rootNode->GetRenderContext()->GetNodeId());
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
+            rootNode->GetRenderContext());
+        canvasNode_->SetLinkedRootNodeId(rosenRenderContext->GetNodeId());
         Rosen::RSTransaction::FlushImplicitTransaction();
     }
 }

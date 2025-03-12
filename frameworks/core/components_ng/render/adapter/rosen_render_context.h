@@ -449,7 +449,7 @@ public:
     void FreezeCanvasNode(bool freezeFlag = false);
     void RemoveCanvasNode();
     bool SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
-    void LinkCanvasNodeToRootNode(const RefPtr<Rosen::RSCanvasNode>& rootNode);
+    void LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode);
     std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode();
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
