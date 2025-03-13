@@ -15,7 +15,7 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
-
+#include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/tsa_advanced_feature.h"
@@ -54,6 +54,19 @@ SourceTool GetSourceTool(int32_t orgToolType)
             LOGW("unknown tool type");
             return SourceTool::UNKNOWN;
     }
+}
+
+uint64_t GetPointerSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (AceApplicationInfo::GetInstance().GetTouchEventPassMode() != TouchPassMode::ACCELERATE) {
+        return pointerEvent->GetActionTime();
+    }
+    auto inputTime = pointerEvent->GetSensorInputTime();
+    if (inputTime == 0) {
+        // inject event has no sensor time.
+        inputTime = pointerEvent->GetActionTime();
+    }
+    return inputTime;
 }
 
 TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
@@ -213,7 +226,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     }
     auto touchPoint = ConvertTouchPoint(item);
     TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
-    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    std::chrono::microseconds microseconds(GetPointerSensorTime(pointerEvent));
     TimeStamp time(microseconds);
     event.SetTime(time)
         .SetDeviceId(pointerEvent->GetDeviceId())

@@ -975,25 +975,17 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
 void AceContainer::InitializeCallback()
 {
     ACE_FUNCTION_TRACE();
-
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_,
-                                    isTouchEventsPassThrough = isTouchEventsPassThrough_](const TouchEvent& event,
+    auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
+    bool isDebugAcc = (SystemProperties::GetTouchAccelarate() == static_cast<int32_t>(TouchPassMode::ACCELERATE));
+    pipelineContext_->SetTouchAccelarate((touchPassMode == TouchPassMode::ACCELERATE) || isDebugAcc);
+    pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
                                     const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
-        bool passThroughMode = false;
-        if (isTouchEventsPassThrough.has_value()) {
-            passThroughMode = isTouchEventsPassThrough.value();
-        } else {
-            auto container = Platform::AceContainer::GetContainer(id);
-            if (container) {
-                passThroughMode = AceApplicationInfo::GetInstance().IsTouchEventsPassThrough();
-                container->SetTouchEventsPassThroughMode(passThroughMode);
-            }
-        }
         context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
-        auto touchTask = [context, event, markProcess, node, mode = passThroughMode]() {
+        auto touchTask = [context, event, markProcess, node]() {
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
@@ -1001,9 +993,9 @@ void AceContainer::InitializeCallback()
                 context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
-                    context->OnTouchEvent(event, node, false, mode);
+                    context->OnTouchEvent(event, node, false);
                 } else {
-                    context->OnTouchEvent(event, false, mode);
+                    context->OnTouchEvent(event, false);
                 }
             }
             CHECK_NULL_VOID(markProcess);
