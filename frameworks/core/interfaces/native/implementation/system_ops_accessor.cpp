@@ -14,6 +14,7 @@
  */
 #include <numeric>
 
+#include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -56,11 +57,12 @@ Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
     std::string resourceStr = "";
     resourceStr = std::accumulate(paramsStr.begin(), paramsStr.end(), std::string(),
         [](const std::string& a, const std::string& b) { return a + b; });
-    // auto resourceObject = AceType::MakeRefPtr<Ace::ResourceObject>(valueBundleName, valueModuleName);
-    // auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-    // CHECK_NULL_RETURN(resourceAdapter, -1);
-    // uint32_t resId = resourceAdapter->GetResId(resourceStr);
-    return 1;
+    auto resourceObject =
+        AceType::MakeRefPtr<Ace::ResourceObject>(valueBundleName, valueModuleName, Container::CurrentIdSafely());
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+    CHECK_NULL_RETURN(resourceAdapter, -1);
+    uint32_t resId = resourceAdapter->GetResId(resourceStr);
+    return resId;
 }
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
