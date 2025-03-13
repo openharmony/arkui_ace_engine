@@ -196,9 +196,6 @@ void StaggeredFillAlgorithm::OnSlidingOffsetUpdate(float delta)
 
 ItemRange StaggeredFillAlgorithm::GetRange() const
 {
-    // for (auto& section : sections_) {
-    //     section.PruneFront(0.0f);
-    // } // maybe no prune?
     return { StartIdx().value_or(-1), EndIdx().value_or(-1) };
 }
 
