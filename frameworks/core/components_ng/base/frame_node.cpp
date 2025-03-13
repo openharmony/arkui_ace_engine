@@ -86,10 +86,10 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8;
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 constexpr int32_t DEFAULT_PRECISION = 2;
-constexpr int32_t FRAME_NODE_60 = 60;
-constexpr int32_t FRAME_NODE_72 = 72;
-constexpr int32_t FRAME_NODE_90 = 90;
-constexpr int32_t FRAME_NODE_120 = 120;
+constexpr int32_t FRAME_60 = 60;
+constexpr int32_t FRAME_72 = 72;
+constexpr int32_t FRAME_90 = 90;
+constexpr int32_t FRAME_120 = 120;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -4283,19 +4283,19 @@ void FrameNode::FrameRateDurationsStatisticsEnd(const std::string &scene)
 void FrameNode::AddFrameRateDuration(int32_t frameRate, int32_t duration)
 {
     switch (frameRate) {
-        case FRAME_NODE_120: {
+        case FRAME_120: {
             curFRCSceneFpsInfo_.duration_120 += duration;
             break;
         }
-        case FRAME_NODE_90: {
+        case FRAME_90: {
             curFRCSceneFpsInfo_.duration_90 += duration;
             break;
         }
-        case FRAME_NODE_72: {
+        case FRAME_72: {
             curFRCSceneFpsInfo_.duration_72 += duration;
             break;
         }
-        case FRAME_NODE_60: {
+        case FRAME_60: {
             curFRCSceneFpsInfo_.duration_60 += duration;
             break;
         }
