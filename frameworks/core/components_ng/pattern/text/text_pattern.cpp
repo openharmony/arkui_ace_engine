@@ -5168,6 +5168,16 @@ void TextPattern::UpdateFontColor(const Color& value)
     if (children.empty() && spans_.empty() && !NeedShowAIDetect()) {
         if (contentMod_) {
             contentMod_->TextColorModifier(value);
+        } else if (pManager_) {
+            if (textStyle_.has_value()) {
+                textStyle_->SetTextColor(value);
+            }
+            for (auto&& info : pManager_->GetParagraphs()) {
+                auto paragraph = info.paragraph;
+                CHECK_NULL_VOID(paragraph);
+                auto length = paragraph->GetParagraphText().length();
+                paragraph->UpdateColor(0, length, value);
+            }
         }
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
