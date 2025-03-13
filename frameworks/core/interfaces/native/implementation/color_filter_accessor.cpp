@@ -13,18 +13,32 @@
  * limitations under the License.
  */
 
+#include "frameworks/core/components/image/image_component.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/color_filter_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+
+using namespace Converter;
 namespace ColorFilterAccessor {
 void DestroyPeerImpl(Ark_ColorFilter peer)
 {
+    if (peer) {
+        delete peer;
+        peer = nullptr;
+    }
 }
 Ark_ColorFilter CtorImpl(const Array_Number* value)
 {
-    return {};
+    auto peer = new ColorFilterPeer();
+    CHECK_NULL_RETURN(value, peer);
+    auto colorfiltermatrix = OptConvert<std::vector<float>>(*value);
+    if (colorfiltermatrix && colorfiltermatrix->size() == COLOR_FILTER_MATRIX_SIZE) {
+        peer->SetColorFilterMatrix(std::move(*colorfiltermatrix));
+    }
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,5 +54,4 @@ const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor()
     };
     return &ColorFilterAccessorImpl;
 }
-
 }

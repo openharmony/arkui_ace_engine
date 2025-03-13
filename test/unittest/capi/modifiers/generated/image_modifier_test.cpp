@@ -1132,16 +1132,6 @@ HWTEST_F(ImageModifierTest, setColorFilterTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setColorFilterTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setColorFilterTestValidValues, TestSize.Level1)
-{
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
-}
-
-/*
  * @tc.name: setCopyOptionTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
