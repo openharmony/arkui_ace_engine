@@ -47,6 +47,7 @@ public:
     void SetPosMap(int32_t index, const GridItemMainPos& pos);
     void SetSpace(float space);
     void SetLanes(int32_t lanes);
+    void SetTotalItemCount(int32_t count);
     void DumpAdvanceInfo();
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json);
 

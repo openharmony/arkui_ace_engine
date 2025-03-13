@@ -26,7 +26,6 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutInfo_);
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
-    layoutInfo_->totalItemCount_ = totalItemCount_;
     auto layoutProperty = AceType::DynamicCast<LazyGridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
@@ -34,19 +33,18 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
     realMainSize_ = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
+    totalMainSize_ = layoutInfo_->totalMainSize_;
     UpdateReferencePos(layoutWrapper, contentConstraint.viewPosRef);
     UpdateGap(layoutProperty, contentIdealSize);
 
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateGridItemConstraint(contentIdealSize, childLayoutConstraint);
-    totalMainSize_ = layoutInfo_->totalMainSize_;
 
     if (layoutInfo_->deadline_) {
         return;
     } else if (totalItemCount_ == 0) {
-        layoutInfo_->posMap_.clear();
-        layoutInfo_->startIndex_ = -1;
-        layoutInfo_->endIndex_ = -1;
+        layoutInfo_->SetTotalItemCount(0);
+        totalMainSize_ = 0.0f;
     } else if (needAllLayout_) {
         MeasureGridItemAll(layoutWrapper);
     } else {
@@ -236,6 +234,7 @@ void LazyGridLayoutAlgorithm::MeasureGridItemAll(LayoutWrapper* layoutWrapper)
     layoutInfo_->startIndex_ = 0;
     layoutInfo_->endIndex_ = totalItemCount_ - 1;
     layoutInfo_->totalMainSize_ = totalSize;
+    layoutInfo_->totalItemCount_ = totalItemCount_;
     totalMainSize_ = totalSize;
 }
 
@@ -246,6 +245,7 @@ void LazyGridLayoutAlgorithm::MeasureGridItemLazy(LayoutWrapper* layoutWrapper)
         float startPos = 0.0f;
         GetStartIndexInfo(startIndex, startPos);
         layoutInfo_->SetLanes(lanes_);
+        layoutInfo_->SetTotalItemCount(totalItemCount_);
         layoutInfo_->SetSpace(spaceWidth_);
         layoutInfo_->startIndex_ = startIndex;
         layoutInfo_->endIndex_ = startIndex;
@@ -258,6 +258,7 @@ void LazyGridLayoutAlgorithm::MeasureGridItemLazy(LayoutWrapper* layoutWrapper)
         float endPos = totalMainSize_;
         GetEndIndexInfo(endIndex, endPos);
         layoutInfo_->SetLanes(lanes_);
+        layoutInfo_->SetTotalItemCount(totalItemCount_);
         layoutInfo_->SetSpace(spaceWidth_);
         layoutInfo_->endIndex_ = endIndex;
         layoutInfo_->startIndex_ = endIndex;
@@ -280,7 +281,7 @@ void LazyGridLayoutAlgorithm::MeasureGridItemLazy(LayoutWrapper* layoutWrapper)
 void LazyGridLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
 {
     if (GreatNotEqual(startPos_, totalMainSize_)) {
-        index = totalItemCount_;
+        index = layoutInfo_->totalItemCount_;
         pos = totalMainSize_;
         return;
     } else if (LessNotEqual(endPos_, 0)) {
@@ -315,7 +316,7 @@ void LazyGridLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
     }
     --rit;
     pos = rit->second.startPos;
-    index = LanesFloor(it->first);
+    index = LanesFloor(rit->first);
 }
 
 void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
@@ -325,18 +326,18 @@ void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
         pos = 0;
         return;
     } else if (GreatNotEqual(startPos_, totalMainSize_)) {
-        index = totalItemCount_;
+        index = layoutInfo_->totalItemCount_;
         pos = totalMainSize_;
         return;
-    } else if (GreatOrEqual(endPos_, totalMainSize_) || layoutInfo_->endIndex_ >= totalItemCount_) {
+    } else if (GreatOrEqual(endPos_, totalMainSize_) || layoutInfo_->endIndex_ >= layoutInfo_->totalItemCount_) {
         pos = totalMainSize_;
-        index = totalItemCount_ - 1;
+        index = LanesCeil(layoutInfo_->totalItemCount_ - 1);
         return;
     }
     auto it = layoutInfo_->posMap_.find(layoutInfo_->endIndex_);
     if (it == layoutInfo_->posMap_.end()) {
         pos = totalMainSize_;
-        index = totalItemCount_ - 1;
+        index = LanesCeil(layoutInfo_->totalItemCount_ - 1);
         return;
     }
     std::reverse_iterator<std::map<int, GridItemMainPos>::iterator> rit(++it);
@@ -347,7 +348,7 @@ void LazyGridLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos)
         ++nextIt;
     }
     if (GreatOrEqual(rit->second.endPos + spaceWidth_, endPos_)) {
-        index = LanesCeil(it->first);
+        index = LanesCeil(rit->first);
         pos = rit->second.endPos;
         return;
     }
