@@ -12152,7 +12152,7 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
-    static _CanvasRenderer_createPattern(ptr: KPointer, image: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    static _CanvasRenderer_createPattern(ptr: KPointer, image: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         if ((this._LoadOnce()) == (true))
         {
             return this._CanvasRenderer_createPattern(ptr, image, thisArray, thisLength)
