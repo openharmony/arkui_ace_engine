@@ -63,6 +63,17 @@ void CanvasRendererPeerImpl::TriggerBeginPathImpl()
     }
     pattern_->BeginPath();
 }
+void CanvasRendererPeerImpl::TriggerDrawImageImpl(const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& info)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerDrawImageImpl pattern "
+            "not bound to component.");
+        return;
+    }
+    if (pixelMap) {
+        pattern_->DrawPixelMap(pixelMap, info);
+    }
+}
 void CanvasRendererPeerImpl::TriggerStroke0Impl()
 {
     if (!pattern_) {

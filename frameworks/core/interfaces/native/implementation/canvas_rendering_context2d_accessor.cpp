@@ -91,8 +91,8 @@ Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
     Validator::ValidateByRange(optQuality, IMAGE_QUALITY_MIN, IMAGE_QUALITY_MAX);
     auto imageType = optType.value_or(IMAGE_TYPE_DEFAULT);
     auto imageQuality = optQuality.value_or(IMAGE_QUALITY_DEFAULT);
-    peerImpl->ToDataURL(imageType, imageQuality);
-    return {};
+    auto dataURL = peerImpl->ToDataURL(imageType, imageQuality);
+    return Converter::ArkValue<Ark_String>(dataURL);
 }
 void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,
