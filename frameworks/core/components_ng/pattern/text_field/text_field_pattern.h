@@ -1557,6 +1557,10 @@ public:
     {
         isFilterChanged_ = isFilterChanged;
     }
+    bool GetCancelButtonTouchInfo()
+    {
+        return cancelButtonTouched_;
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -2076,6 +2080,7 @@ private:
     PreviewText callbackOldPreviewText_;
     bool isFilterChanged_ = false;
     std::optional<bool> showPasswordState_;
+    bool cancelButtonTouched_ = false;
 };
 } // namespace OHOS::Ace::NG
 

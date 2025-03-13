@@ -147,6 +147,7 @@ struct ParagraphStyle {
     bool halfLeading = false;
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
     Dimension paragraphSpacing;
+    bool isEndAddParagraphSpacing = false;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -179,6 +180,8 @@ struct ParagraphStyle {
         result += std::to_string(fontSize);
         result += ", indent: ";
         result += indent.ToString();
+        result += ", paragraphSpacing: ";
+        result += paragraphSpacing.ToString();
         return result;
     }
 };

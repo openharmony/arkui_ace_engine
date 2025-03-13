@@ -55,6 +55,7 @@
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -344,6 +345,7 @@ constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 constexpr double ZOOMIN_PUBLIC_ERRAND = 0.4444;
 constexpr int32_t ZOOM_CONVERT_NUM = 10;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
+constexpr int32_t MIN_ACCESSIBILITY_FOCUS_SIZE = 2;
 
 constexpr int32_t PINCH_START_TYPE = 1;
 constexpr int32_t PINCH_UPDATE_TYPE = 3;
@@ -3251,7 +3253,9 @@ void WebPattern::OnModifyDone()
             popupRenderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
             popupRenderSurface_->SetRenderContext(renderContextForPopupSurface_);
             renderContext->AddChild(renderContextForSurface_, 0);
-            renderContext->AddChild(renderContextForPopupSurface_, 1);
+            if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+                renderContext->AddChild(renderContextForPopupSurface_, 1);
+            }
             popupRenderSurface_->InitSurface();
             popupRenderSurface_->SetTransformHint(rotation_);
             popupRenderSurface_->UpdateSurfaceConfig();
@@ -3752,6 +3756,14 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         }
         touchPointX = touchPoint.x;
         touchPointY = touchPoint.y;
+        if (info.GetSourceTool() == SourceTool::PEN &&
+            delegate_->SetFocusByPosition(touchPointX, touchPointY) &&
+            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(touchPointX, touchPointY)) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "stylus touch down is editable.");
+            isNeedInterceptedTouchEvent_ = true;
+            WebRequestFocus();
+            return;
+        }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
@@ -3766,6 +3778,10 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = true;
     UninitTouchEventListener();
+    if (isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN) {
+        isNeedInterceptedTouchEvent_ = false;
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -3801,6 +3817,7 @@ void WebPattern::OnMagnifierHandleMove(const RectF& handleRect, bool isFirst)
 
 void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 {
+    CHECK_EQUAL_VOID(isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN, true);
     if (isDragging_) {
         return;
     }
@@ -3858,6 +3875,10 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
     UninitTouchEventListener();
+    if (isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN) {
+        isNeedInterceptedTouchEvent_ = false;
+        return;
+    }
     if (IsRootNeedExportTexture()) {
         HandleTouchUp(info, false);
     }
@@ -4079,7 +4100,7 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
 
 void WebPattern::HideMagnifier()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "HideMagnifier");
+    TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -4881,7 +4902,6 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
 
 void WebPattern::NotifyForNextTouchEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::NotifyForNextTouchEvent");
     CHECK_NULL_VOID(delegate_);
     delegate_->NotifyForNextTouchEvent();
 }
@@ -6216,7 +6236,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         return;
     }
     if (GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
-        if (rect.Width() <= 1 || rect.Height() <= 1) {
+        if (rect.Width() <= MIN_ACCESSIBILITY_FOCUS_SIZE || rect.Height() <= MIN_ACCESSIBILITY_FOCUS_SIZE) {
             renderContext->ResetAccessibilityFocusRect();
             renderContext->UpdateAccessibilityFocus(false);
         } else {
@@ -6527,8 +6547,8 @@ void WebPattern::OnShowAutofillPopupV2(
 
 void WebPattern::OnHideAutofillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup");
     if (!isShowAutofillPopup_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup isShowAutofillPopup_ is null");
         return;
     }
     auto host = GetHost();
@@ -6830,7 +6850,9 @@ void WebPattern::OnRebuildFrame()
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContext->AddChild(renderContextForSurface_, 0);
     CHECK_NULL_VOID(renderContextForPopupSurface_);
-    renderContext->AddChild(renderContextForPopupSurface_, 1);
+    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        renderContext->AddChild(renderContextForPopupSurface_, 1);
+    }
 }
 
 void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,

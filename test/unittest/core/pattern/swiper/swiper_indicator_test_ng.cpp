@@ -522,16 +522,16 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTouchBottom002, TestSize.L
     info.mainDelta_ = 1.0f;
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
-    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(info));
-    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
+    EXPECT_FALSE(indicatorPattern->SwiperIndicatorPattern::CheckIsTouchBottom(info));
+    EXPECT_TRUE(indicatorPattern->SwiperIndicatorPattern::CheckIsTouchBottom(touchLocationInfo));
 
     pattern_->currentIndex_ = 0;
     layoutProperty_->UpdateLoop(false);
     pattern_->leftButtonId_ = 1;
     pattern_->rightButtonId_ = 1;
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
-    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(info));
-    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
+    EXPECT_TRUE(indicatorPattern->SwiperIndicatorPattern::CheckIsTouchBottom(info));
+    EXPECT_TRUE(indicatorPattern->SwiperIndicatorPattern::CheckIsTouchBottom(touchLocationInfo));
 }
 
 /**

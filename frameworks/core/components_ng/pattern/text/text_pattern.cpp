@@ -198,6 +198,17 @@ void TextPattern::InitSelection(const Offset& pos)
         selectionOffset.SetY(pManager_->GetHeight());
     }
     int32_t extend = pManager_->GetGlyphIndexByCoordinate(selectionOffset, true);
+    if (pManager_->GetParagraphs().size() > 1) {
+        // paragraph may contain only newlines, look forward for non-newlines characters.
+        auto selectRects = pManager_->GetRects(extend, extend + 1);
+        if (selectRects.size() == 1 && NearZero(selectRects.back().Width())) {
+            auto selectStr = GetSelectedText(extend, extend + 1);
+            while (selectStr == u"\n" && extend > 0) {
+                --extend;
+                selectStr = GetSelectedText(extend, extend + 1);
+            }
+        }
+    }
     int32_t start = 0;
     int32_t end = 0;
     if (!pManager_->GetWordBoundary(extend, start, end)) {
@@ -974,13 +985,10 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
 
-    if (IsUsingMouse() && isMousePressed_ && leftMousePressed_) {
-        Offset clickOffset {textOffset.GetX(), textOffset.GetY()};
-        auto distance = (clickOffset - leftMousePressedOffset_).GetDistance();
-        if (distance >= CLICK_THRESHOLD.ConvertToPx()) {
-            TAG_LOGI(ACE_TEXT, "TextOffset not match not trigger click");
-            return;
-        }
+    if (IsUsingMouse() && isMousePressed_ && leftMousePressed_ && moveOverClickThreshold_) {
+        TAG_LOGI(ACE_TEXT, "not trigger click after mouse move");
+        moveOverClickThreshold_ = false;
+        return;
     }
 
     if (IsSelectableAndCopy() || NeedShowAIDetect()) {
@@ -1897,6 +1905,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
     isMousePressed_ = false;
     leftMousePressed_ = false;
+    moveOverClickThreshold_ = false;
     // stop auto scroll.
     auto host = GetHost();
     if (host && scrollableParent_.Upgrade() && !selectOverlay_->SelectOverlayIsOn()) {
@@ -1919,6 +1928,11 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
         HandleSelectionChange(textSelector_.baseOffset, end);
         selectOverlay_->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), info.GetGlobalLocation(), false);
+        auto distance = (textOffset - leftMousePressedOffset_).GetDistance();
+        if (distance >= CLICK_THRESHOLD.ConvertToPx()) {
+            moveOverClickThreshold_ = true;
+            return;
+        }
     }
 }
 

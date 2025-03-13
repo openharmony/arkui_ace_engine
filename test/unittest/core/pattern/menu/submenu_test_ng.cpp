@@ -82,6 +82,18 @@ constexpr float MENU_SIZE_HEIGHT = 150.0f;
 constexpr double MENU_OFFSET_X = 10.0;
 constexpr double MENU_OFFSET_Y = 10.0;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
+constexpr float SUBMENU_SIZE_HEIGHT = 200.0f;
+constexpr float SUBMENU_SIZE_HEIGHT_NEW = 90.0f;
+constexpr float MENU_ITEM_WIDTH = 50.0f;
+constexpr float MENU_ITEM_HEIGHT = 20.0f;
+constexpr float MENU_ITEM_WRAPPER_HEIGHT = 300.0f;
+constexpr float MENU_ITEM_WRAPPER_WIDTH = 200.0f;
+constexpr float MENU_ITEM_WRAPPER_X = 100.0f;
+constexpr float MENU_ITEM_WRAPPER_Y = 300.0f;
+constexpr float MENU_ITEM_WRAPPER_Y_NEW = 100.0f;
+constexpr float THREE_HUNDRED_FIFTY = 350.0f;
+constexpr float THREE_HUNDRED_TEN = 310.0f;
+constexpr float ONE = 1.0f;
 constexpr float TWENTY = 20.0f;
 constexpr float ZERO = 0.0f;
 constexpr float FOUR = 4.0f;
@@ -797,5 +809,103 @@ HWTEST_F(SubMenuTestNg, SubMenuDelayTest002, TestSize.Level1)
     menuItemPattern->isSubMenuShowed_ = true;
     menuItemPattern->CheckHideSubMenu([]() {}, mousePoint, menuZone);
     EXPECT_FALSE(menuItemPattern->IsSubMenuShowed());
+}
+
+/**
+ * @tc.name: GetSubMenuPosition001
+ * @tc.desc: Verify GetSubMenuPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, GetSubMenuPosition001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    bool stacked = true;
+    auto pipelineContext = menuItemNode->GetContextWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->windowModal_ = WindowModal::NORMAL;
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    EXPECT_EQ(subMenuLayoutAlgorithm.GetSubMenuPosition(menuItemNode, stacked).x_, ZERO);
+}
+
+/**
+ * @tc.name: VerticalLayoutSubMenuHalfScreen001
+ * @tc.desc: Verify VerticalLayoutSubMenuHalfScreen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, VerticalLayoutSubMenuHalfScreen001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    SizeF size = SizeT(TARGET_SIZE_WIDTH, SUBMENU_SIZE_HEIGHT);
+    SizeF menuItemSize = SizeT(MENU_ITEM_WIDTH, MENU_ITEM_HEIGHT);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.position_.y_ = MENU_ITEM_WRAPPER_WIDTH;
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeT(TARGET_SIZE_WIDTH, MENU_ITEM_WRAPPER_HEIGHT);
+    float position = ONE;
+    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenuHalfScreen(size, position, menuItemSize), TARGET_SIZE_WIDTH);
+}
+
+/**
+ * @tc.name: VerticalLayoutSubMenuHalfScreen002
+ * @tc.desc: Verify VerticalLayoutSubMenuHalfScreen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, VerticalLayoutSubMenuHalfScreen002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    SizeF size = SizeT(TARGET_SIZE_WIDTH, SUBMENU_SIZE_HEIGHT);
+    SizeF menuItemSize = SizeT(MENU_ITEM_WIDTH, MENU_ITEM_HEIGHT);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeT(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    float position = ONE;
+    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenuHalfScreen(size, position, menuItemSize), ZERO);
+}
+
+/**
+ * @tc.name: VerticalLayoutSubMenu001
+ * @tc.desc: Verify VerticalLayoutSubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, VerticalLayoutSubMenu001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    SizeF size = SizeT(TARGET_SIZE_WIDTH, SUBMENU_SIZE_HEIGHT_NEW);
+    SizeF menuItemSize = SizeT(MENU_ITEM_WIDTH, MENU_ITEM_HEIGHT);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.wrapperRect_ =
+        Rect(MENU_ITEM_WRAPPER_X, MENU_ITEM_WRAPPER_Y, MENU_ITEM_WRAPPER_WIDTH, TARGET_SIZE_HEIGHT);
+    float position = THREE_HUNDRED_FIFTY;
+    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenu(size, position, menuItemSize), THREE_HUNDRED_TEN);
+}
+
+/**
+ * @tc.name: VerticalLayoutSubMenu002
+ * @tc.desc: Verify VerticalLayoutSubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, VerticalLayoutSubMenu002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    SizeF size = SizeT(TARGET_SIZE_WIDTH, SUBMENU_SIZE_HEIGHT);
+    SizeF menuItemSize = SizeT(MENU_ITEM_WIDTH, MENU_ITEM_HEIGHT);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.wrapperRect_ =
+        Rect(MENU_ITEM_WRAPPER_X, MENU_ITEM_WRAPPER_Y_NEW, MENU_ITEM_WRAPPER_WIDTH, TARGET_SIZE_HEIGHT);
+    float position = ONE;
+    EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenu(size, position, menuItemSize), TARGET_SIZE_WIDTH);
 }
 } // namespace OHOS::Ace::NG

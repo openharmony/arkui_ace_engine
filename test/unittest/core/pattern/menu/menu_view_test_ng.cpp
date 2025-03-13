@@ -232,4 +232,18 @@ HWTEST_F(MenuViewTestNg, GetHasIcon001, TestSize.Level1)
     auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
 }
+/**
+ * @tc.name: GetMenuPixelMap001
+ * @tc.desc: MenuView GetMenuPixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, GetMenuPixelMap001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, GetNodeId(), AceType::MakeRefPtr<TextPattern>());
+    MenuParam menuParam;
+    MenuView::GetMenuPixelMap(targetNode, menuParam, wrapperNode_);
+
+    ASSERT_NE(targetNode, nullptr);
+}
 } // namespace OHOS::Ace::NG

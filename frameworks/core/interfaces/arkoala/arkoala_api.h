@@ -652,6 +652,22 @@ struct ArkUIGeometryTransitionOptions {
     ArkUI_Int32 hierarchyStrategy;
 };
 
+struct ArkUIBindTipsOptionsTime {
+    ArkUI_Float32 appearingTime;
+    ArkUI_Float32 disappearingTime;
+    ArkUI_Float32 appearingTimeWithContinuousOperation;
+    ArkUI_Float32 disappearingTimeWithContinuousOperation;
+};
+
+struct ArkUIBindTipsOptionsArrow {
+    ArkUI_Bool enableArrow;
+    ArkUI_CharPtr arrowPointPosition;
+    ArkUI_Float64 arrowWidthValue;
+    ArkUI_Int32 arrowWidthUnit;
+    ArkUI_Float64 arrowHeightValue;
+    ArkUI_Int32 arrowHeightUnit;
+};
+
 struct ArkUIFlexOptions {
     ArkUI_Int32 direction;
     ArkUI_Int32 wrap;
@@ -2014,6 +2030,9 @@ struct ArkUICommonModifier {
     void (*setGeometryTransition)(
         ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options);
     void (*resetGeometryTransition)(ArkUINodeHandle node);
+    void (*setBindTips)(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptionsTime timeOptions,
+        ArkUIBindTipsOptionsArrow arrowOptions);
+    void (*resetBindTips)(ArkUINodeHandle node);
     void (*setPixelStretchEffect)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetPixelStretchEffect)(ArkUINodeHandle node);
@@ -2348,8 +2367,6 @@ struct ArkUICommonModifier {
     ArkUI_CharPtr (*getAccessibilityRole)(ArkUINodeHandle node);
     void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut);
     void (*resetFocusScopeId)(ArkUINodeHandle node);
-    void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
-    void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
     void (*setFocusScopePriority)(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority);
     void (*resetFocusScopePriority)(ArkUINodeHandle node);
     void (*setPixelRound)(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length);
@@ -2395,6 +2412,8 @@ struct ArkUICommonModifier {
         ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval);
     void (*setPrivacySensitive)(ArkUINodeHandle node, ArkUI_Int32 sensitive);
     void (*resetPrivacySensitive)(ArkUINodeHandle node);
+    void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
+    void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
 };
 
 struct ArkUICommonShapeModifier {
@@ -3118,6 +3137,15 @@ struct ArkUINavigatorModifier {
 struct ArkUINodeContainerModifier {
     void (*rebuild)(ArkUI_Int32 nodeId);
     void (*clean)(ArkUINodeHandle node);
+};
+
+struct ArkUILazyGridLayoutModifier {
+    void (*setColumnsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap);
+    void (*resetColumnsGap)(ArkUINodeHandle node);
+    void (*setRowsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap);
+    void (*resetRowsGap)(ArkUINodeHandle node);
+    void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
+    void (*resetColumnsTemplate)(ArkUINodeHandle node);
 };
 
 struct ArkUITimepickerModifier {
@@ -6029,6 +6057,7 @@ struct ArkUINodeModifiers {
     const ArkUIThemeModifier* (*getThemeModifier)();
     const ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
     const ArkUIIndicatorComponentModifier* (*getIndicatorComponentModifier)();
+    const ArkUILazyGridLayoutModifier* (*getLazyGridLayoutModifier)();
 };
 
 // same as inner defines in property.h

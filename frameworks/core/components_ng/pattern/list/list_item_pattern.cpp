@@ -923,46 +923,46 @@ void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     json->PutExtAttr("selected", isSelected_, filter);
 }
 
-void ListItemPattern::SwipeForward()
+void ListItemPattern::SwipeCommon(ListItemSwipeIndex targetState)
 {
+    bool isForward = (targetState == ListItemSwipeIndex::SWIPER_END);
+    ListItemSwipeIndex checkPosition = targetState;
+    ListItemSwipeIndex oppositePosition = isForward ? ListItemSwipeIndex::SWIPER_START : ListItemSwipeIndex::SWIPER_END;
+    float collapsedOffset = isForward ? -1.0f : 1.0f;
+
     auto itemPosition = GetSwiperIndex();
-    if (itemPosition == ListItemSwipeIndex::SWIPER_END) {
+    if (itemPosition == checkPosition) {
         return;
     }
 
     if (GetSwipeActionState() == SwipeActionState::COLLAPSED) {
-        curOffset_ = -1.0f;
+        curOffset_ = collapsedOffset;
         MarkDirtyNode();
-        pendingSwipeFunc_ = [this]() {
-            FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_END);
-            StartSpringMotion(curOffset_, -endNodeSize_, 0.0f, true);
+        pendingSwipeFunc_ = [weakPtr = WeakClaim(this), targetState]() {
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireSwipeActionStateChange(targetState);
+
+            float targetOffset =
+                (targetState == ListItemSwipeIndex::SWIPER_END) ? -(pattern->endNodeSize_) : pattern->startNodeSize_;
+            pattern->StartSpringMotion(pattern->curOffset_, targetOffset, 0.0f, true);
         };
     }
-    if (itemPosition == ListItemSwipeIndex::SWIPER_START) {
+
+    if (itemPosition == oppositePosition) {
         FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
         StartSpringMotion(curOffset_, 0.0f, 0.0f, true);
     }
 }
 
+void ListItemPattern::SwipeForward()
+{
+    SwipeCommon(ListItemSwipeIndex::SWIPER_END);
+}
+
 void ListItemPattern::SwipeBackward()
 {
-    auto itemPosition = GetSwiperIndex();
-    if (itemPosition == ListItemSwipeIndex::SWIPER_START) {
-        return;
-    }
-
-    if (GetSwipeActionState() == SwipeActionState::COLLAPSED) {
-        curOffset_ = 1.0f;
-        MarkDirtyNode();
-        pendingSwipeFunc_ = [this]() {
-            FireSwipeActionStateChange(ListItemSwipeIndex::SWIPER_START);
-            StartSpringMotion(curOffset_, startNodeSize_, 0.0f, true);
-        };
-    }
-    if (itemPosition == ListItemSwipeIndex::SWIPER_END) {
-        FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
-        StartSpringMotion(curOffset_, 0.0f, 0.0f, true);
-    }
+    SwipeCommon(ListItemSwipeIndex::SWIPER_START);
 }
 
 SwipeActionState ListItemPattern::GetSwipeActionState()

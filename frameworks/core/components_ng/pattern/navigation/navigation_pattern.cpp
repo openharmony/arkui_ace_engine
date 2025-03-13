@@ -1709,6 +1709,31 @@ int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex,
 
 bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node)
 {
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    do {
+        if (parentNode_.Upgrade() || !host) {
+            break;
+        }
+        auto context = host->GetContext();
+        // Avoid the loading problem of atomicservice on the home page
+        if ((context && !context->GetInstallationFree()) || !context) {
+            break;
+        }
+        RefPtr<UINode> parentCustomNode;
+        auto curNode = host->GetParent();
+        while (curNode) {
+            auto curTag = curNode->GetTag();
+            if (curTag == V2::JS_VIEW_ETS_TAG) {
+                parentCustomNode = curNode;
+                break;
+            }
+            curNode = curNode->GetParent();
+        }
+        auto pattern = host->GetPattern<NavigationPattern>();
+        if (pattern && parentCustomNode) {
+            pattern->SetParentCustomNode(parentCustomNode);
+        }
+    } while (false);
     bool isCreate = navigationStack_->CreateNodeByIndex(index, parentNode_, node);
     if (node) {
         node->SetFreeze(true, true);
@@ -1722,8 +1747,6 @@ bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& nod
     if (navigationNode && navDestinationPattern) {
         navDestinationPattern->SetNavigationNode(navigationNode);
         navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
-        navigationStack_->SetDestinationIdToJsStack(
-            index, std::to_string(navDestinationPattern->GetNavDestinationId()));
     }
     auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, isCreate);

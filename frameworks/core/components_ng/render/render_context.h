@@ -778,8 +778,6 @@ public:
 
     virtual void SetDrawNode() {}
 
-    virtual void SetDrawNodeChangeCallback() {}
-
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

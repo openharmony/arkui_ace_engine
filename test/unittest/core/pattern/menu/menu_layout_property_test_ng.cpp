@@ -71,6 +71,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
+constexpr int32_t THEME_ID = 3;
 constexpr MenuType TYPE = MenuType::MENU;
 const std::string EMPTY_TEXT = "";
 const std::string TEXT_TAG = "text";
@@ -562,6 +563,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, ToJsonValue001, TestSize.Level1)
     EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
     EXPECT_EQ(json->GetString("fontColor"), Color::RED.ColorToString());
     EXPECT_EQ(fontJsonObject->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
+    menuNode->SetThemeScopeId(THEME_ID);
     property->UpdateExpandingMode(SubMenuExpandingMode::STACK);
     property->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("title"), "title");

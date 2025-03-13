@@ -86,6 +86,7 @@ public:
     virtual void SetUIContentType(UIContentType uIContentType) {};
     virtual bool IsRestrictedWorkerThread() { return false; }
     virtual bool HasWorkerUsing(void *worker) { return false; }
+    virtual bool CheckWorkerMaxConstraint() { return true; }
     virtual void UpdateParentOffsetToWindow(const OffsetF& offset) = 0;
 
     virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}

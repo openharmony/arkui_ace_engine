@@ -2234,4 +2234,19 @@ bool TimePickerRowPattern::NeedAdaptForAging()
     }
     return false;
 }
+
+void TimePickerRowPattern::UpdateUserSetSelectColor()
+{
+    UpdateAllChildNode();
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (columnNode) {
+            auto pattern = columnNode->GetPattern<TimePickerColumnPattern>();
+            if (pattern) {
+                pattern->UpdateUserSetSelectColor();
+            }
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

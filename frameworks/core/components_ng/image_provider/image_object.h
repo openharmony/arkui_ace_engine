@@ -45,7 +45,7 @@ public:
 
     const SizeF& GetImageSize() const;
     const ImageSourceInfo& GetSourceInfo() const;
-    const RefPtr<ImageData>& GetData() const;
+    RefPtr<ImageData> GetData() const;
     int32_t GetFrameCount() const;
     ImageRotateOrientation GetOrientation() const;
     ImageRotateOrientation GetUserOrientation() const;

@@ -973,15 +973,15 @@ void ScrollPattern::CaleSnapOffsets()
 
 void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
 {
-    CHECK_NULL_VOID(GreatOrEqual(intervalSize_.Value(), SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE));
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
+    auto intervalSize = intervalSize_.Unit() == DimensionUnit::PERCENT ?
+                        intervalSize_.Value() * mainSize : intervalSize_.ConvertToPx();
+    CHECK_NULL_VOID(GreatOrEqual(intervalSize, SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE));
     auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
     auto start = 0.0f;
     auto end = -scrollableDistance_;
     auto snapOffset = 0.0f;
     auto sizeDelta = 0.0f;
-    auto intervalSize = intervalSize_.Unit() == DimensionUnit::PERCENT ?
-                        intervalSize_.Value() * mainSize : intervalSize_.ConvertToPx();
     float temp = static_cast<int32_t>(extentMainSize / intervalSize) * intervalSize;
     switch (scrollSnapAlign) {
         case ScrollSnapAlign::START:

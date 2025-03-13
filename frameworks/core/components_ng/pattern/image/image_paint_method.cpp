@@ -52,7 +52,7 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
 
     BorderRadiusArray radiusXY = BorderRadiusArray();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         auto paintRectWidth = renderCtx->GetPaintRectWithoutTransform().Width();
         radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth),
                          borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth)),

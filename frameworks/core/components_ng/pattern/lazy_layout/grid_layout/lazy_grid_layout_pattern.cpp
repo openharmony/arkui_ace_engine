@@ -92,6 +92,9 @@ void LazyGridLayoutPattern::OnAttachToMainTree()
             parent = parent->GetParent();
             continue;
         }
+        if (parent->GetTag() != V2::WATERFLOW_ETS_TAG) {
+            LOGF_ABORT("LazyGridLayout cannot be used under the %{public}s", parent->GetTag().c_str());
+        }
         return;
     }
 }

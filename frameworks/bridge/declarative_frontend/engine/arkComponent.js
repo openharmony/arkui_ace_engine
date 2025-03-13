@@ -1429,6 +1429,72 @@ class GeometryTransitionModifier extends ModifierWithKey {
     }
   }
 }
+class BindTipsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBindTips(node);
+    }
+    else {
+      if (this.value.message === undefined) {
+        return;
+      }
+      getUINativeModule().common.setBindTips(
+        node,
+        this.value.message,
+        this.value.options?.appearingTime,
+        this.value.options?.disappearingTime,
+        this.value.options?.appearingTimeWithContinuousOperation,
+        this.value.options?.disappearingTimeWithContinuousOperation,
+        this.value.options?.enableArrow,
+        this.value.options?.arrowPointPosition,
+        this.value.options?.arrowWidth,
+        this.value.options?.arrowHeight
+      );
+    }
+  }
+  checkObjectDiff() {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.message, this.value.message) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.appearingTime,
+        this.value.options.appearingTime
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.disappearingTime,
+        this.value.options.disappearingTime
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.appearingTimeWithContinuousOperation,
+        this.value.options.appearingTimeWithContinuousOperation
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.disappearingTimeWithContinuousOperation,
+        this.value.options.disappearingTimeWithContinuousOperation
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.enableArrow,
+        this.value.options.enableArrow
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.arrowPointPosition,
+        this.value.options.arrowPointPosition
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.arrowWidth,
+        this.value.options.arrowWidth
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.arrowHeight,
+        this.value.options.arrowHeight
+      )
+    );
+  }
+}
+BindTipsModifier.identity = Symbol('bindTips');
+
 GeometryTransitionModifier.identity = Symbol('geometryTransition');
 class BindMenuModifier extends ModifierWithKey {
   constructor(value) {
@@ -4492,6 +4558,13 @@ class ArkComponent {
   }
   bindPopup(show, popup) {
     throw new Error('Method not implemented.');
+  }
+  bindTips(message, options) {
+    let arkBindTipsOptions = new ArkBindTipsOptions();
+    arkBindTipsOptions.message = message;
+    arkBindTipsOptions.options = options;
+    modifierWithKey(this._modifiersWithKeys, BindTipsModifier.identity, BindTipsModifier, arkBindTipsOptions);
+    return this;
   }
   bindMenu(content, options) {
     let arkBindMenu = new ArkBindMenu();
@@ -18025,6 +18098,15 @@ class ArkBindMenu{
   }
   isEqual(another) {
     return (this.content === another.content && this.options === another.options);
+  }
+}
+class ArkBindTipsOptions {
+  constructor() {
+      this.message = undefined;
+      this.options = undefined;
+  }
+  isEqual(another) {
+      return (this.message === another.message && this.options === another.options);
   }
 }
 class ArkSymbolEffect {
@@ -34195,6 +34277,85 @@ if (globalThis.ContainerSpan !== undefined) {
     });
   };
 }
+/// <reference path='./import.ts' />
+class ArkLazyGridLayout extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  columnsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridColumnsGapModifier.identity, LazyGridColumnsGapModifier, value);
+    return this;
+  }
+  rowsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridRowsGapModifier.identity, LazyGridRowsGapModifier, value);
+    return this;
+  }
+}
+class ArkLazyVGridLayoutComponent extends ArkLazyGridLayout {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  columnsTemplate(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridColumnsTemplateModifier.identity, LazyGridColumnsTemplateModifier, value);
+    return this;
+  }
+}
+class LazyGridColumnsTemplateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().lazyVGridLayout.resetColumnsTemplate(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setColumnsTemplate(node, this.value);
+    }
+  }
+}
+LazyGridColumnsTemplateModifier.identity = Symbol('lazyGridColumnsTemplate');
+class LazyGridColumnsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().lazyGridLayout.resetColumnsGap(node);
+    }
+    else {
+      getUINativeModule().lazyGridLayout.setColumnsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LazyGridColumnsGapModifier.identity = Symbol('lazyGridColumnsGap');
+class LazyGridRowsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isObject(this.value)) {
+      getUINativeModule().lazyGridLayout.resetRowsGap(node);
+    }
+    else {
+      getUINativeModule().lazyGridLayout.setRowsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LazyGridRowsGapModifier.identity = Symbol('lazyGridRowsGap');
+// @ts-ignore
+globalThis.LazyVGridLayout.attributeModifier = function (modifier) {
+  attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    return new ArkLazyVGridLayoutComponent(nativePtr);
+  }, (nativePtr, classType, modifierJS) => {
+    return new modifierJS.LazyVGridLayoutModifier(nativePtr, classType);
+  });
+};
 
 function getArkUINodeFromNapi() {
   if(globalThis.__XNode__ === undefined) {

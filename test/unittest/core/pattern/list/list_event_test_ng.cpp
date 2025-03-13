@@ -1018,6 +1018,102 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollSnapAlign015
+ * @tc.desc: Test if SnapEndPos has changed while the snap animation is in progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ScrollSnapAlign015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign::START
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+
+    /**
+     * @tc.steps: step2. StartSnapAnimation with 500 offset.
+     * @tc.expected: Start snap Animation.
+     */
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = -500.f,
+        .animationVelocity = -0.f,
+        .snapDirection = SnapDirection::NONE,
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    MockAnimationManager::GetInstance().SetTicks(3);
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
+    EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+
+    /**
+     * @tc.steps: step3. Check if SnapEndPos has changed while the snap animation is in progress.
+     * @tc.expected: Not start snap Animation.
+     */
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+}
+
+/**
+ * @tc.name: ScrollSnapAlign016
+ * @tc.desc: Test if SnapEndPos has changed while the snap animation is in progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ScrollSnapAlign016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign::START
+     * @tc.expected: Set the list is layout from the end.
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    model.SetStackFromEnd(true);
+    CreateListItems(15);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 1100.0f);
+
+    /**
+     * @tc.steps: step2. StartSnapAnimation with 500 offset.
+     * @tc.expected: Start snap Animation.
+     */
+    SnapAnimationOptions snapAnimationOptions = {
+        .snapDelta = 600.f,
+        .animationVelocity = -0.f,
+        .snapDirection = SnapDirection::NONE,
+    };
+    pattern_->StartSnapAnimation(snapAnimationOptions);
+    MockAnimationManager::GetInstance().SetTicks(3);
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
+    EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+
+    /**
+     * @tc.steps: step3. Check if SnapEndPos has changed while the snap animation is in progress.
+     * @tc.expected: Not start snap Animation.
+     */
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->predictSnapEndPos_, 500.0f);
+}
+
+/**
  * @tc.name: StartSnapAnimation001
  * @tc.desc: Test start snap align by mouse wheel.
  * @tc.type: FUNC

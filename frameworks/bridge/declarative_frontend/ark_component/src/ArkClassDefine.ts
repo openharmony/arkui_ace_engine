@@ -361,6 +361,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkBindTipsOptions {
+  message: ResourceStr | StyledString | undefined;
+  options: TipsOptions | undefined;
+  constructor() {
+    this.message = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkBindTipsOptions): boolean {
+    return (this.options === another.options) && (this.options === another.options);
+  }
+}
+
 class ArkChainMode {
   direction: Axis | undefined;
   style: ChainStyle | undefined;

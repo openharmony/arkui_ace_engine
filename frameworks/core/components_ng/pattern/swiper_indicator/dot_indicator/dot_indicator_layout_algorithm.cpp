@@ -102,7 +102,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
     float indicatorScale = theme->GetIndicatorScale();
-    if (maxDisplayCount_ > 0 && isBindIndicator_) {
+    if ((maxDisplayCount_ > 0 || !indicatorInteractive_) && isBindIndicator_) {
         indicatorScale = 1.0f;
     }
     userItemWidth *= indicatorScale;

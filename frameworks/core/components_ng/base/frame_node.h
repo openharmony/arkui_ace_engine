@@ -500,8 +500,6 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    int32_t GetTransformRotateRelativeToWindow(bool excludeSelf = false);
-
     RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
@@ -1284,6 +1282,11 @@ public:
         topWindowBoundary_ = topWindowBoundary;
     }
     bool CheckVisibleOrActive() override;
+
+    void SetNeedLazyLayout(bool value)
+    {
+        layoutProperty_->SetNeedLazyLayout(value);
+    }
 
 protected:
     void DumpInfo() override;

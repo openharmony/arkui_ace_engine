@@ -491,7 +491,7 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties &dialogPr
 void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name,
     const RefPtr<NG::OverlayManager>& overlay)
 {
-    auto currentId = Container::CurrentId();
+    auto currentId = Container::CurrentIdSafelyWithCheck();
     ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -509,7 +509,7 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
 
 bool ContainerIsService()
 {
-    auto containerId = Container::CurrentIdSafely();
+    auto containerId = Container::CurrentIdSafelyWithCheck();
     if (containerId < 0) {
         auto container = Container::GetActive();
         if (container) {

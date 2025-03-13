@@ -57,6 +57,7 @@ public:
     virtual void SetItemDragHandler(int32_t repeatElmtId, std::function<void(int32_t)>&& onLongPress,
         std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
         std::function<void(int32_t)>&& onDrop) = 0;
+    virtual void SetCreateByTemplate(bool isCreatedByTemplate) = 0;
 
 private:
     static std::unique_ptr<RepeatVirtualScroll2Model> instance_;

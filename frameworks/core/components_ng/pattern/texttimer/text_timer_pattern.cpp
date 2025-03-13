@@ -159,7 +159,7 @@ void TextTimerPattern::OnAttachToFrameNode()
 
 void TextTimerPattern::OnModifyDone()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         Pattern::OnModifyDone();
     }
     auto host = GetHost();

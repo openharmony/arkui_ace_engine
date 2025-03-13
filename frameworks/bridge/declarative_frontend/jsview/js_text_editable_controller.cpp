@@ -34,6 +34,7 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
     JSClass<JSTextEditableController>::CustomMethod("deleteText", &JSTextEditableController::DeleteText);
     JSClass<JSTextEditableController>::CustomMethod("getSelection", &JSTextEditableController::GetSelection);
     JSClass<JSTextEditableController>::CustomMethod("clearPreviewText", &JSTextEditableController::ClearPreviewText);
+    JSClass<JSTextEditableController>::CustomMethod("getText", &JSTextEditableController::GetText);
     JSClass<JSTextEditableController>::Method("stopEditing", &JSTextEditableController::StopEditing);
     JSClass<JSTextEditableController>::Bind(
         globalObj, JSTextEditableController::Constructor, JSTextEditableController::Destructor);
@@ -258,6 +259,40 @@ void JSTextEditableController::ClearPreviewText(const JSCallbackInfo& info)
         controller->ClearPreviewText();
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "ClearPreviewText: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::GetText(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        std::u16string content = controller->GetText();
+        const auto& textRange = info[0];
+        int32_t startIndex = 0;
+        int32_t endIndex = content.length();
+        if (textRange->IsObject()) {
+            JSRef<JSObject> rangeObj = JSRef<JSObject>::Cast(textRange);
+            JSRef<JSVal> start = rangeObj->GetProperty("start");
+            if (start->IsNumber()) {
+                startIndex = start->ToNumber<int32_t>();
+                startIndex = startIndex < 0 ? 0 : startIndex;
+                startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content.length()));
+            }
+            JSRef<JSVal> end = rangeObj->GetProperty("end");
+            if (end->IsNumber()) {
+                endIndex = end->ToNumber<int32_t>();
+                endIndex = endIndex < 0 ? content.length() : endIndex;
+                endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content.length()));
+            }
+            if (startIndex > endIndex) {
+                std::swap(startIndex, endIndex);
+            }
+        }
+        std::u16string result = content.substr(startIndex, endIndex);
+        auto returnValue = JSVal(ToJSValue(result));
+        info.SetReturnValue(JSRef<JSVal>::Make(returnValue));
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "GetText: The JSTextEditableController is NULL");
     }
 }
 

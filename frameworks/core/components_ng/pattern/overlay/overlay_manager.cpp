@@ -2034,7 +2034,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
     RemoveFilter();
 }
 
-RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo)
+RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo,
+    bool isForceClear)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide popup without animation enter");
     popupMap_[targetId] = popupInfo;
@@ -2047,7 +2048,7 @@ RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, co
     auto bubbleRenderProp = popupInfo.popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_RETURN(bubbleRenderProp, nullptr);
     auto autoCancel = bubbleRenderProp->GetAutoCancel().value_or(true);
-    if (!autoCancel) {
+    if (!autoCancel && !isForceClear) {
         return nullptr;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -2577,7 +2578,7 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
     }
 }
 
-void OverlayManager::CleanPopupInSubWindow()
+void OverlayManager::CleanPopupInSubWindow(bool isForceClear)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean popup insubwindow enter");
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -2595,7 +2596,7 @@ void OverlayManager::CleanPopupInSubWindow()
                 continue;
             }
             popupInfo.markNeedUpdate = true;
-            auto removeNode = HidePopupWithoutAnimation(target, popupInfo);
+            auto removeNode = HidePopupWithoutAnimation(target, popupInfo, isForceClear);
             if (removeNode) {
                 targetList.emplace_back(target);
             }
@@ -2607,7 +2608,7 @@ void OverlayManager::CleanPopupInSubWindow()
         CHECK_NULL_VOID(removeNode);
         auto bubblePattern = removeNode->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(bubblePattern);
-        if (bubblePattern->HasOnWillDismiss()) {
+        if (bubblePattern->HasOnWillDismiss() && !isForceClear) {
             SetDismissPopupId(target);
             bubblePattern->CallOnWillDismiss(static_cast<int32_t>(DismissReason::TOUCH_OUTSIDE));
         } else {
@@ -3600,9 +3601,11 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         }
     }
     CHECK_EQUAL_RETURN(overlay->GetTag(), V2::STAGE_ETS_TAG, OVERLAY_EXISTS);
-    CHECK_EQUAL_RETURN(overlay->GetTag(), V2::OVERLAY_ETS_TAG, OVERLAY_EXISTS);
     CHECK_EQUAL_RETURN(overlay->GetTag(), V2::ORDER_OVERLAY_ETS_TAG, OVERLAY_EXISTS);
     CHECK_EQUAL_RETURN(overlay->GetTag(), V2::ATOMIC_SERVICE_ETS_TAG, OVERLAY_EXISTS);
+    if (overlay->GetTag() == V2::OVERLAY_ETS_TAG) {
+        return RemoveOverlayManagerNode();
+    }
     // close dialog with animation
     if (InstanceOf<DialogPattern>(pattern)) {
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
@@ -6046,15 +6049,14 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
     CHECK_NULL_RETURN(safeAreaManager, keyboardOffsetInfo);
     if (safeAreaManager->IsAtomicService()) {
         for (const auto& child : rootNode->GetChildren()) {
-            if (child->GetTag() != V2::ATOMIC_SERVICE_ETS_TAG) {
-                continue;
+            if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
+                auto childNd = AceType::DynamicCast<FrameNode>(rootNode);
+                CHECK_NULL_RETURN(childNd, keyboardOffsetInfo);
+                auto childGeo = childNd->GetGeometryNode();
+                CHECK_NULL_RETURN(childGeo, keyboardOffsetInfo);
+                pageHeight = childGeo->GetFrameSize().Height();
+                finalOffset = pageHeight - keyboardHeight;
             }
-            auto childNd = AceType::DynamicCast<FrameNode>(rootNode);
-            CHECK_NULL_RETURN(childNd, keyboardOffsetInfo);
-            auto childGeo = childNd->GetGeometryNode();
-            CHECK_NULL_RETURN(childGeo, keyboardOffsetInfo);
-            pageHeight = childGeo->GetFrameSize().Height();
-            finalOffset = pageHeight - keyboardHeight;
         }
     } else if (rootNode->GetTag() == V2::STACK_ETS_TAG) {
         auto rootNd = AceType::DynamicCast<FrameNode>(rootNode);
@@ -6073,6 +6075,10 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
     keyboardOffsetInfo.finalOffset = finalOffset;
     keyboardOffsetInfo.inAniStartOffset = pageHeight;
     keyboardOffsetInfo.outAniEndOffset = finalOffset + keyboardHeight;
+    auto container = Container::Current();
+    if (container && safeAreaManager->GetSystemSafeArea().bottom_.IsValid() && !container->IsSceneBoardEnabled()) {
+        keyboardOffsetInfo.finalOffset -= safeAreaManager->GetSystemSafeArea().bottom_.start - pageHeight;
+    }
     return keyboardOffsetInfo;
 }
 
@@ -8055,5 +8061,17 @@ Rect OverlayManager::GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode)
         isCrossWindow, rect.ToString().c_str());
 
     return rect;
+}
+
+int32_t OverlayManager::RemoveOverlayManagerNode()
+{
+    if (overlayInfo_.has_value() && overlayInfo_.value().enableBackPressedEvent && overlayNode_) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove overlay node last component when back pressed");
+        auto componentNode = GetLastChildNotRemoving(overlayNode_);
+        CHECK_NULL_RETURN(componentNode, OVERLAY_EXISTS);
+        RemoveFrameNodeOnOverlay(componentNode);
+        return OVERLAY_REMOVE;
+    }
+    return OVERLAY_EXISTS;
 }
 } // namespace OHOS::Ace::NG

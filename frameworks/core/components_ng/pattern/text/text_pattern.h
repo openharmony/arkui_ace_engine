@@ -976,6 +976,7 @@ private:
 
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
+    bool moveOverClickThreshold_ = false;
     bool isMarqueeRunning_ = false;
 
     RefPtr<ParagraphManager> pManager_;

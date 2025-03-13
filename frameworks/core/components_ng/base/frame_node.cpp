@@ -3599,25 +3599,6 @@ VectorF FrameNode::GetTransformScaleRelativeToWindow() const
     return finalScale;
 }
 
-int32_t FrameNode::GetTransformRotateRelativeToWindow(bool excludeSelf)
-{
-    int32_t FULL_CIRCLE_ANGLE = 360;
-    int32_t rotateDegree = 0;
-    auto context = GetRenderContext();
-    if (context && !excludeSelf) {
-        rotateDegree = context->GetRotateDegree();
-    }
-    auto parent = GetAncestorNodeOfFrame(true);
-    while (parent) {
-        auto contextParent = parent->GetRenderContext();
-        if (contextParent) {
-            rotateDegree += contextParent->GetRotateDegree();
-        }
-        parent = parent->GetAncestorNodeOfFrame(true);
-    }
-    return rotateDegree %= FULL_CIRCLE_ANGLE;
-}
-
 // returns a node's rect relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform

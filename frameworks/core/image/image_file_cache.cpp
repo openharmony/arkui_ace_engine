@@ -335,9 +335,6 @@ void ImageFileCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
 
 void ImageFileCache::ClearAllCacheFiles()
 {
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN  )) {
-        return;
-    }
     auto clearedFlag = StorageProxy::GetInstance()->GetStorage()->GetString("image.filecache.clear");
     if (clearedFlag == "cleared") {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "get cleared = %{public}s failed.", clearedFlag.c_str());

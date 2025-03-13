@@ -259,6 +259,16 @@ void Scrollable::ListenDigitalCrownEvent(const RefPtr<FrameNode>& frameNode)
         return true;
     };
     focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto scroll = weak.Upgrade();
+        CHECK_NULL_VOID(scroll);
+        GestureEvent info;
+        info.SetSourceDevice(SourceType::CROWN);
+        info.SetSourceTool(SourceTool::UNKNOWN);
+        scroll->HandleCrownActionCancel(info);
+    };
+    focusHub->SetOnBlurInternal(std::move(blurTask));
 }
 
 double Scrollable::GetCrownRotatePx(const CrownEvent& event) const
@@ -390,7 +400,7 @@ void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDel
 
 void Scrollable::HandleCrownActionCancel(GestureEvent& info)
 {
-    if (!isDragging_) {
+    if (!isDragging_ || !isCrownEventDragging_) {
         return;
     }
 

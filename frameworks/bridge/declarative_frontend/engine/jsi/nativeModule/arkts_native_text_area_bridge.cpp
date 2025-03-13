@@ -1903,7 +1903,7 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runt
         SetBorderWidthArrayByDimen(bottom, values, units, NUM_2);
         SetBorderWidthArrayByDimen(isRightToLeft ? right : left, values, units, NUM_3);
     } else {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
             ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
             ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
             ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);

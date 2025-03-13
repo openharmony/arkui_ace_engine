@@ -214,6 +214,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     id(value: string): this;
     geometryTransition(id: string): this;
     bindPopup(show: boolean, popup: PopupOptions | CustomPopupOptions): this;
+    bindTips(message: TipsMessageType, options?: TipsOptions): this;
     bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this;
     bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this;
     bindContentCover(isShow: boolean, builder: CustomBuilder, type?: ModalTransition | ContentCoverOptions): this;
@@ -2067,4 +2068,11 @@ declare class ArkComponent3DComponent extends ArkComponent implements Component3
 declare class ArkContainerSpanComponent extends ArkComponent implements ContainerSpanAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     textBackgroundStyle(value: TextBackgroundStyle): ContainerSpanAttribute;
+}
+
+declare class ArkLazyVGridLayoutComponent extends ArkComponent implements LazyVGridLayoutAttribute {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+    columnsTemplate(value: string): this;
+    columnsGap(value: LengthMetrics): this;
+    rowsGap(value: LengthMetrics): this;
 }

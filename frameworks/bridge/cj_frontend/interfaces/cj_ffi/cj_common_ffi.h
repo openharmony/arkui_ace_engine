@@ -298,7 +298,7 @@ struct CJDragEvent {
 struct CJDragItemInfo {
     int64_t pixelMapId;
     void (*builder)();
-    const char* extraInfo;
+    char* extraInfo;
 };
 
 struct CJBaseEvent {
@@ -389,6 +389,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCall
 
 CJ_EXPORT int64_t FfiGeneralSizeOfPointer();
 
+CJ_EXPORT bool FfiOHOSAceFrameworkCanIUse(char* syscapString);
+
 struct CJIndicator {
     double left;
     int32_t leftUnit;
@@ -416,5 +418,7 @@ void AssambleCJEventTarget(
 
 void AssambleCJClickInfo(const OHOS::Ace::GestureEvent& event, CJClickInfo& clickInfo, CJEventTarget& eventTarget,
     CJArea& area, CJPosition& position, CJPosition& globalPosition);
+
+void ReleaseCJDragItemInfo(CJDragItemInfo& info);
 } // namespace OHOS::Ace
 #endif // OHOS_ACE_FRAMEWORK_CJ_COMMON_FFI_H

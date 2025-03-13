@@ -471,6 +471,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
         twinklingInterval_ = 3000; // 3000 : for AtuoUITest
     }
     ResetOriginCaretPosition();
+    callbackOldPreviewText_.offset = -1;
 }
 
 bool TextFieldPattern::GetIndependentControlKeyboard()
@@ -4064,6 +4065,9 @@ void TextFieldPattern::InitPanEvent()
             host->IsDraggable() && pattern->IsPressSelectedBox()) {
             return GestureJudgeResult::REJECT;
         }
+        if (pattern->GetCancelButtonTouchInfo()) {
+            return GestureJudgeResult::REJECT;
+        }
         return GestureJudgeResult::CONTINUE;
     });
 }
@@ -5766,6 +5770,21 @@ void TextFieldPattern::RecordSubmitEvent() const
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
+#if !defined(ENABLE_STANDARD_INPUT)
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    if (layoutProperty && layoutProperty->HasMaxLength()) {
+        bool textChange = false;
+        auto result = UtfUtils::Str8DebugToStr16(value->text);
+        contentController_->FilterTextInputStyle(textChange, result);
+        auto resultLen = static_cast<int32_t>(result.length());
+        auto maxLen = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+        if (resultLen != maxLen) {
+            showCountBorderStyle_ = resultLen > maxLen;
+            HandleCountStyle();
+        }
+    }
+#endif
+
     UpdateEditingValueToRecord();
     contentController_->SetTextValue(UtfUtils::Str8DebugToStr16(value->text));
     selectController_->UpdateCaretIndex(value->selection.baseOffset);
@@ -5775,8 +5794,6 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -10730,6 +10747,7 @@ void TextFieldPattern::HandleCancelButtonTouchDown(const RefPtr<TextInputRespons
     roundRectVector.push_back(mouseRect);
     CHECK_NULL_VOID(textFieldOverlayModifier_);
     textFieldOverlayModifier_->SetHoverColorAndRects(roundRectVector, touchColor.GetValue());
+    cancelButtonTouched_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -10739,6 +10757,7 @@ void TextFieldPattern::HandleCancelButtonTouchUp()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(textFieldOverlayModifier_);
     textFieldOverlayModifier_->ClearHoverColorAndRects();
+    cancelButtonTouched_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

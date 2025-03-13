@@ -128,7 +128,7 @@ HWTEST_F(DragDropInitiatingStateReadyTestNG, DragDropInitiatingStateReadyTestNG0
         ASSERT_NE(handler, nullptr);
         auto machine = handler->initiatingFlow_;
         ASSERT_NE(machine, nullptr);
-
+        machine->InitializeState();
         dragDropManager->ResetDragging(testCase.isDragging ? DragDropMgrState::DRAGGING : DragDropMgrState::IDLE);
         dragDropManager->SetIsDragNodeNeedClean(testCase.isDragNodeNeedClean);
         overlayManager->SetIsGatherWithMenu(testCase.isGatherWithMenu);
