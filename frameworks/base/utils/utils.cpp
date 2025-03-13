@@ -44,12 +44,12 @@ std::string ReadFileToString(const std::string& packagePathStr, const std::strin
     auto configPath = packagePathStr + fileName;
     char realPath[PATH_MAX] = { 0x00 };
     if (!RealPath(configPath.c_str(), realPath)) {
-        LOGE("realpath fail! filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
+        LOGE("realpath fail!");
         return "";
     }
     std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
     if (!file) {
-        LOGE("open file failed, filePath: %{private}s, fail reason: %{public}s", configPath.c_str(), strerror(errno));
+        LOGE("open file failed");
         return "";
     }
     if (std::fseek(file.get(), 0, SEEK_END) != 0) {
