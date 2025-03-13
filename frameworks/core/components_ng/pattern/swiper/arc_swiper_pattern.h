@@ -184,7 +184,6 @@ private:
     double crownVelocity_ = 0.0;
     double crownTurnVelocity_ = 0.0;
     bool isHandleCrownActionEnd_ = false;
-    int32_t oldCurrentIndex_ = -1;
 #endif
     bool canChangeDirectionFlag_ = false;
     bool scrollToLeft_ = false;
