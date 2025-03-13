@@ -23,6 +23,8 @@
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/syntax/for_each_model_ng.h"
+#include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #undef private
 #undef protected
 
@@ -66,7 +68,8 @@ protected:
         int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove = nullptr);
     void CreateItemGroupsInLazyForEach(int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove = nullptr);
     static RefPtr<FrameNode> CreateCustomNode(const std::string& tag, float crossSize, float mainSize);
-
+    LazyForEachModelNG CreateItemsInForLazyEachForItemDragEvent(int32_t itemNumber, float itemMainSize);
+    ForEachModelNG CreateForEachListForItemDragEvent(int32_t itemNumber, int32_t lanes);
     // utils
     std::function<void()> GetRowOrColBuilder(float crossSize, float mainSize);
     std::function<void()> GetRowOrColBuilder(Dimension crossSize, Dimension mainSize);
