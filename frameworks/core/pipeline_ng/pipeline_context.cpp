@@ -751,6 +751,8 @@ void PipelineContext::FlushMouseEventVoluntarily()
     event.action = MouseAction::MOVE;
     event.button = MouseButton::NONE_BUTTON;
     event.sourceType = SourceType::MOUSE;
+    event.deviceId = lastMouseEvent_->deviceId;
+    event.sourceTool = SourceTool::MOUSE;
 
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
@@ -3501,6 +3503,7 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     lastMouseEvent_->touchEventId = event.touchEventId;
     lastMouseEvent_->mockFlushEvent = event.mockFlushEvent;
     lastMouseEvent_->pointerEvent = event.pointerEvent;
+    lastMouseEvent_->deviceId = event.deviceId;
     lastSourceType_ = event.sourceType;
 }
 
@@ -3669,6 +3672,8 @@ void PipelineContext::FlushMouseEvent()
     event.action = MouseAction::MOVE;
     event.button = MouseButton::NONE_BUTTON;
     event.sourceType = SourceType::MOUSE;
+    event.deviceId = lastMouseEvent_->deviceId;
+    event.sourceTool = SourceTool::MOUSE;
 
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rootNode_);
