@@ -19479,6 +19479,9 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
     void (*EndFrame)(Ark_NativePointer root);
     void (*syncInstanceId)(Ark_Int32 instanceId);
     void (*restoreInstanceId)();
+    Ark_Int32 (*getResourceId)(const Ark_String* bundleName,
+                               const Ark_String* moduleName,
+                               const Array_String* params);
 } GENERATED_ArkUISystemOpsAccessor;
 
 typedef struct GENERATED_ArkUIDrawingCanvasAccessor {
