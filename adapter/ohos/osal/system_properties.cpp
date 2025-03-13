@@ -368,6 +368,11 @@ std::pair<float, float> GetPercent()
     return percent;
 }
 
+int32_t ReadTouchAccelarateMode()
+{
+    return system::GetIntParameter("debug.ace.touch.accelarate", 0);
+}
+
 int32_t GetPageCountProp()
 {
     float pageCount = std::atof(system::GetParameter("persist.ace.cachedcount.page_count", "1.0").c_str());
@@ -440,6 +445,7 @@ bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
 float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
+int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThreshold();
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
@@ -857,6 +863,11 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         }
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
+}
+
+int32_t SystemProperties::GetTouchAccelarate()
+{
+    return touchAccelarate_;
 }
 
 bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
