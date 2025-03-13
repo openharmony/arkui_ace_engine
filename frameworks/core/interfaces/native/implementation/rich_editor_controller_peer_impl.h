@@ -66,11 +66,10 @@ public:
         return result;
     }
 
-    int32_t AddBuilderSpanImpl(FrameNode* frameNode, const SpanOptionBase& options)
+    int32_t AddBuilderSpanImpl(RefPtr<UINode> spanNode, const SpanOptionBase& options)
     {
         int32_t result = 0;
         if (auto controller = handler_.Upgrade(); controller) {
-            auto spanNode = SpanNode::GetOrCreateSpanNode(frameNode->GetId());
             result = controller->AddPlaceholderSpan(spanNode, options);
         }
         return result;
