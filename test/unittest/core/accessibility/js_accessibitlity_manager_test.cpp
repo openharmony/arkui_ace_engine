@@ -1268,7 +1268,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager027, TestSize.Level1)
     // Verify that the result is default constructed when context is null
     EXPECT_EQ(result.left, 0);
     EXPECT_EQ(result.top, 0);
-    EXPECT_EQ(result.scaleX, 1.0f);  
-    EXPECT_EQ(result.scaleY, 1.0f);  
+    EXPECT_EQ(result.scaleX, 1.0f);
+    EXPECT_EQ(result.scaleY, 1.0f);
 }
 } // namespace OHOS::Ace::NG
