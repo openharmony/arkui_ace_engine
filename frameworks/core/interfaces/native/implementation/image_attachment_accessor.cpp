@@ -49,10 +49,12 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
     }
 #endif
     auto imageStyle = OptConvert<ImageSpanAttribute>(value.layoutStyle);
-    imageStyle->verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
-    imageStyle->objectFit = OptConvert<ImageFit>(value.objectFit);
-    imageStyle->size = OptConvert<ImageSpanSize>(value.size);
-    imageOptions.imageAttribute = imageStyle;
+    if (imageStyle) {
+        imageStyle->verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
+        imageStyle->objectFit = OptConvert<ImageFit>(value.objectFit);
+        imageStyle->size = OptConvert<ImageSpanSize>(value.size);
+        imageOptions.imageAttribute = imageStyle;
+    }
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
 }
 } // namespace Converter
@@ -96,14 +98,16 @@ Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
 }
 Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
-    CHECK_NULL_RETURN(peer && peer->imageSpan, INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
+    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageSpanOptions().imageAttribute,
+        INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);    
     auto aligment = peer->imageSpan->GetImageSpanOptions().imageAttribute->verticalAlign;
     CHECK_NULL_RETURN(aligment, INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
     return ArkValue<Ark_ImageSpanAlignment>(*aligment);
 }
 Ark_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
 {
-    CHECK_NULL_RETURN(peer && peer->imageSpan, INVALID_ENUM_VAL<Ark_ImageFit>);
+    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageSpanOptions().imageAttribute,
+        INVALID_ENUM_VAL<Ark_ImageFit>);
     auto objectFit = peer->imageSpan->GetImageSpanOptions().imageAttribute->objectFit;
     CHECK_NULL_RETURN(objectFit, INVALID_ENUM_VAL<Ark_ImageFit>);
     return ArkValue<Ark_ImageFit>(*objectFit);

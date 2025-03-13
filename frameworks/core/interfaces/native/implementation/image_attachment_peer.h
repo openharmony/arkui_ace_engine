@@ -19,8 +19,5 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 
 struct ImageAttachmentPeer final {
-    ImageAttachmentPeer() = default;
-    ~ImageAttachmentPeer() = default;
     OHOS::Ace::RefPtr<OHOS::Ace::ImageSpan> imageSpan;
-    ACE_DISALLOW_COPY_AND_MOVE(ImageAttachmentPeer);
 };
