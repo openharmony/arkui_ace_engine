@@ -20,7 +20,7 @@
 #include "generated/test_fixtures.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
+#include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -32,7 +32,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace  {
     const auto ATTRIBUTE_TYPE_NAME = "type";
-    const auto ATTRIBUTE_TYPE_DEFAULT_VALUE = "ToggleType.Checkbox";
+    const auto ATTRIBUTE_TYPE_DEFAULT_VALUE = "ToggleType.Switch";
     const auto ATTRIBUTE_IS_ON_NAME = "isOn";
     const auto ATTRIBUTE_IS_ON_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
@@ -255,7 +255,7 @@ HWTEST_F(ToggleModifierTest, setToggleOptionsTestIsOnInvalidValues, TestSize.Lev
 HWTEST_F(ToggleModifierTest, setOnChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -811,7 +811,7 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusInvalidValues, T
 HWTEST_F(ToggleModifierTest, setOnChangeEventIsOnImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
