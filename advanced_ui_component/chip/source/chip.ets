@@ -849,11 +849,13 @@ export struct ChipComponent {
     let currentColor: ResourceColor;
     let themeChipNode = this.theme.chipNode;
     if (this.getChipActive()) {
-      currentColor = (this.chipNodeOnFocus || this.isHover) && !this.isSetActiveChipBgColor() ? themeChipNode.focusActivatedBgColor :
-        this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
+      currentColor =
+        (this.chipNodeOnFocus || this.isHover) && !this.isSetActiveChipBgColor() ? themeChipNode.focusActivatedBgColor :
+          this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
     } else {
-      currentColor = (this.chipNodeOnFocus || this.isHover) && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
-        this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
+      currentColor =
+        (this.chipNodeOnFocus || this.isHover) && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
+          this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
     }
     let sourceColor: ColorMetrics;
     try {
