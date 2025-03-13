@@ -104,6 +104,17 @@ void RosenWindow::Init()
     }
 }
 
+void RosenWindow::InitArkUI_X()
+{
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    CHECK_NULL_VOID(rsWindow_);
+    auto surfaceNode = rsWindow_->GetSurfaceNode();
+    if (rsUIDirector_ && surfaceNode) {
+        rsUIDirector_->SetRSSurfaceNode(surfaceNode);
+    }
+#endif
+}
+
 void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
 {
     if (!rsWindow_ || rate < 0) {
