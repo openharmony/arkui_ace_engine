@@ -20,6 +20,9 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+
+void  TestFunction(const DragPointerEvent& event) {}
+
 void DragDropManagerTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
@@ -1818,5 +1821,176 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest042, TestSize.Level1)
     container->isScenceBoardWindow_ = false;
     dragDropManager->ResetPreTargetFrameNode(instanceId);
     EXPECT_EQ(dragDropManager->preTargetFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: CheckIsFolderSubwindowBoundary001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, CheckIsFolderSubwindowBoundary001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    bool result = dragDropManager->CheckIsFolderSubwindowBoundary(0.0f, 0.0f, 0);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: HandleUIExtensionDragEvent001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, HandleUIExtensionDragEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    DragPointerEvent pointerEvent;
+    DragEventType type = DragEventType::ENTER;
+    dragDropManager->HandleUIExtensionDragEvent(frameNode, pointerEvent, type);
+    EXPECT_NE(pointerEvent.action, PointerAction::PULL_IN_WINDOW);
+}
+
+/**
+ * @tc.name: HandleUIExtensionDragEvent002
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, HandleUIExtensionDragEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    DragPointerEvent pointerEvent;
+    DragEventType type = DragEventType::LEAVE;
+    dragDropManager->HandleUIExtensionDragEvent(frameNode, pointerEvent, type);
+    EXPECT_NE(pointerEvent.action, PointerAction::PULL_OUT_WINDOW);
+}
+
+/**
+ * @tc.name: HandleUIExtensionDragEvent003
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, HandleUIExtensionDragEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    DragPointerEvent pointerEvent;
+    DragEventType type =  DragEventType::PULL_CANCEL;
+    dragDropManager->HandleUIExtensionDragEvent(frameNode, pointerEvent, type);
+    EXPECT_NE(pointerEvent.action, PointerAction::PULL_CANCEL);
+}
+
+/**
+ * @tc.name: CalculateScale001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, CalculateScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    float with = 100.0f;
+    float height = 100.0f;
+    float widthLimit = 50.0f;
+    float heightLimit = 50.0f;
+    auto scaleDataInfo = dragDropManager->CalculateScale(with, height, widthLimit, heightLimit);
+    EXPECT_EQ(scaleDataInfo->isNeedScale, true);
+
+    with = 100.0f;
+    height = 50.0f;
+    widthLimit = 50.0f;
+    heightLimit = 50.0f;
+    scaleDataInfo = dragDropManager->CalculateScale(with, height, widthLimit, heightLimit);
+    EXPECT_EQ(scaleDataInfo->isNeedScale, true);
+
+    with = 0.0f;
+    height = 50.0f;
+    widthLimit = 50.0f;
+    heightLimit = 50.0f;
+    scaleDataInfo = dragDropManager->CalculateScale(with, height, widthLimit, heightLimit);
+    EXPECT_EQ(scaleDataInfo->isNeedScale, false);
+
+    with = 50.0f;
+    height = 0.0f;
+    widthLimit = 50.0f;
+    heightLimit = 50.0f;
+    scaleDataInfo = dragDropManager->CalculateScale(with, height, widthLimit, heightLimit);
+    EXPECT_EQ(scaleDataInfo->isNeedScale, false);
+}
+
+/**
+ * @tc.name: NotifyPullEventListener001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, NotifyPullEventListener001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+    bool result = false;
+    dragDropManager->NotifyPullEventListener(pointerEvent);
+    EXPECT_EQ(result, false);
+
+    std::function<void(const DragPointerEvent&)> testFunction;
+    dragDropManager->pullEventListener_.insert({2, testFunction});
+    dragDropManager->NotifyPullEventListener(pointerEvent);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: UnRegisterPullEventListener001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, UnRegisterPullEventListener001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    const int32_t EXISTING_ID = 100;
+    auto testListener = [](const DragPointerEvent&) {};
+    dragDropManager->pullEventListener_.emplace(EXISTING_ID, testListener);
+    ASSERT_EQ(dragDropManager->pullEventListener_.size(), 1);
+
+    dragDropManager->UnRegisterPullEventListener(EXISTING_ID);
+    EXPECT_EQ(dragDropManager->pullEventListener_.size(), 0);
 }
 } // namespace OHOS::Ace::NG
