@@ -44,11 +44,11 @@ public:
 
     void Register();
 
-    void Update(int32_t s, void* pointer);
+    void Update(int32_t s, int32_t e, void* pointer);
 
-    void RangeModeUpdate(int32_t s, int32_t e);
+    void ParallelModeUpdate(int32_t s, int32_t e);
 
-    void NormalModeUpdate(int32_t s, void* pointer);
+    void NormalModeUpdate(int32_t s, int32_t e, void* pointer);
 
     RefPtr<FrameNode> CreateItem(int32_t idx);
 

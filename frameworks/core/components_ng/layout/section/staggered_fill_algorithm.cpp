@@ -194,12 +194,12 @@ void StaggeredFillAlgorithm::OnSlidingOffsetUpdate(float delta)
     });
 }
 
-int32_t StaggeredFillAlgorithm::GetMarkIndex()
+ItemRange StaggeredFillAlgorithm::GetRange() const
 {
-    for (auto& section : sections_) {
-        section.PruneFront(0.0f);
-    }
-    return StartIdx().value_or(-1);
+    // for (auto& section : sections_) {
+    //     section.PruneFront(0.0f);
+    // } // maybe no prune?
+    return { StartIdx().value_or(-1), EndIdx().value_or(-1) };
 }
 
 void StaggeredFillAlgorithm::UpdateSyncCachedCnt()

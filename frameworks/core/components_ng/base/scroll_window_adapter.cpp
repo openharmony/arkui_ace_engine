@@ -28,10 +28,10 @@ namespace OHOS::Ace::NG {
 
 void ScrollWindowAdapter::PrepareReset(int32_t idx, float extraOffset)
 {
-    markIndex_ = idx;
+    range_.start = range_.end = idx;
     jumpPending_ = std::make_unique<PendingJump>(idx, ScrollAlign::START, extraOffset);
     fillAlgorithm_->MarkJump();
-    RequestRecompose(idx);
+    RequestRecompose(range_);
 }
 
 void ScrollWindowAdapter::PrepareJump(int32_t idx, ScrollAlign align, float extraOffset)
@@ -39,13 +39,13 @@ void ScrollWindowAdapter::PrepareJump(int32_t idx, ScrollAlign align, float extr
     if (idx == LAST_ITEM) {
         idx = totalCount_ - 1;
     }
-    if (idx == markIndex_) {
+    if (idx == range_.start) {
         return;
     }
-    markIndex_ = idx;
+    range_.start = range_.end = idx;
     jumpPending_ = std::make_unique<PendingJump>(idx, align, extraOffset);
     fillAlgorithm_->MarkJump();
-    RequestRecompose(idx);
+    RequestRecompose(range_);
 }
 
 bool ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align, float extraOffset)
@@ -55,33 +55,34 @@ bool ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign ali
         return true;
     }
     target_ = std::make_unique<PendingJump>(targetIdx, align, extraOffset);
-    RequestRecompose(markIndex_);
+    RequestRecompose(range_);
     return false;
 }
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 {
-    auto* item = GetChildPtrByIndex(markIndex_);
+    const int32_t markIndex = direction == FillDirection::START ? range_.start : range_.end;
+    auto* item = GetChildPtrByIndex(markIndex);
     if (!item) {
         nodeToIndex_.clear();
         indexToNode_.clear();
         item = static_cast<FrameNode*>(container_->GetLastChild().GetRawPtr());
     }
     if (!item) {
-        LOGE("current node of %{public}d is nullptr, childrenCount = %{public}d", markIndex_,
+        LOGE("current node of %{public}d is nullptr, childrenCount = %{public}d", markIndex,
             container_->TotalChildCount());
         return nullptr;
     }
     // 1: remeasure the mark item.
-    if (!filled_.count(markIndex_)) {
-        fillAlgorithm_->FillMarkItem(size_, axis_, item, markIndex_);
-        filled_.insert(markIndex_);
+    if (!filled_.count(markIndex)) {
+        fillAlgorithm_->FillMarkItem(size_, axis_, item, markIndex);
+        filled_.insert(markIndex);
 
-        indexToNode_[markIndex_] = WeakClaim(item);
-        nodeToIndex_[item] = markIndex_;
+        indexToNode_[markIndex] = WeakClaim(item);
+        nodeToIndex_[item] = markIndex;
     }
     // 2: check if more space for new item.
-    if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex_, direction)) {
+    if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex, direction)) {
         LOGI("no more space left");
         return nullptr;
     }
@@ -91,10 +92,10 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirection direction)
 {
     // check range.
-    if (direction == FillDirection::START && (markIndex_ <= 0)) {
+    if (direction == FillDirection::START && (range_.start <= 0)) {
         return nullptr;
     }
-    if (direction == FillDirection::END && (markIndex_ >= totalCount_ - 1)) {
+    if (direction == FillDirection::END && (range_.end >= totalCount_ - 1)) {
         return nullptr;
     }
     if (markItem == nullptr) {
@@ -142,11 +143,10 @@ bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
         return false;
     }
     fillAlgorithm_->OnSlidingOffsetUpdate(delta);
-    if (rangeMode_) {
+    if (parallelMode_) {
         bool res = fillAlgorithm_->OnSlidingOffsetUpdate(size_, axis_, delta);
         if (res) {
-            auto range = fillAlgorithm_->GetRange();
-            RequestRecompose(range.first);
+            RequestRecompose(fillAlgorithm_->GetRange());
         }
         return res;
     }
@@ -161,18 +161,18 @@ bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
         }
     }
     LOGD("need to load");
-    markIndex_ = fillAlgorithm_->GetMarkIndex();
+    range_ = fillAlgorithm_->GetRange();
 
-    RequestRecompose(markIndex_);
+    RequestRecompose(range_);
     return true;
 }
 
-void ScrollWindowAdapter::RequestRecompose(int32_t markIdx) const
+void ScrollWindowAdapter::RequestRecompose(const ItemRange& currentRange) const
 {
     for (auto&& updater : updaters_) {
         if (updater) {
             // nullptr to mark the first item
-            updater(markIdx, nullptr);
+            updater(currentRange.start, currentRange.end, nullptr);
         }
     }
 }
@@ -184,16 +184,15 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
     fillAlgorithm_->PreFill(size_, axis_, totalCount_);
     if (jumpPending_) {
         if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
-            scroll->ScrollToIndex(markIndex_, false, jumpPending_->align, jumpPending_->extraOffset);
+            scroll->ScrollToIndex(range_.start, false, jumpPending_->align, jumpPending_->extraOffset);
         } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
-            swiper->ChangeIndex(markIndex_, false);
+            swiper->ChangeIndex(range_.start, false);
         }
         jumpPending_.reset();
     } else if (target_) {
         if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
             scroll->ScrollToIndex(target_->index, true, target_->align, target_->extraOffset);
         } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
-            std::cout << "changeIdx to " << target_->index << "\n";
             swiper->ChangeIndex(target_->index, true);
         }
     }
@@ -208,8 +207,8 @@ void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)
     axis_ = axis;
 
     if (fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::END)) {
-        markIndex_ = fillAlgorithm_->GetMarkIndex();
-        RequestRecompose(markIndex_);
+        range_ = fillAlgorithm_->GetRange();
+        RequestRecompose(range_);
     }
 }
 

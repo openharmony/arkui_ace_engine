@@ -63,7 +63,7 @@ void OnRangeUpdateImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(updater);
 
     auto onEvent = [callback = CallbackHelper(*updater)](
-                       const Ark_Int32 index, const Ark_NativePointer mark) { callback.Invoke(index, mark, 0); };
+                       const Ark_Int32 start, const Ark_Int32 end, const Ark_NativePointer mark) { callback.Invoke(start, mark, end); };
     auto* scrollWindowAdapter = frameNode->GetOrCreateScrollWindowAdapter();
     CHECK_NULL_VOID(scrollWindowAdapter);
     scrollWindowAdapter->RegisterUpdater(std::move(onEvent));
