@@ -818,6 +818,21 @@ public:
 
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
 
+    void SetFoldStatusFromListener(FoldStatus foldStatus)
+    {
+        foldStatusFromListener_ = foldStatus;
+    }
+
+    FoldStatus GetFoldStatusFromListener() override
+    {
+        return foldStatusFromListener_;
+    }
+
+    void InitFoldStatusFromListener() override
+    {
+        foldStatusFromListener_ = GetCurrentFoldStatus();
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -883,6 +898,7 @@ private:
     float windowScale_ = 1.0f;
     sptr<IRemoteObject> token_;
     sptr<IRemoteObject> parentToken_;
+    FoldStatus foldStatusFromListener_ = FoldStatus::UNKNOWN;
 
     bool isSubContainer_ = false;
     bool isFormRender_ = false;
