@@ -650,6 +650,13 @@ public:
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
     SelectionInfo GetSpansInfoByRange(int32_t start, int32_t end);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
+    bool CheckStyledStringRangeValid(int32_t start, int32_t length);
+    void UpdateSelectStyledStringStyle(int32_t start, int32_t end, KeyCode code);
+    template<typename T>
+    void UpdateSpansStyleInRange(int32_t start, int32_t end, const RefPtr<SpanBase>& baseSpan,
+        std::function<RefPtr<T>(const RefPtr<T>&)>&& updateSpanFunc);
+    void UpdateStyledStringFontStyle(int32_t start, int32_t end, const Font& font);
+    void UpdateStyledStringDecorationType(int32_t start, int32_t end, const TextDecoration& type);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
     struct UpdateSpanStyle GetUpdateSpanStyle();
