@@ -434,6 +434,7 @@ void PerfMonitor::EndCommercial(const std::string& sceneId, bool isRsRender)
 
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time)
 {
+    std::lock_guard<std::mutex> Lock(mMutex);
     mSourceType = sourceType;
     if (time <= 0) {
         time = GetCurrentRealTimeNs();
