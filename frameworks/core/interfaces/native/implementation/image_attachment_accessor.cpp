@@ -23,10 +23,9 @@
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
-
 namespace GeneratedModifier {
-    const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
-}
+const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
+} // namespace GeneratedModifier
 namespace Converter {
 
 template<>
@@ -50,14 +49,18 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
     }
 #endif
     auto imageStyle = OptConvert<ImageSpanAttribute>(value.layoutStyle);
-    imageStyle->verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
-    imageStyle->objectFit = OptConvert<ImageFit>(value.objectFit);
-    imageStyle->size = OptConvert<ImageSpanSize>(value.size);
-    imageOptions.imageAttribute = imageStyle;
+    if (imageStyle) {
+        imageStyle->verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
+        imageStyle->objectFit = OptConvert<ImageFit>(value.objectFit);
+        imageStyle->size = OptConvert<ImageSpanSize>(value.size);
+        imageOptions.imageAttribute = imageStyle;
+    }
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
 }
 } // namespace Converter
-namespace GeneratedModifier {
+} // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAttachmentAccessor {
 using namespace Converter;
 void DestroyPeerImpl(Ark_ImageAttachment peer)
@@ -66,7 +69,6 @@ void DestroyPeerImpl(Ark_ImageAttachment peer)
     peer->imageSpan = nullptr;
     delete peer;
 }
-
 Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
 {
     auto peer = new ImageAttachmentPeer();
@@ -78,7 +80,7 @@ Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeerImpl);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
 {
@@ -100,19 +102,20 @@ Ark_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
 }
 Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
-    CHECK_NULL_RETURN(peer && peer->imageSpan, INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
+    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageSpanOptions().imageAttribute,
+        INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
     auto aligment = peer->imageSpan->GetImageSpanOptions().imageAttribute->verticalAlign;
     CHECK_NULL_RETURN(aligment, INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
     return ArkValue<Ark_ImageSpanAlignment>(*aligment);
 }
 Ark_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
 {
-    CHECK_NULL_RETURN(peer && peer->imageSpan, INVALID_ENUM_VAL<Ark_ImageFit>);
+    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageSpanOptions().imageAttribute,
+        INVALID_ENUM_VAL<Ark_ImageFit>);
     auto objectFit = peer->imageSpan->GetImageSpanOptions().imageAttribute->objectFit;
     CHECK_NULL_RETURN(objectFit, INVALID_ENUM_VAL<Ark_ImageFit>);
     return ArkValue<Ark_ImageFit>(*objectFit);
 }
-
 Ark_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
 {
     return {};
@@ -137,5 +140,5 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
     };
     return &ImageAttachmentAccessorImpl;
 }
-} // namespace GeneratedModifier
-} // namespace OHOS::Ace::NG
+
+}
