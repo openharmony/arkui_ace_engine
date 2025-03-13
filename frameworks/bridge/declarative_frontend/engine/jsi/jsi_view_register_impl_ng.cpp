@@ -474,7 +474,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #ifndef ARKUI_WEARABLE
     JSStepper::JSBind(globalObj);
     JSStepperItem::JSBind(globalObj);
-    JSSideBar::JSBind(globalObj);
 #endif
     JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
@@ -503,6 +502,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTextArea::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
     JSTextClock::JSBind(globalObj);
+    JSSideBar::JSBind(globalObj);
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSGauge::JSBind(globalObj);

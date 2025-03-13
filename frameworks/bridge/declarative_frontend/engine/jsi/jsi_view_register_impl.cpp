@@ -595,7 +595,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridCol", JSGridCol::JSBind },
 #ifndef ARKUI_WEARABLE
     { "Stepper", JSStepper::JSBind },
-    { "SideBarContainer", JSSideBar::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
 #endif
     { "Toggle", JSToggle::JSBind },
@@ -653,6 +652,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
+    { "SideBarContainer", JSSideBar::JSBind },
 #ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
 #endif
