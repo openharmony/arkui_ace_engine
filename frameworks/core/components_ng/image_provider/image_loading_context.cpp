@@ -50,7 +50,7 @@ ImageLoadingContext::~ImageLoadingContext()
         auto state = stateManager_->GetCurrentState();
         if (state == ImageLoadingState::DATA_LOADING) {
             // cancel CreateImgObj task
-            ImageProvider::CancelTask(src_.GetKey(), WeakClaim(this));
+            ImageProvider::CancelTask(src_.GetTaskKey(), WeakClaim(this));
             if (Downloadable()) {
                 DownloadManager::GetInstance()->RemoveDownloadTaskWithPreload(src_.GetSrc(), imageDfxConfig_.nodeId_);
             }
