@@ -91,6 +91,7 @@ template("ace_osal_ohos_source_set") {
       "trace_id_impl.cpp",
       "view_data_wrap_ohos.cpp",
       "want_wrap_ohos.cpp",
+      "websocket_manager.cpp",
       "window_utils.cpp",
     ]
 
