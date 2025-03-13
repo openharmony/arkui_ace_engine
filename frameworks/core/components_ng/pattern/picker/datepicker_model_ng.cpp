@@ -546,11 +546,12 @@ void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     }
     if (value.textColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedColor, value.textColor.value());
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-        CHECK_NULL_VOID(datePickerPattern);
-        datePickerPattern->UpdateUserSetSelectColor();
+        if (theme->IsCircleDial()) {
+            auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+            if (datePickerPattern) {
+                datePickerPattern->UpdateUserSetSelectColor();
+            }
+        }
     } else {
         ResetDataPickerTextStyleColor(frameNode, &DataPickerRowLayoutProperty::GetSelectedTextStyle);
     }
@@ -826,12 +827,11 @@ void DatePickerModelNG::SetSelectedTextStyle(
             DataPickerRowLayoutProperty, SelectedFontSize,
             ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
     }
-    if (value.textColor.has_value()) {
-        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_VOID(frameNode);
+    if (value.textColor.has_value() && theme->IsCircleDial() && frameNode) {
         auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-        CHECK_NULL_VOID(datePickerPattern);
-        datePickerPattern->UpdateUserSetSelectColor();
+        if (datePickerPattern) {
+            datePickerPattern->UpdateUserSetSelectColor();
+        }
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);

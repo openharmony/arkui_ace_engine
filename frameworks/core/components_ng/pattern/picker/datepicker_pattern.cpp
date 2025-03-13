@@ -2902,9 +2902,8 @@ bool DatePickerPattern::IsCircle()
 
 void DatePickerPattern::ClearFocus()
 {
-    if (!IsCircle()) {
-        return;
-    }
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    CHECK_EQUAL_VOID(lunarSwitch_, false);
 
     if (!selectedColumnId_.empty()) {
         const auto& allChildNode = GetAllChildNode();
@@ -2920,10 +2919,9 @@ void DatePickerPattern::ClearFocus()
 
 void DatePickerPattern::SetDefaultFocus()
 {
-    if (!IsCircle()) {
-        return;
-    }
-
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    CHECK_EQUAL_VOID(lunarSwitch_, false);
+    lunarSwitch_ = false;
     std::function<void(std::string& focusId)> call =  [weak = WeakClaim(this)](std::string& focusId) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -2982,6 +2980,7 @@ void DatePickerPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
 
 void DatePickerPattern::UpdateUserSetSelectColor()
 {
+    CHECK_EQUAL_VOID(IsCircle(), false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto&& children = host->GetChildren();

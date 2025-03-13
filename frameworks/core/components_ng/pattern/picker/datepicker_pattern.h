@@ -200,6 +200,9 @@ public:
     void SetShowLunar(bool value)
     {
         isForceUpdate_ = value != lunar_;
+        if (!lunarSwitch_) {
+            lunarSwitch_ = isForceUpdate_;
+        }
         lunar_ = value;
     }
 
@@ -903,6 +906,7 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
     std::string selectedColumnId_;
+    bool lunarSwitch_ = true;
 };
 } // namespace OHOS::Ace::NG
 

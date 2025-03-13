@@ -411,10 +411,12 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
     }
     if (value.textColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, value.textColor.value());
-
-        auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-        CHECK_NULL_VOID(textPickerPattern);
-        textPickerPattern->UpdateUserSetSelectColor();
+        if (pickerTheme->IsCircleDial()) {
+            auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+            if (textPickerPattern) {
+                textPickerPattern->UpdateUserSetSelectColor();
+            }
+        }
     } else {
         ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetSelectedTextStyle);
     }
@@ -1010,10 +1012,11 @@ void TextPickerModelNG::SetSelectedTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedColor,
         value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);
-    if (value.textColor.has_value()) {
+    if (value.textColor.has_value() && pickerTheme->IsCircleDial()) {
         auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-        CHECK_NULL_VOID(textPickerPattern);
-        textPickerPattern->UpdateUserSetSelectColor();
+        if (textPickerPattern) {
+            textPickerPattern->UpdateUserSetSelectColor();
+        }
     }
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
