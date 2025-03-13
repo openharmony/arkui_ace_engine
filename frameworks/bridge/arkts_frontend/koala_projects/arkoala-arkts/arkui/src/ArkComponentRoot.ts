@@ -42,6 +42,8 @@ export function ArkComponentRoot(
                         default: break
                     }
                 })
+            } else {
+                content();
             }
             let shown = rememberDisposable(() => {
                 let state = mutableState(false)
