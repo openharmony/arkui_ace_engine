@@ -994,7 +994,7 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg056, TestSize.Level1)
     layoutAlgorithm->arrowPlacement_ = Placement::NONE;
     SizeF menuSize;
     layoutAlgorithm->UpdateArrowOffsetWithMenuLimit(menuSize, layoutWrapper);
-    EXPECT_EQ(layoutAlgorithm->arrowMinLimit_, 0.0)
+    EXPECT_EQ(layoutAlgorithm->arrowMinLimit_, 0.0);
 }
 
 /**
