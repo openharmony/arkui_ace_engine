@@ -219,7 +219,6 @@ void LayoutInspector::SetCallback(int32_t instanceId)
             OHOS::AbilityRuntime::ConnectServerManager::Get().SetProfilerCallBack(
                 [](bool status) { return SetStateProfilerStatus(status); });
             OHOS::AbilityRuntime::ConnectServerManager::Get().SetSwitchCallback(
-                [](bool status) { return SetStatus(status); },
                 [](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
         };
         OHOS::AbilityRuntime::ConnectServerManager::Get().RegisterAddInstanceCallback(addInstanceCallBack);
@@ -231,8 +230,7 @@ void LayoutInspector::SetCallback(int32_t instanceId)
         RegisterConnectCallback();
     } else {
         OHOS::Ace::ConnectServerManager::Get().SetLayoutInspectorCallback(
-            [](int32_t containerId) { return CreateLayoutInfo(containerId); },
-            [](bool status) { return SetStatus(status); });
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); });
         isUseStageModel_ = false;
     }
 
@@ -240,7 +238,6 @@ void LayoutInspector::SetCallback(int32_t instanceId)
         OHOS::AbilityRuntime::ConnectServerManager::Get().SetProfilerCallBack(
             [](bool status) { return SetStateProfilerStatus(status); });
         OHOS::AbilityRuntime::ConnectServerManager::Get().SetSwitchCallback(
-            [](bool status) { return SetStatus(status); },
             [](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
     };
     OHOS::AbilityRuntime::ConnectServerManager::Get().RegisterSendInstanceMessageCallback(sendInstanceMessageCallBack);
