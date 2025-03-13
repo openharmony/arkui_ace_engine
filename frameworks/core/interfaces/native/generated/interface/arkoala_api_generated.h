@@ -732,6 +732,16 @@ typedef struct Array_SheetInfo Array_SheetInfo;
 typedef struct Opt_Array_SheetInfo Opt_Array_SheetInfo;
 typedef struct Ark_ActionSheetButtonOptions Ark_ActionSheetButtonOptions;
 typedef struct Opt_ActionSheetButtonOptions Opt_ActionSheetButtonOptions;
+typedef struct Ark_Union_Number_TextCase Ark_Union_Number_TextCase;
+typedef struct Opt_Union_Number_TextCase Opt_Union_Number_TextCase;
+typedef struct Ark_Union_Number_TextOverflow Ark_Union_Number_TextOverflow;
+typedef struct Opt_Union_Number_TextOverflow Opt_Union_Number_TextOverflow;
+typedef struct Ark_Union_Number_TextAlign Ark_Union_Number_TextAlign;
+typedef struct Opt_Union_Number_TextAlign Opt_Union_Number_TextAlign;
+typedef struct Ark_Union_Number_String_FontWeight Ark_Union_Number_String_FontWeight;
+typedef struct Opt_Union_Number_String_FontWeight Opt_Union_Number_String_FontWeight;
+typedef struct Ark_Union_Number_FontStyle Ark_Union_Number_FontStyle;
+typedef struct Opt_Union_Number_FontStyle Opt_Union_Number_FontStyle;
 typedef struct Callback_Extender_OnFinish Callback_Extender_OnFinish;
 typedef struct Opt_Callback_Extender_OnFinish Opt_Callback_Extender_OnFinish;
 typedef struct Callback_Extender_OnProgress Callback_Extender_OnProgress;
@@ -1406,6 +1416,10 @@ typedef struct ClickEventPeer* Ark_ClickEvent;
 typedef struct Opt_ClickEvent Opt_ClickEvent;
 typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack Opt_NavExtender_OnUpdateStack;
+typedef struct Ark_MeasureOptions Ark_MeasureOptions;
+typedef struct Opt_MeasureOptions Opt_MeasureOptions;
+typedef struct Ark_FontInfo Ark_FontInfo;
+typedef struct Opt_FontInfo Opt_FontInfo;
 typedef struct Ark_FontOptions Ark_FontOptions;
 typedef struct Opt_FontOptions Opt_FontOptions;
 typedef struct Ark_RoundRectShapeOptions Ark_RoundRectShapeOptions;
@@ -3047,6 +3061,15 @@ typedef struct Opt_DialogButtonStyle {
     Ark_Tag tag;
     Ark_DialogButtonStyle value;
 } Opt_DialogButtonStyle;
+typedef enum Ark_TextCase {
+    ARK_TEXT_CASE_NORMAL = 0,
+    ARK_TEXT_CASE_LOWER_CASE = 1,
+    ARK_TEXT_CASE_UPPER_CASE = 2,
+} Ark_TextCase;
+typedef struct Opt_TextCase {
+    Ark_Tag tag;
+    Ark_TextCase value;
+} Opt_TextCase;
 typedef enum Ark_StyledStringKey {
     ARK_STYLED_STRING_KEY_FONT = 0,
     ARK_STYLED_STRING_KEY_DECORATION = 1,
@@ -5314,15 +5337,6 @@ typedef struct Opt_CopyOptions {
     Ark_Tag tag;
     Ark_CopyOptions value;
 } Opt_CopyOptions;
-typedef enum Ark_TextCase {
-    ARK_TEXT_CASE_NORMAL = 0,
-    ARK_TEXT_CASE_LOWER_CASE = 1,
-    ARK_TEXT_CASE_UPPER_CASE = 2,
-} Ark_TextCase;
-typedef struct Opt_TextCase {
-    Ark_Tag tag;
-    Ark_TextCase value;
-} Opt_TextCase;
 typedef enum Ark_RelateType {
     ARK_RELATE_TYPE_FILL = 0,
     ARK_RELATE_TYPE_FIT = 1,
@@ -7618,6 +7632,62 @@ typedef struct Opt_ActionSheetButtonOptions {
     Ark_Tag tag;
     Ark_ActionSheetButtonOptions value;
 } Opt_ActionSheetButtonOptions;
+typedef struct Ark_Union_Number_TextCase {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_TextCase value1;
+    };
+} Ark_Union_Number_TextCase;
+typedef struct Opt_Union_Number_TextCase {
+    Ark_Tag tag;
+    Ark_Union_Number_TextCase value;
+} Opt_Union_Number_TextCase;
+typedef struct Ark_Union_Number_TextOverflow {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_TextOverflow value1;
+    };
+} Ark_Union_Number_TextOverflow;
+typedef struct Opt_Union_Number_TextOverflow {
+    Ark_Tag tag;
+    Ark_Union_Number_TextOverflow value;
+} Opt_Union_Number_TextOverflow;
+typedef struct Ark_Union_Number_TextAlign {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_TextAlign value1;
+    };
+} Ark_Union_Number_TextAlign;
+typedef struct Opt_Union_Number_TextAlign {
+    Ark_Tag tag;
+    Ark_Union_Number_TextAlign value;
+} Opt_Union_Number_TextAlign;
+typedef struct Ark_Union_Number_String_FontWeight {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_String value1;
+        Ark_FontWeight value2;
+    };
+} Ark_Union_Number_String_FontWeight;
+typedef struct Opt_Union_Number_String_FontWeight {
+    Ark_Tag tag;
+    Ark_Union_Number_String_FontWeight value;
+} Opt_Union_Number_String_FontWeight;
+typedef struct Ark_Union_Number_FontStyle {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_FontStyle value1;
+    };
+} Ark_Union_Number_FontStyle;
+typedef struct Opt_Union_Number_FontStyle {
+    Ark_Tag tag;
+    Ark_Union_Number_FontStyle value;
+} Opt_Union_Number_FontStyle;
 typedef struct Callback_Extender_OnFinish {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId);
@@ -10433,6 +10503,43 @@ typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
     NavExtender_OnUpdateStack value;
 } Opt_NavExtender_OnUpdateStack;
+typedef struct Ark_MeasureOptions {
+    Ark_Union_String_Resource textContent;
+    Opt_Union_Number_String_Resource constraintWidth;
+    Opt_Union_Number_String_Resource fontSize;
+    Opt_Union_Number_FontStyle fontStyle;
+    Opt_Union_Number_String_FontWeight fontWeight;
+    Opt_Union_String_Resource fontFamily;
+    Opt_Union_Number_String letterSpacing;
+    Opt_Union_Number_TextAlign textAlign;
+    Opt_Union_Number_TextOverflow overflow;
+    Opt_Number maxLines;
+    Opt_Union_Number_String_Resource lineHeight;
+    Opt_Union_Number_String baselineOffset;
+    Opt_Union_Number_TextCase textCase;
+    Opt_Union_Number_String textIndent;
+    Opt_WordBreak wordBreak;
+} Ark_MeasureOptions;
+typedef struct Opt_MeasureOptions {
+    Ark_Tag tag;
+    Ark_MeasureOptions value;
+} Opt_MeasureOptions;
+typedef struct Ark_FontInfo {
+    Ark_String path;
+    Ark_String postScriptName;
+    Ark_String fullName;
+    Ark_String family;
+    Ark_String subfamily;
+    Ark_Number weight;
+    Ark_Number width;
+    Ark_Boolean italic;
+    Ark_Boolean monoSpace;
+    Ark_Boolean symbolic;
+} Ark_FontInfo;
+typedef struct Opt_FontInfo {
+    Ark_Tag tag;
+    Ark_FontInfo value;
+} Opt_FontInfo;
 typedef struct Ark_FontOptions {
     Ark_Union_String_Resource familyName;
     Ark_Union_String_Resource familySrc;
@@ -19665,7 +19772,13 @@ typedef struct GENERATED_ArkUIGlobalScope_ohos_fontAccessor {
     Ark_NativePointer (*getFinalizer)();
     void (*registerFont)(const Ark_FontOptions* options);
     Array_String (*getSystemFontList)();
+    Ark_FontInfo (*getFontByName)(const Ark_String* fontName);
 } GENERATED_ArkUIGlobalScope_ohos_fontAccessor;
+
+typedef struct GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor {
+    Ark_Number (*measureText)(const Ark_MeasureOptions* options);
+    Ark_SizeOptions (*measureTextSize)(const Ark_MeasureOptions* options);
+} GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor;
 
 typedef struct GENERATED_ArkUIScaleSymbolEffectAccessor {
     void (*destroyPeer)(Ark_ScaleSymbolEffect peer);
@@ -22118,6 +22231,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIEllipseShapeAccessor* (*getEllipseShapeAccessor)();
     const GENERATED_ArkUIPathShapeAccessor* (*getPathShapeAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* (*getGlobalScope_ohos_fontAccessor)();
+    const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* (*getGlobalScope_ohos_measure_utilsAccessor)();
     const GENERATED_ArkUIScaleSymbolEffectAccessor* (*getScaleSymbolEffectAccessor)();
     const GENERATED_ArkUIReplaceSymbolEffectAccessor* (*getReplaceSymbolEffectAccessor)();
     const GENERATED_ArkUIFrameNodeAccessor* (*getFrameNodeAccessor)();

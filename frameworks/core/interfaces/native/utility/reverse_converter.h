@@ -288,6 +288,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
     void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
+    void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src);
 
     // SORTED_SECTION
     template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);

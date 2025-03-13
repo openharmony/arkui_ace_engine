@@ -218,6 +218,7 @@ const GENERATED_ArkUICircleShapeAccessor* GetCircleShapeAccessor();
 const GENERATED_ArkUIEllipseShapeAccessor* GetEllipseShapeAccessor();
 const GENERATED_ArkUIPathShapeAccessor* GetPathShapeAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor();
+const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos_measure_utilsAccessor();
 const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor();
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor();
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor();
@@ -500,6 +501,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetEllipseShapeAccessor,
         GetPathShapeAccessor,
         GetGlobalScope_ohos_fontAccessor,
+        GetGlobalScope_ohos_measure_utilsAccessor,
         GetScaleSymbolEffectAccessor,
         GetReplaceSymbolEffectAccessor,
         GetFrameNodeAccessor,

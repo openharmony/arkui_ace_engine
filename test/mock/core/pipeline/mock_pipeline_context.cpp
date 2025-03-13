@@ -1083,6 +1083,10 @@ void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
     }
 }
 
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return false;
+}
 
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
