@@ -8074,4 +8074,19 @@ int32_t OverlayManager::RemoveOverlayManagerNode()
     }
     return OVERLAY_EXISTS;
 }
+
+void OverlayManager::SkipMenuShow(int32_t targetId)
+{
+    skipTargetIds_.insert(targetId);
+}
+
+void OverlayManager::ResumeMenuShow(int32_t targetId)
+{
+    skipTargetIds_.erase(targetId);
+}
+
+bool OverlayManager::CheckSkipMenuShow(int32_t targetId)
+{
+    return skipTargetIds_.find(targetId) != skipTargetIds_.end();
+}
 } // namespace OHOS::Ace::NG

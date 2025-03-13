@@ -703,6 +703,9 @@ public:
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
     static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode);
+    void SkipMenuShow(int32_t targetId);
+    void ResumeMenuShow(int32_t targetId);
+    bool CheckSkipMenuShow(int32_t targetId);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -970,6 +973,7 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
+    std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
 };
 } // namespace OHOS::Ace::NG
