@@ -53,7 +53,11 @@ void SetRepeatImpl(Ark_GestureEvent peer,
 }
 Array_FingerInfo GetFingerListImpl(Ark_GestureEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, {});
+    const std::list<FingerInfo>& fingerList = info->GetFingerList();
+    return Converter::ArkValue<Array_FingerInfo>(fingerList, Converter::FC);
 }
 void SetFingerListImpl(Ark_GestureEvent peer,
                        const Array_FingerInfo* fingerList)

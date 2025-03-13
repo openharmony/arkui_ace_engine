@@ -469,4 +469,44 @@ HWTEST_F(GestureEventAccessorTest, SetFingerListTest, TestSize.Level1)
         i++;
     }
 }
+/**
+ * @tc.name: GetFingerListTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventAccessorTest, GetFingerListTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getFingerList, nullptr);
+    auto eventInfo = peer_->GetEventInfo();
+    ASSERT_NE(eventInfo, nullptr);
+    std::list<FingerInfo> fingerInfo;
+    const int fingerId = 0;
+    const float expectedWindowX = 2.5f;
+    const float expectedWindowY = 3.7f;
+    Offset globalOffset(expectedWindowX, expectedWindowY);
+    const float expectedX = 4.5f;
+    const float expectedY = 5.7f;
+    Offset localOffset(expectedX, expectedY);
+    const float expectedDisplayX = 1.5f;
+    const float expectedDisplayY = 1.7f;
+    Offset screenOffset(expectedDisplayX, expectedDisplayY);
+    auto item = FingerInfo {
+        .fingerId_ = fingerId,
+        .globalLocation_ = globalOffset,
+        .localLocation_ = localOffset,
+        .screenLocation_ = screenOffset,
+    };
+    fingerInfo.push_back(item);
+    eventInfo->SetFingerList(fingerInfo);
+    Array_FingerInfo fingerInfoArr = accessor_->getFingerList(peer_);
+    ASSERT_EQ(static_cast<int32_t>(fingerInfoArr.length), 1);
+    ASSERT_NE(fingerInfoArr.array, nullptr);
+    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->displayX), expectedDisplayX);
+    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->displayY), expectedDisplayY);
+    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->globalX), expectedWindowX);
+    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->globalY), expectedWindowY);
+    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->localX), expectedX);
+    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->localY), expectedY);
+    EXPECT_EQ(Converter::Convert<int32_t>(fingerInfoArr.array->id), fingerId);
+}
 }
