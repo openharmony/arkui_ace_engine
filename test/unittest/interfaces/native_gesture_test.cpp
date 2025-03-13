@@ -685,3 +685,455 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer027, TestSize.Level1)
     ret = OH_ArkUI_GetGestureParam_distanceThreshold(recognizer, distanceThreshold);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED);
 }
+
+/**
+ * @tc.name: GestureImplTest001
+ * @tc.desc: Test the OH_ArkUI_GestureEvent_GetActionType function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest001, TestSize.Level1)
+{
+    ArkUI_GestureEvent event;
+    event.eventData.subKind = ON_ACTION;
+    EXPECT_EQ(OH_ArkUI_GestureEvent_GetActionType(&event), GESTURE_EVENT_ACTION_ACCEPT);
+
+    event.eventData.subKind = ON_ACTION_START;
+    EXPECT_EQ(OH_ArkUI_GestureEvent_GetActionType(&event), GESTURE_EVENT_ACTION_ACCEPT);
+
+    event.eventData.subKind = ON_ACTION_UPDATE;
+    EXPECT_EQ(OH_ArkUI_GestureEvent_GetActionType(&event), GESTURE_EVENT_ACTION_UPDATE);
+
+    event.eventData.subKind = ON_ACTION_END;
+    EXPECT_EQ(OH_ArkUI_GestureEvent_GetActionType(&event), GESTURE_EVENT_ACTION_END);
+
+    event.eventData.subKind = ON_ACTION_CANCEL;
+    EXPECT_EQ(OH_ArkUI_GestureEvent_GetActionType(&event), GESTURE_EVENT_ACTION_CANCEL);
+
+    event.eventData.subKind = -1;
+    EXPECT_EQ(OH_ArkUI_GestureEvent_GetActionType(&event), GESTURE_EVENT_ACTION_ACCEPT);
+}
+
+/**
+* @tc.name: GestureImplTest002
+* @tc.desc: Test the OH_ArkUI_GestureEvent_GetRawInputEvent function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest002, TestSize.Level1)
+{
+    auto* ret1 = OH_ArkUI_GestureEvent_GetRawInputEvent(nullptr);
+    EXPECT_EQ(ret1, nullptr);
+
+    ArkUI_GestureEvent event;
+    ArkUI_UIInputEvent inputEvent;
+    event.eventData.repeat = 10;
+    event.eventData.velocity = 10.0f;
+    event.eventData.velocityX = 11.0f;
+    event.eventData.velocityY = 12.0f;
+    event.eventData.x = 13.0f;
+    event.eventData.y = 14.0f;
+    event.eventData.angle = 15.0f;
+    event.eventData.speed = 16.0f;
+    event.eventData.scale = 17.0f;
+    event.eventData.pinchCenterX = 18.0f;
+    event.eventData.pinchCenterY = 19.0f;
+    event.eventData.rawPointerEvent = &inputEvent;
+    auto* ret2 = OH_ArkUI_GestureEvent_GetRawInputEvent(&event);
+    auto repeat = OH_ArkUI_LongPress_GetRepeatCount(&event);
+    auto velocity = OH_ArkUI_PanGesture_GetVelocity(&event);
+    auto velocityX = OH_ArkUI_PanGesture_GetVelocityX(&event);
+    auto velocityY = OH_ArkUI_PanGesture_GetVelocityY(&event);
+    auto x = OH_ArkUI_PanGesture_GetOffsetX(&event);
+    auto y = OH_ArkUI_PanGesture_GetOffsetY(&event);
+    auto swipeAngle = OH_ArkUI_SwipeGesture_GetAngle(&event);
+    auto speed = OH_ArkUI_SwipeGesture_GetVelocity(&event);
+    auto rotationAngle = OH_ArkUI_RotationGesture_GetAngle(&event);
+    auto scale = OH_ArkUI_PinchGesture_GetScale(&event);
+    auto pinchCenterX = OH_ArkUI_PinchGesture_GetCenterX(&event);
+    auto pinchCenterY = OH_ArkUI_PinchGesture_GetCenterY(&event);
+    EXPECT_NE(ret2, nullptr);
+    EXPECT_EQ(repeat, 10);
+    EXPECT_EQ(velocity, 10.0f);
+    EXPECT_EQ(velocityX, 11.0f);
+    EXPECT_EQ(velocityY, 12.0f);
+    EXPECT_EQ(x, 13.0f);
+    EXPECT_EQ(y, 14.0f);
+    EXPECT_EQ(swipeAngle, 15.0f);
+    EXPECT_EQ(speed, 16.0f);
+    EXPECT_EQ(rotationAngle, 15.0f);
+    EXPECT_EQ(scale, 17.0f);
+    EXPECT_EQ(pinchCenterX, 18.0f);
+    EXPECT_EQ(pinchCenterY, 19.0f);
+}
+
+/**
+* @tc.name: GestureImplTest003
+* @tc.desc: Test the OH_ArkUI_GestureEvent_GetNode function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest003, TestSize.Level1)
+{
+    auto* ret1 = OH_ArkUI_GestureEvent_GetNode(nullptr);
+    EXPECT_EQ(ret1, nullptr);
+
+    ArkUI_GestureEvent event;
+    ArkUI_NodeHandle node;
+    event.eventData.repeat = 10;
+    event.attachNode = &node;
+    auto* ret2 = OH_ArkUI_GestureEvent_GetNode(&event);
+    EXPECT_NE(ret2, nullptr);
+}
+
+/**
+* @tc.name: GestureImplTest004
+* @tc.desc: Test the OH_ArkUI_GestureInterruptInfo_GetSystemFlag function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest004, TestSize.Level1)
+{
+    ArkUI_GestureInterruptInfo interruptInfo;
+    interruptInfo.interruptData.isSystemGesture = true;
+    auto result = OH_ArkUI_GestureInterruptInfo_GetSystemFlag(&interruptInfo);
+    EXPECT_TRUE(result);
+
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    interruptInfo.interruptData.userData = recognizer;
+    auto* re1 = OH_ArkUI_GestureInterruptInfo_GetRecognizer(&interruptInfo);
+    EXPECT_NE(re1, nullptr);
+}
+
+/**
+* @tc.name: GestureImplTest005
+* @tc.desc: Test the OH_ArkUI_GestureInterruptInfo_GetGestureEvent function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest005, TestSize.Level1)
+{
+    auto* ret1 = OH_ArkUI_GestureInterruptInfo_GetGestureEvent(nullptr);
+    EXPECT_EQ(ret1, nullptr);
+
+    ArkUI_GestureInterruptInfo interruptInfo;
+    interruptInfo.interruptData.gestureEvent = nullptr;
+    auto* re2 = OH_ArkUI_GestureInterruptInfo_GetGestureEvent(&interruptInfo);
+    EXPECT_EQ(re2, nullptr);
+
+    ArkUI_GestureEvent event;
+    event.eventData.repeat = 10;
+    interruptInfo.interruptData.gestureEvent = &event;
+    interruptInfo.interruptData.inputEvent = nullptr;
+    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent*>(interruptInfo.interruptData.gestureEvent);
+    EXPECT_EQ(gestureEvent->eventData.rawPointerEvent, nullptr);
+
+    interruptInfo.interruptData.userData = nullptr;
+    auto* re3 = OH_ArkUI_GestureInterruptInfo_GetGestureEvent(&interruptInfo);
+    EXPECT_EQ(re3, nullptr);
+
+    auto* nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto* gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    interruptInfo.interruptData.userData = reinterpret_cast<void*>(gestureNode);
+    auto* re4 = OH_ArkUI_GestureInterruptInfo_GetGestureEvent(&interruptInfo);
+    EXPECT_NE(re4, nullptr);
+}
+
+/**
+* @tc.name: GestureImplTest006
+* @tc.desc: Test the OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest006, TestSize.Level1)
+{
+    ArkUI_GestureInterruptInfo interruptInfo;
+    interruptInfo.interruptData.isSystemGesture = true;
+    interruptInfo.interruptData.systemRecognizerType = 10;
+    auto result = OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType(&interruptInfo);
+    EXPECT_EQ(result, 10);
+
+    interruptInfo.interruptData.isSystemGesture = false;
+    result = OH_ArkUI_GestureInterruptInfo_GetSystemRecognizerType(&interruptInfo);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+* @tc.name: GestureImplTest007
+* @tc.desc: Test the OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest007, TestSize.Level1)
+{
+    ArkUI_GestureInterruptInfo interruptInfo;
+    ArkUI_TouchRecognizerHandleArray recognizers;
+    interruptInfo.interruptData.touchRecognizerCnt = 10;
+
+    int32_t size;
+    auto ret1 = OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers(nullptr, &recognizers, &size);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers(&interruptInfo, nullptr, &size);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret3 = OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers(&interruptInfo, &recognizers, nullptr);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret4 = OH_ArkUI_GestureInterruptInfo_GetTouchRecognizers(&interruptInfo, &recognizers, &size);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(size, 10);
+}
+
+/**
+* @tc.name: GestureImplTest008
+* @tc.desc: Test the OH_ArkUI_TouchRecognizer_GetNodeHandle function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest008, TestSize.Level1)
+{
+    auto ret1 = OH_ArkUI_TouchRecognizer_GetNodeHandle(nullptr);
+    EXPECT_EQ(ret1, nullptr);
+}
+
+/**
+* @tc.name: GestureImplTest009
+* @tc.desc: Test the OH_ArkUI_TouchRecognizer_CancelTouch function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest009, TestSize.Level1)
+{
+    ArkUI_GestureInterruptInfo interruptInfo;
+    interruptInfo.interruptData.touchRecognizerCnt = 10;
+    auto ret1 = OH_ArkUI_TouchRecognizer_CancelTouch(nullptr, &interruptInfo);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+* @tc.name: GestureImplTest0010
+* @tc.desc: Test the OH_ArkUI_GetResponseRecognizersFromInterruptInfo function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0010, TestSize.Level1)
+{
+    ArkUI_GestureRecognizerHandleArray recognizers;
+    ArkUI_GestureInterruptInfo interruptInfo;
+    interruptInfo.interruptData.count = 10;
+    int32_t count = 10;
+    auto ret1 = OH_ArkUI_GetResponseRecognizersFromInterruptInfo(&interruptInfo, nullptr, &count);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_GetResponseRecognizersFromInterruptInfo(&interruptInfo, &recognizers, nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret3 = OH_ArkUI_GetResponseRecognizersFromInterruptInfo(&interruptInfo, &recognizers, &count);
+    EXPECT_EQ(ret3, 0);
+    EXPECT_EQ(count, 10);
+}
+
+/**
+* @tc.name: GestureImplTest0011
+* @tc.desc: Test the OH_ArkUI_SetGestureRecognizerEnabled function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0011, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    auto ret1 = OH_ArkUI_SetGestureRecognizerEnabled(nullptr, true);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_SetGestureRecognizerEnabled(recognizer, true);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    auto ret3 = OH_ArkUI_GetGestureRecognizerEnabled(nullptr);
+    EXPECT_EQ(ret3, false);
+    auto ret4 = OH_ArkUI_GetGestureRecognizerEnabled(recognizer);
+    EXPECT_EQ(ret4, false);
+
+    auto ret5 = OH_ArkUI_SetGestureRecognizerLimitFingerCount(recognizer, true);
+    EXPECT_EQ(ret5, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+* @tc.name: GestureImplTest0012
+* @tc.desc: Test the OH_ArkUI_GetGestureRecognizerState function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0012, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    ArkUI_GestureRecognizerState state;
+    auto ret1 = OH_ArkUI_GetGestureRecognizerState(nullptr, &state);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_GetGestureRecognizerState(recognizer, &state);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+* @tc.name: GestureImplTest0013
+* @tc.desc: Test the OH_ArkUI_GetGestureEventTargetInfo function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0013, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    ArkUI_GestureEventTargetInfo* info = nullptr;
+    auto ret1 = OH_ArkUI_GetGestureEventTargetInfo(nullptr, &info);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_GetGestureEventTargetInfo(recognizer, &info);
+    EXPECT_EQ(ret2, 0);
+    EXPECT_NE(info, nullptr);
+}
+
+/**
+* @tc.name: GestureImplTest0014
+* @tc.desc: Test the OH_ArkUI_GestureEventTargetInfo_IsScrollBegin function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0014, TestSize.Level1)
+{
+    ArkUI_GestureEventTargetInfo info;
+    bool ret = false;
+    auto ret1 = OH_ArkUI_GestureEventTargetInfo_IsScrollBegin(nullptr, &ret);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_GestureEventTargetInfo_IsScrollBegin(&info, &ret);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+* @tc.name: GestureImplTest0015
+* @tc.desc: Test the OH_ArkUI_GestureEventTargetInfo_IsScrollEnd function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0015, TestSize.Level1)
+{
+    ArkUI_GestureEventTargetInfo info;
+    bool ret = false;
+    auto ret1 = OH_ArkUI_GestureEventTargetInfo_IsScrollEnd(nullptr, &ret);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_GestureEventTargetInfo_IsScrollEnd(&info, &ret);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+* @tc.name: GestureImplTest0016
+* @tc.desc: Test the OH_ArkUI_GetPanGestureDirectionMask function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0016, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    ArkUI_GestureDirectionMask mask;
+    auto ret1 = OH_ArkUI_GetPanGestureDirectionMask(nullptr, &mask);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_GetPanGestureDirectionMask(recognizer, &mask);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+* @tc.name: GestureImplTest0017
+* @tc.desc: Test the OH_ArkUI_IsBuiltInGesture function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0017, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    auto ret1 = OH_ArkUI_IsBuiltInGesture(nullptr);
+    EXPECT_EQ(ret1, false);
+    auto ret2 = OH_ArkUI_IsBuiltInGesture(recognizer);
+    EXPECT_EQ(ret2, false);
+}
+
+/**
+* @tc.name: GestureImplTest0018
+* @tc.desc: Test the OH_ArkUI_GetGestureTag function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0018, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    char buffer[100];
+    int32_t bufferSize = 100;
+    int32_t result = 0;
+    auto ret1 = OH_ArkUI_GetGestureTag(nullptr, buffer, bufferSize, &result);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_GetGestureTag(recognizer, buffer, bufferSize, &result);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+* @tc.name: GestureImplTest0019
+* @tc.desc: Test the OH_ArkUI_GetGestureBindNodeId function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0019, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    char nodeId[128];
+    std::fill_n(nodeId, sizeof(nodeId), 0);
+    auto ret1 = OH_ArkUI_GetGestureBindNodeId(nullptr, nodeId, sizeof(nodeId), nullptr);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_GetGestureBindNodeId(recognizer, nodeId, sizeof(nodeId), nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+* @tc.name: GestureImplTest0020
+* @tc.desc: Test the OH_ArkUI_IsGestureRecognizerValid function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0020, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    auto ret1 = OH_ArkUI_IsGestureRecognizerValid(nullptr);
+    EXPECT_EQ(ret1, false);
+    auto ret2 = OH_ArkUI_IsGestureRecognizerValid(recognizer);
+    EXPECT_EQ(ret2, false);
+}
+
+/**
+* @tc.name: GestureImplTest0021
+* @tc.desc: Test the OH_ArkUI_ParallelInnerGestureEvent_GetUserData function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0021, TestSize.Level1)
+{
+    auto *event = new ArkUI_ParallelInnerGestureEvent();
+    auto ret1 = OH_ArkUI_ParallelInnerGestureEvent_GetUserData(event);
+    EXPECT_EQ(ret1, nullptr);
+}
+
+/**
+* @tc.name: GestureImplTest0022
+* @tc.desc: Test the OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0022, TestSize.Level1)
+{
+    auto *event = new ArkUI_ParallelInnerGestureEvent();
+    auto ret1 = OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer(event);
+    EXPECT_EQ(ret1, nullptr);
+}
+
+/**
+* @tc.name: GestureImplTest0023
+* @tc.desc: Test the OH_ArkUI_ParallelInnerGestureEvent_GetConflictRecognizers function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0023, TestSize.Level1)
+{
+    ArkUI_ParallelInnerGestureEvent *event = new ArkUI_ParallelInnerGestureEvent();
+    ArkUI_GestureRecognizerHandleArray array;
+    int32_t size = 0;
+    event->count = 10;
+    auto ret1 = OH_ArkUI_ParallelInnerGestureEvent_GetConflictRecognizers(event, nullptr, &size);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_ParallelInnerGestureEvent_GetConflictRecognizers(event, &array, nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret3 = OH_ArkUI_ParallelInnerGestureEvent_GetConflictRecognizers(event, &array, &size);
+    EXPECT_EQ(ret3, 0);
+    EXPECT_EQ(size, 10);
+}
+
+/**
+* @tc.name: GestureImplTest0024
+* @tc.desc: Test the OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeGestureTest, GestureImplTest0024, TestSize.Level1)
+{
+    ArkUI_GestureRecognizer recognizer;
+    ArkUI_GestureRecognizerDisposeNotifyCallback callback = nullptr;
+    auto ret1 = OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(nullptr, callback, nullptr);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto ret2 = OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(&recognizer, callback, nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
