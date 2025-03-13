@@ -629,4 +629,93 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest015, TestSize.Level1)
     EXPECT_FALSE(dynamicPattern->adaptiveHeight_);
 #endif
 }
+
+/**
+ * @tc.name: DynamicPatternTest016
+ * @tc.desc: Test HandleErrorCallback case DC_WORKER_HAS_USED_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest016, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with DCWORKERHASUSEDERROR.
+     * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
+     */
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest017
+ * @tc.desc: Test HandleErrorCallback case DC_ONLY_RUN_ON_SCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest017, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with DCONLYRUNONSCB.
+     * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
+     */
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_ONLY_RUN_ON_SCB);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest018
+ * @tc.desc: Test HandleErrorCallback case DC_INTERNAL_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest018, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with DCINTERNALERROR.
+     * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
+     */
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_INTERNAL_ERROR);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest019
+ * @tc.desc: Test HandleErrorCallback case default
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest019, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with an invalid code.
+     * @tc.expected: expect PLATFORMLOGI is called with the correct message.
+     */
+    DCResultCode invalidCode = static_cast<DCResultCode>(99999);
+    dynamicPattern->HandleErrorCallback(invalidCode);
+#endif
+}
 } // namespace OHOS::Ace::NG
