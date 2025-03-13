@@ -26,6 +26,9 @@ namespace OHOS::Ace::NG {
 struct KeyboardOptions {
     bool supportAvoidance;
 };
+struct PathShapeOptions {
+    std::optional<std::string> commands;
+};
 }
 
 namespace OHOS::Ace::NG::Converter {
@@ -123,6 +126,11 @@ enum class ThreatType {
 struct Header {
     std::string headerKey;
     std::string headerValue;
+
+    bool operator==(const Header& other) const
+    {
+        return (headerKey == other.headerKey && headerValue == other.headerValue);
+    }
 };
 
 using PickerSelectedType = std::variant<uint32_t, std::vector<uint32_t>>;

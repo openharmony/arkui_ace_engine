@@ -29,6 +29,7 @@
 // SORTED_SECTION
 #include "base/geometry/dimension.h"
 #include "core/common/ime/text_input_action.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components/image/image_event.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components/web/web_event.h"
@@ -149,6 +150,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
+    void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src);
     void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src);
     void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
@@ -170,6 +172,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
+    void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx);
     void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
@@ -193,6 +196,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_MarqueeState& dst, int32_t src);
     void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src);
+    void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src);
     void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src);
     void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src);
     void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src);
@@ -208,9 +212,12 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Number& dst, const long long& src);
     void AssignArkValue(Ark_Number& dst, const long& src);
     void AssignArkValue(Ark_Number& dst, const uint32_t& src);
+    void AssignArkValue(Ark_OffsetResult& dst, const Offset& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
+    void AssignArkValue(Ark_Position& dst, const OffsetF& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
+    void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src);
     void AssignArkValue(Ark_RectResult& dst, const RectF& src);
     void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src);
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
@@ -234,6 +241,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
     void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src);
+    void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src);
+    void AssignArkValue(Ark_ShadowType& dst, const ShadowType& src);
     void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
     void AssignArkValue(Ark_SheetType& dst, const SheetType& src);
     void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
@@ -252,6 +261,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
+    void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src);
     void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
     void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src);
     void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
@@ -262,6 +272,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src);
     void AssignArkValue(Ark_UnifiedData& arkData, const RefPtr<UnifiedData>& data);
     void AssignArkValue(Ark_ViewportFit& dst, const ViewportFit& src);
+    void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemGroupIndex& src);
     void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src);
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
@@ -614,17 +625,27 @@ namespace OHOS::Ace::NG::Converter {
         }
     };
 
-    // Create Ark_CallbackResource
-    template <typename T, typename F,
+    // Create Ark_CallbackResource with async callback.
+    template <typename T,
         std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
-    T ArkValue(F callbackFunc, Ark_Int32 resId = 0)
+    T ArkValue(decltype(T().call) callbackFunc, Ark_Int32 resId = 0)
     {
         return T { .resource = { .resourceId = resId, .hold = nullptr, .release = nullptr },
             .call = callbackFunc, .callSync = nullptr
         };
     }
 
-    // Create Ark_CallbackResource
+    // Create Ark_CallbackResource with sync callback.
+    template <typename T,
+        std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
+    T ArkValue(decltype(T().callSync) callbackFunc, Ark_Int32 resId = 0)
+    {
+        return T { .resource = { .resourceId = resId, .hold = nullptr, .release = nullptr },
+            .call = nullptr, .callSync = callbackFunc
+        };
+    }
+
+    // Create Ark_CallbackResource with sync and async callbacks.
     template <typename T,
         std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true>
     T ArkValue(decltype(T().call) callback = nullptr, decltype(T().callSync) callbackSync = nullptr, Ark_Int32 id = 0)

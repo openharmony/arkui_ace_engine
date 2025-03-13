@@ -72,9 +72,8 @@ void ScrollPage1Impl(Ark_Scroller peer,
 }
 Ark_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
 {
-    CHECK_NULL_RETURN(peer, {}); // need to fix default value
-    peer->TriggerCurrentOffset();
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return peer->TriggerCurrentOffset();
 }
 void ScrollToIndexImpl(Ark_Scroller peer,
                        const Ark_Number* value,
@@ -102,8 +101,7 @@ Ark_RectResult GetItemRectImpl(Ark_VMContext vmContext,
                                const Ark_Number* index)
 {
     CHECK_NULL_RETURN(peer, {}); // need to fix default value
-    peer->TriggerGetItemRect(index);
-    return {}; 
+    return peer->TriggerGetItemRect(index);
 }
 Ark_Number GetItemIndexImpl(Ark_VMContext vmContext,
                             Ark_Scroller peer,

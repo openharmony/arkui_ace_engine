@@ -464,9 +464,11 @@ namespace Converter {
     template<> Gradient Convert(const Ark_LinearGradient_common& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> Header Convert(const Ark_Header& src);
+    template<> Header Convert(const Ark_WebHeader& src);
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> LightSource Convert(const Ark_LightSource& src);
+    template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
     template<> OptionParam Convert(const Ark_MenuElement& src);
@@ -515,6 +517,7 @@ namespace Converter {
     template<> std::u16string Convert(const Ark_String& src);
     template<> std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
+    template<> std::vector<uint32_t> Convert(const Ark_Buffer& src);
 
     // NOT_SORTED_SECTION: Changing ordering can lead to build problem!
     template<> Dimension Convert(const Ark_String& src);
@@ -542,6 +545,7 @@ namespace Converter {
     template<> BorderStyleProperty Convert(const Ark_BorderStyle& src);
     template<> Dimension Convert(const Ark_CustomObject& src);
     template<> DimensionOffset Convert(const Ark_Offset& src);
+    template<> DimensionOffset Convert(const Ark_Position& src);
     template<> FontMetaData Convert(const Ark_Font& src);
     template<> ShadowColorStrategy Convert(const Ark_Color& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
@@ -549,6 +553,8 @@ namespace Converter {
     template<> DimensionOffset Convert(const Ark_ActionSheetOffset& src);
     template<> KeyboardOptions Convert(const Ark_KeyboardOptions& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
+    template<> Rect Convert(const Ark_RectResult& src);
+    template<> PathShapeOptions Convert(const Ark_PathShapeOptions& value);
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);

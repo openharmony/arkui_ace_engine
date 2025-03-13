@@ -389,7 +389,7 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
         accessor->destroyPeer(peer);
     };
 
-    auto arkCallback = Converter::ArkValue<PasteButtonCallback>(nullptr, onClick, frameNode->GetId());
+    auto arkCallback = Converter::ArkValue<PasteButtonCallback>(onClick, frameNode->GetId());
     modifier_->setOnClick(node_, &arkCallback);
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);

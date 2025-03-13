@@ -13,7 +13,17 @@
  * limitations under the License.
  */
 
+#ifdef WEB_SUPPORTED
+#ifdef ARKUI_CAPI_UNITTEST
+#include "test/unittest/capi/stubs/mock_application_context.h"
+#include "test/unittest/capi/stubs/mock_nweb_helper.h"
+#else
+#include "application_context.h"
+#include "nweb_helper.h"
+#endif // ARKUI_CAPI_UNITTEST
+#endif // WEB_SUPPORTED
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/webview_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -21,10 +31,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebviewControllerAccessor {
 void DestroyPeerImpl(Ark_WebviewController peer)
 {
+    delete peer;
 }
 Ark_WebviewController CtorImpl()
 {
-    return nullptr;
+    return new WebviewControllerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,11 +43,35 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void InitializeWebEngineImpl()
 {
+#ifdef WEB_SUPPORTED
+    auto applicationContext = AbilityRuntime::ApplicationContext::GetApplicationContext();
+    const std::string& bundlePath = applicationContext->GetBundleCodeDir();
+    NWeb::NWebHelper::Instance().SetBundlePath(bundlePath);
+    if (!NWeb::NWebHelper::Instance().InitAndRun(true)) {
+        LOGE("ARKOALA InitializeWebEngine Failed.");
+    }
+#endif
 }
 void LoadUrlImpl(Ark_WebviewController peer,
                  const Ark_Union_String_Resource* url,
                  const Opt_Array_WebHeader* headers)
 {
+#ifdef WEB_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(url);
+    CHECK_NULL_VOID(headers);
+    auto nweb = NWeb::NWebHelper::Instance().GetNWeb(peer->nwebId);
+    CHECK_NULL_VOID(nweb);
+    std::string urlStr = Converter::OptConvert<std::string>(*url).value_or("");
+    std::map<std::string, std::string> httpHeaders;
+    auto headersOpt = Converter::OptConvert<std::vector<Converter::Header>>(*headers);
+    if (headersOpt) {
+        for (auto header : headersOpt.value()) {
+            httpHeaders[header.headerKey] = header.headerValue;
+        }
+    }
+    nweb->Load(urlStr, httpHeaders);
+#endif
 }
 } // WebviewControllerAccessor
 const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor()

@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/permission_request_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -39,19 +40,17 @@ void DenyImpl(Ark_PermissionRequest peer)
 }
 Ark_String GetOriginImpl(Ark_PermissionRequest peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetOrigin();
-    // origin value need to be returned
-    LOGE("PermissionRequestAccessor::GetOriginImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetOrigin();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Array_String GetAccessibleResourceImpl(Ark_PermissionRequest peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, {});
-    peer->handler->GetResources();
-    // accessible resource value need to be returned
-    LOGE("PermissionRequestAccessor::GetAccessibleResourceImpl - return value need to be supported");
-    return {};
+    std::vector<std::string> result;
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Array_String>(result, Converter::FC));
+    result = peer->handler->GetResources();
+    return Converter::ArkValue<Array_String>(result, Converter::FC);
 }
 void GrantImpl(Ark_PermissionRequest peer,
                const Array_String* resources)

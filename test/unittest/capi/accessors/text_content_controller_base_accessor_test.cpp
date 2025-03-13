@@ -82,12 +82,15 @@ HWTEST_F(TextContentControllerBaseAccessorTest, GetTextContentLinesNumTest, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_GetCaretOffsetTest, TestSize.Level1)
+HWTEST_F(TextContentControllerBaseAccessorTest, GetCaretOffsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getCaretOffset, nullptr);
-    EXPECT_CALL(*mockTextContentControllerBase_, GetCaretPosition()).Times(1).WillOnce(Return(NG::OffsetF(1, 1)));
-    auto checkValue = accessor_->getCaretOffset(peer_);
-    EXPECT_EQ(&checkValue, nullptr); // fix after updating return value
+    EXPECT_CALL(*mockTextContentControllerBase_, GetCaretPosition()).Times(1).WillOnce(Return(NG::OffsetF(0, 0)));
+    Ark_CaretOffset offset = accessor_->getCaretOffset(peer_);
+    auto x = Converter::Convert<int32_t>(offset.x);
+    auto y = Converter::Convert<int32_t>(offset.y);
+    EXPECT_EQ(x, 0);
+    EXPECT_EQ(y, 0);
 }
 
 /**

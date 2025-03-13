@@ -15,16 +15,25 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "background_color_style_peer.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG {
+namespace GeneratedModifier {
 namespace BackgroundColorStyleAccessor {
 void DestroyPeerImpl(Ark_BackgroundColorStyle peer)
 {
+    delete peer;
 }
 Ark_BackgroundColorStyle CtorImpl(const Ark_TextBackgroundStyle* textBackgroundStyle)
 {
-    return {};
+    TextBackgroundStyle style;
+    if (textBackgroundStyle) {
+        style = Converter::Convert<TextBackgroundStyle>(*textBackgroundStyle);
+    }
+    auto span = AceType::MakeRefPtr<OHOS::Ace::BackgroundColorSpan>(style);
+    return new BackgroundColorStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -45,5 +54,5 @@ const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccess
     };
     return &BackgroundColorStyleAccessorImpl;
 }
-
+}
 }

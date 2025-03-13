@@ -291,6 +291,21 @@ void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponen
     }
 }
 
+void AssignArkValue(Ark_MessageLevel& dst, const MessageLevel& src)
+{
+    switch (src) {
+        case MessageLevel::DEBUG: dst = ARK_MESSAGE_LEVEL_DEBUG; break;
+        case MessageLevel::ERROR: dst = ARK_MESSAGE_LEVEL_ERROR; break;
+        case MessageLevel::INFO: dst = ARK_MESSAGE_LEVEL_INFO; break;
+        case MessageLevel::LOG: dst = ARK_MESSAGE_LEVEL_LOG; break;
+        case MessageLevel::WARN: dst = ARK_MESSAGE_LEVEL_WARN; break;
+        default: {
+            dst = static_cast<Ark_MessageLevel>(-1);
+            LOGE("Unexpected enum value in MessageLevel: %{public}d", src);
+        }
+    }
+}
+
 void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
 {
     switch (src) {
@@ -436,6 +451,18 @@ void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
         case ScrollState::FLING: dst = ARK_SCROLL_STATE_FLING; break;
         default: dst = static_cast<Ark_ScrollState>(-1);
             LOGE("Unexpected enum value in ScrollState: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_ShadowType& dst, const ShadowType& src)
+{
+    switch (src) {
+        case ShadowType::COLOR: dst = ARK_SHADOW_TYPE_COLOR; break;
+        case ShadowType::BLUR: dst = ARK_SHADOW_TYPE_BLUR; break;
+        default:
+            dst = static_cast<Ark_ShadowType>(-1);
+            LOGE("Unexpected enum value in ShadowType: %{public}d", src);
+            break;
     }
 }
 

@@ -21,6 +21,9 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,6 +59,19 @@ public:
         accessors_ = fullAPI_ ? fullAPI_->getAccessors() : nullptr;
         accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
         MockPipelineContext::SetUp();
+
+        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
+        ASSERT_TRUE(MockPipelineContext::GetCurrent());
+        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
+        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
+        themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
+            .WillRepeatedly(testing::Return(themeConstants_));
+        EXPECT_CALL(*themeManager_, GetTheme(testing::_)).WillRepeatedly(CatchEmptyTheme);
+
+        themeConstants_->LoadTheme(0);
+        MockThemeStyle::GetInstance()->SetAttributes({});
+
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
         ASSERT_NE(accessor_, nullptr);
         if constexpr (HasFinalizer<AccessorType>::value) {
@@ -67,13 +83,20 @@ public:
         MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+#ifdef CAPI_BACKTRACE
+        ResetThemes();
+#endif
     }
 
     static void TearDownTestCase()
     {
+        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
         MockPipelineContext::TearDown();
         MockContainer::TearDown();
         finalyzer_ = nullptr;
+        themeManager_ = nullptr;
+        themeConstants_ = nullptr;
     }
 
     static void AddResource(std::string key, const ResRawValue& value)
@@ -116,9 +139,19 @@ public:
         peer_ = nullptr;
     }
 
+    template<typename Theme>
+    static void SetupTheme()
+    {
+        auto theme = typename Theme::Builder().Build(themeConstants_);
+        EXPECT_CALL(*themeManager_, GetTheme(Theme::TypeId())).WillRepeatedly(testing::Return(theme));
+    }
+
 protected:
     inline static const GENERATED_ArkUIFullNodeAPI *fullAPI_;
     inline static const GENERATED_ArkUIAccessors *accessors_;
+
+    inline static RefPtr<MockThemeManager> themeManager_;
+    inline static RefPtr<ThemeConstants> themeConstants_;
 
 public:
     inline static const AccessorType *accessor_;

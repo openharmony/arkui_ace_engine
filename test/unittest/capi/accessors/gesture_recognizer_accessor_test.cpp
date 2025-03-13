@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/event_target_info_peer.h"
 #include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
 
@@ -214,5 +215,20 @@ HWTEST_F(GestureRecognizerAccessorTest, IsValidTest, TestSize.Level1)
     EXPECT_FALSE(accessor_->isValid(peer_));
     EXPECT_FALSE(accessor_->isValid(nullptr));
     EXPECT_FALSE(accessor_->isValid(peer_));
+}
+
+/**
+ * @tc.name: GetTagTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerAccessorTest, GetTagTest, TestSize.Level1)
+{
+    const std::string expectedTag = "Test";
+    auto info = AccessibilityManager::MakeRefPtr<GestureInfo>();
+    info->SetTag(expectedTag);
+    peer_->GetRecognizer()->SetGestureInfo(info);
+    auto result = accessor_->getTag(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(result), expectedTag);
 }
 } // namespace OHOS::Ace::NG

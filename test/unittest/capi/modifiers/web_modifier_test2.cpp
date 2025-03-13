@@ -650,7 +650,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_NativeEmbedTouchInfo data) {
+    auto checkCallback = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_NativeEmbedTouchInfo data) {
         auto touchEventOpt = Converter::OptConvert<Ark_TouchEvent>(data.touchEvent);
         ASSERT_TRUE(touchEventOpt.has_value());
         auto eventPtr = touchEventOpt.value();

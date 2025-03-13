@@ -85,6 +85,13 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::
     dst = peer;
 }
 
+void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src)
+{
+    dst.index = Converter::ArkValue<Ark_Number>(0);
+    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
+}
+
 void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info)
 {
     const auto peer = GeneratedModifier::GetFullAPI()->getAccessors()->getDragEventAccessor()->ctor();
@@ -105,6 +112,23 @@ void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
     };
 }
 
+void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
+{
+    dst.actualBoundingBoxAscent = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxAscent);
+    dst.actualBoundingBoxDescent = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxDescent);
+    dst.actualBoundingBoxLeft = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxLeft);
+    dst.actualBoundingBoxRight = Converter::ArkValue<Ark_Number>(src.actualBoundingBoxRight);
+    dst.alphabeticBaseline = Converter::ArkValue<Ark_Number>(src.alphabeticBaseline);
+    dst.emHeightAscent = Converter::ArkValue<Ark_Number>(src.emHeightAscent);
+    dst.emHeightDescent = Converter::ArkValue<Ark_Number>(src.emHeightDescent);
+    dst.fontBoundingBoxAscent = Converter::ArkValue<Ark_Number>(src.fontBoundingBoxAscent);
+    dst.fontBoundingBoxDescent = Converter::ArkValue<Ark_Number>(src.fontBoundingBoxDescent);
+    dst.hangingBaseline = Converter::ArkValue<Ark_Number>(src.hangingBaseline);
+    dst.ideographicBaseline = Converter::ArkValue<Ark_Number>(src.ideographicBaseline);
+    dst.width = Converter::ArkValue<Ark_Number>(src.width);
+    dst.height = Converter::ArkValue<Ark_Number>(src.height);
+}
+
 void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
 {
     dst = LengthMetricsPeer::Create(src);
@@ -119,10 +143,39 @@ void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
         ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
 }
 
+void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemGroupIndex& src)
+{
+    dst.index = ArkValue<Ark_Number>(src.index);
+    dst.itemGroupArea = src.area < 0 ?
+        ArkValue<Opt_ListItemGroupArea>(Ark_Empty{}) : ArkValue<Opt_ListItemGroupArea>(src.area);
+    dst.itemIndexInGroup = src.indexInGroup < 0 ?
+        ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
+}
+
+void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.Left());
+    dst.y = ArkValue<Ark_Number>(src.Top());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
+
 void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src)
 {
     dst.value0 = ArkValue<Ark_Length>(src.first);
     dst.value1 = ArkValue<Ark_Length>(src.second);
+}
+
+void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src)
+{
+    dst.radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(src.GetBlurRadius());
+    dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
+    dst.color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
+        src.GetColor().ColorToString());
+    auto offset = src.GetOffset();
+    dst.offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(offset.GetX());
+    dst.offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(offset.GetY());
+    dst.fill = Converter::ArkValue<Opt_Boolean>(src.GetIsFilled());
 }
 
 void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
@@ -289,6 +342,12 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     dst.area = area;
 }
 
+void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx)
+{
+    dst.headerKey = Converter::ArkValue<Ark_String>(src.headerKey, ctx);
+    dst.headerValue = Converter::ArkValue<Ark_String>(src.headerValue, ctx);
+}
+
 void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx)
 {
     dst.supportAvoidance = Converter::ArkValue<Opt_Boolean>(src.supportAvoidance);
@@ -299,5 +358,25 @@ Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
 {
     DimensionUnit du = OptConvert<DimensionUnit>(unit).value_or(DimensionUnit::INVALID);
     return LengthMetricsPeer::Create(Dimension(value, du));
+}
+
+void AssignArkValue(Ark_Position& dst, const OffsetF& src)
+{
+    dst.x = Converter::ArkValue<Opt_Length>(src.GetX());
+    dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
+}
+
+void AssignArkValue(Ark_OffsetResult& dst, const Offset& src)
+{
+    dst.xOffset = ArkValue<Ark_Number>(src.GetX());
+    dst.yOffset = ArkValue<Ark_Number>(src.GetY());
+}
+
+void AssignArkValue(Ark_RectResult& dst, const RectF& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.GetX());
+    dst.y = ArkValue<Ark_Number>(src.GetY());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
 }
 } // namespace OHOS::Ace::NG::Converter

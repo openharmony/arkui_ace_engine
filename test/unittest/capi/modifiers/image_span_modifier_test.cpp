@@ -14,11 +14,13 @@
  */
 
 #include <gtest/gtest.h>
+#include <sstream>
+#include <vector>
 
+#include "image_common_methods_test.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "arkoala_api_generated.h"
@@ -29,6 +31,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
 namespace  {
+    constexpr auto PRECISION = 6;
+
     constexpr auto ATTRIBUTE_SRC_NAME = "src";
     constexpr auto ATTRIBUTE_SRC_DEFAULT_VALUE = "";
     constexpr auto ATTRIBUTE_RAWSRC_NAME = "rawSrc";
@@ -167,6 +171,35 @@ const std::vector<LoadImageSuccessEvent> COMPLETE_EVENT_TEST_PLAN = {
     { LoadImageSuccessEvent(100, 100, 100, 100, 0, 100, 100, 0, 0) },
     { LoadImageSuccessEvent(10, 20, 30, 40, 1, 50, 60, 70, 80) },
 };
+
+/*
+ * @tc.name: setColorFilterTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageSpanModifierTest, setColorFilterTest, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setColorFilter);
+    auto accessor = GeneratedModifier::GetColorFilterAccessor();
+    ASSERT_TRUE(accessor);
+    auto jsonValue = GetJsonValue(node_);
+    auto result = GetAttrValue<std::string>(jsonValue, ColorFilter::ATTRIBUTE_COLOR_FILTER_NAME);
+    EXPECT_EQ(result, ColorFilter::ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE);
+    for (auto& [name, value, expected] : ColorFilter::floatMatrixTest) {
+        std::stringstream expectedStream;
+        expectedStream << std::fixed << std::setprecision(PRECISION);
+        auto peer = accessor->ctor(&value);
+        ASSERT_TRUE(peer);
+        auto unionValue = Converter::ArkUnion<Ark_Union_ColorFilter_DrawingColorFilter, Ark_ColorFilter>(peer);
+        modifier_->setColorFilter(node_, &unionValue);
+        jsonValue = GetJsonValue(node_);
+        for (const auto& elem : expected) {
+            expectedStream << std::fixed << elem << " ";
+        }
+        result = GetAttrValue<std::string>(jsonValue, ColorFilter::ATTRIBUTE_COLOR_FILTER_NAME);
+        EXPECT_EQ(result, expectedStream.str());
+    }
+}
 
 /*
  * @tc.name: setOnCompleteTest

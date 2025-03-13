@@ -232,6 +232,8 @@ public:
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback);
+    static void SetHapPathCallback(FrameNode* frameNode, std::function<void(const std::string&)>&& hapPathCallback);
     static void SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc);
     static void SetRenderMode(FrameNode* frameNode, const std::optional<RenderMode>& renderMode);
     static void SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode);

@@ -46,6 +46,22 @@ RefPtr<FrameNode> WebModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+void WebModelNG::SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetSetWebIdCallback(std::move(webIdCallback));
+}
+
+void WebModelNG::SetHapPathCallback(FrameNode* frameNode, std::function<void(const std::string&)>&& hapPathCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetSetHapPathCallback(std::move(hapPathCallback));
+}
+
 void WebModelNG::SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc)
 {
     CHECK_NULL_VOID(frameNode);

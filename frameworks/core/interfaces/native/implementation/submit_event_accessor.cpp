@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -39,11 +40,11 @@ void KeepEditableStateImpl(Ark_SubmitEvent peer)
 }
 Ark_String GetTextImpl(Ark_SubmitEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->GetEventInfo(), {});
-    auto text = peer->GetEventInfo()->GetText();
-    LOGE("Arkoala method SubmitEventAccessor.GetTextImpl has incorrect return type");
-    return {};
+    std::u16string result = u"";
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    CHECK_NULL_RETURN(peer->GetEventInfo(), Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->GetEventInfo()->GetText();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 void SetTextImpl(Ark_SubmitEvent peer,
                  const Ark_String* text)

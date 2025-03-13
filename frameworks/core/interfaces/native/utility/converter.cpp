@@ -775,6 +775,14 @@ DimensionOffset Convert(const Ark_Offset& src)
 }
 
 template<>
+DimensionOffset Convert(const Ark_Position& src)
+{
+    auto x = Converter::OptConvert<Dimension>(src.x);
+    auto y = Converter::OptConvert<Dimension>(src.y);
+    return DimensionOffset(x.has_value() ? x.value() : Dimension(), y.has_value() ? y.value() : Dimension());
+}
+
+template<>
 FontMetaData Convert(const Ark_Font& src)
 {
     return { OptConvert<Dimension>(src.size), OptConvert<FontWeight>(src.weight) };
@@ -902,6 +910,15 @@ GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
 
 template<>
 Header Convert(const Ark_Header& src)
+{
+    Header header;
+    header.headerKey = Converter::Convert<std::string>(src.headerKey);
+    header.headerValue = Converter::Convert<std::string>(src.headerValue);
+    return header;
+}
+
+template<>
+Header Convert(const Ark_WebHeader& src)
 {
     Header header;
     header.headerKey = Converter::Convert<std::string>(src.headerKey);
@@ -1124,6 +1141,32 @@ ListItemIndex Convert(const Ark_VisibleListContentInfo& src)
         itemIndex.indexInGroup = indexInGroup.value();
     }
     return itemIndex;
+}
+
+template<>
+ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src)
+{
+    auto itemIndex = ListItemGroupIndex{.index = Convert<int32_t>(src.index)}; // a struct is initialized by default
+    auto itemGroupArea = OptConvert<ListItemGroupArea>(src.itemGroupArea);
+    if (itemGroupArea.has_value()) {
+        itemIndex.area = static_cast<int32_t>(itemGroupArea.value());
+    }
+    auto indexInGroup = OptConvert<int32_t>(src.itemIndexInGroup);
+    if (indexInGroup.has_value()) {
+        itemIndex.indexInGroup = indexInGroup.value();
+    }
+    return itemIndex;
+}
+
+template<>
+Rect Convert(const Ark_RectResult& src)
+{
+    return Rect(
+        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.width),
+        Converter::Convert<float>(src.height)
+    );
 }
 
 template<>
@@ -2048,5 +2091,35 @@ SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
         };
     }
     return selectMenuParam;
+}
+
+template<>
+std::pair<Dimension, Dimension> Convert(const Ark_Position& src)
+{
+    auto x = Converter::OptConvert<Dimension>(src.x);
+    auto y = Converter::OptConvert<Dimension>(src.y);
+    return std::make_pair(x.has_value() ? x.value() : Dimension(), y.has_value() ? y.value() : Dimension());
+}
+
+template<>
+std::vector<uint32_t> Convert(const Ark_Buffer& src)
+{
+    std::vector<uint32_t> dataArray;
+    auto array = (src.data != nullptr) ? static_cast<uint32_t*>(src.data) : nullptr;
+    auto size = src.length / sizeof(uint32_t);
+    if (array && size > 0) {
+        for (int64_t idx = 0; idx < size; idx++) {
+            dataArray.push_back(array[idx]);
+        }
+    }
+    return dataArray;
+}
+
+template<>
+PathShapeOptions Convert(const Ark_PathShapeOptions& value)
+{
+    return {
+        .commands = Converter::OptConvert<std::string>(value.commands),
+    };
 }
 } // namespace OHOS::Ace::NG::Converter

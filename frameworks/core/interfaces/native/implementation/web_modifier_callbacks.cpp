@@ -1069,7 +1069,7 @@ void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
     arkEventResult = peer;
     parameter.result = Converter::ArkValue<Opt_EventResult>(arkEventResult);
     auto arkCallback = CallbackHelper(*value);
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 bool OnOverrideUrlLoading(const OnOverrideUrlLoadingCallback* value,

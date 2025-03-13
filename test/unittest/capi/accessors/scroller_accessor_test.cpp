@@ -356,10 +356,10 @@ HWTEST_F(ScrollerAccessorTest, scrollByXTest, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5 },
         { Converter::ArkValue<Ark_Length>(0.12_pct), 0 },
         { Converter::ArkValue<Ark_Length>(-0.12_pct), 0 },
-        { RES_ARK_LENGTH, 0 },
+        { RES_ARK_LENGTH, 10 },
     };
 
-    Ark_Length arkDy = Converter::ArkValue<Ark_Length>(0);
+    Ark_Length arkDy = Converter::ArkValue<Ark_Length>(0._px);
 
     for (const auto &[arkLength, expected]: testPlan) {
         EXPECT_CALL(*mockScrollerController_, ScrollBy(expected, 0, false)).Times(1);
@@ -394,10 +394,10 @@ HWTEST_F(ScrollerAccessorTest, scrollByYTest, TestSize.Level1)
         { Converter::ArkValue<Ark_Length>(-4.5_fp), -4.5 },
         { Converter::ArkValue<Ark_Length>(0.12_pct), 0 },
         { Converter::ArkValue<Ark_Length>(-0.12_pct), 0 },
-        { RES_ARK_LENGTH, 0 },
+        { RES_ARK_LENGTH, 10 },
     };
 
-    Ark_Length arkDx = Converter::ArkValue<Ark_Length>(0);
+    Ark_Length arkDx = Converter::ArkValue<Ark_Length>(0._px);
 
     for (const auto &[arkLength, expected]: testPlan) {
         EXPECT_CALL(*mockScrollerController_, ScrollBy(0, expected, false)).Times(1);
@@ -579,15 +579,18 @@ HWTEST_F(ScrollerAccessorTest, getItemIndexTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, DISABLED_currentOffsetTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, currentOffsetTest, TestSize.Level1)
 {
     auto expectedOffset = Offset(1.5, 3.5);
 
     ASSERT_NE(accessor_->currentOffset, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetCurrentOffset()).Times(1).WillOnce(Return(expectedOffset));
-    accessor_->currentOffset(peer_);
-    // wait for return value type change from Ark_NativePointer to another type which is acceptable to "offset" data
+    auto arkOffsetResult = accessor_->currentOffset(peer_);
+    auto x = Converter::Convert<float>(arkOffsetResult.xOffset);
+    auto y = Converter::Convert<float>(arkOffsetResult.yOffset);
+    EXPECT_FLOAT_EQ(x, expectedOffset.GetX());
+    EXPECT_FLOAT_EQ(y, expectedOffset.GetY());
 }
 
 /**
@@ -595,7 +598,7 @@ HWTEST_F(ScrollerAccessorTest, DISABLED_currentOffsetTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, DISABLED_getItemRectTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, getItemRectTest, TestSize.Level1)
 {
     auto expectedRect = Rect(2.5, 4.75, 10.43, 24);
     int32_t index = 5;
