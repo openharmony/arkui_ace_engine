@@ -1381,6 +1381,39 @@ class ArkBindMenu{
   }
 }
 
+class ArkSearchAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkSearchAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
+class ArkTextAreaAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkTextAreaAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
+class ArkTextInputAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkTextAreaAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;
