@@ -471,6 +471,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
         twinklingInterval_ = 3000; // 3000 : for AtuoUITest
     }
     ResetOriginCaretPosition();
+    callbackOldPreviewText_.offset = -1;
 }
 
 bool TextFieldPattern::GetIndependentControlKeyboard()
