@@ -72,6 +72,7 @@ void XComponentPatternV2::OnAttachToMainTree()
         XComponentPattern::OnAttachToMainTree();
         return;
     }
+    isOnTree_ = true;
     if (autoInitialize_) {
         HandleSurfaceCreated();
     }
@@ -98,6 +99,9 @@ void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& co
         return;
     }
     localPosition_ = geometryNode->GetContentOffset();
+    if (IsSupportImageAnalyzerFeature()) {
+        UpdateAnalyzerUIConfig(geometryNode);
+    }
     const auto& [offsetChanged, sizeChanged] = UpdateSurfaceRect();
     HandleSurfaceChangeEvent(offsetChanged, sizeChanged, config.frameOffsetChange);
     AddAfterLayoutTaskForExportTexture();
@@ -151,6 +155,7 @@ void XComponentPatternV2::XComponentSizeChange(const RectF& surfaceRect)
     CHECK_NULL_VOID(renderSurface_);
     auto width = surfaceRect.Width();
     auto height = surfaceRect.Height();
+    needNotifySizeChanged_ = true;
     renderSurface_->UpdateSurfaceSizeInUserData(
         static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     renderSurface_->AdjustNativeWindowSize(
@@ -171,6 +176,7 @@ void XComponentPatternV2::OnSurfaceChanged(const RectF& surfaceRect)
             callback(surfaceHolder_, surfaceRect.Width(), surfaceRect.Height());
         }
     }
+    needNotifySizeChanged_ = false;
 }
 
 void XComponentPatternV2::OnDetachFromMainTree()
@@ -180,6 +186,7 @@ void XComponentPatternV2::OnDetachFromMainTree()
         XComponentPattern::OnDetachFromMainTree();
         return;
     }
+    isOnTree_ = false;
     if (autoInitialize_) {
         HandleSurfaceDestroyed();
     }
@@ -256,6 +263,9 @@ int32_t XComponentPatternV2::HandleSurfaceCreated()
                 callback(surfaceHolder_);
             }
         }
+    }
+    if (needNotifySizeChanged_) {
+        OnSurfaceChanged(paintRect_);
     }
     return ERROR_CODE_NO_ERROR;
 }

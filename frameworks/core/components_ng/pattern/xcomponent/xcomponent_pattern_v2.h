@@ -80,6 +80,7 @@ private:
     bool isInitialized_ = false;
     bool isLifecycleInterfaceCalled_ = false;
     bool usesSuperMethod_ = false;
+    bool needNotifySizeChanged_ = false;
     OH_ArkUI_SurfaceHolder* surfaceHolder_ = nullptr;
     XComponentNodeType nodeType_ = XComponentNodeType::UNKNOWN;
 };
