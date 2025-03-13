@@ -112,6 +112,18 @@ public:
                 previewBuildFunc();
                 previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
             }
+            if (menuParam.onAppear) {
+                menuParam.onAppear();
+            }
+            if (menuParam.onDisappear) {
+                menuParam.onDisappear();
+            }
+            if (menuParam.aboutToAppear) {
+                menuParam.aboutToAppear();
+            }
+            if (menuParam.aboutToDisappear) {
+                menuParam.aboutToDisappear();
+            }
         }
 };
 } // namespace OHOS::Ace::NG

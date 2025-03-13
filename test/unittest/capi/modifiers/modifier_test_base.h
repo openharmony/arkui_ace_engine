@@ -47,6 +47,28 @@ inline RefPtr<Theme> CatchEmptyTheme(ThemeType type)
     return nullptr;
 }
 
+MATCHER_P2(CompareBorderRadius, expected, localized, "Compare BorderRadiuses")
+{
+    if (localized) {
+        return arg.radiusTopStart == expected &&
+        arg.radiusTopEnd == expected &&
+        arg.radiusBottomStart == expected &&
+        arg.radiusBottomEnd == expected;
+    }
+    return arg.radiusTopLeft == expected &&
+        arg.radiusTopRight == expected &&
+        arg.radiusBottomLeft == expected &&
+        arg.radiusBottomRight == expected;
+}
+
+MATCHER_P(CompareMarginPadding, expected, "Compare margins and paddings")
+{
+    return arg.left == expected &&
+        arg.right == expected &&
+        arg.top == expected &&
+        arg.bottom == expected;
+}
+
 template <typename Modifier, auto GetModifierFunc, GENERATED_Ark_NodeType NodeType>
 class ModifierTestBase : public testing::Test {
 public:
