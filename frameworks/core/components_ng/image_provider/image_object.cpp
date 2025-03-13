@@ -33,7 +33,7 @@ const ImageSourceInfo& ImageObject::GetSourceInfo() const
     return src_;
 }
 
-const RefPtr<ImageData>& ImageObject::GetData() const
+RefPtr<ImageData> ImageObject::GetData() const
 {
     std::shared_lock lock(dataMutex_);
     return data_;
