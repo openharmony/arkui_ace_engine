@@ -78,6 +78,7 @@ constexpr int32_t MENU_X = 100;
 constexpr int32_t MENU_Y_TOP = 100;
 constexpr int32_t MENU_Y_BOTTOM = 1400;
 constexpr int32_t MENU_Y_MIDDLE = 1100;
+constexpr int32_t NODE_ID = 1;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float TARGET_SIZE_WIDTH = 50.0f;
@@ -92,6 +93,20 @@ const Dimension CONTAINER_BORDER_WIDTH = 0.0_vp;
 const Dimension CONTENT_PADDING = 4.0_vp;
 constexpr float OFFSET_FIRST = 50.0f;
 constexpr float OFFSET_SECOND = 100.0f;
+constexpr float OFFSET_FIRST_NEW = 100.0f;
+constexpr float TARGET_OFFSET_FIRST = 10.0f;
+constexpr float TARGET_OFFSET_SECOND = 10.0f;
+constexpr float RECT_FIRST = 10.0f;
+constexpr float RECT_SECOND = 10.0f;
+constexpr float RECT_THIRD = 10.0f;
+constexpr float RECT_FORTH = 10.0f;
+constexpr float RECT_THIRD_NEW = 20.0f;
+constexpr float RECT_FORTH_NEW = 20.0f;
+constexpr float MENU_SIZE_WIDTH_NEW = 100.0f;
+constexpr float MENU_SIZE_HEIGHT_NEW = 100.0f;
+constexpr float SELECT_POSITION_X = -50.0f;
+constexpr float TWENTY = 20.0f;
+const std::string MENU_TAG = "menu";
 
 RefPtr<Theme> GetTheme(ThemeType type)
 {
@@ -842,5 +857,102 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg054, TestSize.Level1)
     layoutAlgorithm->placement_ = Placement::NONE;
     layoutAlgorithm->UpdatePropArrowOffset();
     EXPECT_EQ(layoutAlgorithm->propArrowOffset_.value_, 0.0);
+}
+
+/**
+ * @tc.name: ModifyTargetOffset001
+ * @tc.desc: Verify ModifyTargetOffset.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, ModifyTargetOffset001, TestSize.Level1)
+{
+    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
+    menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
+    menuLayoutAlgorithm.isExpandDisplay_ = true;
+    menuLayoutAlgorithm.isTargetNodeInSubwindow_ = false;
+    menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
+    menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
+    ;
+    menuLayoutAlgorithm.isUIExtensionSubWindow_ = false;
+    menuLayoutAlgorithm.ModifyTargetOffset();
+    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TWENTY);
+}
+
+/**
+ * @tc.name: ModifyTargetOffset002
+ * @tc.desc: Verify ModifyTargetOffset.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, ModifyTargetOffset002, TestSize.Level1)
+{
+    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
+    menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
+    menuLayoutAlgorithm.isExpandDisplay_ = false;
+    menuLayoutAlgorithm.isTargetNodeInSubwindow_ = false;
+    menuLayoutAlgorithm.isUIExtensionSubWindow_ = true;
+    menuLayoutAlgorithm.isExpandDisplay_ = false;
+    menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
+    menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
+    menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
+    menuLayoutAlgorithm.ModifyTargetOffset();
+    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TARGET_OFFSET_FIRST);
+}
+
+/**
+ * @tc.name: ModifyTargetOffset002
+ * @tc.desc: Verify ModifyTargetOffset.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, ModifyTargetOffset003, TestSize.Level1)
+{
+    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
+    menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
+    menuLayoutAlgorithm.isExpandDisplay_ = true;
+    menuLayoutAlgorithm.isTargetNodeInSubwindow_ = true;
+    menuLayoutAlgorithm.isUIExtensionSubWindow_ = true;
+    menuLayoutAlgorithm.isExpandDisplay_ = false;
+    menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
+    menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
+    menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
+    menuLayoutAlgorithm.ModifyTargetOffset();
+    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TARGET_OFFSET_FIRST);
+}
+
+/**
+ * @tc.name: GetSelectChildPosition001
+ * @tc.desc: Verify GetSelectChildPosition.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, GetSelectChildPosition001, TestSize.Level1)
+{
+    SizeF childSize = SizeF(MENU_SIZE_WIDTH_NEW, MENU_SIZE_HEIGHT_NEW);
+    bool didNeedArrow = true;
+    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
+    menuLayoutAlgorithm.placement_ = Placement::BOTTOM;
+    EXPECT_EQ(menuLayoutAlgorithm.GetSelectChildPosition(childSize, didNeedArrow).x_, SELECT_POSITION_X);
+}
+
+/**
+ * @tc.name: GetSelectChildPosition002
+ * @tc.desc: Verify GetSelectChildPosition.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, GetSelectChildPosition002, TestSize.Level1)
+{
+    SizeF childSize = SizeF(MENU_SIZE_WIDTH_NEW, MENU_SIZE_HEIGHT_NEW);
+    bool didNeedArrow = true;
+    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
+    MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
+    menuLayoutAlgorithm.placement_ = Placement::TOP_LEFT;
+    EXPECT_EQ(menuLayoutAlgorithm.GetSelectChildPosition(childSize, didNeedArrow).x_, SELECT_POSITION_X);
 }
 } // namespace OHOS::Ace::NG
