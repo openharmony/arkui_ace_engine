@@ -33,6 +33,13 @@ namespace OHOS::Ace::NG {
 class SvgContext;
 class SvgAnimation;
 
+struct SvgInitStyleProcessInfo {
+    SvgInitStyleProcessInfo() = default;
+    SvgInitStyleProcessInfo(RefPtr<SvgNode> svgNode) : svgNode(svgNode) {}
+    RefPtr<SvgNode> svgNode = nullptr; // The SVG node currently being processed
+    int32_t childIndex = 0; // Index of the next child node to traverse for the current node
+};
+
 // three level inherit class, for example:
 // 1. SvgMask::SvgQuote::SvgNode
 // 2. SvgPath::SvgGraphic::SvgNode
@@ -44,6 +51,11 @@ public:
     ~SvgNode() override = default;
 
     void InitStyle(const SvgBaseAttribute& attr);
+    void ProcessSvgStyle(RefPtr<SvgNode> svgNode, const SvgBaseAttribute& attr);
+    void ProcessChildAnimations(const RefPtr<SvgNode>& currentSvgNode);
+    bool ProcessChildStyle(SvgInitStyleProcessInfo& currentSvgNodeInfo,
+        std::stack<std::pair<SvgInitStyleProcessInfo, const SvgBaseAttribute*>>& initStyleTaskSt);
+    void InitStyleDfs(const WeakPtr<SvgNode>& root, const SvgBaseAttribute& attr);
 
     // draw entrance function, approve override by second level class.
     virtual void Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
@@ -61,7 +73,7 @@ public:
         OnAppendChild(child);
     }
 
-    virtual void InheritAttr(const SvgBaseAttribute& parent)
+    void InheritAttr(const SvgBaseAttribute& parent)
     {
         attributes_.Inherit(parent);
     }
