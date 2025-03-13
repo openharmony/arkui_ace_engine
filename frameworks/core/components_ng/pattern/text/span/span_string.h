@@ -57,6 +57,7 @@ public:
         bool includeEndHalf = true, bool rangeNeedNotChange = true) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
+    RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     bool operator==(const SpanString& other) const;
     std::list<RefPtr<NG::SpanItem>> GetSpanItems() const;
     void AddSpan(const RefPtr<SpanBase>& span);
@@ -93,7 +94,6 @@ public:
     RefPtr<UrlSpan> ToUrlSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     std::string ToString();
 protected:
-    RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(
         int32_t start, int32_t length, const std::list<RefPtr<SpanBase>>& spans) const;
     void MergeIntervals(std::list<RefPtr<SpanBase>>& spans);

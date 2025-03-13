@@ -2474,6 +2474,103 @@ void RichEditorPattern::UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCod
     }
 }
 
+bool RichEditorPattern::CheckStyledStringRangeValid(int32_t start, int32_t length)
+{
+    if (!styledString_ || !styledString_->CheckRange(start, length)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range:[%{public}d-%{public}d] is invalid or styledString is null",
+            start, start + length);
+        return false;
+    }
+    return true;
+}
+
+void RichEditorPattern::UpdateSelectStyledStringStyle(int32_t start, int32_t end, KeyCode code)
+{
+    CHECK_NULL_VOID(CheckStyledStringRangeValid(start, end - start));
+    Font updateFont;
+    bool isFirstSpanStylePresent;
+    switch (code) {
+    case KeyCode::KEY_B: {
+        auto firstFontSpan = DynamicCast<FontSpan>(styledString_->GetSpan(start, 1, SpanType::Font));
+        isFirstSpanStylePresent = firstFontSpan && firstFontSpan->GetFont().fontWeight == FontWeight::BOLD;
+        updateFont.fontWeight = isFirstSpanStylePresent ? FontWeight::NORMAL : FontWeight::BOLD;
+        UpdateStyledStringFontStyle(start, end, updateFont);
+        break;
+    }
+    case KeyCode::KEY_I: {
+        auto firstFontSpan = DynamicCast<FontSpan>(styledString_->GetSpan(start, 1, SpanType::Font));
+        isFirstSpanStylePresent = firstFontSpan && firstFontSpan->GetFont().fontStyle == OHOS::Ace::FontStyle::ITALIC;
+        updateFont.fontStyle = isFirstSpanStylePresent ? OHOS::Ace::FontStyle::NORMAL : OHOS::Ace::FontStyle::ITALIC;
+        UpdateStyledStringFontStyle(start, end, updateFont);
+        break;
+    }
+    case KeyCode::KEY_U: {
+        auto firstDecorationSpan = DynamicCast<DecorationSpan>(styledString_->GetSpan(start, 1, SpanType::Decoration));
+        isFirstSpanStylePresent =
+            firstDecorationSpan && firstDecorationSpan->GetTextDecorationType() == TextDecoration::UNDERLINE;
+        auto updateDecorationType = isFirstSpanStylePresent ? TextDecoration::NONE : TextDecoration::UNDERLINE;
+        UpdateStyledStringDecorationType(start, end, updateDecorationType);
+        break;
+    }
+    default:
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "Unsupported key code for UpdateSelectStyledStringStyle");
+        return;
+    }
+}
+
+template<typename T>
+void RichEditorPattern::UpdateSpansStyleInRange(int32_t start, int32_t end, const RefPtr<SpanBase>& baseSpan,
+    std::function<RefPtr<T>(const RefPtr<T>&)>&& updateSpanFunc)
+{
+    auto length = end - start;
+    CHECK_NULL_VOID(CheckStyledStringRangeValid(start, length));
+    CHECK_NULL_VOID(baseSpan);
+    auto spanType = baseSpan->GetSpanType();
+    std::vector<RefPtr<SpanBase>> updateSpans;
+    updateSpans.push_back(baseSpan);
+    auto originalSpans = styledString_->GetSpans(start, length, spanType);
+    for (auto& originalSpan : originalSpans) {
+        auto originalTypedSpan = DynamicCast<T>(originalSpan);
+        CHECK_NULL_CONTINUE(originalTypedSpan)
+        updateSpans.push_back(updateSpanFunc(originalTypedSpan));
+    }
+    paragraphCache_.Clear();
+    styledString_->BindWithSpans(updateSpans);
+    styledString_->NotifySpanWatcher();
+}
+
+void RichEditorPattern::UpdateStyledStringFontStyle(int32_t start, int32_t end, const Font& font)
+{
+    auto fontSpan = AceType::MakeRefPtr<FontSpan>(font, start, end);
+    auto updateFontSpanFunc = [&font](const RefPtr<FontSpan>& oriFontSpan) -> RefPtr<FontSpan> {
+        CHECK_NULL_RETURN(oriFontSpan, nullptr);
+        auto fontStyle = oriFontSpan->GetFont();
+        if (font.fontStyle.has_value()) {
+            fontStyle.fontStyle = font.fontStyle.value();
+        }
+        if (font.fontWeight.has_value()) {
+            fontStyle.fontWeight = font.fontWeight.value();
+        }
+        return AceType::MakeRefPtr<FontSpan>(fontStyle, oriFontSpan->GetStartIndex(), oriFontSpan->GetEndIndex());
+    };
+    UpdateSpansStyleInRange<FontSpan>(start, end, fontSpan, updateFontSpanFunc);
+}
+
+void RichEditorPattern::UpdateStyledStringDecorationType(int32_t start, int32_t end, const TextDecoration& type)
+{
+    std::optional<Color> colorOption;
+    std::optional<TextDecorationStyle> styleOption;
+    auto decorationSpan = AceType::MakeRefPtr<DecorationSpan>(type, colorOption, styleOption, start, end);
+    auto updateDecorationSpanFunc = [&type](const RefPtr<DecorationSpan>& oriDecorationSpan) -> RefPtr<DecorationSpan> {
+        CHECK_NULL_RETURN(oriDecorationSpan, nullptr);
+        auto decorationColor = oriDecorationSpan->GetColor();
+        auto decorationStyle = oriDecorationSpan->GetTextDecorationStyle();
+        return AceType::MakeRefPtr<DecorationSpan>(type, decorationColor, decorationStyle,
+            oriDecorationSpan->GetStartIndex(), oriDecorationSpan->GetEndIndex());
+    };
+    UpdateSpansStyleInRange<DecorationSpan>(start, end, decorationSpan, updateDecorationSpanFunc);
+}
+
 void RichEditorPattern::CloseSystemMenu()
 {
     if (!SelectOverlayIsOn()) {
