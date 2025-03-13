@@ -286,6 +286,7 @@ void XComponentPattern::InitSurface()
     } else if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetRenderContext(renderContext);
         renderSurface_->SetIsTexture(true);
+        renderContext->OnNodeNameUpdate(GetId());
     }
     renderSurface_->InitSurface();
     renderSurface_->UpdateSurfaceConfig();
