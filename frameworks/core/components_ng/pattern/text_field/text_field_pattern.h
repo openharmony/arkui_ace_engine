@@ -1511,6 +1511,11 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool GetEnableHapticFeedback() const
+    {
+        return isEnableHapticFeedback_;
+    }
+
     void SetIsFocusedBeforeClick(bool isFocusedBeforeClick)
     {
         isFocusedBeforeClick_ = isFocusedBeforeClick;
