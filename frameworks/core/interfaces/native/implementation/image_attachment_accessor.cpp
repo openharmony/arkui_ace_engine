@@ -99,7 +99,7 @@ Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
 Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
     CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageSpanOptions().imageAttribute,
-        INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);    
+        INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
     auto aligment = peer->imageSpan->GetImageSpanOptions().imageAttribute->verticalAlign;
     CHECK_NULL_RETURN(aligment, INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
     return ArkValue<Ark_ImageSpanAlignment>(*aligment);
