@@ -547,6 +547,87 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGeometryNodeToJsonValue01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeToTreeJson01
+ * @tc.desc: Test the function ToTreeJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeToTreeJson01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function ToTreeJson.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    frameNode->SetLayoutProperty(layoutProperty);
+
+    InspectorConfig testConfig;
+    auto jsonValue = std::make_unique<JsonValue>();
+    testConfig.contentOnly = true;
+    frameNode->ToTreeJson(jsonValue, testConfig);
+}
+
+/**
+ * @tc.name: FrameNodeToTreeJson02
+ * @tc.desc: Test the function ToTreeJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeToTreeJson02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function ToTreeJson.
+     */
+    frameNode->paintProperty_ = nullptr;
+    frameNode->propInspectorId_ = "123";
+    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
+
+    InspectorConfig testConfig;
+    auto jsonValue = std::make_unique<JsonValue>();
+    testConfig.contentOnly = false;
+    frameNode->ToTreeJson(jsonValue, testConfig);
+}
+
+/**
+ * @tc.name: FrameNodeToTreeJson03
+ * @tc.desc: Test the function ToTreeJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeToTreeJson03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function ToTreeJson.
+     */
+    auto pattern = frameNode->pattern_;
+    frameNode->pattern_ = nullptr;
+    frameNode->paintProperty_ = nullptr;
+    frameNode->accessibilityProperty_->accessibilityText_ = "test";
+    frameNode->layoutProperty_ = nullptr;
+
+    InspectorConfig testConfig;
+    auto jsonValue = std::make_unique<JsonValue>();
+    testConfig.contentOnly = false;
+    frameNode->ToTreeJson(jsonValue, testConfig);
+    frameNode->pattern_ = pattern;
+}
+
+/**
  * @tc.name: FrameNodeFromJson01
  * @tc.desc: Test the function FromJson
  * @tc.type: FUNC
