@@ -1675,12 +1675,14 @@ std::set<int32_t> SwiperPattern::CalcVisibleIndex(float offset) const
             pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index + 1, displayCount) : index + 1;
         }
         auto currentIndex = index - 1;
-        while (currentIndex >= pageStartIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex >= targetIndex_.value_or(currentIndex) && currentIndex >= pageStartIndex &&
+               itemPosition_.find(currentIndex) == itemPosition_.end()) {
             visibleIndex.insert(GetLoopIndex(currentIndex));
             currentIndex--;
         }
         currentIndex = index + 1;
-        while (currentIndex <= pageEndIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex <= targetIndex_.value_or(currentIndex) && currentIndex <= pageEndIndex &&
+               itemPosition_.find(currentIndex) == itemPosition_.end()) {
             visibleIndex.insert(GetLoopIndex(currentIndex));
             currentIndex++;
         }
@@ -1727,13 +1729,15 @@ void SwiperPattern::CalculateAndUpdateItemInfo(float offset)
             pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index + 1, displayCount) : index + 1;
         }
         auto currentIndex = index - 1;
-        while (currentIndex >= pageStartIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex >= targetIndex_.value_or(currentIndex) && currentIndex >= pageStartIndex &&
+               itemPosition_.find(currentIndex) == itemPosition_.end()) {
             UpdateItemInfoInCustomAnimation(currentIndex, startPos - itemPosDiff * (index - currentIndex),
                 endPos - itemPosDiff * (index - currentIndex));
             currentIndex--;
         }
         currentIndex = index + 1;
-        while (currentIndex <= pageEndIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex <= targetIndex_.value_or(currentIndex) && currentIndex <= pageEndIndex &&
+               itemPosition_.find(currentIndex) == itemPosition_.end()) {
             UpdateItemInfoInCustomAnimation(currentIndex, startPos + itemPosDiff * (currentIndex - index),
                 endPos + itemPosDiff * (currentIndex - index));
             currentIndex++;
