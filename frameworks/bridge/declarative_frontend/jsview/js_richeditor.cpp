@@ -262,8 +262,7 @@ JSRef<JSObject> JSRichEditor::CreateJsTextBackgroundStyle(const TextBackgroundSt
 {
     JSRef<JSObject> textBackgroundStyleObj = JSRef<JSObject>::New();
     textBackgroundStyleObj->SetProperty<std::string>("color", style.backgroundColor->ColorToString());
-    textBackgroundStyleObj->SetProperty<std::string>(
-        "BorderRadiusProperty", style.backgroundRadius->ToString());
+    textBackgroundStyleObj->SetProperty<std::string>("radius", style.backgroundRadius->ToString());
     return textBackgroundStyleObj;
 }
 
