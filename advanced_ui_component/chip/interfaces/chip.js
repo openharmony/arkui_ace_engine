@@ -1992,7 +1992,7 @@ export class ChipComponent extends ViewPU {
             Button.padding(0);
             Button.stateEffect(false);
             Button.focusable(!this.isSuffixIconFocusStyleCustomized);
-            Button.hoverEffect(!this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
+            Button.hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
@@ -2039,7 +2039,7 @@ export class ChipComponent extends ViewPU {
               this.onClicked();
             });
             Button.focusable(this.getSuffixIconFocusable());
-            Button.hoverEffect(!this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
+            Button.hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.getSuffixIconSrc());
@@ -2079,7 +2079,7 @@ export class ChipComponent extends ViewPU {
               this.deleteChipNodeAnimate();
             });
             Button.focusable(!this.isSuffixIconFocusStyleCustomized);
-            Button.hoverEffect(!this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
+            Button.hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create({

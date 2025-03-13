@@ -1248,7 +1248,7 @@ export struct ChipComponent {
           .padding(0)
           .stateEffect(false)
           .focusable(!this.isSuffixIconFocusStyleCustomized)
-          .hoverEffect(!this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined)
+          .hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined)
         } else if (this.suffixIcon?.src !== "") {
           Button({ type: ButtonType.Normal }) {
             Image(this.getSuffixIconSrc())
@@ -1291,7 +1291,7 @@ export struct ChipComponent {
             this.onClicked()
           })
           .focusable(this.getSuffixIconFocusable())
-          .hoverEffect(!this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined)
+          .hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined)
         } else if (this.allowClose ?? true) {
           Button({ type: ButtonType.Normal }) {
             SymbolGlyph($r('sys.symbol.xmark'))
@@ -1316,7 +1316,7 @@ export struct ChipComponent {
             this.deleteChipNodeAnimate()
           })
           .focusable(!this.isSuffixIconFocusStyleCustomized)
-          .hoverEffect(!this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined)
+          .hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined)
         }
       }
       .direction(this.chipDirection)
