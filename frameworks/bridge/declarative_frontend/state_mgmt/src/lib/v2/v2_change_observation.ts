@@ -165,24 +165,8 @@ class ObserveV2 {
     // ViewPU is the likely case where no dependecy gets recorded
     // for others no dependencies are unlikely to happen
 
-    const [id, cmp] = bound;
-    if (this.id2targets_[id]?.size) {
-      // only add IView | MonitorV2 | ComputedV2 if at least one dependency was
-      // recorded when rendering this ViewPU/ViewV2/Monitor/ComputedV2
-      // ViewPU is the likely case where no dependecy gets recorded
-      // for others no dependencies are unlikely to happen
-      const weakRef = WeakRefPool.get(cmp);
-      if (this.id2cmp_[id] === weakRef) {
-        return;
-      }
-
-      this.id2cmp_[id] = weakRef;
-      WeakRefPool.onGC(cmp, () => {
-        if (this.id2cmp_[id] === weakRef) {
-          delete this.id2cmp_[id];
-        }
-      });
-    }
+    // once set, the value remains unchanged
+    this.id2cmp_[bound[0]] = new WeakRef<Object>(bound[1]);
   }
 
   // clear any previously created dependency view model object to elmtId
@@ -214,7 +198,6 @@ class ObserveV2 {
     });
 
     delete this.id2targets_[id];
-    //delete this.id2cmp_[id];
 
     stateMgmtConsole.propertyAccess(`clearBinding (at the end): id2cmp_ length=${Object.keys(this.id2cmp_).length}, entries=${JSON.stringify(Object.keys(this.id2cmp_))} `);
     stateMgmtConsole.propertyAccess(`... id2targets_ length=${Object.keys(this.id2targets_).length}, entries=${JSON.stringify(Object.keys(this.id2targets_))} `);
