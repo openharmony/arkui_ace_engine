@@ -1006,12 +1006,12 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg057, TestSize.Level1)
 {
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
-     SizeF menuSize;
-     RefPtr<MenuLayoutProperty> menuProp = AceType::MakeRefPtr<MenuLayoutProperty>();
-     ASSERT_NE(menuProp, nullptr);
-     menuProp->layoutDirection_ = TextDirection::RTL;
-     layoutAlgorithm->ComputeMenuPositionByAlignType(menuProp, menuSize);
-     EXPECT_EQ(layoutAlgorithm->position_.x_, 0.0);
+    SizeF menuSize;
+    RefPtr<MenuLayoutProperty> menuProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    ASSERT_NE(menuProp, nullptr);
+    menuProp->layoutDirection_ = TextDirection::RTL;
+    layoutAlgorithm->ComputeMenuPositionByAlignType(menuProp, menuSize);
+    EXPECT_EQ(layoutAlgorithm->position_.x_, 0.0);
 }
 
 /**
