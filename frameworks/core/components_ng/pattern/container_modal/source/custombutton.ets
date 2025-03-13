@@ -431,6 +431,7 @@ struct custombutton {
   }
 
   onShowMenuWithTimer() {
+    this.onCancelMenuTimer()
     if (!this.hideSplit && this.isFocused) {
       this.showMenuTimeoutId = setTimeout(() => {
         this.isShowMenu = true
