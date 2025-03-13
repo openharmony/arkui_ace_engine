@@ -21,7 +21,9 @@
 #define private public
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -737,5 +739,333 @@ HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback003, TestSi
     auto finish = navDestinationNode->BuildTransitionFinishCallback(true, [] () {});
     finish();
     EXPECT_TRUE(navDestinationNode->isOnAnimation_);
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Branch: if (filter.IsFastFilter()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, ToJsonValue001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    std::unique_ptr<JsonValue> info = JsonUtil::Create(true);
+    InspectorFilter filter;
+    filter.filterFixed = 1;
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("mode"), "");
+}
+
+/**
+ * @tc.name: ToJsonValue002
+ * @tc.desc: Branch: if (filter.IsFastFilter()) = false
+ *           Branch: if (titleBarNode) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, ToJsonValue002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->propContent_ = u"MainPage";
+    titleBarNode->title_ = textNode;
+
+    std::unique_ptr<JsonValue> info = JsonUtil::Create(true);
+    InspectorFilter filter;
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("title"), "MainPage");
+}
+
+/**
+ * @tc.name: ToJsonValue003
+ * @tc.desc: Branch: if (filter.IsFastFilter()) = false
+ *           Branch: if (titleBarNode) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, ToJsonValue003, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    std::unique_ptr<JsonValue> info = JsonUtil::Create(true);
+    InspectorFilter filter;
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("title"), "");
+}
+
+/**
+ * @tc.name: TransitionTypeToString001
+ * @tc.desc: Branch: case NavigationSystemTransitionType::NONE = true
+ *           Branch: case NavigationSystemTransitionType::TITLE = true
+ *           Branch: case NavigationSystemTransitionType::CONTENT = true
+ *           Branch: case NavigationSystemTransitionType::FADE = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TransitionTypeToString001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::NONE;
+
+    std::unique_ptr<JsonValue> info = JsonUtil::Create(true);
+    InspectorFilter filter;
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("systemTransition"), "NavigationSystemTransitionType.NONE");
+
+    navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::TITLE;
+
+    info = JsonUtil::Create(true);
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("systemTransition"), "NavigationSystemTransitionType.TITLE");
+
+    navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::CONTENT;
+
+    info = JsonUtil::Create(true);
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("systemTransition"), "NavigationSystemTransitionType.CONTENT");
+
+    navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::FADE;
+
+    info = JsonUtil::Create(true);
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("systemTransition"), "NavigationSystemTransitionType.FADE");
+}
+
+/**
+ * @tc.name: TransitionTypeToString002
+ * @tc.desc: Branch: case NavigationSystemTransitionType::EXPLODE = true
+ *           Branch: case NavigationSystemTransitionType::SLIDE_RIGHT = true
+ *           Branch: case NavigationSystemTransitionType::SLIDE_BOTTOM = true
+ *           Branch: default = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, TransitionTypeToString002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::EXPLODE;
+
+    std::unique_ptr<JsonValue> info = JsonUtil::Create(true);
+    InspectorFilter filter;
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("systemTransition"), "NavigationSystemTransitionType.EXPLODE");
+
+    navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::SLIDE_RIGHT;
+
+    info = JsonUtil::Create(true);
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("systemTransition"), "NavigationSystemTransitionType.SLIDE_RIGHT");
+
+    navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType::SLIDE_BOTTOM;
+
+    info = JsonUtil::Create(true);
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("systemTransition"), "NavigationSystemTransitionType.SLIDE_BOTTOM");
+
+    navDestinationNode->systemTransitionType_ = NavigationSystemTransitionType(-1);
+
+    info = JsonUtil::Create(true);
+    navDestinationNode->ToJsonValue(info, filter);
+    EXPECT_EQ(info->GetString("systemTransition"), "NavigationSystemTransitionType.DEFAULT");
+}
+
+/**
+ * @tc.name: CheckTransitionPop001
+ * @tc.desc: Branch: if (IsCacheNode()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, CheckTransitionPop001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->isCacheNode_ = true;
+
+    bool ret = navDestinationNode->CheckTransitionPop(1);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CheckTransitionPop002
+ * @tc.desc: Branch: if (IsCacheNode()) = false
+ *           Branch: if (animationId_ != animationId) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, CheckTransitionPop002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->isCacheNode_ = false;
+    navDestinationNode->animationId_ = 0;
+
+    bool ret = navDestinationNode->CheckTransitionPop(1);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CheckTransitionPop003
+ * @tc.desc: Branch: if (IsCacheNode()) = false
+ *           Branch: if (animationId_ != animationId) = false
+ *           Branch: if (GetTransitionType() != PageTransitionType::EXIT_POP) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, CheckTransitionPop003, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->isCacheNode_ = false;
+    navDestinationNode->animationId_ = 1;
+    navDestinationNode->transitionType_ = PageTransitionType::ENTER;
+
+    bool ret = navDestinationNode->CheckTransitionPop(1);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CheckTransitionPop004
+ * @tc.desc: Branch: if (IsCacheNode()) = false
+ *           Branch: if (animationId_ != animationId) = false
+ *           Branch: if (GetTransitionType() != PageTransitionType::EXIT_POP) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, CheckTransitionPop004, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->isCacheNode_ = false;
+    navDestinationNode->animationId_ = 1;
+    navDestinationNode->transitionType_ = PageTransitionType::EXIT_POP;
+
+    bool ret = navDestinationNode->CheckTransitionPop(1);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: DoCustomTransition001
+ * @tc.desc: Branch: if (!delegate) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition001, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->navDestinationTransitionDelegate_ = nullptr;
+
+    int32_t ret = navDestinationNode->DoCustomTransition(NavigationOperation::PUSH, false);
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: DoCustomTransition002
+ * @tc.desc: Branch: if (!delegate) = false
+ *           Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = false
+ *           Branch: if (!allTransitions.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition002, TestSize.Level1)
+{
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->navDestinationTransitionDelegate_ = [](NavigationOperation operation, bool isEnter) {
+        return std::nullopt;
+    };
+    navDestinationNode->canReused_ = true;
+    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(navDestinationEventHub, nullptr);
+    navDestinationEventHub->SetEnabledInternal(true);
+
+    int32_t ret = navDestinationNode->DoCustomTransition(NavigationOperation::PUSH, false);
+    EXPECT_EQ(ret, -1);
+    EXPECT_TRUE(navDestinationEventHub->enabled_);
+}
+
+/**
+ * @tc.name: DoCustomTransition003
+ * @tc.desc: Branch: if (!delegate) = false
+ *           Branch: if (!canReused_ && eventHub) = false
+ *           Condition: !canReused_ = true, eventHub = false
+ *           Branch: if (!allTransitions.has_value()) = false
+ *           Branch: if (transition.duration + transition.delay > longestAnimationDuration) = true
+ *           Branch: if (longestAnimationDuration != INT32_MIN) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition003, TestSize.Level1)
+{
+    NavDestinationGroupNodeTestNg::SetUpTestCase();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestinationNode->navDestinationTransitionDelegate_ = [](NavigationOperation operation, bool isEnter) {
+        std::vector<NavDestinationTransition> allTransitions;
+        NavDestinationTransition transition;
+        transition.event = []() { };
+        transition.onTransitionEnd = []() { };
+        transition.duration = 100.0f;
+        transition.delay = 100.0f;
+        transition.curve = Curves::EASE_IN_OUT;
+        allTransitions.emplace_back(transition);
+        return allTransitions;
+    };
+    navDestinationNode->canReused_ = false;
+    navDestinationNode->eventHub_ = nullptr;
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    navDestinationNode->pattern_ = nullptr;
+
+    int32_t ret = navDestinationNode->DoCustomTransition(NavigationOperation::PUSH, false);
+    EXPECT_EQ(ret, -1);
+    navDestinationNode->pattern_ = navDestinationPattern;
+    NavDestinationGroupNodeTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: DoCustomTransition004
+ * @tc.desc: Branch: if (!delegate) = false
+ *           Branch: if (!canReused_ && eventHub) = true
+ *           Condition: !canReused_ = true, eventHub = true
+ *           Branch: if (!allTransitions.has_value()) = false
+ *           Branch: if (transition.duration + transition.delay > longestAnimationDuration) = false
+ *           Branch: if (longestAnimationDuration != INT32_MIN) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition004, TestSize.Level1)
+{
+    NavDestinationGroupNodeTestNg::SetUpTestCase();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navDestinationPattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigationNode));
+    navDestinationNode->navDestinationTransitionDelegate_ = [](NavigationOperation operation, bool isEnter) {
+        std::vector<NavDestinationTransition> allTransitions;
+        NavDestinationTransition transition;
+        transition.event = []() { };
+        transition.onTransitionEnd = []() { };
+        transition.duration = INT32_MIN;
+        transition.delay = 0.0f;
+        transition.curve = Curves::EASE_IN_OUT;
+        allTransitions.emplace_back(transition);
+        return allTransitions;
+    };
+    navDestinationNode->canReused_ = false;
+    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
+    ASSERT_NE(navDestinationEventHub, nullptr);
+    navDestinationNode->animationId_ = 0;
+
+    int32_t ret = navDestinationNode->DoCustomTransition(NavigationOperation::PUSH, false);
+    EXPECT_EQ(ret, 1);
+    NavDestinationGroupNodeTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG
