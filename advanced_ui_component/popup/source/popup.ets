@@ -684,6 +684,14 @@ export struct PopupComponent {
     return applyMaxSize
   }
 
+  private getTitleTextAlign(): TextAlign {
+    let titleAlign = TextAlign.Start;
+    if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
+      titleAlign = TextAlign.End;
+    }
+    return titleAlign
+  }
+
   build() {
     Row() {
       if (this.icon.image !== '' && this.icon.image !== void (0)) {
@@ -711,7 +719,7 @@ export struct PopupComponent {
               .fontSize(this.getTitleFontSize())
               .fontColor(this.getTitleFontColor())
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
-              .textAlign(Configuration.getLocale().dir === 'rtl' ? TextAlign.End : TextAlign.Start)
+              .textAlign(this.getTitleTextAlign())
             if (this.showClose || this.showClose === void (0)) {
               Button() {
                 SymbolGlyph()
