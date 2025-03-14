@@ -8584,7 +8584,9 @@ ArkUINativeModuleValue CommonBridge::GetWindowName(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
-    std::string windowName = context->GetWindow()->GetWindowName();
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
+    std::string windowName = window->GetWindowName();
     return panda::StringRef::NewFromUtf8(vm, windowName.c_str());
 }
 
