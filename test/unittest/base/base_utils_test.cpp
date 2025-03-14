@@ -1191,7 +1191,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest070, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest071, TestSize.Level1)
 {
-    uint8_t invalidByte[1] = {0x80};
+    uint8_t invalidByte[1] = { 0x80 };
     size_t size = MUtf8ToUtf16Size(invalidByte, 1);
     EXPECT_EQ(size, 1);
 }
@@ -1203,7 +1203,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest071, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest072, TestSize.Level1)
 {
-    uint8_t mutf8[] = {0xED, 0xA0, 0xBC, 0xED, 0xB7, 0x84};
+    uint8_t mutf8[] = { 0xED, 0xA0, 0xBC, 0xED, 0xB7, 0x84 };
     size_t mutf8Len = sizeof(mutf8) / sizeof(mutf8[0]);
     size_t utf16Size = MUtf8ToUtf16Size(mutf8, mutf8Len);
     EXPECT_EQ(utf16Size, 2);
@@ -1216,7 +1216,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest072, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest073, TestSize.Level1)
 {
-    uint8_t data[1] = {0x80};
+    uint8_t data[1] = { 0x80 };
     auto result = ConvertMUtf8ToUtf16Pair(data, 1);
     EXPECT_EQ(result.first, 0x80);
     EXPECT_EQ(result.second, 1);
@@ -1229,7 +1229,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest073, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest074, TestSize.Level1)
 {
-    uint8_t data[2] = {0xE0, 0x80};
+    uint8_t data[2] = { 0xE0, 0x80 };
     auto result = ConvertMUtf8ToUtf16Pair(data, 2);
     EXPECT_EQ(result.first, 0xE0);
     EXPECT_EQ(result.second, 1);
@@ -1242,7 +1242,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest074, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest075, TestSize.Level1)
 {
-    uint8_t data[3] = {0xF0, 0x80, 0x80};
+    uint8_t data[3] = { 0xF0, 0x80, 0x80 };
     auto result = ConvertMUtf8ToUtf16Pair(data, 3);
     EXPECT_EQ(result.first, 0xF0);
     EXPECT_EQ(result.second, 1);
@@ -1255,7 +1255,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest075, TestSize.Level1)
  */
 HWTEST_F(BaseUtilsTest, BaseUtilsTest076, TestSize.Level1)
 {
-    uint8_t mutf8[] = {0xF0, 0x9D, 0x84, 0x9E};
+    uint8_t mutf8[] = { 0xF0, 0x9D, 0x84, 0x9E };
     auto [codePoint, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8, 4);
     EXPECT_TRUE(codePoint > 0xFFFF);
     EXPECT_EQ(nbytes, 4);
