@@ -563,6 +563,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
     void SetButtonIdeaSize();
+    void CalculateButtonMetrics(RefPtr<UINode> child, RefPtr<PickerTheme> pickerTheme);
     std::string GetRangeStr() const;
     std::string GetOptionsMultiStr() const;
     std::string GetOptionsMultiStrInternal() const;

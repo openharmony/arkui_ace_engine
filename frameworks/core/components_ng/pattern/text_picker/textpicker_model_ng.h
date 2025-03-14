@@ -94,6 +94,7 @@ public:
     void SetDisableTextStyleAnimation(const bool value) override;
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override;
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
+    void SetSelectedBackgroundStyle(const NG::PickerBackgroundStyle& value) override;
     void UpdateUserSetSelectColor() override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
@@ -148,6 +149,8 @@ public:
     static std::vector<Dimension> GetColumnWidths(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
     static bool GetEnableHapticFeedback(FrameNode* frameNode);
+    static void SetSelectedBackgroundStyle(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
+    static PickerBackgroundStyle GetSelectedBackgroundStyle(FrameNode* frameNode);
 
 private:
     void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);

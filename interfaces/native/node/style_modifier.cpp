@@ -181,6 +181,7 @@ constexpr float SLIDER_STEP_MIN_F = 0.01f;
 constexpr float HALF = 0.5f;
 constexpr float DEFAULT_HINT_RADIUS = 16.0f;
 constexpr float DEFAULT_SCROLL_FADING_EDGE_LENGTH = 32.0f;
+constexpr float DEFAULT_PICKER_SELECTED_BACKGROUND_BORDERRADIUS = 24.0f;
 constexpr int32_t REQUIRED_ONE_PARAM = 1;
 constexpr int32_t REQUIRED_TWO_PARAM = 2;
 constexpr int32_t REQUIRED_THREE_PARAM = 3;
@@ -189,6 +190,7 @@ constexpr int32_t REQUIRED_FIVE_PARAM = 5;
 constexpr int32_t REQUIRED_SEVEN_PARAM = 7;
 constexpr int32_t REQUIRED_TWENTY_PARAM = 20;
 constexpr int32_t MAX_ATTRIBUTE_ITEM_LEN = 20;
+constexpr int32_t VP = 1;
 std::string g_stringValue;
 ArkUI_NumberValue g_numberValues[MAX_ATTRIBUTE_ITEM_LEN] = { 0 };
 ArkUI_AttributeItem g_attributeItem = { g_numberValues, MAX_ATTRIBUTE_ITEM_LEN, nullptr, nullptr };
@@ -225,6 +227,7 @@ constexpr uint32_t DEFAULT_ANIMATION_MODE = 0;
 constexpr uint32_t CONVERT_CONTENT_TYPE = 5;
 constexpr uint32_t DEFAULT_PICKER_STYLE_COLOR = 0xFF182431;
 constexpr uint32_t DEFAULT_PICKER_SELECTED_COLOR = 0xFF007DFF;
+constexpr uint32_t DEFAULT_PICKER_SELECTED_BACKGROUND_COLOR = 0x0C182431;
 const std::string EMPTY_STR = "";
 const std::vector<std::string> ACCESSIBILITY_LEVEL_VECTOR = { "auto", "yes", "no", "no-hide-descendants" };
 std::map<std::string, int32_t> ACCESSIBILITY_LEVEL_MAP = { { "auto", 0 }, { "yes", 1 }, { "no", 2 },
@@ -9797,6 +9800,73 @@ void ResetTextPickerEnableHapticFeedback(ArkUI_NodeHandle node)
     textPickerModifier->resetTextPickerEnableHapticFeedback(node->uiNodeHandle);
 }
 
+int32_t SetTextPickerSelectedBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    if (!InRegion(NUM_0,NUM_5,item->size)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Bool getValue[5] = {false, false, false, false, false};
+    ArkUI_Uint32 color = DEFAULT_PICKER_SELECTED_BACKGROUND_COLOR;
+    ArkUI_Float32 value[NUM_4] = {DEFAULT_PICKER_SELECTED_BACKGROUND_BORDERRADIUS,
+        DEFAULT_PICKER_SELECTED_BACKGROUND_BORDERRADIUS, DEFAULT_PICKER_SELECTED_BACKGROUND_BORDERRADIUS,
+        DEFAULT_PICKER_SELECTED_BACKGROUND_BORDERRADIUS};
+    ArkUI_Int32 unit[NUM_4] = {VP, VP, VP, VP};
+    auto fullImpl = GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, ERROR_CODE_INTERNAL_ERROR);
+    auto modifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(modifiers, ERROR_CODE_INTERNAL_ERROR);
+    auto textPickerModifier = modifiers->getTextPickerModifier();
+    CHECK_NULL_RETURN(textPickerModifier, ERROR_CODE_INTERNAL_ERROR);
+    if (item->size > NUM_0) {
+        color = item->value[NUM_0].u32;
+        getValue[0] = true;
+    }
+    for (int i = NUM_1; i < item->size; ++i) {
+        if (GreatOrEqual(item->value[i].f32,NUM_0)) {
+            value[i - NUM_1] = item->value[i].f32;
+            getValue[i] = true;
+        }
+    }
+    if (item->size == NUM_2 && GreatOrEqual(item->value[NUM_1].f32,NUM_0)) {
+        for (int i = NUM_1; i < NUM_4; ++i) {
+            value[i] = item->value[i].f32;
+            getValue[i + NUM_1] = true;
+        }
+    }
+    textPickerModifier->setTextPickerSelectedBackgroundStyle(node->uiNodeHandle, getValue, color, value, unit);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextPickerSelectedBackgroundStyle(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, &g_attributeItem);
+    auto modifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(modifiers, &g_attributeItem);
+    auto textPickerModifier = modifiers->getTextPickerModifier();
+    CHECK_NULL_RETURN(textPickerModifier, &g_attributeItem);
+    ArkUINumberValue result[NUM_5];
+    textPickerModifier->getTextPickerSelectedBackgroundStyle(node->uiNodeHandle, result);
+    g_numberValues[NUM_0].u32 = result[NUM_0].u32;
+    g_numberValues[NUM_1].f32 = result[NUM_1].f32;
+    g_numberValues[NUM_2].f32 = result[NUM_2].f32;
+    g_numberValues[NUM_3].f32 = result[NUM_3].f32;
+    g_numberValues[NUM_4].f32 = result[NUM_4].f32;
+    g_attributeItem.size = NUM_5;
+    return &g_attributeItem;
+}
+
+void ResetTextPickerSelectedBackgroundStyle(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    CHECK_NULL_VOID(fullImpl);
+    auto modifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_VOID(modifiers);
+    auto textPickerModifier = modifiers->getTextPickerModifier();
+    CHECK_NULL_VOID(textPickerModifier);
+    textPickerModifier->resetTextPickerSelectedBackgroundStyle(node->uiNodeHandle);
+}
 // Row&Column
 int32_t SetAlignItems(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -15397,7 +15467,7 @@ int32_t SetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
     static Setter* setters[] = { SetTextPickerRange, SetTextPickerSelected, SetTextPickerValue,
         SetTextPickerDisappearTextStyle, SetTextPickerTextStyle, SetTextPickerSelectedTextStyle,
         SetTextPickerSelectedIndex, SetTextPickerCanLoop, SetTextPickerDefaultPickerItemHeight,
-        SetTextPickerColumnWidths, SetTextPickerEnableHapticFeedback };
+        SetTextPickerColumnWidths, SetTextPickerEnableHapticFeedback, SetTextPickerSelectedBackgroundStyle };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textpicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -15410,7 +15480,7 @@ const ArkUI_AttributeItem* GetTextPickerAttribute(ArkUI_NodeHandle node, int32_t
     static Getter* getters[] = { GetTextPickerRange, GetTextPickerSelected, GetTextPickerValue,
         GetTextPickerDisappearTextStyle, GetTextPickerTextStyle, GetTextPickerSelectedTextStyle,
         GetTextPickerSelectedIndex, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight,
-        GetTextPickerColumnWidths, GetTextPickerEnableHapticFeedback };
+        GetTextPickerColumnWidths, GetTextPickerEnableHapticFeedback, GetTextPickerSelectedBackgroundStyle };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -15423,7 +15493,7 @@ void ResetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetTextPickerRange, ResetTextPickerSelectedIndex, ResetTextPickerValue,
         ResetTextPickerDisappearTextStyle, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
         ResetTextPickerSelectedIndex, ResetTextPickerCanLoop, ResetTextPickerDefaultPickerItemHeight,
-        ResetTextPickerColumnWidths, ResetTextPickerEnableHapticFeedback };
+        ResetTextPickerColumnWidths, ResetTextPickerEnableHapticFeedback, ResetTextPickerSelectedBackgroundStyle };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "timepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
