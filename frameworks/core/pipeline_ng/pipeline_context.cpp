@@ -524,6 +524,9 @@ void PipelineContext::FlushDragEvents()
         dragEvents_.clear();
         return;
     }
+    if (!manager->IsDragFwkShow()) {
+        manager->DoDragMoveAnimate(manager->GetDragAnimationPointerEvent());
+    }
     std::string extraInfo = manager->GetExtraInfo();
     std::unordered_set<int32_t> moveEventIds;
     decltype(dragEvents_) dragEvents(std::move(dragEvents_));
@@ -2830,7 +2833,7 @@ void PipelineContext::OnTouchEvent(
         }
         if (dragDropManager_ && dragDropManager_->IsDragging() && dragDropManager_->IsSameDraggingPointer(point.id)) {
             auto pointerEvent = DragPointerEvent(scalePoint.x, scalePoint.y, scalePoint.screenX, scalePoint.screenY);
-            dragDropManager_->DoDragMoveAnimate(pointerEvent);
+            dragDropManager_->SetDragAnimationPointerEvent(pointerEvent);
         }
         touchEvents_.emplace_back(point);
         hasIdleTasks_ = true;
@@ -3547,7 +3550,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     if (event.action == MouseAction::MOVE) {
         if (dragDropManager_ && dragDropManager_->IsDragging() && event.pullAction != MouseAction::PULL_MOVE) {
             auto pointerEvent = DragPointerEvent(event.x, event.y, event.screenX, event.screenY);
-            dragDropManager_->DoDragMoveAnimate(pointerEvent);
+            dragDropManager_->SetDragAnimationPointerEvent(pointerEvent);
         }
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
@@ -4592,7 +4595,7 @@ void PipelineContext::HandleOnDragEventMove(const DragPointerEvent& pointerEvent
     CHECK_NULL_VOID(manager);
     std::string extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
-        manager->DoDragMoveAnimate(pointerEvent);
+        manager->SetDragAnimationPointerEvent(pointerEvent);
         dragEvents_[node].emplace_back(pointerEvent);
         RequestFrame();
     }
