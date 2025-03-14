@@ -172,7 +172,7 @@ typedef const InteropAsyncWorker* InteropAsyncWorkerPtr;
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 123
+#define GENERATED_ARKUI_FULL_API_VERSION 124
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -809,6 +809,8 @@ typedef struct StyledStringPeer* Ark_StyledString;
 typedef struct Opt_StyledString Opt_StyledString;
 typedef struct Ark_NavigationAnimatedTransition Ark_NavigationAnimatedTransition;
 typedef struct Opt_NavigationAnimatedTransition Opt_NavigationAnimatedTransition;
+typedef struct Profiler_Callback_String_Void Profiler_Callback_String_Void;
+typedef struct Opt_Profiler_Callback_String_Void Opt_Profiler_Callback_String_Void;
 typedef struct OnLinearIndicatorChangeCallback OnLinearIndicatorChangeCallback;
 typedef struct Opt_OnLinearIndicatorChangeCallback Opt_OnLinearIndicatorChangeCallback;
 typedef struct Ark_LinearIndicatorStyle Ark_LinearIndicatorStyle;
@@ -8453,6 +8455,15 @@ typedef struct Opt_NavigationAnimatedTransition {
     Ark_Tag tag;
     Ark_NavigationAnimatedTransition value;
 } Opt_NavigationAnimatedTransition;
+typedef struct Profiler_Callback_String_Void {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String info);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String info);
+} Profiler_Callback_String_Void;
+typedef struct Opt_Profiler_Callback_String_Void {
+    Ark_Tag tag;
+    Profiler_Callback_String_Void value;
+} Opt_Profiler_Callback_String_Void;
 typedef struct OnLinearIndicatorChangeCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Number index, const Ark_Number progress);
@@ -11582,8 +11593,8 @@ typedef struct Opt_ClickEvent {
 } Opt_ClickEvent;
 typedef struct NavExtender_OnUpdateStack {
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_String value);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String value);
+    void (*call)(const Ark_Int32 resourceId, const Ark_String name);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String name);
 } NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
@@ -21374,6 +21385,10 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
     void (*restoreInstanceId)();
 } GENERATED_ArkUISystemOpsAccessor;
 
+typedef struct GENERATED_ArkUIFocusControllerAccessor {
+    void (*requestFocus)(const Ark_String* key);
+} GENERATED_ArkUIFocusControllerAccessor;
+
 typedef struct GENERATED_ArkUIDrawingCanvasAccessor {
     void (*destroyPeer)(Ark_DrawingCanvas peer);
     Ark_DrawingCanvas (*ctor)(Ark_PixelMap pixelmap);
@@ -21614,6 +21629,16 @@ typedef struct GENERATED_ArkUIPixelMapAccessor {
 typedef struct GENERATED_ArkUINavExtenderAccessor {
     void (*setUpdateStackCallback)(Ark_NavPathStack peer,
                                    const NavExtender_OnUpdateStack* callback);
+    void (*syncStack)(Ark_NavPathStack peer);
+    Ark_Boolean (*checkNeedCreate)(Ark_NativePointer navigation,
+                                   Ark_NavPathStack stack);
+    Ark_NativePointer (*navigationCreate)(Ark_Int32 peer,
+                                          Ark_Int32 flag);
+    void (*setNavigationOptions)(Ark_NativePointer navigation,
+                                 Ark_NavPathStack stack);
+    void (*setNavDestinationNode)(Ark_NavPathStack peer,
+                                  Ark_Int32 index,
+                                  Ark_NativePointer node);
 } GENERATED_ArkUINavExtenderAccessor;
 
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
@@ -24103,7 +24128,7 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
     Ark_CustomObject (*getInspectorNodes)();
     Ark_CustomObject (*getInspectorNodeById)(const Ark_Number* id);
     void (*setAppBgColor)(const Ark_String* value);
-    void (*Profiler_registerVsyncCallback)(const Callback_String_Void* callback_);
+    void (*Profiler_registerVsyncCallback)(const Profiler_Callback_String_Void* callback_);
     void (*Profiler_unregisterVsyncCallback)();
     void (*cursorControl_setCursor)(Ark_PointerStyle value);
     void (*cursorControl_restoreDefault)();
@@ -24239,6 +24264,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUnifiedDataAccessor* (*getUnifiedDataAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUISystemOpsAccessor* (*getSystemOpsAccessor)();
+    const GENERATED_ArkUIFocusControllerAccessor* (*getFocusControllerAccessor)();
     const GENERATED_ArkUIDrawingCanvasAccessor* (*getDrawingCanvasAccessor)();
     const GENERATED_ArkUILengthMetricsAccessor* (*getLengthMetricsAccessor)();
     const GENERATED_ArkUIColorMetricsAccessor* (*getColorMetricsAccessor)();

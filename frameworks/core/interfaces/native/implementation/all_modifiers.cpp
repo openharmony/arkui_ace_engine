@@ -205,6 +205,7 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor();
+const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
 const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
 const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor();
@@ -502,6 +503,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUnifiedDataAccessor,
         GetLazyForEachOpsAccessor,
         GetSystemOpsAccessor,
+        GetFocusControllerAccessor,
         GetDrawingCanvasAccessor,
         GetLengthMetricsAccessor,
         GetColorMetricsAccessor,

@@ -23,11 +23,38 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                 const NavExtender_OnUpdateStack* callback)
 {
 }
+void SyncStackImpl(Ark_NavPathStack peer)
+{
+}
+Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
+                                Ark_NavPathStack stack)
+{
+    return {};
+}
+Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,
+                                       Ark_Int32 flag)
+{
+    return {};
+}
+void SetNavigationOptionsImpl(Ark_NativePointer navigation,
+                              Ark_NavPathStack stack)
+{
+}
+void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
+                               Ark_Int32 index,
+                               Ark_NativePointer node)
+{
+}
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
 {
     static const GENERATED_ArkUINavExtenderAccessor NavExtenderAccessorImpl {
         NavExtenderAccessor::SetUpdateStackCallbackImpl,
+        NavExtenderAccessor::SyncStackImpl,
+        NavExtenderAccessor::CheckNeedCreateImpl,
+        NavExtenderAccessor::NavigationCreateImpl,
+        NavExtenderAccessor::SetNavigationOptionsImpl,
+        NavExtenderAccessor::SetNavDestinationNodeImpl,
     };
     return &NavExtenderAccessorImpl;
 }

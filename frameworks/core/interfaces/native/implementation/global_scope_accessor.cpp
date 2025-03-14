@@ -179,7 +179,7 @@ Ark_CustomObject GetInspectorNodeByIdImpl(const Ark_Number* id)
 void SetAppBgColorImpl(const Ark_String* value)
 {
 }
-void Profiler_registerVsyncCallbackImpl(const Callback_String_Void* callback_)
+void Profiler_registerVsyncCallbackImpl(const Profiler_Callback_String_Void* callback_)
 {
 }
 void Profiler_unregisterVsyncCallbackImpl()
