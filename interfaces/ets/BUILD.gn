@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
@@ -19,5 +20,19 @@ group("ace_ani_package") {
     "${ace_root}/interfaces/ets/ani/animator:animator_ani",
     "${ace_root}/interfaces/ets/ani/animator:animator_ani_abc",
     "${ace_root}/interfaces/ets/ani/animator:animator_ani_abc_etc",
+    "${ace_root}/interfaces/ets/ani/curves:curves_ani",
+    "${ace_root}/interfaces/ets/ani/curves:curves_etc",
+    "${ace_root}/interfaces/ets/ani/matrix4:matrix4_ani",
+    "${ace_root}/interfaces/ets/ani/matrix4:matrix4_etc",
+    "${ace_root}/interfaces/ets/ani/mediaquery:mediaquery_ani",
+    "${ace_root}/interfaces/ets/ani/mediaquery:mediaquery_etc",
+    "${ace_root}/interfaces/ets/ani/ohosprompt:prompt_ani",
+    "${ace_root}/interfaces/ets/ani/ohosprompt:prompt_etc",
+    "${ace_root}/interfaces/ets/ani/performanceMonitor:performanceMonitor_ani",
+    "${ace_root}/interfaces/ets/ani/performanceMonitor:performanceMonitor_etc",
+    "${ace_root}/interfaces/ets/ani/promptaction:promptAction_ani",
+    "${ace_root}/interfaces/ets/ani/promptaction:promptAction_etc",
+    "${ace_root}/interfaces/ets/ani/systemprompt:systemprompt_ani",
+    "${ace_root}/interfaces/ets/ani/systemprompt:systemprompt_etc",
   ]
 }
