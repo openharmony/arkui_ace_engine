@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_arkui_componentSnapshotAccessor {
-void DestroyPeerImpl(Ark_GlobalScope_ohos_arkui_componentSnapshot peer)
-{
-}
-Ark_GlobalScope_ohos_arkui_componentSnapshot CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void GetImpl(const Ark_String* id,
              const AsyncCallback_image_PixelMap_Void* callback,
              const Opt_SnapshotOptions* options)
@@ -39,9 +28,6 @@ void GetImpl(const Ark_String* id,
 const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor()
 {
     static const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor GlobalScope_ohos_arkui_componentSnapshotAccessorImpl {
-        GlobalScope_ohos_arkui_componentSnapshotAccessor::DestroyPeerImpl,
-        GlobalScope_ohos_arkui_componentSnapshotAccessor::CtorImpl,
-        GlobalScope_ohos_arkui_componentSnapshotAccessor::GetFinalizerImpl,
         GlobalScope_ohos_arkui_componentSnapshotAccessor::GetImpl,
     };
     return &GlobalScope_ohos_arkui_componentSnapshotAccessorImpl;

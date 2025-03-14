@@ -81,12 +81,20 @@ void UpdateTransitionImpl(Ark_NavigationTransitionProxy peer,
         peer->handler->UpdateTransition(convProgress.value());
     }
 }
+Ark_NavContentInfo GetFromImpl(Ark_NavigationTransitionProxy peer)
+{
+    return {};
+}
 void SetFromImpl(Ark_NavigationTransitionProxy peer,
                  const Ark_NavContentInfo* from)
 {
     CHECK_NULL_VOID(peer && from && peer->handler);
     Converter::Convert<Converter::NavContentInfo>(*from);
     LOGE("NavigationTransitionProxyAccessor::SetFromImpl, modifying from attribute isn't supported");
+}
+Ark_NavContentInfo GetToImpl(Ark_NavigationTransitionProxy peer)
+{
+    return {};
 }
 void SetToImpl(Ark_NavigationTransitionProxy peer,
                const Ark_NavContentInfo* to)
@@ -116,7 +124,9 @@ const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionP
         NavigationTransitionProxyAccessor::FinishTransitionImpl,
         NavigationTransitionProxyAccessor::CancelTransitionImpl,
         NavigationTransitionProxyAccessor::UpdateTransitionImpl,
+        NavigationTransitionProxyAccessor::GetFromImpl,
         NavigationTransitionProxyAccessor::SetFromImpl,
+        NavigationTransitionProxyAccessor::GetToImpl,
         NavigationTransitionProxyAccessor::SetToImpl,
         NavigationTransitionProxyAccessor::GetIsInteractiveImpl,
         NavigationTransitionProxyAccessor::SetIsInteractiveImpl,

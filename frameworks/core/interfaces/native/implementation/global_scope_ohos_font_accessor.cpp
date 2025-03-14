@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_fontAccessor {
-void DestroyPeerImpl(Ark_GlobalScope_ohos_font peer)
-{
-}
-Ark_GlobalScope_ohos_font CtorImpl()
-{
-    return {};
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void RegisterFontImpl(const Ark_FontOptions* options)
 {
 }
@@ -41,9 +30,6 @@ Array_String GetSystemFontListImpl()
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
 {
     static const GENERATED_ArkUIGlobalScope_ohos_fontAccessor GlobalScope_ohos_fontAccessorImpl {
-        GlobalScope_ohos_fontAccessor::DestroyPeerImpl,
-        GlobalScope_ohos_fontAccessor::CtorImpl,
-        GlobalScope_ohos_fontAccessor::GetFinalizerImpl,
         GlobalScope_ohos_fontAccessor::RegisterFontImpl,
         GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
     };

@@ -19,17 +19,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
-void DestroyPeerImpl(LazyForEachOpsPeer* peer)
-{
-}
-Ark_LazyForEachOps CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node,
                                        Ark_NativePointer mark,
                                        Ark_Int32 direction)
@@ -82,9 +71,6 @@ void NotifyChangeImpl(Ark_NativePointer node,
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
     static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
-        LazyForEachOpsAccessor::DestroyPeerImpl,
-        LazyForEachOpsAccessor::CtorImpl,
-        LazyForEachOpsAccessor::GetFinalizerImpl,
         LazyForEachOpsAccessor::NeedMoreElementsImpl,
         LazyForEachOpsAccessor::OnRangeUpdateImpl,
         LazyForEachOpsAccessor::SetCurrentIndexImpl,

@@ -49,6 +49,10 @@ Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
     auto value = Converter::ArkValue<Ark_TextDecorationType>(peer->span->GetTextDecorationType());
     return value;
 }
+Ark_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
+{
+    return {};
+}
 Ark_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
 {
     CHECK_NULL_RETURN(peer, {});
@@ -66,6 +70,7 @@ const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor()
         DecorationStyleAccessor::CtorImpl,
         DecorationStyleAccessor::GetFinalizerImpl,
         DecorationStyleAccessor::GetTypeImpl,
+        DecorationStyleAccessor::GetColorImpl,
         DecorationStyleAccessor::GetStyleImpl,
     };
     return &DecorationStyleAccessorImpl;

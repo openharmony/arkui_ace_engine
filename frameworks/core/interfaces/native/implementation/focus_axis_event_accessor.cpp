@@ -30,6 +30,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Map_AxisModel_Number GetAxisMapImpl(Ark_FocusAxisEvent peer)
+{
+    return {};
+}
 void SetAxisMapImpl(Ark_FocusAxisEvent peer,
                     const Map_AxisModel_Number* axisMap)
 {
@@ -49,6 +53,7 @@ const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
         FocusAxisEventAccessor::DestroyPeerImpl,
         FocusAxisEventAccessor::CtorImpl,
         FocusAxisEventAccessor::GetFinalizerImpl,
+        FocusAxisEventAccessor::GetAxisMapImpl,
         FocusAxisEventAccessor::SetAxisMapImpl,
         FocusAxisEventAccessor::GetStopPropagationImpl,
         FocusAxisEventAccessor::SetStopPropagationImpl,

@@ -938,6 +938,10 @@ void ResetImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerResetImpl();
 }
+Ark_Union_LengthMetrics_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
+{
+    return {};
+}
 void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
                           const Ark_Union_LengthMetrics_String* letterSpacing)
 {
@@ -980,6 +984,10 @@ void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(opt);
     peerImpl->TriggerSetGlobalCompositeOperationImpl(*opt);
 }
+Ark_Union_String_Number_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+{
+    return {};
+}
 void SetFillStyleImpl(Ark_CanvasRenderer peer,
                       const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
 {
@@ -988,6 +996,10 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(fillStyle);
     LOGE("ARKOALA CanvasRendererAccessor::SetStrokeStyleImpl input Union includes same type members");
+}
+Ark_Union_String_Number_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+{
+    return {};
 }
 void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
                         const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
@@ -1329,12 +1341,15 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
         CanvasRendererAccessor::SaveLayerImpl,
         CanvasRendererAccessor::RestoreLayerImpl,
         CanvasRendererAccessor::ResetImpl,
+        CanvasRendererAccessor::GetLetterSpacingImpl,
         CanvasRendererAccessor::SetLetterSpacingImpl,
         CanvasRendererAccessor::GetGlobalAlphaImpl,
         CanvasRendererAccessor::SetGlobalAlphaImpl,
         CanvasRendererAccessor::GetGlobalCompositeOperationImpl,
         CanvasRendererAccessor::SetGlobalCompositeOperationImpl,
+        CanvasRendererAccessor::GetFillStyleImpl,
         CanvasRendererAccessor::SetFillStyleImpl,
+        CanvasRendererAccessor::GetStrokeStyleImpl,
         CanvasRendererAccessor::SetStrokeStyleImpl,
         CanvasRendererAccessor::GetFilterImpl,
         CanvasRendererAccessor::SetFilterImpl,

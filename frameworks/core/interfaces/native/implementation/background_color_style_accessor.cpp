@@ -39,6 +39,10 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+Ark_TextBackgroundStyle GetTextBackgroundStyleImpl(Ark_BackgroundColorStyle peer)
+{
+    return {};
+}
 } // BackgroundColorStyleAccessor
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor()
 {
@@ -46,6 +50,7 @@ const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccess
         BackgroundColorStyleAccessor::DestroyPeerImpl,
         BackgroundColorStyleAccessor::CtorImpl,
         BackgroundColorStyleAccessor::GetFinalizerImpl,
+        BackgroundColorStyleAccessor::GetTextBackgroundStyleImpl,
     };
     return &BackgroundColorStyleAccessorImpl;
 }

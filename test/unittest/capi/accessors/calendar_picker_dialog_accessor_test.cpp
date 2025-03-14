@@ -21,8 +21,8 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class CalendarPickerDialogAccessorTest : public AccessorTestBase<GENERATED_ArkUICalendarPickerDialogAccessor,
-    &GENERATED_ArkUIAccessors::getCalendarPickerDialogAccessor, CalendarPickerDialogPeer> {
+class CalendarPickerDialogAccessorTest : public StaticAccessorTest<GENERATED_ArkUICalendarPickerDialogAccessor,
+    &GENERATED_ArkUIAccessors::getCalendarPickerDialogAccessor> {
 };
 
 /**

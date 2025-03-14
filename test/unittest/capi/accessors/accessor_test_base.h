@@ -189,5 +189,9 @@ public:
     }
 };
 
+template<typename AccessorType, auto GetAccessorFunc>
+class StaticAccessorTest : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, void> {
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
