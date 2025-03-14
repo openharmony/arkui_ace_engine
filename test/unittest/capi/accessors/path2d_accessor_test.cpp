@@ -16,10 +16,8 @@
 #include <gmock/gmock.h>
 
 #include "accessor_test_base.h"
-#include "core/interfaces/native/implementation/matrix2d_peer.h"
-#include "core/interfaces/native/implementation/path2d_accessor_peer_impl.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/implementation/matrix2d_peer_impl.h"
+#include "core/interfaces/native/implementation/path2d_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 
@@ -50,7 +48,8 @@ public:
         mockPath_ = new MockCanvasPath();
         mockPathKeeper_ = AceType::Claim(mockPath_);
         ASSERT_NE(mockPathKeeper_, nullptr);
-        peer_->path = mockPathKeeper_;
+        RefPtr<CanvasPath2D> pathKeeper = mockPathKeeper_;
+        peer_->SetCanvasPath2d(pathKeeper);
         ASSERT_NE(mockPath_, nullptr);
     }
 
@@ -74,21 +73,23 @@ HWTEST_F(Path2DAccessorTest, addPathTest, TestSize.Level1)
     ASSERT_NE(accessor_->addPath, nullptr);
     auto peerPathImpl = Referenced::MakeRefPtr<Path2DPeer>();
     auto arkPath = Referenced::RawPtr(peerPathImpl);
-    peerPathImpl->path = AceType::MakeRefPtr<MockCanvasPath>();
+    RefPtr<CanvasPath2D> pathKeeper = mockPathKeeper_;
+    peerPathImpl->SetCanvasPath2d(pathKeeper);
     auto peerMatrix = new Matrix2DPeer();
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peerMatrix);
-    peerMatrix->transform.scaleX = NUMBER_TEST_PLAN[0];
-    peerMatrix->transform.scaleY = NUMBER_TEST_PLAN[1];
-    peerMatrix->transform.skewX = NUMBER_TEST_PLAN[2];
-    peerMatrix->transform.skewY = NUMBER_TEST_PLAN[3];
-    peerMatrix->transform.translateX = NUMBER_TEST_PLAN[4];
-    peerMatrix->transform.translateY = NUMBER_TEST_PLAN[5];
-    auto tr = peerMatrix->transform;
-    EXPECT_CALL(*mockPath_, AddPath(peerPathImpl->path)).Times(3);
+    peerMatrix->SetScaleX(NUMBER_TEST_PLAN[0]);
+    peerMatrix->SetScaleY(NUMBER_TEST_PLAN[1]);
+    peerMatrix->SetRotateX(NUMBER_TEST_PLAN[2]);
+    peerMatrix->SetRotateY(NUMBER_TEST_PLAN[3]);
+    peerMatrix->SetTranslateX(NUMBER_TEST_PLAN[4]);
+    peerMatrix->SetTranslateY(NUMBER_TEST_PLAN[5]);
+    auto tr = peerMatrix->GetTransform();
+    EXPECT_CALL(*mockPath_, AddPath(peerPathImpl->GetCanvasPath2d())).Times(3);
     EXPECT_CALL(*mockPath_, SetTransform(tr.scaleX, tr.skewX, tr.skewY, tr.scaleY, tr.translateX, tr.translateY))
         .Times(3);
     accessor_->addPath(peer_, arkPath, &optMatrix);
     accessor_->addPath(peer_, arkPath, &optMatrix);
     accessor_->addPath(peer_, arkPath, &optMatrix);
+    pathKeeper->DecRefCount();
 }
 } // namespace OHOS::Ace::NG

@@ -119,6 +119,12 @@ void ValidateNonEmpty(std::optional<CalcDimension>& opt)
         opt.reset();
     }
 }
+void ValidateNonEmpty(std::optional<std::string>& opt)
+{
+    if (opt.has_value() && opt.value().empty()) {
+        opt.reset();
+    }
+}
 void ValidateNonNegative(std::optional<int>& value)
 {
     if (value.has_value() && Negative(value.value())) {

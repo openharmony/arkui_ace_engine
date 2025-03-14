@@ -13,19 +13,48 @@
  * limitations under the License.
  */
 
-#include "canvas_renderer_peer_impl.h"
+#include "canvas_pattern_peer.h"
+
+#include "arkoala_api_generated.h"
+#include "canvas_pattern_peer.h"
+#include "image_bitmap_peer_impl.h"
+#include "pixel_map_peer.h"
+
+#include "arkoala_api_generated.h"
+#include "canvas_pattern_peer.h"
+#include "image_bitmap_peer_impl.h"
+#include "pixel_map_peer.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 const std::set<std::string> FONT_WEIGHTS = {
-    "100", "200", "300", "400", "500", "600", "700", "800", "900",
-    "bold", "bolder", "lighter", "medium", "normal", "regular",
+    "100",
+    "200",
+    "300",
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+    "900",
+    "bold",
+    "bolder",
+    "lighter",
+    "medium",
+    "normal",
+    "regular",
 };
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
-constexpr double MATH_2_PI = 2 * M_PI;
-constexpr double DIFF = 1e-10;
-constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" };
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
+constexpr double DEFAULT_QUALITY = 0.92;
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr double DIFF = 1e-10;
+constexpr uint32_t PIXEL_SIZE = 4;
+constexpr int32_t ALPHA_INDEX = 3;
+constexpr auto TEXT_FONT_STYLE_ITALIC = "italic";
 const std::unordered_map<std::string, LineCapStyle> LINE_CAP_MAP = {
     { "butt", LineCapStyle::BUTT },
     { "round", LineCapStyle::ROUND },
@@ -36,13 +65,58 @@ const std::unordered_map<std::string, LineJoinStyle> LINE_JOIN_MAP = {
     { "miter", LineJoinStyle::MITER },
     { "round", LineJoinStyle::ROUND },
 };
+const double ERROR_VALUE = 0;
+const std::string ERROR_STRING = "";
+const auto MULTI_BY_2 = 2;
+const auto EVEN_BY_2 = 2;
+
+template<typename T>
+inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
+{
+    int64_t index = BinarySearchFindIndex(map, length, key);
+    return index != -1 ? map[index].value : defaultValue;
+}
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
+}
+Ace::FontWeight ConvertStrToFontWeight(
+    const std::string& weight, Ace::FontWeight defaultFontWeight = FontWeight::NORMAL)
+{
+    return StringUtils::StringToFontWeight(weight, defaultFontWeight);
+}
+Ace::FontStyle ConvertStrToFontStyle(const std::string& fontStyle)
+{
+    return fontStyle == TEXT_FONT_STYLE_ITALIC ? Ace::FontStyle::ITALIC : Ace::FontStyle::NORMAL;
+}
+inline std::vector<std::string> ConvertStrToFontFamilies(const std::string& family)
+{
+    std::vector<std::string> fontFamilies;
+    std::stringstream stream(family);
+    std::string fontFamily;
+    while (getline(stream, fontFamily, ',')) {
+        fontFamilies.emplace_back(fontFamily);
+    }
+    return fontFamilies;
+}
+} // namespace
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
+std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> CanvasRendererPeerImpl::pattern_;
+unsigned int CanvasRendererPeerImpl::patternCount_ = 0;
 CanvasRendererPeerImpl::CanvasRendererPeerImpl()
 {
+    instanceId_ = Container::CurrentIdSafely();
     density_ = PipelineBase::GetCurrentDensity();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        isJudgeSpecialValue_ = true;
     }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     if (pipeline) {
@@ -54,392 +128,919 @@ CanvasRendererPeerImpl::CanvasRendererPeerImpl()
         });
     }
 }
-void CanvasRendererPeerImpl::TriggerBeginPathImpl()
+CanvasRendererPeerImpl::~CanvasRendererPeerImpl()
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerBeginPathImpl pattern "
-             "not bound to component.");
-        return;
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
     }
-    pattern_->BeginPath();
 }
-void CanvasRendererPeerImpl::TriggerStroke0Impl()
+RefPtr<CanvasPath2D> CanvasRendererPeerImpl::MakePath2D()
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerStroke0Impl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->Stroke();
+    return AceType::MakeRefPtr<CanvasPath2D>();
 }
-void CanvasRendererPeerImpl::TriggerRestoreImpl()
+void CanvasRendererPeerImpl::DrawImage(ImageBitmapPeer* bitmap, const DrawImageParam& params)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerRestoreImpl pattern "
-             "not bound to component.");
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    Ace::CanvasImage image;
+    ExtractInfoToImage(image, params, true);
+    image.instanceId = bitmap->GetInstanceId();
+
+    Ace::ImageInfo imageInfo;
+#if !defined(PREVIEW)
+    imageInfo.pixelMap = bitmap->GetPixelMap();
+    CHECK_NULL_VOID(imageInfo.pixelMap);
+    imageInfo.image = image;
+    renderingContext2DModel_->DrawPixelMap(imageInfo);
+#else
+    image.src = bitmap->GetSrc();
+    image.imageData = bitmap->GetImageData();
+    imageInfo.image = image;
+    imageInfo.imgWidth = bitmap->GetWidth();
+    imageInfo.imgHeight = bitmap->GetHeight();
+    renderingContext2DModel_->DrawImage(imageInfo);
+#endif
+}
+void CanvasRendererPeerImpl::DrawSvgImage(ImageBitmapPeer* bitmap, const DrawImageParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    Ace::CanvasImage image;
+    ExtractInfoToImage(image, params, true);
+    image.instanceId = bitmap->GetInstanceId();
+
+    Ace::ImageInfo imageInfo;
+    imageInfo.image = image;
+    imageInfo.svgDom = bitmap->GetSvgDom();
+    CHECK_NULL_VOID(imageInfo.svgDom);
+    imageInfo.imageFit = bitmap->GetImageFit();
+    renderingContext2DModel_->DrawSvgImage(imageInfo);
+}
+void CanvasRendererPeerImpl::DrawPixelMap(PixelMapPeer* pixelMap, const DrawImageParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(pixelMap);
+#if !defined(PREVIEW)
+    Ace::CanvasImage image;
+    ExtractInfoToImage(image, params, false);
+
+    Ace::ImageInfo imageInfo;
+    imageInfo.image = image;
+    imageInfo.pixelMap = pixelMap->pixelMap;
+    CHECK_NULL_VOID(imageInfo.pixelMap);
+    renderingContext2DModel_->DrawPixelMap(imageInfo);
+#endif
+}
+void CanvasRendererPeerImpl::BeginPath()
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->BeginPath();
+}
+void CanvasRendererPeerImpl::Clip(const std::optional<std::string>& ruleStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    auto fillRule = CanvasFillRule::NONZERO;
+    // clip(fillRule?: CanvasFillRule): void
+    if (ruleStr) {
+        fillRule = *ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    }
+    renderingContext2DModel_->SetClipRuleForPath(fillRule);
+}
+void CanvasRendererPeerImpl::Clip(const std::optional<std::string>& ruleStr, const RefPtr<CanvasPath2D>& path)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    auto fillRule = CanvasFillRule::NONZERO;
+    if (!path) {
+        // clip(fillRule?: CanvasFillRule): void
+        if (ruleStr) {
+            fillRule = *ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+        }
+        renderingContext2DModel_->SetClipRuleForPath(fillRule);
+    } else {
+        // clip(path: Path2D, fillRule?: CanvasFillRule): void
+        if (ruleStr) {
+            fillRule = *ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+        }
+        renderingContext2DModel_->SetClipRuleForPath2D(fillRule, path);
+    }
+}
+void CanvasRendererPeerImpl::Fill(const std::optional<std::string>& ruleStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    auto fillRule = CanvasFillRule::NONZERO;
+    // fill(fillRule?: CanvasFillRule): void
+    if (ruleStr) {
+        fillRule = *ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    }
+    renderingContext2DModel_->SetFillRuleForPath(fillRule);
+}
+void CanvasRendererPeerImpl::Fill(const std::optional<std::string>& ruleStr, const RefPtr<CanvasPath2D>& path)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    auto fillRule = CanvasFillRule::NONZERO;
+    if (!path) {
+        // fill(fillRule?: CanvasFillRule): void
+        if (ruleStr) {
+            fillRule = *ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+        }
+        renderingContext2DModel_->SetFillRuleForPath(fillRule);
+    } else {
+        // fill(path: Path2D, fillRule?: CanvasFillRule): void
+        if (ruleStr) {
+            fillRule = *ruleStr == "evenodd" ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+        }
+        renderingContext2DModel_->SetFillRuleForPath2D(fillRule, path);
+    }
+}
+void CanvasRendererPeerImpl::Stroke()
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetStrokeRuleForPath(CanvasFillRule::NONZERO);
+}
+void CanvasRendererPeerImpl::Stroke(const RefPtr<CanvasPath2D>& path)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (!path) {
+        renderingContext2DModel_->SetStrokeRuleForPath(CanvasFillRule::NONZERO);
+    } else {
+        renderingContext2DModel_->SetStrokeRuleForPath2D(CanvasFillRule::NONZERO, path);
+    }
+}
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateLinearGradient(
+    double x0, double y0, double x1, double y1)
+{
+    if (IfJudgeSpecialValue(x0) && IfJudgeSpecialValue(y0) && IfJudgeSpecialValue(x1) && IfJudgeSpecialValue(y1)) {
+        double density = GetDensity();
+        auto gradient = std::make_shared<Ace::Gradient>();
+        gradient->SetType(Ace::GradientType::LINEAR);
+        gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
+        gradient->SetEndOffset(Offset(x1 * density, y1 * density));
+        return gradient;
+    }
+    return nullptr;
+}
+void CanvasRendererPeerImpl::CreatePattern(
+    ImageBitmapPeer* bitmap, CanvasPatternPeer* canvasPattern, std::optional<std::string>& repetition)
+{
+    CHECK_NULL_VOID(bitmap);
+    CHECK_NULL_VOID(canvasPattern);
+    std::string repeat;
+    if (repetition) {
+        repeat = repetition.value();
+    }
+    auto pattern = std::make_shared<Ace::Pattern>();
+    pattern->SetImgSrc(bitmap->GetSrc());
+    pattern->SetImageWidth(bitmap->GetWidth());
+    pattern->SetImageHeight(bitmap->GetHeight());
+    pattern->SetRepetition(repeat);
+#if !defined(PREVIEW)
+    auto pixelMap = bitmap->GetPixelMap();
+    pattern->SetPixelMap(pixelMap);
+#endif
+    pattern_[patternCount_] = pattern;
+    canvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
+    canvasPattern->SetId(patternCount_);
+    canvasPattern->SetUnit(GetUnit());
+    patternCount_++;
+}
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateRadialGradient(const RadialGradientParam& params)
+{
+    double x0 = 0;
+    double y0 = 0;
+    double r0 = 0;
+    double x1 = 0;
+    double y1 = 0;
+    double r1 = 0;
+    if (GetDoubleArg(x0, params.x0) && GetDoubleArg(y0, params.y0) && GetDoubleArg(r0, params.r0) &&
+        GetDoubleArg(x1, params.x1) && GetDoubleArg(y1, params.y1) && GetDoubleArg(r1, params.r1)) {
+        double density = GetDensity();
+        auto gradient = std::make_shared<Ace::Gradient>();
+        gradient->SetType(Ace::GradientType::RADIAL);
+        gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
+        gradient->SetEndOffset(Offset(x1 * density, y1 * density));
+        gradient->SetInnerRadius(r0 * density);
+        gradient->SetOuterRadius(r1 * density);
+        return gradient;
+    }
+    return nullptr;
+}
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient(double x, double y, double startAngle)
+{
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y) && IfJudgeSpecialValue(startAngle)) {
+        double density = GetDensity();
+        auto gradient = std::make_shared<OHOS::Ace::Gradient>();
+        gradient->SetType(Ace::GradientType::CONIC);
+        gradient->GetConicGradient().startAngle =
+            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * M_PI))));
+        gradient->GetConicGradient().centerX = Ace::AnimatableDimension(Ace::Dimension(x * density));
+        gradient->GetConicGradient().centerY = Ace::AnimatableDimension(Ace::Dimension(y * density));
+        return gradient;
+    }
+    return nullptr;
+}
+void CanvasRendererPeerImpl::CreateImageData(
+    std::vector<uint8_t>& vbuffer, double fWidth, double fHeight, uint32_t& width, uint32_t& height)
+{
+    double density = GetDensity();
+    fWidth *= density;
+    fHeight *= density;
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(fWidth + DIFF));
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(fHeight + DIFF));
+    vbuffer.resize(finalWidth * finalHeight * PIXEL_SIZE);
+    uint32_t* buffer = (uint32_t*)vbuffer.data();
+    if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
+        vbuffer.clear();
+        width = 0;
+        height = 0;
         return;
     }
+    for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
+        buffer[idx] = 0xffffffff;
+    }
+    width = finalWidth;
+    height = finalHeight;
+}
+void CanvasRendererPeerImpl::CreateImageData(std::vector<uint8_t>& vbuffer, uint32_t& width, uint32_t& height)
+{
+    uint32_t finalWidth = width;
+    uint32_t finalHeight = height;
+    vbuffer.resize(finalWidth * finalHeight * PIXEL_SIZE);
+    uint32_t* buffer = (uint32_t*)vbuffer.data();
+    if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
+        vbuffer.clear();
+        width = 0;
+        height = 0;
+        return;
+    }
+    for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
+        buffer[idx] = 0xffffffff;
+    }
+    width = finalWidth;
+    height = finalHeight;
+}
+void CanvasRendererPeerImpl::GetImageData(
+    std::vector<uint8_t>& vbuffer, Ace::ImageSize& imageSize, uint32_t& width, uint32_t& height)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    double density = GetDensity();
+    imageSize.left *= density;
+    imageSize.top *= density;
+    imageSize.width = imageSize.width * density + DIFF;
+    imageSize.height = imageSize.height * density + DIFF;
+
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    vbuffer.resize(finalWidth * finalHeight * PIXEL_SIZE);
+    uint8_t* buffer = vbuffer.data();
+    if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
+        vbuffer.clear();
+        width = 0;
+        height = 0;
+        return;
+    }
+    renderingContext2DModel_->GetImageDataModel(imageSize, buffer);
+    width = finalWidth;
+    height = finalHeight;
+}
+RefPtr<Ace::PixelMap> CanvasRendererPeerImpl::GetPixelMap(
+    const double x, const double y, const double width, const double height)
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    CHECK_NULL_RETURN(renderingContext2DModel_, nullptr);
+    double density = GetDensity();
+    ImageSize imageSize = { .left = x, .top = y, .width = width, .height = height };
+    imageSize.left *= density;
+    imageSize.top *= density;
+    imageSize.width = imageSize.width * density + DIFF;
+    imageSize.height = imageSize.height * density + DIFF;
+    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        return nullptr;
+    }
+    return renderingContext2DModel_->GetPixelMap(imageSize);
+#else
+    LOGE("ARKOALA CanvasRendererPeerImpl::GetPixelMap PixelMap is not supported on current platform.");
+    return nullptr;
+#endif
+}
+void CanvasRendererPeerImpl::PutImageData(Ace::ImageData& src, const PutImageDataParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(src.data.data());
+    int32_t imgWidth = static_cast<int32_t>(src.dirtyWidth);
+    int32_t imgHeight = static_cast<int32_t>(src.dirtyHeight);
+
+    // Parse other parameters
+    Ace::ImageData imageData = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
+    ParseImageData(imageData, params);
+
+    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
+                                                : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
+    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
+                                                 : std::min(imgHeight - imageData.dirtyY, imageData.dirtyHeight);
+    // copy the data from the image data.
+    std::vector<uint32_t> vbuffer = src.data;
+    auto* buffer = (uint8_t*)vbuffer.data();
+    int32_t bufferLength = vbuffer.size() * sizeof(uint32_t);
+    imageData.data = std::vector<uint32_t>();
+    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
+            if (bufferLength > static_cast<int32_t>(idx + ALPHA_INDEX)) {
+                uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
+                uint8_t red = buffer[idx];       // idx: the 1st byte format: red
+                uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green
+                uint8_t blue = buffer[idx + 2];  // idx + 2: The 3rd byte format: blue
+                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
+            }
+        }
+    }
+    renderingContext2DModel_->PutImageData(imageData);
+}
+std::vector<double> CanvasRendererPeerImpl::GetLineDash()
+{
+    std::vector<double> segments;
+    CHECK_NULL_RETURN(renderingContext2DModel_, segments);
+    double density = GetDensity();
+    if (density == 0) {
+        return segments;
+    }
+    auto lineDash = renderingContext2DModel_->GetLineDash();
+    for (auto i = 0U; i < lineDash.size(); i++) {
+        segments.push_back(lineDash[i] /= density);
+    }
+    return segments;
+}
+void CanvasRendererPeerImpl::SetLineDash(const std::vector<double>& segments)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    std::vector<double> lineDash;
+    if (!GetDoubleArgArray(lineDash, segments)) {
+        return;
+    }
+    if (lineDash.size() % EVEN_BY_2 != 0) {
+        lineDash.insert(lineDash.end(), lineDash.begin(), lineDash.end());
+    }
+    double density = GetDensity();
+    if (!Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TEN)) {
+        for (auto i = 0U; i < lineDash.size(); i++) {
+            lineDash[i] *= density;
+        }
+    }
+    renderingContext2DModel_->SetLineDash(lineDash);
+}
+void CanvasRendererPeerImpl::ClearRect(const double x, const double y, const double width, const double height)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y) && IfJudgeSpecialValue(width) && IfJudgeSpecialValue(height)) {
+        renderingContext2DModel_->ClearRect(Rect(x, y, width, height) * GetDensity());
+    }
+}
+void CanvasRendererPeerImpl::FillRect(const double x, const double y, const double width, const double height)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y) && IfJudgeSpecialValue(width) && IfJudgeSpecialValue(height)) {
+        renderingContext2DModel_->FillRect(Rect(x, y, width, height) * GetDensity());
+    }
+}
+void CanvasRendererPeerImpl::StrokeRect(const double x, const double y, const double width, const double height)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y) && IfJudgeSpecialValue(width) && IfJudgeSpecialValue(height)) {
+        renderingContext2DModel_->StrokeRect(Rect(x, y, width, height) * GetDensity());
+    }
+}
+void CanvasRendererPeerImpl::Restore()
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
     if (!savePaintState_.empty()) {
         paintState_ = savePaintState_.back();
         savePaintState_.pop_back();
     }
-    pattern_->Restore();
+    renderingContext2DModel_->Restore();
 }
-void CanvasRendererPeerImpl::TriggerSaveImpl()
+void CanvasRendererPeerImpl::Save()
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSaveImpl pattern "
-             "not bound to component.");
-        return;
-    }
+    CHECK_NULL_VOID(renderingContext2DModel_);
     savePaintState_.push_back(paintState_);
-    pattern_->Save();
+    renderingContext2DModel_->CanvasRendererSave();
 }
-void CanvasRendererPeerImpl::TriggerResetTransformImpl()
+void CanvasRendererPeerImpl::FillText(const std::string& text, double x, double y, const std::optional<float>& optWidth)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerResetTransformImpl pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        FillTextInfo textInfo;
+        textInfo.text = text;
+        double density = GetDensity();
+        textInfo.x = x * density;
+        textInfo.y = y * density;
+        double maxWidth = 0.0;
+        if (optWidth) {
+            maxWidth = optWidth.value() * density;
+        } else if (!optWidth) {
+            maxWidth = FLT_MAX;
+        }
+        if (maxWidth < 0) {
+            return;
+        }
+        textInfo.maxWidth = maxWidth;
+        renderingContext2DModel_->SetFillText(paintState_, textInfo);
     }
-    pattern_->ResetTransform();
 }
-void CanvasRendererPeerImpl::TriggerSaveLayerImpl()
+void CanvasRendererPeerImpl::MeasureText(Ace::TextMetrics& textMetrics, const std::string& text)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSaveLayerImpl pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    double density = GetDensity();
+    if (Positive(density)) {
+        textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
     }
-    pattern_->SaveLayer();
 }
-void CanvasRendererPeerImpl::TriggerRestoreLayerImpl()
+void CanvasRendererPeerImpl::StrokeText(
+    const std::string& text, double x, double y, const std::optional<float>& optWidth)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerRestoreLayerImpl pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        FillTextInfo textInfo;
+        textInfo.text = text;
+        double density = GetDensity();
+        textInfo.x = x * density;
+        textInfo.y = y * density;
+        double maxWidth = 0.0;
+        if (optWidth) {
+            maxWidth = optWidth.value() * density;
+        } else if (!optWidth) {
+            maxWidth = FLT_MAX;
+        }
+        if (maxWidth < 0) {
+            return;
+        }
+        textInfo.maxWidth = maxWidth;
+        renderingContext2DModel_->SetStrokeText(paintState_, textInfo);
     }
-    pattern_->RestoreLayer();
 }
-void CanvasRendererPeerImpl::TriggerResetImpl()
+void CanvasRendererPeerImpl::GetTransform(Matrix2DPeer* matrix)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerResetImpl pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(matrix);
+    ContainerScope scope(instanceId_);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto transform = renderingContext2DModel_->GetTransform();
+        matrix->SetTransform(transform);
     }
-    pattern_->Reset();
 }
-std::optional<LineDashParam> CanvasRendererPeerImpl::TriggerGetLineDashImpl()
+void CanvasRendererPeerImpl::ResetTransform()
 {
-    auto opt = std::make_optional<LineDashParam>();
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerGetLineDashImpl pattern "
-             "not bound to component.");
-        return opt;
-    }
-    opt = pattern_->GetLineDash();
-    return opt;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->ResetTransform();
 }
-void CanvasRendererPeerImpl::TriggerSetLineDashImpl(const std::vector<double>& segments)
+void CanvasRendererPeerImpl::Rotate(double angle)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetLineDashImpl pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(angle)) {
+        renderingContext2DModel_->CanvasRendererRotate(angle);
     }
-    pattern_->UpdateLineDash(segments);
 }
-void CanvasRendererPeerImpl::TriggerClearRectImpl(const Rect& rect)
+void CanvasRendererPeerImpl::Scale(double x, double y)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerClearRect pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        renderingContext2DModel_->CanvasRendererScale(x, y);
     }
-    pattern_->ClearRect(rect);
 }
-void CanvasRendererPeerImpl::TriggerFillRectImpl(const Rect& rect)
+void CanvasRendererPeerImpl::SetTransform(TransformParam& param)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerFillRect pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(param.scaleX) && IfJudgeSpecialValue(param.skewY) && IfJudgeSpecialValue(param.skewX) &&
+        IfJudgeSpecialValue(param.scaleY) && IfJudgeSpecialValue(param.translateX) &&
+        IfJudgeSpecialValue(param.translateY)) {
+        double density = GetDensity();
+        param.translateX *= density;
+        param.translateY *= density;
+        renderingContext2DModel_->SetTransform(param, true);
     }
-    pattern_->FillRect(rect);
 }
-void CanvasRendererPeerImpl::TriggerStrokeRectImpl(const Rect& rect)
+void CanvasRendererPeerImpl::SetTransform(const std::optional<Matrix2DPeer*>& optMatrix)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerFillRect pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
+        CHECK_NULL_VOID(optMatrix && optMatrix.value());
+        auto matrix = optMatrix.value();
+        auto param = matrix->GetTransform();
+        renderingContext2DModel_->SetTransform(param, false);
     }
-    pattern_->StrokeRect(rect);
 }
-void CanvasRendererPeerImpl::TriggerRotateImpl(double angle)
+void CanvasRendererPeerImpl::SetTransform(unsigned int id, const TransformParam& transform)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerRotate pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (id >= 0 && id <= patternCount_) {
+        renderingContext2DModel_->SetTransform(pattern_[id], transform);
     }
-    pattern_->Rotate(angle);
 }
-void CanvasRendererPeerImpl::TriggerScaleImpl(double x, double y)
+void CanvasRendererPeerImpl::Transform(TransformParam& param)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerScale pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(param.scaleX) && IfJudgeSpecialValue(param.skewY) && IfJudgeSpecialValue(param.skewX) &&
+        IfJudgeSpecialValue(param.scaleY) && IfJudgeSpecialValue(param.translateX) &&
+        IfJudgeSpecialValue(param.translateY)) {
+        double density = GetDensity();
+        param.translateX *= density;
+        param.translateY *= density;
+        renderingContext2DModel_->Transform(param);
     }
-    pattern_->Scale(x, y);
 }
-void CanvasRendererPeerImpl::TriggerTranslateImpl(double x, double y)
+void CanvasRendererPeerImpl::Translate(double x, double y)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTranslate pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        double density = GetDensity();
+        renderingContext2DModel_->Translate(x * density, y * density);
     }
-    pattern_->Translate(x, y);
 }
-void CanvasRendererPeerImpl::TriggerSetGlobalAlphaImpl(double alpha)
+void CanvasRendererPeerImpl::SetPixelMap(const RefPtr<Ace::PixelMap>& pixelMap)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateGlobalAlpha pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateGlobalAlpha(alpha);
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(pixelMap);
+    ImageInfo imageInfo = { .pixelMap = pixelMap };
+    renderingContext2DModel_->DrawPixelMap(imageInfo);
 }
-void CanvasRendererPeerImpl::TriggerFillTextImpl(
-    const std::string& text, double x, double y, std::optional<double> maxWidth)
+void CanvasRendererPeerImpl::TransferFromImageBitmap(ImageBitmapPeer* bitmap)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerFillTextImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->FillText(text, x, y, maxWidth);
-}
-void CanvasRendererPeerImpl::TriggerStrokeTextImpl(
-    const std::string& text, double x, double y, std::optional<double> maxWidth)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerStrokeTextImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->StrokeText(text, x, y, maxWidth);
-}
-void CanvasRendererPeerImpl::TriggerSetTransformImpl(const TransformParam& param)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetTransform0Impl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->SetTransform(param);
-}
-void CanvasRendererPeerImpl::TriggerTransformImpl(const TransformParam& param)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTransformImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->Transform(param);
-}
-void CanvasRendererPeerImpl::TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetGlobalCompositeOperationImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateCompositeOperation(type);
-}
-void CanvasRendererPeerImpl::TriggerSetFilterImpl(const std::string& filterStr)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetFilterImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->SetFilterParam(filterStr);
-}
-void CanvasRendererPeerImpl::TriggerSetImageSmoothingEnabledImpl(bool enabled)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetImageSmoothingEnabledImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateSmoothingEnabled(enabled);
-}
-double CanvasRendererPeerImpl::TriggerGetLineDashOffsetImpl()
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerGetLineDashOffsetImpl pattern "
-             "not bound to component.");
-        return 0;
-    }
-    return pattern_->GetLineDash().dashOffset;
-}
-void CanvasRendererPeerImpl::TriggerSetLineDashOffsetImpl(double dash)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetLineDashOffsetImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateLineDashOffset(dash);
-}
-void CanvasRendererPeerImpl::TriggerSetLineWidthImpl(double width)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetLineWidthImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateLineWidth(width);
-}
-void CanvasRendererPeerImpl::TriggerSetMiterLimitImpl(double limit)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetMiterLimitImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateMiterLimit(limit);
-}
-void CanvasRendererPeerImpl::TriggerSetShadowBlurImpl(double blur)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetShadowBlurImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateShadowBlur(blur);
-}
-void CanvasRendererPeerImpl::TriggerSetShadowColorImpl(Color& color)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetShadowColorImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateShadowColor(color);
-}
-void CanvasRendererPeerImpl::TriggerSetShadowOffsetXImpl(double offsetX)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetShadowOffsetXImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateShadowOffsetX(offsetX);
-}
-void CanvasRendererPeerImpl::TriggerSetShadowOffsetYImpl(double offsetY)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetShadowOffsetYImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateShadowOffsetY(offsetY);
-}
-void CanvasRendererPeerImpl::TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerStroke1Impl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->Stroke(path);
-}
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    CHECK_NULL_VOID(canvasRenderingContext2DModel);
+    CHECK_NULL_VOID(bitmap);
 #ifdef PIXEL_MAP_SUPPORTED
-void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->TransferFromImageBitmap(pixelMap);
-}
+    auto pixelMap = bitmap->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    canvasRenderingContext2DModel->TransferFromImageBitmap(pixelMap);
 #else
-void CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl(const double width, const double height)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerTransferFromImageBitmapImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    auto imageData = pattern_->GetImageData(0, 0, width, height);
+    auto imageData = bitmap->GetImageData();
     CHECK_NULL_VOID(imageData);
-    pattern_->TransferFromImageBitmap(*imageData);
-}
+    canvasRenderingContext2DModel->TransferFromImageBitmap(imageData);
 #endif
-void CanvasRendererPeerImpl::TriggerSetFillStyleImpl(const Color& color)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetFillStyleImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateFillColor(color);
 }
-void CanvasRendererPeerImpl::TriggerSetFillStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient)
+void CanvasRendererPeerImpl::SaveLayer()
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetFillStyleImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->SetFillGradient(gradient);
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SaveLayer();
 }
-void CanvasRendererPeerImpl::TriggerSetFillStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern)
+void CanvasRendererPeerImpl::RestoreLayer()
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetFillStyleImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateFillPattern(pattern);
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->RestoreLayer();
 }
-void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const Color& color)
+void CanvasRendererPeerImpl::Reset()
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateStrokeColor(color);
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    ResetPaintState();
+    renderingContext2DModel_->Reset();
 }
-void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient)
+void CanvasRendererPeerImpl::SetGlobalAlpha(double alpha)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(alpha)) {
+        renderingContext2DModel_->SetGlobalAlpha(alpha);
     }
-    pattern_->SetStrokeGradient(gradient);
 }
-void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern)
+void CanvasRendererPeerImpl::SetGlobalCompositeOperation(const std::string& compositeStr)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl pattern "
-             "not bound to component.");
-        return;
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    static const LinearMapNode<CompositeOperation> compositeOperationTable[] = {
+        { "copy", CompositeOperation::COPY },
+        { "destination-atop", CompositeOperation::DESTINATION_ATOP },
+        { "destination-in", CompositeOperation::DESTINATION_IN },
+        { "destination-out", CompositeOperation::DESTINATION_OUT },
+        { "destination-over", CompositeOperation::DESTINATION_OVER },
+        { "lighter", CompositeOperation::LIGHTER },
+        { "source-atop", CompositeOperation::SOURCE_ATOP },
+
+        { "source-in", CompositeOperation::SOURCE_IN },
+        { "source-out", CompositeOperation::SOURCE_OUT },
+        { "source-over", CompositeOperation::SOURCE_OVER },
+        { "xor", CompositeOperation::XOR },
+    };
+    auto type = ConvertStrToEnum(compositeStr.c_str(), compositeOperationTable, ArraySize(compositeOperationTable),
+        CompositeOperation::SOURCE_OVER);
+    renderingContext2DModel_->SetCompositeType(type);
+}
+void CanvasRendererPeerImpl::SetFillStyle(const std::string& colorStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    Color color;
+    if (Color::ParseColorString(colorStr, color)) {
+        renderingContext2DModel_->SetFillColor(color, true);
     }
-    pattern_->UpdateStrokePattern(pattern);
+}
+void CanvasRendererPeerImpl::SetFillStyle(const uint32_t colorNum)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetFillColor(Color(colorNum), false);
+}
+void CanvasRendererPeerImpl::SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(gradient);
+    renderingContext2DModel_->SetFillGradient(gradient);
+}
+
+void CanvasRendererPeerImpl::SetFillStyle(int32_t id)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetFillPattern(GetPatternPtr(id));
+}
+void CanvasRendererPeerImpl::SetStrokeStyle(const std::string& colorStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    Color color;
+    if (Color::ParseColorString(colorStr, color)) {
+        renderingContext2DModel_->SetStrokeColor(color, true);
+    }
+}
+void CanvasRendererPeerImpl::SetStrokeStyle(const uint32_t colorNum)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetStrokeColor(Color(ColorAlphaAdapt(colorNum)), false);
+}
+void CanvasRendererPeerImpl::SetStrokeStyle(const std::shared_ptr<Ace::Gradient>& gradient)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(gradient);
+    renderingContext2DModel_->SetStrokeGradient(gradient);
+}
+void CanvasRendererPeerImpl::SetStrokeStyle(int32_t id)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetStrokePattern(GetPatternPtr(id));
+}
+void CanvasRendererPeerImpl::SetFilter(const std::string& filterStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (!filterStr.empty()) {
+        renderingContext2DModel_->SetFilterParam(filterStr);
+    }
+}
+void CanvasRendererPeerImpl::SetImageSmoothingEnabled(bool enabled)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetSmoothingEnabled(enabled);
+}
+void CanvasRendererPeerImpl::SetImageSmoothingQuality(const std::string& quality)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (QUALITY_TYPE.find(quality) != QUALITY_TYPE.end()) {
+        renderingContext2DModel_->SetSmoothingQuality(quality);
+    }
+}
+void CanvasRendererPeerImpl::SetLineCap(const std::string& capStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    static const LinearMapNode<LineCapStyle> lineCapTable[] = {
+        { "butt", LineCapStyle::BUTT },
+        { "round", LineCapStyle::ROUND },
+        { "square", LineCapStyle::SQUARE },
+    };
+    auto lineCap = ConvertStrToEnum(capStr.c_str(), lineCapTable, ArraySize(lineCapTable), LineCapStyle::BUTT);
+    renderingContext2DModel_->SetLineCap(lineCap);
+}
+void CanvasRendererPeerImpl::SetLineDashOffset(double lineDashOffset)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(lineDashOffset)) {
+        renderingContext2DModel_->SetLineDashOffset(lineDashOffset * GetDensity());
+    }
+}
+void CanvasRendererPeerImpl::SetLineJoin(const std::string& joinStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    static const LinearMapNode<LineJoinStyle> lineJoinTable[3] = {
+        { "bevel", LineJoinStyle::BEVEL },
+        { "miter", LineJoinStyle::MITER },
+        { "round", LineJoinStyle::ROUND },
+    };
+    auto lineJoin = ConvertStrToEnum(joinStr.c_str(), lineJoinTable, ArraySize(lineJoinTable), LineJoinStyle::MITER);
+    renderingContext2DModel_->SetLineJoin(lineJoin);
+}
+void CanvasRendererPeerImpl::SetLineWidth(double lineWidth)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(lineWidth)) {
+        renderingContext2DModel_->SetLineWidth(lineWidth * GetDensity());
+    }
+}
+void CanvasRendererPeerImpl::SetMiterLimit(double limit)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(limit)) {
+        renderingContext2DModel_->SetMiterLimit(limit);
+    }
+}
+void CanvasRendererPeerImpl::SetShadowBlur(double blur)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(blur)) {
+        renderingContext2DModel_->SetShadowBlur(blur);
+    }
+}
+void CanvasRendererPeerImpl::SetShadowColor(const std::string& colorStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetShadowColor(Color::FromString(colorStr));
+}
+void CanvasRendererPeerImpl::SetShadowOffsetX(double offsetX)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(offsetX)) {
+        renderingContext2DModel_->SetShadowOffsetX(offsetX * GetDensity());
+    }
+}
+void CanvasRendererPeerImpl::SetShadowOffsetY(double offsetY)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(offsetY)) {
+        renderingContext2DModel_->SetShadowOffsetY(offsetY * GetDensity());
+    }
+}
+void CanvasRendererPeerImpl::SetTextDirection(const std::string& directionStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    const LinearMapNode<TextDirection> textDirectionTable[] = {
+        { "inherit", TextDirection::INHERIT },
+        { "ltr", TextDirection::LTR },
+        { "rtl", TextDirection::RTL },
+    };
+    auto direction =
+        ConvertStrToEnum(directionStr.c_str(), textDirectionTable, ArraySize(textDirectionTable), TextDirection::LTR);
+    renderingContext2DModel_->SetTextDirection(direction);
+}
+void CanvasRendererPeerImpl::SetFont(std::string fontStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    std::vector<std::string> fontProps;
+    StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
+    bool updateFontweight = false;
+    bool updateFontStyle = false;
+    for (const auto& fontProp : fontProps) {
+        if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
+            updateFontweight = true;
+            auto weight = ConvertStrToFontWeight(fontProp);
+            paintState_.SetFontWeight(weight);
+            renderingContext2DModel_->SetFontWeight(weight);
+        } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
+            updateFontStyle = true;
+            auto fontStyle = ConvertStrToFontStyle(fontProp);
+            paintState_.SetFontStyle(fontStyle);
+            renderingContext2DModel_->SetFontStyle(fontStyle);
+        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
+            auto families = ConvertStrToFontFamilies(fontProp);
+            paintState_.SetFontFamilies(families);
+            renderingContext2DModel_->SetFontFamilies(families);
+        } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
+            Ace::Dimension size;
+            if (fontProp.find("vp") != std::string::npos) {
+                size = GetDimensionValue(fontProp);
+            } else {
+                std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
+                size = Ace::Dimension(StringUtils::StringToDouble(fontProp));
+            }
+            paintState_.SetFontSize(size);
+            renderingContext2DModel_->SetFontSize(size);
+        }
+    }
+    if (!updateFontStyle) {
+        renderingContext2DModel_->SetFontStyle(Ace::FontStyle::NORMAL);
+    }
+    if (!updateFontweight) {
+        renderingContext2DModel_->SetFontWeight(Ace::FontWeight::NORMAL);
+    }
+}
+void CanvasRendererPeerImpl::SetTextAlign(const std::string& alignStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    static const LinearMapNode<TextAlign> textAlignTable[] = {
+        { "center", TextAlign::CENTER },
+        { "end", TextAlign::END },
+        { "left", TextAlign::LEFT },
+        { "right", TextAlign::RIGHT },
+        { "start", TextAlign::START },
+    };
+    auto align = ConvertStrToEnum(alignStr.c_str(), textAlignTable, ArraySize(textAlignTable), TextAlign::CENTER);
+    paintState_.SetTextAlign(align);
+    renderingContext2DModel_->SetTextAlign(align);
+}
+void CanvasRendererPeerImpl::SetTextBaseline(const std::string& baselineStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    static const LinearMapNode<TextBaseline> BASELINE_TABLE[] = {
+        { "alphabetic", TextBaseline::ALPHABETIC },
+        { "bottom", TextBaseline::BOTTOM },
+        { "hanging", TextBaseline::HANGING },
+        { "ideographic", TextBaseline::IDEOGRAPHIC },
+        { "middle", TextBaseline::MIDDLE },
+        { "top", TextBaseline::TOP },
+    };
+    auto baseline =
+        ConvertStrToEnum(baselineStr.c_str(), BASELINE_TABLE, ArraySize(BASELINE_TABLE), TextBaseline::ALPHABETIC);
+    paintState_.SetTextBaseline(baseline);
+    renderingContext2DModel_->SetTextBaseline(baseline);
+}
+// inheritance
+void CanvasRendererPeerImpl::ResetPaintState()
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
+        // The default value of the font size in canvas is 14px.
+        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+    } else {
+        paintState_ = PaintState();
+    }
+    std::vector<PaintState>().swap(savePaintState_);
+    isInitializeShadow_ = false;
+    isOffscreenInitializeShadow_ = false;
+}
+void CanvasRendererPeerImpl::SetAntiAlias()
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetAntiAlias(anti_);
+}
+void CanvasRendererPeerImpl::SetDensity()
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    double density = GetDensity(true);
+    renderingContext2DModel_->SetDensity(density);
+}
+std::string CanvasRendererPeerImpl::ToDataURL(
+    const std::optional<std::string>& optType, const std::optional<float>& optQuality)
+{
+    CHECK_NULL_RETURN(renderingContext2DModel_, ERROR_STRING);
+    std::string type;
+    double quality = DEFAULT_QUALITY;
+    if (optType) {
+        type = optType.value();
+    }
+    if (optQuality && IfJudgeSpecialValue(optQuality.value())) {
+        quality = optQuality.value();
+    }
+    return renderingContext2DModel_->ToDataURL(type, quality);
+}
+// private
+void CanvasRendererPeerImpl::ExtractInfoToImage(Ace::CanvasImage& image, const DrawImageParam& params, bool isImage)
+{
+    double density = GetDensity();
+    switch (params.size) {
+        case SizeParam::TWO_ARGS:
+            image.flag = IMAGE_FLAG_0;
+            GetDoubleArg(image.dx, params.dx);
+            GetDoubleArg(image.dy, params.dy);
+            image.dx *= density;
+            image.dy *= density;
+            break;
+        // 5 parameters: drawImage(image, dx, dy, dWidth, dHeight)
+        case SizeParam::FOUR_ARGS:
+            image.flag = IMAGE_FLAG_1;
+            GetDoubleArg(image.dx, params.dx);
+            GetDoubleArg(image.dy, params.dy);
+            GetDoubleArg(image.dWidth, params.dWidth);
+            GetDoubleArg(image.dHeight, params.dHeight);
+            image.dx *= density;
+            image.dy *= density;
+            image.dWidth *= density;
+            image.dHeight *= density;
+            break;
+        // 9 parameters: drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+        case SizeParam::EIGHT_ARGS:
+            image.flag = IMAGE_FLAG_2;
+            GetDoubleArg(image.sx, params.sx);
+            GetDoubleArg(image.sy, params.sy);
+            GetDoubleArg(image.sWidth, params.sWidth);
+            GetDoubleArg(image.sHeight, params.sHeight);
+            GetDoubleArg(image.dx, params.dx);
+            GetDoubleArg(image.dy, params.dy);
+            GetDoubleArg(image.dWidth, params.dWidth);
+            GetDoubleArg(image.dHeight, params.dHeight);
+            // In higher versions, sx, sy, sWidth, sHeight are parsed in VP units
+            // In lower versions, sx, sy, sWidth, sHeight are parsed in PX units
+            if (isImage || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+                image.sx *= density;
+                image.sy *= density;
+                image.sWidth *= density;
+                image.sHeight *= density;
+            }
+            image.dx *= density;
+            image.dy *= density;
+            image.dWidth *= density;
+            image.dHeight *= density;
+            break;
+        default:
+            break;
+    }
 }
 Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
 {
-    Dimension dimension = StringUtils::StringToDimension(str);
+    return (StringUtils::StringToDimension(str));
+}
+Dimension CanvasRendererPeerImpl::GetDimensionValue(const Dimension& dimension)
+{
     if ((dimension.Unit() == DimensionUnit::NONE) || (dimension.Unit() == DimensionUnit::PX)) {
         return Dimension(dimension.Value());
     }
@@ -448,326 +1049,42 @@ Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
     }
     return Dimension(0.0);
 }
-void CanvasRendererPeerImpl::SetFont(std::string fontStr)
+Ace::Pattern CanvasRendererPeerImpl::GetPattern(unsigned int id)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetFont pattern not bound to component.");
+    if (id < 0 || id >= pattern_.size()) {
+        return Ace::Pattern();
+    }
+    return *(pattern_[id].get());
+}
+std::shared_ptr<Ace::Pattern> CanvasRendererPeerImpl::GetPatternPtr(int32_t id)
+{
+    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
+        return std::shared_ptr<Ace::Pattern>();
+    }
+    return pattern_[id];
+}
+void CanvasRendererPeerImpl::ParseImageData(Ace::ImageData& imageData, const PutImageDataParam& params)
+{
+    if (params.x) {
+        imageData.x = static_cast<int32_t>(GetDimensionValue(*params.x).Value());
+    }
+    if (params.y) {
+        imageData.y = static_cast<int32_t>(GetDimensionValue(*params.y).Value());
+    }
+    if (params.size != SizeParam::SIX_ARGS) {
         return;
     }
-    bool updateFontweight = false;
-    bool updateFontStyle = false;
-    std::vector<std::string> fontProps;
-    StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
-    for (const auto& fontProp : fontProps) {
-        if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
-            updateFontweight = true;
-            auto weight = StringUtils::StringToFontWeight(fontProp, Ace::FontWeight::NORMAL);
-            pattern_->UpdateFontWeight(weight);
-        } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
-            updateFontStyle = true;
-            auto fontStyle =
-                fontProp == DOM_TEXT_FONT_STYLE_ITALIC ? OHOS::Ace::FontStyle::ITALIC : Ace::FontStyle::NORMAL;
-            pattern_->UpdateFontStyle(fontStyle);
-        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
-            std::vector<std::string> fontFamilies;
-            std::stringstream stream(fontProp);
-            std::string fontFamily;
-            while (getline(stream, fontFamily, ',')) {
-                fontFamilies.emplace_back(fontFamily);
-            }
-            pattern_->UpdateFontFamilies(fontFamilies);
-        } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
-            Dimension size;
-            if (fontProp.find("vp") != std::string::npos) {
-                size = GetDimensionValue(fontProp);
-            } else {
-                std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
-                size = Dimension(StringUtils::StringToDouble(fontProp));
-            }
-            if (size.IsNonNegative()) {
-                pattern_->UpdateFontSize(size);
-            }
-        }
+    if (params.dirtyX) {
+        imageData.dirtyX = static_cast<int32_t>(GetDimensionValue(*params.dirtyX).Value());
     }
-    if (!updateFontStyle) {
-        pattern_->UpdateFontStyle(Ace::FontStyle::NORMAL);
+    if (params.dirtyY) {
+        imageData.dirtyY = static_cast<int32_t>(GetDimensionValue(*params.dirtyY).Value());
     }
-    if (!updateFontweight) {
-        pattern_->UpdateFontWeight(Ace::FontWeight::NORMAL);
+    if (params.dirtyWidth) {
+        imageData.dirtyWidth = static_cast<int32_t>(GetDimensionValue(*params.dirtyWidth).Value());
     }
-}
-std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateLinearGradient(
-    const double x0, const double y0, const double x1, const double y1)
-{
-    double density = GetDensity();
-    auto gradient = std::make_shared<OHOS::Ace::Gradient>();
-    gradient->SetType(OHOS::Ace::GradientType::LINEAR);
-    gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
-    gradient->SetEndOffset(Offset(x1 * density, y1 * density));
-    return gradient;
-}
-std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateRadialGradient(const std::vector<double> params)
-{
-    double density = GetDensity();
-    auto gradient = std::make_shared<OHOS::Ace::Gradient>();
-    auto x0 = params[0];
-    auto y0 = params[1];
-    auto r0 = params[2];
-    auto x1 = params[3];
-    auto y1 = params[4];
-    auto r1 = params[5];
-    gradient->SetType(OHOS::Ace::GradientType::RADIAL);
-    gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
-    gradient->SetEndOffset(Offset(x1 * density, y1 * density));
-    gradient->SetInnerRadius(r0 * density);
-    gradient->SetOuterRadius(r1 * density);
-    return gradient;
-}
-std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient(
-    const double startAngle, const double x, const double y)
-{
-    double density = GetDensity();
-    auto gradient = std::make_shared<OHOS::Ace::Gradient>();
-    gradient->SetType(OHOS::Ace::GradientType::CONIC);
-    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (MATH_2_PI))));
-    gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
-    gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
-    return gradient;
-}
-void CanvasRendererPeerImpl::ClearImageData()
-{
-    imageData.x = 0;
-    imageData.y = 0;
-    imageData.dirtyX = 0;
-    imageData.dirtyY = 0;
-    imageData.dirtyWidth = 0;
-    imageData.dirtyHeight = 0;
-    imageData.data.clear();
-    imageData.pixelMap = nullptr;
-}
-Ace::ImageSize CanvasRendererPeerImpl::GetImageSize(
-    const double& x, const double& y, const double& width, const double& height)
-{
-    Ace::ImageSize imageSize;
-    double density = GetDensity();
-    imageSize.left = x * density + DIFF;
-    imageSize.top = y * density + DIFF;
-    imageSize.width = width * density + DIFF;
-    imageSize.height = height * density + DIFF;
-    return imageSize;
-}
-std::unique_ptr<Ace::ImageData> CanvasRendererPeerImpl::GetImageData(const ImageSize& imageSize)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::GetImageData pattern not bound to component.");
-        return nullptr;
+    if (params.dirtyHeight) {
+        imageData.dirtyHeight = static_cast<int32_t>(GetDimensionValue(*params.dirtyHeight).Value());
     }
-    return pattern_->GetImageData(imageSize.left, imageSize.top, imageSize.width, imageSize.height);
-}
-void CanvasRendererPeerImpl::GetPixelMap(const ImageSize& imageSize)
-{
-#ifdef PIXEL_MAP_SUPPORTED
-    LOGE("ARKOALA CanvasRendererPeerImpl::GetPixelMap not implemented because PixelMap not implemented.");
-#endif
-}
-double CanvasRendererPeerImpl::GetDimension(const Dimension& dimension, const bool force)
-{
-    auto value = dimension.Value();
-    if (force) {
-        return value;
-    }
-    double density = GetDensity();
-    return value * density + DIFF;
-}
-void CanvasRendererPeerImpl::ParseImageData(const ImageSizeExt& ext)
-{
-    if (ext.x) {
-        imageData.x = static_cast<int32_t>(*ext.x);
-    }
-    if (ext.y) {
-        imageData.y = static_cast<int32_t>(*ext.y);
-    }
-    if (ext.dirtyX) {
-        imageData.dirtyX = static_cast<int32_t>(*ext.dirtyX);
-    }
-    if (ext.dirtyY) {
-        imageData.dirtyY = static_cast<int32_t>(*ext.dirtyY);
-    }
-    if (ext.dirtyWidth) {
-        imageData.dirtyWidth = static_cast<int32_t>(*ext.dirtyWidth);
-    }
-    if (ext.dirtyHeight) {
-        imageData.dirtyHeight = static_cast<int32_t>(*ext.dirtyHeight);
-    }
-}
-void CanvasRendererPeerImpl::PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::PutImageData pattern not bound to component.");
-        return;
-    }
-    auto finalWidth = static_cast<int32_t>(std::abs(src.dirtyWidth));
-    auto finalHeight = static_cast<int32_t>(std::abs(src.dirtyHeight));
-    ClearImageData();
-    imageData.dirtyWidth = finalWidth;
-    imageData.dirtyHeight = finalHeight;
-    ParseImageData(ext);
-    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, finalWidth)
-                                                : std::min(finalWidth - imageData.dirtyX, imageData.dirtyWidth);
-    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, finalHeight)
-                                                 : std::min(finalHeight - imageData.dirtyY, imageData.dirtyHeight);
-    auto size = static_cast<uint32_t>(src.data.size());
-    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
-        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
-            uint32_t idx = static_cast<uint32_t>(j + finalWidth * i);
-            if (size > idx) {
-                imageData.data.emplace_back(src.data[idx]);
-            }
-        }
-    }
-    pattern_->PutImageData(imageData);
-}
-std::optional<OHOS::Ace::TextMetrics> CanvasRendererPeerImpl::GetTextMetrics(const std::string& text)
-{
-    std::optional<OHOS::Ace::TextMetrics> textMetrics = std::nullopt;
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::GetTextMetrics pattern not bound to component.");
-        return textMetrics;
-    }
-    auto density = GetDensity();
-    if (NonPositive(density) || density == 0) {
-        return textMetrics;
-    }
-    textMetrics = pattern_->MeasureTextMetrics(text, paintState_);
-    textMetrics->height /= density;
-    textMetrics->actualBoundingBoxLeft /= density;
-    textMetrics->actualBoundingBoxRight /= density;
-    textMetrics->actualBoundingBoxAscent /= density;
-    textMetrics->actualBoundingBoxDescent /= density;
-    textMetrics->hangingBaseline /= density;
-    textMetrics->alphabeticBaseline /= density;
-    textMetrics->ideographicBaseline /= density;
-    textMetrics->emHeightAscent /= density;
-    textMetrics->emHeightDescent /= density;
-    textMetrics->fontBoundingBoxAscent /= density;
-    textMetrics->fontBoundingBoxDescent /= density;
-    return textMetrics;
-}
-std::optional<TransformParam> CanvasRendererPeerImpl::GetTransform()
-{
-    std::optional<TransformParam> param = std::nullopt;
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::GetTransform pattern not bound to component.");
-        return param;
-    }
-    param = pattern_->GetTransform();
-    return param;
-}
-void CanvasRendererPeerImpl::SetPixelMap(RefPtr<PixelMap> pixelMap)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetPixelMap pattern not bound to component.");
-        return;
-    }
-    OHOS::Ace::CanvasImage canvasImage;
-    pattern_->DrawPixelMap(pixelMap, canvasImage);
-}
-void CanvasRendererPeerImpl::SetImageSmoothingQuality(const std::string& quality)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetImageSmoothingQuality pattern not bound to component.");
-        return;
-    }
-    if (QUALITY_TYPE.find(quality) == QUALITY_TYPE.end()) {
-        return;
-    }
-    pattern_->UpdateSmoothingQuality(quality);
-}
-void CanvasRendererPeerImpl::SetLineCap(const std::string& capStr)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetLineCap pattern not bound to component.");
-        return;
-    }
-    auto cap = LineCapStyle::BUTT;
-    auto iter = LINE_CAP_MAP.find(capStr);
-    if (iter != LINE_CAP_MAP.end()) {
-        cap = iter->second;
-    }
-    pattern_->UpdateLineCap(cap);
-}
-void CanvasRendererPeerImpl::SetLineJoin(const std::string& joinStr)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetLineJoin pattern not bound to component.");
-        return;
-    }
-    auto join = LineJoinStyle::MITER;
-    auto iter = LINE_JOIN_MAP.find(joinStr);
-    if (iter != LINE_JOIN_MAP.end()) {
-        join = iter->second;
-    }
-    pattern_->UpdateLineJoin(join);
-}
-void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::Clip pattern not bound to component.");
-        return;
-    }
-    pattern_->UpdateFillRuleForPath(fillRule);
-    pattern_->Clip();
-}
-void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::Clip pattern not bound to component.");
-        return;
-    }
-    pattern_->UpdateFillRuleForPath(fillRule);
-    pattern_->Clip(path);
-}
-void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::Fill pattern not bound to component.");
-        return;
-    }
-    pattern_->UpdateFillRuleForPath(fillRule);
-    pattern_->Fill();
-}
-void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::Fill pattern not bound to component.");
-        return;
-    }
-    pattern_->UpdateFillRuleForPath(fillRule);
-    pattern_->Fill(path);
-}
-void CanvasRendererPeerImpl::SetTextDirection(const Ace::TextDirection& direction)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextDirection pattern not bound to component.");
-        return;
-    }
-    pattern_->SetTextDirection(direction);
-}
-
-void CanvasRendererPeerImpl::SetTextAlign(const TextAlign& align)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextAlign pattern not bound to component.");
-        return;
-    }
-    pattern_->UpdateTextAlign(align);
-}
-void CanvasRendererPeerImpl::SetTextBaseline(const TextBaseline& baseline)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextBaseline pattern not bound to component.");
-        return;
-    }
-    pattern_->UpdateTextBaseline(baseline);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
