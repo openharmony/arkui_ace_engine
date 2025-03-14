@@ -18,7 +18,6 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
-#include "common_method_modifier_impl.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components_ng/base/frame_node.h"
@@ -37,8 +36,15 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
+#include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/pan_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/pinch_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
+#include "core/interfaces/native/implementation/rotation_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/swipe_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "base/log/log_wrapper.h"
 
@@ -4054,35 +4060,47 @@ void FocusScopePriorityImpl(Ark_NativePointer node,
     auto optPriority = priority ? Converter::OptConvert<uint32_t>(*priority) : std::nullopt;
     ViewAbstract::SetFocusScopePriority(frameNode, convIdValue, optPriority);
 }
-void GestureImpl(Ark_NativePointer node,
-                 const Ark_GestureType* gesture,
-                 const Opt_GestureMask* mask)
+void GestureImplInternal(Ark_NativePointer node, const Ark_GestureType* gesture, const Opt_GestureMask* mask,
+    GesturePriority priority)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(gesture);
-    std::optional<GestureMask> maskOpt = mask ? Converter::OptConvert<GestureMask>(*mask) : std::nullopt;
-    CreateGesture(frameNode, gesture, maskOpt.value_or(GestureMask::Normal), GesturePriority::Low);
+
+    std::optional<RefPtr<Gesture>> aceGestureOpt;
+    Converter::VisitUnion(*gesture,
+        [&aceGestureOpt](const auto& gestureType) {
+            aceGestureOpt = gestureType->gesture;
+        },
+        []() {}
+    );
+    CHECK_NULL_VOID(aceGestureOpt);
+    auto aceGesture = aceGestureOpt.value();
+    auto gestureMask = (mask ?
+        Converter::OptConvert<GestureMask>(*mask) : std::nullopt).value_or(GestureMask::Normal);
+    aceGesture->SetGestureMask(gestureMask);
+    aceGesture->SetPriority(priority);
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    gestureEventHub->AddGesture(aceGesture);
+}
+void GestureImpl(Ark_NativePointer node,
+                 const Ark_GestureType* gesture,
+                 const Opt_GestureMask* mask)
+{
+    GestureImplInternal(node, gesture, mask, GesturePriority::Low);
 }
 void PriorityGestureImpl(Ark_NativePointer node,
                          const Ark_GestureType* gesture,
                          const Opt_GestureMask* mask)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(gesture);
-    std::optional<GestureMask> maskOpt = mask ? Converter::OptConvert<GestureMask>(*mask) : std::nullopt;
-    CreateGesture(frameNode, gesture, maskOpt.value_or(GestureMask::Normal), GesturePriority::High);
+    GestureImplInternal(node, gesture, mask, GesturePriority::High);
 }
 void ParallelGestureImpl(Ark_NativePointer node,
                          const Ark_GestureType* gesture,
                          const Opt_GestureMask* mask)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(gesture);
-    std::optional<GestureMask> maskOpt = mask ? Converter::OptConvert<GestureMask>(*mask) : std::nullopt;
-    CreateGesture(frameNode, gesture, maskOpt.value_or(GestureMask::Normal), GesturePriority::Parallel);
+    GestureImplInternal(node, gesture, mask, GesturePriority::Parallel);
 }
 void BlurImpl(Ark_NativePointer node,
               const Ark_Number* value,
