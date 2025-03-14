@@ -721,38 +721,28 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest019, TestSize.Level1)
 
 /**
  * @tc.name: DynamicPatternTest020
- * @tc.desc: Test CheckConstraint returns error when container is null or UIContentType is not
+ * @tc.desc: Test OnAttachContext with null context
  * @tc.type: FUNC
  */
 HWTEST_F(DynamicPatternTestNg, DynamicPatternTest020, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     /**
-     * @tc.steps: step1. Create DynamicPattern with invalid instanceId to get null container
+     * @tc.steps: step1. Create DynamicPattern and set initial instanceId.
      */
-    auto dynamicPattern = CreateDynamicComponent();
-    ASSERT_NE(dynamicPattern, nullptr);
-    // Force invalid instanceId
-    int32_t invalidInstanceId = -1;
-    dynamicPattern->SetHostInstanceId(invalidInstanceId);
+    auto pattern = AceType::MakeRefPtr<DynamicPattern>();
+    int oldInstanceId = 123;
+    pattern->instanceId_ = oldInstanceId;
 
     /**
-     * @tc.expected: CheckConstraint returns DC_INTERNAL_ERROR when container is null
+     * @tc.steps: step2. Call OnAttachContext with nullptr context.
      */
-    EXPECT_EQ(dynamicPattern->CheckConstraint(), DCResultCode::DC_INTERNAL_ERROR);
+    pattern->OnAttachContext(nullptr);
 
     /**
-     * @tc.steps: step2. Create valid container with unsupported UIContentType
+     * @tc.expected: instanceId_ remains unchanged.
      */
-    int32_t validInstanceId = 1;
-    dynamicPattern->SetHostInstanceId(validInstanceId);
-    auto container = Platform::AceContainer::GetOrCreateContainer(validInstanceId);
-    container->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
-
-    /**
-     * @tc.expected: CheckConstraint returns DC_NOT_SUPPORT_UI_CONTENT_TYPE
-     */
-    EXPECT_EQ(dynamicPattern->CheckConstraint(), DCResultCode::DC_NOT_SUPPORT_UI_CONTENT_TYPE);
+    EXPECT_EQ(pattern->instanceId_, oldInstanceId);
 #endif
 }
 } // namespace OHOS::Ace::NG
