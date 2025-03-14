@@ -18,6 +18,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_udmf.h"
+#include "core/common/task_executor_impl.h"
  
 #include "core/text/text_emoji_processor.h"
 #include "base/i18n/localization.h"
@@ -790,4 +791,163 @@ HWTEST_F(TextFieldPatternTestEight, OnDragDrop001, TestSize.Level0)
     func(dragEvent, str);
     EXPECT_FALSE(pattern_->releaseInDrop_);
 }
-} // namespace OHOS::Ace::NG
+
+/**
+ * @tc.name: HandleSingleClickEvent001
+ * @tc.desc: test HandleSingleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, HandleSingleClickEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->mouseStatus_ = MouseStatus::MOVE;
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+
+    auto tmpHost = pattern_->GetHost();
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+
+    GestureEvent info;
+    bool firstGetFocus = true;
+    pattern_->HandleSingleClickEvent(info, firstGetFocus);
+    EXPECT_EQ(paintProperty->GetInputStyleValue(InputStyle::DEFAULT), InputStyle::INLINE);
+
+    pattern_->mouseStatus_ = MouseStatus::NONE;
+    pattern_->selectOverlay_->isUsingMouse_ = false;
+    pattern_->needSelectAll_ = true;
+
+    pattern_->HandleSingleClickEvent(info, firstGetFocus);
+    EXPECT_EQ(paintProperty->GetInputStyleValue(InputStyle::DEFAULT), InputStyle::INLINE);
+}
+
+/**
+ * @tc.name: StopTwinkling001
+ * @tc.desc: test StopTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, StopTwinkling001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->cursorVisible_ = false;
+    pattern_->StopTwinkling();
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
+}
+
+/**
+ * @tc.name: ShowCaretAndStopTwinklingg001
+ * @tc.desc: test ShowCaretAndStopTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ShowCaretAndStopTwinkling001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->ShowCaretAndStopTwinkling();
+    EXPECT_TRUE(pattern_->cursorVisible_);
+}
+
+/**
+ * @tc.name: FilterInitializeText001
+ * @tc.desc: test FilterInitializeText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, FilterInitializeText001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+   
+    pattern_->showCountBorderStyle_ = true;
+    pattern_->isFilterChanged_ = true;
+
+    auto host = pattern_->GetHost();
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto func = [](const ChangeValueInfo& info) {
+        return false;
+    };
+    eventHub->onWillChangeEvent_ = func;
+    pattern_->FilterInitializeText();
+    EXPECT_FALSE(pattern_->isFilterChanged_);
+}
+
+/**
+ * @tc.name: HandleLongPress001
+ * @tc.desc: test HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, HandleLongPress001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    GestureEvent info;
+    FingerInfo finfo;
+    info.fingerList_.push_back(finfo);
+    pattern_->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern_);
+    pattern_->longPressFingerNum_ = 1;
+    pattern_->contentController_ = AceType::MakeRefPtr<ContentController>(pattern_);
+    std::u16string value = u"test";
+    pattern_->contentController_->SetTextValue(value);
+    pattern_->HandleLongPress(info);
+    EXPECT_TRUE(pattern_->magnifierController_->magnifierNodeExist_);
+}
+
+/**
+ * @tc.name: IsMouseOverScrollBar001
+ * @tc.desc: test IsMouseOverScrollBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, IsMouseOverScrollBar001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    BaseEventInfo* info = nullptr;
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF, ShapeMode::DEFAULT);
+    auto ret = pattern_->IsMouseOverScrollBar(info);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNode001
+ * @tc.desc: test OnDetachFromFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, OnDetachFromFrameNode001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    FrameNode* node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    pattern_->OnDetachFromFrameNode(node);
+    auto pipeline = pattern_->GetContext();
+    EXPECT_TRUE(AIWriteAdapter::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager()));
+
+    std::optional<int32_t> temp;
+    pattern_->surfaceChangedCallbackId_ = temp;
+    pattern_->surfacePositionChangedCallbackId_ = temp;
+    pattern_->OnDetachFromFrameNode(node);
+    EXPECT_TRUE(AIWriteAdapter::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager()));
+}
+} // namespace OHOS::Ace::NG,
