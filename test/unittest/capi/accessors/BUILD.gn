@@ -39,6 +39,7 @@ ace_unittest("capi_all_accessors_test") {
     "color_filter_accessor_test.cpp",
     "component_snapshot_accessor_test.cpp",
     "console_message_accessor_test.cpp",
+    "controller_handler_accessor_test.cpp",
     "custom_dialog_controller_accessor_test.cpp",
     "data_resubmission_handler_accessor_test.cpp",
     "date_picker_dialog_accessor_test.cpp",

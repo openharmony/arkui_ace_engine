@@ -31,11 +31,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebviewControllerAccessor {
 void DestroyPeerImpl(Ark_WebviewController peer)
 {
-    delete peer;
+    if (peer) {
+        peer->DecRefCount();
+    }
 }
 Ark_WebviewController CtorImpl()
 {
-    return new WebviewControllerPeer();
+    auto peer = Referenced::MakeRefPtr<WebviewControllerPeer>();
+    peer->IncRefCount();
+    return Referenced::RawPtr(peer);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
