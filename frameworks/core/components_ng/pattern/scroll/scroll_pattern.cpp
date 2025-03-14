@@ -1041,11 +1041,11 @@ void ScrollPattern::CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign
     auto nextElement = snapPaginations[length + 1];
     for (; length < size; length++) {
         element = snapPaginations[length];
-        nextElement = snapPaginations[length + 1];
         current = element.Unit() == DimensionUnit::PERCENT ? element.Value() * mainSize : element.ConvertToPx();
         if (length == size - 1) {
             next = extentMainSize;
         } else {
+            nextElement = snapPaginations[length + 1];
             next = nextElement.Unit() == DimensionUnit::PERCENT ? nextElement.Value() * mainSize
                                                                 : nextElement.ConvertToPx();
         }
