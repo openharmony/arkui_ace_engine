@@ -66,6 +66,16 @@ public:
     MOCK_METHOD(
         int32_t, StartAsyncDataRetrieval, (napi_env env, napi_value napiValue, const std::string& key), (override));
     MOCK_METHOD(int32_t, Cancel, (const std::string& key), (override));
+
+    MOCK_METHOD(void, SetTagProperty, (const RefPtr<UnifiedData>& unifiedData, const std::string& tag), (override));
+    MOCK_METHOD(std::string, GetPlainTextEntry, (const RefPtr<UnifiedData>& unifiedData), (override));
+    MOCK_METHOD(void, GetHtmlEntry,
+        (const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent), (override));
+    MOCK_METHOD(void, GetLinkEntry,
+        (const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description), (override));
+    MOCK_METHOD(
+        bool, GetFileUriEntry, (const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri), (override));
+    MOCK_METHOD(std::vector<uint8_t>, GetSpanStringEntry, (const RefPtr<UnifiedData>& unifiedData), (override));
 };
 class MockUnifiedData : public UnifiedData {
     DECLARE_ACE_TYPE(MockUnifiedData, UnifiedData);
