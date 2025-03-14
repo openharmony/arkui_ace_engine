@@ -15,6 +15,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
 
@@ -26,13 +27,13 @@ void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 }
 Ark_BaselineOffsetStyle CtorImpl(Ark_LengthMetrics value)
 {
-    RefPtr<BaselineOffsetSpan> span;
+    std::optional<Dimension> offset;
+    Dimension defaultOffset = Dimension(0, DimensionUnit::VP);
     if (value) {
-        auto offset = Converter::Convert<Dimension>(value);
-        span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset);
-    } else {
-        span = AceType::MakeRefPtr<BaselineOffsetSpan>();
+        offset = Converter::OptConvert<Dimension>(value);
+        Validator::ValidateNonPercent(offset);
     }
+    RefPtr<BaselineOffsetSpan> span = AceType::MakeRefPtr<BaselineOffsetSpan>(offset.value_or(defaultOffset));
     return new BaselineOffsetStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()

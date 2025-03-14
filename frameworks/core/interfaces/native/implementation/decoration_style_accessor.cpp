@@ -44,8 +44,9 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->span, {});
+    auto invalidValue = static_cast<Ark_TextDecorationType>(-1);
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
     auto value = Converter::ArkValue<Ark_TextDecorationType>(peer->span->GetTextDecorationType());
     return value;
 }
@@ -55,10 +56,11 @@ Ark_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
 }
 Ark_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->span, {});
+    auto invalidValue = static_cast<Ark_TextDecorationStyle>(-1);
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
     auto optValue = peer->span->GetTextDecorationStyle();
-    CHECK_NULL_RETURN(optValue.has_value(), {});
+    CHECK_NULL_RETURN(optValue.has_value(), invalidValue);
     auto value = Converter::ArkValue<Ark_TextDecorationStyle>(optValue.value());
     return value;
 }
