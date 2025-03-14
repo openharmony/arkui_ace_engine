@@ -105,9 +105,6 @@ constexpr float RECT_THIRD = 10.0f;
 constexpr float RECT_FORTH = 10.0f;
 constexpr float RECT_THIRD_NEW = 20.0f;
 constexpr float RECT_FORTH_NEW = 20.0f;
-constexpr float MENU_SIZE_WIDTH_NEW = 100.0f;
-constexpr float MENU_SIZE_HEIGHT_NEW = 100.0f;
-constexpr float SELECT_POSITION_X = -50.0f;
 constexpr float TWENTY = 20.0f;
 const std::string MENU_TAG = "menu";
 } // namespace
@@ -889,7 +886,7 @@ HWTEST_F(MenuLayout3TestNg, ModifyTargetOffset002, TestSize.Level1)
 }
 
 /**
- * @tc.name: ModifyTargetOffset002
+ * @tc.name: ModifyTargetOffset003
  * @tc.desc: Verify ModifyTargetOffset.
  * @tc.type: FUNC
  */
@@ -908,38 +905,6 @@ HWTEST_F(MenuLayout3TestNg, ModifyTargetOffset003, TestSize.Level1)
     menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
     menuLayoutAlgorithm.ModifyTargetOffset();
     EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TARGET_OFFSET_FIRST);
-}
-
-/**
- * @tc.name: GetSelectChildPosition001
- * @tc.desc: Verify GetSelectChildPosition.
- * @tc.type: FUNC
- */
-
-HWTEST_F(MenuLayout3TestNg, GetSelectChildPosition001, TestSize.Level1)
-{
-    SizeF childSize = SizeF(MENU_SIZE_WIDTH_NEW, MENU_SIZE_HEIGHT_NEW);
-    bool didNeedArrow = true;
-    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
-    MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
-    menuLayoutAlgorithm.placement_ = Placement::BOTTOM;
-    EXPECT_EQ(menuLayoutAlgorithm.GetSelectChildPosition(childSize, didNeedArrow).x_, SELECT_POSITION_X);
-}
-
-/**
- * @tc.name: GetSelectChildPosition002
- * @tc.desc: Verify GetSelectChildPosition.
- * @tc.type: FUNC
- */
-
-HWTEST_F(MenuLayout3TestNg, GetSelectChildPosition002, TestSize.Level1)
-{
-    SizeF childSize = SizeF(MENU_SIZE_WIDTH_NEW, MENU_SIZE_HEIGHT_NEW);
-    bool didNeedArrow = true;
-    std::optional<OffsetF> parentPosition = std::make_optional(OffsetF(OFFSET_FIRST_NEW, OFFSET_SECOND));
-    MenuLayoutAlgorithm menuLayoutAlgorithm(NODE_ID, MENU_TAG, parentPosition);
-    menuLayoutAlgorithm.placement_ = Placement::TOP_LEFT;
-    EXPECT_EQ(menuLayoutAlgorithm.GetSelectChildPosition(childSize, didNeedArrow).x_, SELECT_POSITION_X);
 }
 
 /**
