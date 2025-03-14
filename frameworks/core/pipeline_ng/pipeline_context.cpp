@@ -2198,7 +2198,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "origin positionY: %{public}f, height %{public}f", positionY, height);
 
-        float positionYWithOffset = positionY;
         float keyboardOffset = manager ? manager->GetClickPositionOffset() :
             context->safeAreaManager_->GetKeyboardOffset();
         float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
@@ -2216,10 +2215,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use origin arg from the window");
         } else if (manager->GetIfFocusTextFieldIsInline()) {
             manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
-            positionYWithOffset = positionY;
+            positionY -= keyboardOffset;
         } else if (!NearEqual(positionY, currentPos) && !context->IsEnableKeyBoardAvoidMode()) {
             positionY = currentPos;
-            positionYWithOffset = currentPos;
             height = manager->GetHeight();
         }
 
@@ -2228,7 +2226,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         }
         auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         float newKeyboardOffset = context->CalcNewKeyboardOffset(keyboardHeight,
-            positionYWithOffset, height, rootSize, onFocusField && manager->GetIfFocusTextFieldIsInline());
+            positionY, height, rootSize, onFocusField && manager->GetIfFocusTextFieldIsInline());
         if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
             manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId()) {
             context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
