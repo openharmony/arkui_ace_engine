@@ -362,4 +362,270 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg005, TestSize.L
     sessionCallbacks->transferExtensionDataFunc_(params);
     EXPECT_NE(sessionCallbacks->transferExtensionDataFunc_, nullptr);
 }
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg006
+ * @tc.desc: Test the method InitNotifyRemoteReadyFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg006, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+    sessionWrapper->InitNotifyRemoteReadyFunc();
+    
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    EXPECT_NE(sessionWrapper->session_, nullptr);
+    EXPECT_NE(sessionWrapper->taskExecutor_, nullptr);
+    sessionWrapper->InitNotifyRemoteReadyFunc();
+
+    auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pattern));
+    sessionWrapper->hostPattern_ = weak;
+
+    sessionWrapper->taskExecutor_ = nullptr;
+    sessionWrapper->InitNotifyRemoteReadyFunc();
+    sessionCallbacks->notifyRemoteReadyFunc_();
+    EXPECT_NE(sessionCallbacks->notifyRemoteReadyFunc_, nullptr);
+    
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    sessionWrapper->InitNotifyRemoteReadyFunc();
+    sessionCallbacks->notifyRemoteReadyFunc_();
+    EXPECT_NE(sessionCallbacks->notifyRemoteReadyFunc_, nullptr);
+
+    sessionWrapper->session_->persistentId_ = 0;
+    sessionWrapper->InitNotifyRemoteReadyFunc();
+    sessionCallbacks->notifyRemoteReadyFunc_();
+    EXPECT_NE(sessionCallbacks->notifyRemoteReadyFunc_, nullptr);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg007
+ * @tc.desc: Test the method InitNotifySyncOnFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg007, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+    sessionWrapper->InitNotifySyncOnFunc();
+    
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    EXPECT_NE(sessionWrapper->session_, nullptr);
+    EXPECT_NE(sessionWrapper->taskExecutor_, nullptr);
+    sessionWrapper->InitNotifySyncOnFunc();
+
+    auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pattern));
+    sessionWrapper->hostPattern_ = weak;
+
+    sessionWrapper->taskExecutor_ = nullptr;
+    sessionWrapper->InitNotifySyncOnFunc();
+    sessionCallbacks->notifySyncOnFunc_();
+    EXPECT_NE(sessionCallbacks->notifySyncOnFunc_, nullptr);
+    
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    sessionWrapper->InitNotifySyncOnFunc();
+    sessionCallbacks->notifySyncOnFunc_();
+    EXPECT_NE(sessionCallbacks->notifySyncOnFunc_, nullptr);
+
+    sessionWrapper->session_->persistentId_ = 0;
+    sessionWrapper->InitNotifySyncOnFunc();
+    sessionCallbacks->notifySyncOnFunc_();
+    EXPECT_NE(sessionCallbacks->notifySyncOnFunc_, nullptr);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg008
+ * @tc.desc: Test the method InitNotifyAsyncOnFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg008, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+    sessionWrapper->InitNotifyAsyncOnFunc();
+    
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    EXPECT_NE(sessionWrapper->session_, nullptr);
+    EXPECT_NE(sessionWrapper->taskExecutor_, nullptr);
+    sessionWrapper->InitNotifyAsyncOnFunc();
+
+    auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pattern));
+    sessionWrapper->hostPattern_ = weak;
+
+    sessionWrapper->taskExecutor_ = nullptr;
+    sessionWrapper->InitNotifyAsyncOnFunc();
+    sessionCallbacks->notifyAsyncOnFunc_();
+    EXPECT_NE(sessionCallbacks->notifyAsyncOnFunc_, nullptr);
+    
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    sessionWrapper->InitNotifyAsyncOnFunc();
+    sessionCallbacks->notifyAsyncOnFunc_();
+    EXPECT_NE(sessionCallbacks->notifyAsyncOnFunc_, nullptr);
+
+    sessionWrapper->session_->persistentId_ = 0;
+    sessionWrapper->InitNotifyAsyncOnFunc();
+    sessionCallbacks->notifyAsyncOnFunc_();
+    EXPECT_NE(sessionCallbacks->notifyAsyncOnFunc_, nullptr);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg009
+ * @tc.desc: Test the method InitNotifyBindModalFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg009, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+    sessionWrapper->InitNotifyBindModalFunc();
+    
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    EXPECT_NE(sessionWrapper->session_, nullptr);
+    EXPECT_NE(sessionWrapper->taskExecutor_, nullptr);
+    sessionWrapper->InitNotifyBindModalFunc();
+
+    auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pattern));
+    sessionWrapper->hostPattern_ = weak;
+
+    sessionWrapper->taskExecutor_ = nullptr;
+    sessionWrapper->InitNotifyBindModalFunc();
+    sessionCallbacks->notifyBindModalFunc_();
+    EXPECT_NE(sessionCallbacks->notifyBindModalFunc_, nullptr);
+    
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    sessionWrapper->InitNotifyBindModalFunc();
+    sessionCallbacks->notifyBindModalFunc_();
+    EXPECT_NE(sessionCallbacks->notifyBindModalFunc_, nullptr);
+
+    sessionWrapper->session_->persistentId_ = 0;
+    sessionWrapper->InitNotifyBindModalFunc();
+    sessionCallbacks->notifyBindModalFunc_();
+    EXPECT_NE(sessionCallbacks->notifyBindModalFunc_, nullptr);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg010
+ * @tc.desc: Test the method InitNotifyGetAvoidAreaByTypeFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg010, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+    sessionWrapper->InitNotifyGetAvoidAreaByTypeFunc();
+    
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    EXPECT_NE(sessionWrapper->session_, nullptr);
+    sessionWrapper->InitNotifyGetAvoidAreaByTypeFunc();
+
+    auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
+    Rosen::AvoidAreaType type = Rosen::AvoidAreaType::TYPE_SYSTEM;
+    int32_t apiVersion = 12;
+    int32_t instanceId = 100;
+    sessionWrapper->instanceId_ = 100;
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    Rosen::AvoidArea avoidArea = container->GetAvoidAreaByType(type, apiVersion);
+
+    sessionWrapper->InitNotifyGetAvoidAreaByTypeFunc();
+    auto ret = sessionCallbacks->notifyGetAvoidAreaByTypeFunc_(type, apiVersion);
+    EXPECT_EQ(ret, avoidArea);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg011
+ * @tc.desc: Test the method InitNotifyExtensionEventFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg011, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+    sessionWrapper->InitNotifyExtensionEventFunc();
+    
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    EXPECT_NE(sessionWrapper->session_, nullptr);
+    EXPECT_NE(sessionWrapper->taskExecutor_, nullptr);
+    sessionWrapper->InitNotifyExtensionEventFunc();
+
+    uint32_t eventId = 100;
+    auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pattern));
+    sessionWrapper->hostPattern_ = weak;
+
+    sessionWrapper->taskExecutor_ = nullptr;
+    sessionWrapper->InitNotifyExtensionEventFunc();
+    sessionCallbacks->notifyExtensionEventFunc_(eventId);
+    EXPECT_NE(sessionCallbacks->notifyExtensionEventFunc_, nullptr);
+    
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    sessionWrapper->InitNotifyExtensionEventFunc();
+    sessionCallbacks->notifyExtensionEventFunc_(eventId);
+    EXPECT_NE(sessionCallbacks->notifyExtensionEventFunc_, nullptr);
+
+    sessionWrapper->session_->persistentId_ = 0;
+    sessionWrapper->InitNotifyExtensionEventFunc();
+    sessionCallbacks->notifyExtensionEventFunc_(eventId);
+    EXPECT_NE(sessionCallbacks->notifyExtensionEventFunc_, nullptr);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg012
+ * @tc.desc: Test the method InitGetStatusBarHeightFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg012, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_EQ(sessionWrapper->session_, nullptr);
+    sessionWrapper->InitGetStatusBarHeightFunc();
+    
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    EXPECT_NE(sessionWrapper->session_, nullptr);
+    sessionWrapper->InitGetStatusBarHeightFunc();
+
+    auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
+    int32_t instanceId = 100;
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    auto getStatusBarHeight = container->GetStatusBarHeight();
+
+    sessionWrapper->InitGetStatusBarHeightFunc();
+    auto ret = sessionCallbacks->getStatusBarHeightFunc_();
+    EXPECT_EQ(ret, getStatusBarHeight);
+}
 } // namespace OHOS::Ace::NG
