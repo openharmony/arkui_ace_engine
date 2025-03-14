@@ -608,10 +608,6 @@ public:
         return customNode_.Upgrade();
     }
 
-    void SetActiveSetting(bool active)
-    {
-        activeSetting_ = active;
-    }
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
     float GetSelectMenuWidthFromTheme() const;
@@ -622,7 +618,7 @@ public:
     void RemoveLastNodeDivider(const RefPtr<UINode>& lastNode);
     void UpdateMenuItemDivider();
     void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);
-    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -747,7 +743,7 @@ private:
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
     bool needHideAfterTouch_ = true;
-    bool activeSetting_ = false;
+
     std::optional<OffsetF> lastPosition_;
     std::optional<Placement> lastPlacement_;
     OffsetF originOffset_;

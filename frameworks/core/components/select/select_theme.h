@@ -662,17 +662,6 @@ public:
         return secondaryFontColor_;
     }
 
-    const Color& GetLabelColor() const
-    {
-        return labelColor_;
-    }
-
-    void SetLabelColor(const Color& value)
-    {
-        labelColor_ = value;
-    }
-
-
     const std::string& GetFontFamily() const
     {
         return fontFamily_;
@@ -1503,7 +1492,7 @@ private:
     Color disabledColor_;
     Color clickedColor_;
     Color selectedColor_;
-    Color labelColor_;
+
     Color backgroundColor_ = Color::WHITE;
     Color backgroundColorButton_ = Color::WHITE;
     Color disabledBackgroundColor_;
