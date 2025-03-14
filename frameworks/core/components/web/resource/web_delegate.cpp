@@ -4697,6 +4697,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
         .SetEventCategory(Recorder::EventCategory::CATEGORY_WEB)
         .SetEventType(eventType)
         .SetText(param)
+        .SetExtra("active", pattern->GetActiveStatus() ? "true" : "false")
         .SetHost(host)
         .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
