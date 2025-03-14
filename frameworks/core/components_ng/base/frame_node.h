@@ -1283,6 +1283,28 @@ public:
     }
     bool CheckVisibleOrActive() override;
 
+    void SetPaintNode(const RefPtr<FrameNode>& paintNode)
+    {
+        paintNode_ = paintNode;
+    }
+
+    const RefPtr<FrameNode>& GetPaintNode() const
+    {
+        return paintNode_;
+    }
+
+    void SetFocusPaintNode(const RefPtr<FrameNode>& accessibilityFocusPaintNode)
+    {
+        accessibilityFocusPaintNode_ = accessibilityFocusPaintNode;
+    }
+
+    const RefPtr<FrameNode>& GetFocusPaintNode() const
+    {
+        return accessibilityFocusPaintNode_;
+    }
+
+    bool IsDrawFocusOnTop() const;
+
     void SetNeedLazyLayout(bool value)
     {
         layoutProperty_->SetNeedLazyLayout(value);
@@ -1530,6 +1552,10 @@ private:
     bool hasPositionZ_ = false;
 
     RefPtr<FrameNode> overlayNode_;
+
+    RefPtr<FrameNode> paintNode_;
+
+    RefPtr<FrameNode> accessibilityFocusPaintNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 

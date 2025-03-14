@@ -1488,6 +1488,9 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
             safeAreaManager->RemoveRestoreNode(WeakClaim(this));
         }
     }
+    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->OnAccessibilityDetachFromMainTree();
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -2385,6 +2388,9 @@ void FrameNode::RebuildRenderContextTree()
         if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
             children.push_back(overlayNode_);
         }
+    }
+    if (accessibilityFocusPaintNode_) {
+        children.push_back(accessibilityFocusPaintNode_);
     }
     for (const auto& child : children) {
         frameChildren_.emplace(child);
@@ -4618,17 +4624,11 @@ void FrameNode::UpdateAccessibilityNodeRect()
     if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         return;
     }
-    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
-    if (isFocus && !IsAccessibilityVirtualNode()) {
-        if (accessibilityProperty->IsMatchAccessibilityResponseRegion(false)) {
-            auto rectInt = accessibilityProperty->GetAccessibilityResponseRegionRect(false);
-            renderContext_->UpdateAccessibilityFocusRect(rectInt);
-        } else {
-            renderContext_->UpdateAccessibilityRoundRect();
-        }
-    }
+    auto context = GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto accessibilityManager = context->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->UpdateAccessibilityNodeRect(Claim(this));
 }
 
 bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
@@ -6556,5 +6556,12 @@ void FrameNode::FireFrameNodeDestructorCallback()
 const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 {
     return kitNode_;
+}
+
+bool FrameNode::IsDrawFocusOnTop() const
+{
+    auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return static_cast<FocusDrawLevel>(accessibilityProperty->GetFocusDrawLevel()) == FocusDrawLevel::TOP;
 }
 } // namespace OHOS::Ace::NG

@@ -20,7 +20,9 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_container_handler.h"
+#include "frameworks/core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #include "js_third_provider_interaction_operation.h"
 #include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
@@ -145,6 +147,51 @@ bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node)
 bool NeedUpdateChildrenOfAccessibilityElementInfo(const RefPtr<NG::UINode>& node)
 {
     return !IsDynamicComponent(node);
+}
+
+bool CheckChildIsAccessibilityFocus(const RefPtr<NG::UINode> &uiNode, RefPtr<NG::FrameNode> &focusFrameNode)
+{
+    CHECK_NULL_RETURN(uiNode, false);
+    auto nowFrameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (nowFrameNode) {
+        auto accessibilityProperty = nowFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty) {
+            auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
+            if (isFocus) {
+                focusFrameNode = nowFrameNode;
+                return true;
+            }
+        }
+    }
+    auto children = uiNode->GetChildren(true);
+    for (const auto& child : children) {
+        if (CheckChildIsAccessibilityFocus(child, focusFrameNode)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void UpdatePaintNodeRender(const RefPtr<NG::FrameNode>& focusNode)
+{
+    CHECK_NULL_VOID(focusNode);
+    ACE_SCOPED_TRACE("Node[%s] UpdatePaintNodeRender", focusNode->GetTag().c_str());
+    auto paintNode = focusNode->GetPaintNode();
+    CHECK_NULL_VOID(paintNode);
+    auto pattern = paintNode->GetPattern<NG::AccessibilityFocusPaintNodePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateRenderWithFocusNode();
+    auto renderContext = paintNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto accessibilityProperty = focusNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+
+    if (accessibilityProperty->IsMatchAccessibilityResponseRegion(false)) {
+        auto rectInt = accessibilityProperty->GetAccessibilityResponseRegionRect(false);
+        renderContext->UpdateAccessibilityFocusRect(rectInt);
+    } else {
+        renderContext->UpdateAccessibilityRoundRect();
+    }
 }
 
 Accessibility::EventType ConvertStrToEventType(const std::string& type)
@@ -2294,11 +2341,81 @@ bool ActLongClick(RefPtr<NG::FrameNode>& frameNode)
     return gesture->ActLongClick();
 }
 
+void CreateOrUpdateAccessibilityFocusPaint(const RefPtr<NG::FrameNode>& focusFrameNode)
+{
+    CHECK_NULL_VOID(focusFrameNode);
+    ACE_SCOPED_TRACE("CreateOrUpdateAccessibilityFocusPaint: targetNode[%s].", focusFrameNode->GetTag().c_str());
+    auto paintNode = NG::FrameNode::CreateFrameNode(V2::ACCESSIBILITY_FOCUS_PAINT_NODE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<NG::AccessibilityFocusPaintNodePattern>(focusFrameNode));
+    CHECK_NULL_VOID(paintNode);
+    auto pattern = paintNode->GetPattern<NG::AccessibilityFocusPaintNodePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateFocusNode(focusFrameNode);
+    auto renderContext = paintNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->OnZIndexUpdate(INT32_MAX);
+    renderContext->ResetAccessibilityFocusRect();
+    renderContext->UpdateAccessibilityFocus(true);
+
+    auto pipeline = focusFrameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    auto rootNode = AceType::DynamicCast<NG::FrameNode>(overlayManager->FindWindowScene(focusFrameNode));
+    CHECK_NULL_VOID(rootNode);
+    pattern->UpdateRootNode(rootNode);
+    rootNode->SetFocusPaintNode(paintNode);
+    rootNode->MarkNeedSyncRenderTree();
+    rootNode->RebuildRenderContextTree();
+}
+
+void RemoveAccessibilityFocusPaint(const RefPtr<NG::FrameNode>& focusFrameNode)
+{
+    CHECK_NULL_VOID(focusFrameNode);
+    ACE_SCOPED_TRACE("Node[%s] RemoveAccessibilityFocusPaint", focusFrameNode->GetTag().c_str());
+    auto paintNode = focusFrameNode->GetPaintNode();
+    CHECK_NULL_VOID(paintNode);
+    focusFrameNode->SetPaintNode(nullptr);
+    auto renderContext = paintNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateAccessibilityFocus(false);
+    auto pattern = paintNode->GetPattern<NG::AccessibilityFocusPaintNodePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto rootNode = AceType::DynamicCast<NG::FrameNode>(pattern->GetRootNode().Upgrade());
+    CHECK_NULL_VOID(rootNode);
+    rootNode->SetFocusPaintNode(nullptr);
+    rootNode->MarkNeedSyncRenderTree();
+    rootNode->RebuildRenderContextTree();
+}
+
+void PaintAccessibilityFocusNode(const RefPtr<NG::FrameNode>& focusNode, bool focus)
+{
+    CHECK_NULL_VOID(focusNode);
+    if (focusNode->IsDrawFocusOnTop()) {
+        if (focus) {
+            CreateOrUpdateAccessibilityFocusPaint(focusNode);
+            UpdatePaintNodeRender(focusNode);
+        } else {
+            RemoveAccessibilityFocusPaint(focusNode);
+        }
+    } else {
+        auto context = focusNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateAccessibilityFocus(focus);
+    }
+}
+
 void ClearAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int64_t focusNodeId)
 {
     auto oldFocusNode = GetFramenodeByAccessibilityId(root, focusNodeId);
     CHECK_NULL_VOID(oldFocusNode);
-    oldFocusNode->GetRenderContext()->UpdateAccessibilityFocus(false);
+    if (oldFocusNode->IsDrawFocusOnTop()) {
+        PaintAccessibilityFocusNode(oldFocusNode, false);
+    } else {
+        oldFocusNode->GetRenderContext()->UpdateAccessibilityFocus(false);
+    }
 }
 
 void UpdateAccessibilityFocusRect(const RefPtr<NG::FrameNode>& frameNode,
@@ -2315,7 +2432,7 @@ void UpdateAccessibilityFocusRect(const RefPtr<NG::FrameNode>& frameNode,
         if (isAccessibilityVirtualNode) {
             renderContext->UpdateAccessibilityFocus(true, frameNode->GetAccessibilityId());
         } else {
-            renderContext->UpdateAccessibilityFocus(true);
+            PaintAccessibilityFocusNode(frameNode, true);
         }
     } else {
         if (isAccessibilityVirtualNode) {
@@ -2326,7 +2443,7 @@ void UpdateAccessibilityFocusRect(const RefPtr<NG::FrameNode>& frameNode,
             renderContext->UpdateAccessibilityFocus(true, frameNode->GetAccessibilityId());
         } else {
             renderContext->ResetAccessibilityFocusRect();
-            renderContext->UpdateAccessibilityFocus(true);
+            PaintAccessibilityFocusNode(frameNode, true);
         }
     }
 }
@@ -2351,7 +2468,11 @@ bool ActAccessibilityFocus(int64_t elementId, const RefPtr<NG::FrameNode>& frame
         if (elementId != currentFocusNodeId) {
             return false;
         }
-        renderContext->UpdateAccessibilityFocus(false);
+        if (isAccessibilityVirtualNode) {
+            renderContext->UpdateAccessibilityFocus(false);
+        } else {
+            PaintAccessibilityFocusNode(frameNode, false);
+        }
         currentFocusNodeId = -1;
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, true);
@@ -6137,9 +6258,7 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     Register(false);
     if (currentFocusNodeId_ != -1 && lastElementId_ != -1) {
         auto focusNode = lastFrameNode_.Upgrade();
-        if (focusNode != nullptr) {
-            focusNode->GetRenderContext()->UpdateAccessibilityFocus(false);
-        }
+        PaintAccessibilityFocusNode(focusNode, false);
     }
     lastFrameNode_.Reset();
     lastElementId_ = -1;
@@ -7511,5 +7630,43 @@ AccessibilityParentRectInfo JsAccessibilityManager::GetTransformRectInfoRelative
     }
     rectInfo.rotateTransform = rotateData;
     return rectInfo;
+}
+
+void JsAccessibilityManager::UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
+    if (isFocus && !frameNode->IsAccessibilityVirtualNode() && !frameNode->IsDrawFocusOnTop()) {
+        if (accessibilityProperty->IsMatchAccessibilityResponseRegion(false)) {
+            auto rectInt = accessibilityProperty->GetAccessibilityResponseRegionRect(false);
+            renderContext->UpdateAccessibilityFocusRect(rectInt);
+        } else {
+            renderContext->UpdateAccessibilityRoundRect();
+        }
+    } else {
+        RefPtr<NG::FrameNode> focusFrameNode = nullptr;
+        auto checkflag = CheckChildIsAccessibilityFocus(frameNode, focusFrameNode);
+        if (checkflag && focusFrameNode && focusFrameNode->IsDrawFocusOnTop()) {
+            UpdatePaintNodeRender(focusFrameNode);
+        }
+    }
+}
+
+void JsAccessibilityManager::OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& focusNode)
+{
+    auto paintNode = focusNode->GetPaintNode();
+    CHECK_NULL_VOID(paintNode);
+    auto paintNodePattern = AceType::DynamicCast<NG::AccessibilityFocusPaintNodePattern>(paintNode->GetPattern());
+    CHECK_NULL_VOID(paintNodePattern);
+    auto currentFocusNode = paintNodePattern->GetFocusNode().Upgrade();
+    CHECK_NULL_VOID(currentFocusNode);
+    if (currentFocusNode->GetId() == focusNode->GetId()) {
+        paintNodePattern->OnDetachFromFocusNode();
+        RemoveAccessibilityFocusPaint(focusNode);
+    }
 }
 } // namespace OHOS::Ace::Framework

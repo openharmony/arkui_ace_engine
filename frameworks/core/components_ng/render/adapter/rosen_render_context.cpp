@@ -41,6 +41,7 @@
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/render/adapter/background_modifier.h"
@@ -2677,6 +2678,18 @@ void RosenRenderContext::UpdateAccessibilityRoundRect()
 
     auto node = GetHost();
     CHECK_NULL_VOID(node);
+    if (node->GetTag() == V2::ACCESSIBILITY_FOCUS_PAINT_NODE_TAG) {
+        auto paintNodePattern = AceType::DynamicCast<AccessibilityFocusPaintNodePattern>(node->GetPattern());
+        CHECK_NULL_VOID(paintNodePattern);
+        auto focusNode = paintNodePattern->GetFocusNode().Upgrade();
+        CHECK_NULL_VOID(focusNode);
+        auto pipeline = focusNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto rect = pipeline->GetRootRect();
+        std::shared_ptr<Rosen::RectF> drawRect =
+            std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+        UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, drawRect);
+    }
     auto nodeWidth = node->GetGeometryNode()->GetFrameSize().Width();
     auto nodeHeight = node->GetGeometryNode()->GetFrameSize().Height();
 
@@ -3638,8 +3651,11 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
     isFocusBoxGlow_ = isFocusBoxGlow;
     if (isAccessibilityFocus) {
         InitAccessibilityFocusModidifer(paintRect, paintColor, borderWidthPx);
-        UpdateDrawRegion(
-            DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
+        auto host = GetHost();
+        if (host && host->GetTag() != V2::ACCESSIBILITY_FOCUS_PAINT_NODE_TAG) {
+            UpdateDrawRegion(
+                DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
+        }
         rsNode_->AddModifier(accessibilityFocusStateModifier_);
         accessibilityFocusStateModifier_->AttachAnimationRectProperty();
         RequestNextFrame();
@@ -3970,6 +3986,13 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
         } else {
             child->SetDeleteRsNode(true);
             GetLiveChildren(child, childNodes);
+        }
+    }
+    auto accessibilityFocusPaintNode = node->GetFocusPaintNode();
+    if (accessibilityFocusPaintNode) {
+        childNodes.emplace_back(accessibilityFocusPaintNode);
+        if (accessibilityFocusPaintNode->HasPositionZ()) {
+            pipeline->AddPositionZNode(accessibilityFocusPaintNode->GetId());
         }
     }
     auto overlayNode = node->GetOverlayNode();
@@ -6414,6 +6437,7 @@ void RosenRenderContext::NotifyHostTransformUpdated(bool changed)
     CHECK_NULL_VOID(host);
     host->NotifyTransformInfoChanged();
     host->OnNodeTransformInfoUpdate(changed);
+    host->UpdateAccessibilityNodeRect();
 }
 
 void RosenRenderContext::SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate)
