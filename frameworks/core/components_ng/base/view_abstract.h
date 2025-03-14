@@ -172,12 +172,12 @@ public:
     static void SetBackgroundImageSyncMode(bool syncMode);
     static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
-    static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
-    static void SetMotionBlur(const MotionBlurOption &motionBlurOption);
-    static void SetBackgroundEffect(const EffectOption &effectOption);
+    static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
+    static void SetMotionBlur(const MotionBlurOption& motionBlurOption);
+    static void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
-    static void SetForegroundEffect(float radius);
-    static void SetForegroundBlurStyle(const BlurStyleOption &fgBlurStyle);
+    static void SetForegroundEffect(float radius, const SysOptions& sysOptions = SysOptions());
+    static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
     static void SetLightUpEffect(double radio);
@@ -239,14 +239,16 @@ public:
     static void SetBackgroundAlign(const Alignment &align);
 
     // decoration
-    static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
+    static void SetBackdropBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions());
     static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
     static void SetBgDynamicBrightness(const BrightnessOption& brightnessOption);
     static void SetFgDynamicBrightness(const BrightnessOption& brightnessOption);
     static void SetDynamicDim(float DimDegree);
-    static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
-    static void SetBackShadow(const Shadow &shadow);
+    static void SetFrontBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions());
+    static void SetBackShadow(const Shadow& shadow);
     static void SetBlendMode(BlendMode blendMode);
     static void SetBlendApplyType(BlendApplyType blendApplyType);
     static void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender);
@@ -576,8 +578,9 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
-    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
-    static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
+    static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption,
+        const SysOptions& sysOptions = SysOptions());
+    static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
@@ -585,7 +588,8 @@ public:
     static void SetGrayScale(FrameNode* frameNode, const Dimension& grayScale);
     static void SetContrast(FrameNode* frameNode, const Dimension& contrast);
     static void SetBrightness(FrameNode* frameNode, const Dimension& brightness);
-    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
+    static void SetFrontBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption,
+        const SysOptions& sysOptions = SysOptions());
     static void SetHueRotate(FrameNode* frameNode, float hueRotate);
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
@@ -598,11 +602,13 @@ public:
     static void SetHasBorderImageOutset(FrameNode* frameNode, bool tag);
     static void SetHasBorderImageRepeat(FrameNode* frameNode, bool tag);
     static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
-    static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
+    static void SetForegroundBlurStyle(
+        FrameNode* frameNode, const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetLinearGradientBlur(FrameNode* frameNode, const NG::LinearGradientBlurPara& blurPara);
     static void SetMagnifier(FrameNode* frameNode, const MagnifierParams& magnifierOffset);
     static void ReSetMagnifier(FrameNode* frameNode);
-    static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
+    static void SetBackgroundBlurStyle(
+        FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
@@ -671,9 +677,10 @@ public:
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
-    static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &motionBlurOption);
-    static void SetForegroundEffect(FrameNode* frameNode, float radius);
-    static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
+    static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption& motionBlurOption);
+    static void SetForegroundEffect(FrameNode* frameNode, float radius, const SysOptions& sysOptions = SysOptions());
+    static void SetBackgroundEffect(
+        FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
     static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);

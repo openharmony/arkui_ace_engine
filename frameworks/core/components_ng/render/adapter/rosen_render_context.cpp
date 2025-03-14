@@ -177,7 +177,7 @@ ColorMode GetResourceColorMode(PipelineContext* pipeline)
 }
 
 std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
-    const BlurStyleOption& blurStyleOption, PipelineContext* pipeline)
+    const BlurStyleOption& blurStyleOption, PipelineContext* pipeline, const SysOptions& sysOptions)
 {
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
@@ -197,7 +197,7 @@ std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
     auto saturation = (blurParam->saturation - 1) * ratio + 1.0;
     auto brightness = (blurParam->brightness - 1) * ratio + 1.0;
     return Rosen::RSFilter::CreateMaterialFilter(radiusBlur, saturation, brightness, maskColor.GetValue(),
-        static_cast<Rosen::BLUR_COLOR_MODE>(blurStyleOption.adaptiveColor));
+        static_cast<Rosen::BLUR_COLOR_MODE>(blurStyleOption.adaptiveColor), sysOptions.disableSystemAdaptation);
 }
 
 RSPen GetRsPen(uint32_t strokeColor, float strokeWidth)
@@ -908,16 +908,18 @@ void RosenRenderContext::SetBackBlurFilter()
     const auto& background = GetBackground();
     CHECK_NULL_VOID(background);
     const auto& blurStyleOption = background->propBlurStyleOption;
+    auto sysOptions = background->propSysOptions.value_or(SysOptions());
     std::shared_ptr<Rosen::RSFilter> backFilter;
     if (!blurStyleOption.has_value()) {
         const auto& radius = background->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
             float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
-            backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+            backFilter =
+                Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius, sysOptions.disableSystemAdaptation);
         }
     } else {
-        backFilter = CreateRSMaterialFilter(blurStyleOption.value(), context);
+        backFilter = CreateRSMaterialFilter(blurStyleOption.value(), context, sysOptions);
     }
     rsNode_->SetBackgroundFilter(backFilter);
 }
@@ -955,16 +957,18 @@ void RosenRenderContext::SetFrontBlurFilter()
     const auto& foreground = GetForeground();
     CHECK_NULL_VOID(foreground);
     const auto& blurStyleOption = foreground->propBlurStyleOption;
+    auto sysOptions = foreground->propSysOptionsForBlur.value_or(SysOptions());
     std::shared_ptr<Rosen::RSFilter> frontFilter;
     if (!blurStyleOption.has_value()) {
         const auto& radius = foreground->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
             float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
-            frontFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+            frontFilter =
+                Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius, sysOptions.disableSystemAdaptation);
         }
     } else {
-        frontFilter = CreateRSMaterialFilter(blurStyleOption.value(), context);
+        frontFilter = CreateRSMaterialFilter(blurStyleOption.value(), context, sysOptions);
     }
 
     rsNode_->SetFilter(frontFilter);
@@ -1003,11 +1007,12 @@ bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOpt
     return blurEnable;
 }
 
-void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
+void RosenRenderContext::UpdateBackBlurStyle(
+    const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckBlurStyleOption(bgBlurStyle)) {
+    if (groupProperty->CheckBlurStyleOption(bgBlurStyle) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
         // Same with previous value.
         // If colorMode is following system and has valid blurStyle, still needs updating
         if (bgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
@@ -1019,6 +1024,7 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
         }
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
+        groupProperty->propSysOptions = sysOptions;
     }
 
     if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
@@ -1028,14 +1034,16 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     SetBackBlurFilter();
 }
 
-void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+void RosenRenderContext::UpdateBackgroundEffect(
+    const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckEffectOption(effectOption)) {
+    if (groupProperty->CheckEffectOption(effectOption) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
         return;
     }
     groupProperty->propEffectOption = effectOption;
+    groupProperty->propSysOptions = sysOptions;
     if (!effectOption.has_value()) {
         return;
     }
@@ -1051,9 +1059,10 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
     if (effectOption->adaptiveColor == AdaptiveColor::AVERAGE) {
         fastAverage = Rosen::BLUR_COLOR_MODE::FASTAVERAGE;
     }
-    std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(backblurRadius,
-        static_cast<float>(effectOption->saturation), static_cast<float>(effectOption->brightness),
-        effectOption->color.GetValue(), static_cast<Rosen::BLUR_COLOR_MODE>(fastAverage));
+    std::shared_ptr<Rosen::RSFilter> backFilter =
+        Rosen::RSFilter::CreateMaterialFilter(backblurRadius, static_cast<float>(effectOption->saturation),
+            static_cast<float>(effectOption->brightness), effectOption->color.GetValue(),
+            static_cast<Rosen::BLUR_COLOR_MODE>(fastAverage), sysOptions.disableSystemAdaptation);
     rsNode_->SetBackgroundFilter(backFilter);
     if (effectOption->blurOption.grayscale.size() > 1) {
         Rosen::Vector2f grayScale(effectOption->blurOption.grayscale[0], effectOption->blurOption.grayscale[1]);
@@ -1061,11 +1070,12 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
     }
 }
 
-void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle)
+void RosenRenderContext::UpdateFrontBlurStyle(
+    const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckBlurStyleOption(fgBlurStyle)) {
+    if (groupProperty->CheckBlurStyleOption(fgBlurStyle) && groupProperty->CheckSysOptionsForBlurSame(sysOptions)) {
         // Same with previous value.
         // If colorMode is following system and has valid blurStyle, still needs updating
         if (fgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
@@ -1077,8 +1087,20 @@ void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOptio
         }
     } else {
         groupProperty->propBlurStyleOption = fgBlurStyle;
+        groupProperty->propSysOptionsForBlur = sysOptions;
     }
     SetFrontBlurFilter();
+}
+
+void RosenRenderContext::UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions)
+{
+    CHECK_NULL_VOID(rsNode_);
+    const auto& groupProperty = GetOrCreateForeground();
+    if (groupProperty->CheckSysOptionsForEffectSame(sysOptions)) {
+        return;
+    }
+    groupProperty->propSysOptionsForForeEffect = sysOptions;
+    rsNode_->SetForegroundEffectDisableSystemAdaptation(sysOptions.disableSystemAdaptation);
 }
 
 void RosenRenderContext::ResetBackBlurStyle()
@@ -4183,15 +4205,17 @@ void RosenRenderContext::UpdateMotionBlur(const MotionBlurOption& motionBlurOpti
     rsNode_->SetMotionBlurPara(motionBlurOption.radius, anchor);
 }
 
-void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)
+void RosenRenderContext::UpdateBackBlur(
+    const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckBlurRadiusChanged(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
         // Same with previous value
         return;
     }
     groupProperty->propBlurRadius = radius;
+    groupProperty->propSysOptions = sysOptions;
     SetBackBlurFilter();
     if (blurOption.grayscale.size() > 1) {
         Rosen::Vector2f grayScale(blurOption.grayscale[0], blurOption.grayscale[0]);
@@ -4227,15 +4251,17 @@ void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
     SetFrontBlurFilter();
 }
 
-void RosenRenderContext::UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption)
+void RosenRenderContext::UpdateFrontBlur(
+    const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckBlurRadiusChanged(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius) && groupProperty->CheckSysOptionsForBlurSame(sysOptions)) {
         // Same with previous value
         return;
     }
     groupProperty->propBlurRadius = radius;
+    groupProperty->propSysOptionsForBlur = sysOptions;
     SetFrontBlurFilter();
     if (blurOption.grayscale.size() > 1) {
         Rosen::Vector2f grayScale(blurOption.grayscale[0], blurOption.grayscale[1]);
@@ -5337,6 +5363,22 @@ void RosenRenderContext::DumpInfo()
         if (groupProperty->propEffectOption.has_value()) {
             auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();
             DumpLog::GetInstance().AddDesc(std::string("backgroundEffect:").append(backgroundEffect));
+        }
+        if (groupProperty->propSysOptions.has_value()) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("backDisable:")
+                    .append(std::to_string(groupProperty->propSysOptions->disableSystemAdaptation)));
+        }
+        const auto& foregroundProperty = GetOrCreateForeground();
+        if (foregroundProperty->propSysOptionsForBlur.has_value()) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("blurDisable:")
+                    .append(std::to_string(foregroundProperty->propSysOptionsForBlur->disableSystemAdaptation)));
+        }
+        if (foregroundProperty->propSysOptionsForForeEffect.has_value()) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("foreEffectDisable:")
+                    .append(std::to_string(foregroundProperty->propSysOptionsForForeEffect->disableSystemAdaptation)));
         }
         auto&& graphicProps = GetOrCreateGraphics();
         if (graphicProps->propFgDynamicBrightnessOption.has_value()) {

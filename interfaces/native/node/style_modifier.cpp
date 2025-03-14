@@ -1412,7 +1412,7 @@ int32_t SetBlur(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     ArkUI_Float64 blur = item->value[NUM_0].f32;
     BlurOption blurOption;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBlur(
-        node->uiNodeHandle, blur, blurOption.grayscale.data(), blurOption.grayscale.size());
+        node->uiNodeHandle, blur, blurOption.grayscale.data(), blurOption.grayscale.size(), true);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -10101,7 +10101,7 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     bool isValidColor = false;
     Color inactiveColor = Color::TRANSPARENT;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
-        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue());
+        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue(), true);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -10141,9 +10141,9 @@ int32_t SetForegroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
     BlurOption blurOption = {{grayScaleStart, grayScaleEnd}};
-    
+
     fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundBlurStyle(
-        node->uiNodeHandle, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
+        node->uiNodeHandle, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size(), true);
     return ERROR_CODE_NO_ERROR;
 }
 
