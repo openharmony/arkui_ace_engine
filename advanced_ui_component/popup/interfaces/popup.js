@@ -797,7 +797,7 @@ export class d1 extends ViewPU {
         }
         if (this.maxWidth !== undefined) {
             if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
-                p1 = px2vp(this.maxWidth);
+                p1 = this.maxWidth;
             }
             else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
                 p1 = c1;
