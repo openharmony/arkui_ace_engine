@@ -674,6 +674,30 @@ private:
     int32_t instanceId_ = -1;
 };
 
+class WaterfallModeChangeListener : public OHOS::Rosen::IWaterfallModeChangeListener {
+public:
+    explicit WaterfallModeChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~WaterfallModeChangeListener() = default;
+
+    void OnWaterfallModeChange(bool enable) override
+    {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "waterfall mode is changed, waterfallMode: %{public}d", enable);
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [instanceId = instanceId_, enable] {
+                SubwindowManager::GetInstance()->OnWaterfallModeChanged(instanceId, enable);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIWaterfallModeChanged");
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
 class FoldScreenListener : public OHOS::Rosen::DisplayManager::IFoldStatusListener {
 public:
     explicit FoldScreenListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -2067,6 +2091,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    waterfallModeChangeListener_ = new WaterfallModeChangeListener(instanceId_);
+    window_->RegisterWaterfallModeChangeListener(waterfallModeChangeListener_);
     foldStatusListener_ = new FoldScreenListener(instanceId_);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
     foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_);
@@ -2427,6 +2453,10 @@ void UIContentImpl::Destroy()
     ContainerScope::RemoveAndCheck(instanceId_);
     UnregisterDisplayManagerCallback();
     SubwindowManager::GetInstance()->OnDestroyContainer(instanceId_);
+
+    if (window_) {
+        window_->UnregisterWaterfallModeChangeListener(waterfallModeChangeListener_);
+    }
 }
 
 void UIContentImpl::UnregisterDisplayManagerCallback()
@@ -3461,6 +3491,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
     foldStatusListener_ = new FoldScreenListener(instanceId_);
+    waterfallModeChangeListener_ = new WaterfallModeChangeListener(instanceId_);
+    window_->RegisterWaterfallModeChangeListener(waterfallModeChangeListener_);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
     foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_, isDialog);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
