@@ -2993,4 +2993,20 @@ void SelectOverlayNode::OnDetachFromMainTree(bool recursive, PipelineContext* co
     isCustomMenuAppear_ = false;
     FrameNode::OnDetachFromMainTree(recursive, context);
 }
+
+void SelectOverlayNode::UpdateToolBarFromMainWindow(bool menuItemChanged, bool noAnimation)
+{
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetIsMenuShowInSubWindow()) {
+        auto containerId = pattern->GetContainerId();
+        if (containerId != -1) {
+            ContainerScope scope(containerId);
+            UpdateToolBar(menuItemChanged, noAnimation);
+            return;
+        }
+    }
+
+    UpdateToolBar(menuItemChanged, noAnimation);
+}
 } // namespace OHOS::Ace::NG

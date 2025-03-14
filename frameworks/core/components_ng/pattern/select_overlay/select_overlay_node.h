@@ -107,6 +107,7 @@ public:
     void OnCustomSelectMenuAppear();
     void FireCustomMenuChangeEvent(bool isMenuShow);
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
+    void UpdateToolBarFromMainWindow(bool menuItemChanged, bool noAnimation = false);
 
 private:
     void CreateToolBar();
