@@ -4945,8 +4945,7 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
         CalcCounterAfterFilterInsertValue(originLength, insertValue,
             static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
     }
-    int32_t newCaretIndex = offset + caretMoveLength;
-    selectController_->UpdateCaretIndex(newCaretIndex);
+    selectController_->UpdateCaretIndex(offset + caretMoveLength);
 
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, offset);
@@ -4963,6 +4962,7 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
     TwinklingByFocus();
     CloseSelectOverlay(true);
     ScrollToSafeArea();
+    ProcessResponseArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return selectController_->GetCaretIndex();
 }
