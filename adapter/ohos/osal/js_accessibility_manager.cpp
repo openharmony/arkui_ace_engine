@@ -2726,9 +2726,8 @@ void JsAccessibilityManager::UpdateVirtualNodeFocus()
 
 JsAccessibilityManager::~JsAccessibilityManager()
 {
-    auto eventType = AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED;
-
-    UnsubscribeStateObserver(eventType);
+    UnsubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
+    UnsubscribeStateObserver(AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED);
 
     DeregisterInteractionOperation();
 }
@@ -2766,28 +2765,30 @@ bool JsAccessibilityManager::UnsubscribeToastObserver()
     return true;
 }
 
-bool JsAccessibilityManager::SubscribeStateObserver(int eventType)
+bool JsAccessibilityManager::SubscribeStateObserver(uint32_t eventType)
 {
-    if (!stateObserver_) {
-        stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
+    if (!stateObserver_[eventType]) {
+        stateObserver_[eventType] = std::make_shared<JsAccessibilityStateObserver>();
     }
 
-    stateObserver_->SetAccessibilityManager(WeakClaim(this));
-    stateObserver_->SetPipeline(context_);
+    stateObserver_[eventType]->SetAccessibilityManager(WeakClaim(this));
+    stateObserver_[eventType]->SetPipeline(context_);
+    stateObserver_[eventType]->SetEventType(eventType);
 
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
-    Accessibility::RetError ret = instance->SubscribeStateObserver(stateObserver_, eventType);
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, " the result of SubscribeStateObserver:%{public}d", ret);
+    Accessibility::RetError ret = instance->SubscribeStateObserver(stateObserver_[eventType], eventType);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, " the result of SubscribeStateObserver:%{public}d, eventType:%{public}u",
+        ret, eventType);
     return ret == RET_OK;
 }
 
-bool JsAccessibilityManager::UnsubscribeStateObserver(int eventType)
+bool JsAccessibilityManager::UnsubscribeStateObserver(uint32_t eventType)
 {
-    CHECK_NULL_RETURN(stateObserver_, false);
+    CHECK_NULL_RETURN(stateObserver_[eventType], false);
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
-    Accessibility::RetError ret = instance->UnsubscribeStateObserver(stateObserver_, eventType);
+    Accessibility::RetError ret = instance->UnsubscribeStateObserver(stateObserver_[eventType], eventType);
     return ret == RET_OK;
 }
 
@@ -2837,6 +2838,7 @@ void JsAccessibilityManager::InitializeCallback()
     }
 
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
+    SubscribeStateObserver(AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED);
     if (isEnabled) {
         RegisterInteractionOperation(windowId_);
     }
@@ -6503,28 +6505,34 @@ void JsAccessibilityManager::UpdateElementInfosTreeId(std::list<Accessibility::A
 void JsAccessibilityManager::SetPipelineContext(const RefPtr<PipelineBase>& context)
 {
     context_ = context;
-    if (stateObserver_ != nullptr) {
-        stateObserver_->SetPipeline(context_);
+    if (stateObserver_[AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED] != nullptr) {
+        stateObserver_[AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED]->SetPipeline(context_);
     }
 }
 
 void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const bool state)
 {
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "accessibility state changed:%{public}d", state);
+    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "accessibility state changed:%{public}d, event type:%{public}u", state,
+        eventType_);
+
     // Do not upgrade jsAccessibilityManager on async thread, destructor will cause freeze
     auto pipelineRef = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipelineRef);
     pipelineRef->GetTaskExecutor()->PostTask(
-        [weak = accessibilityManager_, state]() {
+        [weak = accessibilityManager_, state, eventType = eventType_]() {
             auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
-            if (state) {
-                jsAccessibilityManager->RegisterInteractionOperation(jsAccessibilityManager->GetWindowId());
-            } else {
-                jsAccessibilityManager->DeregisterInteractionOperation();
+            if (eventType == AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED) {
+                if (state) {
+                    jsAccessibilityManager->RegisterInteractionOperation(jsAccessibilityManager->GetWindowId());
+                } else {
+                    jsAccessibilityManager->DeregisterInteractionOperation();
+                }
+                AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
+                jsAccessibilityManager->NotifyAccessibilitySAStateChange(state);
+            } else if (eventType == AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED) {
+                jsAccessibilityManager->isScreenReaderEnabled_ = state;
             }
-            AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
-            jsAccessibilityManager->NotifyAccessibilitySAStateChange(state);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityStateChanged");
 }
@@ -7442,15 +7450,6 @@ void JsAccessibilityManager::FireAccessibilityEventCallback(uint32_t eventId, in
         default:
             break;
     }
-}
-
-bool JsAccessibilityManager::IsScreenReaderEnabled()
-{
-    auto client = AccessibilitySystemAbilityClient::GetInstance();
-    CHECK_NULL_RETURN(client, false);
-    bool isEnabled = false;
-    client->IsScreenReaderEnabled(isEnabled);
-    return isEnabled;
 }
 
 int32_t JsAccessibilityManager::GetTransformDegreeRelativeToWindow(const RefPtr<NG::FrameNode>& node, bool excludeSelf)

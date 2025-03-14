@@ -187,8 +187,8 @@ public:
 
     bool SubscribeToastObserver();
     bool UnsubscribeToastObserver();
-    bool SubscribeStateObserver(int eventType);
-    bool UnsubscribeStateObserver(int eventType);
+    bool SubscribeStateObserver(uint32_t eventType);
+    bool UnsubscribeStateObserver(uint32_t eventType);
     int RegisterInteractionOperation(int windowId);
     void DeregisterInteractionOperation();
 
@@ -356,7 +356,10 @@ public:
     void RegisterUIExtBusinessConsumeCallback();
     void RegisterGetParentRectHandler();
 
-    bool IsScreenReaderEnabled() override;
+    bool IsScreenReaderEnabled() override
+    {
+        return isScreenReaderEnabled_;
+    }
 
     void SetFocusMoveResultWithNode(
         const WeakPtr<NG::FrameNode>& hostNode,
@@ -485,10 +488,16 @@ private:
             pipeline_ = pipeline;
         }
 
+        void SetEventType(uint32_t eventType)
+        {
+            eventType_ = eventType;
+        }
+
     private:
         // Do not upgrade accessibilityManager_ on async thread, destructor might cause freeze
         WeakPtr<JsAccessibilityManager> accessibilityManager_;
         WeakPtr<PipelineBase> pipeline_;
+        uint32_t eventType_;
     };
 
     bool AccessibilityActionEvent(const Accessibility::ActionType& action,
@@ -675,11 +684,12 @@ private:
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
-    std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;
+    std::unordered_map<uint32_t, std::shared_ptr<JsAccessibilityStateObserver>> stateObserver_;
     std::shared_ptr<ToastAccessibilityConfigObserver> toastObserver_ = nullptr;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     int64_t currentFocusNodeId_ = -1;
+    bool isScreenReaderEnabled_ = false;
 
     int64_t lastElementId_ = -1;
     WeakPtr<NG::FrameNode> lastFrameNode_;
