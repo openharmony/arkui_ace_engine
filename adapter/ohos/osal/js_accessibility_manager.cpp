@@ -2178,17 +2178,6 @@ void SearchExtensionElementInfoNG(const SearchParameter& searchParam,
         }
     }
 }
-
-bool IsNodeInRoot(const RefPtr<NG::FrameNode>& node, const RefPtr<NG::PipelineContext>& ngPipeline)
-{
-    CHECK_NULL_RETURN(node, false);
-    CHECK_NULL_RETURN(ngPipeline, false);
-    auto rect = node->GetTransformRectRelativeToWindow();
-    auto root = ngPipeline->GetRootElement();
-    CHECK_NULL_RETURN(root, false);
-    auto rootRect = root->GetTransformRectRelativeToWindow();
-    return LessNotEqual(rect.GetX(), rootRect.GetX() + rootRect.Width());
-}
 }
 
 void JsAccessibilityManager::UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
@@ -5927,23 +5916,19 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t
         return;
     }
     CHECK_NULL_VOID(webPattern);
-    auto webNode = webPattern->GetHost();
-    bool webActive = webPattern->GetActiveStatus();
-    if (!webActive) {
-        TAG_LOGD(AceLogTag::ACE_WEB,
-            "SearchWebElementinfo webActive false, elementId: %{public}" PRId64
-            ", requestId: %{public}d, mode: %{public}d, windowId: %{public}d",
-            elementId, requestId, mode, windowId);
-        SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
-        return;
-    }
-    if (!IsNodeInRoot(webNode, ngPipeline)) {
-        TAG_LOGD(AceLogTag::ACE_WEB,
-            "SearchWebElementInfo IsNodeInRoot, elementId: %{public}" PRId64
-            ", requestId: %{public}d, mode: %{public}d, windowId: %{public}d",
-            elementId, requestId, mode, windowId);
-        SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
-        return;
+
+    if (elementId == -1) {
+        auto webNode = webPattern->GetHost();
+        AccessibilityElementInfo webInfo;
+        SetRootAccessibilityVisible(webNode, webInfo);
+        if (!webInfo.GetAccessibilityVisible()) {
+            TAG_LOGD(AceLogTag::ACE_WEB,
+                "SearchWebElementinfo accessibility visible false, elementId: %{public}" PRId64
+                ", requestId: %{public}d, mode: %{public}d, windowId: %{public}d",
+                elementId, requestId, mode, windowId);
+            SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
+            return;
+        }
     }
 
     SearchWebElementInfoByAccessibilityIdNG(elementId, mode, infos, ngPipeline, webPattern);
