@@ -1137,3 +1137,346 @@ HWTEST_F(NativeGestureTest, GestureImplTest0024, TestSize.Level1)
     auto ret2 = OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(&recognizer, callback, nullptr);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: GestureImplTest0025
+ * @tc.desc: Test the CreateTapGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0025, TestSize.Level1)
+{
+    int32_t count = 1;
+    int32_t fingers = 11;
+    auto ret = OHOS::Ace::GestureModel::CreateTapGesture(count, fingers);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0026
+ * @tc.desc: Test the CreateTapGestureWithDistanceThreshold function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0026, TestSize.Level1)
+{
+    int32_t count = 1;
+    int32_t fingers = 11;
+    double distanceThreshold = 10.0;
+    auto ret = OHOS::Ace::GestureModel::CreateTapGestureWithDistanceThreshold(count, fingers, distanceThreshold);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0027
+ * @tc.desc: Test the CreateLongPressGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0027, TestSize.Level1)
+{
+    int32_t fingers = 11;
+    bool repeatResult = true;
+    int32_t duration = 100;
+    auto ret = OHOS::Ace::GestureModel::CreateLongPressGesture(fingers, repeatResult, duration);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0028
+ * @tc.desc: Test the CreateLongPressGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0028, TestSize.Level1)
+{
+    int32_t fingers = 11;
+    bool repeatResult = true;
+    int32_t duration = 100;
+    auto ret = OHOS::Ace::GestureModel::CreateLongPressGesture(fingers, repeatResult, duration);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0029
+ * @tc.desc: Test the CreatePinchGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0029, TestSize.Level1)
+{
+    int32_t fingers = 11;
+    double distance1 = 10.0;
+    auto ret1 = OHOS::Ace::GestureModel::CreatePinchGesture(fingers, distance1);
+    EXPECT_NE(ret1, nullptr);
+    double distance2 = 0.0;
+    auto ret2 = OHOS::Ace::GestureModel::CreatePinchGesture(fingers, distance2);
+    EXPECT_NE(ret2, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0030
+ * @tc.desc: Test the CreateRotationGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0030, TestSize.Level1)
+{
+    int32_t fingers = 11;
+    double angle = 10.0;
+    auto ret = OHOS::Ace::GestureModel::CreateRotationGesture(fingers, angle);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0031
+ * @tc.desc: Test the CreateSwipeGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0031, TestSize.Level1)
+{
+    int32_t fingers = 11;
+    ArkUI_GestureDirectionMask directions = 1;
+    double speed1 = 10.0;
+    auto ret1 = OHOS::Ace::GestureModel::CreateSwipeGesture(fingers, directions, speed1);
+    EXPECT_NE(ret1, nullptr);
+    double speed2 = 0.0;
+    auto ret2 = OHOS::Ace::GestureModel::CreateSwipeGesture(fingers, directions, speed2);
+    EXPECT_NE(ret2, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0032
+ * @tc.desc: Test the CreatePanGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0032, TestSize.Level1)
+{
+    int32_t fingers = 2;
+    ArkUI_GestureDirectionMask directions = 1;
+    double distanceNum = 10.0;
+    auto ret1 = OHOS::Ace::GestureModel::CreatePanGesture(fingers, directions, distanceNum);
+    EXPECT_NE(ret1, nullptr);
+    fingers = 20;
+    auto ret2 = OHOS::Ace::GestureModel::CreatePanGesture(fingers, directions, distanceNum);
+    EXPECT_NE(ret2, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0033
+ * @tc.desc: Test the DisposeGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0033, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
+    auto longPressGesture = gestureAPI->gestureApi1->createLongPressGesture(1, true, 500);
+    OHOS::Ace::GestureModel::DisposeGesture(longPressGesture);
+    EXPECT_EQ(longPressGesture->extraData, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0034
+ * @tc.desc: Test the SetGestureEventTarget function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0034, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto longPressGesture = gestureAPI->gestureApi1->createLongPressGesture(1, true, 500);
+    auto onActionCallBack = [](ArkUI_GestureEvent *event, void *extraParam) {};
+    auto ret = OHOS::Ace::GestureModel::SetGestureEventTarget(
+        longPressGesture, GESTURE_EVENT_ACTION_ACCEPT, gestureNode, onActionCallBack);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GestureImplTest0035
+ * @tc.desc: Test the AddGestureToNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0035, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto longPressGesture = gestureAPI->gestureApi1->createLongPressGesture(1, true, 500);
+    auto ret = OHOS::Ace::GestureModel::AddGestureToNode(gestureNode, longPressGesture, PRIORITY, NORMAL_GESTURE_MASK);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GestureImplTest0036
+ * @tc.desc: Test the RemoveGestureFromNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0036, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto longPressGesture = gestureAPI->gestureApi1->createLongPressGesture(1, true, 500);
+    auto ret = OHOS::Ace::GestureModel::RemoveGestureFromNode(gestureNode, longPressGesture);
+    EXPECT_EQ(longPressGesture->targetInfo.uiNode, nullptr);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GestureImplTest0037
+ * @tc.desc: Test the CreateGroupGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0037, TestSize.Level1)
+{
+    auto ret = OHOS::Ace::GestureModel::CreateGroupGesture(EXCLUSIVE_GROUP);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: GestureImplTest0038
+ * @tc.desc: Test the AddChildGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0038, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
+    auto group = gestureAPI->gestureApi1->createGroupGesture(EXCLUSIVE_GROUP);
+    auto tapGesture = gestureAPI->gestureApi1->createTapGesture(1, 1);
+    auto ret = OHOS::Ace::GestureModel::AddChildGesture(group, tapGesture);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GestureImplTest0039
+ * @tc.desc: Test the GetGestureType function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0039, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
+    auto longPressGesture = gestureAPI->gestureApi1->createLongPressGesture(1, true, 500);
+    longPressGesture->type = 2;
+    auto ret = OHOS::Ace::GestureModel::GetGestureType(longPressGesture);
+    EXPECT_EQ(ret, 2);
+}
+
+/**
+ * @tc.name: GestureImplTest0040
+ * @tc.desc: Test the RemoveChildGesture function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0040, TestSize.Level1)
+{
+    auto gestureAPI = reinterpret_cast<ArkUI_NativeGestureAPI_2*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "ArkUI_NativeGestureAPI_2"));
+    auto group = gestureAPI->gestureApi1->createGroupGesture(EXCLUSIVE_GROUP);
+    auto tapGesture = gestureAPI->gestureApi1->createTapGesture(1, 1);
+    auto ret = OHOS::Ace::GestureModel::RemoveChildGesture(group, tapGesture);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GestureImplTest0041
+ * @tc.desc: Test the HandleGestureEvent function.
+ * @tc.type: FUNC
+ */
+void MockTargetReceiver(ArkUI_GestureEvent* event, void* extraParam)
+{
+    EXPECT_NE(event->eventData.rawPointerEvent, nullptr);
+}
+void MockTargetReceiver2(ArkUI_GestureEvent* event, void* extraParam)
+{
+    EXPECT_NE(event->eventData.rawPointerEvent, nullptr);
+    EXPECT_EQ(event->attachNode, nullptr);
+}
+HWTEST_F(NativeGestureTest, GestureImplTest0041, TestSize.Level1)
+{
+    ArkUINodeEvent* event1 = nullptr;
+    OHOS::Ace::GestureModel::HandleGestureEvent(event1);
+    EXPECT_EQ(event1, nullptr);
+
+    ArkUINodeEvent event2;
+    event2.extraParam = 0;
+    OHOS::Ace::GestureModel::HandleGestureEvent(&event2);
+    EXPECT_EQ(event2.extraParam, 0);
+
+    ArkUINodeEvent event3 = {0};
+    OHOS::Ace::GestureModel::GestureInnerData extraData;
+    extraData.gesture = nullptr;
+    extraData.targetReceiver = MockTargetReceiver;
+    extraData.extraParam = nullptr;
+    event3.kind = ArkUIEventCategory::GESTURE_ASYNC_EVENT;
+    event3.extraParam = reinterpret_cast<ArkUI_Int64>(&extraData);
+    event3.gestureAsyncEvent.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_MOUSE);
+    event3.gestureAsyncEvent.rawPointerEvent = nullptr;
+    OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
+    event3.gestureAsyncEvent.rawPointerEvent = nullptr;
+    event3.kind = ArkUIEventCategory::INVALID;
+    event3.gestureAsyncEvent.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_AXIS);
+    OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
+    event3.gestureAsyncEvent.rawPointerEvent = nullptr;
+    event3.gestureAsyncEvent.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_TOUCH);
+    OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
+
+    ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
+    recognizer->attachNode = nullptr;
+    extraData.gesture = reinterpret_cast<ArkUI_GestureRecognizer*>(recognizer);
+    extraData.targetReceiver = MockTargetReceiver2;
+    event3.extraParam = reinterpret_cast<ArkUI_Int64>(&extraData);
+    OHOS::Ace::GestureModel::HandleGestureEvent(&event3);
+}
+
+/**
+ * @tc.name: GestureImplTest0042
+ * @tc.desc: Test the SetGestureInterrupterToNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0042, TestSize.Level1)
+{
+    auto interrupter = [](ArkUI_GestureInterruptInfo* info) -> ArkUI_GestureInterruptResult {
+        return ArkUI_GestureInterruptResult::GESTURE_INTERRUPT_RESULT_CONTINUE;
+    };
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto ret = OHOS::Ace::GestureModel::SetGestureInterrupterToNode(gestureNode, interrupter);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GestureImplTest0043
+ * @tc.desc: Test the SetGestureInterrupterToNodeWithUserData function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0043, TestSize.Level1)
+{
+    auto interrupter = [](ArkUI_GestureInterruptInfo* info) -> ArkUI_GestureInterruptResult {
+        return ArkUI_GestureInterruptResult::GESTURE_INTERRUPT_RESULT_CONTINUE;
+    };
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    void* userData = reinterpret_cast<void*>(new int);
+    auto ret = OHOS::Ace::GestureModel::SetGestureInterrupterToNodeWithUserData(gestureNode, userData, interrupter);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: GestureImplTest0044
+ * @tc.desc: Test the SetInnerGestureParallelTo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0044, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    void* userData = reinterpret_cast<void*>(new int);
+    auto ret = OHOS::Ace::GestureModel::SetInnerGestureParallelTo(gestureNode, userData, nullptr);
+    EXPECT_EQ(ret, 0);
+}
