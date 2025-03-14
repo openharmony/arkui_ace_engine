@@ -166,13 +166,17 @@ typedef struct InteropAsyncWorker {
 } InteropAsyncWorker;
 typedef const InteropAsyncWorker* InteropAsyncWorkerPtr;
 
+typedef struct InteropObject {
+  InteropCallbackResource resource;
+} InteropObject;
+
 #endif // _INTEROP_TYPES_H_
 
 
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 123
+#define GENERATED_ARKUI_FULL_API_VERSION 124
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -764,6 +768,8 @@ typedef struct StyledStringPeer* Ark_StyledString;
 typedef struct Opt_StyledString Opt_StyledString;
 typedef struct Ark_NavigationAnimatedTransition Ark_NavigationAnimatedTransition;
 typedef struct Opt_NavigationAnimatedTransition Opt_NavigationAnimatedTransition;
+typedef struct Profiler_Callback_String_Void Profiler_Callback_String_Void;
+typedef struct Opt_Profiler_Callback_String_Void Opt_Profiler_Callback_String_Void;
 typedef struct OnLinearIndicatorChangeCallback OnLinearIndicatorChangeCallback;
 typedef struct Opt_OnLinearIndicatorChangeCallback Opt_OnLinearIndicatorChangeCallback;
 typedef struct Ark_LinearIndicatorStyle Ark_LinearIndicatorStyle;
@@ -2022,6 +2028,8 @@ typedef struct Ark_Union_Color_Number_String Ark_Union_Color_Number_String;
 typedef struct Opt_Union_Color_Number_String Opt_Union_Color_Number_String;
 typedef struct OnScrollEdgeCallback OnScrollEdgeCallback;
 typedef struct Opt_OnScrollEdgeCallback Opt_OnScrollEdgeCallback;
+typedef struct ScrollOnScrollCallback ScrollOnScrollCallback;
+typedef struct Opt_ScrollOnScrollCallback Opt_ScrollOnScrollCallback;
 typedef struct Callback_ClickEvent_SaveButtonOnClickResult_Void Callback_ClickEvent_SaveButtonOnClickResult_Void;
 typedef struct Opt_Callback_ClickEvent_SaveButtonOnClickResult_Void Opt_Callback_ClickEvent_SaveButtonOnClickResult_Void;
 typedef struct Ark_SaveButtonOptions Ark_SaveButtonOptions;
@@ -2412,8 +2420,6 @@ typedef struct ChildrenMainSizePeer* Ark_ChildrenMainSize;
 typedef struct Opt_ChildrenMainSize Opt_ChildrenMainSize;
 typedef struct Ark_Union_ContentClipMode_RectShape Ark_Union_ContentClipMode_RectShape;
 typedef struct Opt_Union_ContentClipMode_RectShape Opt_Union_ContentClipMode_RectShape;
-typedef struct ScrollOnScrollCallback ScrollOnScrollCallback;
-typedef struct Opt_ScrollOnScrollCallback Opt_ScrollOnScrollCallback;
 typedef struct Callback_Number_Number_Void Callback_Number_Number_Void;
 typedef struct Opt_Callback_Number_Number_Void Opt_Callback_Number_Number_Void;
 typedef struct TextContentControllerBasePeer TextContentControllerBasePeer;
@@ -5230,6 +5236,15 @@ typedef struct Opt_ImageRenderMode {
     Ark_Tag tag;
     Ark_ImageRenderMode value;
 } Opt_ImageRenderMode;
+typedef enum Ark_ScrollState {
+    ARK_SCROLL_STATE_IDLE = 0,
+    ARK_SCROLL_STATE_SCROLL = 1,
+    ARK_SCROLL_STATE_FLING = 2,
+} Ark_ScrollState;
+typedef struct Opt_ScrollState {
+    Ark_Tag tag;
+    Ark_ScrollState value;
+} Opt_ScrollState;
 typedef enum Ark_GridDirection {
     ARK_GRID_DIRECTION_ROW = 0,
     ARK_GRID_DIRECTION_COLUMN = 1,
@@ -5303,6 +5318,20 @@ typedef struct Opt_EllipsisMode {
     Ark_Tag tag;
     Ark_EllipsisMode value;
 } Opt_EllipsisMode;
+typedef enum Ark_ScrollSource {
+    ARK_SCROLL_SOURCE_DRAG = 0,
+    ARK_SCROLL_SOURCE_FLING = 1,
+    ARK_SCROLL_SOURCE_EDGE_EFFECT = 2,
+    ARK_SCROLL_SOURCE_OTHER_USER_INPUT = 3,
+    ARK_SCROLL_SOURCE_SCROLL_BAR = 4,
+    ARK_SCROLL_SOURCE_SCROLL_BAR_FLING = 5,
+    ARK_SCROLL_SOURCE_SCROLLER = 6,
+    ARK_SCROLL_SOURCE_SCROLLER_ANIMATION = 7,
+} Ark_ScrollSource;
+typedef struct Opt_ScrollSource {
+    Ark_Tag tag;
+    Ark_ScrollSource value;
+} Opt_ScrollSource;
 typedef enum Ark_CopyOptions {
     ARK_COPY_OPTIONS_NONE = 0,
     ARK_COPY_OPTIONS_IN_APP = 1,
@@ -5341,29 +5370,6 @@ typedef struct Opt_EmbeddedType {
     Ark_Tag tag;
     Ark_EmbeddedType value;
 } Opt_EmbeddedType;
-typedef enum Ark_ScrollSource {
-    ARK_SCROLL_SOURCE_DRAG = 0,
-    ARK_SCROLL_SOURCE_FLING = 1,
-    ARK_SCROLL_SOURCE_EDGE_EFFECT = 2,
-    ARK_SCROLL_SOURCE_OTHER_USER_INPUT = 3,
-    ARK_SCROLL_SOURCE_SCROLL_BAR = 4,
-    ARK_SCROLL_SOURCE_SCROLL_BAR_FLING = 5,
-    ARK_SCROLL_SOURCE_SCROLLER = 6,
-    ARK_SCROLL_SOURCE_SCROLLER_ANIMATION = 7,
-} Ark_ScrollSource;
-typedef struct Opt_ScrollSource {
-    Ark_Tag tag;
-    Ark_ScrollSource value;
-} Opt_ScrollSource;
-typedef enum Ark_ScrollState {
-    ARK_SCROLL_STATE_IDLE = 0,
-    ARK_SCROLL_STATE_SCROLL = 1,
-    ARK_SCROLL_STATE_FLING = 2,
-} Ark_ScrollState;
-typedef struct Opt_ScrollState {
-    Ark_Tag tag;
-    Ark_ScrollState value;
-} Opt_ScrollState;
 typedef enum Ark_LineJoinStyle {
     ARK_LINE_JOIN_STYLE_MITER = 0,
     ARK_LINE_JOIN_STYLE_ROUND = 1,
@@ -7709,6 +7715,15 @@ typedef struct Opt_NavigationAnimatedTransition {
     Ark_Tag tag;
     Ark_NavigationAnimatedTransition value;
 } Opt_NavigationAnimatedTransition;
+typedef struct Profiler_Callback_String_Void {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_String info);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String info);
+} Profiler_Callback_String_Void;
+typedef struct Opt_Profiler_Callback_String_Void {
+    Ark_Tag tag;
+    Profiler_Callback_String_Void value;
+} Opt_Profiler_Callback_String_Void;
 typedef struct OnLinearIndicatorChangeCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Number index, const Ark_Number progress);
@@ -10460,8 +10475,8 @@ typedef struct Opt_ClickEvent {
 } Opt_ClickEvent;
 typedef struct NavExtender_OnUpdateStack {
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId);
+    void (*call)(const Ark_Int32 resourceId, const Ark_String name);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String name);
 } NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
@@ -13020,6 +13035,15 @@ typedef struct Opt_OnScrollEdgeCallback {
     Ark_Tag tag;
     OnScrollEdgeCallback value;
 } Opt_OnScrollEdgeCallback;
+typedef struct ScrollOnScrollCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
+} ScrollOnScrollCallback;
+typedef struct Opt_ScrollOnScrollCallback {
+    Ark_Tag tag;
+    ScrollOnScrollCallback value;
+} Opt_ScrollOnScrollCallback;
 typedef struct Callback_ClickEvent_SaveButtonOnClickResult_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_ClickEvent event, Ark_SaveButtonOnClickResult result);
@@ -14690,15 +14714,6 @@ typedef struct Opt_Union_ContentClipMode_RectShape {
     Ark_Tag tag;
     Ark_Union_ContentClipMode_RectShape value;
 } Opt_Union_ContentClipMode_RectShape;
-typedef struct ScrollOnScrollCallback {
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
-} ScrollOnScrollCallback;
-typedef struct Opt_ScrollOnScrollCallback {
-    Ark_Tag tag;
-    ScrollOnScrollCallback value;
-} Opt_ScrollOnScrollCallback;
 typedef struct Callback_Number_Number_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last);
@@ -16766,10 +16781,6 @@ typedef struct GENERATED_ArkUIScrollableCommonMethodModifier {
                         const Ark_Union_Number_Resource* value);
     void (*setOnScroll)(Ark_NativePointer node,
                         const Callback_Number_Number_Void* value);
-    void (*setOnWillScroll)(Ark_NativePointer node,
-                            const Opt_ScrollOnWillScrollCallback* value);
-    void (*setOnDidScroll)(Ark_NativePointer node,
-                           const ScrollOnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
                             const Callback_Void* value);
     void (*setOnReachEnd)(Ark_NativePointer node,
@@ -19539,6 +19550,10 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
     void (*restoreInstanceId)();
 } GENERATED_ArkUISystemOpsAccessor;
 
+typedef struct GENERATED_ArkUIFocusControllerAccessor {
+    void (*requestFocus)(const Ark_String* key);
+} GENERATED_ArkUIFocusControllerAccessor;
+
 typedef struct GENERATED_ArkUIDrawingCanvasAccessor {
     void (*destroyPeer)(Ark_DrawingCanvas peer);
     Ark_DrawingCanvas (*ctor)(Ark_PixelMap pixelmap);
@@ -22100,7 +22115,7 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
     Ark_CustomObject (*getInspectorNodes)();
     Ark_CustomObject (*getInspectorNodeById)(const Ark_Number* id);
     void (*setAppBgColor)(const Ark_String* value);
-    void (*Profiler_registerVsyncCallback)(const Callback_String_Void* callback_);
+    void (*Profiler_registerVsyncCallback)(const Profiler_Callback_String_Void* callback_);
     void (*Profiler_unregisterVsyncCallback)();
     void (*cursorControl_setCursor)(Ark_PointerStyle value);
     void (*cursorControl_restoreDefault)();
@@ -22236,6 +22251,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUnifiedDataAccessor* (*getUnifiedDataAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUISystemOpsAccessor* (*getSystemOpsAccessor)();
+    const GENERATED_ArkUIFocusControllerAccessor* (*getFocusControllerAccessor)();
     const GENERATED_ArkUIDrawingCanvasAccessor* (*getDrawingCanvasAccessor)();
     const GENERATED_ArkUILengthMetricsAccessor* (*getLengthMetricsAccessor)();
     const GENERATED_ArkUIColorMetricsAccessor* (*getColorMetricsAccessor)();
