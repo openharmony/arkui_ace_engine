@@ -1132,6 +1132,14 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_REFRESH_REFRESHING));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_REFRESH_ON_OFFSET_CHANGE, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_REFRESH_ON_OFFSET_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_KEY_EVENT, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ArkUIEventSubKind::ON_KEY_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_KEY_PRE_IME, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ArkUIEventSubKind::ON_KEY_PREIME));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_CLICK_EVENT, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ArkUIEventSubKind::ON_CLICK_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_HOVER_EVENT, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ArkUIEventSubKind::ON_HOVER_EVENT));
 
     nodeType = static_cast<int32_t>(ARKUI_NODE_TOGGLE);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_TOGGLE_ON_CHANGE, nodeType);
@@ -1176,6 +1184,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     nodeType = static_cast<int32_t>(ARKUI_NODE_SWIPER);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_CHANGE, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_SELECTED, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_SELECTED));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_ANIMATION_START, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_ANIMATION_START));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_ANIMATION_END, nodeType);
@@ -1184,6 +1194,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_GESTURE_SWIPE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_DID_CONTENT_SCROLL));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_SWIPER_EVENT_ON_UNSELECTED, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_SWIPER_UNSELECTED));
 
     nodeType = static_cast<int32_t>(ARKUI_NODE_TEXT);
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_TEXT_ON_DETECT_RESULT_UPDATE, nodeType);
@@ -1204,6 +1216,13 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_IMAGE_ANIMATOR_ON_REPEAT));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_IMAGE_ANIMATOR_ON_FINISH));
+
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_FOCUS_AXIS, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_FOCUS_AXIS));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_CHECKBOX_GROUP_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_ON_AXIS, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_AXIS));
 }
 
 /**
@@ -1404,6 +1423,26 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_IMAGE_ANIMATOR_EVENT_ON_REPEAT));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_IMAGE_ANIMATOR_ON_FINISH);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_KEY_EVENT);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_KEY_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_KEY_PREIME);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_KEY_PRE_IME));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_KEY_DISPATCH);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_DISPATCH_KEY_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_CLICK_EVENT);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_CLICK_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_HOVER_EVENT);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_HOVER_EVENT));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_SWIPER_SELECTED);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SWIPER_EVENT_ON_SELECTED));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_SWIPER_UNSELECTED);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_SWIPER_EVENT_ON_UNSELECTED));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_FOCUS_AXIS);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_FOCUS_AXIS));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_CHECKBOX_GROUP_CHANGE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE));
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ArkUIEventSubKind::ON_AXIS);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_ON_AXIS));
 }
 
 /**
@@ -5057,6 +5096,28 @@ HWTEST_F(NativeNodeTest, NativeNodeTest070, TestSize.Level1)
     origin.mouseEvent.subKind = ArkUIEventSubKind::ON_TEXT_AREA_WILL_INSERT;
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), false);
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &compatibleEvent), false);
+
+    origin.kind = ArkUIEventCategory::DRAG_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_DRAG_START;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_KEY_PREIME;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_FOCUS_AXIS;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::TEXT_INPUT_CHANGE;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_TEXT_INPUT_CHANGE;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::AXIS_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_AXIS;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::CLICK_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_CLICK_EVENT;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
+    origin.kind = ArkUIEventCategory::HOVER_EVENT;
+    origin.dragEvent.subKind = ArkUIEventSubKind::ON_HOVER_EVENT;
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertEvent(&origin, &event), true);
 }
 
 /**
@@ -5081,6 +5142,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest071, TestSize.Level1)
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(1), 1);
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(2), 2);
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(3), 3);
+    EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(13), 13);
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseActionType(0), 0);
 
     EXPECT_EQ(OHOS::Ace::NodeModel::ConvertToCMouseEventButtonType(1), 1);
