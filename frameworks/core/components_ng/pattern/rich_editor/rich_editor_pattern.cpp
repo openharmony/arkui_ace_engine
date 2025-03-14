@@ -2806,6 +2806,7 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
         spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
         spanNode->UpdateLeadingMargin(*style.leadingMargin);
     }
+    IF_PRESENT(GetHost(), MarkDirtyNode(PROPERTY_UPDATE_MEASURE));
 }
 
 void RichEditorPattern::ScheduleCaretTwinkling()
