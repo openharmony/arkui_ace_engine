@@ -35,19 +35,25 @@ export default function CalendarPickerDialogBootcampTest() {
         await driver.delayMs(10000);
 
 
+        let ListItemGroup :Component[] = await driver.findComponents(ON.type('ListItemGroup'))
+        let width:Point = await ListItemGroup[0].getBoundsCenter()
+        let width2:Point = await ListItemGroup[4].getBoundsCenter()
+        await driver.swipe(width.x, width2.y, width.x, width.y, 500)
+        await driver.delayMs(2000);
 
         let atomDisplays:Component = await driver.findComponent(ON.text('弹窗'));
         await atomDisplays.click();
         await driver.delayMs(3000);
-
-
-        let ListItemGroup :Component[] = await driver.findComponents(ON.type('ListItem'))
-        let width:Point = await ListItemGroup[0].getBoundsCenter()
-        let width2:Point = await ListItemGroup[2].getBoundsCenter()
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
+
+
+        let ListItemGroup1 :Component[] = await driver.findComponents(ON.type('ListItem'))
+        let width3:Point = await ListItemGroup1[0].getBoundsCenter()
+        let width4:Point = await ListItemGroup1[2].getBoundsCenter()
+        await driver.swipe(width3.x, width4.y, width3.x, width3.y, 500)
         await driver.delayMs(2000);
 
-        let scrollSearch:Component = await driver.findComponent(ON.text('半模态/BindSheet'))
+        let scrollSearch:Component = await driver.findComponent(ON.text('日历选择器弹窗/CalendarpickerDialog'))
         await scrollSearch.click()
         await driver.delayMs(2000);
 
