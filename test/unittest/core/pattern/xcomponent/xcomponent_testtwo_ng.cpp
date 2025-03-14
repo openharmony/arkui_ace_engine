@@ -764,4 +764,62 @@ HWTEST_F(XComponentTestTwoNg, NativeXComponentCallbackTest, TestSize.Level1)
     pattern->OnSurfaceDestroyed();
     ASSERT_TRUE(hasSurfaceDestroyed);
 }
+
+/**
+ * @tc.name: GetGlobalPositionTestOne
+ * @tc.desc: Test GetGlobalPosition Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetGlobalPositionTestOne, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    xComponentController->pattern_ = nullptr;
+    float offsetX = 20.0f;
+    float offsetY = 30.0f;
+    auto result = xComponentController->GetGlobalPosition(offsetX, offsetY);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_BAD_PARAMETER);
+}
+
+/**
+ * @tc.name: GetGlobalPositionTestTwo
+ * @tc.desc: Test GetGlobalPosition Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetGlobalPositionTestTwo, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->type_ = XComponentType::SURFACE;
+    xComponentController->pattern_ = pattern;
+    float offsetX = 20.0f;
+    float offsetY = 30.0f;
+    auto result = xComponentController->GetGlobalPosition(offsetX, offsetY);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_NO_ERROR);
+}
+
+/**
+ * @tc.name: GetGlobalPositionTestThree
+ * @tc.desc: Test GetGlobalPosition Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetGlobalPositionTestThree, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->type_ = XComponentType::TEXTURE;
+    xComponentController->pattern_ = pattern;
+    float offsetX = 20.0f;
+    float offsetY = 30.0f;
+    auto result = xComponentController->GetGlobalPosition(offsetX, offsetY);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_TYPE_ERROR);
+}
 } // namespace OHOS::Ace::NG
