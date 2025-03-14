@@ -753,6 +753,50 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetCo
 }
 
 /**
+ * @tc.name: CalcTargetSelectedIndexOnBackward001
+ * @tc.desc: Test CalcTargetSelectedIndexOnBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcTargetSelectedIndexOnBackward001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.currentSelectedIndex_ = 100;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(5, 4);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 99);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 100;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(5, 1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 100;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(5, -1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -1);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 2;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(2, 10);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 2;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(2, 1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
+
+    dotIndicatorModifier.currentSelectedIndex_ = 2;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(2, -1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -1);
+
+    dotIndicatorModifier.currentSelectedIndex_ = -1;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnBackward(2, -1);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -1);
+}
+
+/**
  * @tc.name: StopAnimation001
  * @tc.desc: Test StopAnimation
  * @tc.type: FUNC
