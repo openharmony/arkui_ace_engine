@@ -115,6 +115,8 @@ bool InjectingExecutor::InjectOnePonterEvent(
         activingItem.SetPressed(true);
         activingItem.SetOriginPointerId(activingPointer.finger);
         pointerEvent->AddPointerItem(activingItem);
+        pointerEvent->SetActionTime(activingPointer.actionTime);
+        pointerEvent->SetSensorInputTime(activingPointer.actionTime - 2000);
         // 3. pack all other pointers into items
         for (auto& otherPointer : allOtherInjectings) {
             MMI::PointerEvent::PointerItem item;

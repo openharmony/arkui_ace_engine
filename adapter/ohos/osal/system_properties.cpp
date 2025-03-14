@@ -431,6 +431,11 @@ int32_t ReadDragDropFrameworkStatus()
     return system::GetIntParameter("debug.ace.drag.drop.framework.status", 0);
 }
 
+int32_t ReadTouchAccelarateMode()
+{
+    return system::GetIntParameter("debug.ace.touch.accelarate", 0);
+}
+
 bool IsAsyncInitializeEnabled()
 {
     return system::GetBoolParameter("persist.ace.async.initialize", true);
@@ -577,6 +582,7 @@ float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
+int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -1123,6 +1129,11 @@ bool SystemProperties::IsNeedSymbol()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+int32_t SystemProperties::GetTouchAccelarate()
+{
+    return touchAccelarate_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

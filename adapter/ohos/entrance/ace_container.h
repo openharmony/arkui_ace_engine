@@ -791,11 +791,6 @@ public:
         return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
     }
 
-    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
-    {
-        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
-    }
-
     void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
     {
         singleHandTransform_ = singleHandTransform;
@@ -948,7 +943,6 @@ private:
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
-    std::optional<bool> isTouchEventsPassThrough_;
 
     SingleHandTransform singleHandTransform_;
 };
