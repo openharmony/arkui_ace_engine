@@ -104,6 +104,16 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     return true;
 }
 
+void DatePickerPattern::FlushChildNodes()
+{
+    auto frameNodes = GetAllChildNode();
+    for (auto it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        it.second->MarkModifyDone();
+        it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
 void DatePickerPattern::OnModifyDone()
 {
     auto host = GetHost();
@@ -140,6 +150,7 @@ void DatePickerPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+    FlushChildNodes();
 }
 
 void DatePickerPattern::InitDisabled()
