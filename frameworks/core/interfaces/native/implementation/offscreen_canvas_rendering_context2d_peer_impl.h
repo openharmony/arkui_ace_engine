@@ -15,7 +15,6 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCRN_CANVAS_RENDERING_CNTXT2D_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCRN_CANVAS_RENDERING_CNTXT2D_PEER_H
 
-#include "base/memory/referenced.h"
 #include "canvas_renderer_peer_impl.h"
 #include "arkoala_api_generated.h"
 
@@ -26,9 +25,48 @@ public:
     OffscreenCanvasRenderingContext2DPeerImpl();
     ~OffscreenCanvasRenderingContext2DPeerImpl() override = default;
 
-    static void AddOffscreenCanvasPattern(const RefPtr<AceType>& pattern) {}
-    void SetWidth(double width) {}
-    void SetHeight(double height) {}
+    void SetOptions(double width, double height, const std::optional<RenderingContextSettingsPeer*>& optSettings);
+    void RemoveOptions();
+    ImageBitmapPeer* TransferToImageBitmap(ImageBitmapPeer* bitmap);
+    static void AddOffscreenCanvasPattern(const RefPtr<AceType>& pattern)
+    {
+        CHECK_NULL_VOID(pattern);
+        std::lock_guard<std::mutex> lock(mutex_);
+        offscreenPatternMap_[offscreenPatternCount_++] = pattern;
+    }
+    static RefPtr<AceType> GetOffscreenPattern(int32_t id)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return offscreenPatternMap_[id];
+    }
+    uint32_t GetId()
+    {
+        return id_;
+    }
+    void SetWidth(double width)
+    {
+        width_ = width;
+    }
+    double GetWidth() const
+    {
+        return width_;
+    }
+    void SetHeight(double height)
+    {
+        height_ = height;
+    }
+    double GetHeight() const
+    {
+        return height_;
+    }
+
+private:
+    static std::mutex mutex_;
+    uint32_t id_ = 0;
+    double width_ = 0.0f;
+    double height_ = 0.0f;
+    static std::unordered_map<uint32_t, RefPtr<AceType>> offscreenPatternMap_;
+    static uint32_t offscreenPatternCount_;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

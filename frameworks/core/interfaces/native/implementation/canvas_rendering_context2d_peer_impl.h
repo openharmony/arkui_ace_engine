@@ -15,14 +15,8 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERING_CONTEXT2D_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERING_CONTEXT2D_PEER_IMPL_H
 
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/common/container_consts.h"
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
-#include "canvas_renderer_peer_impl.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "canvas_renderer_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -36,54 +30,19 @@ public:
     };
     using CanvasCallbackList = std::list<CallbackHelper<Callback_Void>>;
     using CanvasCallbackIterator = CanvasCallbackList::const_iterator;
-    CanvasRenderingContext2DPeerImpl() = default;
+    CanvasRenderingContext2DPeerImpl();
     ~CanvasRenderingContext2DPeerImpl() override = default;
 
+    void SetOptions(const std::optional<RenderingContextSettingsPeer*>& optSettings);
     void OnAttachToCanvas();
     void OnDetachFromCanvas();
-
-    void TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
-        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
-    void TriggerStopImageAnalyzer();
-    double TriggerGetHeight();
-    double TriggerGetWidth();
-    std::string ToDataURL(const std::string& type, float& quality);
-
-    void UpdateDensity()
-    {
-        CHECK_NULL_VOID(pattern_);
-        double density = PipelineBase::GetCurrentDensity();
-        pattern_->SetDensity(density);
-    }
-    void SetAntiAlias(bool antialias)
-    {
-        antialias_ = antialias;
-    }
-
-    void UpdateAntiAlias()
-    {
-        CHECK_NULL_VOID(pattern_);
-        pattern_->SetAntiAlias(antialias_);
-    }
-
-    void SetCanvasPattern(const RefPtr<AceType>& pattern);
-
+    void StartImageAnalyzer(
+    const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void StopImageAnalyzer();
+    double GetHeight();
+    double GetWidth();
     void On(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
     void Off(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
-
-    void SetInstanceId(int32_t instanceId)
-    {
-        instanceId_ = instanceId;
-    }
-
-    int32_t GetInstanceId()
-    {
-        return instanceId_;
-    }
-
-public:
-    bool antialias_ = false;
-    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
     CanvasCallbackList::const_iterator FindCallbackInList(const CanvasCallbackList& callbackFuncPairList,

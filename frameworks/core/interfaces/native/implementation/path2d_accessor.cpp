@@ -16,8 +16,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-#include "matrix2d_peer.h"
-#include "path2d_accessor_peer_impl.h"
+#include "matrix2d_peer_impl.h"
+#include "path2d_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Path2DAccessor {
@@ -32,6 +32,7 @@ Ark_Path2D CtorImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<Path2DPeerImpl>();
     peerImpl->IncRefCount();
+    peerImpl->SetOptions();
     return reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -43,21 +44,10 @@ void AddPathImpl(Ark_Path2D peer,
                  const Opt_Matrix2D* transform)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(path);
-    auto peerImpl = reinterpret_cast<Path2DPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(peerImpl->path);
-    auto peerImpl2 = reinterpret_cast<Path2DPeerImpl*>(path);
-    CHECK_NULL_VOID(peerImpl2);
-    CHECK_NULL_VOID(peerImpl2->path);
-    peerImpl->path->AddPath(peerImpl2->path);
     CHECK_NULL_VOID(transform);
-    auto opt = Converter::OptConvert<Ark_Matrix2D>(*transform);
-    CHECK_NULL_VOID(opt);
-    auto matrix = opt.value();
-    CHECK_NULL_VOID(matrix);
-    auto tr = matrix->transform;
-    peerImpl->path->SetTransform(tr.scaleX, tr.skewX, tr.skewY, tr.scaleY, tr.translateX, tr.translateY);
+    auto peerImpl = reinterpret_cast<Path2DPeerImpl*>(peer);
+    auto matrix = Converter::OptConvert<Ark_Matrix2D>(*transform);
+    peerImpl->Path2DAddPath(path, matrix);
 }
 } // Path2DAccessor
 const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()

@@ -15,87 +15,69 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCREEN_CANVAS_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCREEN_CANVAS_PEER_H
 
-#include <optional>
-#include "core/common/container_scope.h"
-#include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
-#include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
-#include "core/interfaces/native/implementation/offscreen_canvas_rendering_context2d_peer_impl.h"
-#include "core/interfaces/native/implementation/rendering_context_settings_peer.h"
-#include "core/pipeline/pipeline_base.h"
+#include "offscreen_canvas_rendering_context2d_peer_impl.h"
+#include "arkoala_api_generated.h"
 
 struct OffscreenCanvasPeer {
     OffscreenCanvasPeer() = default;
     virtual ~OffscreenCanvasPeer() = default;
 
-    void Constructor(const std::vector<double>& params);
-    void Destructor();
+    void SetOptions(const double cw, const double ch);
+    void RemoveOptions();
     ImageBitmapPeer* TransferToImageBitmap(ImageBitmapPeer* bitmap);
     OffscreenCanvasRenderingContext2DPeer* GetContext2D(OffscreenCanvasRenderingContext2DPeer* offscreenCanvasContext,
         RenderingContextSettingsPeer* offscreenCanvasSettings);
     double OnGetHeight(double errValue);
-    void OnSetHeight(double height);
+    void OnSetHeight(double value);
     double OnGetWidth(double errValue);
-    void OnSetWidth(double height);
+    void OnSetWidth(double value);
 
     double GetDensity()
     {
         double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
         return ((GetUnit() == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
     }
-
     void SetWidth(double value)
     {
         width = value;
     }
-
     double GetWidth() const
     {
         return width;
     }
-
     void SetHeight(double value)
     {
         height = value;
     }
-
     double GetHeight() const
     {
         return height;
     }
-
     void SetUnit(OHOS::Ace::CanvasUnit value)
     {
         unit = value;
     }
-
     OHOS::Ace::CanvasUnit GetUnit()
     {
         return unit;
     }
-
     void SetDetachStatus(bool value)
     {
         isDetached = value;
     }
-
     bool IsDetached() const
     {
         return isDetached;
     }
-
     bool IsGetContext() const
     {
         return isGetContext;
     }
-
     void SetOffScreenPattern(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OffscreenCanvasPattern>& value)
     {
         offscreenCanvasPattern = value;
     }
-
     enum class ContextType {
         CONTEXT_2D = 0,
     };

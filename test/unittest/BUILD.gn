@@ -1219,8 +1219,10 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
     "$ace_root/test/mock/core/pattern/mock_time_picker_haptic_controller.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
+    "$ace_root/test/mock/core/render/mock_canvas_rendering_context_2d_model_ng.cpp",
     "$ace_root/test/mock/core/render/mock_drawing_painter.cpp",
     "$ace_root/test/mock/core/render/mock_matrix2d.cpp",
+    "$ace_root/test/mock/core/render/mock_offscreen_canvas_rendering_context_2d_model_ng.cpp",
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(

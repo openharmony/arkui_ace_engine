@@ -14,12 +14,10 @@
  */
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
-#include "core/interfaces/native/implementation/canvas_path_accessor_peer_impl.h"
+#include "core/interfaces/native/implementation/canvas_path_peer_impl.h"
 #include "accessor_test_base.h"
 #include "node_api.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {
@@ -80,7 +78,8 @@ public:
         ASSERT_NE(mockPatternKeeper_, nullptr);
         auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasPathPeerImpl*>(peer_);
         ASSERT_NE(peerImpl, nullptr);
-        peerImpl->path = mockPatternKeeper_;
+        RefPtr<CanvasPath2D> patternKeeper = mockPatternKeeper_;
+        peerImpl->SetCanvasPath2d(patternKeeper);
         ASSERT_NE(mockPattern_, nullptr);
     }
 
