@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "frameworks/core/event/pointer_event.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,9 +50,15 @@ public:
     RefPtr<DynamicPattern> CreateDynamicComponent();
 };
 
-void DynamicPatternTestNg::SetUp() {}
+void DynamicPatternTestNg::SetUp()
+{
+    MockPipelineContext::SetUp();
+}
 
-void DynamicPatternTestNg::TearDown() {}
+void DynamicPatternTestNg::TearDown()
+{
+    MockPipelineContext::TearDown();
+}
 
 RefPtr<DynamicPattern> DynamicPatternTestNg::CreateDynamicComponent()
 {
@@ -743,6 +750,77 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest020, TestSize.Level1)
      * @tc.expected: instanceId_ remains unchanged.
      */
     EXPECT_EQ(pattern->instanceId_, oldInstanceId);
+#endif
+}
+
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest021, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+    EXPECT_NE(dynamicNode, nullptr);
+    EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
+    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
+    EXPECT_NE(dynamicPattern, nullptr);
+
+    auto code = static_cast<DCResultCode>(-1);
+    dynamicPattern->HandleErrorCallback(code);
+    IsolatedInfo curDynamicInfo;
+    void* handRuntime = nullptr;
+    auto pattern = AceType::MakeRefPtr<DynamicPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, handRuntime, curDynamicInfo);
+    auto host = dynamicPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    dynamicPattern->DumpDynamicRenderer(1, false);
+    dynamicPattern->DumpDynamicRenderer(0, true);
+    dynamicPattern->OnAccessibilityChildTreeRegister(1, 1, 1);
+    dynamicPattern->OnAccessibilityChildTreeDeregister();
+    std::vector<std::string> params = { "param1", "param2", "param3" };
+    std::vector<std::string> info;
+    dynamicPattern->OnAccessibilityDumpChildInfo(params, info);
+    dynamicPattern->HandleFocusEvent();
+    auto pipeline = host->GetContext();
+    EXPECT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
+    dynamicPattern->HandleFocusEvent();
+    EXPECT_EQ(pipeline->isFocusActive_, true);
+#endif
+}
+
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest022, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+    EXPECT_NE(dynamicNode, nullptr);
+    EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
+    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
+    EXPECT_NE(dynamicPattern, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    PipelineContext* rawContext = AceType::RawPtr(context);
+    dynamicPattern->OnAttachContext(rawContext);
+    EXPECT_EQ(dynamicPattern->instanceId_, rawContext->GetInstanceId());
+    dynamicPattern->OnAttachContext(rawContext);
+
+    int dummyObject = 42;
+    void* runtime = &dummyObject;
+    dynamicPattern->InitializeDynamicComponent("", "", "", runtime);
+    dynamicPattern->InitializeDynamicComponent("", "", "entryPoint", runtime);
+    RefPtr<LayoutWrapperNode> layoutWrapper;
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipMeasure = true;
+    dirtySwapConfig.skipLayout = false;
+    auto reuslt = dynamicPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(reuslt, false);
+    dirtySwapConfig.skipLayout = true;
+    reuslt = dynamicPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(reuslt, false);
 #endif
 }
 } // namespace OHOS::Ace::NG
