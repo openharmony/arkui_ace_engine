@@ -48,13 +48,11 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
         imageOptions.imagePixelMap = pixelMapPeer->pixelMap;
     }
 #endif
-    auto imageStyle = OptConvert<ImageSpanAttribute>(value.layoutStyle);
-    if (imageStyle) {
-        imageStyle->verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
-        imageStyle->objectFit = OptConvert<ImageFit>(value.objectFit);
-        imageStyle->size = OptConvert<ImageSpanSize>(value.size);
-        imageOptions.imageAttribute = imageStyle;
-    }
+    auto imageStyle = OptConvert<ImageSpanAttribute>(value.layoutStyle).value_or(ImageSpanAttribute());
+    imageStyle.verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
+    imageStyle.objectFit = OptConvert<ImageFit>(value.objectFit);
+    imageStyle.size = OptConvert<ImageSpanSize>(value.size);
+    imageOptions.imageAttribute = imageStyle;
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
 }
 } // namespace Converter
