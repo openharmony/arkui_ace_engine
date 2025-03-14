@@ -13,15 +13,7 @@
  * limitations under the License.
  */
 
-#include "event/ui_input_event_impl.h"
-#include "gtest/gtest.h"
-#include "interfaces/native/node/event_converter.h"
-#include "native_node.h"
-#include "ui_input_event.h"
-
-#include "frameworks/core/event/ace_events.h"
-#include "frameworks/core/event/axis_event.h"
-#include "frameworks/core/event/touch_event.h"
+#include "ui_input_event_test.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,12 +34,6 @@ constexpr int32_t ARKUI_TOOLTYPE = 7;
 constexpr ArkUI_Uint64 ARKUI_MODIFIERKEYSTATE = 1;
 constexpr ArkUI_Uint32 ARKUI_POINTERCOUNTER = 2;
 } // namespace
-class UIInputEventTest : public testing::Test {
-public:
-    static void SetUpTestSuite() {}
-    static void TearDownTestSuite() {}
-};
-
 /**
  * @tc.name: UIInputEventTest001
  * @tc.desc: Test the UIInputEvent property functions in focus axis event case.

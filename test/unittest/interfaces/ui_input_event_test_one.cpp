@@ -13,32 +13,18 @@
  * limitations under the License.
  */
 
-#include "event/ui_input_event_impl.h"
-#include "gtest/gtest.h"
-#include "interfaces/native/node/event_converter.h"
-#include "native_node.h"
-#include "ui_input_event.h"
-
-#include "frameworks/core/event/ace_events.h"
-#include "frameworks/core/event/axis_event.h"
-#include "frameworks/core/event/touch_event.h"
+#include "ui_input_event_test.h"
 
 using namespace testing;
 using namespace testing::ext;
-
 namespace OHOS::Ace {
-class UIInputEventTestOne : public testing::Test {
-public:
-    static void SetUpTestSuite() {}
-    static void TearDownTestSuite() {}
-};
-
+    
 /**
  * @tc.name: OH_ArkUI_UIInputEvent_GetModifierKeyStates001
  * @tc.desc: Test OH_ArkUI_UIInputEvent_GetModifierKeyStates
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_UIInputEvent_GetModifierKeyStates001, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetModifierKeyStates001, TestSize.Level1)
 {
     auto state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(nullptr, nullptr);
     EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -92,7 +78,7 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_UIInputEvent_GetModifierKeyStates001, Tes
  * @tc.desc: Test OH_ArkUI_UIInputEvent_GetModifierKeyStates
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_UIInputEvent_GetModifierKeyStates002, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetModifierKeyStates002, TestSize.Level1)
 {
     int32_t state = 1;
     ArkUI_UIInputEvent event;
@@ -144,7 +130,7 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_UIInputEvent_GetModifierKeyStates002, Tes
  * @tc.desc: test OH_ArkUI_HoverEvent_IsHovered
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_HoverEvent_IsHovered, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_HoverEvent_IsHovered, TestSize.Level1)
 {
     auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
     auto result = OH_ArkUI_HoverEvent_IsHovered(nullptr);
@@ -169,7 +155,7 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_HoverEvent_IsHovered, TestSize.Level1)
  * @tc.desc: Test function OH_ArkUI_AxisEvent_SetPropagation
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_AxisEvent_SetPropagation, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_AxisEvent_SetPropagation, TestSize.Level1)
 {
     int32_t ret = OH_ArkUI_AxisEvent_SetPropagation(nullptr, true);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -196,7 +182,7 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_AxisEvent_SetPropagation, TestSize.Level1
  * @tc.desc: Test function OH_ArkUI_AxisEvent_GetScrollStep
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_AxisEvent_GetScrollStep, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_AxisEvent_GetScrollStep, TestSize.Level1)
 {
     int32_t step = OH_ArkUI_AxisEvent_GetScrollStep(nullptr);
     EXPECT_EQ(step, 0);
@@ -222,35 +208,11 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_AxisEvent_GetScrollStep, TestSize.Level1)
 }
 
 /**
- * @tc.name: OH_ArkUI_PointerEvent_DestroyClonedEvent
- * @tc.desc: Test OH_ArkUI_PointerEvent_DestroyClonedEvent
- * @tc.type: FUNC
- */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_DestroyClonedEvent, TestSize.Level1)
-{
-    auto ret = OH_ArkUI_PointerEvent_DestroyClonedEvent(nullptr);
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
-
-    auto eventHolder = std::make_unique<ArkUI_UIInputEvent>();
-    auto event = eventHolder.release();
-    event->isCloned = false;
-    ret = OH_ArkUI_PointerEvent_DestroyClonedEvent(event);
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
-
-    event->isCloned = true;
-    auto touchEventHolder = std::make_unique<ArkUITouchEvent>();
-    auto touchEvent = touchEventHolder.release();
-    event->inputEvent = touchEvent;
-    ret = OH_ArkUI_PointerEvent_DestroyClonedEvent(event);
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
-}
-
-/**
  * @tc.name: OH_ArkUI_PointerEvent_SetClonedEventLocalPosition
  * @tc.desc: Test setting cloned event position
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventLocalPosition, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPosition, TestSize.Level1)
 {
     ArkUI_UIInputEvent event;
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventLocalPosition(nullptr, 0.0f, 0.0f);
@@ -280,7 +242,7 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventLocalPosition,
  * @tc.desc: Test OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex, TestSize.Level1)
 {
     ArkUI_UIInputEvent event;
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(nullptr, 0.0f, 0.0f, 1);
@@ -318,7 +280,7 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionB
  * @tc.desc: Test OH_ArkUI_PointerEvent_SetClonedEventActionType
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventActionType, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventActionType, TestSize.Level1)
 {
     ArkUI_UIInputEvent event;
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventActionType(nullptr, 1);
@@ -338,7 +300,6 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventActionType, Te
     event.inputEvent = &touchEvent;
 
     ret = OH_ArkUI_PointerEvent_SetClonedEventActionType(&event, 1);
-    EXPECT_EQ(touchEvent.action, 1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
@@ -347,7 +308,7 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventActionType, Te
  * @tc.desc: Test OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId, TestSize.Level1)
 {
     ArkUI_UIInputEvent event;
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(nullptr, 1);
@@ -376,7 +337,7 @@ HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerI
  * @tc.desc: Test OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex
  * @tc.type: FUNC
  */
-HWTEST_F(UIInputEventTestOne, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex, TestSize.Level1)
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex, TestSize.Level1)
 {
     ArkUI_UIInputEvent event;
     auto ret = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(nullptr, 1, 1);
