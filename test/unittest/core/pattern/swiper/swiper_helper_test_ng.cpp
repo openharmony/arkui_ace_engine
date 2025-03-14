@@ -29,6 +29,7 @@ public:
  */
 HWTEST_F(SwiperHelperTestNg, DumpPanDirection001, TestSize.Level1)
 {
+    DumpLog::GetInstance().description_.clear();
     SwiperHelper helper;
     SwiperPattern swiper;
     PanDirection pan;
@@ -179,6 +180,7 @@ HWTEST_F(SwiperHelperTestNg, DumpPanDirection009, TestSize.Level1)
  */
 HWTEST_F(SwiperHelperTestNg, DumpDirection001, TestSize.Level1)
 {
+    DumpLog::GetInstance().description_.clear();
     SwiperHelper helper;
     SwiperPattern swiper;
     Axis direction = Axis::NONE;
@@ -257,6 +259,7 @@ HWTEST_F(SwiperHelperTestNg, DumpDirection005, TestSize.Level1)
  */
 HWTEST_F(SwiperHelperTestNg, DumpIndicatorType001, TestSize.Level1)
 {
+    DumpLog::GetInstance().description_.clear();
     SwiperHelper helper;
     SwiperPattern swiper;
     swiper.lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
@@ -332,6 +335,7 @@ HWTEST_F(SwiperHelperTestNg, DumpIndicatorType005, TestSize.Level1)
  */
 HWTEST_F(SwiperHelperTestNg, DumpAdvanceInfo001, TestSize.Level1)
 {
+    DumpLog::GetInstance().description_.clear();
     SwiperHelper helper;
     SwiperPattern swiper;
     std::map<int32_t, SwiperItemInfo> itemPosition;
