@@ -5476,6 +5476,28 @@ void RosenRenderContext::DumpInfo()
                                                .append(std::string(",anchorY :"))
                                                .append(anchor->GetY().ToString().c_str()));
         }
+
+        auto rsBlendMode = static_cast<int16_t>(rsNode_->GetStagingProperties().GetColorBlendMode());
+        if (GetBackBlendMode().has_value() || rsBlendMode) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("blendMode:") + std::to_string(rsBlendMode));
+            auto blendMode = static_cast<int16_t>(GetBackBlendMode().value_or(BlendMode::NONE));
+            if (rsBlendMode != blendMode) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("blendMode has difference,arkui:") + std::to_string(blendMode));
+            }
+        }
+        
+        auto rsBlendApplyType = static_cast<int16_t>(rsNode_->GetStagingProperties().GetColorBlendApplyType());
+        if (GetBackBlendApplyType().has_value() || rsBlendApplyType) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("blendApplyType:") + std::to_string(rsBlendApplyType));
+            auto blendApplyType = static_cast<int16_t>(GetBackBlendApplyType().value_or(BlendApplyType::FAST));
+            if (rsBlendApplyType != blendApplyType) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("blendApplyType has difference,arkui:") + std::to_string(blendApplyType));
+            }
+        }
     }
     if (disappearingTransitionCount_) {
         DumpLog::GetInstance().AddDesc(
