@@ -21,8 +21,8 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class AlertDialogAccessorTest : public AccessorTestBase<GENERATED_ArkUIAlertDialogAccessor,
-    &GENERATED_ArkUIAccessors::getAlertDialogAccessor, AlertDialogPeer> {
+class AlertDialogAccessorTest : public StaticAccessorTest<GENERATED_ArkUIAlertDialogAccessor,
+    &GENERATED_ArkUIAccessors::getAlertDialogAccessor> {
 };
 
 /**

@@ -2095,6 +2095,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Type_PanGestureInterface_value& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Type_GaugeAttribute_colors_colors& src)
 {
     switch (src.selector) {
@@ -2661,6 +2676,13 @@ void AssignLiteralTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignLiteralTo(std::optional<T>& dst,
+                     const Ark_Literal_Number_distance_fingers_PanDirection_direction& src)
+{
+    AssignTo(dst, src.fingers);
+}
+
+template<typename T>
+void AssignLiteralTo(std::optional<T>& dst,
                      const Ark_Literal_Alignment_align& src)
 {
     AssignTo(dst, src.align);
@@ -2773,7 +2795,28 @@ void AssignLiteralTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignLiteralTo(std::optional<T>& dst,
-                     const Ark_Literal_Number_distance_fingers_PanDirection_direction& src)
+                     const Ark_Literal_Number_angle_fingers& src)
+{
+    AssignTo(dst, src.fingers);
+}
+
+template<typename T>
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Ark_Literal_Number_distance_fingers& src)
+{
+    AssignTo(dst, src.fingers);
+}
+
+template<typename T>
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Ark_Literal_Number_fingers_speed_SwipeDirection_direction& src)
+{
+    AssignTo(dst, src.fingers);
+}
+
+template<typename T>
+void AssignLiteralTo(std::optional<T>& dst,
+                     const Ark_Literal_Number_duration_fingers_Boolean_repeat& src)
 {
     AssignTo(dst, src.fingers);
 }
@@ -3083,6 +3126,7 @@ ASSIGN_OPT(Opt_BreakpointsReference)
 ASSIGN_OPT(Opt_GridRowColumnOption)
 ASSIGN_OPT(Opt_GutterOption)
 ASSIGN_OPT(Opt_GridColColumnOption)
+ASSIGN_OPT(Opt_PanDirection)
 ASSIGN_OPT(Opt_LinearGradient)
 ASSIGN_OPT(Opt_Callback_Date_Void)
 ASSIGN_OPT(Opt_Callback_DatePickerResult_Void)
@@ -3446,7 +3490,8 @@ ASSIGN_OPT(Opt_PanGestureOptions)
 ASSIGN_OPT(Opt_EventTargetInfo)
 ASSIGN_OPT(Opt_GestureRecognizerState)
 ASSIGN_OPT(Opt_GestureControl_GestureType)
-ASSIGN_OPT(Opt_PanDirection)
+ASSIGN_OPT(Opt_SwipeDirection)
+ASSIGN_OPT(Opt_Literal_Number_distance_fingers_PanDirection_direction)
 ASSIGN_OPT(Opt_Array_FingerInfo)
 ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient)
 ASSIGN_OPT(Opt_Array_Tuple_Union_ResourceColor_LinearGradient_Number)
@@ -3809,12 +3854,10 @@ ASSIGN_OPT(Opt_Callback_FullscreenInfo_Void)
 ASSIGN_OPT(Opt_VideoOptions)
 ASSIGN_OPT(Opt_SwitchStyle)
 ASSIGN_OPT(Opt_ToggleOptions)
-ASSIGN_OPT(Opt_TimePickerDialog)
 ASSIGN_OPT(Opt_TimePickerResult)
 ASSIGN_OPT(Opt_TimePickerOptions)
 ASSIGN_OPT(Opt_TextTimerOptions)
 ASSIGN_OPT(Opt_TextPickerResult)
-ASSIGN_OPT(Opt_TextPickerDialog)
 ASSIGN_OPT(Opt_Type_TextPickerAttribute_onChange_callback)
 ASSIGN_OPT(Opt_Callback_String_Number_Void)
 ASSIGN_OPT(Opt_TextCascadePickerRangeContent)
@@ -4076,7 +4119,7 @@ ASSIGN_OPT(Opt_Callback_ItemDragInfo_Number_Void)
 ASSIGN_OPT(Opt_Callback_ItemDragInfo_Number_Number_Void)
 ASSIGN_OPT(Opt_Callback_ItemDragInfo_Void)
 ASSIGN_OPT(Opt_ItemDragInfo)
-ASSIGN_OPT(Opt_Callback_ItemDragInfo_Number_CustomBuilder)
+ASSIGN_OPT(Opt_onItemDragStart_event_type)
 ASSIGN_OPT(Opt_ComputedBarAttribute)
 ASSIGN_OPT(Opt_Callback_Number_Number_ComputedBarAttribute)
 ASSIGN_OPT(Opt_GridDirection)
@@ -4085,7 +4128,13 @@ ASSIGN_OPT(Opt_GridLayoutOptions)
 ASSIGN_OPT(Opt_PanRecognizer)
 ASSIGN_OPT(Opt_ScrollableTargetInfo)
 ASSIGN_OPT(Opt_GesturePriority)
-ASSIGN_OPT(Opt_Literal_Number_distance_fingers_PanDirection_direction)
+ASSIGN_OPT(Opt_Array_GestureType)
+ASSIGN_OPT(Opt_Literal_Number_angle_fingers)
+ASSIGN_OPT(Opt_Literal_Number_distance_fingers)
+ASSIGN_OPT(Opt_Literal_Number_fingers_speed_SwipeDirection_direction)
+ASSIGN_OPT(Opt_Type_PanGestureInterface_value)
+ASSIGN_OPT(Opt_Literal_Number_duration_fingers_Boolean_repeat)
+ASSIGN_OPT(Opt_TapGestureParameters)
 ASSIGN_OPT(Opt_GestureEvent)
 ASSIGN_OPT(Opt_SwipeGestureEvent)
 ASSIGN_OPT(Opt_RotationGestureEvent)
@@ -4094,7 +4143,6 @@ ASSIGN_OPT(Opt_PanGestureEvent)
 ASSIGN_OPT(Opt_LongPressGestureEvent)
 ASSIGN_OPT(Opt_TapGestureEvent)
 ASSIGN_OPT(Opt_GestureMode)
-ASSIGN_OPT(Opt_SwipeDirection)
 ASSIGN_OPT(Opt_GaugeIndicatorOptions)
 ASSIGN_OPT(Opt_GaugeShadowOptions)
 ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_LinearGradient_Number)
@@ -4127,7 +4175,6 @@ ASSIGN_OPT(Opt_TerminationInfo)
 ASSIGN_OPT(Opt_Callback_TerminationInfo_Void)
 ASSIGN_OPT(Opt_EmbeddedType)
 ASSIGN_OPT(Opt_EllipseOptions)
-ASSIGN_OPT(Opt_DatePickerDialog)
 ASSIGN_OPT(Opt_DatePickerResult)
 ASSIGN_OPT(Opt_DatePickerOptions)
 ASSIGN_OPT(Opt_DataPanelShadowOptions)
@@ -4136,7 +4183,6 @@ ASSIGN_OPT(Opt_ColorStop)
 ASSIGN_OPT(Opt_Array_ColorStop)
 ASSIGN_OPT(Opt_CustomDialogControllerOptions)
 ASSIGN_OPT(Opt_CustomDialogController)
-ASSIGN_OPT(Opt_ContextMenu)
 ASSIGN_OPT(Opt_SceneOptions)
 ASSIGN_OPT(Opt_UICommonEvent)
 ASSIGN_OPT(Opt_ChildrenMainSize)
@@ -4268,7 +4314,6 @@ ASSIGN_OPT(Opt_Union_ImageBitmap_PixelMap)
 ASSIGN_OPT(Opt_CanvasRenderer)
 ASSIGN_OPT(Opt_LengthMetricsUnit)
 ASSIGN_OPT(Opt_CanvasPath)
-ASSIGN_OPT(Opt_CalendarPickerDialog)
 ASSIGN_OPT(Opt_CalendarOptions)
 ASSIGN_OPT(Opt_CalendarRequestedData)
 ASSIGN_OPT(Opt_Callback_CalendarRequestedData_Void)
@@ -4296,27 +4341,17 @@ ASSIGN_OPT(Opt_OnAlphabetIndexerSelectCallback)
 ASSIGN_OPT(Opt_AlphabetIndexerOptions)
 ASSIGN_OPT(Opt_AlertDialogButtonOptions)
 ASSIGN_OPT(Opt_Type_AlertDialog_show_value)
-ASSIGN_OPT(Opt_AlertDialog)
 ASSIGN_OPT(Opt_DismissDialogAction)
 ASSIGN_OPT(Opt_SheetInfo)
-ASSIGN_OPT(Opt_ActionSheet)
 ASSIGN_OPT(Opt_Literal_Want_want)
-ASSIGN_OPT(Opt_EventEmulator)
-ASSIGN_OPT(Opt_NavExtender)
 ASSIGN_OPT(Opt_ReplaceSymbolEffect)
 ASSIGN_OPT(Opt_ScaleSymbolEffect)
-ASSIGN_OPT(Opt_GlobalScope_ohos_font)
 ASSIGN_OPT(Opt_PathShapeOptions)
 ASSIGN_OPT(Opt_ShapeSize)
 ASSIGN_OPT(Opt_Union_RectShapeOptions_RoundRectShapeOptions)
-ASSIGN_OPT(Opt_GlobalScope_ohos_arkui_performanceMonitor)
-ASSIGN_OPT(Opt_GlobalScope_ohos_arkui_componentSnapshot)
 ASSIGN_OPT(Opt_WebHeader)
 ASSIGN_OPT(Opt_Array_WebHeader)
-ASSIGN_OPT(Opt_SystemOps)
-ASSIGN_OPT(Opt_LazyForEachOps)
 ASSIGN_OPT(Opt_NativePointer)
-ASSIGN_OPT(Opt_AnimationExtender)
 #undef ASSIGN_OPT
 }
 

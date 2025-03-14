@@ -1065,6 +1065,10 @@ void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(opt);
     peerImpl->TriggerSetGlobalCompositeOperationImpl(*opt);
 }
+Ark_Union_String_Number_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+{
+    return {};
+}
 void SetFillStyleImpl(Ark_CanvasRenderer peer,
                       const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
 {
@@ -1103,6 +1107,10 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
         },
         []() {}
     );
+}
+Ark_Union_String_Number_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+{
+    return {};
 }
 void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
                         const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
@@ -1478,7 +1486,9 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
         CanvasRendererAccessor::SetGlobalAlphaImpl,
         CanvasRendererAccessor::GetGlobalCompositeOperationImpl,
         CanvasRendererAccessor::SetGlobalCompositeOperationImpl,
+        CanvasRendererAccessor::GetFillStyleImpl,
         CanvasRendererAccessor::SetFillStyleImpl,
+        CanvasRendererAccessor::GetStrokeStyleImpl,
         CanvasRendererAccessor::SetStrokeStyleImpl,
         CanvasRendererAccessor::GetFilterImpl,
         CanvasRendererAccessor::SetFilterImpl,

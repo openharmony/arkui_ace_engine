@@ -301,7 +301,7 @@ void SupportAnimationImpl(Ark_NativePointer node,
     GridModelNG::SetSupportAnimation(frameNode, Converter::Convert<bool>(value));
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         const Callback_ItemDragInfo_Number_CustomBuilder* value)
+                         const onItemDragStart_event_type* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

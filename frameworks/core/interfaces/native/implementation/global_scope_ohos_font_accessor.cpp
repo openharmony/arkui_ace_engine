@@ -25,18 +25,6 @@ struct GlobalScope_ohos_fontPeer {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_fontAccessor {
-void DestroyPeerImpl(Ark_GlobalScope_ohos_font peer)
-{
-    delete peer;
-}
-Ark_GlobalScope_ohos_font CtorImpl()
-{
-    return new GlobalScope_ohos_fontPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void RegisterFontImpl(const Ark_FontOptions* options)
 {
     CHECK_NULL_VOID(options);
@@ -76,13 +64,11 @@ Ark_FontInfo GetFontByNameImpl(const Ark_String* fontName)
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
 {
     static const GENERATED_ArkUIGlobalScope_ohos_fontAccessor GlobalScope_ohos_fontAccessorImpl {
-        GlobalScope_ohos_fontAccessor::DestroyPeerImpl,
-        GlobalScope_ohos_fontAccessor::CtorImpl,
-        GlobalScope_ohos_fontAccessor::GetFinalizerImpl,
         GlobalScope_ohos_fontAccessor::RegisterFontImpl,
         GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
         GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
     };
     return &GlobalScope_ohos_fontAccessorImpl;
 }
+
 }

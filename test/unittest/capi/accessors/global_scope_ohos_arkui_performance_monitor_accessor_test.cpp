@@ -64,22 +64,18 @@ const std::vector<std::pair<Ark_Number, int32_t>> testFixtureNumberValues = {
 } // namespace
 
 class GlobalScope_ohos_arkui_performanceMonitorAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor,
-          &GENERATED_ArkUIAccessors::getGlobalScope_ohos_arkui_performanceMonitorAccessor,
-          GlobalScope_ohos_arkui_performanceMonitorPeer> {
+    : public StaticAccessorTest<GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor,
+          &GENERATED_ArkUIAccessors::getGlobalScope_ohos_arkui_performanceMonitorAccessor> {
 public:
     void SetUp(void) override
     {
-        ASSERT_NE(this->accessor_->ctor, nullptr);
-        this->peer_ = static_cast<GlobalScope_ohos_arkui_performanceMonitorPeer*>(this->accessor_->ctor());
-        ASSERT_EQ(this->peer_, nullptr);
         mockPerfMonitor_ = new PerfMonitor();
         ASSERT_NE(mockPerfMonitor_, nullptr);
         PerfMonitor::pMonitor = mockPerfMonitor_;
     }
     void TearDown() override
     {
-        AccessorTestBase::TearDown();
+        StaticAccessorTest::TearDown();
         PerfMonitor::pMonitor = nullptr;
         delete mockPerfMonitor_;
         mockPerfMonitor_ = nullptr;

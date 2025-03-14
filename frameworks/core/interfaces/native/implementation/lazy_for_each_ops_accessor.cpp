@@ -25,25 +25,8 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 
-struct LazyForEachOpsPeer {
-    virtual ~LazyForEachOpsPeer() = default;
-};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
-void DestroyPeerImpl(LazyForEachOpsPeer* peer)
-{
-    delete peer;
-}
-Ark_LazyForEachOps CtorImpl()
-{
-    return new LazyForEachOpsPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void*>(&DestroyPeerImpl);
-}
-
 Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node, Ark_NativePointer mark, Ark_Int32 direction)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -103,9 +86,6 @@ void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, 
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
     static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
-        LazyForEachOpsAccessor::DestroyPeerImpl,
-        LazyForEachOpsAccessor::CtorImpl,
-        LazyForEachOpsAccessor::GetFinalizerImpl,
         LazyForEachOpsAccessor::NeedMoreElementsImpl,
         LazyForEachOpsAccessor::OnRangeUpdateImpl,
         LazyForEachOpsAccessor::SetCurrentIndexImpl,
@@ -115,4 +95,4 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
     return &LazyForEachOpsAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

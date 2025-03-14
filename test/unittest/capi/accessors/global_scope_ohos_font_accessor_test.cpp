@@ -26,18 +26,8 @@ using namespace testing;
 using namespace testing::ext;
 
 class GlobalScopeOhosFontAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUIGlobalScope_ohos_fontAccessor,
-          &GENERATED_ArkUIAccessors::getGlobalScope_ohos_fontAccessor,
-          GlobalScope_ohos_fontPeer> {
-public:
-    void SetUp(void) override
-    {
-        AccessorTestBase::SetUp();
-    }
-    void TearDown() override
-    {
-        AccessorTestBase::TearDown();
-    }
+    : public StaticAccessorTest<GENERATED_ArkUIGlobalScope_ohos_fontAccessor,
+          &GENERATED_ArkUIAccessors::getGlobalScope_ohos_fontAccessor> {
 };
 
 namespace {

@@ -22,17 +22,13 @@
 #include "frameworks/core/components_ng/render/adapter/component_snapshot.h"
 #include "arkoala_api_generated.h"
 
-struct GlobalScope_ohos_arkui_componentSnapshotPeer {
-    virtual ~GlobalScope_ohos_arkui_componentSnapshotPeer() = default;
-};
-
 namespace OHOS::Ace::NG {
 namespace Converter {
 template<>
 SnapshotOptions Convert(const Ark_SnapshotOptions& src)
 {
     SnapshotOptions ret;
-    ret.scale = Converter::OptConvert<float>(src.scale).value_or(false);
+    ret.scale = Converter::OptConvert<float>(src.scale).value_or(1.0f);
     ret.waitUntilRenderFinished = Converter::OptConvert<bool>(src.waitUntilRenderFinished).value_or(false);
     return ret;
 }
@@ -41,19 +37,6 @@ SnapshotOptions Convert(const Ark_SnapshotOptions& src)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_arkui_componentSnapshotAccessor {
-void DestroyPeerImpl(Ark_GlobalScope_ohos_arkui_componentSnapshot peer)
-{
-    CHECK_NULL_VOID(peer);
-    delete peer;
-}
-Ark_GlobalScope_ohos_arkui_componentSnapshot CtorImpl()
-{
-    return new GlobalScope_ohos_arkui_componentSnapshotPeer();
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
 void GetImpl(const Ark_String* id,
              const AsyncCallback_image_PixelMap_Void* callback,
              const Opt_SnapshotOptions* options)
@@ -78,9 +61,6 @@ void GetImpl(const Ark_String* id,
 const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor()
 {
     static const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor GlobalScope_ohos_arkui_componentSnapshotAccessorImpl {
-        GlobalScope_ohos_arkui_componentSnapshotAccessor::DestroyPeerImpl,
-        GlobalScope_ohos_arkui_componentSnapshotAccessor::CtorImpl,
-        GlobalScope_ohos_arkui_componentSnapshotAccessor::GetFinalizerImpl,
         GlobalScope_ohos_arkui_componentSnapshotAccessor::GetImpl,
     };
     return &GlobalScope_ohos_arkui_componentSnapshotAccessorImpl;
