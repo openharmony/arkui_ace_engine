@@ -117,6 +117,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg001, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitForegroundCallback();
+    EXPECT_EQ(sessionWrapper->foregroundCallback_, nullptr);
     
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
@@ -126,7 +127,6 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg001, TestSize.L
     sessionWrapper->hostPattern_ = nullptr;
     
     sessionWrapper->InitForegroundCallback();
-
     OHOS::Rosen::WSError errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
     sessionWrapper->foregroundCallback_(errcode);
 
@@ -141,7 +141,6 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg001, TestSize.L
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->foregroundCallback_(errcode);
 
-
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
@@ -153,19 +152,13 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg001, TestSize.L
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitForegroundCallback();
     sessionWrapper->foregroundCallback_(errcode);
+    EXPECT_NE(sessionWrapper->foregroundCallback_, nullptr);
     
     sessionWrapper->session_->persistentId_ = 0;
-    uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
-    pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
-
-    weak = AceType::WeakClaim(AceType::RawPtr(pattern));
-    sessionWrapper->hostPattern_ = weak;
-    errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
-    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitForegroundCallback();
     sessionWrapper->foregroundCallback_(errcode);
+    EXPECT_NE(sessionWrapper->foregroundCallback_, nullptr);
+    EXPECT_TRUE(pattern->IsCompatibleOldVersion());
 }
 
 /**
@@ -178,6 +171,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg002, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitBackgroundCallback();
+    EXPECT_EQ(sessionWrapper->backgroundCallback_, nullptr);
     
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
@@ -187,7 +181,6 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg002, TestSize.L
     sessionWrapper->hostPattern_ = nullptr;
     
     sessionWrapper->InitBackgroundCallback();
-
     OHOS::Rosen::WSError errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
     sessionWrapper->backgroundCallback_(errcode);
 
@@ -202,7 +195,6 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg002, TestSize.L
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->backgroundCallback_(errcode);
 
-
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
@@ -214,19 +206,13 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg002, TestSize.L
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitBackgroundCallback();
     sessionWrapper->backgroundCallback_(errcode);
+    EXPECT_NE(sessionWrapper->backgroundCallback_, nullptr);
     
     sessionWrapper->session_->persistentId_ = 0;
-    uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
-    pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
-
-    weak = AceType::WeakClaim(AceType::RawPtr(pattern));
-    sessionWrapper->hostPattern_ = weak;
-    errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
-    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitBackgroundCallback();
     sessionWrapper->backgroundCallback_(errcode);
+    EXPECT_NE(sessionWrapper->backgroundCallback_, nullptr);
+    EXPECT_TRUE(pattern->IsCompatibleOldVersion());
 }
 
 /**
@@ -239,6 +225,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg003, TestSize.L
     auto sessionWrapper = GenerateSessionWrapperImpl();
     EXPECT_EQ(sessionWrapper->session_, nullptr);
     sessionWrapper->InitDestructionCallback();
+    EXPECT_EQ(sessionWrapper->destructionCallback_, nullptr);
     
     Rosen::SessionInfo sessionInfo;
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
@@ -248,7 +235,6 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg003, TestSize.L
     sessionWrapper->hostPattern_ = nullptr;
     
     sessionWrapper->InitDestructionCallback();
-
     OHOS::Rosen::WSError errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
     sessionWrapper->destructionCallback_(errcode);
 
@@ -263,7 +249,6 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg003, TestSize.L
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->destructionCallback_(errcode);
 
-
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
@@ -275,19 +260,13 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg003, TestSize.L
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitDestructionCallback();
     sessionWrapper->destructionCallback_(errcode);
+    EXPECT_NE(sessionWrapper->destructionCallback_, nullptr);
     
     sessionWrapper->session_->persistentId_ = 0;
-    uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
-    pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
-
-    weak = AceType::WeakClaim(AceType::RawPtr(pattern));
-    sessionWrapper->hostPattern_ = weak;
-    errcode = OHOS::Rosen::WSError::WS_DO_NOTHING;
-    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitDestructionCallback();
     sessionWrapper->destructionCallback_(errcode);
+    EXPECT_NE(sessionWrapper->destructionCallback_, nullptr);
+    EXPECT_TRUE(pattern->IsCompatibleOldVersion());
 }
 
 /**
@@ -316,25 +295,28 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg004, TestSize.L
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
-
     auto weak = AceType::WeakClaim(AceType::RawPtr(pattern));
     sessionWrapper->hostPattern_ = weak;
 
     sessionWrapper->taskExecutor_ = nullptr;
     sessionWrapper->InitTransferAbilityResultFunc();
     sessionCallbacks->transferAbilityResultFunc_(code, want);
+    EXPECT_NE(sessionCallbacks->transferAbilityResultFunc_, nullptr);
     
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitTransferAbilityResultFunc();
     sessionCallbacks->transferAbilityResultFunc_(code, want);
+    EXPECT_NE(sessionCallbacks->transferAbilityResultFunc_, nullptr);
 
     sessionWrapper->session_->persistentId_ = 0;
     sessionWrapper->InitTransferAbilityResultFunc();
     sessionCallbacks->transferAbilityResultFunc_(code, want);
+    EXPECT_NE(sessionCallbacks->transferAbilityResultFunc_, nullptr);
 
     sessionWrapper->sessionType_ = SessionType::INVALID_TYPE;
     sessionWrapper->InitTransferAbilityResultFunc();
     sessionCallbacks->transferAbilityResultFunc_(code, want);
+    EXPECT_NE(sessionCallbacks->transferAbilityResultFunc_, nullptr);
 }
 
 /**
@@ -362,20 +344,22 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg005, TestSize.L
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
-
     auto weak = AceType::WeakClaim(AceType::RawPtr(pattern));
     sessionWrapper->hostPattern_ = weak;
 
     sessionWrapper->taskExecutor_ = nullptr;
     sessionWrapper->InitTransferExtensionDataFunc();
     sessionCallbacks->transferExtensionDataFunc_(params);
+    EXPECT_NE(sessionCallbacks->transferExtensionDataFunc_, nullptr);
     
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->InitTransferExtensionDataFunc();
     sessionCallbacks->transferExtensionDataFunc_(params);
+    EXPECT_NE(sessionCallbacks->transferExtensionDataFunc_, nullptr);
 
     sessionWrapper->session_->persistentId_ = 0;
     sessionWrapper->InitTransferExtensionDataFunc();
     sessionCallbacks->transferExtensionDataFunc_(params);
+    EXPECT_NE(sessionCallbacks->transferExtensionDataFunc_, nullptr);
 }
 } // namespace OHOS::Ace::NG
