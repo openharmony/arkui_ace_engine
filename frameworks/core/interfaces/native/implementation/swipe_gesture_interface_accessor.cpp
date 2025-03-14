@@ -14,17 +14,27 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/swipe_gesture_interface_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/gestures/gesture_info.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwipeGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_SwipeGestureInterface peer)
 {
+    delete peer;
 }
 Ark_SwipeGestureInterface CtorImpl()
 {
-    return nullptr;
+    int32_t fingersNum = DEFAULT_SLIDE_FINGER;
+    double speedNum = DEFAULT_SLIDE_SPEED;
+    SwipeDirection slideDirection;
+    auto peer = new SwipeGestureInterfacePeer();
+    peer->gesture = AceType::MakeRefPtr<SwipeGesture>(fingersNum, slideDirection, speedNum);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,7 +43,13 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_SwipeGestureInterface OnActionImpl(Ark_SwipeGestureInterface peer,
                                        const Callback_GestureEvent_Void* event)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
+    auto onAction = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
+        auto arkEvent = Converter::ArkGestureEventSync(info);
+        arkCallback.InvokeSync(arkEvent.ArkValue());
+    };
+    peer->gesture->SetOnActionId(std::move(onAction));
+    return peer;
 }
 } // SwipeGestureInterfaceAccessor
 const GENERATED_ArkUISwipeGestureInterfaceAccessor* GetSwipeGestureInterfaceAccessor()
@@ -46,8 +62,4 @@ const GENERATED_ArkUISwipeGestureInterfaceAccessor* GetSwipeGestureInterfaceAcce
     };
     return &SwipeGestureInterfaceAccessorImpl;
 }
-
-struct SwipeGestureInterfacePeer {
-    virtual ~SwipeGestureInterfacePeer() = default;
-};
 }
