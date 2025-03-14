@@ -14,125 +14,18 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { RadioBlock, SliderBlock, useEnabled} from 'common';
-import { SymbolGlyphModifier } from '@kit.ArkUI';
+import { RadioBlock } from 'common';
 
 @Component
-export struct ToolBarBootcamp {
+export struct TitleBarBootcamp {
   @Provide('navPathStack') navPathStack: NavPathStack = new NavPathStack();
   @State hideItemValue: boolean = false;
   @State menuItems: Array<NavigationMenuItem> = [
     {
-      value: 'menuItem1',
-      icon: 'resources/base/media/icon.svg' // 图标资源路径
-    },
-    {
-      value: 'menuItem2',
-      icon: 'resources/base/media/icon.svg' // 图标资源路径
-    },
-    {
-      value: 'menuItem3',
-      icon: 'resources/base/media/icon.svg' // 图标资源路径
+      value: 'menuItem',
+      icon: 'resources/base/media/text_title.svg' // 图标资源路径
     },
   ]
-  @State toolItems: Array<ToolbarItem> = [
-    {
-      value: 'toolItem1',
-      icon: 'resources/base/media/icon.svg', // 图标资源路径
-      status: ToolbarItemStatus.ACTIVE,
-      activeIcon: 'resources/base/media/icon.svg',
-      action: () => {
-      }
-    },
-    {
-      value: 'toolItem2',
-      icon: 'resources/base/media/icon1.svg', // 图标资源路径
-      status: ToolbarItemStatus.DISABLED,
-      action: () => {
-      }
-    },
-    {
-      value: 'toolItem3',
-      icon: 'resources/base/media/icon2.svg', // 图标资源路径
-      activeIcon: 'resources/base/media/icon2.svg',
-      action: () => {
-      }
-    },
-    {
-      value: 'toolItem4',
-      icon: 'resources/base/media/text_bold.svg', // 图标资源路径
-      activeIcon: 'resources/base/media/text_bold.svg',
-      action: () => {
-      }
-    },
-    {
-      value: 'toolItem5',
-      icon: 'resources/base/media/text_color.svg', // 图标资源路径
-      activeIcon: 'resources/base/media/text_color.svg',
-      action: () => {
-      }
-    },
-    {
-      value: 'toolItem6',
-      icon: 'resources/base/media/text_title.svg', // 图标资源路径
-      activeIcon: 'resources/base/media/text_title.svg',
-      action: () => {
-      }
-    }
-  ]
-
-  @State toolItems0: Array<ToolbarItem> = [
-    {
-      value: '通话',
-      icon: 'resources/base/media/ic_public_ok.svg', // 图标资源路径
-      symbolIcon: new SymbolGlyphModifier($r('sys.symbol.voice_convert_text')),
-      status: ToolbarItemStatus.ACTIVE,
-      activeSymbolIcon: new SymbolGlyphModifier($r('sys.symbol.voice_convert_text')),
-      action: () => {
-      }
-    },
-    {
-      value: '消息',
-      symbolIcon: new SymbolGlyphModifier($r('sys.symbol.message')),
-      status: ToolbarItemStatus.ACTIVE,
-      activeSymbolIcon: new SymbolGlyphModifier($r('sys.symbol.message')),
-      action: () => {
-      }
-    },
-    {
-      value: '联系人',
-      symbolIcon: new SymbolGlyphModifier($r('sys.symbol.contacts_book_fill')),
-      status: ToolbarItemStatus.ACTIVE,
-      activeSymbolIcon: new SymbolGlyphModifier($r('sys.symbol.contacts_book_fill')),
-      action: () => {
-      }
-    },
-    {
-      value: '收藏',
-      symbolIcon: new SymbolGlyphModifier($r('sys.symbol.phone_badge_star')),
-      status: ToolbarItemStatus.ACTIVE,
-      activeSymbolIcon: new SymbolGlyphModifier($r('sys.symbol.phone_badge_star')),
-      action: () => {
-      }
-    },
-    {
-      value: '收藏',
-      symbolIcon: new SymbolGlyphModifier($r('sys.symbol.phone_badge_star')),
-      status: ToolbarItemStatus.ACTIVE,
-      activeSymbolIcon: new SymbolGlyphModifier($r('sys.symbol.phone_badge_star')),
-      action: () => {
-      }
-    },
-    {
-      value: '收藏',
-      symbolIcon: new SymbolGlyphModifier($r('sys.symbol.phone_badge_star')),
-      status: ToolbarItemStatus.ACTIVE,
-      activeSymbolIcon: new SymbolGlyphModifier($r('sys.symbol.phone_badge_star')),
-      action: () => {
-      }
-    }
-  ]
-
   @Require @Prop title: ResourceStr;
   @State navigationMode: NavigationMode = NavigationMode.Stack;
   @State enableToolBarAdaptation: boolean = false;
@@ -140,8 +33,8 @@ export struct ToolBarBootcamp {
   @State enableNavigationMode: boolean = false;
   @State enableAdaptation: boolean = false;
   @State enableHideItem: boolean = false;
+  @State isBackGroundEffect: boolean = false;
   @State enableEffect: boolean = false;
-  @State isBackGroundEffect: boolean = true;
   @State blurStyle: BlurStyle = BlurStyle.COMPONENT_ULTRA_THIN;
   @State enableBlurStyle: boolean = false;
   @State enableRadius: boolean = false;
@@ -193,13 +86,10 @@ export struct ToolBarBootcamp {
         if (this.isNavigation) {
           Navigation(this.navPathStack) {
             Column() {
-              Text('我是Navigation主页面内容')
             }
           }
           .titleMode(NavigationTitleMode.Mini)
-          .menus(this.menuItems)
-          .toolbarConfiguration(this.toolItems0, this.isBackGroundEffect ? {
-            hideItemValue: this.hideItemValue,
+          .title('titleBar', this.isBackGroundEffect ? {
             backgroundEffect:
             {
               radius: this.isRadius,
@@ -208,9 +98,8 @@ export struct ToolBarBootcamp {
               color: this.isColorEffect,
               adaptiveColor: this.isAdaptiveColor,
               blurOptions: this.isBlurOptions,
-            },
+            }
           } : {
-            hideItemValue: this.hideItemValue,
             backgroundBlurStyle: this.blurStyle,
             backgroundBlurStyleOptions:
             {
@@ -224,19 +113,41 @@ export struct ToolBarBootcamp {
             }
           }
           )
-          .title('一级页面')
-          .hideTitleBar(false)
-        }else{
-          NavDestination(){
+          .mode(this.navigationMode)
+          .menus(this.menuItems, this.isBackGroundEffect ?
+            {
+              moreButtonOptions: {
+                backgroundEffect: {
+                  radius: this.isRadius,
+                  saturation: this.isSaturation,
+                  brightness: this.isBrightness,
+                  color: this.isColorEffect,
+                  adaptiveColor: this.isAdaptiveColor,
+                  blurOptions: this.isBlurOptions,
+                },
+              }
+            } : {
+              moreButtonOptions: {
+                backgroundBlurStyle: this.blurStyle,
+                backgroundBlurStyleOptions:
+                {
+                  colorMode: this.isColorMode,
+                  adaptiveColor:
+                  this.isAdaptiveColor,
+                  scale:
+                  this.isScale,
+                  blurOptions:
+                  this.isBlurOptions
+                }
+              }
+            }
+          )
+        } else {
+          NavDestination() {
             Column() {
-              Text('我是NavDestination主页面内容')
             }
           }
-          .menus(this.menuItems)
-          .toolbarConfiguration(this.toolItems,
-            { backgroundBlurStyle: BlurStyle.Thick, hideItemValue: this.hideItemValue })
-          .toolbarConfiguration(this.toolItems0, this.isBackGroundEffect ? {
-            hideItemValue: this.hideItemValue,
+          .title('titleBar', this.isBackGroundEffect ? {
             backgroundEffect:
             {
               radius: this.isRadius,
@@ -245,9 +156,8 @@ export struct ToolBarBootcamp {
               color: this.isColorEffect,
               adaptiveColor: this.isAdaptiveColor,
               blurOptions: this.isBlurOptions,
-            },
+            }
           } : {
-            hideItemValue: this.hideItemValue,
             backgroundBlurStyle: this.blurStyle,
             backgroundBlurStyleOptions:
             {
@@ -260,6 +170,34 @@ export struct ToolBarBootcamp {
               this.isBlurOptions
             }
           }
+          )
+          .menus(this.menuItems, this.isBackGroundEffect ?
+            {
+              moreButtonOptions: {
+                backgroundEffect: {
+                  radius: this.isRadius,
+                  saturation: this.isSaturation,
+                  brightness: this.isBrightness,
+                  color: this.isColorEffect,
+                  adaptiveColor: this.isAdaptiveColor,
+                  blurOptions: this.isBlurOptions,
+                },
+              }
+            } : {
+              moreButtonOptions: {
+                backgroundBlurStyle: this.blurStyle,
+                backgroundBlurStyleOptions:
+                {
+                  colorMode: this.isColorMode,
+                  adaptiveColor:
+                  this.isAdaptiveColor,
+                  scale:
+                  this.isScale,
+                  blurOptions:
+                  this.isBlurOptions
+                }
+              }
+            }
           )
         }
       }.width('100%').height('100%')
@@ -271,45 +209,20 @@ export struct ToolBarBootcamp {
     Scroll() {
       Column({ space: 8 }) {
         RadioBlock({
-          title: '设置无字模式',
-          isEnabled: this.enableHideItem,
-          value: this.hideItemValue,
-          dataSource: [{ label: '无字模式开', value: true }, { label: '无字模式关', value: false }]
-        })
-
-        RadioBlock({
-          title: '是否开启自适应',
-          isEnabled: this.enableAdaptation,
-          value: this.enableToolBarAdaptation,
-          dataSource: [{ label: '是', value: true }, { label: '否', value: false }]
-        })
-
-        RadioBlock({
-          title: '选择navigation模式',
-          isEnabled: this.enableNavigationMode,
-          value: this.navigationMode,
-          dataSource: [
-            { label: '堆栈', value: NavigationMode.Stack },
-            { label: '分栏', value: NavigationMode.Split },
-            { label: '自动', value: NavigationMode.Auto }]
-        })
-
-        RadioBlock({
           title: '是否设置backgroundEffectOptions',
           isEnabled: this.enableEffect,
           value: this.isBackGroundEffect,
           dataSource: [
-            { label: 'true', value: true },
-            { label: 'false', value: false },
+            { label: '是', value: true },
+            { label: '否', value: false },
           ]
         })
 
         RadioBlock({
-          title: '背景模糊选项',
+          title: '标题栏背景模糊样式',
           isEnabled: this.enableBlurStyle,
           value: this.blurStyle,
           dataSource: [
-            { label: '厚材质模糊', value: BlurStyle.Thick },
             { label: '组件超轻薄材质模糊', value: BlurStyle.COMPONENT_ULTRA_THIN },
             { label: '组件轻薄材质模糊', value: BlurStyle.COMPONENT_THIN },
             { label: '组件普通材质模糊', value: BlurStyle.COMPONENT_REGULAR },
@@ -384,7 +297,7 @@ export struct ToolBarBootcamp {
             { label: '(1,1)', value: { grayscale: [1, 1] } as BlurOptions },
           ]
         })
-
+        //backgroundblurstyleoptions
         RadioBlock({
           title: '背景模糊样式（深浅色模式）',
           isEnabled: this.enableColorMode,
@@ -430,8 +343,8 @@ export struct ToolBarBootcamp {
 
 @Preview
 @Component
-struct ToolBarBootcampPreviewer {
+struct TitleBarBootcampPreviewer {
   build() {
-    ToolBarBootcamp({ title: '标题栏/ToolBar' })
+    TitleBarBootcamp({ title: '标题栏/TitleBar' })
   }
 }
