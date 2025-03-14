@@ -214,19 +214,19 @@ void GestureEventHub::ResetDragActionForWeb()
     dragDropManager->ResetDragging();
 }
 
-void GestureEventHub::StartDragTaskForWeb()
+bool GestureEventHub::StartDragTaskForWeb()
 {
     if (!isReceivedDragGestureInfo_) {
         TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop StartDragTaskForWeb failed,"
                                      "because not recv gesture info");
-        return;
+        return false;
     }
 
     isReceivedDragGestureInfo_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     auto taskScheduler = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskScheduler);
+    CHECK_NULL_RETURN(taskScheduler, false);
 
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop post a task to start drag for web");
     taskScheduler->PostTask(
@@ -240,6 +240,7 @@ void GestureEventHub::StartDragTaskForWeb()
             dragEventActuator->StartDragTaskForWeb(*gestureHub->gestureInfoForWeb_);
         },
         TaskExecutor::TaskType::UI, "ArkUIGestureWebStartDrag");
+    return true;
 }
 
 RefPtr<PixelMap> CreatePixelMapFromString(const std::string& filePath)

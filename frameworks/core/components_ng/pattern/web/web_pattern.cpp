@@ -1927,7 +1927,11 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag and start drag task for web,"
         "is mouse event: %{public}d", isMouseEvent_);
-    gestureHub->StartDragTaskForWeb();
+    bool result = gestureHub->StartDragTaskForWeb();
+    if (!result && isMouseEvent_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web fail, reset drag action");
+        ResetDragAction();
+    }
     return true;
 }
 
