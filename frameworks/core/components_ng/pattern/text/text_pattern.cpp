@@ -557,6 +557,9 @@ std::u16string TextPattern::GetSelectedText(int32_t start, int32_t end, bool inc
         auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(textForDisplay_.length()));
         auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(textForDisplay_.length())), 0,
             static_cast<int32_t>(textForDisplay_.length()));
+        if (max - min < 0) {
+            return std::u16string();
+        }
         if (getSubstrDirectly) {
             return textForDisplay_.substr(min, max - min);
         } else {
@@ -2660,6 +2663,7 @@ std::u16string TextPattern::GetSelectedSpanText(std::u16string value, int32_t st
     auto min = std::min(start, end);
     auto max = std::max(start, end);
     if (getSubstrDirectly) {
+        min = std::clamp(min, 0, static_cast<int32_t>(value.length()));
         return value.substr(min, max - min);
     } else {
         return TextEmojiProcessor::SubU16string(min, max - min, value, includeStartHalf, includeEndHalf);
