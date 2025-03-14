@@ -583,12 +583,12 @@ class BackdropBlurModifier extends ModifierWithKey {
     }
     else {
       getUINativeModule().common.setBackdropBlur(
-        node, this.value.value, (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.grayscale);
+        node, this.value.value, (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.grayscale, this.value.disableSystemAdaptation);
     }
   }
   checkObjectDiff() {
     return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
+      (this.stageValue.options === this.value.options) && (this.stageValue.disableSystemAdaptation === this.value.disableSystemAdaptation));
   }
 }
 BackdropBlurModifier.identity = Symbol('backdropBlur');
@@ -729,12 +729,12 @@ class BlurModifier extends ModifierWithKey {
     }
     else {
       getUINativeModule().common.setBlur(
-        node, this.value.value, (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.grayscale);
+        node, this.value.value, (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.grayscale, this.value.disableSystemAdaptation);
     }
   }
   checkObjectDiff() {
     return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
+      (this.stageValue.options === this.value.options) && (this.stageValue.disableSystemAdaptation === this.value.disableSystemAdaptation));
   }
 }
 BlurModifier.identity = Symbol('blur');
@@ -1205,7 +1205,7 @@ class ForegroundBlurStyleModifier extends ModifierWithKey {
     }
     else {
       getUINativeModule().common.setForegroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
-        (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale);
+        (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale, this.value.disableSystemAdaptation);
     }
   }
   checkObjectDiff() {
@@ -1213,7 +1213,8 @@ class ForegroundBlurStyleModifier extends ModifierWithKey {
       this.stageValue.colorMode === this.value.colorMode &&
       this.stageValue.adaptiveColor === this.value.adaptiveColor &&
       this.stageValue.scale === this.value.scale &&
-      this.stageValue.blurOptions === this.value.blurOptions);
+      this.stageValue.blurOptions === this.value.blurOptions &&
+      this.stageValue.disableSystemAdaptation === this.value.disableSystemAdaptation);
   }
 }
 ForegroundBlurStyleModifier.identity = Symbol('foregroundBlurStyle');
@@ -1316,7 +1317,7 @@ class BackgroundBlurStyleModifier extends ModifierWithKey {
       getUINativeModule().common.setBackgroundBlurStyle(node, this.value.blurStyle, this.value.colorMode,
         this.value.adaptiveColor, this.value.scale,
         (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale,
-        this.value.policy, this.value.inactiveColor, this.value.type);
+        this.value.policy, this.value.inactiveColor, this.value.type, this.value.disableSystemAdaptation);
     }
   }
 }
@@ -1704,11 +1705,11 @@ class ForegroundEffectModifier extends ModifierWithKey {
       getUINativeModule().common.resetForegroundEffect(node);
     }
     else {
-      getUINativeModule().common.setForegroundEffect(node, this.value.radius);
+      getUINativeModule().common.setForegroundEffect(node, this.value.radius, this.value.disableSystemAdaptation);
     }
   }
   checkObjectDiff() {
-    return !(this.value.radius === this.stageValue.radius);
+    return !(this.value.radius === this.stageValue.radius && this.value.disableSystemAdaptation === this.stageValue.disableSystemAdaptation);
   }
 }
 ForegroundEffectModifier.identity = Symbol('foregroundEffect');
@@ -2649,7 +2650,7 @@ class BackgroundEffectModifier extends ModifierWithKey {
       getUINativeModule().common.setBackgroundEffect(node, this.value.radius, this.value.saturation,
         this.value.brightness, this.value.color, this.value.adaptiveColor,
         (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale,
-        this.value.policy, this.value.inactiveColor, this.value.type);
+        this.value.policy, this.value.inactiveColor, this.value.type, this.value.disableSystemAdaptation);
     }
   }
   checkObjectDiff() {
@@ -2663,7 +2664,8 @@ class BackgroundEffectModifier extends ModifierWithKey {
       this.value.inactiveColor === this.stageValue.inactiveColor &&
       this.value.type === this.stageValue.type &&
       ((_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale) === ((_b = this.stageValue.blurOptions) === null ||
-      _b === void 0 ? void 0 : _b.grayscale));
+      _b === void 0 ? void 0 : _b.grayscale) &&
+      this.value.disableSystemAdaptation === this.stageValue.disableSystemAdaptation);
   }
 }
 BackgroundEffectModifier.identity = Symbol('backgroundEffect');
@@ -3579,8 +3581,22 @@ class ArkComponent {
     }
     return this;
   }
-  backgroundEffect(options) {
-    modifierWithKey(this._modifiersWithKeys, BackgroundEffectModifier.identity, BackgroundEffectModifier, options);
+  backgroundEffect(options, sysOptions) {
+    let arkBackgroundEffect = new ArkBackgroundEffect();
+    if (typeof options === 'object') {
+      arkBackgroundEffect.radius = options.radius;
+      arkBackgroundEffect.saturation = options.saturation;
+      arkBackgroundEffect.brightness = options.brightness;
+      arkBackgroundEffect.color = options.color;
+      arkBackgroundEffect.adaptiveColor = options.adaptiveColor;
+      arkBackgroundEffect.blurOptions = options.blurOptions;
+      arkBackgroundEffect.policy = options.policy;
+      arkBackgroundEffect.inactiveColor = options.inactiveColor;
+    }
+    if (typeof sysOptions === 'object') {
+      arkBackgroundEffect.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
+    }
+    modifierWithKey(this._modifiersWithKeys, BackgroundEffectModifier.identity, BackgroundEffectModifier, arkBackgroundEffect);
     return this;
   }
   backgroundBrightness(params) {
@@ -3785,7 +3801,7 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BackgroundImageResizableModifier.identity, BackgroundImageResizableModifier, value);
     return this;
   }
-  backgroundBlurStyle(value, options) {
+  backgroundBlurStyle(value, options, sysOptions) {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity, BackgroundBlurStyleModifier, undefined);
       return this;
@@ -3801,10 +3817,13 @@ class ArkComponent {
       arkBackgroundBlurStyle.inactiveColor = options.inactiveColor;
       arkBackgroundBlurStyle.type = options.type;
     }
+    if (typeof sysOptions === 'object') {
+      arkBackgroundBlurStyle.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
+    }
     modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity, BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
     return this;
   }
-  foregroundBlurStyle(value, options) {
+  foregroundBlurStyle(value, options, sysOptions) {
     if (isUndefined(value)) {
       modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity, ForegroundBlurStyleModifier, undefined);
       return this;
@@ -3816,6 +3835,9 @@ class ArkComponent {
       arkForegroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkForegroundBlurStyle.scale = options.scale;
       arkForegroundBlurStyle.blurOptions = options.blurOptions;
+    }
+    if (typeof sysOptions === 'object') {
+      arkForegroundBlurStyle.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
     }
     modifierWithKey(this._modifiersWithKeys, ForegroundBlurStyleModifier.identity, ForegroundBlurStyleModifier, arkForegroundBlurStyle);
     return this;
@@ -3952,8 +3974,15 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BorderImageModifier.identity, BorderImageModifier, value);
     return this;
   }
-  foregroundEffect(value) {
-    modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, value);
+  foregroundEffect(value, sysOptions) {
+    let arkForegroundEffect = new ArkForegroundEffect();
+    if (typeof value === 'object') {
+      arkForegroundEffect.radius = value.radius;
+    }
+    if (typeof sysOptions === 'object') {
+      arkForegroundEffect.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
+    }
+    modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, arkForegroundEffect);
     return this;
   }
   foregroundColor(value) {
@@ -4087,10 +4116,13 @@ class ArkComponent {
     return this;
   }
 
-  blur(value, options) {
+  blur(value, options, sysOptions) {
     let blur = new ArkBlurOptions();
     blur.value = value;
     blur.options = options;
+    if (typeof sysOptions === 'object') {
+      blur.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
+    }
     modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, blur);
     return this;
   }
@@ -4180,10 +4212,13 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, useEffectObj);
     return this;
   }
-  backdropBlur(value, options) {
+  backdropBlur(value, options, sysOptions) {
     let blur = new ArkBlurOptions();
     blur.value = value;
     blur.options = options;
+    if (typeof sysOptions === 'object') {
+      blur.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
+    }
     modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, blur);
     return this;
   }
@@ -17290,13 +17325,15 @@ class ArkForegroundBlurStyle {
     this.adaptiveColor = undefined;
     this.scale = undefined;
     this.blurOptions = undefined;
+    this.disableSystemAdaptation = undefined;
   }
   isEqual(another) {
     return (this.blurStyle === another.blurStyle &&
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
       this.scale === another.scale &&
-      this.blurOptions === another.blurOptions);
+      this.blurOptions === another.blurOptions &&
+      this.disableSystemAdaptation === another.disableSystemAdaptation);
   }
 }
 class ArkLinearGradientBlur {
@@ -17383,6 +17420,26 @@ class ArkBlurOptions {
   constructor() {
     this.value = undefined;
     this.options = undefined;
+    this.disableSystemAdaptation = undefined;
+  }
+}
+class ArkForegroundEffect {
+  constructor() {
+    this.radius = undefined;
+    this.disableSystemAdaptation = undefined;
+  }
+}
+class ArkBackgroundEffect {
+  constructor() {
+    this.radius = undefined;
+    this.saturation = undefined;
+    this.brightness = undefined;
+    this.color = undefined;
+    this.adaptiveColor = undefined;
+    this.blurOptions = undefined;
+    this.policy = undefined;
+    this.inactiveColor = undefined;
+    this.disableSystemAdaptation = undefined;
   }
 }
 class InvertOptions {
@@ -17464,6 +17521,7 @@ class ArkBackgroundBlurStyle {
     this.policy = undefined;
     this.inactiveColor = undefined;
     this.type = undefined;
+    this.disableSystemAdaptation = undefined;
   }
   isEqual(another) {
     return (this.blurStyle === another.blurStyle &&
@@ -17473,7 +17531,8 @@ class ArkBackgroundBlurStyle {
       this.blurOptions === another.blurOptions &&
       this.policy === another.policy &&
       this.inactiveColor === another.inactiveColor &&
-      this.type === another.type);
+      this.type === another.type &&
+      this.disableSystemAdaptation === another.disableSystemAdaptation);
   }
 }
 class ArkBorderDashGap {
@@ -28465,13 +28524,16 @@ class ArkXComponentComponent extends ArkComponent {
   parallelGesture(gesture, mask) {
     throw new Error('Method not implemented.');
   }
-  blur(value, options) {
+  blur(value, options, sysOptions) {
     if (this.xComponentType !== XComponentType.NODE) {
       return this;
     }
     let blur = new ArkBlurOptions();
     blur.value = value;
     blur.options = options;
+    if (typeof sysOptions === 'object') {
+      blur.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
+    }
     modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, blur);
     return this;
   }
@@ -28576,13 +28638,16 @@ class ArkXComponentComponent extends ArkComponent {
   useEffect(value) {
     throw new Error('Method not implemented.');
   }
-  backdropBlur(value, options) {
+  backdropBlur(value, options, sysOptions) {
     if (this.xComponentType !== XComponentType.NODE) {
       return this;
     }
     let blur = new ArkBlurOptions();
     blur.value = value;
     blur.options = options;
+    if (typeof sysOptions === 'object') {
+      blur.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
+    }
     modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, blur);
     return this;
   }

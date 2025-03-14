@@ -288,17 +288,17 @@ void ViewAbstract::SetBackgroundImagePosition(FrameNode* frameNode, const Backgr
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition, frameNode);
 }
 
-void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
+void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+    SetBackgroundBlurStyle(frameNode, bgBlurStyle, sysOptions);
 }
 
-void ViewAbstract::SetForegroundEffect(float radius)
+void ViewAbstract::SetForegroundEffect(float radius, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -308,6 +308,7 @@ void ViewAbstract::SetForegroundEffect(float radius)
     auto target = frameNode->GetRenderContext();
     if (target) {
         target->UpdateForegroundEffect(radius);
+        target->UpdateForegroundEffectDisableSystemAdaptation(sysOptions);
     }
 }
 
@@ -319,15 +320,15 @@ void ViewAbstract::SetMotionBlur(const MotionBlurOption &motionBlurOption)
     ACE_UPDATE_RENDER_CONTEXT(MotionBlur, motionBlurOption);
 }
 
-void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
+void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOption);
+    SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOption, sysOptions);
 }
 
-void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
+void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -336,7 +337,7 @@ void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlurStyle(fgBlurStyle);
+        target->UpdateFrontBlurStyle(fgBlurStyle, sysOptions);
         if (target->GetFrontBlurRadius().has_value()) {
             target->UpdateFrontBlurRadius(Dimension());
         }
@@ -2637,7 +2638,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     overlayManager->ShowMenu(targetNode->GetId(), offset, menuNode);
 }
 
-void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -2649,7 +2650,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& bl
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlur(radius, blurOption);
+        target->UpdateBackBlur(radius, blurOption, sysOptions);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -2671,7 +2672,8 @@ void ViewAbstract::SetNodeBackdropBlur(FrameNode *frameNode, const Dimension& ra
     }
 }
 
-void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
+void ViewAbstract::SetBackdropBlur(
+    FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -2679,7 +2681,7 @@ void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlur(radius, blurOption);
+        target->UpdateBackBlur(radius, blurOption, sysOptions);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -2727,7 +2729,7 @@ void ViewAbstract::SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* br
     ACE_UPDATE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender);
 }
 
-void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -2736,7 +2738,7 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurO
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlur(radius, blurOption);
+        target->UpdateFrontBlur(radius, blurOption, sysOptions);
         if (target->GetFrontBlurStyle().has_value()) {
             target->UpdateFrontBlurStyle(std::nullopt);
         }
@@ -2751,12 +2753,13 @@ void ViewAbstract::SetDynamicDim(float DimDegree)
     ACE_UPDATE_RENDER_CONTEXT(DynamicDimDegree, DimDegree);
 }
 
-void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
+void ViewAbstract::SetFrontBlur(
+    FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlur(radius, blurOption);
+        target->UpdateFrontBlur(radius, blurOption, sysOptions);
         if (target->GetFrontBlurStyle().has_value()) {
             target->UpdateFrontBlurStyle(std::nullopt);
         }
@@ -3715,11 +3718,12 @@ void ViewAbstract::SetBorderImageGradient(FrameNode* frameNode, const NG::Gradie
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderSourceFromImage, false, frameNode);
 }
 
-void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle)
+void ViewAbstract::SetForegroundBlurStyle(
+    FrameNode* frameNode, const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions)
 {
     const auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlurStyle(fgBlurStyle);
+        target->UpdateFrontBlurStyle(fgBlurStyle, sysOptions);
         if (target->GetFrontBlurRadius().has_value()) {
             target->UpdateFrontBlurRadius(Dimension());
         }
@@ -3741,7 +3745,8 @@ void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Magnifier, frameNode);
 }
 
-void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleOption& bgBlurStyle)
+void ViewAbstract::SetBackgroundBlurStyle(
+    FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -3755,7 +3760,7 @@ void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleO
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlurStyle(bgBlurStyle);
+        target->UpdateBackBlurStyle(bgBlurStyle, sysOptions);
         if (target->GetBackBlurRadius().has_value()) {
             target->UpdateBackBlurRadius(Dimension());
         }
@@ -4260,12 +4265,13 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
+void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
         target->UpdateForegroundEffect(radius);
+        target->UpdateForegroundEffectDisableSystemAdaptation(sysOptions);
     }
 }
 
@@ -4274,7 +4280,8 @@ void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &m
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
 }
 
-void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
+void ViewAbstract::SetBackgroundEffect(
+    FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -4292,7 +4299,7 @@ void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption 
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
-        target->UpdateBackgroundEffect(effectOption);
+        target->UpdateBackgroundEffect(effectOption, sysOptions);
     }
 }
 
