@@ -1097,7 +1097,7 @@ public:
         IF_TRUE(!focusHub->RequestFocusImmediately(), isOnlyRequestFocus_ = false);
     }
 
-    DisplayMode GetBarDisplayMode()
+    DisplayMode GetBarDisplayMode() const
     {
         return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
