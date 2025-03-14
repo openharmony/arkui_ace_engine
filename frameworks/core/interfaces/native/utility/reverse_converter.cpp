@@ -373,4 +373,18 @@ void AssignArkValue(Ark_Position& dst, const OffsetF& src)
     dst.x = Converter::ArkValue<Opt_Length>(src.GetX());
     dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
 }
+
+void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src)
+{
+    dst.path = ArkValue<Ark_String>(src.path);
+    dst.postScriptName = ArkValue<Ark_String>(src.postScriptName);
+    dst.fullName = ArkValue<Ark_String>(src.fullName);
+    dst.family = ArkValue<Ark_String>(src.family);
+    dst.subfamily = ArkValue<Ark_String>(src.subfamily);
+    dst.weight = ArkValue<Ark_Number>(src.weight);
+    dst.width = ArkValue<Ark_Number>(src.width);
+    dst.italic = ArkValue<Ark_Boolean>(src.italic);
+    dst.monoSpace = ArkValue<Ark_Boolean>(src.monoSpace);
+    dst.symbolic = ArkValue<Ark_Boolean>(src.symbolic);
+}
 } // namespace OHOS::Ace::NG::Converter

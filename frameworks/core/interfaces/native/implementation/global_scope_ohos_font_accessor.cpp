@@ -62,6 +62,16 @@ Array_String GetSystemFontListImpl()
     }
     return Converter::ArkValue<Array_String>(fontList, Converter::FC);
 }
+Ark_FontInfo GetFontByNameImpl(const Ark_String* fontName)
+{
+    FontInfo fontInfo;
+    auto fontNameCasted = Converter::Convert<std::string>(*fontName);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->GetSystemFont(fontNameCasted, fontInfo);
+    }
+    return Converter::ArkValue<Ark_FontInfo>(fontInfo);
+}
 } // GlobalScope_ohos_fontAccessor
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
 {
@@ -71,6 +81,7 @@ const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAcce
         GlobalScope_ohos_fontAccessor::GetFinalizerImpl,
         GlobalScope_ohos_fontAccessor::RegisterFontImpl,
         GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
+        GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
     };
     return &GlobalScope_ohos_fontAccessorImpl;
 }
