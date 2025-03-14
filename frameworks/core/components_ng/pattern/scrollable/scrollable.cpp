@@ -99,7 +99,9 @@ Scrollable::~Scrollable()
         AceAsyncTraceEndCommercial(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") +
             nodeTag_).c_str());
         auto context = context_.Upgrade();
-        context->SetUiDvsyncSwitch(false);
+        if (context) {
+            context->SetUiDvsyncSwitch(false);
+        }
     }
     StopFrictionAnimation();
     StopSpringAnimation();
