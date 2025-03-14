@@ -279,12 +279,16 @@ private:
     float previewScale_ = 1.0f;
     MenuDumpInfo dumpInfo_;
     MarginPropertyF layoutRegionMargin_;
+    bool isPreviewContainScale_ = false;
     bool isExpandDisplay_ = false;
     bool isFreeMultiWindow_ = false;
     bool isUIExtensionSubWindow_ = false;
     RectF displayWindowRect_;
     RectF UIExtensionHostWindowRect_;
-    bool isPreviewContainScale_ = false;
+
+    OffsetF childOffset_;
+    SizeF childMarginFrameSize_;
+    std::string clipPath_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;
