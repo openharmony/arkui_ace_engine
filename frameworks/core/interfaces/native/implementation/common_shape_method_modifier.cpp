@@ -135,9 +135,24 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA CommonShapeMethodModifier.StrokeDashArray -> Method is not implemented.");
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonShapeMethodModelNG::SetStrokeDashArray(frameNode, convValue);
+    int32_t length = value->length;
+    std::vector<Dimension> strokeDashArray;
+    for (int32_t i = 0; i < length; ++i) {
+        Ark_Length arkStrokeDash = value->array[i];
+        auto optStrokeDash = Converter::OptConvert<Dimension>(arkStrokeDash);
+        Validator::ValidatePositive(optStrokeDash);
+        Validator::ValidateNonPercent(optStrokeDash);
+        if (optStrokeDash.has_value()) {
+            strokeDashArray.emplace_back(optStrokeDash.value());
+        }
+    }
+    if (length == static_cast<int32_t>(strokeDashArray.size()) && (length & 1)) {
+        for (int32_t i = 0; i < length; ++i) {
+            strokeDashArray.emplace_back(strokeDashArray[i]);
+        }
+    }
+    ShapeModelNG::SetStrokeDashArray(frameNode, strokeDashArray);
+    LOGE("ARKOALA CommonShapeMethodModifier.StrokeDashArray -> Method is not fully implemented.");
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()

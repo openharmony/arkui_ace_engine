@@ -37,6 +37,7 @@ const auto SCALE_LIMIT_MIN = 0.0;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0XFF000000;
+constexpr double DIFF = 1e-10;
 const auto EMPTY_STRING = "";
 const auto FILL_RULE_EVEN_ODD = "evenodd";
 const auto DIR_AUTO = "auto";
@@ -62,17 +63,17 @@ struct Ark_Custom_Rect {
     Ark_Number h;
 };
 const std::unordered_map<std::string, CompositeOperation> COMPOSITE_TABLE = {
-    { "SOURCE_OVER", CompositeOperation::SOURCE_OVER },
-    { "SOURCE_ATOP", CompositeOperation::SOURCE_ATOP },
-    { "SOURCE_IN", CompositeOperation::SOURCE_IN },
-    { "SOURCE_OUT", CompositeOperation::SOURCE_OUT },
-    { "DESTINATION_OVER", CompositeOperation::DESTINATION_OVER },
-    { "DESTINATION_ATOP", CompositeOperation::DESTINATION_ATOP },
-    { "DESTINATION_IN", CompositeOperation::DESTINATION_IN },
-    { "DESTINATION_OUT", CompositeOperation::DESTINATION_OUT },
-    { "LIGHTER", CompositeOperation::LIGHTER },
-    { "COPY", CompositeOperation::COPY },
-    { "XOR", CompositeOperation::XOR }
+    { "source-over", CompositeOperation::SOURCE_OVER },
+    { "source-atop", CompositeOperation::SOURCE_ATOP },
+    { "source-in", CompositeOperation::SOURCE_IN },
+    { "source-out", CompositeOperation::SOURCE_OUT },
+    { "destination-over", CompositeOperation::DESTINATION_OVER },
+    { "destination-atop", CompositeOperation::DESTINATION_ATOP },
+    { "destination-in", CompositeOperation::DESTINATION_IN },
+    { "destination-out", CompositeOperation::DESTINATION_OUT },
+    { "lighter", CompositeOperation::LIGHTER },
+    { "copy", CompositeOperation::COPY },
+    { "xor", CompositeOperation::XOR }
 };
 std::optional<double> ConvertDimension(
     GeneratedModifier::CanvasRendererPeerImpl* peerImpl, const Ark_Union_Number_String& src)
@@ -153,7 +154,6 @@ void AssignCast(std::optional<CompositeOperation>& dst, const Ark_String& src)
 {
     auto str = Converter::Convert<std::string>(src);
     str = StringUtils::TrimStr(str);
-    StringUtils::TransformStrCase(str, StringUtils::TEXT_CASE_UPPERCASE);
     auto item = COMPOSITE_TABLE.find(str);
     if (item != COMPOSITE_TABLE.end()) {
         dst = item->second;
@@ -210,10 +210,11 @@ void DrawImage0Impl(Ark_CanvasRenderer peer,
         LOGE("ARKOALA CanvasRendererAccessor::DrawImage0Impl Error Parameters");
         return;
     }
+    double density = peerImpl->GetDensity();
     Ace::CanvasImage info {
         .flag = 0,
-        .dx = static_cast<double>(Converter::Convert<float>(*dx)),
-        .dy = static_cast<double>(Converter::Convert<float>(*dy)),
+        .dx = static_cast<double>(Converter::Convert<float>(*dx)) * density,
+        .dy = static_cast<double>(Converter::Convert<float>(*dy)) * density,
     };
     Converter::VisitUnion(
         *image,
@@ -243,12 +244,13 @@ void DrawImage1Impl(Ark_CanvasRenderer peer,
         LOGE("ARKOALA CanvasRendererAccessor::DrawImage1Impl Error Parameters");
         return;
     }
+    double density = peerImpl->GetDensity();
     Ace::CanvasImage info {
         .flag = 1,
-        .dx = static_cast<double>(Converter::Convert<float>(*dx)),
-        .dy = static_cast<double>(Converter::Convert<float>(*dy)),
-        .dWidth = static_cast<double>(Converter::Convert<float>(*dw)),
-        .dHeight = static_cast<double>(Converter::Convert<float>(*dh)),
+        .dx = static_cast<double>(Converter::Convert<float>(*dx)) * density,
+        .dy = static_cast<double>(Converter::Convert<float>(*dy)) * density,
+        .dWidth = static_cast<double>(Converter::Convert<float>(*dw)) * density,
+        .dHeight = static_cast<double>(Converter::Convert<float>(*dh)) * density,
     };
     Converter::VisitUnion(
         *image,
@@ -282,16 +284,17 @@ void DrawImage2Impl(Ark_CanvasRenderer peer,
         LOGE("ARKOALA CanvasRendererAccessor::DrawImage2Impl Error Parameters");
         return;
     }
+    double density = peerImpl->GetDensity();
     Ace::CanvasImage info {
         .flag = 2,
-        .sx = static_cast<double>(Converter::Convert<float>(*sx)),
-        .sy = static_cast<double>(Converter::Convert<float>(*sy)),
-        .sWidth = static_cast<double>(Converter::Convert<float>(*sw)),
-        .sHeight = static_cast<double>(Converter::Convert<float>(*sh)),
-        .dx = static_cast<double>(Converter::Convert<float>(*dx)),
-        .dy = static_cast<double>(Converter::Convert<float>(*dy)),
-        .dWidth = static_cast<double>(Converter::Convert<float>(*dw)),
-        .dHeight = static_cast<double>(Converter::Convert<float>(*dh)),
+        .sx = static_cast<double>(Converter::Convert<float>(*sx)) * density,
+        .sy = static_cast<double>(Converter::Convert<float>(*sy)) * density,
+        .sWidth = static_cast<double>(Converter::Convert<float>(*sw)) * density,
+        .sHeight = static_cast<double>(Converter::Convert<float>(*sh)) * density,
+        .dx = static_cast<double>(Converter::Convert<float>(*dx)) * density,
+        .dy = static_cast<double>(Converter::Convert<float>(*dy)) * density,
+        .dWidth = static_cast<double>(Converter::Convert<float>(*dw)) * density,
+        .dHeight = static_cast<double>(Converter::Convert<float>(*dh)) * density,
     };
     Converter::VisitUnion(
         *image,
@@ -400,10 +403,11 @@ Ark_CanvasGradient CreateLinearGradientImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_RETURN(y0, nullptr);
     CHECK_NULL_RETURN(x1, nullptr);
     CHECK_NULL_RETURN(y1, nullptr);
-    double cx0 = static_cast<double>(Converter::Convert<float>(*x0));
-    double cy0 = static_cast<double>(Converter::Convert<float>(*y0));
-    double cx1 = static_cast<double>(Converter::Convert<float>(*x1));
-    double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
+    double density = peerImpl->GetDensity();
+    double cx0 = static_cast<double>(Converter::Convert<float>(*x0)) * density;
+    double cy0 = static_cast<double>(Converter::Convert<float>(*y0)) * density;
+    double cx1 = static_cast<double>(Converter::Convert<float>(*x1)) * density;
+    double cy1 = static_cast<double>(Converter::Convert<float>(*y1)) * density;
     auto gradient = peerImpl->CreateLinearGradient(cx0, cy0, cx1, cy1);
     CHECK_NULL_RETURN(gradient, nullptr);
     auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
@@ -459,12 +463,13 @@ Ark_CanvasGradient CreateRadialGradientImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_RETURN(x1, nullptr);
     CHECK_NULL_RETURN(y1, nullptr);
     CHECK_NULL_RETURN(r1, nullptr);
-    double cx0 = static_cast<double>(Converter::Convert<float>(*x0));
-    double cy0 = static_cast<double>(Converter::Convert<float>(*y0));
-    double cr0 = static_cast<double>(Converter::Convert<float>(*r0));
-    double cx1 = static_cast<double>(Converter::Convert<float>(*x1));
-    double cy1 = static_cast<double>(Converter::Convert<float>(*y1));
-    double cr1 = static_cast<double>(Converter::Convert<float>(*r1));
+    double density = peerImpl->GetDensity();
+    double cx0 = static_cast<double>(Converter::Convert<float>(*x0)) * density;
+    double cy0 = static_cast<double>(Converter::Convert<float>(*y0)) * density;
+    double cr0 = static_cast<double>(Converter::Convert<float>(*r0)) * density;
+    double cx1 = static_cast<double>(Converter::Convert<float>(*x1)) * density;
+    double cy1 = static_cast<double>(Converter::Convert<float>(*y1)) * density;
+    double cr1 = static_cast<double>(Converter::Convert<float>(*r1)) * density;
     std::vector<double> params;
     params.insert(params.end(), { cx0, cy0, cr0, cx1, cy1, cr1 });
     auto gradient = peerImpl->CreateRadialGradient(params);
@@ -484,9 +489,10 @@ Ark_CanvasGradient CreateConicGradientImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_RETURN(startAngle, nullptr);
     CHECK_NULL_RETURN(x, nullptr);
     CHECK_NULL_RETURN(y, nullptr);
+    double density = peerImpl->GetDensity();
     double ca = static_cast<double>(Converter::Convert<float>(*startAngle));
-    double cx = static_cast<double>(Converter::Convert<float>(*x));
-    double cy = static_cast<double>(Converter::Convert<float>(*y));
+    double cx = static_cast<double>(Converter::Convert<float>(*x)) * density;
+    double cy = static_cast<double>(Converter::Convert<float>(*y)) * density;
     auto gradient = peerImpl->CreateConicGradient(ca, cx, cy);
     CHECK_NULL_RETURN(gradient, nullptr);
     auto canvasGradientPeer = reinterpret_cast<CanvasGradientPeer*>(GetCanvasGradientAccessor()->ctor());
@@ -503,8 +509,9 @@ Ark_ImageData CreateImageData0Impl(Ark_CanvasRenderer peer,
     CHECK_NULL_RETURN(peerImpl, nullptr);
     CHECK_NULL_RETURN(sw, nullptr);
     CHECK_NULL_RETURN(sh, nullptr);
-    auto width = static_cast<double>(Converter::Convert<float>(*sw));
-    auto height = static_cast<double>(Converter::Convert<float>(*sh));
+    double density = peerImpl->GetDensity();
+    auto width = static_cast<double>(Converter::Convert<float>(*sw)) * density + DIFF;
+    auto height = static_cast<double>(Converter::Convert<float>(*sh)) * density + DIFF;
     ImageSize imageSize = peerImpl->GetImageSize(0, 0, width, height);
     auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
@@ -544,10 +551,11 @@ Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_RETURN(sy, nullptr);
     CHECK_NULL_RETURN(sw, nullptr);
     CHECK_NULL_RETURN(sh, nullptr);
-    auto x = static_cast<double>(Converter::Convert<float>(*sx));
-    auto y = static_cast<double>(Converter::Convert<float>(*sy));
-    auto width = static_cast<double>(Converter::Convert<float>(*sw));
-    auto height = static_cast<double>(Converter::Convert<float>(*sh));
+    double density = peerImpl->GetDensity();
+    auto x = static_cast<double>(Converter::Convert<float>(*sx)) * density;
+    auto y = static_cast<double>(Converter::Convert<float>(*sy)) * density;
+    auto width = static_cast<double>(Converter::Convert<float>(*sw)) * density + DIFF;
+    auto height = static_cast<double>(Converter::Convert<float>(*sh)) * density + DIFF;
     ImageSize imageSize = peerImpl->GetImageSize(x, y, width, height);
     auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
@@ -578,10 +586,11 @@ Ark_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_RETURN(sy, nullptr);
     CHECK_NULL_RETURN(sw, nullptr);
     CHECK_NULL_RETURN(sh, nullptr);
-    auto x = static_cast<double>(Converter::Convert<float>(*sx));
-    auto y = static_cast<double>(Converter::Convert<float>(*sy));
-    auto width = static_cast<double>(Converter::Convert<float>(*sw));
-    auto height = static_cast<double>(Converter::Convert<float>(*sh));
+    double density = peerImpl->GetDensity();
+    auto x = static_cast<double>(Converter::Convert<float>(*sx)) * density;
+    auto y = static_cast<double>(Converter::Convert<float>(*sy)) * density;
+    auto width = static_cast<double>(Converter::Convert<float>(*sw)) * density + DIFF;
+    auto height = static_cast<double>(Converter::Convert<float>(*sh)) * density + DIFF;
     ImageSize imageSize = peerImpl->GetImageSize(x, y, width, height);
     peerImpl->ClearImageData();
     peerImpl->GetPixelMap(imageSize);
@@ -663,8 +672,10 @@ void SetLineDashImpl(Ark_CanvasRenderer peer,
             return;
         }
     }
+    double density = peerImpl->GetDensity();
     std::vector<double> dst;
-    std::transform(src.begin(), src.end(), std::back_inserter(dst), [](auto val) { return static_cast<double>(val); });
+    std::transform(src.begin(), src.end(), std::back_inserter(dst),
+        [density](auto val) { return static_cast<double>(val) * density; });
     peerImpl->TriggerSetLineDashImpl(dst);
 }
 void ClearRectImpl(Ark_CanvasRenderer peer,
@@ -680,7 +691,7 @@ void ClearRectImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(h);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
+    double density = peerImpl->GetDensity();
     auto arkRect = Ark_Custom_Rect {
         .x = *x,
         .y = *y,
@@ -691,7 +702,7 @@ void ClearRectImpl(Ark_CanvasRenderer peer,
     if (!rect.IsValid()) {
         return;
     }
-    peerImpl->TriggerClearRectImpl(rect);
+    peerImpl->TriggerClearRectImpl(rect * density);
 }
 void FillRectImpl(Ark_CanvasRenderer peer,
                   const Ark_Number* x,
@@ -706,7 +717,7 @@ void FillRectImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(h);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
+    double density = peerImpl->GetDensity();
     auto arkRect = Ark_Custom_Rect {
         .x = *x,
         .y = *y,
@@ -717,7 +728,7 @@ void FillRectImpl(Ark_CanvasRenderer peer,
     if (!rect.IsValid()) {
         return;
     }
-    peerImpl->TriggerFillRectImpl(rect);
+    peerImpl->TriggerFillRectImpl(rect * density);
 }
 void StrokeRectImpl(Ark_CanvasRenderer peer,
                     const Ark_Number* x,
@@ -732,7 +743,7 @@ void StrokeRectImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(h);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
+    double density = peerImpl->GetDensity();
     auto arkRect = Ark_Custom_Rect {
         .x = *x,
         .y = *y,
@@ -743,7 +754,7 @@ void StrokeRectImpl(Ark_CanvasRenderer peer,
     if (!rect.IsValid()) {
         return;
     }
-    peerImpl->TriggerStrokeRectImpl(rect);
+    peerImpl->TriggerStrokeRectImpl(rect * density);
 }
 void RestoreImpl(Ark_CanvasRenderer peer)
 {
@@ -772,15 +783,15 @@ void FillTextImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(maxWidth);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
+    double density = peerImpl->GetDensity();
     auto valueText = Converter::Convert<std::string>(*text);
-    auto valueX = static_cast<double>(Converter::Convert<float>(*x));
-    auto valueY = static_cast<double>(Converter::Convert<float>(*y));
+    auto valueX = static_cast<double>(Converter::Convert<float>(*x)) * density;
+    auto valueY = static_cast<double>(Converter::Convert<float>(*y)) * density;
     auto opt = Converter::OptConvert<float>(*maxWidth);
 
-    auto optMaxWidth = std::make_optional<double>();
+    std::optional<double> optMaxWidth = std::nullopt;
     if (opt.has_value()) {
-        *optMaxWidth = static_cast<double>(*opt);
+        optMaxWidth = static_cast<double>(*opt) * density;
     }
     peerImpl->TriggerFillTextImpl(valueText, valueX, valueY, optMaxWidth);
 }
@@ -813,15 +824,15 @@ void StrokeTextImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(maxWidth);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
+    double density = peerImpl->GetDensity();
     auto valueText = Converter::Convert<std::string>(*text);
-    auto valueX = static_cast<double>(Converter::Convert<float>(*x));
-    auto valueY = static_cast<double>(Converter::Convert<float>(*y));
+    auto valueX = static_cast<double>(Converter::Convert<float>(*x)) * density;
+    auto valueY = static_cast<double>(Converter::Convert<float>(*y)) * density;
     auto opt = Converter::OptConvert<float>(*maxWidth);
 
-    auto optMaxWidth = std::make_optional<double>();
+    std::optional<double> optMaxWidth = std::nullopt;
     if (opt.has_value()) {
-        *optMaxWidth = static_cast<double>(*opt);
+        optMaxWidth = static_cast<double>(*opt) * density;
     }
     peerImpl->TriggerStrokeTextImpl(valueText, valueX, valueY, optMaxWidth);
 }
@@ -892,14 +903,14 @@ void SetTransform0Impl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(f);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
+    double density = peerImpl->GetDensity();
     auto param = TransformParam {
         .scaleX = static_cast<double>(Converter::Convert<float>(*a)),
-        .skewX = static_cast<double>(Converter::Convert<float>(*b)),
-        .skewY = static_cast<double>(Converter::Convert<float>(*c)),
+        .skewX = static_cast<double>(Converter::Convert<float>(*c)),
+        .skewY = static_cast<double>(Converter::Convert<float>(*b)),
         .scaleY = static_cast<double>(Converter::Convert<float>(*d)),
-        .translateX = static_cast<double>(Converter::Convert<float>(*e)),
-        .translateY = static_cast<double>(Converter::Convert<float>(*f)) };
+        .translateX = static_cast<double>(Converter::Convert<float>(*e)) * density,
+        .translateY = static_cast<double>(Converter::Convert<float>(*f)) * density};
     if (param.scaleX < SCALE_LIMIT_MIN || param.scaleY < SCALE_LIMIT_MIN) {
         return;
     }
@@ -939,14 +950,14 @@ void TransformImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(f);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
+    double density = peerImpl->GetDensity();
     auto param = TransformParam {
         .scaleX = static_cast<double>(Converter::Convert<float>(*a)),
         .skewX = static_cast<double>(Converter::Convert<float>(*b)),
         .skewY = static_cast<double>(Converter::Convert<float>(*c)),
         .scaleY = static_cast<double>(Converter::Convert<float>(*d)),
-        .translateX = static_cast<double>(Converter::Convert<float>(*e)),
-        .translateY = static_cast<double>(Converter::Convert<float>(*f)) };
+        .translateX = static_cast<double>(Converter::Convert<float>(*e)) * density,
+        .translateY = static_cast<double>(Converter::Convert<float>(*f)) * density};
     if (LessNotEqual(param.scaleX, SCALE_LIMIT_MIN) || LessNotEqual(param.scaleY, SCALE_LIMIT_MIN)) {
         return;
     }
@@ -961,9 +972,9 @@ void TranslateImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(y);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
-    auto transX = static_cast<double>(Converter::Convert<float>(*x));
-    auto transY = static_cast<double>(Converter::Convert<float>(*y));
+    double density = peerImpl->GetDensity();
+    auto transX = static_cast<double>(Converter::Convert<float>(*x)) * density;
+    auto transY = static_cast<double>(Converter::Convert<float>(*y)) * density;
     peerImpl->TriggerTranslateImpl(transX, transY);
 }
 void SetPixelMapImpl(Ark_CanvasRenderer peer,
@@ -1230,8 +1241,8 @@ void SetLineDashOffsetImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(lineDashOffset);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
-    auto offset = static_cast<double>(Converter::Convert<float>(*lineDashOffset));
+    double density = peerImpl->GetDensity();
+    auto offset = static_cast<double>(Converter::Convert<float>(*lineDashOffset)) * density;
     peerImpl->TriggerSetLineDashOffsetImpl(offset);
 }
 Ark_String GetLineJoinImpl(Ark_CanvasRenderer peer)
@@ -1265,8 +1276,8 @@ void SetLineWidthImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(lineWidth);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
-    auto width = static_cast<double>(Converter::Convert<float>(*lineWidth));
+    double density = peerImpl->GetDensity();
+    auto width = static_cast<double>(Converter::Convert<float>(*lineWidth)) * density;
     peerImpl->TriggerSetLineWidthImpl(width);
 }
 Ark_Number GetMiterLimitImpl(Ark_CanvasRenderer peer)
@@ -1333,8 +1344,8 @@ void SetShadowOffsetXImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(shadowOffsetX);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
-    auto offsetX = static_cast<double>(Converter::Convert<float>(*shadowOffsetX));
+    double density = peerImpl->GetDensity();
+    auto offsetX = static_cast<double>(Converter::Convert<float>(*shadowOffsetX)) * density;
     peerImpl->TriggerSetShadowOffsetXImpl(offsetX);
 }
 Ark_Number GetShadowOffsetYImpl(Ark_CanvasRenderer peer)
@@ -1350,8 +1361,8 @@ void SetShadowOffsetYImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(shadowOffsetY);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
-    auto offsetY = static_cast<double>(Converter::Convert<float>(*shadowOffsetY));
+    double density = peerImpl->GetDensity();
+    auto offsetY = static_cast<double>(Converter::Convert<float>(*shadowOffsetY)) * density;
     peerImpl->TriggerSetShadowOffsetYImpl(offsetY);
 }
 Ark_String GetDirectionImpl(Ark_CanvasRenderer peer)
