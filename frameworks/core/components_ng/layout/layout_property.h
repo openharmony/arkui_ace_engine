@@ -392,6 +392,8 @@ public:
         return needLazyLayout_;
     }
 
+    void ConstraintViewPosRef(ViewPosReference& viewPosRef);
+
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
     void CheckMarkAnchorPosition(TextDirection layoutDirection);
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
@@ -422,7 +424,6 @@ private:
     void CheckBorderAndPadding();
     void ConstraintContentByPadding();
     void ConstraintContentByBorder();
-    void ConstraintViewPosRef();
     void ConstraintContentBySafeAreaPadding();
     PaddingPropertyF CreateSafeAreaPadding();
     bool DecideMirror();

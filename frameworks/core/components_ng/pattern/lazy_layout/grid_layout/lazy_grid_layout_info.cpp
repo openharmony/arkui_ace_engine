@@ -167,6 +167,8 @@ void LazyGridLayoutInfo::SetLanes(int32_t lanes)
 {
     if (lanes_ != lanes) {
         posMap_.clear();
+        updatedStart_ = INT_MAX;
+        updatedEnd_ = -1;
     }
     lanes_ = lanes;
 }

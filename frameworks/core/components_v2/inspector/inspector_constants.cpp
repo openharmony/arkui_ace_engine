@@ -655,5 +655,5 @@ const char MAGNIFIER_TAG[] = "Magnifier";
 const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[] = "Accessibility_focus_paint_node";
 
 // LazyVGridLayout
-const char LAZY_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
+const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 } // namespace OHOS::Ace::V2
