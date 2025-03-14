@@ -87,10 +87,6 @@ public:
         DisposeNode(node_);
     }
 
-private:
-    inline static RefPtr<MockThemeManager> themeManager_;
-    inline static RefPtr<ThemeConstants> themeConstants_;
-
     inline static const GENERATED_ArkUIBasicNodeAPI *basicAPI_
         = reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI *>(
             GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind::GENERATED_BASIC,

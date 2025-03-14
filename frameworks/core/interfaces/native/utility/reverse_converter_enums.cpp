@@ -580,6 +580,43 @@ void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src)
             LOGE("Unexpected enum value in TextOverflow: %{public}d", src);
     }
 }
+void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src)
+{
+    switch (src) {
+        case VerticalAlign::TOP: dst = ARK_IMAGE_SPAN_ALIGNMENT_TOP; break;
+        case VerticalAlign::CENTER: dst = ARK_IMAGE_SPAN_ALIGNMENT_CENTER; break;
+        case VerticalAlign::BOTTOM: dst = ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM; break;
+        case VerticalAlign::BASELINE: dst = ARK_IMAGE_SPAN_ALIGNMENT_BASELINE; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_ImageSpanAlignment>;
+            LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", static_cast<int>(src));
+    }
+}
+
+void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src)
+{
+    switch (src) {
+        case ImageFit::CONTAIN: dst = ARK_IMAGE_FIT_CONTAIN; break;
+        case ImageFit::COVER: dst = ARK_IMAGE_FIT_COVER; break;
+        case ImageFit::FITWIDTH: dst = ARK_IMAGE_FIT_AUTO; break;
+        case ImageFit::FILL: dst = ARK_IMAGE_FIT_FILL; break;
+        case ImageFit::SCALE_DOWN: dst = ARK_IMAGE_FIT_SCALE_DOWN; break;
+        case ImageFit::NONE: dst = ARK_IMAGE_FIT_NONE; break;
+        case ImageFit::TOP_LEFT: dst = ARK_IMAGE_FIT_TOP_START; break;
+        case ImageFit::TOP: dst = ARK_IMAGE_FIT_TOP; break;
+        case ImageFit::TOP_END: dst = ARK_IMAGE_FIT_TOP_END; break;
+        case ImageFit::START: dst = ARK_IMAGE_FIT_START; break;
+        case ImageFit::CENTER: dst = ARK_IMAGE_FIT_CENTER; break;
+        case ImageFit::END: dst = ARK_IMAGE_FIT_END; break;
+        case ImageFit::BOTTOM_START: dst = ARK_IMAGE_FIT_BOTTOM_START; break;
+        case ImageFit::BOTTOM: dst = ARK_IMAGE_FIT_BOTTOM; break;
+        case ImageFit::BOTTOM_END: dst = ARK_IMAGE_FIT_BOTTOM_END; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_ImageFit>;
+            LOGE("Unexpected enum value in Ark_ImageFit: %{public}d", static_cast<int>(src));
+    }
+}
+
 void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src)
 {
     switch (src) {

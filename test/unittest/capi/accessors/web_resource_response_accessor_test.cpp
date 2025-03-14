@@ -63,10 +63,6 @@ public:
         peer_->handler = Referenced::MakeRefPtr<WebResponse>();
         ASSERT_NE(peer_->handler, nullptr);
     }
-
-private:
-    inline static RefPtr<MockThemeManager> themeManager_;
-    inline static RefPtr<ThemeConstants> themeConstants_;
 };
 
 /**
