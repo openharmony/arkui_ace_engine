@@ -16,15 +16,25 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "frameworks/core/components_ng/pattern/text/span/span_object.h"
+#include "frameworks/core/interfaces/native/implementation/length_metrics_peer.h"
+#include "frameworks/core/interfaces/native/utility/callback_helper.h"
+#include "frameworks/core/interfaces/native/utility/reverse_converter.h"
+#include "line_height_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineHeightStyleAccessor {
 void DestroyPeerImpl(Ark_LineHeightStyle peer)
 {
+    CHECK_NULL_VOID(peer);
+    delete peer;
 }
 Ark_LineHeightStyle CtorImpl(Ark_LengthMetrics lineHeight)
 {
-    return {};
+    auto peer = new LineHeightStylePeer();
+    Dimension height = Converter::OptConvert<Dimension>(lineHeight).value_or(Dimension());
+    peer->span = AceType::MakeRefPtr<LineHeightSpan>(height);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +42,10 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetLineHeightImpl(Ark_LineHeightStyle peer)
 {
-    return {};
+    Ark_Number ret = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, ret);
+    CHECK_NULL_RETURN(peer->span, ret);
+    return Converter::ArkValue<Ark_Number>(peer->span->GetLineHeight().ConvertToPx());
 }
 } // LineHeightStyleAccessor
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor()
