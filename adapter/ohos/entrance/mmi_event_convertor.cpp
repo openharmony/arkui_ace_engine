@@ -685,6 +685,14 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)
 {
+    if (pointerEvent->GetSourceType() != OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
+        pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW)) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "SourceType:%{public}d error, PointerAction:%{public}d "
+            "instanceId:%{public}d",
+            pointerEvent->GetSourceType(), pointerEvent->GetPointerAction(), instanceId);
+    }
+
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
         auto container = Platform::AceContainer::GetContainer(instanceId);
         if (container) {
