@@ -227,7 +227,7 @@ public:
     {
         return isStackSubmenuHeader_;
     }
-    RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
+    RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const PointF& position);
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
 

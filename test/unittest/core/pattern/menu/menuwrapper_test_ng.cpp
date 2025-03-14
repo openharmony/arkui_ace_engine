@@ -700,19 +700,23 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg013, TestSize.Level1)
     ASSERT_NE(menu, nullptr);
     auto container = FrameNode::CreateFrameNode("", 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
     auto mockScroll = FrameNode::CreateFrameNode("", 2, AceType::MakeRefPtr<Pattern>());
-    container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
-    menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
+    auto mockContainerContext = AceType::DynamicCast<MockRenderContext>(container->GetRenderContext());
+    mockContainerContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 200.0f, 200.0f));
+    auto mockMenuContext = AceType::DynamicCast<MockRenderContext>(menu->GetRenderContext());
+    mockMenuContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 70.0f, 70.0f));
     mockScroll->MountToParent(container);
     menu->MountToParent(mockScroll);
     container->MountToParent(wrapperNode);
 
     auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode1->MountToParent(menu);
-    menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    auto mockMenuItemContext1 = AceType::DynamicCast<MockRenderContext>(menuItemNode1->GetRenderContext());
+    mockMenuItemContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
 
     auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode2->MountToParent(menu);
-    menuItemNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    auto mockMenuItemContext2 = AceType::DynamicCast<MockRenderContext>(menuItemNode2->GetRenderContext());
+    mockMenuItemContext2->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
 
     TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
     TouchLocationInfo locationInfo(TARGET_ID);
@@ -956,15 +960,15 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
     auto menuItemPattern2 = menuItemNode2->GetPattern<MenuItemPattern>();
 
     wrapperPattern->IncreaseEmbeddedSubMenuCount();
-    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
     subMenu->MountToParent(wrapperNode);
 
     menu->GetLayoutProperty<MenuLayoutProperty>()->UpdateExpandingMode(SubMenuExpandingMode::STACK);
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 }
 

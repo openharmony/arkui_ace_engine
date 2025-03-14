@@ -1685,7 +1685,7 @@ float MenuItemPattern::GetDividerStroke()
     return props->GetStrokeWidth().value_or(Dimension(0.0f, DimensionUnit::PX)).ConvertToPx();
 }
 
-RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& position)
+RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const PointF& position)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -1698,7 +1698,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
     auto clickableAreaSize = clickableArea_->GetGeometryNode()->GetFrameSize();
     auto clickableAreaZone = RectF(clickableAreaOffset.GetX(), clickableAreaOffset.GetY(),
         clickableAreaSize.Width(), clickableAreaSize.Height());
-    if (clickableAreaZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+    if (clickableAreaZone.IsInRegion(position)) {
         return host;
     }
     RefPtr<FrameNode> menuItem = nullptr;
@@ -1711,7 +1711,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
             auto menuItemSize = menuItem->GetGeometryNode()->GetFrameSize();
             auto menuItemZone = RectF(menuItemOffset.GetX(), menuItemOffset.GetY(),
                 menuItemSize.Width(), menuItemSize.Height());
-            if (menuItemZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            if (menuItemZone.IsInRegion(position)) {
                 break;
             } else {
                 menuItem = nullptr;
