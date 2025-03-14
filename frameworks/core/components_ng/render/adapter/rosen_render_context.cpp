@@ -6984,4 +6984,15 @@ std::shared_ptr<Rosen::RSCanvasNode> RosenRenderContext::GetCanvasNode()
     }
     return canvasNode_;
 }
+
+void RosenRenderContext::SetIsWideColorGamut(bool isWideColorGamut)
+{
+    auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
+    CHECK_NULL_VOID(rsCanvasNode);
+    if (isWideColorGamut_ != isWideColorGamut) {
+        isWideColorGamut_ = isWideColorGamut;
+        rsCanvasNode->SetIsWideColorGamut(isWideColorGamut_);
+        return;
+    }
+}
 } // namespace OHOS::Ace::NG

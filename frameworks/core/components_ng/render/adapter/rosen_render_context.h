@@ -376,6 +376,7 @@ public:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
     void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) override;
+    void SetIsWideColorGamut(bool isWideColorGamut) override;
     void SetAlphaOffscreen(bool isOffScreen) override;
     void MarkContentChanged(bool isChanged) override;
     void MarkDrivenRender(bool flag) override;
@@ -692,6 +693,7 @@ protected:
     PatternType patternType_ = PatternType::DEFAULT;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHdr_ = false;
+    bool isWideColorGamut_ = false;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool firstTransitionIn_ = false;

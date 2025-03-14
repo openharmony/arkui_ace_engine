@@ -460,6 +460,11 @@ void ImagePattern::OnImageLoadSuccess()
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "ImageLoadSuccess %{public}s", imageDfxConfig_.ToStringWithSrc().c_str());
     }
+    auto context = host->GetRenderContext();
+    auto pixelMap = image_->GetPixelMap();
+    if (context && pixelMap) {
+        context->SetIsWideColorGamut(pixelMap->GetIsWideColorGamut());
+    }
     host->MarkNeedRenderOnly();
 }
 

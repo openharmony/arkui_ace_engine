@@ -217,6 +217,10 @@ public:
     {
         return 0;
     }
+    bool GetIsWideColorGamut() const override
+    {
+        return false;
+    }
 };
 
 class NWebDragDataDummy : public NWeb::NWebDragData {
