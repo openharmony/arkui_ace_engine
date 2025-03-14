@@ -43,15 +43,6 @@ void AssignCast(std::optional<Ace::SpanType>& dst, const Ark_StyledStringKey& sr
 }
 
 template<>
-ImageSpanSize Convert(const Ark_SizeOptions& src)
-{
-    return {
-        .width = OptConvert<CalcDimension>(src.width),
-        .height = OptConvert<CalcDimension>(src.height)
-    };
-}
-
-template<>
 BorderRadiusProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
 {
     auto result = OptConvert<BorderRadiusProperty>(src.borderRadius);

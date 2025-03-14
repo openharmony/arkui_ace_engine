@@ -471,6 +471,7 @@ namespace Converter {
     template<> Header Convert(const Ark_Header& src);
     template<> Header Convert(const Ark_WebHeader& src);
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
+    template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);
@@ -723,7 +724,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardAvoidMode& src);
     template<> void AssignCast(std::optional<WebLayoutMode>& dst, const Ark_WebLayoutMode& src);
     template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);
-    template<> void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
 

@@ -19,9 +19,10 @@
 #include <vector>
 
 // sorted part of the code
+#include "core/components/common/layout/constants.h"
 #include "core/components/theme/theme_style.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
-#include "frameworks/core/gestures/drag_event.h"
+#include "core/gestures/drag_event.h"
 
 namespace OHOS::Ace::NG::AccessorTestFixtures {
 
@@ -140,5 +141,16 @@ extern const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtur
 extern const std::vector<std::tuple<std::string, OHOS::Ace::DragBehavior, Ark_DragBehavior>>
     testFixtureEnumArkDragBehaviorValues;
 extern const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceInitTable;
+
+extern const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, VerticalAlign>>
+testFixtureVerticalAlignValidValues;
+extern const std::vector<std::tuple<std::string, Ark_ImageSpanAlignment, std::optional<VerticalAlign>>>
+testFixtureVerticalAlignInvalidValues;
+
+extern const std::vector<std::tuple<std::string, Ark_ImageFit, ImageFit>> testFixtureObjectFitValidValues;
+extern const std::vector<std::tuple<std::string, Ark_ImageFit, std::optional<ImageFit>>>
+    testFixtureObjectFitInvalidValues;
+
+extern const std::vector<std::tuple<std::string, Ark_Length, Dimension>> testFixtureDimensionAnyValidValues;
 } // namespace OHOS::Ace::NG::AccessorTestFixtures
 #endif

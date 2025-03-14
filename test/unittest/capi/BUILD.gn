@@ -38,6 +38,7 @@ web_components_support_for_test = true
 form_component_support_for_test = true
 component3d_component_support_for_test = true
 plugin_components_support_for_test = true
+pixel_map_supported_for_test = true
 window_scene_support_for_test = false
 
 copy("copy_libxml2") {
@@ -130,5 +131,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     defines += [ "WINDOW_SCENE_SUPPORTED" ]
   }
 
+  if (defined(pixel_map_supported_for_test) && pixel_map_supported_for_test) {
+    defines += [ "PIXEL_MAP_TEST_SUPPORTED" ]
+  }
   cflags_cc = [ "-Wno-unused-variable" ]
 }
