@@ -218,31 +218,39 @@ class ObserveV2 {
    *
    */
 
-  // runs idleTasks until empty or maxExecutionTimeMs is reached
-  public runIdleTasks(maxExecutionTimeMs: number = Infinity): void {
+  // runs idleTasks until empty or deadline is reached
+  public runIdleTasks(deadline: number = Infinity): void {
+    stateMgmtConsole.debug(`UINodeRegisterProxy.runIdleTasks(${deadline})`);
+
     // fast check for early return
     if (!this.idleTasks_ || this.idleTasks_.end === 0) {
       return;
     }
 
-    const deadline = Date.now() + maxExecutionTimeMs;
-
     while (this.idleTasks_.first < this.idleTasks_.end) {
       const [func, ...args] = this.idleTasks_[this.idleTasks_.first++] || [];
       func?.apply(this, args);
-
-      if (Date.now() > deadline) {
+      if (Date.now() >= deadline) {
         return;
       }
     }
     this.idleTasks_.first = 0;
     this.idleTasks_.end = 0;
+  }
 
-    // If there's still time, do low-priority cleanup
+  // do low-priority cleanup unless the deadline is already reached
+  public runIdleCleanup(deadline: number): void {
+    stateMgmtConsole.debug(`UINodeRegisterProxy.runIdleCleanup()`);
+
+    if (Date.now() >= deadline) {
+      return;
+    }
+
     for (let id in this.id2targets_) {
-      if (!this.id2targets_[id]?.size) {
-        delete this.id2targets_[id];
-      }
+      if (!this.id2targets_[id]?.size) delete this.id2targets_[id];
+    }
+    for (let id in this.id2cmp_) {
+      if (!this.id2cmp_[id]?.deref()) delete this.id2cmp_[id];
     }
   }
 
