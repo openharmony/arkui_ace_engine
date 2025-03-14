@@ -1661,6 +1661,10 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     auto overlayManager = dragNodePipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     auto isExpandDisplay = DragDropFuncWrapper::IsExpandDisplay(context);
+    auto dragDropManager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(context, dragNodePipeline,
+        subWindow, isExpandDisplay, container->GetInstanceId());
+    CHECK_NULL_RETURN(dragDropManager, false);
+    dragDropManager->SetIsDragWithContextMenu(data.isMenuShow);
 
     // create text node
     auto subWindowOffset = isExpandDisplay ? subWindow->GetWindowRect().GetOffset() : OffsetF();
@@ -1692,8 +1696,6 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     overlayManager->RemovePixelMap();
     DragAnimationHelper::ShowBadgeAnimation(textNode);
     DragAnimationHelper::HideDragNodeCopy(overlayManager);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, false);
 
     dragDropManager->DoDragStartAnimation(
         subWindowOverlayManager, info, eventHub->GetOrCreateGestureEventHub(), data);
