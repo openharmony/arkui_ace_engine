@@ -2508,7 +2508,7 @@ void SwiperPattern::InitIndicator()
             indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
                 [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
         }
-        swiperNode->AddChild(indicatorNode);
+        swiperNode->UINode::AddChild(indicatorNode);
     } else {
         indicatorNode =
             DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetIndicatorId())));
@@ -2522,7 +2522,7 @@ void SwiperPattern::InitIndicator()
             RemoveIndicatorNode();
             indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
                 [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
-            swiperNode->AddChild(indicatorNode);
+            swiperNode->UINode::AddChild(indicatorNode);
         }
     }
     lastSwiperIndicatorType_ = indicatorType;
