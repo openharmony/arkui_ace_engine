@@ -98,8 +98,8 @@ Scrollable::~Scrollable()
         PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
         AceAsyncTraceEndCommercial(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") +
             nodeTag_).c_str());
-        auto context = context_.Upgrade();
-        if (context) {
+        if (context_) {
+            auto context = context_.Upgrade();
             context->SetUiDvsyncSwitch(false);
         }
     }
