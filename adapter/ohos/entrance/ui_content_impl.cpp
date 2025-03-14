@@ -3505,7 +3505,7 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
 bool UIContentImpl::IfNeedTouchOutsideListener(const std::string& windowName)
 {
     return !StringUtils::StartWith(windowName, SUBWINDOW_TOAST_PREFIX) ||
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
