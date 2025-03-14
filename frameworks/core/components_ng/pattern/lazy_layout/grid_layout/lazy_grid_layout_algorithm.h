@@ -66,12 +66,14 @@ public:
     int32_t LanesFloor(int32_t index) const;
     int32_t LanesCeil(int32_t index) const;
 
+    static std::optional<ViewPosReference> GetReferencePos(RefPtr<FrameNode> frameNode);
+
 private:
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize, const PaddingPropertyF& padding);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t laneIdx) const;
     void UpdateGridItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void UpdateGap(const RefPtr<LazyGridLayoutProperty>& layoutProperty, const OptionalSizeF& selfIdealSize);
-    void UpdateReferencePos(LayoutWrapper* layoutWrapper, const std::optional<ViewPosReference>& posRef);
+    void UpdateReferencePos(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef);
     void MeasureGridItemAll(LayoutWrapper* layoutWrapper);
     void MeasureGridItemLazy(LayoutWrapper* layoutWrapper);
     void GetStartIndexInfo(int32_t& index, float& pos);

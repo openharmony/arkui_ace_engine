@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 
@@ -30,8 +31,14 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
-    auto contentIdealSize = CreateIdealSize(
-        contentConstraint, axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
+    auto contentIdealSize = CreateIdealSize(contentConstraint, axis_, layoutProperty->GetMeasureType());
+    if (!GetCrossAxisSize(contentIdealSize, axis_)) {
+        auto maxSize = GetCrossAxisSize(contentConstraint.maxSize, axis_);
+        if (GreaterOrEqualToInfinity(maxSize)) {
+            maxSize = GetCrossAxisSize(contentConstraint.percentReference, axis_);
+        }
+        SetCrossAxisSize(maxSize, axis_, contentIdealSize);
+    }
     realMainSize_ = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
     totalMainSize_ = layoutInfo_->totalMainSize_;
     UpdateReferencePos(layoutWrapper, contentConstraint.viewPosRef);
@@ -180,9 +187,35 @@ void LazyGridLayoutAlgorithm::UpdateGridItemConstraint(const OptionalSizeF& self
     childLayoutConstraints_ = std::move(layoutConstraints);
 }
 
-void LazyGridLayoutAlgorithm::UpdateReferencePos(LayoutWrapper* layoutWrapper,
-    const std::optional<ViewPosReference>& posRef)
+std::optional<ViewPosReference> LazyGridLayoutAlgorithm::GetReferencePos(RefPtr<FrameNode> frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    if (frameNode->GetTag() != V2::COMMON_VIEW_ETS_TAG && frameNode->GetTag() != V2::NODE_CONTAINER_ETS_TAG &&
+        frameNode->GetTag() != "BuilderProxyNode" && frameNode->GetTag() != V2::FLOW_ITEM_ETS_TAG &&
+        frameNode->GetTag() != V2::LAZY_V_GRID_LAYOUT_ETS_TAG) {
+        return std::nullopt;
+    }
+    auto geometry = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometry, std::nullopt);
+    auto constraintOpt = geometry->GetParentLayoutConstraint();
+    CHECK_NULL_RETURN(constraintOpt, std::nullopt);
+    auto& constraint = constraintOpt.value();
+    if (constraint.viewPosRef.has_value()) {
+        auto viewPosRef = constraint.viewPosRef.value();
+        frameNode->GetLayoutProperty()->ConstraintViewPosRef(viewPosRef);
+        return viewPosRef;
+    }
+    auto viewPosRefOpt = GetReferencePos(frameNode->GetAncestorNodeOfFrame(true));
+    CHECK_NULL_RETURN(viewPosRefOpt, std::nullopt);
+    frameNode->GetLayoutProperty()->ConstraintViewPosRef(viewPosRefOpt.value());
+    return viewPosRefOpt;
+}
+
+void LazyGridLayoutAlgorithm::UpdateReferencePos(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef)
+{
+    if (!posRef.has_value()) {
+        posRef = GetReferencePos(layoutWrapper->GetHostNode());
+    }
     if (!posRef.has_value() || posRef.value().axis != axis_) {
         needAllLayout_ = true;
         return;
