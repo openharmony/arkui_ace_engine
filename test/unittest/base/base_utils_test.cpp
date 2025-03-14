@@ -1258,7 +1258,7 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest076, TestSize.Level1)
     uint8_t mutf8[] = {0xF0, 0x9D, 0x84, 0x9E};
     auto [codePoint, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8, 4);
     EXPECT_TRUE(codePoint > 0xFFFF);
-    EXPECT_EQ(nbytes, 4); 
+    EXPECT_EQ(nbytes, 4);
 }
 
 /**
