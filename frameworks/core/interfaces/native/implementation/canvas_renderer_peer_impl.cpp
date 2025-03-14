@@ -233,11 +233,7 @@ void CanvasRendererPeerImpl::TriggerFillTextImpl(
              "not bound to component.");
         return;
     }
-    double density = GetDensity();
-    if (maxWidth.has_value()) {
-        maxWidth = maxWidth.value() * density;
-    }
-    pattern_->FillText(text, x * density, y * density, maxWidth);
+    pattern_->FillText(text, x, y, maxWidth);
 }
 void CanvasRendererPeerImpl::TriggerStrokeTextImpl(
     const std::string& text, double x, double y, std::optional<double> maxWidth)
@@ -464,7 +460,8 @@ void CanvasRendererPeerImpl::TriggerArcImpl(double x,
              "not bound to component.");
         return;
     }
-    pattern_->Arc({x, y, radius, startAngle, endAngle, counterclockwise});
+    double density = GetDensity();
+    pattern_->Arc({x * density, y * density, radius * density, startAngle, endAngle, counterclockwise});
 }
 void CanvasRendererPeerImpl::TriggerArcToImpl(double x1, double y1, double x2, double y2, double radius)
 {
@@ -473,7 +470,8 @@ void CanvasRendererPeerImpl::TriggerArcToImpl(double x1, double y1, double x2, d
              "not bound to component.");
         return;
     }
-    pattern_->ArcTo({x1, y1, x2, y2, radius});
+    double density = GetDensity();
+    pattern_->ArcTo({x1 * density, y1 * density, x2 * density, y2 * density, radius * density});
 }
 void CanvasRendererPeerImpl::TriggerBezierCurveToImpl(double cp1x,
                                                       double cp1y,
@@ -487,7 +485,10 @@ void CanvasRendererPeerImpl::TriggerBezierCurveToImpl(double cp1x,
              "not bound to component.");
         return;
     }
-    pattern_->BezierCurveTo({cp1x, cp1y, cp2x, cp2y, x, y});
+    double density = GetDensity();
+    pattern_->BezierCurveTo({cp1x * density, cp1y * density,
+                            cp2x * density, cp2y * density,
+                            x * density, y * density});
 }
 void CanvasRendererPeerImpl::TriggerClosePathImpl()
 {
@@ -512,7 +513,9 @@ void CanvasRendererPeerImpl::TriggerEllipseImpl(double x,
              "not bound to component.");
         return;
     }
-    pattern_->Ellipse({x, y, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise});
+    double density = GetDensity();
+    pattern_->Ellipse({x * density, y * density, radiusX * density, radiusY * density,
+                        rotation, startAngle, endAngle, counterclockwise});
 }
 void CanvasRendererPeerImpl::TriggerLineToImpl(double x, double y)
 {
@@ -521,7 +524,8 @@ void CanvasRendererPeerImpl::TriggerLineToImpl(double x, double y)
              "not bound to component.");
         return;
     }
-    pattern_->LineTo(x, y);
+    double density = GetDensity();
+    pattern_->LineTo(x * density, y * density);
 }
 void CanvasRendererPeerImpl::TriggerMoveToImpl(double x, double y)
 {
@@ -530,7 +534,8 @@ void CanvasRendererPeerImpl::TriggerMoveToImpl(double x, double y)
              "not bound to component.");
         return;
     }
-    pattern_->MoveTo(x, y);
+    double density = GetDensity();
+    pattern_->MoveTo(x * density, y * density);
 }
 void CanvasRendererPeerImpl::TriggerQuadraticCurveToImpl(double cpx, double cpy, double x, double y)
 {
@@ -539,7 +544,8 @@ void CanvasRendererPeerImpl::TriggerQuadraticCurveToImpl(double cpx, double cpy,
              "not bound to component.");
         return;
     }
-    pattern_->QuadraticCurveTo({cpx, cpy, x, y});
+    double density = GetDensity();
+    pattern_->QuadraticCurveTo({cpx * density, cpy * density, x * density, y * density});
 }
 void CanvasRendererPeerImpl::TriggerRectImpl(double x, double y, double w, double h)
 {
@@ -548,7 +554,8 @@ void CanvasRendererPeerImpl::TriggerRectImpl(double x, double y, double w, doubl
              "not bound to component.");
         return;
     }
-    pattern_->AddRect({x, y, w, h});
+    double density = GetDensity();
+    pattern_->AddRect({x * density, y * density, w * density, h * density});
 }
 Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
 {

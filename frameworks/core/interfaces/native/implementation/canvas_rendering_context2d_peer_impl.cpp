@@ -18,6 +18,7 @@
 
 namespace {
 constexpr auto ERROR_VALUE = -1;
+constexpr auto EMPTY_STRING = "";
 
 } // namespace
 
@@ -201,7 +202,7 @@ std::string CanvasRenderingContext2DPeerImpl::ToDataURL(const std::string& type,
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRenderingContext2DPeerImpl::TriggerGetWidth pattern not bound to component.");
-        return "";
+        return EMPTY_STRING;
     }
     return pattern_->ToDataURL(type, quality);
 }

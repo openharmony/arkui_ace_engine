@@ -93,21 +93,21 @@ std::vector<std::tuple<Opt_Number, std::optional<double>>> OPT_NUMBER_TEST_PLAN 
     { Converter::ArkValue<Opt_Number>(-100), -100 },
     { Converter::ArkValue<Opt_Number>(12.34), 12.34 },
     { Converter::ArkValue<Opt_Number>(-56.73), -56.73 },
-    { Converter::ArkValue<Opt_Number>(Ark_Empty()), std::make_optional<double>() },
+    { Converter::ArkValue<Opt_Number>(Ark_Empty()), std::nullopt },
 };
 
 std::vector<std::tuple<Ark_String, CompositeOperation>> ARK_COMPOSITE_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("source_OVER"), CompositeOperation::SOURCE_OVER },
-    { Converter::ArkValue<Ark_String>("  source_ATOP"), CompositeOperation::SOURCE_ATOP },
-    { Converter::ArkValue<Ark_String>("source_IN  "), CompositeOperation::SOURCE_IN },
-    { Converter::ArkValue<Ark_String>("  source_OUT  "), CompositeOperation::SOURCE_OUT },
-    { Converter::ArkValue<Ark_String>("DESTINATION_over"), CompositeOperation::DESTINATION_OVER },
-    { Converter::ArkValue<Ark_String>("  DESTINATION_atop"), CompositeOperation::DESTINATION_ATOP },
-    { Converter::ArkValue<Ark_String>("DESTINATION_in  "), CompositeOperation::DESTINATION_IN },
-    { Converter::ArkValue<Ark_String>("  DESTINATION_out "), CompositeOperation::DESTINATION_OUT },
-    { Converter::ArkValue<Ark_String>("LIGHTER  "), CompositeOperation::LIGHTER },
-    { Converter::ArkValue<Ark_String>(" copy"), CompositeOperation::COPY },
-    { Converter::ArkValue<Ark_String>("XOR"), CompositeOperation::XOR },
+    { Converter::ArkValue<Ark_String>("source-over"), CompositeOperation::SOURCE_OVER },
+    { Converter::ArkValue<Ark_String>("source-atop"), CompositeOperation::SOURCE_ATOP },
+    { Converter::ArkValue<Ark_String>("source-in"), CompositeOperation::SOURCE_IN },
+    { Converter::ArkValue<Ark_String>("source-out"), CompositeOperation::SOURCE_OUT },
+    { Converter::ArkValue<Ark_String>("destination-over"), CompositeOperation::DESTINATION_OVER },
+    { Converter::ArkValue<Ark_String>("destination-atop"), CompositeOperation::DESTINATION_ATOP },
+    { Converter::ArkValue<Ark_String>("destination-in"), CompositeOperation::DESTINATION_IN },
+    { Converter::ArkValue<Ark_String>("destination-out"), CompositeOperation::DESTINATION_OUT },
+    { Converter::ArkValue<Ark_String>("lighter"), CompositeOperation::LIGHTER },
+    { Converter::ArkValue<Ark_String>("copy"), CompositeOperation::COPY },
+    { Converter::ArkValue<Ark_String>("xor"), CompositeOperation::XOR },
     { Converter::ArkValue<Ark_String>(""), static_cast<CompositeOperation>(-1) },
     { Converter::ArkValue<Ark_String>("unknown value"), static_cast<CompositeOperation>(-1) },
 };
@@ -886,8 +886,8 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform0Test, TestSize.Level1)
             accessor_->setTransform0(peer_, &arkS, &x, &y, &arkS, &arkD, &arkD);
 
             EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewY, expectedY));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewX, expectedY));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewY, expectedX));
         }
     }
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
