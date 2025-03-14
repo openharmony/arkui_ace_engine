@@ -209,11 +209,11 @@ HWTEST_F(TextFieldPatternTestNine, OnTextGestureSelectionUpdate001, TestSize.Lev
 }
 
 /**
- * @tc.name: OnTextGenstureSelectionEnd001
- * @tc.desc: test OnTextGenstureSelectionEnd
+ * @tc.name: OnTextGestureSelectionEnd001
+ * @tc.desc: test OnTextGestureSelectionEnd
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNine, OnTextGenstureSelectionEnd001, TestSize.Level0)
+HWTEST_F(TextFieldPatternTestNine, OnTextGestureSelectionEnd001, TestSize.Level0)
 {
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::VISIBLE_PASSWORD);
@@ -227,14 +227,14 @@ HWTEST_F(TextFieldPatternTestNine, OnTextGenstureSelectionEnd001, TestSize.Level
     pattern_->contentRect_.x_ = 33;
     pattern_->contentRect_.height_ = 44;
     pattern_->contentRect_.y_ = 44;
-    pattern_->OnTextGenstureSelectionEnd(locationInfo);
+    pattern_->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_TRUE(LessNotEqual(locationInfo.localLocation_.GetX(), pattern_->contentRect_.Left()));
 
     pattern_->contentRect_.width_ = 1,
     pattern_->contentRect_.x_ = 1;
     pattern_->contentRect_.height_ = 2;
     pattern_->contentRect_.y_ = 2;
-    pattern_->OnTextGenstureSelectionEnd(locationInfo);
+    pattern_->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_FALSE(LessNotEqual(locationInfo.localLocation_.GetX(), pattern_->contentRect_.Right()));
 }
 
