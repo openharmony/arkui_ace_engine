@@ -28,6 +28,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/theme/blur_style_theme.h"
@@ -1058,5 +1059,58 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetFrameNodeByKey, TestSize.Level1)
     std::string key = "";
     RefPtr<FrameNode> ret = NG::DragDropFuncWrapper::GetFrameNodeByKey(frameNode, key);
     EXPECT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: StartDragAction
+ * @tc.desc: Test StartDragAction func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, StartDragAction, TestSize.Level1)
+{
+    auto dragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
+    auto container = Container::Current();
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(0, container);
+    dragAction->instanceId = 0;
+    int32_t ret = DragDropFuncWrapper::StartDragAction(dragAction);
+    EXPECT_EQ(ret, -1);
+
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    aceEngine.AddContainer(1, MockContainer::container_);
+    dragAction->instanceId = 1;
+    ret = DragDropFuncWrapper::StartDragAction(dragAction);
+    EXPECT_EQ(ret, -1);
+
+    dragAction->dragState = DragAdapterState::SENDING;
+    ret = DragDropFuncWrapper::StartDragAction(dragAction);
+    EXPECT_EQ(ret, -1);
+
+    MockContainer::Current()->pipelineContext_->SetIsDragging(true);
+    ret = DragDropFuncWrapper::StartDragAction(dragAction);
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: HandleOnDragEvent
+ * @tc.desc: Test HandleOnDragEvent func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, HandleOnDragEvent, TestSize.Level1)
+{
+    auto dragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(0, MockContainer::container_);
+    dragAction->instanceId = 0;
+    dragAction->dragState = DragAdapterState::INIT;
+    DragDropFuncWrapper::HandleOnDragEvent(dragAction);
+    EXPECT_EQ(dragAction->dragState, DragAdapterState::INIT);
+
+    dragAction->dragState = DragAdapterState::SENDING;
+    DragDropFuncWrapper::HandleOnDragEvent(dragAction);
+    EXPECT_EQ(dragAction->dragState, DragAdapterState::SUCCESS);
 }
 } // namespace OHOS::Ace::NG
