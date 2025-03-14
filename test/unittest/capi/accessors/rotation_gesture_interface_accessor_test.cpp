@@ -28,8 +28,7 @@ using namespace Converter;
 
 class MockRotationGesture : public RotationGesture {
     public:
-        MockRotationGesture(int32_t fingers, double angle) :
-            RotationGesture(fingers, angle) {}
+        MockRotationGesture(int32_t fingers, double angle) : RotationGesture(fingers, angle) {}
         ~MockRotationGesture() override = default;
     
         void HandleOnActionStart(GestureEvent& event)
@@ -54,7 +53,7 @@ struct RotationEvent {
     int32_t resourceId;
 };
 
-static const int expectedResId = 123;
+static const int RES_ID = 123;
 
 class RotationGestureInterfaceAccessorTest : public AccessorTestBase<GENERATED_ArkUIRotationGestureInterfaceAccessor,
     &GENERATED_ArkUIAccessors::getRotationGestureInterfaceAccessor, RotationGestureInterfacePeer> {
@@ -64,7 +63,7 @@ class RotationGestureInterfaceAccessorTest : public AccessorTestBase<GENERATED_A
     
             int32_t fingersNum = DEFAULT_SLIDE_FINGER;
             double angleNum = 0;
-            peer_->gesture = AceType::MakeRefPtr<MockRotationGesture>(fingersNum, angleNum);;
+            peer_->gesture = AceType::MakeRefPtr<MockRotationGesture>(fingersNum, angleNum);
         }
     };
 
@@ -81,14 +80,14 @@ HWTEST_F(RotationGestureInterfaceAccessorTest, onActionStartTest, TestSize.Level
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_GestureEvent_Void>(nullptr, onActionStartFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_GestureEvent_Void>(nullptr, onActionStartFunc, RES_ID);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->onActionStart(peer_, &arkCallback);
     GestureEvent evt;
     (reinterpret_cast<MockRotationGesture*>(Referenced::RawPtr(peer_->gesture)))->HandleOnActionStart(evt);
     ASSERT_TRUE(rotationEvent);
-    EXPECT_EQ(rotationEvent->resourceId, expectedResId);
+    EXPECT_EQ(rotationEvent->resourceId, RES_ID);
 }
 
  /**
@@ -104,14 +103,14 @@ HWTEST_F(RotationGestureInterfaceAccessorTest, onActionUpdateTest, TestSize.Leve
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_GestureEvent_Void>(nullptr, onActionUpdateFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_GestureEvent_Void>(nullptr, onActionUpdateFunc, RES_ID);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->onActionUpdate(peer_, &arkCallback);
     GestureEvent evt;
     (reinterpret_cast<MockRotationGesture*>(Referenced::RawPtr(peer_->gesture)))->HandleOnActionUpdate(evt);
     ASSERT_TRUE(rotationEvent);
-    EXPECT_EQ(rotationEvent->resourceId, expectedResId);
+    EXPECT_EQ(rotationEvent->resourceId, RES_ID);
 }
 
  /**
@@ -128,14 +127,14 @@ HWTEST_F(RotationGestureInterfaceAccessorTest, onActionEndTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_GestureEvent_Void>(nullptr, onActionEndFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_GestureEvent_Void>(nullptr, onActionEndFunc, RES_ID);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->onActionEnd(peer_, &arkCallback);
     GestureEvent evt;
     (reinterpret_cast<MockRotationGesture*>(Referenced::RawPtr(peer_->gesture)))->HandleOnActionEnd(evt);
     ASSERT_TRUE(rotationEvent);
-    EXPECT_EQ(rotationEvent->resourceId, expectedResId);
+    EXPECT_EQ(rotationEvent->resourceId, RES_ID);
 }
 
  /**
@@ -151,12 +150,12 @@ HWTEST_F(RotationGestureInterfaceAccessorTest, onActionCancelTest, TestSize.Leve
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_Void>(onActionCancelFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(onActionCancelFunc, RES_ID);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->onActionCancel(peer_, &arkCallback);
     (reinterpret_cast<MockRotationGesture*>(Referenced::RawPtr(peer_->gesture)))->HandleOnActionCancel();
     ASSERT_TRUE(rotationEvent);
-    EXPECT_EQ(rotationEvent->resourceId, expectedResId);
+    EXPECT_EQ(rotationEvent->resourceId, RES_ID);
     }
 } // namespace OHOS::Ace::NG
