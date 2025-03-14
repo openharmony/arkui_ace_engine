@@ -680,6 +680,11 @@ bool GestureEventHub::ParsePixelMapAsync(DragDropInfo& dragDropInfo, const DragD
         }
     }
 
+    if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode == nullptr && dragPreviewInfo.pixelMap == nullptr &&
+        dragPreviewInfo.customNode == nullptr && pixelMap_ != nullptr && !frameNode->GetDragPreview().onlyForLifting) {
+        dragDropInfo.pixelMap = pixelMap_;
+        return true;
+    }
     if (dragPreviewInfo.pixelMap != nullptr) {
         ACE_SCOPED_TRACE("drag: handling with pixelmap directly");
         dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
