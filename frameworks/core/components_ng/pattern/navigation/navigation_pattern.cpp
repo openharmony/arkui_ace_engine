@@ -799,7 +799,7 @@ void NavigationPattern::UpdateNavPathList()
             auto navDestination =
                 DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
             if (navDestination) {
-                navDestination->SetCanReused(true);
+                navDestination->SetInCurrentStack(true);
                 auto eventHub = navDestination->GetEventHub<EventHub>();
                 CHECK_NULL_VOID(eventHub);
                 eventHub->SetEnabledInternal(true);
@@ -3007,6 +3007,7 @@ void NavigationPattern::RecoveryToLastStack(
 {
     if (preTopDestination) {
         preTopDestination->SetIsOnAnimation(false);
+        preTopDestination->SetInCurrentStack(true);
     }
     if (newTopDestination) {
         newTopDestination->SetIsOnAnimation(false);
