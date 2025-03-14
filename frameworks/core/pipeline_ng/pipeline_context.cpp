@@ -2772,7 +2772,7 @@ void PipelineContext::OnTouchEvent(
                 eventManager_->SetInnerFlag(true);
             }
         }
-        if (IsFormRender() && touchTestResults.find(point.id) != touchTestResults.end()) {
+        if (IsFormRenderExceptDynamicComponent() && touchTestResults.find(point.id) != touchTestResults.end()) {
             for (const auto& touchResult : touchTestResults[point.id]) {
                 auto recognizer = AceType::DynamicCast<NG::RecognizerGroup>(touchResult);
                 if (recognizer) {
