@@ -926,4 +926,137 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, NotifyDragEndPendingDone, TestSize.L
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
     DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(false);
 }
+
+/**
+ * @tc.name: Test GetAnonyString
+ * @tc.desc: Test GetAnonyString func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetAnonyString, TestSize.Level1)
+{
+    std::string fullString = "";
+    std::string anonyStr = "";
+    std::string ret = NG::DragDropFuncWrapper::GetAnonyString(fullString);
+    EXPECT_EQ(ret, anonyStr);
+
+    fullString = "test";
+    anonyStr = "t******t";
+    ret = NG::DragDropFuncWrapper::GetAnonyString(fullString);
+    EXPECT_EQ(ret, anonyStr);
+
+    fullString = "testFullString";
+    anonyStr = "test******ring";
+    ret = NG::DragDropFuncWrapper::GetAnonyString(fullString);
+    EXPECT_EQ(ret, anonyStr);
+}
+
+/**
+ * @tc.name: Test GetPointerEventAction
+ * @tc.desc: Test GetPointerEventAction func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetPointerEventAction, TestSize.Level1)
+{
+    TouchEvent touchPoint;
+    DragPointerEvent event;
+
+    NG::DragDropFuncWrapper::GetPointerEventAction(touchPoint, event);
+    EXPECT_EQ(event.action, PointerAction::UNKNOWN);
+
+    touchPoint.type = TouchType::CANCEL;
+    NG::DragDropFuncWrapper::GetPointerEventAction(touchPoint, event);
+    EXPECT_EQ(event.action, PointerAction::CANCEL);
+
+    touchPoint.type = TouchType::DOWN;
+    NG::DragDropFuncWrapper::GetPointerEventAction(touchPoint, event);
+    EXPECT_EQ(event.action, PointerAction::DOWN);
+
+    touchPoint.type = TouchType::MOVE;
+    NG::DragDropFuncWrapper::GetPointerEventAction(touchPoint, event);
+    EXPECT_EQ(event.action, PointerAction::MOVE);
+
+    touchPoint.type = TouchType::UP;
+    NG::DragDropFuncWrapper::GetPointerEventAction(touchPoint, event);
+    EXPECT_EQ(event.action, PointerAction::UP);
+
+    touchPoint.type = TouchType::PULL_MOVE;
+    NG::DragDropFuncWrapper::GetPointerEventAction(touchPoint, event);
+    EXPECT_EQ(event.action, PointerAction::PULL_MOVE);
+
+    touchPoint.type = TouchType::PULL_UP;
+    NG::DragDropFuncWrapper::GetPointerEventAction(touchPoint, event);
+    EXPECT_EQ(event.action, PointerAction::PULL_UP);
+
+    touchPoint.type = TouchType::PULL_IN_WINDOW;
+    NG::DragDropFuncWrapper::GetPointerEventAction(touchPoint, event);
+    EXPECT_EQ(event.action, PointerAction::PULL_IN_WINDOW);
+
+    touchPoint.type = TouchType::PULL_OUT_WINDOW;
+    NG::DragDropFuncWrapper::GetPointerEventAction(touchPoint, event);
+    EXPECT_EQ(event.action, PointerAction::PULL_OUT_WINDOW);
+}
+
+/**
+ * @tc.name: Test GetFrameNodeByInspectorId
+ * @tc.desc: Test GetFrameNodeByInspectorId func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetFrameNodeByInspectorId, TestSize.Level1)
+{
+    std::string inspectorId = "";
+    RefPtr<FrameNode> ret = NG::DragDropFuncWrapper::GetFrameNodeByInspectorId(inspectorId);
+    EXPECT_EQ(ret, nullptr);
+
+    inspectorId = "test";
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode->UpdateInspectorId(inspectorId);
+    auto context = PipelineContext::GetCurrentContext();
+    context->rootNode_ = rootNode;
+    rootNode->AddChild(frameNode);
+    ret = NG::DragDropFuncWrapper::GetFrameNodeByInspectorId(inspectorId);
+    EXPECT_EQ(ret, frameNode);
+
+    frameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+    ret = NG::DragDropFuncWrapper::GetFrameNodeByInspectorId(inspectorId);
+    EXPECT_EQ(ret, nullptr);
+
+    frameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+    ret = NG::DragDropFuncWrapper::GetFrameNodeByInspectorId(inspectorId);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: Test GetPointRelativeToMainWindow
+ * @tc.desc: Test GetPointRelativeToMainWindow func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetPointRelativeToMainWindow, TestSize.Level1)
+{
+    Point point = { 0, 0 };
+    OffsetF ret = NG::DragDropFuncWrapper::GetPointRelativeToMainWindow(point);
+    EXPECT_EQ(ret.GetX(), point.GetX());
+    EXPECT_EQ(ret.GetY(), point.GetY());
+}
+
+/**
+ * @tc.name: Test GetFrameNodeByKey
+ * @tc.desc: Test GetFrameNodeByKey func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetFrameNodeByKey, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    std::string key = "";
+    RefPtr<FrameNode> ret = NG::DragDropFuncWrapper::GetFrameNodeByKey(frameNode, key);
+    EXPECT_NE(ret, nullptr);
+}
 } // namespace OHOS::Ace::NG
