@@ -235,7 +235,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleLengthMetrics, TestSize.
     };
     const Ark_LengthMetrics lengthMetrics = Converter::ArkValue<Ark_LengthMetrics>(length.GetDimension());
     const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
-        .margin = Converter::ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>        (lengthMetrics),
+        .margin = Converter::ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>(lengthMetrics),
         .padding = Converter::ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(lengthMetrics),
         .borderRadius = Converter::ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_LengthMetrics>(lengthMetrics),
     };
