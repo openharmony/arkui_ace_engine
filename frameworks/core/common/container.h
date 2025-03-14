@@ -218,6 +218,13 @@ public:
 
     virtual FoldStatus GetCurrentFoldStatus();
 
+    virtual FoldStatus GetFoldStatusFromListener()
+    {
+        return GetCurrentFoldStatus();
+    }
+
+    virtual void InitFoldStatusFromListener() {}
+
     virtual NG::SafeAreaInsets GetKeyboardSafeArea();
 
     virtual std::string GetHapPath() const
