@@ -2787,6 +2787,7 @@ void AceContainer::CheckAndSetFontFamily()
     path = path.append("/fonts/");
     auto fontFamilyNames = GetFontFamilyName(path);
     if (fontFamilyNames.empty()) {
+        TAG_LOGI(AceLogTag::ACE_FONT, "FontFamilyNames is empty");
         return;
     }
     familyName = fontFamilyNames[0];
