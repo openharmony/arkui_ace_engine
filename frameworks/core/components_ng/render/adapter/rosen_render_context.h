@@ -386,7 +386,7 @@ public:
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
-    void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
+    void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
     void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;

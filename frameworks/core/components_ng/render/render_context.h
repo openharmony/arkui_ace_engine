@@ -170,7 +170,7 @@ public:
 
     virtual void SetFrameWithoutAnimation(const RectF& paintRect) {};
 
-    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
+    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) {}
     virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
 
     virtual void OnModifyDone() {}
