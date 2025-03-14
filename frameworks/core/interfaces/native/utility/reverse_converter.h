@@ -253,7 +253,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
     void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
-    void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src);
+    void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx);
     void AssignArkValue(Ark_ShadowType& dst, const ShadowType& src);
     void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
     void AssignArkValue(Ark_SheetType& dst, const SheetType& src);
