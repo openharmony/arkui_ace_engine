@@ -27,7 +27,7 @@ void SyncStackImpl(Ark_NavPathStack peer)
 {
 }
 Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
-                                Ark_NavPathStack stack)
+                                Ark_Int32 index)
 {
     return {};
 }

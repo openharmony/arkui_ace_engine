@@ -1068,6 +1068,82 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Number_TextCase& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Number_TextOverflow& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Number_TextAlign& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Number_String_FontWeight& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Number_FontStyle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_AttachmentType& src)
 {
     switch (src.selector) {
@@ -3129,6 +3205,7 @@ ASSIGN_OPT(Opt_CanvasPattern)
 ASSIGN_OPT(Opt_CanvasGradient)
 ASSIGN_OPT(Opt_VoidCallback)
 ASSIGN_OPT(Opt_DialogButtonStyle)
+ASSIGN_OPT(Opt_TextCase)
 ASSIGN_OPT(Opt_Map_String_CustomObject)
 ASSIGN_OPT(Opt_Callback_NavigationTransitionProxy_Void)
 ASSIGN_OPT(Opt_Callback_Boolean_Void)
@@ -3331,6 +3408,11 @@ ASSIGN_OPT(Opt_AlertDialogButtonBaseOptions)
 ASSIGN_OPT(Opt_ActionSheetOffset)
 ASSIGN_OPT(Opt_Array_SheetInfo)
 ASSIGN_OPT(Opt_ActionSheetButtonOptions)
+ASSIGN_OPT(Opt_Union_Number_TextCase)
+ASSIGN_OPT(Opt_Union_Number_TextOverflow)
+ASSIGN_OPT(Opt_Union_Number_TextAlign)
+ASSIGN_OPT(Opt_Union_Number_String_FontWeight)
+ASSIGN_OPT(Opt_Union_Number_FontStyle)
 ASSIGN_OPT(Opt_Callback_Extender_OnFinish)
 ASSIGN_OPT(Opt_Callback_Extender_OnProgress)
 ASSIGN_OPT(Opt_Float32)
@@ -3801,6 +3883,8 @@ ASSIGN_OPT(Opt_AlertDialogParamWithConfirm)
 ASSIGN_OPT(Opt_ActionSheetOptions)
 ASSIGN_OPT(Opt_ClickEvent)
 ASSIGN_OPT(Opt_NavExtender_OnUpdateStack)
+ASSIGN_OPT(Opt_MeasureOptions)
+ASSIGN_OPT(Opt_FontInfo)
 ASSIGN_OPT(Opt_FontOptions)
 ASSIGN_OPT(Opt_RoundRectShapeOptions)
 ASSIGN_OPT(Opt_RectShapeOptions)
@@ -4131,6 +4215,7 @@ ASSIGN_OPT(Opt_OnScrollFrameBeginHandlerResult)
 ASSIGN_OPT(Opt_OnScrollFrameBeginCallback)
 ASSIGN_OPT(Opt_Union_Color_Number_String)
 ASSIGN_OPT(Opt_OnScrollEdgeCallback)
+ASSIGN_OPT(Opt_ScrollOnScrollCallback)
 ASSIGN_OPT(Opt_ScrollDirection)
 ASSIGN_OPT(Opt_SaveButtonCallback)
 ASSIGN_OPT(Opt_SaveButtonOptions)
@@ -4297,6 +4382,7 @@ ASSIGN_OPT(Opt_GridContainerOptions)
 ASSIGN_OPT(Opt_GridColOptions)
 ASSIGN_OPT(Opt_GridItemOptions)
 ASSIGN_OPT(Opt_Literal_Number_offsetRemain)
+ASSIGN_OPT(Opt_ScrollState)
 ASSIGN_OPT(Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain)
 ASSIGN_OPT(Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void)
 ASSIGN_OPT(Opt_Callback_ItemDragInfo_Number_Void)
@@ -4360,8 +4446,8 @@ ASSIGN_OPT(Opt_HeightBreakpoint)
 ASSIGN_OPT(Opt_WidthBreakpoint)
 ASSIGN_OPT(Opt_TextSelectableMode)
 ASSIGN_OPT(Opt_MarqueeUpdateStrategy)
+ASSIGN_OPT(Opt_ScrollSource)
 ASSIGN_OPT(Opt_CopyOptions)
-ASSIGN_OPT(Opt_TextCase)
 ASSIGN_OPT(Opt_RelateType)
 ASSIGN_OPT(Opt_Week)
 ASSIGN_OPT(Opt_BusinessError)
@@ -4383,9 +4469,6 @@ ASSIGN_OPT(Opt_UICommonEvent)
 ASSIGN_OPT(Opt_ChildrenMainSize)
 ASSIGN_OPT(Opt_EffectEdge)
 ASSIGN_OPT(Opt_Union_ContentClipMode_RectShape)
-ASSIGN_OPT(Opt_ScrollOnScrollCallback)
-ASSIGN_OPT(Opt_ScrollSource)
-ASSIGN_OPT(Opt_ScrollState)
 ASSIGN_OPT(Opt_Callback_Number_Number_Void)
 ASSIGN_OPT(Opt_TextContentControllerBase)
 ASSIGN_OPT(Opt_View)

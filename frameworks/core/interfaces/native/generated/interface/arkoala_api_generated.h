@@ -166,6 +166,10 @@ typedef struct InteropAsyncWorker {
 } InteropAsyncWorker;
 typedef const InteropAsyncWorker* InteropAsyncWorkerPtr;
 
+typedef struct InteropObject {
+  InteropCallbackResource resource;
+} InteropObject;
+
 #endif // _INTEROP_TYPES_H_
 
 
@@ -794,6 +798,16 @@ typedef struct Array_SheetInfo Array_SheetInfo;
 typedef struct Opt_Array_SheetInfo Opt_Array_SheetInfo;
 typedef struct Ark_ActionSheetButtonOptions Ark_ActionSheetButtonOptions;
 typedef struct Opt_ActionSheetButtonOptions Opt_ActionSheetButtonOptions;
+typedef struct Ark_Union_Number_TextCase Ark_Union_Number_TextCase;
+typedef struct Opt_Union_Number_TextCase Opt_Union_Number_TextCase;
+typedef struct Ark_Union_Number_TextOverflow Ark_Union_Number_TextOverflow;
+typedef struct Opt_Union_Number_TextOverflow Opt_Union_Number_TextOverflow;
+typedef struct Ark_Union_Number_TextAlign Ark_Union_Number_TextAlign;
+typedef struct Opt_Union_Number_TextAlign Opt_Union_Number_TextAlign;
+typedef struct Ark_Union_Number_String_FontWeight Ark_Union_Number_String_FontWeight;
+typedef struct Opt_Union_Number_String_FontWeight Opt_Union_Number_String_FontWeight;
+typedef struct Ark_Union_Number_FontStyle Ark_Union_Number_FontStyle;
+typedef struct Opt_Union_Number_FontStyle Opt_Union_Number_FontStyle;
 typedef struct Callback_Extender_OnFinish Callback_Extender_OnFinish;
 typedef struct Opt_Callback_Extender_OnFinish Opt_Callback_Extender_OnFinish;
 typedef struct Callback_Extender_OnProgress Callback_Extender_OnProgress;
@@ -1538,6 +1552,10 @@ typedef struct ClickEventPeer* Ark_ClickEvent;
 typedef struct Opt_ClickEvent Opt_ClickEvent;
 typedef struct NavExtender_OnUpdateStack NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack Opt_NavExtender_OnUpdateStack;
+typedef struct Ark_MeasureOptions Ark_MeasureOptions;
+typedef struct Opt_MeasureOptions Opt_MeasureOptions;
+typedef struct Ark_FontInfo Ark_FontInfo;
+typedef struct Opt_FontInfo Opt_FontInfo;
 typedef struct Ark_FontOptions Ark_FontOptions;
 typedef struct Opt_FontOptions Opt_FontOptions;
 typedef struct Ark_RoundRectShapeOptions Ark_RoundRectShapeOptions;
@@ -2154,6 +2172,8 @@ typedef struct Ark_Union_Color_Number_String Ark_Union_Color_Number_String;
 typedef struct Opt_Union_Color_Number_String Opt_Union_Color_Number_String;
 typedef struct OnScrollEdgeCallback OnScrollEdgeCallback;
 typedef struct Opt_OnScrollEdgeCallback Opt_OnScrollEdgeCallback;
+typedef struct ScrollOnScrollCallback ScrollOnScrollCallback;
+typedef struct Opt_ScrollOnScrollCallback Opt_ScrollOnScrollCallback;
 typedef struct SaveButtonCallback SaveButtonCallback;
 typedef struct Opt_SaveButtonCallback Opt_SaveButtonCallback;
 typedef struct Ark_SaveButtonOptions Ark_SaveButtonOptions;
@@ -2586,8 +2606,6 @@ typedef struct ChildrenMainSizePeer* Ark_ChildrenMainSize;
 typedef struct Opt_ChildrenMainSize Opt_ChildrenMainSize;
 typedef struct Ark_Union_ContentClipMode_RectShape Ark_Union_ContentClipMode_RectShape;
 typedef struct Opt_Union_ContentClipMode_RectShape Opt_Union_ContentClipMode_RectShape;
-typedef struct ScrollOnScrollCallback ScrollOnScrollCallback;
-typedef struct Opt_ScrollOnScrollCallback Opt_ScrollOnScrollCallback;
 typedef struct Callback_Number_Number_Void Callback_Number_Number_Void;
 typedef struct Opt_Callback_Number_Number_Void Opt_Callback_Number_Number_Void;
 typedef struct TextContentControllerBasePeer TextContentControllerBasePeer;
@@ -3241,6 +3259,15 @@ typedef struct Opt_DialogButtonStyle {
     Ark_Tag tag;
     Ark_DialogButtonStyle value;
 } Opt_DialogButtonStyle;
+typedef enum Ark_TextCase {
+    ARK_TEXT_CASE_NORMAL = 0,
+    ARK_TEXT_CASE_LOWER_CASE = 1,
+    ARK_TEXT_CASE_UPPER_CASE = 2,
+} Ark_TextCase;
+typedef struct Opt_TextCase {
+    Ark_Tag tag;
+    Ark_TextCase value;
+} Opt_TextCase;
 typedef enum Ark_StyledStringKey {
     ARK_STYLED_STRING_KEY_FONT = 0,
     ARK_STYLED_STRING_KEY_DECORATION = 1,
@@ -5615,6 +5642,15 @@ typedef struct Opt_ImageRenderMode {
     Ark_Tag tag;
     Ark_ImageRenderMode value;
 } Opt_ImageRenderMode;
+typedef enum Ark_ScrollState {
+    ARK_SCROLL_STATE_IDLE = 0,
+    ARK_SCROLL_STATE_SCROLL = 1,
+    ARK_SCROLL_STATE_FLING = 2,
+} Ark_ScrollState;
+typedef struct Opt_ScrollState {
+    Ark_Tag tag;
+    Ark_ScrollState value;
+} Opt_ScrollState;
 typedef enum Ark_GridDirection {
     ARK_GRID_DIRECTION_ROW = 0,
     ARK_GRID_DIRECTION_COLUMN = 1,
@@ -5687,6 +5723,20 @@ typedef struct Opt_MarqueeUpdateStrategy {
     Ark_Tag tag;
     Ark_MarqueeUpdateStrategy value;
 } Opt_MarqueeUpdateStrategy;
+typedef enum Ark_ScrollSource {
+    ARK_SCROLL_SOURCE_DRAG = 0,
+    ARK_SCROLL_SOURCE_FLING = 1,
+    ARK_SCROLL_SOURCE_EDGE_EFFECT = 2,
+    ARK_SCROLL_SOURCE_OTHER_USER_INPUT = 3,
+    ARK_SCROLL_SOURCE_SCROLL_BAR = 4,
+    ARK_SCROLL_SOURCE_SCROLL_BAR_FLING = 5,
+    ARK_SCROLL_SOURCE_SCROLLER = 6,
+    ARK_SCROLL_SOURCE_SCROLLER_ANIMATION = 7,
+} Ark_ScrollSource;
+typedef struct Opt_ScrollSource {
+    Ark_Tag tag;
+    Ark_ScrollSource value;
+} Opt_ScrollSource;
 typedef enum Ark_CopyOptions {
     ARK_COPY_OPTIONS_NONE = 0,
     ARK_COPY_OPTIONS_IN_APP = 1,
@@ -5697,15 +5747,6 @@ typedef struct Opt_CopyOptions {
     Ark_Tag tag;
     Ark_CopyOptions value;
 } Opt_CopyOptions;
-typedef enum Ark_TextCase {
-    ARK_TEXT_CASE_NORMAL = 0,
-    ARK_TEXT_CASE_LOWER_CASE = 1,
-    ARK_TEXT_CASE_UPPER_CASE = 2,
-} Ark_TextCase;
-typedef struct Opt_TextCase {
-    Ark_Tag tag;
-    Ark_TextCase value;
-} Opt_TextCase;
 typedef enum Ark_RelateType {
     ARK_RELATE_TYPE_FILL = 0,
     ARK_RELATE_TYPE_FIT = 1,
@@ -5742,29 +5783,6 @@ typedef struct Opt_EffectEdge {
     Ark_Tag tag;
     Ark_EffectEdge value;
 } Opt_EffectEdge;
-typedef enum Ark_ScrollSource {
-    ARK_SCROLL_SOURCE_DRAG = 0,
-    ARK_SCROLL_SOURCE_FLING = 1,
-    ARK_SCROLL_SOURCE_EDGE_EFFECT = 2,
-    ARK_SCROLL_SOURCE_OTHER_USER_INPUT = 3,
-    ARK_SCROLL_SOURCE_SCROLL_BAR = 4,
-    ARK_SCROLL_SOURCE_SCROLL_BAR_FLING = 5,
-    ARK_SCROLL_SOURCE_SCROLLER = 6,
-    ARK_SCROLL_SOURCE_SCROLLER_ANIMATION = 7,
-} Ark_ScrollSource;
-typedef struct Opt_ScrollSource {
-    Ark_Tag tag;
-    Ark_ScrollSource value;
-} Opt_ScrollSource;
-typedef enum Ark_ScrollState {
-    ARK_SCROLL_STATE_IDLE = 0,
-    ARK_SCROLL_STATE_SCROLL = 1,
-    ARK_SCROLL_STATE_FLING = 2,
-} Ark_ScrollState;
-typedef struct Opt_ScrollState {
-    Ark_Tag tag;
-    Ark_ScrollState value;
-} Opt_ScrollState;
 typedef enum Ark_LineJoinStyle {
     ARK_LINE_JOIN_STYLE_MITER = 0,
     ARK_LINE_JOIN_STYLE_ROUND = 1,
@@ -8389,6 +8407,62 @@ typedef struct Opt_ActionSheetButtonOptions {
     Ark_Tag tag;
     Ark_ActionSheetButtonOptions value;
 } Opt_ActionSheetButtonOptions;
+typedef struct Ark_Union_Number_TextCase {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_TextCase value1;
+    };
+} Ark_Union_Number_TextCase;
+typedef struct Opt_Union_Number_TextCase {
+    Ark_Tag tag;
+    Ark_Union_Number_TextCase value;
+} Opt_Union_Number_TextCase;
+typedef struct Ark_Union_Number_TextOverflow {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_TextOverflow value1;
+    };
+} Ark_Union_Number_TextOverflow;
+typedef struct Opt_Union_Number_TextOverflow {
+    Ark_Tag tag;
+    Ark_Union_Number_TextOverflow value;
+} Opt_Union_Number_TextOverflow;
+typedef struct Ark_Union_Number_TextAlign {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_TextAlign value1;
+    };
+} Ark_Union_Number_TextAlign;
+typedef struct Opt_Union_Number_TextAlign {
+    Ark_Tag tag;
+    Ark_Union_Number_TextAlign value;
+} Opt_Union_Number_TextAlign;
+typedef struct Ark_Union_Number_String_FontWeight {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_String value1;
+        Ark_FontWeight value2;
+    };
+} Ark_Union_Number_String_FontWeight;
+typedef struct Opt_Union_Number_String_FontWeight {
+    Ark_Tag tag;
+    Ark_Union_Number_String_FontWeight value;
+} Opt_Union_Number_String_FontWeight;
+typedef struct Ark_Union_Number_FontStyle {
+    Ark_Int32 selector;
+    union {
+        Ark_Number value0;
+        Ark_FontStyle value1;
+    };
+} Ark_Union_Number_FontStyle;
+typedef struct Opt_Union_Number_FontStyle {
+    Ark_Tag tag;
+    Ark_Union_Number_FontStyle value;
+} Opt_Union_Number_FontStyle;
 typedef struct Callback_Extender_OnFinish {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId);
@@ -11600,6 +11674,43 @@ typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
     NavExtender_OnUpdateStack value;
 } Opt_NavExtender_OnUpdateStack;
+typedef struct Ark_MeasureOptions {
+    Ark_Union_String_Resource textContent;
+    Opt_Union_Number_String_Resource constraintWidth;
+    Opt_Union_Number_String_Resource fontSize;
+    Opt_Union_Number_FontStyle fontStyle;
+    Opt_Union_Number_String_FontWeight fontWeight;
+    Opt_Union_String_Resource fontFamily;
+    Opt_Union_Number_String letterSpacing;
+    Opt_Union_Number_TextAlign textAlign;
+    Opt_Union_Number_TextOverflow overflow;
+    Opt_Number maxLines;
+    Opt_Union_Number_String_Resource lineHeight;
+    Opt_Union_Number_String baselineOffset;
+    Opt_Union_Number_TextCase textCase;
+    Opt_Union_Number_String textIndent;
+    Opt_WordBreak wordBreak;
+} Ark_MeasureOptions;
+typedef struct Opt_MeasureOptions {
+    Ark_Tag tag;
+    Ark_MeasureOptions value;
+} Opt_MeasureOptions;
+typedef struct Ark_FontInfo {
+    Ark_String path;
+    Ark_String postScriptName;
+    Ark_String fullName;
+    Ark_String family;
+    Ark_String subfamily;
+    Ark_Number weight;
+    Ark_Number width;
+    Ark_Boolean italic;
+    Ark_Boolean monoSpace;
+    Ark_Boolean symbolic;
+} Ark_FontInfo;
+typedef struct Opt_FontInfo {
+    Ark_Tag tag;
+    Ark_FontInfo value;
+} Opt_FontInfo;
 typedef struct Ark_FontOptions {
     Ark_Union_String_Resource familyName;
     Ark_Union_String_Resource familySrc;
@@ -14245,6 +14356,15 @@ typedef struct Opt_OnScrollEdgeCallback {
     Ark_Tag tag;
     OnScrollEdgeCallback value;
 } Opt_OnScrollEdgeCallback;
+typedef struct ScrollOnScrollCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
+} ScrollOnScrollCallback;
+typedef struct Opt_ScrollOnScrollCallback {
+    Ark_Tag tag;
+    ScrollOnScrollCallback value;
+} Opt_ScrollOnScrollCallback;
 typedef struct SaveButtonCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_ClickEvent event, Ark_SaveButtonOnClickResult result, const Opt_BusinessError error);
@@ -16065,15 +16185,6 @@ typedef struct Opt_Union_ContentClipMode_RectShape {
     Ark_Tag tag;
     Ark_Union_ContentClipMode_RectShape value;
 } Opt_Union_ContentClipMode_RectShape;
-typedef struct ScrollOnScrollCallback {
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState);
-} ScrollOnScrollCallback;
-typedef struct Opt_ScrollOnScrollCallback {
-    Ark_Tag tag;
-    ScrollOnScrollCallback value;
-} Opt_ScrollOnScrollCallback;
 typedef struct Callback_Number_Number_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Number first, const Ark_Number last);
@@ -18309,10 +18420,6 @@ typedef struct GENERATED_ArkUIScrollableCommonMethodModifier {
                         const Ark_Union_Number_Resource* value);
     void (*setOnScroll)(Ark_NativePointer node,
                         const Callback_Number_Number_Void* value);
-    void (*setOnWillScroll)(Ark_NativePointer node,
-                            const Opt_ScrollOnWillScrollCallback* value);
-    void (*setOnDidScroll)(Ark_NativePointer node,
-                           const ScrollOnScrollCallback* value);
     void (*setOnReachStart)(Ark_NativePointer node,
                             const Callback_Void* value);
     void (*setOnReachEnd)(Ark_NativePointer node,
@@ -21564,7 +21671,13 @@ typedef struct GENERATED_ArkUIPathShapeAccessor {
 typedef struct GENERATED_ArkUIGlobalScope_ohos_fontAccessor {
     void (*registerFont)(const Ark_FontOptions* options);
     Array_String (*getSystemFontList)();
+    Ark_FontInfo (*getFontByName)(const Ark_String* fontName);
 } GENERATED_ArkUIGlobalScope_ohos_fontAccessor;
+
+typedef struct GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor {
+    Ark_Number (*measureText)(const Ark_MeasureOptions* options);
+    Ark_SizeOptions (*measureTextSize)(const Ark_MeasureOptions* options);
+} GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor;
 
 typedef struct GENERATED_ArkUIScaleSymbolEffectAccessor {
     void (*destroyPeer)(Ark_ScaleSymbolEffect peer);
@@ -21631,7 +21744,7 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
                                    const NavExtender_OnUpdateStack* callback);
     void (*syncStack)(Ark_NavPathStack peer);
     Ark_Boolean (*checkNeedCreate)(Ark_NativePointer navigation,
-                                   Ark_NavPathStack stack);
+                                   Ark_Int32 index);
     Ark_NativePointer (*navigationCreate)(Ark_Int32 peer,
                                           Ark_Int32 flag);
     void (*setNavigationOptions)(Ark_NativePointer navigation,
@@ -24278,6 +24391,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIEllipseShapeAccessor* (*getEllipseShapeAccessor)();
     const GENERATED_ArkUIPathShapeAccessor* (*getPathShapeAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* (*getGlobalScope_ohos_fontAccessor)();
+    const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* (*getGlobalScope_ohos_measure_utilsAccessor)();
     const GENERATED_ArkUIScaleSymbolEffectAccessor* (*getScaleSymbolEffectAccessor)();
     const GENERATED_ArkUIReplaceSymbolEffectAccessor* (*getReplaceSymbolEffectAccessor)();
     const GENERATED_ArkUIFrameNodeAccessor* (*getFrameNodeAccessor)();

@@ -307,8 +307,6 @@ const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodMo
         ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
         ScrollableCommonMethodModifier::FrictionImpl,
         ScrollableCommonMethodModifier::OnScrollImpl,
-        ScrollableCommonMethodModifier::OnWillScrollImpl,
-        ScrollableCommonMethodModifier::OnDidScrollImpl,
         ScrollableCommonMethodModifier::OnReachStartImpl,
         ScrollableCommonMethodModifier::OnReachEndImpl,
         ScrollableCommonMethodModifier::OnScrollStartImpl,
