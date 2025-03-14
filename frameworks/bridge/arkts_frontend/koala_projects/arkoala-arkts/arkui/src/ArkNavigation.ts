@@ -358,13 +358,11 @@ export function ArkNavigation(
         if (pathInfos != undefined) {
             const data = rememberMutableState<PathData>(PathData.EMPTY)
             remember(() => {
-                const updater: (name: string) => void =
-                    (name: string) => {
-                        // Object deserialization is not implemented so param is empty array
-                        const params = pathInfos!.getParamByName(name)
-                        data.value = new PathData(name, params)
+                const updater: () => void =
+                    () => {
+                        
                     }
-                const value_casted = updater as (((name: string) => void))
+                const value_casted = updater as ((() => void))
                 NavExtender.setUpdateStackCallback(pathInfos!, value_casted)
             })
             withNavData(data.value, () => {

@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
@@ -26,17 +28,38 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
 {
     auto stack = peer;
     CHECK_NULL_VOID(stack);
-    auto updater = [callback = CallbackHelper(*callback)](const std::string& value) {
-        auto stringValue = Converter::ArkValue<Ark_String>(value);
-        callback.Invoke(stringValue);
+    auto updater = [callback = CallbackHelper(*callback)]() {
+        callback.Invoke();
     };
     stack->SetUpdateCallback(std::move(updater));
+}
+void SyncStackImpl(Ark_NavPathStack peer)
+{
+}
+Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer, Ark_Int32 flag)
+{
+    return {};
+}
+void SetNavigationOptionsImpl(Ark_NativePointer peer, Ark_NavPathStack pathStack)
+{
+}
+Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation, Ark_Int32 index)
+{
+    return {};
+}
+void SetNavDestinationNodeImpl(Ark_NavPathStack pathStack, Ark_Int32 index, Ark_NativePointer node)
+{
 }
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
 {
     static const GENERATED_ArkUINavExtenderAccessor NavExtenderAccessorImpl {
         NavExtenderAccessor::SetUpdateStackCallbackImpl,
+        NavExtenderAccessor::SyncStackImpl,
+        NavExtenderAccessor::CheckNeedCreateImpl,
+        NavExtenderAccessor::NavigationCreateImpl,
+        NavExtenderAccessor::SetNavigationOptionsImpl,
+        NavExtenderAccessor::SetNavDestinationNodeImpl,
     };
     return &NavExtenderAccessorImpl;
 }

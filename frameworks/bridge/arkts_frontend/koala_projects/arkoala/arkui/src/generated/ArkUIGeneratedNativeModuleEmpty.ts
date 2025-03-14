@@ -5238,6 +5238,23 @@ export class ArkUIGeneratedNativeModuleEmpty {
     _NavExtender_setUpdateStackCallback(peer: KPointer, thisArray: Uint8Array, thisLength: int32): void {
         console.log("_NavExtender_setUpdateStackCallback")
     }
+    _NavExtender_syncStack(peer: KPointer): void {
+        console.log("_NavExtender_syncStack")
+    }
+    _NavExtender_checkNeedCreate(navigation: KPointer, index: int32): boolean {
+        console.log("_NavExtender_checkNeedCreate")
+        return false
+    }
+    _NavExtender_navigationCreate(peer: KInt, flag: KInt): KPointer {
+        console.log("_NavExtender_navigationCreate")
+        return -1
+    }
+    _NavExtender_setNavigationOptions(navigation: KPointer, stack: KPointer): void {
+        console.log("_NavExtender_setNavigationOptions")
+    }
+    _NavExtender_setNavDestinationNode(peer: KPointer, index: KInt, node: KPointer): void {
+        console.log("_NavExtender_setNavDestinationNode")
+    }
     _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void {
         console.log("_EventEmulator_emitClickEvent")
     }

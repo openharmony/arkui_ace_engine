@@ -21686,6 +21686,75 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SyncStackImpl(Ark_NavPathStack peer)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("syncStack(");
+        WriteToString(&out, peer);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
+                                    Ark_Int32 index)
+    {
+        if (!needGroupedLog(1)) {
+            return 0;
+        }
+        string out("checkNeedCreate(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, index);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,
+                                           Ark_Int32 flag)
+    {
+        if (!needGroupedLog(1)) {
+            return nullptr;
+        }
+        string out("navigationCreate(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, flag);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    void SetNavigationOptionsImpl(Ark_NativePointer navigation,
+                                  Ark_NavPathStack stack)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setNavigationOptions(");
+        WriteToString(&out, navigation);
+        out.append(", ");
+        WriteToString(&out, stack);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
+                                   Ark_Int32 index,
+                                   Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setNavDestinationNode(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, index);
+        out.append(", ");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // NavExtenderAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
@@ -34714,6 +34783,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUINavExtenderAccessor NavExtenderAccessorImpl {
             NavExtenderAccessor::SetUpdateStackCallbackImpl,
+            NavExtenderAccessor::SyncStackImpl,
+            NavExtenderAccessor::CheckNeedCreateImpl,
+            NavExtenderAccessor::NavigationCreateImpl,
+            NavExtenderAccessor::SetNavigationOptionsImpl,
+            NavExtenderAccessor::SetNavDestinationNodeImpl,
         };
         return &NavExtenderAccessorImpl;
     }

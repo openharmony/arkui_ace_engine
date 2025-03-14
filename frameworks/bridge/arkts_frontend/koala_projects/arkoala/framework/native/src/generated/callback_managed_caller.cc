@@ -4276,7 +4276,6 @@ void callManagedNavExtender_OnUpdateStack(Ark_Int32 resourceId, Ark_String value
     Serializer argsSerializer = Serializer(_buffer.buffer, sizeof(_buffer.buffer), &(_buffer.resourceHolder));
     argsSerializer.writeInt32(Kind_NavExtender_OnUpdateStack);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeString(value);
     enqueueCallback(&_buffer);
 }
 void callManagedNavExtender_OnUpdateStackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_String value)
@@ -4285,7 +4284,6 @@ void callManagedNavExtender_OnUpdateStackSync(Ark_VMContext vmContext, Ark_Int32
     Serializer argsSerializer = Serializer(_buffer, sizeof(_buffer), nullptr);
     argsSerializer.writeInt32(Kind_NavExtender_OnUpdateStack);
     argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeString(value);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
 void callManagedOnAdsBlockedCallback(Ark_Int32 resourceId, Ark_AdsBlockedDetails details)

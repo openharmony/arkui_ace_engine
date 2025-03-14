@@ -18019,10 +18019,30 @@ Ark_Boolean impl_PixelMap_getIsStrideAlignment(Ark_NativePointer thisPtr) {
 KOALA_INTEROP_1(PixelMap_getIsStrideAlignment, Ark_Boolean, Ark_NativePointer)
 void impl_NavExtender_setUpdateStackCallback(Ark_NativePointer peer, uint8_t* thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
-        NavExtender_OnUpdateStack callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavExtender_OnUpdateStack)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavExtender_OnUpdateStack))))};;
+        NavExtender_OnUpdateStack callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavExtender_OnUpdateStack)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavExtender_OnUpdateStack))))};;
         GetAccessors()->getNavExtenderAccessor()->setUpdateStackCallback(static_cast<Ark_NavPathStack>(peer), (const NavExtender_OnUpdateStack*)&callback_value);
 }
 KOALA_INTEROP_V3(NavExtender_setUpdateStackCallback, Ark_NativePointer, uint8_t*, int32_t)
+void impl_NavExtender_syncStack(Ark_NativePointer peer) {
+    GetAccessors()->getNavExtenderAccessor()->syncStack(static_cast<Ark_NavPathStack>(peer));
+}
+KOALA_INTEROP_V1(NavExtender_syncStack, Ark_NativePointer)
+Ark_Boolean impl_NavExtender_checkNeedCreate(Ark_NativePointer navigation, Ark_Int32 index) {
+    return GetAccessors()->getNavExtenderAccessor()->checkNeedCreate(navigation, index);
+}
+KOALA_INTEROP_2(NavExtender_checkNeedCreate, Ark_Boolean, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_NavExtender_navigationCreate(Ark_Int32 peer, Ark_Int32 flag) {
+    return GetAccessors()->getNavExtenderAccessor()->navigationCreate(peer, flag);
+}
+KOALA_INTEROP_2(NavExtender_navigationCreate, Ark_NativePointer, Ark_Int32, Ark_Int32)
+void impl_NavExtender_setNavigationOptions(Ark_NativePointer navigation, Ark_NativePointer stack) {
+    GetAccessors()->getNavExtenderAccessor()->setNavigationOptions(navigation, static_cast<Ark_NavPathStack>(stack));
+}
+KOALA_INTEROP_V2(NavExtender_setNavigationOptions, Ark_NativePointer, Ark_NativePointer)
+void impl_NavExtender_setNavDestinationNode(Ark_NativePointer peer, Ark_Int32 index, Ark_NativePointer node) {
+    GetAccessors()->getNavExtenderAccessor()->setNavDestinationNode(static_cast<Ark_NavPathStack>(peer), index, node);
+}
+KOALA_INTEROP_V3(NavExtender_setNavDestinationNode, Ark_NativePointer, Ark_Int32, Ark_NativePointer)
 void impl_EventEmulator_emitClickEvent(Ark_NativePointer node, Ark_NativePointer event) {
         GetAccessors()->getEventEmulatorAccessor()->emitClickEvent(node, static_cast<Ark_ClickEvent>(event));
 }

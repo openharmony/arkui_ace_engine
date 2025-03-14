@@ -11711,6 +11711,41 @@ export class ArkUIGeneratedNativeModule {
         }
         throw new Error("Not implemented")
     }
+    static _NavExtender_syncStack(peer: KPointer): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._NavExtender_syncStack(peer)
+        }
+        throw new Error("Not implemented")
+    }
+    static _NavExtender_checkNeedCreate(navigation: KPointer, index: int32): boolean {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._NavExtender_checkNeedCreate(navigation, index)
+        }
+        throw new Error("Not implemented")
+    }
+    static _NavExtender_navigationCreate(peer: KInt, flag: KInt): KPointer {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._NavExtender_navigationCreate(peer, flag)
+        }
+        throw new Error("Not implemented")
+    }
+    static _NavExtender_setNavigationOptions(navigation: KPointer, stack: KPointer): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._NavExtender_setNavigationOptions(navigation, stack)
+        }
+        throw new Error("Not implemented")
+    }
+    static _NavExtender_setNavDestinationNode(peer: KPointer, index: KInt, node: KPointer): void {
+        if ((this._LoadOnce()) == (true))
+        {
+            return this._NavExtender_setNavDestinationNode(peer, index, node)
+        }
+        throw new Error("Not implemented")
+    }
     static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void {
         if ((this._LoadOnce()) == (true))
         {
