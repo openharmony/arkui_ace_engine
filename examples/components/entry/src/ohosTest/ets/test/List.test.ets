@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import SliderBootcampTest from './ButtonsAndSelections/SliderBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  SliderBootcampTest();
 }
