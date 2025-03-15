@@ -634,9 +634,7 @@ export struct ChipComponent {
   }
 
   @Styles
-  hoverStyle()
-  {
-    .onHover(!this.isSuffixIconFocusStyleCustomized ? undefined : (isHover: boolean) => {
+  hoverStyle() { .onHover(!this.isSuffixIconFocusStyleCustomized ? undefined : (isHover: boolean) => {
       isHover ? this.chipZoomIn() : this.chipZoomOut();
     })
   }
