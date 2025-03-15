@@ -99,8 +99,10 @@ void FormRenderWindow::Destroy()
     frameCallback_.userData_ = nullptr;
     frameCallback_.callback_ = nullptr;
     CHECK_NULL_VOID(rsUIDirector_);
-    rsUIDirector_->Destroy();
-    rsUIDirector_.reset();
+    if (rsUIDirector_) {
+        rsUIDirector_->Destroy();
+        rsUIDirector_.reset();
+    }
     callbacks_.clear();
 #endif
 }
