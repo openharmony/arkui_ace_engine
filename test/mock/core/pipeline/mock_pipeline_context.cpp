@@ -780,9 +780,7 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
 {
-    auto currentContainer = Container::CurrentSafelyWithCheck();
-    CHECK_NULL_RETURN(currentContainer, nullptr);
-    return currentContainer->GetPipelineContext();
+    return NG::MockPipelineContext::GetCurrent();
 }
 
 double PipelineBase::GetCurrentDensity()
