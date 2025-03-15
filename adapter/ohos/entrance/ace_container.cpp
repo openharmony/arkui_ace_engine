@@ -1118,6 +1118,7 @@ void AceContainer::SetView(const RefPtr<AceView>& view, double density, int32_t 
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    window->Init();
 #else
     auto platformWindow = PlatformWindow::Create(view);
     CHECK_NULL_VOID(platformWindow);
@@ -1143,6 +1144,7 @@ UIContentErrorCode AceContainer::SetViewNew(
         container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+        window->Init();
         container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
 
