@@ -96,6 +96,16 @@ public:
     {
         return isShowInDatePickerDialog_;
     }
+
+    void SetShowLunarSwitch(bool value)
+    {
+        showLunarSwitch_ = value;
+    }
+
+    bool GetShowLunarSwitch() const
+    {
+        return showLunarSwitch_;
+    }
     
     void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
     {
@@ -639,6 +649,7 @@ private:
     bool isAmPmTimeOrderUpdate_ = false;
     bool isPreLanguageUg_ = false;
     bool isShowInDialog_ = false;
+    bool showLunarSwitch_ = false;
     bool isUserSetDividerSpacingFont_ = false;
     bool isUserSetGradientFont_ = false;
     Dimension gradientHeight_;
