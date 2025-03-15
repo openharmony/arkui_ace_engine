@@ -1518,6 +1518,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         container->UpdateFormSharedImage(formImageDataMap_);
         container->UpdateFormData(formData_);
         isFormRenderInit_ = true;
+        TAG_LOGI(AceLogTag::ACE_FORM, "isFormRenderInit_ true");
     }
 
     if (isFormRender_) {

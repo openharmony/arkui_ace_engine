@@ -108,6 +108,7 @@ void FormFrontendDeclarative::UpdateData(const std::string& dataList)
 {
     CHECK_NULL_VOID(taskExecutor_);
     // eTSCard UI == Main JS/UI/PLATFORM
+    TAG_LOGI(AceLogTag::ACE_FORM, "UpdateData, dataList length:%{public}zu", dataList.length());
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), dataList] {
             auto frontend = weak.Upgrade();
@@ -121,8 +122,10 @@ void FormFrontendDeclarative::UpdateData(const std::string& dataList)
 void FormFrontendDeclarative::UpdatePageData(const std::string& dataList)
 {
     CHECK_RUN_ON(UI); // eTSCard UI == Main JS/UI/PLATFORM
+    TAG_LOGI(AceLogTag::ACE_FORM, "UpdatePageData, dataList length:%{public}zu", dataList.length());
     auto delegate = GetDelegate();
     if (!delegate) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "UpdatePageData delegate is null");
         return;
     }
     delegate->UpdatePageData(dataList);
