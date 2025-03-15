@@ -50,9 +50,11 @@ ImageLoadingContext::~ImageLoadingContext()
         auto state = stateManager_->GetCurrentState();
         if (state == ImageLoadingState::DATA_LOADING) {
             // cancel CreateImgObj task
-            ImageProvider::CancelTask(src_.GetTaskKey(), WeakClaim(this));
             if (Downloadable()) {
+                ImageProvider::CancelTask(src_.GetTaskKey() + (GetOnProgressCallback() ? "1" : "0"), WeakClaim(this));
                 DownloadManager::GetInstance()->RemoveDownloadTaskWithPreload(src_.GetSrc(), imageDfxConfig_.nodeId_);
+            } else {
+                ImageProvider::CancelTask(src_.GetTaskKey(), WeakClaim(this));
             }
         } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE) {
             // cancel MakeCanvasImage task
