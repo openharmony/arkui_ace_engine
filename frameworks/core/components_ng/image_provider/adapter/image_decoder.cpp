@@ -31,58 +31,87 @@
 #include "core/image/image_loader.h"
 
 namespace OHOS::Ace::NG {
-ImageDecoder::ImageDecoder(const RefPtr<ImageObject>& obj, const SizeF& size, bool forceResize)
-    : obj_(obj), desiredSize_(size), forceResize_(forceResize)
-{
-    CHECK_NULL_VOID(obj_);
-    CHECK_NULL_VOID(ImageProvider::PrepareImageData(obj_));
+std::shared_mutex ImageDecoder::pixelMapMtx_;
+std::unordered_map<std::string, WeakPtr<PixelMap>> ImageDecoder::weakPixelMapCache_;
 
-    auto imageData = obj_->GetData();
-    auto data = AceType::DynamicCast<DrawingImageData>(imageData);
-    CHECK_NULL_VOID(data);
-    data_ = data->GetRSData();
+WeakPtr<PixelMap> ImageDecoder::GetFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size)
+{
+    std::shared_lock<std::shared_mutex> lock(pixelMapMtx_);
+    auto key = ImageUtils::GenerateImageKey(imageSourceInfo, size);
+    // key exists -> task is running
+    auto it = weakPixelMapCache_.find(key);
+    if (it != weakPixelMapCache_.end()) {
+        return it->second;
+    }
+    return nullptr;
 }
 
-RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
+void ImageDecoder::RemoveFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size)
 {
-    CHECK_NULL_RETURN(obj_ && data_, nullptr);
-    ACE_SCOPED_TRACE("MakeSkiaImage %s", obj_->GetSourceInfo().ToString().c_str());
+    std::unique_lock<std::shared_mutex> lock(pixelMapMtx_);
+    auto key = ImageUtils::GenerateImageKey(imageSourceInfo, size);
+    weakPixelMapCache_.erase(key);
+}
+
+void ImageDecoder::AddToPixelMapCache(
+    const ImageSourceInfo& imageSourceInfo, const SizeF& size, WeakPtr<PixelMap> weakPixelMap)
+{
+    std::unique_lock<std::shared_mutex> lock(pixelMapMtx_);
+    auto key = ImageUtils::GenerateImageKey(imageSourceInfo, size);
+    weakPixelMapCache_.emplace(key, weakPixelMap);
+}
+
+RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage(
+    const RefPtr<ImageObject>& obj, const ImageDecoderConfig& imageDecoderConfig)
+{
+    CHECK_NULL_RETURN(obj, nullptr);
+    ImageProvider::PrepareImageData(obj);
+    auto imageData = AceType::DynamicCast<DrawingImageData>(obj->GetData());
+    CHECK_NULL_RETURN(imageData, nullptr);
+    auto data = imageData->GetRSData();
+    CHECK_NULL_RETURN(data, nullptr);
+    ACE_SCOPED_TRACE("MakeSkiaImage %s", obj->GetSourceInfo().ToString().c_str());
     // check compressed image cache
     {
-        auto image = QueryCompressedCache();
+        auto image = QueryCompressedCache(obj, data, imageDecoderConfig);
         if (image) {
             return image;
         }
     }
 
-    auto image = ResizeDrawingImage();
+    auto image = ResizeDrawingImage(obj, data, imageDecoderConfig);
     CHECK_NULL_RETURN(image, nullptr);
     auto canvasImage = CanvasImage::Create(&image);
 
     if (ImageCompressor::GetInstance()->CanCompress()) {
-        TryCompress(DynamicCast<DrawingImage>(canvasImage));
+        TryCompress(obj, DynamicCast<DrawingImage>(canvasImage), imageDecoderConfig);
     }
     return canvasImage;
 }
 
 RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
-    AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
+    const RefPtr<ImageObject>& obj, const ImageDecoderConfig& imageDecoderConfig)
 {
-    CHECK_NULL_RETURN(obj_ && data_, nullptr);
-    auto imageDfxConfig = obj_->GetImageDfxConfig();
+    CHECK_NULL_RETURN(obj, nullptr);
+    ImageProvider::PrepareImageData(obj);
+    auto imageData = AceType::DynamicCast<DrawingImageData>(obj->GetData());
+    CHECK_NULL_RETURN(imageData, nullptr);
+    auto data = imageData->GetRSData();
+    CHECK_NULL_RETURN(data, nullptr);
+    auto imageDfxConfig = obj->GetImageDfxConfig();
     auto src = imageDfxConfig.imageSrc_;
-    auto source = ImageSource::Create(static_cast<const uint8_t*>(data_->GetData()), data_->GetSize());
+    auto source = ImageSource::Create(static_cast<const uint8_t*>(data->GetData()), data->GetSize());
     if (!source) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "ImageSouce Create Fail, %{private}s-%{public}s.", src.c_str(),
             imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
 
-    auto width = static_cast<int32_t>(std::lround(desiredSize_.Width()));
-    auto height = static_cast<int32_t>(std::lround(desiredSize_.Height()));
+    auto width = static_cast<int32_t>(std::lround(imageDecoderConfig.desiredSize_.Width()));
+    auto height = static_cast<int32_t>(std::lround(imageDecoderConfig.desiredSize_.Height()));
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
     // Determine whether to decode the width and height of each other based on the orientation
-    SwapDecodeSize(width, height);
+    SwapDecodeSize(obj, width, height);
     std::string isTrimMemRebuild = "False";
     if (imageDfxConfig.isTrimMemRecycle_) {
         isTrimMemRebuild = "True";
@@ -90,11 +119,14 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
             src.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
     }
     ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ],"
-        "[%d-%d-%d], isTrimMemRebuild: [%s]",
-        src.c_str(), sourceSize.first, sourceSize.second, width, height, static_cast<int32_t>(isHdrDecoderNeed),
-        static_cast<int32_t>(imageQuality), static_cast<int32_t>(photoDecodeFormat), isTrimMemRebuild.c_str());
+                     "[%d-%d-%d], isTrimMemRebuild: [%s]",
+        src.c_str(), sourceSize.first, sourceSize.second, width, height,
+        static_cast<int32_t>(imageDecoderConfig.isHdrDecoderNeed_),
+        static_cast<int32_t>(imageDecoderConfig.imageQuality_),
+        static_cast<int32_t>(imageDecoderConfig.photoDecodeFormat_), isTrimMemRebuild.c_str());
 
-    auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed, photoDecodeFormat);
+    auto pixmap = source->CreatePixelMap({ width, height }, imageDecoderConfig.imageQuality_,
+        imageDecoderConfig.isHdrDecoderNeed_, imageDecoderConfig.photoDecodeFormat_);
     if (!pixmap) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, "PixelMap Create Fail, src = %{private}s-%{public}s.", src.c_str(),
             imageDfxConfig.ToStringWithoutSrc().c_str());
@@ -104,22 +136,24 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(
     auto image = PixelMapImage::Create(pixmap);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "Image Decode success, Info:%{public}s-%{public}s-%{public}s-%{public}d x %{public}d-%{public}d-%{public}d",
-            imageDfxConfig.ToStringWithSrc().c_str(), GetResolutionQuality(imageQuality).c_str(),
-            desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight(), isHdrDecoderNeed,
-            static_cast<int32_t>(photoDecodeFormat));
+            "Image Decode success, Info:%{public}s-%{public}s-%{public}d x %{public}d-%{public}d-%{public}d",
+            imageDfxConfig.ToStringWithSrc().c_str(), imageDecoderConfig.desiredSize_.ToString().c_str(),
+            image->GetWidth(), image->GetHeight(), imageDecoderConfig.isHdrDecoderNeed_,
+            static_cast<int32_t>(imageDecoderConfig.photoDecodeFormat_));
         pixmap->SavePixelMapToFile(imageDfxConfig.ToStringWithoutSrc() + "_decode_");
     }
+
+    AddToPixelMapCache(obj->GetSourceInfo(), imageDecoderConfig.desiredSize_, image->GetPixelMap());
 
     return image;
 }
 
-void ImageDecoder::SwapDecodeSize(int32_t& width, int32_t& height)
+void ImageDecoder::SwapDecodeSize(const RefPtr<ImageObject>& obj, int32_t& width, int32_t& height)
 {
-    if (width == 0 || height == 0 || obj_->GetUserOrientation() == ImageRotateOrientation::UP) {
+    if (width == 0 || height == 0 || obj->GetUserOrientation() == ImageRotateOrientation::UP) {
         return;
     }
-    auto orientation = obj_->GetOrientation();
+    auto orientation = obj->GetOrientation();
     if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT) {
         std::swap(width, height);
     }
@@ -141,32 +175,33 @@ std::shared_ptr<RSImage> ImageDecoder::ForceResizeImage(const std::shared_ptr<RS
     return drImage;
 }
 
-std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
+std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage(
+    const RefPtr<ImageObject>& obj, std::shared_ptr<RSData> data, const ImageDecoderConfig& imageDecoderConfig)
 {
-    CHECK_NULL_RETURN(data_, nullptr);
-    auto rsSkiaData = data_->GetImpl<Rosen::Drawing::SkiaData>();
+    CHECK_NULL_RETURN(data, nullptr);
+    auto rsSkiaData = data->GetImpl<Rosen::Drawing::SkiaData>();
     CHECK_NULL_RETURN(rsSkiaData, nullptr);
     auto skData = rsSkiaData->GetSkData();
     auto encodedImage = std::make_shared<RSImage>();
-    if (!encodedImage->MakeFromEncoded(data_)) {
+    if (!encodedImage->MakeFromEncoded(data)) {
         return nullptr;
     }
-    CHECK_NULL_RETURN(desiredSize_.IsPositive(), encodedImage);
+    CHECK_NULL_RETURN(imageDecoderConfig.desiredSize_.IsPositive(), encodedImage);
 
-    auto width = std::lround(desiredSize_.Width());
-    auto height = std::lround(desiredSize_.Height());
+    auto width = std::lround(imageDecoderConfig.desiredSize_.Width());
+    auto height = std::lround(imageDecoderConfig.desiredSize_.Height());
 
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, {});
     auto info = codec->getInfo();
 
     ACE_SCOPED_TRACE("ImageResize %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ]",
-        obj_->GetSourceInfo().ToString().c_str(), info.width(), info.height(), static_cast<int32_t>(width),
+        obj->GetSourceInfo().ToString().c_str(), info.width(), info.height(), static_cast<int32_t>(width),
         static_cast<int32_t>(height));
 
     // sourceSize is set by developer, then we will force scaling to [TargetSize] using SkImage::scalePixels,
     // this method would succeed even if the codec doesn't support that size.
-    if (forceResize_) {
+    if (imageDecoderConfig.forceResize_) {
         info = info.makeWH(width, height);
         auto imageInfo = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(info);
         return ForceResizeImage(encodedImage, imageInfo);
@@ -179,7 +214,7 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
         auto idealSize = codec->getScaledDimensions(scale);
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGD(AceLogTag::ACE_IMAGE, "desiredSize = %{public}s, codec idealSize: %{public}dx%{public}d",
-                desiredSize_.ToString().c_str(), idealSize.width(), idealSize.height());
+                imageDecoderConfig.desiredSize_.ToString().c_str(), idealSize.width(), idealSize.height());
         }
 
         info = info.makeWH(idealSize.width(), idealSize.height());
@@ -195,9 +230,10 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
     return encodedImage;
 }
 
-RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
+RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache(
+    const RefPtr<ImageObject>& obj, std::shared_ptr<RSData> data, const ImageDecoderConfig& imageDecoderConfig)
 {
-    auto key = ImageUtils::GenerateImageKey(obj_->GetSourceInfo(), desiredSize_);
+    auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), imageDecoderConfig.desiredSize_);
     auto cachedData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
     CHECK_NULL_RETURN(cachedData, {});
 
@@ -207,21 +243,22 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
     TAG_LOGI(AceLogTag::ACE_IMAGE, "use astc cache %{private}s", key.c_str());
 
     // create encoded SkImage to use its uniqueId
-    CHECK_NULL_RETURN(data_, {});
+    CHECK_NULL_RETURN(data, {});
     auto image = std::make_shared<RSImage>();
-    if (!image->MakeFromEncoded(data_)) {
+    if (!image->MakeFromEncoded(data)) {
         return nullptr;
     }
     auto canvasImage = AceType::DynamicCast<DrawingImage>(CanvasImage::Create(&image));
     // round width and height to nearest int
-    int32_t dstWidth = std::lround(desiredSize_.Width());
-    int32_t dstHeight = std::lround(desiredSize_.Height());
+    int32_t dstWidth = std::lround(imageDecoderConfig.desiredSize_.Width());
+    int32_t dstHeight = std::lround(imageDecoderConfig.desiredSize_.Height());
     canvasImage->SetCompressData(stripped, dstWidth, dstHeight);
     canvasImage->ReplaceRSImage(nullptr);
     return canvasImage;
 }
 
-void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
+void ImageDecoder::TryCompress(
+    const RefPtr<ImageObject>& obj, const RefPtr<DrawingImage>& image, const ImageDecoderConfig& imageDecoderConfig)
 {
 #ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.
@@ -241,7 +278,7 @@ void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
     auto height = rsBitmap.GetHeight();
     // try compress image
     if (ImageCompressor::GetInstance()->CanCompress()) {
-        auto key = ImageUtils::GenerateImageKey(obj_->GetSourceInfo(), desiredSize_);
+        auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), imageDecoderConfig.desiredSize_);
         auto compressData = ImageCompressor::GetInstance()->GpuCompress(key, rsBitmap, width, height);
         ImageCompressor::GetInstance()->WriteToFile(key, compressData, { width, height });
         if (compressData) {
@@ -264,21 +301,5 @@ void ImageDecoder::TryCompress(const RefPtr<DrawingImage>& image)
     }
     SkGraphics::PurgeResourceCache();
 #endif
-}
-
-std::string ImageDecoder::GetResolutionQuality(AIImageQuality imageQuality)
-{
-    switch (imageQuality) {
-        case AIImageQuality::NONE:
-            return "NONE";
-        case AIImageQuality::LOW:
-            return "LOW";
-        case AIImageQuality::NORMAL:
-            return "MEDIUM";
-        case AIImageQuality::HIGH:
-            return "HIGH";
-        default:
-            return "LOW";
-    }
 }
 } // namespace OHOS::Ace::NG
