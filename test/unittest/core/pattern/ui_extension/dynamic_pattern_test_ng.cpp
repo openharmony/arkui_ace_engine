@@ -92,7 +92,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest001, TestSize.Level1)
     dynamicPattern->InitializeDynamicComponent("", "", MOCK_ABC_ENTRY_POINT, runtime);
     EXPECT_TRUE(dynamicPattern->curDynamicInfo_.abcPath.empty());
     EXPECT_TRUE(dynamicPattern->curDynamicInfo_.entryPoint.empty());
-    EXPECT_TRUE(dynamicPattern->curDynamicInfo_.reourcePath.empty());
+    EXPECT_TRUE(dynamicPattern->curDynamicInfo_.resourcePath.empty());
     EXPECT_TRUE(dynamicPattern->curDynamicInfo_.registerComponents.empty());
 
      /**
