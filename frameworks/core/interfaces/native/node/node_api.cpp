@@ -2075,6 +2075,18 @@ ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSu
     return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
 }
 
+ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle handle, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
+    ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundBlurStyleOptions(handle, intArray, scale, uintArray, isValidColor);
+}
+
+ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle handle, ArkUI_Float32 (*floatArray)[3], ArkUI_Int32 (*intArray)[2],
+    ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundEffect(handle, floatArray, intArray, uintArray, isValidColor);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2121,7 +2133,9 @@ const ArkUIDialogAPI* GetDialogAPI()
         .openCustomDialog = OpenCustomDialog,
         .updateCustomDialog = UpdateCustomDialog,
         .closeCustomDialog = CloseCustomDialog,
-        .setSubwindowMode = SetDialogSubwindowMode
+        .setSubwindowMode = SetDialogSubwindowMode,
+        .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
+        .setBackgroundEffect = SetBackgroundEffect
     };
     CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;

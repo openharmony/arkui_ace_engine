@@ -64,6 +64,8 @@ struct _ArkUIDialog {
     OHOS::Ace::DimensionUnit heightUnit;
     std::optional<OHOS::Ace::Shadow> customShadow;
     ArkUI_Int32 blurStyle;
+    std::optional<OHOS::Ace::BlurStyleOption> blurStyleOption;
+    std::optional<OHOS::Ace::EffectOption> effectOption;
     OHOS::Ace::KeyboardAvoidMode keyboardAvoidMode;
     ArkUI_Bool enableHoverMode;
     OHOS::Ace::HoverModeAreaType hoverModeAreaType;
@@ -121,6 +123,10 @@ ArkUI_Int32 SetKeyboardAvoidMode(ArkUIDialogHandle controllerHandler, ArkUI_Int3
 ArkUI_Int32 EnableHoverMode(ArkUIDialogHandle controllerHandler, bool enableHoverMode);
 ArkUI_Int32 SetHoverModeArea(ArkUIDialogHandle controllerHandler, ArkUI_Int32 hoverModeAreaType);
 ArkUI_Int32 SetFocusable(ArkUIDialogHandle handle, bool focusable);
+ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle controllerHandler, ArkUI_Int32 (*intArray)[3],
+    ArkUI_Float32 scale, ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor);
+ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle controllerHandler, ArkUI_Float32 (*floatArray)[3],
+    ArkUI_Int32 (*intArray)[2], ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor);
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif

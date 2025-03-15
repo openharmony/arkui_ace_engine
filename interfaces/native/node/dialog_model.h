@@ -81,6 +81,8 @@ int32_t SetKeyboardAvoidMode(ArkUI_NativeDialogHandle handle, ArkUI_KeyboardAvoi
 int32_t EnableHoverMode(ArkUI_NativeDialogHandle handle, bool enableHoverMode);
 int32_t SetHoverModeArea(ArkUI_NativeDialogHandle handle, ArkUI_HoverModeAreaType hoverModeAreaType);
 int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable);
+int32_t SetBackgroundBlurStyleOptions(ArkUI_NativeDialogHandle handle, const ArkUI_AttributeItem* customShadow);
+int32_t SetBackgroundEffect(ArkUI_NativeDialogHandle handle, const ArkUI_AttributeItem* customShadow);
 } // namespace OHOS::Ace::NG::DialogModel
 
 #endif // ARKUI_NATIVE_NODE_DIALOG_MODEL_H

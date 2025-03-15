@@ -36,6 +36,156 @@ constexpr int NUM_6 = 6;
 const int ALLOW_SIZE_7(7);
 constexpr int COLOR_STRATEGY_STYLE = 1;
 constexpr int COLOR_STYLE = 2;
+constexpr int32_t REQUIRED_ONE_PARAM = 1;
+constexpr int32_t BLURSTYLE_COLOR_MODE = 0;
+constexpr int32_t BLURSTYLE_ADAPTIVE_COLOR = 1;
+constexpr int32_t BLURSTYLE_SCALE = 2;
+constexpr int32_t BLURSTYLE_GRAY_SCALE_BLACK = 3;
+constexpr int32_t BLURSTYLE_GRAY_SCALE_WHITE = 4;
+constexpr int32_t BLURSTYLE_POLICY = 5;
+constexpr int32_t BLURSTYLE_INACTIVE_COLOR = 6;
+constexpr int32_t EFFECT_RADIUS = 0;
+constexpr int32_t EFFECT_SATURATION = 1;
+constexpr int32_t EFFECT_BRIGHTNESS = 2;
+constexpr int32_t EFFECT_COLOR = 3;
+constexpr int32_t EFFECT_ADAPTIVE_COLOR = 4;
+constexpr int32_t EFFECT_GRAY_SCALE_BLACK = 5;
+constexpr int32_t EFFECT_GRAY_SCALE_WHITE = 6;
+constexpr int32_t EFFECT_POLICY = 7;
+constexpr int32_t EFFECT_COLOR_INDEX = 8;
+constexpr uint32_t COLOR_TRANSPARENT = 0x00000000;
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
+}
+
+int32_t ParseColorMode(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    int32_t colorMode = ARKUI_COLOR_MODE_SYSTEM;
+    if (size > index) {
+        int32_t value = item->value[index].i32;
+        if (value >= static_cast<int32_t>(ARKUI_COLOR_MODE_SYSTEM) &&
+            value <= static_cast<int32_t>(ARKUI_COLOR_MODE_DARK)) {
+            colorMode = value;
+        }
+    }
+    return colorMode;
+}
+
+int32_t ParseAdaptiveColor(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    int32_t adaptiveColor = ARKUI_ADAPTIVE_COLOR_DEFAULT;
+    if (size > index) {
+        int32_t value = item->value[index].i32;
+        if (value >= static_cast<int32_t>(ARKUI_ADAPTIVE_COLOR_DEFAULT) &&
+            value <= static_cast<int32_t>(ARKUI_ADAPTIVE_COLOR_AVERAGE)) {
+            adaptiveColor = value;
+        }
+    }
+    return adaptiveColor;
+}
+
+float ParseScale(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    float scale = 1.0f;
+    if (size > index) {
+        scale = std::clamp(item->value[index].f32, 0.0f, 1.0f);
+    }
+    return scale;
+}
+
+uint32_t ParseGrayScaleBlack(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    uint32_t grayScaleBlack = 0;
+    if (size > index) {
+        grayScaleBlack = item->value[index].u32;
+    }
+    return grayScaleBlack;
+}
+
+uint32_t ParseGrayScaleWhite(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    uint32_t grayScaleWhite = 0;
+    if (size > index) {
+        grayScaleWhite = item->value[index].u32;
+    }
+    return grayScaleWhite;
+}
+
+int32_t ParsePolicy(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    int32_t policy = ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE;
+    if (size > index) {
+        int32_t value = item->value[index].i32;
+        if (value >= static_cast<int32_t>(ARKUI_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE) &&
+            value <= static_cast<int32_t>(ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE)) {
+            policy = value;
+        }
+    }
+    return policy;
+}
+
+float ParseRadius(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    float radius = 0.0f;
+    if (size > index) {
+        float value = item->value[index].f32;
+        if (OHOS::Ace::GreatOrEqual(value, 0.0f)) {
+            radius = value;
+        }
+    }
+    return radius;
+}
+
+float ParseSaturation(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    float saturation = 1.0f;
+    if (size > index) {
+        float value = item->value[index].f32;
+        if (value > 0.0f || OHOS::Ace::NearZero(value)) {
+            saturation = value;
+        }
+    }
+    return saturation;
+}
+
+float ParseBrightness(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    float brightness = 1.0f;
+    if (size > index) {
+        float value = item->value[index].f32;
+        if (value > 0.0f || OHOS::Ace::NearZero(value)) {
+            brightness = value;
+        }
+    }
+    return brightness;
+}
+
+uint32_t ParseColor(const ArkUI_AttributeItem* item, int32_t index)
+{
+    auto size = item->size;
+    uint32_t color = COLOR_TRANSPARENT;
+    if (size > index) {
+        color = ColorAlphaAdapt(item->value[index].u32);
+    }
+    return color;
+}
 } // namespace
 
 ArkUI_CustomDialogOptions* OH_ArkUI_CustomDialog_CreateOptions(ArkUI_NodeHandle content)
@@ -388,6 +538,82 @@ int32_t OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback(
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     return impl->getDialogAPI()->registerOnDidDisappear(options->handle, userData, callback);
+}
+
+int32_t OH_ArkUI_CustomDialog_SetBackgroundBlurStyleOptions(
+    ArkUI_CustomDialogOptions* options, const ArkUI_AttributeItem* backgroundBlurStyleOptions)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !options) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto size = backgroundBlurStyleOptions->size;
+    if (size < REQUIRED_ONE_PARAM) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t colorMode = ParseColorMode(backgroundBlurStyleOptions, BLURSTYLE_COLOR_MODE);
+    int32_t adaptiveColor = ParseAdaptiveColor(backgroundBlurStyleOptions, BLURSTYLE_ADAPTIVE_COLOR);
+    float scale = ParseScale(backgroundBlurStyleOptions, BLURSTYLE_SCALE);
+    uint32_t grayScaleBlack = ParseGrayScaleBlack(backgroundBlurStyleOptions, BLURSTYLE_GRAY_SCALE_BLACK);
+    uint32_t grayScaleWhite = ParseGrayScaleWhite(backgroundBlurStyleOptions, BLURSTYLE_GRAY_SCALE_WHITE);
+    int32_t policy = ParsePolicy(backgroundBlurStyleOptions, BLURSTYLE_POLICY);
+    bool isValidColor = false;
+    uint32_t inactiveColor = COLOR_TRANSPARENT;
+    if (size > BLURSTYLE_INACTIVE_COLOR) {
+        inactiveColor = ColorAlphaAdapt(backgroundBlurStyleOptions->value[BLURSTYLE_INACTIVE_COLOR].u32);
+        isValidColor = true;
+    }
+    int32_t intArray[NUM_3];
+    intArray[NUM_0] = colorMode;
+    intArray[NUM_1] = adaptiveColor;
+    intArray[NUM_2] = policy;
+    uint32_t uintArray[NUM_3];
+    uintArray[NUM_0] = grayScaleBlack;
+    uintArray[NUM_1] = grayScaleWhite;
+    uintArray[NUM_2] = inactiveColor;
+    return impl->getDialogAPI()->setBackgroundBlurStyleOptions(
+        options->handle, &intArray, scale, &uintArray, isValidColor);
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
+}
+
+int32_t OH_ArkUI_CustomDialog_SetBackgroundEffect(
+    ArkUI_CustomDialogOptions* options, const ArkUI_AttributeItem* backgroundEffect)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !options) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto size = backgroundEffect->size;
+    if (size < REQUIRED_ONE_PARAM) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    float radius = ParseRadius(backgroundEffect, EFFECT_RADIUS);
+    float saturation = ParseSaturation(backgroundEffect, EFFECT_SATURATION);
+    float brightness = ParseBrightness(backgroundEffect, EFFECT_BRIGHTNESS);
+    uint32_t color = ParseColor(backgroundEffect, EFFECT_COLOR);
+    int32_t adaptiveColor = ParseAdaptiveColor(backgroundEffect, EFFECT_ADAPTIVE_COLOR);
+    uint32_t grayScaleBlack = ParseGrayScaleBlack(backgroundEffect, EFFECT_GRAY_SCALE_BLACK);
+    uint32_t grayScaleWhite = ParseGrayScaleWhite(backgroundEffect, EFFECT_GRAY_SCALE_WHITE);
+    int32_t policy = ParsePolicy(backgroundEffect, EFFECT_POLICY);
+    bool isValidColor = false;
+    uint32_t inactiveColor = COLOR_TRANSPARENT;
+    if (size > EFFECT_COLOR_INDEX) {
+        inactiveColor = ColorAlphaAdapt(backgroundEffect->value[EFFECT_COLOR_INDEX].u32);
+        isValidColor = true;
+    }
+    float floatArray[NUM_3];
+    floatArray[NUM_0] = radius;
+    floatArray[NUM_1] = saturation;
+    floatArray[NUM_2] = brightness;
+    int32_t intArray[NUM_2];
+    intArray[NUM_0] = adaptiveColor;
+    intArray[NUM_1] = policy;
+    uint32_t uintArray[NUM_4];
+    uintArray[NUM_0] = color;
+    uintArray[NUM_1] = grayScaleBlack;
+    uintArray[NUM_2] = grayScaleWhite;
+    uintArray[NUM_3] = inactiveColor;
+    return impl->getDialogAPI()->setBackgroundEffect(options->handle, &floatArray, &intArray, &uintArray, isValidColor);
 }
 
 #ifdef __cplusplus

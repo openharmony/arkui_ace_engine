@@ -1148,6 +1148,21 @@ typedef enum {
 } ArkUI_ColorMode;
 
 /**
+ * @brief Enumerates the activation policies for the background blur effect.
+ *
+ * @since 18
+ */
+typedef enum {
+    /** The blur effect changes according to the window's focus state;
+     *  it is inactive when the window is not in focus and active when the window is in focus. */
+    ARKUI_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE = 0,
+    /** The blur effect is always active. */
+    ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE,
+    /** The blur effect is always inactive. */
+    ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE,
+} ArkUI_BlurStyleActivePolicy;
+
+/**
  * @brief Enumerates the system color modes.
  *
  * @since 12

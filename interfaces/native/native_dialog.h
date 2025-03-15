@@ -592,6 +592,33 @@ typedef struct {
      * @since 18
      */
     int32_t (*setFocusable)(ArkUI_NativeDialogHandle handle, bool focusable);
+
+    /**
+     * @brief Sets the background blur effect for a custom dialog box.
+     *
+     * @note This method must be called before the <b>show</b> method.
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param backgroundBlurStyleOptions Background blur effect options.
+     * @return Returns the result code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 18
+     */
+    int32_t (*setBackgroundBlurStyleOptions)(
+        ArkUI_NativeDialogHandle handle, const ArkUI_AttributeItem* backgroundBlurStyleOptions);
+
+    /**
+     * @brief Sets the background effect parameters for a custom dialog box.
+     *
+     * @note This method must be called before the <b>show</b> method.
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param backgroundEffect Background effect.
+     * @return Returns the result code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 18
+     */
+    int32_t (*setBackgroundEffect)(ArkUI_NativeDialogHandle handle, const ArkUI_AttributeItem* backgroundEffect);
 } ArkUI_NativeDialogAPI_3;
 
 /**
@@ -1037,6 +1064,32 @@ int32_t OH_ArkUI_CustomDialog_RegisterOnWillDisappearCallback(
  */
 int32_t OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback(
     ArkUI_CustomDialogOptions* options, void* userData, void (*callback)(void* userData));
+
+/**
+ * @brief Sets the background blur effect for a dialog box.
+ *
+ * @param options Dialog box parameters.
+ * @param backgroundBlurStyleOptions Background blur effect options of the dialog box.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 18
+ */
+int32_t OH_ArkUI_CustomDialog_SetBackgroundBlurStyleOptions(
+    ArkUI_CustomDialogOptions* options, const ArkUI_AttributeItem* backgroundBlurStyleOptions);
+
+/**
+ * @brief Sets the background effect parameters for a dialog box.
+ *
+ * @param options Dialog box parameters.
+ * @param backgroundEffect Background effect of the dialog box.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 18
+ */
+int32_t OH_ArkUI_CustomDialog_SetBackgroundEffect(
+    ArkUI_CustomDialogOptions* options, const ArkUI_AttributeItem* backgroundEffect);
 
 #ifdef __cplusplus
 };
