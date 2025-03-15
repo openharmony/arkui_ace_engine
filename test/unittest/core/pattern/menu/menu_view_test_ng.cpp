@@ -52,6 +52,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -66,6 +67,7 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string TEXT_TAG = "text";
+constexpr int32_t TARGET_ID = 100;
 
 } // namespace
 class MenuViewTestNg : public testing::Test {
@@ -224,5 +226,70 @@ HWTEST_F(MenuViewTestNg, GetMenuPixelMap001, TestSize.Level1)
     MenuView::GetMenuPixelMap(targetNode, menuParam, wrapperNode_);
 
     ASSERT_NE(targetNode, nullptr);
+}
+
+/**
+ * @tc.name: SkipMenuTest001
+ * @tc.desc: Verify bindMenu gesture event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SkipMenuTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a targetNode
+     */
+    TextModelNG textModel;
+    textModel.Create("Text");
+    /**
+     * @tc.steps: step2. bindMenuGesture with optionParams.
+     * @tc.expected: check the menu event is not nullptr.
+     */
+    std::vector<OptionParam> optionParams;
+    MenuParam param;
+    optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
+    ViewAbstractModelNG viewAbstractModel;
+    viewAbstractModel.BindMenuGesture(std::move(optionParams), nullptr, param);
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureHub->showMenu_, nullptr);
+    EXPECT_NE(gestureHub->bindMenuTouch_, nullptr);
+    NG::ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: SkipMenuTest002
+ * @tc.desc: Verify skip function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SkipMenuTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a overlayManger
+     */
+    auto overlayManger = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    /**
+     * @tc.steps: step2. skip menu show with target id
+     * @tc.expected: check the skip ids not empty.
+     */
+    overlayManger->SkipMenuShow(TARGET_ID);
+    ASSERT_FALSE(overlayManger->skipTargetIds_.empty());
+    /**
+     * @tc.steps: step3. skip menu show with target id again
+     * @tc.expected: The skip id is not added repeatedly.
+     */
+    overlayManger->SkipMenuShow(TARGET_ID);
+    EXPECT_EQ(overlayManger->skipTargetIds_.size(), 1);
+    /**
+     * @tc.steps: step4. search targetId will skip
+     * @tc.expected: Return true skip the menu show.
+     */
+    EXPECT_TRUE(overlayManger->CheckSkipMenuShow(TARGET_ID));
+    /**
+     * @tc.steps: step5. resume the target menu show
+     * @tc.expected: Remove success and CheckSkipMenuShow return false.
+     */
+    overlayManger->ResumeMenuShow(TARGET_ID);
+    ASSERT_TRUE(overlayManger->skipTargetIds_.empty());
+    EXPECT_FALSE(overlayManger->CheckSkipMenuShow(TARGET_ID));
 }
 } // namespace OHOS::Ace::NG
