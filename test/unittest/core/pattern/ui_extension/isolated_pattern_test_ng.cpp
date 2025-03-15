@@ -148,7 +148,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest002, TestSize.Level1)
     void* runtime = nullptr;
     isolatedPattern->InitializeIsolatedComponent(wantWrap, runtime);
     EXPECT_TRUE(isolatedPattern->curIsolatedInfo_.abcPath.empty());
-    EXPECT_TRUE(isolatedPattern->curIsolatedInfo_.reourcePath.empty());
+    EXPECT_TRUE(isolatedPattern->curIsolatedInfo_.resourcePath.empty());
     EXPECT_TRUE(isolatedPattern->curIsolatedInfo_.entryPoint.empty());
     EXPECT_TRUE(isolatedPattern->curIsolatedInfo_.registerComponents.empty());
 
@@ -161,7 +161,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest002, TestSize.Level1)
     auto entryPoint = want.GetStringParam(ENTRY_POINT);
     auto registerComponents = want.GetStringArrayParam(REGISTER_COMPONENTS);
     isolatedPattern->curIsolatedInfo_.abcPath = abcPath;
-    isolatedPattern->curIsolatedInfo_.reourcePath = resourcePath;
+    isolatedPattern->curIsolatedInfo_.resourcePath = resourcePath;
     isolatedPattern->curIsolatedInfo_.entryPoint = entryPoint;
     isolatedPattern->curIsolatedInfo_.registerComponents = registerComponents;
     isolatedPattern->DumpInfo();

@@ -207,7 +207,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     rendererDumpInfo_.createUiContenTime = GetCurrentTimestamp();
 
     uiContent_->InitializeDynamic(hostInstanceId_,
-        isolatedInfo_.reourcePath, isolatedInfo_.abcPath, isolatedInfo_.entryPoint, isolatedInfo_.registerComponents);
+        isolatedInfo_.resourcePath, isolatedInfo_.abcPath, isolatedInfo_.entryPoint, isolatedInfo_.registerComponents);
 
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
     if (runtimeContext) {

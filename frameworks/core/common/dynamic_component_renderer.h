@@ -37,7 +37,7 @@ struct RendererDumpInfo {
 
 struct IsolatedInfo {
     std::string abcPath;
-    std::string reourcePath;
+    std::string resourcePath;
     std::string entryPoint;
     std::vector<std::string> registerComponents;
 };
