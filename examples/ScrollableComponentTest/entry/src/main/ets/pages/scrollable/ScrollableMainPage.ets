@@ -32,7 +32,8 @@ class TextList {
 struct IndexPage {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, 'ScrollableMainPage', 'pages/Scrollable/ScrollableMainPage'),
+    new TextList(1, 'Back', 'pages/Index'),
+    new TextList(2, 'ListNestedScroll1', 'pages/Scrollable/ListNestedScroll1'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

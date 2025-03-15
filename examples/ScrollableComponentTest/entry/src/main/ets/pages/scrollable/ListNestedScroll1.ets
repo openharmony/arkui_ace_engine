@@ -46,19 +46,19 @@ struct ListNestedScroll1 {
                         .textAlign(TextAlign.Center)
                     }
                     .borderRadius(10).backgroundColor(0xFFFFFF)
-                    .width('60%')
+                      .width('60%')
                   }, (item: number) => JSON.stringify(item))
                 }
                 .edgeEffect(EdgeEffect.None)
-                .listDirection(Axis.Horizontal)
-                .height('100vp')
-                .width('100%')
-                .borderRadius(10)
-                .backgroundColor(0xDCDCDC)
-                .scrollBar(BarState.Off)
+                  .listDirection(Axis.Horizontal)
+                  .height('100vp')
+                  .width('100%')
+                  .borderRadius(10)
+                  .backgroundColor(0xDCDCDC)
+                  .scrollBar(BarState.Off)
               }
               .width('100%')
-              .backgroundColor(0xDCDCDC)
+                .backgroundColor(0xDCDCDC)
 
               Scroll(this.scroller1) {
                 Column() {
@@ -75,17 +75,17 @@ struct ListNestedScroll1 {
                 }.width('100%')
               }
               .enableScrollInteraction(false) //禁用该组件手势滑动
-              .backgroundColor(Color.Red)
-              .height('100%')
-              .scrollable(ScrollDirection.Vertical)
-              .scrollBar(BarState.Off)
-              .edgeEffect(EdgeEffect.None)
+                .backgroundColor(Color.Red)
+                .height('100%')
+                .scrollable(ScrollDirection.Vertical)
+                .scrollBar(BarState.Off)
+                .edgeEffect(EdgeEffect.None)
             }
           }
           .enableScrollInteraction(false) //禁用该组件手势滑动
-          .scrollBar(BarState.Off)
-          .edgeEffect(EdgeEffect.None)
-          .height('100%')
+            .scrollBar(BarState.Off)
+            .edgeEffect(EdgeEffect.None)
+            .height('100%')
         }
 
         ListItem() {
@@ -104,11 +104,11 @@ struct ListNestedScroll1 {
             }.width('100%')
           }
           .enableScrollInteraction(false) //禁用该组件手势滑动
-          .backgroundColor(Color.Yellow)
-          .height('100%')
-          .scrollable(ScrollDirection.Vertical)
-          .scrollBar(BarState.Off)
-          .edgeEffect(EdgeEffect.None)
+            .backgroundColor(Color.Yellow)
+            .height('100%')
+            .scrollable(ScrollDirection.Vertical)
+            .scrollBar(BarState.Off)
+            .edgeEffect(EdgeEffect.None)
         }
       }
 
@@ -148,15 +148,15 @@ struct ListNestedScroll1 {
         }
         return { offsetRemain: offset };
       })
-      .listDirection(Axis.Vertical)
-      .scrollBar(BarState.Off)
-      .friction(0.6)
-      .edgeEffect(EdgeEffect.Spring)
-      .width('90%')
-      .height('100%')
+        .listDirection(Axis.Vertical)
+        .scrollBar(BarState.Off)
+        .friction(0.6)
+        .edgeEffect(EdgeEffect.Spring)
+        .width('90%')
+        .height('100%')
     }
     .width('100%')
-    .height('100%')
-    .backgroundColor(0xDCDCDC)
+      .height('100%')
+      .backgroundColor(0xDCDCDC)
   }
 }
