@@ -820,6 +820,8 @@ public:
     {
         return DisplayMode::AUTO;
     }
+
+    void MarkScrollBarProxyDirty();
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
