@@ -515,9 +515,7 @@ public:
 
     float CalculateFriction(float gamma)
     {
-        if (GreatOrEqual(gamma, 1.0)) {
-            gamma = 1.0f;
-        }
+        gamma = std::clamp(gamma, 0.0f, 1.0f);
         return exp(-ratio_.value_or(1.848f) * gamma);
     }
     virtual float GetMainContentSize() const;
