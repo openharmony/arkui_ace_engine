@@ -614,13 +614,13 @@ void LazyGridLayoutAlgorithm::LayoutCachedItemsBackward(LayoutWrapper* layoutWra
         layoutedStart_ = totalMainSize_;
         cachedStartIndex_ = totalItemCount_;
     } else {
-        cachedStartIndex_ = layoutInfo_->startIndex_ - spaceWidth_;
+        cachedStartIndex_ = layoutInfo_->startIndex_;
         auto iter = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
         if (iter == layoutInfo_->posMap_.end()) {
             TAG_LOGE(AceLogTag::ACE_LAZY_GRID, "find start index error:%{public}d", layoutInfo_->endIndex_);
             return;
         }
-        layoutedStart_ = iter->second.startPos;
+        layoutedStart_ = iter->second.startPos - spaceWidth_;
         std::reverse_iterator<std::map<int, GridItemMainPos>::iterator> rit(iter);
         rIter = rit;
     }
