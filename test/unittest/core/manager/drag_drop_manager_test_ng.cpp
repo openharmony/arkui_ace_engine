@@ -22,7 +22,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
 void  TestFunction(const DragPointerEvent& event) {}
-
 void DragDropManagerTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
@@ -1992,5 +1991,144 @@ HWTEST_F(DragDropManagerTestNg, UnRegisterPullEventListener001, TestSize.Level1)
 
     dragDropManager->UnRegisterPullEventListener(EXISTING_ID);
     EXPECT_EQ(dragDropManager->pullEventListener_.size(), 0);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, IsAnyDraggableHit001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    RefPtr<PipelineBase> pipeline = NG::MockPipelineContext::pipeline_;
+    int32_t pointId = 100;
+    dragDropManager->IsAnyDraggableHit(pipeline, pointId);
+    EXPECT_EQ(dragDropManager->isAnyDraggableHit_, false);
+
+    dragDropManager->isAnyDraggableHit_ = true;
+    dragDropManager->IsAnyDraggableHit(pipeline, pointId);
+    EXPECT_EQ(dragDropManager->isAnyDraggableHit_, true);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit002
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC 245
+ */
+HWTEST_F(DragDropManagerTestNg, IsAnyDraggableHit002, TestSize.Level1)
+{
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->OnRejected();
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    TouchTestResult touchTestResults = { clickRecognizer };
+    RefPtr<PipelineBase> pipeline = NG::MockPipelineContext::pipeline_;
+    pipeline->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    pipeline->eventManager_->touchTestResults_[100] = touchTestResults;
+    int32_t pointId = 100;
+    dragDropManager->IsAnyDraggableHit(pipeline, pointId);
+    EXPECT_EQ(dragDropManager->isAnyDraggableHit_, false);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit003
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, IsAnyDraggableHit003, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    TouchTestResult touchTestResults;
+    RefPtr<PipelineBase> pipeline = NG::MockPipelineContext::pipeline_;
+    pipeline->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    pipeline->eventManager_->touchTestResults_[100] = touchTestResults;
+    int32_t pointId = 100;
+    dragDropManager->IsAnyDraggableHit(pipeline, pointId);
+    EXPECT_EQ(dragDropManager->isAnyDraggableHit_, false);
+}
+
+/**
+ * @tc.name: RequireSummaryIfNecessary001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, RequireSummaryIfNecessary001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    DragPointerEvent pointerEvent;
+    pointerEvent.pullId = 1;
+    dragDropManager->RequireSummaryIfNecessary(pointerEvent);
+    EXPECT_EQ(dragDropManager->currentPullId_, 1);
+
+    DragPointerEvent pointerEvent1;
+    pointerEvent1.pullId = -1;
+    dragDropManager->RequireSummaryIfNecessary(pointerEvent);
+    EXPECT_EQ(dragDropManager->currentPullId_, 1);
+}
+
+/**
+ * @tc.name: DoDragMoveAnimate001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, DoDragMoveAnimate001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    DragPointerEvent pointerEvent;
+    bool needDoDragMoveAnimate = false;
+    dragDropManager->DoDragMoveAnimate(pointerEvent);
+    EXPECT_EQ(needDoDragMoveAnimate, false);
+}
+
+/**
+ * @tc.name: HandleSyncOnDragStart001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, HandleSyncOnDragStart001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    DragStartRequestStatus dragStartRequestStatus = DragStartRequestStatus::WAITING;
+    dragDropManager->HandleSyncOnDragStart(dragStartRequestStatus);
+    EXPECT_EQ(dragStartRequestStatus, DragStartRequestStatus::WAITING);
+
+    bool callbackCalled = false;
+    auto callback = [&callbackCalled]() { callbackCalled = true; };
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback(callback);
+
+    dragStartRequestStatus = DragStartRequestStatus::READY;
+    dragDropManager->HandleSyncOnDragStart(dragStartRequestStatus);
+    EXPECT_EQ(dragStartRequestStatus, DragStartRequestStatus::READY);
+}
+
+/**
+ * @tc.name: DoDragMoveAnimate002
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, DoDragMoveAnimate002, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    DragPointerEvent pointerEvent;
+    bool needDoDragMoveAnimate = false;
+    dragDropManager->isDragWithContextMenu_ = true;
+    dragDropManager->isDragFwkShow_ = false;
+    dragDropManager->info_.scale = 0.1f;
+    Container::UpdateCurrent(MIN_SUBCONTAINER_ID);
+    SubwindowManager::GetInstance()->AddParentContainerId(MIN_SUBCONTAINER_ID, 1);
+    dragDropManager->info_.imageNode =  AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->DoDragMoveAnimate(pointerEvent);
+    EXPECT_EQ(needDoDragMoveAnimate, false);
 }
 } // namespace OHOS::Ace::NG
