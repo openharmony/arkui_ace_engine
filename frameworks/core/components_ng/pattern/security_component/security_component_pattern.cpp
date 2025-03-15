@@ -30,6 +30,13 @@
 #endif
 
 namespace OHOS::Ace::NG {
+SecurityComponentPattern::~SecurityComponentPattern()
+{
+#ifdef SECURITY_COMPONENT_ENABLE
+    UnregisterSecurityComponent();
+#endif
+}
+
 bool SecurityComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     const DirtySwapConfig& config)
 {
@@ -402,9 +409,6 @@ void SecurityComponentPattern::OnModifyDone()
     InitOnKeyEvent(frameNode);
     InitAppearCallback(frameNode);
     InitOnTouch(frameNode);
-#ifdef SECURITY_COMPONENT_ENABLE
-    RegisterSecurityComponentAsync();
-#endif
 }
 
 void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
@@ -420,7 +424,7 @@ void SecurityComponentPattern::InitAppearCallback(RefPtr<FrameNode>& frameNode)
         auto securityComponentPattern = weak.Upgrade();
         CHECK_NULL_VOID(securityComponentPattern);
         securityComponentPattern->isAppear_ = true;
-        securityComponentPattern->RegisterSecurityComponentAsync();
+        securityComponentPattern->RegisterSecurityComponent();
 #endif
     };
 
@@ -450,19 +454,67 @@ void SecurityComponentPattern::OnWindowShow()
     if (!isAppear_) {
         return;
     }
-    RegisterSecurityComponentAsync();
+    RegisterSecurityComponent();
 #endif
 }
 
 #ifdef SECURITY_COMPONENT_ENABLE
+void SecurityComponentPattern::RegisterSecurityComponentRetry()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    // service is shutdowning, try to load it.
+    int32_t retryCount = MAX_RETRY_TIMES;
+    while (retryCount > 0) {
+        int32_t res = SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId_);
+        if (res == Security::SecurityComponent::SCErrCode::SC_OK) {
+            LOGI("Register security component success.");
+            regStatus_ = SecurityComponentRegisterStatus::REGISTERED;
+            return;
+        } else if (res != Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_SERVICE_NOT_EXIST) {
+            LOGW("Register security component failed, err %{public}d.", res);
+            regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
+            return;
+        }
+
+        retryCount--;
+        std::this_thread::sleep_for(std::chrono::milliseconds(REGISTER_RETRY_INTERVAL));
+    }
+    regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
+    LOGW("Register security component failed, retry %{public}d", MAX_RETRY_TIMES);
+}
+
 void SecurityComponentPattern::RegisterSecurityComponentAsync()
+{
+    if (!SecurityComponentHandler::LoadSecurityComponentService()) {
+        LOGW("load security component service failed.");
+        return;
+    }
+    SingleTaskExecutor::Make(PipelineContext::GetCurrentContext()->GetTaskExecutor(),
+        TaskExecutor::TaskType::UI).PostTask([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->regStatus_ != SecurityComponentRegisterStatus::REGISTERING) {
+            LOGI("Register security component ASync droped.");
+            return;
+        }
+
+        pattern->RegisterSecurityComponentRetry();
+    });
+}
+
+void SecurityComponentPattern::RegisterSecurityComponent()
 {
     if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED ||
         regStatus_ == SecurityComponentRegisterStatus::REGISTERING) {
+        LOGI("Register security component has registered or is registering");
         return;
     }
 
-    regMutex_.lock();
+    if (SecurityComponentHandler::IsSecurityComponentServiceExist()) {
+        RegisterSecurityComponentRetry();
+        return;
+    }
     regStatus_ = SecurityComponentRegisterStatus::REGISTERING;
     auto scTaskExecutor =
         SingleTaskExecutor::Make(PipelineContext::GetCurrentContext()->GetTaskExecutor(),
@@ -470,49 +522,19 @@ void SecurityComponentPattern::RegisterSecurityComponentAsync()
     scTaskExecutor.PostTask([weak = WeakClaim(this)] {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto frameNode = pattern->GetHost();
-        // service is shutdowning, try to load it.
-        int32_t retryCount = MAX_RETRY_TIMES;
-        while (retryCount > 0) {
-            int32_t res = SecurityComponentHandler::RegisterSecurityComponent(frameNode, pattern->scId_);
-            if (res == Security::SecurityComponent::SCErrCode::SC_OK) {
-                pattern->regStatus_ = SecurityComponentRegisterStatus::REGISTERED;
-                pattern->regMutex_.unlock();
-                return;
-            } else if (res != Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_SERVICE_NOT_EXIST) {
-                pattern->regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
-                pattern->regMutex_.unlock();
-                return;
-            }
-
-            retryCount--;
-            std::this_thread::sleep_for(std::chrono::milliseconds(REGISTER_RETRY_INTERVAL));
-        }
-        pattern->regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
-        pattern->regMutex_.unlock();
+        pattern->RegisterSecurityComponentAsync();
     });
 }
 
 void SecurityComponentPattern::UnregisterSecurityComponent()
 {
-    if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
-        return;
-    }
     if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED) {
         SecurityComponentHandler::UnregisterSecurityComponent(scId_);
-        scId_ = -1;
-        regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
-        return;
+    } else {
+        LOGW("security component has not registered, regStatus %{public}d.", regStatus_);
     }
-
-    if (!regMutex_.try_lock_for(std::chrono::milliseconds(MAX_REGISTER_WAITING_TIME))) {
-        LOGW("register task timeout.");
-        return;
-    }
-    SecurityComponentHandler::UnregisterSecurityComponent(scId_);
-    scId_ = -1;
     regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
-    regMutex_.unlock();
+    scId_ = -1;
 }
 
 int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent& event)
@@ -523,19 +545,16 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
     }
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, -1);
-    if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED) {
-        return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-            frameNode, event);
+    if (regStatus_ == SecurityComponentRegisterStatus::REGISTERING) {
+        LOGI("ClickEventHandler: security component is registering.");
+        RegisterSecurityComponentRetry();
     }
-
-    if (!regMutex_.try_lock_for(std::chrono::milliseconds(MAX_REGISTER_WAITING_TIME))) {
-        LOGW("ClickEventHandler: wait for register task timeout.");
+    if (regStatus_ != SecurityComponentRegisterStatus::REGISTERED) {
+        LOGW("ClickEventHandler: security component try to register failed.");
         return -1;
     }
-    int32_t res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+    return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         frameNode, event);
-    regMutex_.unlock();
-    return res;
 }
 
 int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEvent& event)
@@ -546,19 +565,16 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
     }
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, -1);
-    if (regStatus_ == SecurityComponentRegisterStatus::REGISTERED) {
-        return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-            frameNode, event);
+    if (regStatus_ == SecurityComponentRegisterStatus::REGISTERING) {
+        LOGI("KeyEventHandler: security component is registering.");
+        RegisterSecurityComponentRetry();
     }
-
-    if (!regMutex_.try_lock_for(std::chrono::milliseconds(MAX_REGISTER_WAITING_TIME))) {
-        LOGW("KeyEventHandler: wait for register task timeout.");
+    if (regStatus_ != SecurityComponentRegisterStatus::REGISTERED) {
+        LOGW("KeyEventHandler: security component try to register failed.");
         return -1;
     }
-    int32_t res = SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+    return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         frameNode, event);
-    regMutex_.unlock();
-    return res;
 }
 #endif
 } // namespace OHOS::Ace::NG

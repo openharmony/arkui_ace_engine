@@ -40,6 +40,8 @@ public:
     static SecurityComponentProbe probe;
     static int32_t ReportSecurityComponentClickEventInner(int32_t& scId,
         RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompClickEvent& event);
+    static bool IsSecurityComponentServiceExist();
+    static bool LoadSecurityComponentService();
 
 private:
     static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
