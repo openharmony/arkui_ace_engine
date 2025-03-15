@@ -4158,4 +4158,11 @@ const RefPtr<ScrollEdgeEffect>& ScrollablePattern::GetScrollEdgeEffect() const
 {
     return scrollEffect_;
 }
+
+void ScrollablePattern::MarkScrollBarProxyDirty()
+{
+    if (scrollBarProxy_) {
+        scrollBarProxy_->MarkScrollBarDirty();
+    }
+}
 } // namespace OHOS::Ace::NG
