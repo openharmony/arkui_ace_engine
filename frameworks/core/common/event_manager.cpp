@@ -20,6 +20,7 @@
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
 #include "core/common/xcollie/xcollieInterface.h"
+#include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
@@ -727,6 +728,9 @@ bool EventManager::DispatchMultiContainerEvent(const TouchEvent& point)
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 {
+    if (event.sourceType == SourceType::TOUCH) {
+        NG::GestureExtraHandler::NotifiyTouchEvent(event);
+    }
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
     UpdateDragInfo(point);

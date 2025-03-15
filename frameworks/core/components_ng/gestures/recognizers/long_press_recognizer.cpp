@@ -15,6 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
+#include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -354,7 +355,8 @@ double LongPressRecognizer::ConvertPxToVp(double offset) const
 void LongPressRecognizer::SendCallbackMsg(
     const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction)
 {
-    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+    auto extraHandlingResult = GestureExtraHandler::IsGestureShouldBeAbandoned(AceType::Claim(this));
+    if ((gestureInfo_ && gestureInfo_->GetDisposeTag()) || extraHandlingResult) {
         return;
     }
     if (callback && *callback) {
