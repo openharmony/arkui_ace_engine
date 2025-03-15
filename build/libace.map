@@ -418,6 +418,7 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+      OHOS::Ace::PipelineBase::GetImageCache*;
     };
   local:
     *;
