@@ -4906,7 +4906,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
     RegisterGetCurrentPageName(pipeline);
 }
 
-void UIContentImpl::RegisterGetCurrentPageName(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline)
 {
     auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
