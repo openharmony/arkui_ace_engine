@@ -13,33 +13,7 @@
  * limitations under the License.
  */
 
-#include <optional>
-#include <utility>
-
-#include "gtest/gtest.h"
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-
-#define private public
-#define protected public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/syntax/repeat_node.h"
-#include "core/components_ng/syntax/repeat_model_ng.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-#include "core/components_ng/pattern/list/list_item_event_hub.h"
-#include "core/components_ng/pattern/list/list_item_layout_property.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable_item.h"
-#include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#undef private
-#undef protected
+#include "repeat_virtual_2_test_ng.h"
  
 using namespace testing;
 using namespace testing::ext;
@@ -50,104 +24,65 @@ using CacheItem = RepeatVirtualScroll2Caches::CacheItem;
 using OptCacheItem = RepeatVirtualScroll2Caches::OptCacheItem;
 using GetFrameChildResult = RepeatVirtualScroll2Caches::GetFrameChildResult;
 
-namespace {
-/**
- * Map: Repeat node index -> L1 cache repeat node rid
- */
-const std::map<IndexType, RIDType> L1_RID_4_INDEX = {
-    {0, 1},
-    {1, 2},
-    {2, 3},
-    {3, 4},
-    {4, 5},
-    {5, 6}
-};
-
-/**
- * Function needed by RepeatVirtualScrollCaches constructor is special test case
- */
-const auto ON_GET_RID_4_INDEX = [](IndexType index) -> std::pair<RIDType, uint32_t> {
-    auto it = L1_RID_4_INDEX.find(0);
-    if (it != L1_RID_4_INDEX.end()) {
-        return {index, 2};
-    }
-    return {index, 1};
-};
-
-const auto ON_RECYCLE_ITEMS = [](IndexType fromIndex, IndexType toIndex) -> void {
-    return;
-};
-
-const auto ON_ACTIVE_RANGE = [](int32_t fromIndex, int32_t toIndex, bool isLoop) -> void {
-    return;
-};
-
-const auto ON_MOVE_FROM_TO = [](IndexType, IndexType) -> void {
-    return;
-};
-
-const auto ON_PURGE = []() -> void {
-    return;
-};
-}
-
-class RepeatNodeCache2SyntaxTest : public testing::Test {
-public:
-    void SetUp() override
-    {
-        MockPipelineContext::SetUp();
-    }
-
-    void TearDown() override
-    {
-        MockPipelineContext::TearDown();
-    }
-
-    RefPtr<FrameNode> CreateNode(const std::string& tag, int32_t elmtId);
-
-    RefPtr<RepeatVirtualScroll2Node> CreateRepeatVirtualNode(int32_t elmtId, uint32_t totalCount);
-
-    /**
-     * create ListItemNode with 2 Text Node inside
-     */
-    RefPtr<FrameNode> CreateListItemNode(int32_t elmtId);
-};
-
-RefPtr<FrameNode> RepeatNodeCache2SyntaxTest::CreateNode(const std::string& tag, int32_t elmtId)
+RefPtr<FrameNode> RepeatVirtual2TestNg::CreateNode(const std::string& tag)
 {
     auto pattern = AceType::MakeRefPtr<Pattern>();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, elmtId, pattern);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, elmtId_, pattern);
     pattern->AttachToFrameNode(frameNode);
     ViewStackProcessor::GetInstance()->Push(frameNode);
     return frameNode;
 }
 
-RefPtr<RepeatVirtualScroll2Node> RepeatNodeCache2SyntaxTest::CreateRepeatVirtualNode(
-    int32_t elmtId, uint32_t totalCount)
+RefPtr<RepeatVirtualScroll2Node> RepeatVirtual2TestNg::CreateRepeatVirtualNode(uint32_t totalCount)
 {
+    l1Rid4Index_ = {
+        {0, 1},
+        {1, 2},
+        {2, 3},
+        {3, 4},
+        {4, 5},
+        {5, 6}
+    };
+    onGetRid4Index_ = [&](IndexType index) -> std::pair<RIDType, uint32_t> {
+        auto it = l1Rid4Index_.find(0);
+        if (it != l1Rid4Index_.end()) {
+            return {index, 2};
+        }
+        return {index, 1};
+    };
+    onRecycleItems_ = [](IndexType fromIndex, IndexType toIndex) -> void {
+        return;
+    };
+    onActiveRange_ = [](int32_t fromIndex, int32_t toIndex, bool isLoop) -> void {
+        return;
+    };
+    onMoveFromTo_ = [](IndexType, IndexType) -> void {
+        return;
+    };
+    onPurge_ = []() -> void {
+        return;
+    };
     return RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        elmtId, totalCount, ON_GET_RID_4_INDEX, ON_RECYCLE_ITEMS, ON_ACTIVE_RANGE, ON_MOVE_FROM_TO, ON_PURGE);
+        GetElmtId(), totalCount, onGetRid4Index_, onRecycleItems_, onActiveRange_, onMoveFromTo_, onPurge_);
 }
 
-RefPtr<FrameNode> RepeatNodeCache2SyntaxTest::CreateListItemNode(int32_t elmtId)
+RefPtr<FrameNode> RepeatVirtual2TestNg::CreateListItemNode()
 {
     auto tag = "TEXT_ETS_TAG";
-
     auto* stack = ViewStackProcessor::GetInstance();
-    auto listItemFrameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, elmtId,
-        []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+    auto listItemFrameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, GetElmtId(), []() {
+        return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
+    });
 
-    auto textNode = CreateNode(V2::TEXT_ETS_TAG, 100 * elmtId);
+    auto textNode = CreateNode(V2::TEXT_ETS_TAG);
 
     auto pattern = AceType::MakeRefPtr<Pattern>();
-    const uint32_t uniqNumMultiplier1 = 200;
-    auto textFrameNode = AceType::MakeRefPtr<FrameNode>(tag, uniqNumMultiplier1 * elmtId, pattern);
+    auto textFrameNode = AceType::MakeRefPtr<FrameNode>(tag, GetElmtId(), pattern);
     pattern->AttachToFrameNode(textFrameNode);
     listItemFrameNode->AddChild(textFrameNode);
 
     pattern = AceType::MakeRefPtr<Pattern>();
-    const uint32_t uniqNumMultiplier2 = 100;
-    textFrameNode = AceType::MakeRefPtr<FrameNode>(tag, uniqNumMultiplier2 * elmtId, pattern);
+    textFrameNode = AceType::MakeRefPtr<FrameNode>(tag, GetElmtId(), pattern);
     pattern->AttachToFrameNode(textFrameNode);
     listItemFrameNode->AddChild(textFrameNode);
     stack->Push(listItemFrameNode);
@@ -155,11 +90,11 @@ RefPtr<FrameNode> RepeatNodeCache2SyntaxTest::CreateListItemNode(int32_t elmtId)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test000
+ * @tc.name: CreateRepeat001
  * @tc.desc: Test creation of GetOrCreateRepeatNode
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test000, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, CreateRepeat001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -168,19 +103,19 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test000, TestSize.Level1)
      * @tc.expected: Object is not nullptr.
      */
     auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        nodeId, 10, ON_GET_RID_4_INDEX, ON_RECYCLE_ITEMS, ON_ACTIVE_RANGE, ON_MOVE_FROM_TO, ON_PURGE);
+        nodeId, 10, onGetRid4Index_, onRecycleItems_, onActiveRange_, onMoveFromTo_, onPurge_);
 
     EXPECT_NE(repeatNode, nullptr);
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test001
+ * @tc.name: FrameCount001
  * @tc.desc: Test node.FrameCount
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test001, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, FrameCount001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1001, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
 
     /**
      * @tc.steps: step2. Get frame count
@@ -199,17 +134,17 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test002
+ * @tc.name: GetChildren001
  * @tc.desc: Test node.GetChildren
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test002, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, GetChildren001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Test node.GetChildren when repeat is empty
      * @tc.expected: children size shoule be 0
      */
-    auto repeatNode = CreateRepeatVirtualNode(1002, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     auto children = repeatNode->GetChildren();
     EXPECT_EQ(children.size(), 0);
 
@@ -229,13 +164,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test002, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test003
+ * @tc.name: GetFrameChild001
  * @tc.desc: Test caches.GetFrameChild
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test003, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, GetFrameChild001, TestSize.Level1)
 {
-    RepeatVirtualScroll2Caches caches(ON_GET_RID_4_INDEX);
+    RepeatVirtualScroll2Caches caches(onGetRid4Index_);
 
     /**
      * @tc.steps: step1. give l1 cache items include item (rid == 1)
@@ -253,13 +188,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test003, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test004
+ * @tc.name: RemoveNode001
  * @tc.desc: Test caches.RemoveNode
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test004, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, RemoveNode001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1004, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     repeatNode->caches_.l1Rid4Index_ = {
         {0, 1}, {1, 2}, {2, 3}, {3, 4}
     };
@@ -280,13 +215,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test004, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test005
+ * @tc.name: CheckActiveRange001
  * @tc.desc: Test node.CheckActiveRange for List/Swiper-no-Loop scenario
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test005, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, CheckActiveRange001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1005, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     ActiveRangeType activeRange;
 
     /**
@@ -315,13 +250,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test005, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test006
+ * @tc.name: CheckActiveRange002
  * @tc.desc: Test node.CheckActiveRange for Grid/WaterFlow scenario
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test006, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, CheckActiveRange002, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1006, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     ActiveRangeType activeRange;
 
     /**
@@ -350,13 +285,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test006, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test007
+ * @tc.name: CheckActiveRange003
  * @tc.desc: Test node.CheckActiveRange for Swiper-Loop scenario
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test007, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, CheckActiveRange003, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1007, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     repeatNode->SetIsLoop(true);
     ActiveRangeType activeRange;
 
@@ -388,7 +323,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test007, TestSize.Level1)
      * @tc.steps: step4. check active range for: 2 [3 0] 1
      * @tc.expected: active range is {3,2} (overlapped)
      */
-    auto repeatNode2 = CreateRepeatVirtualNode(10071, 4);
+    auto repeatNode2 = CreateRepeatVirtualNode(4);
     repeatNode2->SetIsLoop(true);
     activeRange = repeatNode2->CheckActiveRange(3, 0, 2, 2);
     std::pair<IndexType, IndexType> expect_result4(3, 2);
@@ -398,7 +333,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test007, TestSize.Level1)
      * @tc.steps: step5. check active range for: [0 1] 2 3..
      * @tc.expected: active range is {-2,3}
      */
-    auto repeatNode3 = CreateRepeatVirtualNode(10072, 10);
+    auto repeatNode3 = CreateRepeatVirtualNode(10);
     repeatNode3->SetIsLoop(true);
     activeRange = repeatNode3->CheckActiveRange(0, 1, 2, 2);
     std::pair<IndexType, IndexType> expect_result5(-2, 3);
@@ -406,14 +341,14 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test007, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test008
+ * @tc.name: CheckActiveRange004
  * @tc.desc: Test node.CheckActiveRange for List/Grid/WaterFlow/Swiper-no-Loop scenario (multiple components)
  *   X indicates a non-repeat child
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test008, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, CheckActiveRange004, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1008, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     ActiveRangeType activeRange;
 
     /**
@@ -466,13 +401,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test008, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test009
+ * @tc.name: CheckNodeInL1001
  * @tc.desc: Test node.CheckNode4IndexInL1
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test009, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, CheckNodeInL1001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1009, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2009, AceType::MakeRefPtr<Pattern>());
     CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
     bool remainInL1;
@@ -500,13 +435,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test009, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test010
+ * @tc.name: SetActiveRange001
  * @tc.desc: Test node.DoSetActiveChildRange
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test010, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, SetActiveRange001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1010, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
 
     /**
      * @tc.steps: step1. check normal active range
@@ -538,13 +473,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test010, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test011
+ * @tc.name: GetL1Nodes001
  * @tc.desc: Test caches.GetL1Index4Node
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test011, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, GetL1Nodes001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1011, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2011, AceType::MakeRefPtr<Pattern>());
     CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
     repeatNode->caches_.l1Rid4Index_ = {
@@ -563,13 +498,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test011, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test012
+ * @tc.name: GetAllNodes001
  * @tc.desc: Test caches.GetCacheItem4RID
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test012, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, GetAllNodes001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1012, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2012, AceType::MakeRefPtr<Pattern>());
     CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
 
@@ -588,13 +523,13 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test012, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test013
+ * @tc.name: GetRID4Index001
  * @tc.desc: Test caches.GetRID4Index
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test013, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, GetRID4Index001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1013, 10);
+    auto repeatNode = CreateRepeatVirtualNode(10);
     RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2013, AceType::MakeRefPtr<Pattern>());
     CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
 
@@ -613,17 +548,17 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test013, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test014
+ * @tc.name: ConvertFromToIndex001
  * @tc.desc: Test caches.ConvertFromToIndex
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test014, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, ConvertFromToIndex001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1014, 6);
+    auto repeatNode = CreateRepeatVirtualNode(6);
     repeatNode->MoveData(0, 1);
     repeatNode->MoveData(1, 2);
     repeatNode->MoveData(2, 3);
-    
+
     /**
      * @tc.steps: step1.
      * @tc.expected: index is 0, mappedIndex should be 1.
@@ -665,17 +600,17 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test014, TestSize.Level1)
 }
 
 /**
- * @tc.name: RepeatNodeCache2Test015
+ * @tc.name: ConvertFromToIndex002
  * @tc.desc: Test caches.ConvertFromToIndexRevert
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test015, TestSize.Level1)
+HWTEST_F(RepeatVirtual2TestNg, ConvertFromToIndex002, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1015, 6);
+    auto repeatNode = CreateRepeatVirtualNode(6);
     repeatNode->MoveData(0, 1);
     repeatNode->MoveData(1, 2);
     repeatNode->MoveData(2, 3);
-    
+
     /**
      * @tc.steps: step1.
      * @tc.expected: index is 0, mappedIndex should be 3.
