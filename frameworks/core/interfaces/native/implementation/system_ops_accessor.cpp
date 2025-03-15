@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <numeric>
 
+#include "core/common/resource/resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -44,6 +46,20 @@ void RestoreInstanceIdImpl()
     ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
     restoreInstanceIds_.pop_back();
 }
+Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName, const Ark_String* moduleName, const Array_String* params)
+{
+    auto valueBundleName = Converter::Convert<std::string>(*bundleName);
+    auto valueModuleName = Converter::Convert<std::string>(*moduleName);
+    auto paramsStr = Converter::Convert<std::vector<std::string>>(*params);
+    std::string resourceStr = "";
+    resourceStr = std::accumulate(paramsStr.begin(), paramsStr.end(), std::string(),
+        [](const std::string& a, const std::string& b) { return a + b; });
+    auto resourceObject = AceType::MakeRefPtr<Ace::ResourceObject>(valueBundleName, valueModuleName);
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+    CHECK_NULL_RETURN(resourceAdapter, -1);
+    uint32_t resId = resourceAdapter->GetResId(resourceStr);
+    return resId;
+}
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
@@ -52,6 +68,7 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::EndFrameImpl,
         SystemOpsAccessor::SyncInstanceIdImpl,
         SystemOpsAccessor::RestoreInstanceIdImpl,
+        SystemOpsAccessor::GetResourceIdImpl,
     };
     return &SystemOpsAccessorImpl;
 }
