@@ -333,7 +333,7 @@ class ObserveV2 {
           throw new TypeError(error);
         }
         stateMgmtConsole.propertyAccess(`ObserveV2.addRefV2Compatibility '${attrName}' for id ${bound[0]}...`);
-        this.addRef4IdInternal(bound[0], target, attrName);
+        this.addRef4Id(bound[0], target, attrName);
       } else {
         // inside ViewPU
         stateMgmtConsole.propertyAccess(`ObserveV2.addRefV2Compatibility '${attrName}' for id ${bound[0]} -- skip addRef because render/update is inside V1 ViewPU`);
