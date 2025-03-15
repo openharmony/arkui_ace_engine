@@ -3496,7 +3496,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _CanvasRenderer_createLinearGradient(ptr: KPointer, x0: number, y0: number, x1: number, y1: number): KPointer
     @ani.unsafe.Quick
-    native static _CanvasRenderer_createPattern(ptr: KPointer, image: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): KPointer
+    native static _CanvasRenderer_createPattern(ptr: KPointer, image: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _CanvasRenderer_createRadialGradient(ptr: KPointer, x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): KPointer
     @ani.unsafe.Quick

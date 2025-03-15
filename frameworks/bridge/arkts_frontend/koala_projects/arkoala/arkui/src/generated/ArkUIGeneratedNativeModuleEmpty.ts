@@ -5480,7 +5480,7 @@ export class ArkUIGeneratedNativeModuleEmpty {
         console.log("_CanvasRenderer_createLinearGradient")
         return -1
     }
-    _CanvasRenderer_createPattern(ptr: KPointer, image: KPointer, thisArray: Uint8Array, thisLength: int32): KPointer {
+    _CanvasRenderer_createPattern(ptr: KPointer, image: KPointer, thisArray: Uint8Array, thisLength: int32): KInteropReturnBuffer {
         console.log("_CanvasRenderer_createPattern")
         return -1
     }

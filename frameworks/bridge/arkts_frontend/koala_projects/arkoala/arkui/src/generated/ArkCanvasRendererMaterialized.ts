@@ -765,7 +765,13 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         const retval = ArkUIGeneratedNativeModule._CanvasRenderer_createPattern(this.peer!.ptr, toPeerPtr(image), thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length);
+        let retval_type : int32 = retvalDeserializer.readInt8() as int32
+        if ((RuntimeType.UNDEFINED) != (retval_type)) {
+            const pattern = retvalDeserializer.readCanvasPattern();
+            return pattern;
+        }
+        return undefined;
     }
     private createRadialGradient_serialize(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient {
         const retval = ArkUIGeneratedNativeModule._CanvasRenderer_createRadialGradient(this.peer!.ptr, x0, y0, r0, x1, y1, r1)
