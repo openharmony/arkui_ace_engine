@@ -107,7 +107,7 @@ config("lto_link_config") {
     ldflags = [ "-Wl,--lto-O2" ]
   }
   if (ace_engine_feature_enable_pgo && enable_enhanced_opt) {
-    ldflags += [ 
+    ldflags += [
       "-Wl,-mllvm,-force-sched-model=${ace_engine_feature_sched_model}",
       "-Wl,-plugin-opt=-split-machine-functions",
       "-Wl,-mllvm",
@@ -117,9 +117,9 @@ config("lto_link_config") {
       "-Wl,-mfs-psi-cutoff=999500",
       "-Wl,-z",
       "-Wl,keep-text-section-prefix",
-      "-Wl,--symbol-ordering-file=" + rebase_path(
-        "${ace_engine_feature_pgo_path}/libace_compatible.txt",
-        root_build_dir),
+      "-Wl,--symbol-ordering-file=" +
+          rebase_path("${ace_engine_feature_pgo_path}/libace_compatible.txt",
+                      root_build_dir),
       "-Wl,--no-warn-symbol-ordering",
     ]
   }
