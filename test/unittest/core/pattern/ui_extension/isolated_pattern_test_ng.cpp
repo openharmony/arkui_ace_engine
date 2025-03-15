@@ -38,7 +38,7 @@ namespace {
     const std::string MOCK_HAP_PATH = "Test hap path";
     const std::string MOCK_ABC_PATH = "Test abc path";
     const std::string MOCK_ABC_ENTRY_POINT = "Test entry point";
-    constexpr char RESOURCE_PATH[] = "reourcePath";
+    constexpr char RESOURCE_PATH[] = "resourcePath";
     constexpr char ABC_PATH[] = "abcPath";
     constexpr char ENTRY_POINT[] = "entryPoint";
     constexpr char REGISTER_COMPONENTS[] = "registerComponents";
