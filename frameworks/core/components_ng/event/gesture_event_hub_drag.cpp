@@ -801,8 +801,12 @@ void CalcPreviewPaintRect(const RefPtr<FrameNode> menuWrapperNode, PreparedInfoF
     data.borderRadius = animationInfo.borderRadius;
 }
 
-void GestureEventHub::PrepareDragStartInfo(const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data)
+void GestureEventHub::PrepareDragStartInfo(RefPtr<PipelineContext>& pipeline, PreparedInfoForDrag& data)
 {
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto menuWrapperNode = dragDropManager->GetMenuWrapperNode();
     CHECK_NULL_VOID(menuWrapperNode);
     CalcPreviewPaintRect(menuWrapperNode, data);
     auto previewPaintRect = data.menuPreviewRect;
@@ -916,11 +920,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragDropManager->ResetContextMenuDragPosition();
     RefPtr<Subwindow> subWindow = nullptr;
     if (!needChangeFwkForLeaveWindow && IsNeedSwitchToSubWindow(data)) {
-        if (isMenuShow) {
-            auto menuWrapperNode = dragDropManager->GetMenuWrapperNode();
-            CHECK_NULL_VOID(menuWrapperNode);
-            GestureEventHub::PrepareDragStartInfo(menuWrapperNode, data);
-        }
+        GestureEventHub::PrepareDragStartInfo(pipeline, data);
         auto imageNode = overlayManager->GetPixelMapContentNode();
         DragAnimationHelper::CreatePreviewNode(frameNode, imageNode, defaultPixelMapScale, data);
         CHECK_NULL_VOID(imageNode);
