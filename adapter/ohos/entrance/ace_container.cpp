@@ -3129,6 +3129,8 @@ void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExe
             picNameArray.push_back(imageData.first);
             fileDescriptorArray.push_back(imageData.second->GetAshmemFd());
             byteLenArray.push_back(imageData.second->GetAshmemSize());
+            LOGI("picName:%{public}s, fd:%{public}d, size:%{public}d", imageData.first.c_str(),
+                imageData.second->GetAshmemFd(), imageData.second->GetAshmemSize());
         }
         GetNamesOfSharedImage(picNameArray);
         UpdateSharedImage(picNameArray, byteLenArray, fileDescriptorArray);
