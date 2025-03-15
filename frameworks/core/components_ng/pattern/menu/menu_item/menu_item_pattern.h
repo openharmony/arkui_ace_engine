@@ -271,6 +271,8 @@ friend class ServiceCollaborationMenuAceHelper;
     void OnExpandChanged(const RefPtr<FrameNode>& expandableNode);
     void HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
     void ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode);
+    void SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode);
+    void UpdatePreviewPosition(SizeF oldMenuSize, SizeF menuSize);
 
     OffsetF GetSubMenuPosition(const RefPtr<FrameNode>& targetNode);
 

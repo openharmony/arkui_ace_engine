@@ -507,6 +507,16 @@ public:
 
     void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
 
+    void UpdateLastPlacement(std::optional<Placement> lastPlacement)
+    {
+        lastPlacement_ = lastPlacement;
+    }
+
+    std::optional<Placement> GetLastPlacement()
+    {
+        return lastPlacement_;
+    }
+
     void SetIsEmbedded()
     {
         isEmbedded_ = true;
@@ -612,6 +622,7 @@ private:
     bool needHideAfterTouch_ = true;
 
     std::optional<OffsetF> lastPosition_;
+    std::optional<Placement> lastPlacement_;
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;

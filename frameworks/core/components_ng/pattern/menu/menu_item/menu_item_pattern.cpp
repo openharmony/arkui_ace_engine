@@ -474,6 +474,61 @@ void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
     }
 }
 
+Offset GetTransformCenter(SizeF size, Placement placement)
+{
+    if (placement == Placement::TOP) {
+        return Offset(size.Width() / 2.0f, size.Height());
+    }
+    if (placement == Placement::TOP_LEFT) {
+        return Offset(0.0f, size.Height());
+    }
+    if (placement == Placement::TOP_RIGHT) {
+        return Offset(size.Width(), size.Height());
+    }
+    return Offset();
+}
+
+void MenuItemPattern::UpdatePreviewPosition(SizeF oldMenuSize, SizeF menuSize)
+{
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto topMenu = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(topMenu);
+    auto menuPattern = topMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern && menuPattern->GetPreviewMode() != MenuPreviewMode::NONE);
+
+    auto placement = menuPattern->GetLastPlacement().value_or(Placement::NONE);
+    auto isTopMenuBottomPreview =
+        placement == Placement::TOP || placement == Placement::TOP_LEFT || placement == Placement::TOP_RIGHT;
+
+    auto offsetY = menuSize.Height() - oldMenuSize.Height();
+    CHECK_NULL_VOID(isTopMenuBottomPreview && !NearZero(offsetY));
+
+    auto preview = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(1));
+    CHECK_NULL_VOID(preview);
+    auto tag = preview->GetTag();
+    auto isPreview = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    CHECK_NULL_VOID(isPreview);
+
+    auto renderContext = preview->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto previewGeometryNode = preview->GetGeometryNode();
+    CHECK_NULL_VOID(previewGeometryNode);
+
+    auto offset = previewGeometryNode->GetFrameOffset();
+    offset.AddY(offsetY);
+
+    previewGeometryNode->SetFrameOffset(offset);
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
+
+    auto menuRenderContext = topMenu->GetRenderContext();
+    CHECK_NULL_VOID(menuRenderContext);
+    menuRenderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter(menuSize, placement)));
+}
+
 void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode)
 {
     CHECK_NULL_VOID(expandableNode);
@@ -502,19 +557,55 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     AnimationOption option = AnimationOption();
     auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
     option.SetCurve(rotateOption);
-    AnimationUtils::Animate(option, [host, rightRow, expandableNode, expandableAreaContext, imageContext]() {
-        expandableNode->MountToParent(host, EXPANDABLE_AREA_VIEW_INDEX);
-        imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, SEMI_CIRCLE_ANGEL, 0.0f));
-        expandableNode->MarkModifyDone();
-        expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->FlushUITasks();
-        auto expandableAreaFrameSize = expandableNode->GetGeometryNode()->GetFrameSize();
-        expandableAreaContext->ClipWithRRect(RectF(0.0f, 0.0f, expandableAreaFrameSize.Width(),
-            expandableAreaFrameSize.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), expandableNodeWk = WeakClaim(RawPtr(expandableNode))]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto expandableNode = expandableNodeWk.Upgrade();
+        CHECK_NULL_VOID(expandableNode);
+        pattern->SetShowEmbeddedMenuParams(expandableNode);
     });
+}
+
+void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode)
+{
+    CHECK_NULL_VOID(expandableNode);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(rightRow);
+    auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
+    CHECK_NULL_VOID(imageNode);
+    expandableNode->MountToParent(host, EXPANDABLE_AREA_VIEW_INDEX);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, SEMI_CIRCLE_ANGEL, 0.0f));
+    expandableNode->MarkModifyDone();
+    expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto menuItemPattern = host->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    auto menuWrapper = menuItemPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto topMenu = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(topMenu);
+    auto menuGeometryNode = topMenu->GetGeometryNode();
+    CHECK_NULL_VOID(menuGeometryNode);
+    auto oldMenuSize = menuGeometryNode->GetFrameSize();
+
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushUITasks();
+    auto expandableAreaFrameSize = expandableNode->GetGeometryNode()->GetFrameSize();
+    auto expandableAreaContext = expandableNode->GetRenderContext();
+    CHECK_NULL_VOID(expandableAreaContext);
+    expandableAreaContext->ClipWithRRect(
+        RectF(0.0f, 0.0f, expandableAreaFrameSize.Width(), expandableAreaFrameSize.Height()),
+        RadiusF(EdgeF(0.0f, 0.0f)));
+    menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
 }
 
 void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode)
@@ -536,7 +627,7 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
     expandableAreaContext->UpdateChainedTransition(opacity);
 
-    AnimationUtils::Animate(option, [this, host, expandableNode]() {
+    AnimationUtils::Animate(option, [this, host, expandableNode, menuWrapperPattern]() {
         host->RemoveChild(expandableNode, true);
         host->MarkModifyDone();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -547,9 +638,21 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
+
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto topMenu = menuWrapperPattern->GetMenu();
+        CHECK_NULL_VOID(topMenu);
+        auto menuGeometryNode = topMenu->GetGeometryNode();
+        CHECK_NULL_VOID(menuGeometryNode);
+        auto oldMenuSize = menuGeometryNode->GetFrameSize();
+
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
+
+        auto menuItemPattern = host->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
     });
 }
 
