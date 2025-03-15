@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,18 +14,22 @@
  */
 
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
-#include "drag_drop_manager.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/point.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/geometry/rect.h"
+#include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
-#include "core/components/common/layout/grid_system_manager.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#include "core/components/common/layout/grid_system_manager.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -33,10 +37,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "base/utils/time_util.h"
-
-#include "base/geometry/rect.h"
-#include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -81,45 +81,64 @@ RefPtr<FrameNode> GetMenuWrapperNodeFromDrag()
     return dragDropManager->GetMenuWrapperNode();
 }
 
-RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
-    const RefPtr<PixelMap>& pixelMap, const GestureEvent& info)
+RefPtr<DragDropProxy> DragDropManager::CreateAndShowItemDragOverlay(
+    const RefPtr<PixelMap>& pixelMap, const GestureEvent& info, const RefPtr<EventHub>& eventHub)
 {
     CHECK_NULL_RETURN(pixelMap, nullptr);
+    // create Image for drag
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_RETURN(imageNode, nullptr);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, nullptr);
+    imagePattern->SetSyncLoad(true);
+    auto prop = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(prop, nullptr);
+    prop->UpdateAutoResize(false);
+    prop->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    auto targetSize = CalcSize(NG::CalcLength(pixelMap->GetWidth()), NG::CalcLength(pixelMap->GetHeight()));
+    prop->UpdateUserDefinedIdealSize(targetSize);
+    auto renderProp = imageNode->GetPaintProperty<ImageRenderProperty>();
+    renderProp->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    imageNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    imageNode->MarkModifyDone();
+    imageNode->SetLayoutDirtyMarked(true);
+    imageNode->SetActive(true);
+    imageNode->CreateLayoutTask();
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_RETURN(imageContext, nullptr);
+    imageContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(info.GetGlobalPoint().GetX() - pixelMap->GetWidth() / 2), // 2: Average factor.
+            Dimension(info.GetGlobalPoint().GetY() - pixelMap->GetHeight() / 2)));             // 2: Average factor.
+    imageContext->OnModifyDone();
+
+    AddItemDrag(imageNode, eventHub);
+
+    itemDragOverlayNode_ = imageNode;
     SetIsDragged(true);
     isDragCancel_ = false;
-#if !defined(PREVIEW)
-    if (GetWindowId() == -1) {
-        const float windowScale = GetWindowScale();
-        pixelMap->Scale(windowScale, windowScale, AceAntiAliasingOption::HIGH);
-    }
-    CreateDragWindow(info, pixelMap->GetWidth(), pixelMap->GetHeight());
-    CHECK_NULL_RETURN(dragWindow_, nullptr);
-    dragWindow_->DrawPixelMap(pixelMap);
-#endif
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
 }
 
-RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
-    const RefPtr<UINode>& customNode, const GestureEvent& info)
+RefPtr<DragDropProxy> DragDropManager::CreateAndShowItemDragOverlay(
+    const RefPtr<UINode>& customNode, const GestureEvent& info, const RefPtr<EventHub>& eventHub)
 {
-    dragWindowRootNode_ = CreateDragRootNode(customNode);
-    CHECK_NULL_RETURN(dragWindowRootNode_, nullptr);
+    auto frameNode = DynamicCast<FrameNode>(customNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, nullptr);
+    auto frameRect = geometryNode->GetFrameSize();
+    renderContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(info.GetGlobalPoint().GetX() - frameRect.Width() / 2), // 2: Average factor.
+            Dimension(info.GetGlobalPoint().GetY() - frameRect.Height() / 2)));             // 2: Average factor.
+    renderContext->OnModifyDone();
+    AddItemDrag(frameNode, eventHub);
+    itemDragOverlayNode_ = frameNode;
     SetIsDragged(true);
     isDragCancel_ = false;
-#if !defined(PREVIEW)
-    if (dragWindow_) {
-        return nullptr;
-    }
-
-    auto geometryNode = dragWindowRootNode_->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, nullptr);
-
-    auto frameRect = geometryNode->GetFrameSize();
-    CreateDragWindow(info, static_cast<uint32_t>(frameRect.Width()), static_cast<uint32_t>(frameRect.Height()));
-    CHECK_NULL_RETURN(dragWindow_, nullptr);
-    dragWindow_->DrawFrameNode(dragWindowRootNode_);
-#endif
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
 }
@@ -130,26 +149,6 @@ RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
     isDragCancel_ = false;
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
-}
-
-void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height)
-{
-#if !defined(PREVIEW)
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    const int32_t windowId = GetWindowId();
-    const float windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
-    const Rect rect = pipeline->GetDisplayWindowRectInfo();
-    const int32_t windowY = static_cast<int32_t>(info.GetGlobalPoint().GetY() * windowScale);
-    const int32_t windowX = static_cast<int32_t>(info.GetGlobalPoint().GetX() * windowScale);
-    dragWindow_ = DragWindow::CreateDragWindow(
-        { "APP_DRAG_WINDOW", windowX + rect.Left(), windowY + rect.Top(), width, height, windowId });
-    if (dragWindow_) {
-        dragWindow_->SetOffset(rect.Left(), rect.Top());
-    } else {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "Create drag window failed!");
-    }
-#endif
 }
 
 int32_t DragDropManager::GetWindowId()
@@ -197,12 +196,50 @@ RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& cust
     return rootNode;
 }
 
-void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY)
+void DragDropManager::AddItemDrag(const RefPtr<FrameNode>& frameNode, const RefPtr<EventHub>& eventHub)
 {
-#if !defined(PREVIEW)
-    CHECK_NULL_VOID(dragWindow_);
-    dragWindow_->MoveTo(globalX, globalY);
-#endif
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootNode = pipeline->GetRootElement();
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        auto host = eventHub->GetFrameNode();
+        CHECK_NULL_VOID(host);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        rootNode = DynamicCast<FrameNode>(overlayManager->FindWindowScene(host));
+    }
+    CHECK_NULL_VOID(rootNode);
+    frameNode->MountToParent(rootNode);
+    frameNode->OnMountToParentDone();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+void DragDropManager::RemoveItemDrag()
+{
+    CHECK_NULL_VOID(itemDragOverlayNode_);
+    auto rootNode = itemDragOverlayNode_->GetParent();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->RemoveChild(itemDragOverlayNode_);
+    rootNode->RebuildRenderContextTree();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+void DragDropManager::UpdateItemDragPosition(int32_t globalX, int32_t globalY)
+{
+    CHECK_NULL_VOID(itemDragOverlayNode_);
+    auto rect = itemDragOverlayNode_->GetTransformRectRelativeToWindow();
+    auto pipeline = itemDragOverlayNode_->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    const Rect windowRect = pipeline->GetDisplayWindowRectInfo();
+    auto maxX = static_cast<float>(windowRect.Width() - rect.Width());
+    auto maxY = static_cast<float>(windowRect.Height() - rect.Height());
+    auto renderContext = itemDragOverlayNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(std::min(std::max(globalX - rect.Width() / 2, 0.0f), maxX)), // 2: Average factor.
+            Dimension(std::min(std::max(globalY - rect.Height() / 2, 0.0f), maxY))));             // 2: Average factor.
+    renderContext->OnModifyDone();
 }
 
 void DragDropManager::HideDragPreviewOverlay()
@@ -1200,14 +1237,11 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
 
-    const float windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
-    const float windowX = globalX * windowScale;
-    const float windowY = globalY * windowScale;
-    UpdateDragWindowPosition(static_cast<int32_t>(windowX), static_cast<int32_t>(windowY));
+    UpdateItemDragPosition(globalX, globalY);
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(windowX);
-    itemDragInfo.SetY(windowY);
+    itemDragInfo.SetX(globalX);
+    itemDragInfo.SetY(globalY);
 
     // use -1 for grid item not in eventGrid
     auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](
@@ -1472,13 +1506,10 @@ void DragDropManager::RestoreClipboardData()
 
 void DragDropManager::DestroyDragWindow()
 {
-    if (dragWindow_ != nullptr) {
-        dragWindow_->Destroy();
-        dragWindow_ = nullptr;
-    }
     ResetRecordSize();
-    if (dragWindowRootNode_) {
-        dragWindowRootNode_ = nullptr;
+    if (itemDragOverlayNode_) {
+        RemoveItemDrag();
+        itemDragOverlayNode_ = nullptr;
     }
     SetIsDragged(false);
     SetIsDragWindowShow(false);
