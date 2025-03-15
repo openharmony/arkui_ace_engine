@@ -546,12 +546,6 @@ void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     }
     if (value.textColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedColor, value.textColor.value());
-        if (theme->IsCircleDial()) {
-            auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-            if (datePickerPattern) {
-                datePickerPattern->UpdateUserSetSelectColor();
-            }
-        }
     } else {
         ResetDataPickerTextStyleColor(frameNode, &DataPickerRowLayoutProperty::GetSelectedTextStyle);
     }
@@ -827,12 +821,6 @@ void DatePickerModelNG::SetSelectedTextStyle(
             DataPickerRowLayoutProperty, SelectedFontSize,
             ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
     }
-    if (value.textColor.has_value() && theme->IsCircleDial() && frameNode) {
-        auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-        if (datePickerPattern) {
-            datePickerPattern->UpdateUserSetSelectColor();
-        }
-    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         DataPickerRowLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedWeight,
@@ -985,4 +973,14 @@ void DatePickerModelNG::HasUserDefinedOpacity()
     CHECK_NULL_VOID(renderContext);
     datePickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
+
+void DatePickerModelNG::UpdateUserSetSelectColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->UpdateUserSetSelectColor();
+}
+
 } // namespace OHOS::Ace::NG

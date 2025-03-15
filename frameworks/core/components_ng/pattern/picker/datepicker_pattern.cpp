@@ -2903,15 +2903,16 @@ bool DatePickerPattern::IsCircle()
 void DatePickerPattern::ClearFocus()
 {
     CHECK_EQUAL_VOID(IsCircle(), false);
-    CHECK_EQUAL_VOID(lunarSwitch_, false);
-
+    CHECK_EQUAL_VOID(isFirstTimeSetFocus_, true);
+    CHECK_EQUAL_VOID(lastTimeIsLuanar_, CurrentIsLunar());
     if (!selectedColumnId_.empty()) {
         const auto& allChildNode = GetAllChildNode();
         auto it = allChildNode.find(selectedColumnId_);
         if (it != allChildNode.end()) {
             auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
-            CHECK_NULL_VOID(tmpPattern);
-            tmpPattern->SetSelectedMark(false, false);
+            if (tmpPattern) {
+                tmpPattern->SetSelectedMark(false, false);
+            }
         }
         selectedColumnId_ = "";
     }
@@ -2920,8 +2921,11 @@ void DatePickerPattern::ClearFocus()
 void DatePickerPattern::SetDefaultFocus()
 {
     CHECK_EQUAL_VOID(IsCircle(), false);
-    CHECK_EQUAL_VOID(lunarSwitch_, false);
-    lunarSwitch_ = false;
+    if (!isFirstTimeSetFocus_ && (lastTimeIsLuanar_ == CurrentIsLunar())) {
+        return;
+    }
+    isFirstTimeSetFocus_ = false;
+    lastTimeIsLuanar_ = CurrentIsLunar();
     std::function<void(std::string& focusId)> call =  [weak = WeakClaim(this)](std::string& focusId) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -2995,6 +2999,13 @@ void DatePickerPattern::UpdateUserSetSelectColor()
         CHECK_NULL_VOID(pickerColumnPattern);
         pickerColumnPattern->UpdateUserSetSelectColor();
     }
+}
+
+bool DatePickerPattern::CurrentIsLunar()
+{
+    auto rowLayoutProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_RETURN(rowLayoutProperty, true);
+    return rowLayoutProperty->GetLunarValue(false);
 }
 
 } // namespace OHOS::Ace::NG

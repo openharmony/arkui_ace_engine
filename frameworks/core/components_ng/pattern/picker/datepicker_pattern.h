@@ -200,9 +200,6 @@ public:
     void SetShowLunar(bool value)
     {
         isForceUpdate_ = value != lunar_;
-        if (!lunarSwitch_) {
-            lunarSwitch_ = isForceUpdate_;
-        }
         lunar_ = value;
     }
 
@@ -809,7 +806,7 @@ private:
     void ClearFocus();
     void SetDefaultFocus();
     bool IsCircle();
-
+    bool CurrentIsLunar();
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
     bool OnCrownEvent(const CrownEvent& event);
@@ -906,7 +903,8 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
     std::string selectedColumnId_;
-    bool lunarSwitch_ = true;
+    bool lastTimeIsLuanar_ = true;
+    bool isFirstTimeSetFocus_ = true;
 };
 } // namespace OHOS::Ace::NG
 

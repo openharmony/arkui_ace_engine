@@ -411,12 +411,6 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
     }
     if (value.textColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, value.textColor.value());
-        if (pickerTheme->IsCircleDial()) {
-            auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-            if (textPickerPattern) {
-                textPickerPattern->UpdateUserSetSelectColor();
-            }
-        }
     } else {
         ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetSelectedTextStyle);
     }
@@ -1012,12 +1006,6 @@ void TextPickerModelNG::SetSelectedTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedColor,
         value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);
-    if (value.textColor.has_value() && pickerTheme->IsCircleDial()) {
-        auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-        if (textPickerPattern) {
-            textPickerPattern->UpdateUserSetSelectColor();
-        }
-    }
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedWeight,
@@ -1505,5 +1493,14 @@ void TextPickerModelNG::SetSingleRange(bool isSingleRange)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetSingleRange(isSingleRange);
+}
+
+void TextPickerModelNG::UpdateUserSetSelectColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->UpdateUserSetSelectColor();
 }
 } // namespace OHOS::Ace::NG
