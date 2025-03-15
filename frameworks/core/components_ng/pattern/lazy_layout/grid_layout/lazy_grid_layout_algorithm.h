@@ -91,6 +91,7 @@ private:
     void LayoutCachedItemsBackward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void PredictLayoutForward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void PredictLayoutBackward(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
+    void SyncPredictLayoutInfo(LayoutWrapper* layoutWrapper);
     void FixPosMapBackward(int32_t index);
     void FixPosMapForward(int32_t index, LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
 
