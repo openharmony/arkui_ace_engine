@@ -66,7 +66,7 @@ interface CloseButtonTheme {
   hoverColor: ResourceColor;
   backgroundColor: ResourceColor;
   symbolStyle: SymbolGlyphModifier;
-  symbolSize: number;
+  symbolSize: string;
   accessibilityMessage: Resource;
 }
 
@@ -365,7 +365,7 @@ export struct PopupComponent {
     return this.theme.closeButton.padding
   }
 
-  private getCloseButtonSymbolSize(): Length | undefined {
+  private getCloseButtonSymbolSize(): string | undefined {
     return this.theme.closeButton.symbolSize
   }
 
