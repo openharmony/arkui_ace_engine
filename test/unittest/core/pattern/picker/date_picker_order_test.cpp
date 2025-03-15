@@ -52,6 +52,15 @@ const std::string CONNECTER = "-";
 const std::vector<int> DEFAULT_MONTH_DAY = { 1, 2, 3 };
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr uint8_t PIXEL_ROUND = 18;
+const std::unordered_map<std::string, std::string> EXPECT_DATE_ORDER_MAP = {
+    { "ug", "y-d-M" },
+    { "ar", "y-M-d" },
+    { "fa", "y-M-d" },
+    { "ur", "y-M-d" },
+    { "iw", "y-M-d" },
+    { "he", "y-M-d" },
+};
+
 RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
@@ -1967,5 +1976,139 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder031, TestSize.Level1)
     monthNode->GetPattern<DatePickerColumnPattern>()->SetCurrentIndex(6);
     datePickerPattern->HandleReduceLunarDayChange(0);
     EXPECT_NE(datePickerPattern, nullptr);
+}
+
+/**
+ * @tc.name: DatePickerOrder032
+ * @tc.desc: Test DatePickerDialog OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerOrderTest, DatePickerOrder032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Set the initial language and city.
+     */
+    const std::string language = "ug";
+    const std::string countryOrRegion = "Kashgar";
+    const std::string script = "维吾尔";
+    const std::string keywordsAndValues = "";
+
+    AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
+
+    /**
+     * @tc.steps: steps2. Create DatePickerDialog.
+     */
+    DialogProperties dialogProperties;
+
+    DatePickerSettingData settingData;
+    settingData.lunarswitch = true;
+
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo buttonInfo;
+    buttonInfo.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(buttonInfo);
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto firstColumnNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    ASSERT_NE(firstColumnNode, nullptr);
+
+    auto secondColumnNode = AceType::DynamicCast<FrameNode>(firstColumnNode->GetFirstChild());
+    ASSERT_NE(secondColumnNode, nullptr);
+
+    auto midStackNode = AceType::DynamicCast<FrameNode>(secondColumnNode->GetChildAtIndex(1));
+    ASSERT_NE(midStackNode, nullptr);
+
+    auto datePickerNode = AceType::DynamicCast<FrameNode>(midStackNode->GetFirstChild());
+    ASSERT_NE(datePickerNode, nullptr);
+
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    EXPECT_EQ(datePickerPattern->dateOrder_, EXPECT_DATE_ORDER_MAP.find(language)->second);
+
+    /**
+     * @tc.steps: steps3. Switch language and city.
+     * @tc.expected: The dateOrder_ changed, and isDateOrderChange_ equals true.
+     */
+    const std::string newLanguage = "fa";
+    const std::string newCountryOrRegion = "Hamedan";
+    const std::string newScript = "哈马丹";
+    const std::string newKeywordsAndValues = "";
+    AceApplicationInfo::GetInstance().SetLocale(newLanguage, newCountryOrRegion, newScript, newKeywordsAndValues);
+
+    datePickerPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(datePickerPattern->dateOrder_, EXPECT_DATE_ORDER_MAP.find(newLanguage)->second);
+    EXPECT_EQ(datePickerPattern->isDateOrderChange_, true);
+
+    /**
+     * @tc.steps: steps4. OnModifyDone update the properties and layout.
+     * @tc.expected: The isDateOrderChange_ equals false.
+     */
+    datePickerPattern->OnModifyDone();
+    EXPECT_EQ(datePickerPattern->isDateOrderChange_, false);
+}
+
+/**
+ * @tc.name: DatePickerOrder033
+ * @tc.desc: Test DatePicker OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerOrderTest, DatePickerOrder033, TestSize.Level1)
+{
+    /**
+    * @tc.steps: steps1. Set the initial language and city.
+    */
+    const std::string language = "ug";
+    const std::string countryOrRegion = "Kashgar";
+    const std::string script = "维吾尔";
+    const std::string keywordsAndValues = "";
+
+    AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
+
+    /**
+    * @tc.steps: steps2. Create DatePicker.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    EXPECT_EQ(datePickerPattern->dateOrder_, EXPECT_DATE_ORDER_MAP.find(language)->second);
+
+    /**
+     * @tc.steps: steps3. Switch language and city.
+     * @tc.expected: The dateOrder_ changed, and isDateOrderChange_ equals true.
+     */
+    const std::string newLanguage = "fa";
+    const std::string newCountryOrRegion = "Hamedan";
+    const std::string newScript = "哈马丹";
+    const std::string newKeywordsAndValues = "";
+    AceApplicationInfo::GetInstance().SetLocale(newLanguage, newCountryOrRegion, newScript, newKeywordsAndValues);
+
+    datePickerPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(datePickerPattern->dateOrder_, EXPECT_DATE_ORDER_MAP.find(newLanguage)->second);
+    EXPECT_EQ(datePickerPattern->isDateOrderChange_, true);
+
+    /**
+    * @tc.steps: steps4. OnModifyDone update the properties and layout.
+    * @tc.expected: The isDateOrderChange_ equals false.
+    */
+    datePickerPattern->OnModifyDone();
+    EXPECT_EQ(datePickerPattern->isDateOrderChange_, false);
 }
 } // namespace OHOS::Ace::NG
