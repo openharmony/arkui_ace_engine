@@ -5018,9 +5018,6 @@ void OverlayManager::PlaySheetTransition(
     RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition)
 {
     CHECK_NULL_VOID(sheetNode);
-    sheetNode->OnAccessibilityEvent(
-        isTransitionIn ? AccessibilityEventType::PAGE_OPEN : AccessibilityEventType::PAGE_CLOSE,
-        WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
 
@@ -5040,6 +5037,8 @@ void OverlayManager::PlaySheetTransition(
         sheetPattern->SetCurrentHeight(sheetHeight_);
         float offset = sheetPattern->ComputeTransitionOffset(sheetHeight_);
         if (isFirstTransition) {
+            sheetNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN,
+                WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
             sheetPattern->SheetTransitionAction(offset, true, isTransitionIn);
             if (NearZero(sheetHeight_)) {
                 return;
@@ -5085,6 +5084,8 @@ void OverlayManager::PlaySheetTransition(
             },
             option.GetOnFinishEvent());
     } else {
+        sheetNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {
                 auto sheet = sheetWK.Upgrade();
