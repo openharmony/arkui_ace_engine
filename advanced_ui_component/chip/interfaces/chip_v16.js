@@ -16,7 +16,6 @@
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
-
 const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
@@ -1087,11 +1086,7 @@ export class ChipComponent extends ViewPU {
         !this.isSuffixIconFocusStyleCustomized
           ? undefined
           : isHover => {
-              if (isHover) {
-                this.chipZoomIn();
-              } else {
-                this.chipZoomOut();
-              }
+              isHover ? this.chipZoomIn() : this.chipZoomOut();
             }
       );
     }, Button);

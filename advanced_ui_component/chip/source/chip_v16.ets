@@ -630,12 +630,13 @@ export struct ChipComponent {
       }
       this.chipZoomOut();
     })
+    .hoverStyle()
+  }
+
+  @Styles
+  hoverStyle() {
     .onHover(!this.isSuffixIconFocusStyleCustomized ? undefined : (isHover: boolean) => {
-      if (isHover) {
-        this.chipZoomIn();
-      } else {
-        this.chipZoomOut();
-      }
+      isHover ? this.chipZoomIn() : this.chipZoomOut();
     })
   }
 

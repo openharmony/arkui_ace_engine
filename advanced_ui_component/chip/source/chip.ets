@@ -1248,7 +1248,7 @@ export struct ChipComponent {
           .padding(0)
           .stateEffect(false)
           .focusable(!this.isSuffixIconFocusStyleCustomized)
-          .hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined)
+          .hoverEffect(this.setHoverEffect())
         } else if (this.suffixIcon?.src !== "") {
           Button({ type: ButtonType.Normal }) {
             Image(this.getSuffixIconSrc())
@@ -1291,7 +1291,7 @@ export struct ChipComponent {
             this.onClicked()
           })
           .focusable(this.getSuffixIconFocusable())
-          .hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined)
+          .hoverEffect(this.setHoverEffect())
         } else if (this.allowClose ?? true) {
           Button({ type: ButtonType.Normal }) {
             SymbolGlyph($r('sys.symbol.xmark'))
@@ -1316,7 +1316,7 @@ export struct ChipComponent {
             this.deleteChipNodeAnimate()
           })
           .focusable(!this.isSuffixIconFocusStyleCustomized)
-          .hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined)
+          .hoverEffect(this.setHoverEffect())
         }
       }
       .direction(this.chipDirection)
@@ -1358,7 +1358,6 @@ export struct ChipComponent {
     .onHover((isHover: boolean) => {
       if (isHover) {
         this.isShowPressedBackGroundColor = true;
-        this.isHover = true;
         this.chipZoomIn();
       } else {
         if (!this.isShowPressedBackGroundColor && isHover) {
@@ -1366,9 +1365,9 @@ export struct ChipComponent {
         } else {
           this.isShowPressedBackGroundColor = false
         }
-        this.isHover = false;
         this.chipZoomOut();
       }
+      this.isHover = isHover;
     })
     .onKeyEvent((event) => {
       if (!event || event.type === null || event.type !== KeyType.Down) {
@@ -1383,6 +1382,10 @@ export struct ChipComponent {
       }
     })
     .onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this))
+  }
+
+  private setHoverEffect(): HoverEffect | undefined {
+    return this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined;
   }
 
   private chipZoomOut() {

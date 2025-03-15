@@ -12,9 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
+
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const measure = requireNapi('measure');
 const mediaquery = requireNapi('mediaquery');
@@ -1880,7 +1882,6 @@ export class ChipComponent extends ViewPU {
       Button.onHover(isHover => {
         if (isHover) {
           this.isShowPressedBackGroundColor = true;
-          this.isHover = true;
           this.chipZoomIn();
         } else {
           if (!this.isShowPressedBackGroundColor && isHover) {
@@ -1888,9 +1889,9 @@ export class ChipComponent extends ViewPU {
           } else {
             this.isShowPressedBackGroundColor = false;
           }
-          this.isHover = false;
           this.chipZoomOut();
         }
+        this.isHover = isHover;
       });
       Button.onKeyEvent(event => {
         if (!event || event.type === null || event.type !== KeyType.Down) {
@@ -1992,7 +1993,7 @@ export class ChipComponent extends ViewPU {
             Button.padding(0);
             Button.stateEffect(false);
             Button.focusable(!this.isSuffixIconFocusStyleCustomized);
-            Button.hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
+            Button.hoverEffect(this.setHoverEffect());
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
@@ -2039,7 +2040,7 @@ export class ChipComponent extends ViewPU {
               this.onClicked();
             });
             Button.focusable(this.getSuffixIconFocusable());
-            Button.hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
+            Button.hoverEffect(this.setHoverEffect());
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.getSuffixIconSrc());
@@ -2079,7 +2080,7 @@ export class ChipComponent extends ViewPU {
               this.deleteChipNodeAnimate();
             });
             Button.focusable(!this.isSuffixIconFocusStyleCustomized);
-            Button.hoverEffect(this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined);
+            Button.hoverEffect(this.setHoverEffect());
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create({
@@ -2105,6 +2106,9 @@ export class ChipComponent extends ViewPU {
     If.pop();
     Row.pop();
     Button.pop();
+  }
+  setHoverEffect() {
+    return this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined;
   }
   chipZoomOut() {
     if (this.isSuffixIconFocusStyleCustomized) {
