@@ -1545,7 +1545,6 @@ void ArcSwiperPattern::HandleCrownActionUpdate(double degree, double mainDelta,
         StartVibrator(degree > 0);
         HandleTouchUp();
     }
-    oldCurrentIndex_ = currentIndex_;
 }
 
 void ArcSwiperPattern::HandleCrownActionEnd(
@@ -1580,16 +1579,10 @@ void ArcSwiperPattern::HandleCrownActionEnd(
         StartVibrator(degree > 0);
         HandleTouchUp();
     }
-    oldCurrentIndex_ = currentIndex_;
 }
 
 void ArcSwiperPattern::StartVibrator(bool isLeft)
 {
-    if (oldCurrentIndex_ != -1 &&
-        oldCurrentIndex_ == currentIndex_ &&
-        ((isLeft && currentIndex_ == 1) || (!isLeft && currentIndex_ == TotalCount() - COUNT_TWO_INDEX))) {
-        return;
-    }
     if ((isLeft && currentIndex_ == 0) || (!isLeft && currentIndex_ == TotalCount() - 1)) {
         return;
     }
