@@ -114,13 +114,6 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContextSafelyWithCheck()
     return MockPipelineContext::GetCurrent();
 }
 
-RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
-{
-    auto currentContainer = Container::CurrentSafelyWithCheck();
-    CHECK_NULL_RETURN(currentContainer, nullptr);
-    return currentContainer->GetPipelineContext();
-}
-
 PipelineContext* PipelineContext::GetCurrentContextPtrSafely()
 {
     auto context = MockPipelineContext::GetCurrent();
@@ -783,6 +776,13 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
 {
     return NG::MockPipelineContext::GetCurrent();
+}
+
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
+{
+    auto currentContainer = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return currentContainer->GetPipelineContext();
 }
 
 double PipelineBase::GetCurrentDensity()
