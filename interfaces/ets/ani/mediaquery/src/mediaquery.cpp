@@ -47,12 +47,18 @@ struct MediaQueryResult {
     {
         ani_boolean match = false;
         ani_string media = nullptr;
+        static const char *className = "L@ohos/mediaquery/mediaquery/Mediaquery;";
+        ani_class cls;
+        if (ANI_OK != env->FindClass(className, &cls)) {
+            return;
+        }
         ani_method method;
-        ani_class cls = nullptr;
-        env->Class_FindMethod(cls, "<ctor>", "ZLstd/core/String;:V", &method);
-        env->c_api->Object_New(env, cls, method, &result, match, media);
+        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &method)) {
+            return;
+        }
+        env->Object_New(cls, method, &result, match, media);
         ani_size nr_refs = 16;
-        if (env->CreateLocalScope(nr_refs)) {
+        if (ANI_OK != env->CreateLocalScope(nr_refs)) {
             return;
         }
         const char* mediac = media_.c_str();
@@ -184,7 +190,7 @@ public:
             return;
         }
 
-        MediaQueryListener* listener = GetListener(env, callback);
+        MediaQueryListener* listener = GetListener(env, object);
         if (!listener) {
             env->DestroyLocalScope();
             return;
@@ -205,11 +211,11 @@ public:
     static void Off([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
         ani_string type, ani_object callback)
     {
-        MediaQueryListener* listener = GetListener(env, callback);
-        if (!listener) {
+        size_t argc = ParseArgs(env, object, type, callback);
+        MediaQueryListener* listener = GetListener(env, object);
+        if (!listener || argc == 0) {
             return;
         }
-        size_t argc = ParseArgs(env, object, type, callback);
         if (argc == 1) {
             if (delayDeleteCallbacks_) {
                 delayDeleteEnv_ = env;
@@ -241,30 +247,18 @@ public:
     void AniSerializer([[maybe_unused]] ani_env *env, ani_object& result) override
     {
         MediaQueryResult::AniSerializer(env, result);
-
         static const char *mediaquery = "L@ohos/mediaquery/mediaquery/Mediaquery;";
         ani_class cls2;
         if (ANI_OK != env->FindClass(mediaquery, &cls2)) {
             std::cerr << "Not found '" << mediaquery << "'" << std::endl;
             return;
         }
-
         ani_field serializerField;
         if (ANI_OK != env->Class_FindField(cls2, "nativeSerializerResult", &serializerField)) {
             std::cerr << "animator create Get Field Fail" << "'" << std::endl;
             return;
         }
-        env->Object_SetField_Long(result, serializerField, 8L);
-
-        std::array methods2 = {
-            ani_native_function {"on", nullptr, reinterpret_cast<void *>(On)},
-            ani_native_function {"off", nullptr, reinterpret_cast<void *>(Off)},
-        };
-
-        if (ANI_OK != env->Class_BindNativeMethods(cls2, methods2.data(), methods2.size())) {
-            std::cerr << "Cannot bind native methods to '" << mediaquery << "'" << std::endl;
-            return;
-        };
+        env->Object_SetField_Long(result, serializerField, reinterpret_cast<ani_long>(this));
     }
 
 private:
@@ -285,7 +279,7 @@ private:
         }
     }
 
-    void Initialize([[maybe_unused]] ani_env *env, ani_object callback)
+    void Initialize([[maybe_unused]] ani_env *env)
     {
         ani_size nr_refs = 16;
         if (ANI_OK != env->CreateLocalScope(nr_refs)) {
@@ -305,26 +299,14 @@ private:
         }
     }
 
-    static MediaQueryListener* GetListener([[maybe_unused]] ani_env *env, ani_object callback)
+    static MediaQueryListener* GetListener([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object)
     {
         MediaQueryListener* listener = nullptr;
-        static const char *mediaquery = "L@ohos/mediaquery/mediaquery/Mediaquery;";
-        ani_class cls2;
-        if (ANI_OK != env->FindClass(mediaquery, &cls2)) {
-            std::cerr << "Not found '" << mediaquery << "'" << std::endl;
-            return nullptr;
-        }
-
-        ani_field serializerField;
-        if (ANI_OK != env->Class_FindField(cls2, "nativeSerializerResult", &serializerField)) {
-            std::cerr << "animator create Get Field Fail" << "'" << std::endl;
-            return nullptr;
-        }
-        ani_long serializer {};
-        env->Object_GetField_Long(callback, serializerField, &serializer);
+        ani_long serializer;
+        env->Object_GetFieldByName_Long(object, "nativeSerializerResult", &serializer);
         listener = reinterpret_cast<MediaQueryListener*>(serializer);
         CHECK_NULL_RETURN(listener, nullptr);
-        listener->Initialize(env, callback);
+        listener->Initialize(env);
         return listener;
     }
 
@@ -387,8 +369,7 @@ void Off([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object, ani_
     MediaQueryListener::Off(env, object, type, callback);
 }
 
-static ani_object JSMatchMediaSync([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
-    ani_string condition)
+static ani_object JSMatchMediaSync([[maybe_unused]] ani_env *env, ani_string condition)
 {
     ani_size strSize = 0U;
     env->String_GetUTF8Size(condition, &strSize);
