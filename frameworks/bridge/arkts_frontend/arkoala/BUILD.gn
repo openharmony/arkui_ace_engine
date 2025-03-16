@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
 action("run_arkoala_build") {
   script = "./build.py"
@@ -43,8 +43,11 @@ action("run_arkoala_build") {
     rebase_path("${static_linker_build_path}"),
 
     # Paths: 7 ets stdlib path.
-    rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib")
+    rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
   ]
+
+  external_deps = ets2abc_build_deps
+  external_deps += static_linker_build_deps
 }
 
 ohos_prebuilt_etc("arkoala_prebuild") {

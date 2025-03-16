@@ -50,7 +50,7 @@ const { recognized: args, unknown: rest } = extractArgs(ARGS_SPEC, process.argv.
 let cmd = [
     args.flag('--es2panda-bin'),
     '--stdlib', args.flag('--es2panda-stdlib'),
-    '--extension', 'sts',
+    '--extension', 'ets',
     '--list-files',
     ...rest
 ]
