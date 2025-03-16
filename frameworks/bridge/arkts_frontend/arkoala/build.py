@@ -38,6 +38,9 @@ def main(argv):
     build_path = os.path.abspath(argv[2])
     node_path = os.path.abspath(argv[3])
     output_target_path = os.path.abspath(argv[4])
+    es2panda_path = os.path.abspath(argv[5])
+    arklink_path = os.path.abspath(argv[6])
+    ets_stdlib_path = os.path.abspath(argv[7])
     check_install_path = os.path.join(project_path, "arkoala-arkts", "node_modules")
     check_bin_path = os.path.join(check_install_path, ".bin")
     check_fast_arktsc = os.path.join(check_bin_path, "fast-arktsc")
@@ -54,12 +57,23 @@ def main(argv):
         os.makedirs(dist_path)
     with open(logfile, "a+") as f:
         f.write("koala build:\n")
-        f.write(logfile)
+        f.write(logfile + "\n")
+        f.write("es2panda_path: " + es2panda_path + "\n")
+        f.write("arklink_path:" + arklink_path + "\n")
+        f.write("ets_stdlib_path:" + ets_stdlib_path + "\n")
         f.close()
 
-    env_old = os.environ.copy()
-    env = env_old
-    env["PATH"] = f"{node_path}:{env_old['PATH']}"
+    env = os.environ.copy()
+    env_old_path = env["PATH"]
+    env["PATH"] = f"{node_path}:{env['PATH']}"
+
+    if (es2panda_path != ""):
+        env["ES2PANDA_PATH"] = es2panda_path
+    if (arklink_path != ""):
+        env["ARKLINK_PATH"] = arklink_path
+    if (ets_stdlib_path != ""):
+        env["ETS_STDLIB_PATH"] = ets_stdlib_path
+
     try:
         ret = subprocess.run(["npm", "-v"], capture_output=True, env = env, text=True, check=True)
         with open(logfile, "a+") as f:
@@ -121,7 +135,7 @@ def main(argv):
             print(f"error message: {e.stderr}")
             f.close()
     # restore old env
-    env = env_old
+    env["PATH"] = env_old_path
 
     abc_file = "arkoala.abc"
     built_file = os.path.join(project_path, "arkoala-arkts", "build", abc_file)

@@ -23,12 +23,15 @@ const { formatCommand,
     getUsage,
     checkForHelp } = require('./common')
 
+ark_link_path = process.env.ARKLINK_PATH
+ark_link_path = ark_link_path != "" ? ark_link_path : path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'ark_link')
+
 const ARGS_SPEC = [
     {
         flag: '--arklink-bin',
         help: 'Path to arklink binary',
         domain: 'string',
-        default: path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'ark_link')
+        default: ark_link_path
     },
     ...DEFAULT_DRIVER_FLAGS,
 ]

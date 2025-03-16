@@ -23,18 +23,23 @@ const { formatCommand,
     getUsage,
     checkForHelp } = require('./common')
 
+es2panda_path = process.env.ES2PANDA_PATH
+es2panda_path = es2panda_path != "" ? es2panda_path : path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'es2panda')
+stdlib_path = process.env.ETS_STDLIB_PATH
+stdlib_path = stdlib_path != "" ? stdlib_path : path.join(PANDA_SDK, 'ets', 'stdlib')
+
 const ARGS_SPEC = [
     {
         flag: '--es2panda-bin',
         help: 'Path to es2panda binary',
         domain: 'string',
-        default: path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'es2panda')
+        default: es2panda_path
     },
     {
         flag: '--es2panda-stdlib',
         help: 'Path to es2panda stdlib directory',
         domain: 'string',
-        default: path.join(PANDA_SDK, 'ets', 'stdlib')
+        default: stdlib_path
     },
     ...DEFAULT_DRIVER_FLAGS,
 ]
