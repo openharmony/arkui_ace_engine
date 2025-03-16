@@ -28,9 +28,8 @@
 #include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/core/common/container.h"
-#include "frameworks/core/common/container_scope.cpp"
-#include "frameworks/core/animation/cubic_curve.cpp"
 #include "frameworks/core/animation/curve.h"
+#include "frameworks/core/animation/spring_curve.h"
 #include "test/mock/interfaces/mock_ace_forward_compatibility.cpp"
 namespace {
 struct CurvesObj {
@@ -247,6 +246,154 @@ static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
     return curveNew_object;
 }
 
+static ani_object SpringCurve([[maybe_unused]] ani_env* env,
+    ani_double velocity, ani_double mass, ani_double stiffness, ani_double damping)
+{
+    static const char* className = "L@ohos/curves/curves/Curves;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return nullptr;
+    }
+
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+
+    CurvesObj* springCurve = new CurvesObj();
+    springCurve->interpolate = Interpolate;
+    if (OHOS::Ace::LessOrEqual(mass, 0)) {
+        mass = 1.0;
+    }
+    if (OHOS::Ace::LessOrEqual(stiffness, 0)) {
+        stiffness = 1.0;
+    }
+    if (OHOS::Ace::LessOrEqual(damping, 0)) {
+        damping = 1.0;
+    }
+    auto curve = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::SpringCurve>(velocity, mass, stiffness, damping);
+    std::string curveString = curve->ToString();
+
+    springCurve->curveString = curveString;
+    ani_string curveAniStr {};
+    env->String_NewUTF8(curveString.c_str(), curveString.size(), &curveAniStr);
+
+    ani_object obj;
+
+    if (ANI_OK != env->Object_New(cls, ctor, &obj, reinterpret_cast<ani_object>(springCurve))) {
+        return nullptr;
+    }
+
+    if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
+        return obj;
+    }
+    auto page = GetStagingPage(OHOS::Ace::Container::CurrentId());
+    int32_t pageId = -1;
+    if (page) {
+        pageId = page->GetPageId();
+    }
+    springCurve->pageId = pageId;
+
+    ani_object objNew;
+    if (ANI_OK != env->Object_New(cls, ctor, &objNew, reinterpret_cast<ani_object>(springCurve))) {
+        return nullptr;
+    }
+
+    return objNew;
+}
+
+std::string GetSpringResponsiveMotionCurveString(ani_env *env,
+    ani_object response, ani_object dampingFraction, ani_object overlapDuration)
+{
+    float responseValue = OHOS::Ace::ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+    float dampingFractionValue = OHOS::Ace::ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+    float overlapDurationValue = OHOS::Ace::ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+    
+    ani_boolean isUndefinedResponse = true;
+    env->Reference_IsUndefined(response, &isUndefinedResponse);
+    if (!isUndefinedResponse) {
+        ani_double resultResponse;
+        if (ANI_OK == env->Object_CallMethodByName_Double(response, "doubleValue", nullptr, &resultResponse)) {
+            double value = static_cast<double>(resultResponse);
+            responseValue = static_cast<float>(value);
+        }
+    }
+    ani_boolean isUndefinedDampingFraction = true;
+    env->Reference_IsUndefined(dampingFraction, &isUndefinedDampingFraction);
+    if (!isUndefinedDampingFraction) {
+        ani_double resultDampingFraction;
+        if (ANI_OK == env->Object_CallMethodByName_Double(dampingFraction, "doubleValue",
+            nullptr, &resultDampingFraction)) {
+            double value = static_cast<double>(resultDampingFraction);
+            dampingFractionValue = static_cast<float>(value);
+        }
+    }
+    ani_boolean isUndefinedOverlapDuration = true;
+    env->Reference_IsUndefined(overlapDuration, &isUndefinedOverlapDuration);
+    if (!isUndefinedOverlapDuration) {
+        ani_double resultOverlapDuration;
+        if (ANI_OK == env->Object_CallMethodByName_Double(overlapDuration, "doubleValue",
+            nullptr, &resultOverlapDuration)) {
+            double value = static_cast<double>(resultOverlapDuration);
+            overlapDurationValue = static_cast<float>(value);
+        }
+    }
+    if (OHOS::Ace::LessOrEqual(responseValue, 0)) {
+        responseValue = OHOS::Ace::ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
+    }
+    if (OHOS::Ace::LessNotEqual(dampingFractionValue, 0)) {
+        dampingFractionValue = OHOS::Ace::ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
+    }
+    if (OHOS::Ace::LessNotEqual(overlapDurationValue, 0)) {
+        overlapDurationValue = OHOS::Ace::ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
+    }
+    auto curve = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::ResponsiveSpringMotion>(
+        responseValue, dampingFractionValue, overlapDurationValue);
+    return curve->ToString();
+}
+
+static ani_object SpringResponsiveMotion([[maybe_unused]] ani_env *env,
+    ani_object response, ani_object dampingFraction, ani_object overlapDuration)
+{
+    CurvesObj* springResponsiveMotion = new CurvesObj();
+    springResponsiveMotion->interpolate = Interpolate;
+    static const char *className = "L@ohos/curves/curves/Curves;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return nullptr;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    std::string curveString = GetSpringResponsiveMotionCurveString(env, response, dampingFraction, overlapDuration);
+    springResponsiveMotion->curveString = curveString;
+    std::string curveStr = curveString;
+    ani_string curveAniStr;
+    env->String_NewUTF8(curveStr.c_str(), curveStr.size(), &curveAniStr);
+
+    ani_object curve_object;
+    if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(springResponsiveMotion))) {
+        return nullptr;
+    }
+
+    if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
+        return curve_object;
+    }
+    auto page = GetStagingPage(OHOS::Ace::Container::CurrentId());
+    int32_t pageId = -1;
+    if (page) {
+        pageId = page->GetPageId();
+    }
+    springResponsiveMotion->pageId = pageId;
+
+    ani_object curveNew_object;
+    if (ANI_OK != env->Object_New(cls, ctor, &curveNew_object, reinterpret_cast<ani_object>(springResponsiveMotion))) {
+        return nullptr;
+    }
+    return curveNew_object;
+}
+
 static ani_object SpringMotion([[maybe_unused]] ani_env *env,
     ani_object response, ani_object dampingFraction, ani_object overlapDuration)
 {
@@ -262,7 +409,6 @@ static ani_object SpringMotion([[maybe_unused]] ani_env *env,
         return nullptr;
     }
     std::string curveString = GetSpringMotionCurveString(env, response, dampingFraction, overlapDuration);
-    std::cout << "springMotion curveString" << curveString << std::endl;
     springMotion->curveString = curveString;
     std::string curveStr = curveString;
     ani_string curveAniStr;
@@ -420,7 +566,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"cubicBezierCurve", nullptr, reinterpret_cast<void *>(CubicBezierCurve)},
         ani_native_function {"springMotion", nullptr, reinterpret_cast<void *>(SpringMotion)},
         ani_native_function {"initCurve", nullptr, reinterpret_cast<void*>(InitCurve)},
-        ani_native_function {"interpolatingSpring", nullptr, reinterpret_cast<void*>(InterpolatingSpring)}
+        ani_native_function {"interpolatingSpring", nullptr, reinterpret_cast<void*>(InterpolatingSpring)},
+        ani_native_function {"springCurve", nullptr, reinterpret_cast<void*>(SpringCurve)},
+        ani_native_function {"responsiveSpringMotion", nullptr, reinterpret_cast<void*>(SpringResponsiveMotion)}
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         return ANI_ERROR;
