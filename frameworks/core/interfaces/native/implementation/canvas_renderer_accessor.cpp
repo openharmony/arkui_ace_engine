@@ -646,7 +646,6 @@ void RotateImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(angle);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-
     auto rotateAngle = static_cast<double>(Converter::Convert<float>(*angle));
     peerImpl->Rotate(rotateAngle);
 }
@@ -679,7 +678,8 @@ void SetTransform0Impl(Ark_CanvasRenderer peer,
         peerImpl->ResetTransform();
         return;
     }
-    auto param = TransformParam { .scaleX = static_cast<double>(Converter::Convert<float>(*a)),
+    auto param = TransformParam {
+        .scaleX = static_cast<double>(Converter::Convert<float>(*a)),
         .skewX = static_cast<double>(Converter::Convert<float>(*b)),
         .skewY = static_cast<double>(Converter::Convert<float>(*c)),
         .scaleY = static_cast<double>(Converter::Convert<float>(*d)),
