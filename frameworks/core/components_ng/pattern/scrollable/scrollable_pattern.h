@@ -802,9 +802,16 @@ public:
 
     void SetBackToTop(bool backToTop);
 
+    void ResetBackToTop();
+
     bool GetBackToTop() const
     {
         return backToTop_;
+    }
+
+    void UseDefaultBackToTop(bool useDefaultBackToTop)
+    {
+        useDefaultBackToTop_ = useDefaultBackToTop;
     }
 
     void OnStatusBarClick() override;
@@ -1146,6 +1153,7 @@ private:
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
 
     bool backToTop_ = false;
+    bool useDefaultBackToTop_ = true;
 };
 } // namespace OHOS::Ace::NG
 
