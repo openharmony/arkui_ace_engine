@@ -707,7 +707,7 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane, bool forward) co
         child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child));
         auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(child);
-        info_->lanes_[seg][0].startPos -= forward ? adjustOffset.start : adjustOffset.end;
+        info_->lanes_[seg][0].startPos -= forward ? adjustOffset.start : 0;
     } else {
         child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props_, child));
