@@ -19,37 +19,36 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export  { Color, HorizontalAlign, FlexAlign, IlluminatedType } from "@ohos/arkui"
 export enum CheckBoxShape {
     CIRCLE = 0,
     ROUNDED_SQUARE = 1
 }
-// export enum Color {
-//     WHITE = 0,
-//     White = 0,
-//     BLACK = 1,
-//     Black = 1,
-//     BLUE = 2,
-//     Blue = 2,
-//     BROWN = 3,
-//     Brown = 3,
-//     GRAY = 4,
-//     Gray = 4,
-//     GREEN = 5,
-//     Green = 5,
-//     GREY = 6,
-//     Grey = 6,
-//     ORANGE = 7,
-//     Orange = 7,
-//     PINK = 8,
-//     Pink = 8,
-//     RED = 9,
-//     Red = 9,
-//     YELLOW = 10,
-//     Yellow = 10,
-//     TRANSPARENT = 11,
-//     Transparent = 11
-// }
+export enum Color {
+    WHITE = 0,
+    White = 0,
+    BLACK = 1,
+    Black = 1,
+    BLUE = 2,
+    Blue = 2,
+    BROWN = 3,
+    Brown = 3,
+    GRAY = 4,
+    Gray = 4,
+    GREEN = 5,
+    Green = 5,
+    GREY = 6,
+    Grey = 6,
+    ORANGE = 7,
+    Orange = 7,
+    PINK = 8,
+    Pink = 8,
+    RED = 9,
+    Red = 9,
+    YELLOW = 10,
+    Yellow = 10,
+    TRANSPARENT = 11,
+    Transparent = 11
+}
 export enum ColoringStrategy {
     INVERT = "invert",
     AVERAGE = "average",
@@ -308,28 +307,28 @@ export enum Axis {
     HORIZONTAL = 1,
     Horizontal = 1
 }
-// export enum HorizontalAlign {
-//     START = 0,
-//     Start = 0,
-//     CENTER = 1,
-//     Center = 1,
-//     END = 2,
-//     End = 2
-// }
-// export enum FlexAlign {
-//     START = 0,
-//     Start = 0,
-//     CENTER = 1,
-//     Center = 1,
-//     END = 2,
-//     End = 2,
-//     SPACE_BETWEEN = 3,
-//     SpaceBetween = 3,
-//     SPACE_AROUND = 4,
-//     SpaceAround = 4,
-//     SPACE_EVENLY = 5,
-//     SpaceEvenly = 5
-// }
+export enum HorizontalAlign {
+    START = 0,
+    Start = 0,
+    CENTER = 1,
+    Center = 1,
+    END = 2,
+    End = 2
+}
+export enum FlexAlign {
+    START = 0,
+    Start = 0,
+    CENTER = 1,
+    Center = 1,
+    END = 2,
+    End = 2,
+    SPACE_BETWEEN = 3,
+    SpaceBetween = 3,
+    SPACE_AROUND = 4,
+    SpaceAround = 4,
+    SPACE_EVENLY = 5,
+    SpaceEvenly = 5
+}
 export enum ItemAlign {
     AUTO = 0,
     Auto = 0,
@@ -657,14 +656,14 @@ export enum OptionWidthMode {
     FIT_CONTENT = "fit_content",
     FIT_TRIGGER = "fit_trigger"
 }
-// export enum IlluminatedType {
-//     NONE = 0,
-//     BORDER = 1,
-//     CONTENT = 2,
-//     BORDER_CONTENT = 3,
-//     BLOOM_BORDER = 4,
-//     BLOOM_BORDER_CONTENT = 5
-// }
+export enum IlluminatedType {
+    NONE = 0,
+    BORDER = 1,
+    CONTENT = 2,
+    BORDER_CONTENT = 3,
+    BLOOM_BORDER = 4,
+    BLOOM_BORDER_CONTENT = 5
+}
 export enum FoldStatus {
     FOLD_STATUS_UNKNOWN = 0,
     FOLD_STATUS_EXPANDED = 1,

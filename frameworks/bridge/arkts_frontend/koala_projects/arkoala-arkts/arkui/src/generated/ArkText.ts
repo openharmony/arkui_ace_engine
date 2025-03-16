@@ -49,14 +49,13 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./ArkGestureInterfaces"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { TextOverflowOptions, TextSpanType, TextResponseType, TextOptions } from "./ArkTextInterfaces"
+import { TextOverflowOptions, TextAttribute, TextSpanType, TextResponseType, TextOptions } from "./ArkTextInterfaces"
 import { DecorationStyleInterface } from "./ArkStyledStringInterfaces"
 import { TextDataDetectorConfig, FontSettingOptions } from "./ArkTextCommonInterfaces"
 import { EditMenuOptions } from "./ArkEditMenuOptionsMaterialized"
 import { SelectionMenuOptions } from "./ArkRichEditorInterfaces"
-import { TextAttribute } from "@ohos/arkui"
 /** @memo:stable */
-export class ArkTextComponent extends ArkCommonMethodComponent implements TextAttribute {
+export class ArkTextComponent extends ArkCommonMethodComponent {
     getPeer(): ArkTextPeer {
         return (this.peer as ArkTextPeer)
     }

@@ -14,8 +14,7 @@
             "@koalaui/common": ["../../../../../incremental/common/src"],
             "@koalaui/compat": ["../../../../../incremental/compat/src/arkts"],
             "@koalaui/runtime": ["../../../../../incremental/runtime/build/unmemoized/src"],
-            "#helpindexarkui": ["index.ts"],
-            "@ohos/arkui": ["../../../../bridge/declaration/build/unmemoized/src"]
+            "#helpindexarkui": ["index.ts"]
         }
     },
     "include": [

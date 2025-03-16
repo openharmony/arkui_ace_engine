@@ -13,9 +13,6 @@
         "outDir": "./build/junk",
         "baseUrl": ".",
         "paths": {
-            "@ohos/arkui": [
-                "../bridge/declaration/src"
-            ],
             "@koalaui/common": [
                 "../../incremental/common/src"
             ],
@@ -53,7 +50,6 @@
         "../../incremental/tools/panda/arkts/std-lib/global.d.ts"
     ],
     "references": [
-        { "path": "../bridge/declaration" },
         { "path": "../../arkoala/arkui-common" },
         { "path": "../../arkoala/arkui-common/tsconfig-unmemoize.json" },
         { "path": "../../interop" }
