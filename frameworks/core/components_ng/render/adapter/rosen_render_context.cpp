@@ -1093,17 +1093,6 @@ void RosenRenderContext::UpdateFrontBlurStyle(
     SetFrontBlurFilter();
 }
 
-void RosenRenderContext::UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions)
-{
-    CHECK_NULL_VOID(rsNode_);
-    const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckSysOptionsForEffectSame(sysOptions)) {
-        return;
-    }
-    groupProperty->propSysOptionsForForeEffect = sysOptions;
-    rsNode_->SetForegroundEffectDisableSystemAdaptation(sysOptions.disableSystemAdaptation);
-}
-
 void RosenRenderContext::ResetBackBlurStyle()
 {
     const auto& groupProperty = GetOrCreateBackground();
@@ -5397,11 +5386,6 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(
                 std::string("blurDisable:")
                     .append(std::to_string(foregroundProperty->propSysOptionsForBlur->disableSystemAdaptation)));
-        }
-        if (foregroundProperty->propSysOptionsForForeEffect.has_value()) {
-            DumpLog::GetInstance().AddDesc(
-                std::string("foreEffectDisable:")
-                    .append(std::to_string(foregroundProperty->propSysOptionsForForeEffect->disableSystemAdaptation)));
         }
         auto&& graphicProps = GetOrCreateGraphics();
         if (graphicProps->propFgDynamicBrightnessOption.has_value()) {

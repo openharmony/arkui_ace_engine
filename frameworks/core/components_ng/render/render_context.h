@@ -319,7 +319,6 @@ public:
     virtual void UpdateFrontBlurStyle(
         const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions = SysOptions())
     {}
-    virtual void UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions = SysOptions()) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}

@@ -212,7 +212,6 @@ public:
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(
         const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;
-    void UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions = SysOptions()) override;
     void OnForegroundEffectUpdate(float radius) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;

@@ -1702,11 +1702,11 @@ class ForegroundEffectModifier extends ModifierWithKey {
       getUINativeModule().common.resetForegroundEffect(node);
     }
     else {
-      getUINativeModule().common.setForegroundEffect(node, this.value.radius, this.value.disableSystemAdaptation);
+      getUINativeModule().common.setForegroundEffect(node, this.value.radius);
     }
   }
   checkObjectDiff() {
-    return !(this.value.radius === this.stageValue.radius && this.value.disableSystemAdaptation === this.stageValue.disableSystemAdaptation);
+    return !(this.value.radius === this.stageValue.radius);
   }
 }
 ForegroundEffectModifier.identity = Symbol('foregroundEffect');
@@ -3971,15 +3971,8 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BorderImageModifier.identity, BorderImageModifier, value);
     return this;
   }
-  foregroundEffect(value, sysOptions) {
-    let arkForegroundEffect = new ArkForegroundEffect();
-    if (typeof value === 'object') {
-      arkForegroundEffect.radius = value.radius;
-    }
-    if (typeof sysOptions === 'object') {
-      arkForegroundEffect.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
-    }
-    modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, arkForegroundEffect);
+  foregroundEffect(value) {
+    modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, value);
     return this;
   }
   foregroundColor(value) {
@@ -17417,12 +17410,6 @@ class ArkBlurOptions {
   constructor() {
     this.value = undefined;
     this.options = undefined;
-    this.disableSystemAdaptation = undefined;
-  }
-}
-class ArkForegroundEffect {
-  constructor() {
-    this.radius = undefined;
     this.disableSystemAdaptation = undefined;
   }
 }

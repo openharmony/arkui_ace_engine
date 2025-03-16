@@ -298,7 +298,7 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, co
     SetBackgroundBlurStyle(frameNode, bgBlurStyle, sysOptions);
 }
 
-void ViewAbstract::SetForegroundEffect(float radius, const SysOptions& sysOptions)
+void ViewAbstract::SetForegroundEffect(float radius)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -308,7 +308,6 @@ void ViewAbstract::SetForegroundEffect(float radius, const SysOptions& sysOption
     auto target = frameNode->GetRenderContext();
     if (target) {
         target->UpdateForegroundEffect(radius);
-        target->UpdateForegroundEffectDisableSystemAdaptation(sysOptions);
     }
 }
 
@@ -4265,13 +4264,12 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius, const SysOptions& sysOptions)
+void ViewAbstract::SetForegroundEffect(FrameNode* frameNode, float radius)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
         target->UpdateForegroundEffect(radius);
-        target->UpdateForegroundEffectDisableSystemAdaptation(sysOptions);
     }
 }
 
