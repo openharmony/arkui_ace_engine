@@ -1246,7 +1246,7 @@ export class ArcSlider extends ViewV2 {
             Circle.width(this.diameter);
             Circle.height(this.diameter);
             Circle.fill(BLUR_COLOR_DEFAULT);
-            Circle.backdropBlur(this.options.styleOptions.trackBlur);
+            Circle.backdropBlur(this.options.styleOptions.trackBlur, undefined, { disableSystemAdaptation: true });
         }, Circle);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel();

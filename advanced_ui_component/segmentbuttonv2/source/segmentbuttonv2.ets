@@ -807,12 +807,12 @@ struct SimpleSegmentButtonV2 {
         this.ContentLayer()
       }
       .borderRadius(this.getButtonBorderRadius())
-      .backgroundBlurStyle(this.getButtonBackgroundBlurStyle(), this.getButtonBackgroundBlurStyleOptions())
+      .backgroundBlurStyle(this.getButtonBackgroundBlurStyle(), this.getButtonBackgroundBlurStyleOptions(), { disableSystemAdaptation: true })
       .clip(false)
       .direction(this.languageDirection)
     }
     .backgroundColor(this.getButtonBackgroundColor())
-    .backgroundEffect(this.buttonBackgroundEffect)
+    .backgroundEffect(this.buttonBackgroundEffect, { disableSystemAdaptation: true })
     .borderRadius(this.getButtonBorderRadius())
     .clip(false)
     .constraintSize({
@@ -1129,7 +1129,7 @@ export struct MultiCapsuleSegmentButtonV2 {
               languageDirection: this.languageDirection,
             })
               .borderRadius(this.getItemButtonBorderRadius(repeatItem))
-              .backgroundBlurStyle(this.getItemBackgroundBlurStyle(), this.getItemBackgroundBlurStyleOptions())
+              .backgroundBlurStyle(this.getItemBackgroundBlurStyle(), this.getItemBackgroundBlurStyleOptions(), { disableSystemAdaptation: true })
               .direction(this.languageDirection)
           }
           .accessibilityGroup(true)
@@ -1138,7 +1138,7 @@ export struct MultiCapsuleSegmentButtonV2 {
           .accessibilityDescription(this.getItemAccessibilityDescription(repeatItem))
           .accessibilityLevel(repeatItem.item.accessibilityLevel)
           .backgroundColor(this.getItemBackgroundColor(repeatItem))
-          .backgroundEffect(this.itemBackgroundEffect)
+          .backgroundEffect(this.itemBackgroundEffect, { disableSystemAdaptation: true })
           .borderRadius(this.getItemButtonBorderRadius(repeatItem))
           .constraintSize({ minHeight: this.getItemMinHeight() })
           .direction(this.languageDirection)

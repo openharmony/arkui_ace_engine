@@ -2784,7 +2784,8 @@ class CustomDialogContentComponent extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.constraintSize({ maxHeight: this.contentMaxHeight });
-            Column.backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE);
+            Column.backgroundBlurStyle(this.customStyle ?
+                BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true });
             Column.borderRadius(this.customStyle ? {
                 'id': -1,
                 'type': 10002,

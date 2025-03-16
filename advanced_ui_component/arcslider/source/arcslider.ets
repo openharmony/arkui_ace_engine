@@ -1177,7 +1177,7 @@ export struct ArcSlider {
         .width(this.diameter)
         .height(this.diameter)
         .fill(BLUR_COLOR_DEFAULT)
-        .backdropBlur(this.options.styleOptions.trackBlur)
+        .backdropBlur(this.options.styleOptions.trackBlur, undefined, { disableSystemAdaptation: true })
 
       Button()
         .stateEffect(false)
