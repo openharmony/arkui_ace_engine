@@ -174,6 +174,7 @@ void Scrollable::InitPanRecognizerNG()
     SetOnActionUpdate();
     SetOnActionEnd();
     SetOnActionCancel();
+    SetPanEndCallback();
 }
 
 void Scrollable::SetOnActionStart()
@@ -205,18 +206,37 @@ void Scrollable::SetOnActionEnd()
         auto scroll = weakScroll.Upgrade();
         CHECK_NULL_VOID(scroll);
         scroll->HandleDragEnd(info);
-        if (scroll->panActionEndEvents_.empty()) {
-            scroll->isDragging_ = false;
-            return;
-        }
-        std::for_each(scroll->panActionEndEvents_.begin(), scroll->panActionEndEvents_.end(),
-            [info](GestureEventFunc& event) {
-                auto gestureInfo = info;
-                event(gestureInfo);
-            });
+        scroll->ProcessPanActionEndEvents(info);
         scroll->isDragging_ = false;
     };
     panRecognizerNG_->SetOnActionEnd(actionEnd);
+}
+
+void Scrollable::SetPanEndCallback()
+{
+    CHECK_NULL_VOID(panRecognizerNG_);
+    auto panEndCallback = [weakScroll = AceType::WeakClaim(this)](GestureEvent& info) {
+        auto scroll = weakScroll.Upgrade();
+        if (scroll) {
+            auto tempInfo = info;
+            tempInfo.SetMainDelta(0.0);
+            tempInfo.SetMainVelocity(0.0);
+            ACE_SCOPED_TRACE("Trigger PanEndCallback, id:%d, tag:%s", scroll->nodeId_, scroll->nodeTag_.c_str());
+            scroll->HandleDragEnd(tempInfo, true);
+            scroll->ProcessPanActionEndEvents(tempInfo);
+            scroll->isDragging_ = false;
+        }
+    };
+    panRecognizerNG_->SetPanEndCallback(panEndCallback);
+}
+
+void Scrollable::ProcessPanActionEndEvents(const GestureEvent& info)
+{
+    CHECK_NULL_VOID(!panActionEndEvents_.empty());
+    std::for_each(panActionEndEvents_.begin(), panActionEndEvents_.end(), [info](GestureEventFunc& event) {
+        auto gestureInfo = info;
+        event(gestureInfo);
+    });
 }
 
 void Scrollable::SetOnActionCancel()
@@ -745,7 +765,7 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
     currentVelocity_ = std::clamp(currentVelocity_, -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
 }
 
-void Scrollable::HandleDragEnd(const GestureEvent& info)
+void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
 {
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s, "
         "dragCnt:%{public}d", info.GetMainVelocity(), nodeId_, nodeTag_.c_str(), dragCount_);
@@ -755,12 +775,14 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         return;
     }
     // avoid no render frame when drag end
-    if (NearZero(info.GetMainDelta())) {
-        auto tempInfo = info;
-        tempInfo.SetMainDelta(lastMainDelta_);
-        HandleDragUpdate(tempInfo);
-    } else {
-        HandleDragUpdate(info);
+    if (!isFromPanEnd) {
+        if (NearZero(info.GetMainDelta())) {
+            auto tempInfo = info;
+            tempInfo.SetMainDelta(lastMainDelta_);
+            HandleDragUpdate(tempInfo);
+        } else {
+            HandleDragUpdate(info);
+        }
     }
     ReportToDragFRCScene(info.GetMainVelocity(), NG::SceneStatus::END);
     bool isScrollFromTouchPad = info.GetSourceTool() == SourceTool::TOUCHPAD;
