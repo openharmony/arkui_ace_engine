@@ -80,11 +80,11 @@ std::vector<std::vector<double>> ARRAY_NUMBER_TEST_PLAN = {
     {},
 };
 std::vector<std::tuple<Ark_String, std::string>> ARK_STRING_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("string text", Converter::FC), "string text" },
-    { Converter::ArkValue<Ark_String>("", Converter::FC), "" },
-    { Converter::ArkValue<Ark_String>("123", Converter::FC), "123" },
-    { Converter::ArkValue<Ark_String>("value %2", Converter::FC), "value %2" },
-    { Converter::ArkValue<Ark_String>("echo(%10)", Converter::FC), "echo(%10)" }
+    { Converter::ArkValue<Ark_String>("string text"), "string text" },
+    { Converter::ArkValue<Ark_String>(""), "" },
+    { Converter::ArkValue<Ark_String>("123"), "123" },
+    { Converter::ArkValue<Ark_String>("value %2"), "value %2" },
+    { Converter::ArkValue<Ark_String>("echo(%10)"), "echo(%10)" }
 };
 std::vector<std::tuple<Opt_Number, std::optional<double>>> OPT_NUMBER_TEST_PLAN = {
     { Converter::ArkValue<Opt_Number>(100), 100 },
@@ -95,26 +95,26 @@ std::vector<std::tuple<Opt_Number, std::optional<double>>> OPT_NUMBER_TEST_PLAN 
     { Converter::ArkValue<Opt_Number>(Ark_Empty()), std::nullopt },
 };
 std::vector<std::tuple<Ark_String, CompositeOperation>> ARK_COMPOSITE_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("source-over", Converter::FC), CompositeOperation::SOURCE_OVER },
-    { Converter::ArkValue<Ark_String>("source-atop", Converter::FC), CompositeOperation::SOURCE_ATOP },
-    { Converter::ArkValue<Ark_String>("source-in", Converter::FC), CompositeOperation::SOURCE_IN },
-    { Converter::ArkValue<Ark_String>("source-out", Converter::FC), CompositeOperation::SOURCE_OUT },
-    { Converter::ArkValue<Ark_String>("destination-over", Converter::FC), CompositeOperation::DESTINATION_OVER },
-    { Converter::ArkValue<Ark_String>("destination-atop", Converter::FC), CompositeOperation::DESTINATION_ATOP },
-    { Converter::ArkValue<Ark_String>("destination-in", Converter::FC), CompositeOperation::DESTINATION_IN },
-    { Converter::ArkValue<Ark_String>("destination-out", Converter::FC), CompositeOperation::DESTINATION_OUT },
-    { Converter::ArkValue<Ark_String>("lighter", Converter::FC), CompositeOperation::LIGHTER },
-    { Converter::ArkValue<Ark_String>("copy", Converter::FC), CompositeOperation::COPY },
-    { Converter::ArkValue<Ark_String>("xor", Converter::FC), CompositeOperation::XOR },
-    { Converter::ArkValue<Ark_String>("", Converter::FC), static_cast<CompositeOperation>(-1) },
-    { Converter::ArkValue<Ark_String>("unknown value", Converter::FC), static_cast<CompositeOperation>(-1) },
+    { Converter::ArkValue<Ark_String>("source-over"), CompositeOperation::SOURCE_OVER },
+    { Converter::ArkValue<Ark_String>("source-atop"), CompositeOperation::SOURCE_ATOP },
+    { Converter::ArkValue<Ark_String>("source-in"), CompositeOperation::SOURCE_IN },
+    { Converter::ArkValue<Ark_String>("source-out"), CompositeOperation::SOURCE_OUT },
+    { Converter::ArkValue<Ark_String>("destination-over"), CompositeOperation::DESTINATION_OVER },
+    { Converter::ArkValue<Ark_String>("destination-atop"), CompositeOperation::DESTINATION_ATOP },
+    { Converter::ArkValue<Ark_String>("destination-in"), CompositeOperation::DESTINATION_IN },
+    { Converter::ArkValue<Ark_String>("destination-out"), CompositeOperation::DESTINATION_OUT },
+    { Converter::ArkValue<Ark_String>("lighter"), CompositeOperation::LIGHTER },
+    { Converter::ArkValue<Ark_String>("copy"), CompositeOperation::COPY },
+    { Converter::ArkValue<Ark_String>("xor"), CompositeOperation::XOR },
+    { Converter::ArkValue<Ark_String>(""), static_cast<CompositeOperation>(-1) },
+    { Converter::ArkValue<Ark_String>("unknown value"), static_cast<CompositeOperation>(-1) },
 };
 std::vector<std::tuple<Ark_String, Color>> ARK_STRING_COLOR_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("#ff0000ff", Converter::FC), Color(0xff0000ff) },
-    { Converter::ArkValue<Ark_String>("#00000000", Converter::FC), Color(0x00000000) },
-    { Converter::ArkValue<Ark_String>("#80ffffff", Converter::FC), Color(0x80ffffff) },
-    { Converter::ArkValue<Ark_String>("", Converter::FC), Color::BLACK },
-    { Converter::ArkValue<Ark_String>("invalid color", Converter::FC), Color::BLACK },
+    { Converter::ArkValue<Ark_String>("#ff0000ff"), Color(0xff0000ff) },
+    { Converter::ArkValue<Ark_String>("#00000000"), Color(0x00000000) },
+    { Converter::ArkValue<Ark_String>("#80ffffff"), Color(0x80ffffff) },
+    { Converter::ArkValue<Ark_String>(""), Color::BLACK },
+    { Converter::ArkValue<Ark_String>("invalid color"), Color::BLACK },
 };
 std::vector<std::tuple<Ark_Boolean, bool>> ARK_BOOL_TEST_PLAN = {
     { Converter::ArkValue<Ark_Boolean>(EXPECTED_FALSE), EXPECTED_FALSE },
@@ -195,60 +195,60 @@ std::vector<std::pair<std::string, std::vector<std::string>>>  FONT_FAMILIES_TES
     { "invalid", {} },
 };
 std::vector<std::tuple<Ark_String, std::string>> IMAGE_SMOOTHING_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("low", Converter::FC), "low" },
-    { Converter::ArkValue<Ark_String>("medium", Converter::FC), "medium" },
-    { Converter::ArkValue<Ark_String>("high", Converter::FC), "high" },
-    { Converter::ArkValue<Ark_String>("", Converter::FC), INVALID_STRING_VALUE },
-    { Converter::ArkValue<Ark_String>("invalid", Converter::FC), INVALID_STRING_VALUE }
+    { Converter::ArkValue<Ark_String>("low"), "low" },
+    { Converter::ArkValue<Ark_String>("medium"), "medium" },
+    { Converter::ArkValue<Ark_String>("high"), "high" },
+    { Converter::ArkValue<Ark_String>(""), INVALID_STRING_VALUE },
+    { Converter::ArkValue<Ark_String>("invalid"), INVALID_STRING_VALUE }
 };
 std::vector<std::tuple<Ark_String, LineCapStyle>> LINE_CAP_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("butt", Converter::FC), LineCapStyle::BUTT },
-    { Converter::ArkValue<Ark_String>("round", Converter::FC), LineCapStyle::ROUND },
-    { Converter::ArkValue<Ark_String>("square", Converter::FC), LineCapStyle::SQUARE },
-    { Converter::ArkValue<Ark_String>("", Converter::FC), LineCapStyle::BUTT },
-    { Converter::ArkValue<Ark_String>("invalid", Converter::FC), LineCapStyle::BUTT }
+    { Converter::ArkValue<Ark_String>("butt"), LineCapStyle::BUTT },
+    { Converter::ArkValue<Ark_String>("round"), LineCapStyle::ROUND },
+    { Converter::ArkValue<Ark_String>("square"), LineCapStyle::SQUARE },
+    { Converter::ArkValue<Ark_String>(""), LineCapStyle::BUTT },
+    { Converter::ArkValue<Ark_String>("invalid"), LineCapStyle::BUTT }
 };
 std::vector<std::tuple<Ark_String, LineJoinStyle>> LINE_JOIN_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("bevel", Converter::FC), LineJoinStyle::BEVEL },
-    { Converter::ArkValue<Ark_String>("miter", Converter::FC), LineJoinStyle::MITER },
-    { Converter::ArkValue<Ark_String>("round", Converter::FC), LineJoinStyle::ROUND },
-    { Converter::ArkValue<Ark_String>("", Converter::FC), LineJoinStyle::MITER },
-    { Converter::ArkValue<Ark_String>("invalid", Converter::FC), LineJoinStyle::MITER }
+    { Converter::ArkValue<Ark_String>("bevel"), LineJoinStyle::BEVEL },
+    { Converter::ArkValue<Ark_String>("miter"), LineJoinStyle::MITER },
+    { Converter::ArkValue<Ark_String>("round"), LineJoinStyle::ROUND },
+    { Converter::ArkValue<Ark_String>(""), LineJoinStyle::MITER },
+    { Converter::ArkValue<Ark_String>("invalid"), LineJoinStyle::MITER }
 };
 std::vector<std::tuple<Opt_String, Ace::CanvasFillRule>> FILL_RULE_TEST_PLAN = {
-    { Converter::ArkValue<Opt_String>("evenodd", Converter::FC), Ace::CanvasFillRule::EVENODD },
-    { Converter::ArkValue<Opt_String>("nonzero", Converter::FC), Ace::CanvasFillRule::NONZERO },
-    { Converter::ArkValue<Opt_String>("invalid", Converter::FC), Ace::CanvasFillRule::NONZERO },
-    { Converter::ArkValue<Opt_String>("", Converter::FC), Ace::CanvasFillRule::NONZERO },
-    { Converter::ArkValue<Opt_String>(Ark_Empty(), Converter::FC), Ace::CanvasFillRule::NONZERO }
+    { Converter::ArkValue<Opt_String>("evenodd"), Ace::CanvasFillRule::EVENODD },
+    { Converter::ArkValue<Opt_String>("nonzero"), Ace::CanvasFillRule::NONZERO },
+    { Converter::ArkValue<Opt_String>("invalid"), Ace::CanvasFillRule::NONZERO },
+    { Converter::ArkValue<Opt_String>(""), Ace::CanvasFillRule::NONZERO },
+    { Converter::ArkValue<Opt_String>(Ark_Empty()), Ace::CanvasFillRule::NONZERO }
 };
 std::vector<std::tuple<Ark_String, Ace::TextDirection>> DIRECTION_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("ltr", Converter::FC), Ace::TextDirection::LTR },
-    { Converter::ArkValue<Ark_String>("rtl", Converter::FC), Ace::TextDirection::RTL },
-    { Converter::ArkValue<Ark_String>("inherit", Converter::FC), Ace::TextDirection::INHERIT },
-    { Converter::ArkValue<Ark_String>("auto", Converter::FC), Ace::TextDirection::AUTO },
-    { Converter::ArkValue<Ark_String>("invalid", Converter::FC), Ace::TextDirection::LTR },
-    { Converter::ArkValue<Ark_String>("", Converter::FC), Ace::TextDirection::LTR },
+    { Converter::ArkValue<Ark_String>("ltr"), Ace::TextDirection::LTR },
+    { Converter::ArkValue<Ark_String>("rtl"), Ace::TextDirection::RTL },
+    { Converter::ArkValue<Ark_String>("inherit"), Ace::TextDirection::INHERIT },
+    { Converter::ArkValue<Ark_String>("auto"), Ace::TextDirection::AUTO },
+    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextDirection::LTR },
+    { Converter::ArkValue<Ark_String>(""), Ace::TextDirection::LTR },
 };
 std::vector<std::tuple<Ark_String, Ace::TextAlign>> TEXT_ALIGN_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("center", Converter::FC), Ace::TextAlign::CENTER },
-    { Converter::ArkValue<Ark_String>("end", Converter::FC), Ace::TextAlign::END },
-    { Converter::ArkValue<Ark_String>("justify", Converter::FC), Ace::TextAlign::JUSTIFY },
-    { Converter::ArkValue<Ark_String>("left", Converter::FC), Ace::TextAlign::LEFT },
-    { Converter::ArkValue<Ark_String>("right", Converter::FC), Ace::TextAlign::RIGHT },
-    { Converter::ArkValue<Ark_String>("start", Converter::FC), Ace::TextAlign::START },
-    { Converter::ArkValue<Ark_String>("invalid", Converter::FC), Ace::TextAlign::CENTER },
-    { Converter::ArkValue<Ark_String>("", Converter::FC), Ace::TextAlign::CENTER },
+    { Converter::ArkValue<Ark_String>("center"), Ace::TextAlign::CENTER },
+    { Converter::ArkValue<Ark_String>("end"), Ace::TextAlign::END },
+    { Converter::ArkValue<Ark_String>("justify"), Ace::TextAlign::JUSTIFY },
+    { Converter::ArkValue<Ark_String>("left"), Ace::TextAlign::LEFT },
+    { Converter::ArkValue<Ark_String>("right"), Ace::TextAlign::RIGHT },
+    { Converter::ArkValue<Ark_String>("start"), Ace::TextAlign::START },
+    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextAlign::CENTER },
+    { Converter::ArkValue<Ark_String>(""), Ace::TextAlign::CENTER },
 };
 std::vector<std::tuple<Ark_String, TextBaseline>> TEXT_BASE_LINE_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("alphabetic", Converter::FC), Ace::TextBaseline::ALPHABETIC },
-    { Converter::ArkValue<Ark_String>("bottom", Converter::FC), Ace::TextBaseline::BOTTOM },
-    { Converter::ArkValue<Ark_String>("hanging", Converter::FC), Ace::TextBaseline::HANGING },
-    { Converter::ArkValue<Ark_String>("ideographic", Converter::FC), Ace::TextBaseline::IDEOGRAPHIC },
-    { Converter::ArkValue<Ark_String>("middle", Converter::FC), Ace::TextBaseline::MIDDLE },
-    { Converter::ArkValue<Ark_String>("top", Converter::FC), Ace::TextBaseline::TOP },
-    { Converter::ArkValue<Ark_String>("invalid", Converter::FC), Ace::TextBaseline::ALPHABETIC },
-    { Converter::ArkValue<Ark_String>("", Converter::FC), Ace::TextBaseline::ALPHABETIC },
+    { Converter::ArkValue<Ark_String>("alphabetic"), Ace::TextBaseline::ALPHABETIC },
+    { Converter::ArkValue<Ark_String>("bottom"), Ace::TextBaseline::BOTTOM },
+    { Converter::ArkValue<Ark_String>("hanging"), Ace::TextBaseline::HANGING },
+    { Converter::ArkValue<Ark_String>("ideographic"), Ace::TextBaseline::IDEOGRAPHIC },
+    { Converter::ArkValue<Ark_String>("middle"), Ace::TextBaseline::MIDDLE },
+    { Converter::ArkValue<Ark_String>("top"), Ace::TextBaseline::TOP },
+    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextBaseline::ALPHABETIC },
+    { Converter::ArkValue<Ark_String>(""), Ace::TextBaseline::ALPHABETIC },
 };
 class MockPixelMap : public PixelMap {
 public:

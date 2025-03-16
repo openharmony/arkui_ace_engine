@@ -24,8 +24,6 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRenderingContext2DAccessor {
 const Ark_Number ARK_ERROR_VALUE = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(-1);
-const auto EMPTY_STRING = "";
-const Ark_String ARK_EMPTY_STRING = Converter::ArkValue<Ark_String>(EMPTY_STRING, Converter::FC);
 
 void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
 {
@@ -36,7 +34,7 @@ void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
 }
 Ark_CanvasRenderingContext2D CtorImpl(const Opt_RenderingContextSettings* settings)
 {
-    CHECK_NULL_RETURN(settings, nullptr);
+    CHECK_NULL_RETURN(settings, {});
     auto peerImpl = Referenced::MakeRefPtr<CanvasRenderingContext2DPeerImpl>();
     peerImpl->IncRefCount();
     auto optSettings = Converter::OptConvert<Ark_RenderingContextSettings>(*settings);
@@ -51,11 +49,11 @@ Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
                          const Opt_String* type,
                          const Opt_Float32* quality)
 {
-    CHECK_NULL_RETURN(peer, ARK_EMPTY_STRING);
+    CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, ARK_EMPTY_STRING);
-    CHECK_NULL_RETURN(type, ARK_EMPTY_STRING);
-    CHECK_NULL_RETURN(quality, ARK_EMPTY_STRING);
+    CHECK_NULL_RETURN(peerImpl, {});
+    CHECK_NULL_RETURN(type, {});
+    CHECK_NULL_RETURN(quality, {});
     auto optType = Converter::OptConvert<std::string>(*type);
     auto optQuality = Converter::OptConvert<float>(*quality);
     auto result = peerImpl->ToDataURL(optType, optQuality);
