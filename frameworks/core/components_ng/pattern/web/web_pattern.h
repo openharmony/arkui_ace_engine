@@ -755,6 +755,9 @@ public:
     
     std::string GetCurrentLanguage() override;
 
+    void RegisterSurfaceDensityCallback();
+    void SetSurfaceDensity(double density);
+
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -1209,6 +1212,8 @@ private:
     int64_t lastWidth_ = 0L;
     bool dragWindowFlag_ = false;
     bool isSetMouseDragMonitorState = false;
+    double density_ = 0.0;
+    int32_t densityCallbackId_ = 0;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
 

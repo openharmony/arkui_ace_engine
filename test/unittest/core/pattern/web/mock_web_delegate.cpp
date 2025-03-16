@@ -674,6 +674,7 @@ void WebDelegate::OnWebviewHide() {}
 void WebDelegate::OnWebviewShow() {}
 void WebDelegate::OnRenderToForeground() {}
 void WebDelegate::OnRenderToBackground() {}
+void WebDelegate::SetSurfaceDensity(const double& density) {}
 void WebDelegate::OnOnlineRenderToForeground() {}
 void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should) {}
 void WebDelegate::NotifyMemoryLevel(int32_t level) {}
