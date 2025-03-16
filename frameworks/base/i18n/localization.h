@@ -130,7 +130,7 @@ public:
         return hasZero;
     }
 
-    bool IsInit()
+    bool IsInit() const
     {
         std::lock_guard<std::mutex> lock(mutex_);
         return isInit_;

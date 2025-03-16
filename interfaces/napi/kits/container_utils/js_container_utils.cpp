@@ -37,6 +37,7 @@ static napi_value JSCreateContainerWithoutWindow(napi_env env, napi_callback_inf
     if (argc != 1) {
         LOGE("Wrong arg count.");
         NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        napi_close_handle_scope(env, scope);
         return result;
     }
 
@@ -44,6 +45,7 @@ static napi_value JSCreateContainerWithoutWindow(napi_env env, napi_callback_inf
     // There is no napi context in previewer, no need to check ..
     if (napi_unwrap(env, argv, &context) != napi_ok || !context) {
         NapiThrow(env, "Invalid parameter type of context.", ERROR_CODE_PARAM_INVALID);
+        napi_close_handle_scope(env, scope);
         return result;
     }
 #endif
@@ -51,11 +53,15 @@ static napi_value JSCreateContainerWithoutWindow(napi_env env, napi_callback_inf
     auto container = OHOS::Ace::Platform::WindowFreeContainer::CreateWindowFreeContainer(env, context);
     if (!container) {
         NapiThrow(env, "Create container without window failed.", ERROR_CODE_INTERNAL_ERROR);
+        napi_close_handle_scope(env, scope);
         return result;
     }
 
     auto frontend = container->GetFrontend();
-    CHECK_NULL_RETURN(frontend, result);
+    if (!frontend) {
+        napi_close_handle_scope(env, scope);
+        return result;
+    }
     result = frontend->GetContextValue();
 
     napi_close_handle_scope(env, scope);
