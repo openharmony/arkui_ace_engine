@@ -46,6 +46,7 @@ public:
     void HasUserDefinedOpacity() override {};
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override {};
     void SetDigitalCrownSensitivity(int32_t value) override {};
+    void UpdateUserSetSelectColor() override {};
 };
 
 class DatePickerDialogModelImpl : public DatePickerDialogModel {

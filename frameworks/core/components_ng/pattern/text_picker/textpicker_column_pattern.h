@@ -401,11 +401,6 @@ public:
         return isHover_;
     }
 
-    void UpdateUserSetSelectColor(void)
-    {
-        isUserSetSelectColor_ = true;
-    }
-
     int32_t GetOverScrollDeltaIndex() const;
     void SetCanLoop(bool isLoop);
 
@@ -422,6 +417,7 @@ public:
     void SetSelectedMarkListener(std::function<void(int& selectedColumnId)>& listener);
     void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const int strColumnId);
+    void UpdateUserSetSelectColor(void);
 #ifdef SUPPORT_DIGITAL_CROWN
     int32_t& GetSelectedColumnId();
     bool IsCrownEventEnded();

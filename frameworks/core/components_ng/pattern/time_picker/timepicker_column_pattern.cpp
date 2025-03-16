@@ -1660,6 +1660,16 @@ void TimePickerColumnPattern::GetAnimationColor(uint32_t index, uint32_t showCou
     }
 }
 
+void TimePickerColumnPattern::UpdateUserSetSelectColor()
+{
+    isUserSetSelectColor_ = true;
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    UpdateSelectedTextColor(pickerTheme);
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 std::string& TimePickerColumnPattern::GetSelectedColumnId()
 {

@@ -94,6 +94,7 @@ public:
     void SetDisableTextStyleAnimation(const bool value) override;
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override;
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
+    void UpdateUserSetSelectColor() override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
