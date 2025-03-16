@@ -215,6 +215,10 @@ public:
 
     std::vector<int32_t> GetAllPathIndex() override;
 
+    std::vector<RefPtr<MockNavPathInfo>> MockGetPathStack();
+
+    void MockSetPathStack(std::vector<RefPtr<MockNavPathInfo>>& setPathArray, bool animated = true);
+
     void SetIsEntryByIndex(int32_t index, bool isEntry) override;
 
     // ============================ operation above is for mock NavPathStack in arkTS ============================
