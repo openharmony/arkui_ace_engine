@@ -83,6 +83,7 @@ foreach(item, ace_platforms) {
       "web_accessibility_property_test.cpp",
       "web_content_modifier_test.cpp",
       "web_context_select_overlay_test.cpp",
+      "web_select_overlay_test.cpp",
     ]
     if (defined(config.defines)) {
       defines = config.defines
