@@ -173,6 +173,7 @@ void LazyGridLayoutInfo::SetLanes(int32_t lanes)
         updatedEnd_ = -1;
         cachedUpdatedStart_ = INT_MAX;
         cachedUpdatedEnd_ = -1;
+        estimateItemSize_ = -1.0f;
     }
     lanes_ = lanes;
 }
