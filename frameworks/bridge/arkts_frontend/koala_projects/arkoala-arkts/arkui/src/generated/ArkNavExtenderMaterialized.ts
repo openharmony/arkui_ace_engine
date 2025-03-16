@@ -34,7 +34,7 @@ export class NavExtender {
     }
     public static syncStack(peer: NavPathStack): void {
         const peer_casted = peer as (NavPathStack)
-        NavExtender.syncStack_serialize(peer_casted)
+        // NavExtender.syncStack_serialize(peer_casted)
         return
     }
     public static checkNeedCreate(navigation: KPointer, index: int32): boolean {

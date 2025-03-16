@@ -4308,7 +4308,7 @@ export class TypeChecker {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static ControlSize_ToOrdinal(value: ControlSize): int32 {
-        return value as int32
+        return 0;// TODO: value as int32
     }
     static ControlSize_FromOrdinal(ordinal: int32): ControlSize {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
@@ -4578,7 +4578,7 @@ export class TypeChecker {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static ColoringStrategy_ToOrdinal(value: ColoringStrategy): int32 {
-        return value as int32
+        return 0 // TODO: value as int32
     }
     static ColoringStrategy_FromOrdinal(ordinal: int32): ColoringStrategy {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
@@ -4848,7 +4848,7 @@ export class TypeChecker {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static ArrowPointPosition_ToOrdinal(value: ArrowPointPosition): int32 {
-        return value as int32
+        return 0 // TODO: value as int32
     }
     static ArrowPointPosition_FromOrdinal(ordinal: int32): ArrowPointPosition {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
@@ -4956,7 +4956,7 @@ export class TypeChecker {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static OptionWidthMode_ToOrdinal(value: OptionWidthMode): int32 {
-        return value as int32
+        return 0 // TODO: value as int32
     }
     static OptionWidthMode_FromOrdinal(ordinal: int32): OptionWidthMode {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
@@ -5160,7 +5160,7 @@ export class TypeChecker {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static DataOperationType_ToOrdinal(value: DataOperationType): int32 {
-        return value as int32
+        return 0 // TODO: value as int32
     }
     static DataOperationType_FromOrdinal(ordinal: int32): DataOperationType {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
@@ -5358,19 +5358,19 @@ export class TypeChecker {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static PanelHeight_ToOrdinal(value: PanelHeight): int32 {
-        return value as int32
+        return 0 // TODO: value as int32
     }
     static PanelHeight_FromOrdinal(ordinal: int32): PanelHeight {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static ParticleType_ToOrdinal(value: ParticleType): int32 {
-        return value as int32
+        return 0 // TODO: value as int32
     }
     static ParticleType_FromOrdinal(ordinal: int32): ParticleType {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static ParticleEmitterShape_ToOrdinal(value: ParticleEmitterShape): int32 {
-        return value as int32
+        return 0 // value as int32
     }
     static ParticleEmitterShape_FromOrdinal(ordinal: int32): ParticleEmitterShape {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
@@ -5382,7 +5382,7 @@ export class TypeChecker {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static ParticleUpdater_ToOrdinal(value: ParticleUpdater): int32 {
-        return value as int32
+        return 0 // value as int32
     }
     static ParticleUpdater_FromOrdinal(ordinal: int32): ParticleUpdater {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
@@ -5814,7 +5814,7 @@ export class TypeChecker {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static ProtectedResourceType_ToOrdinal(value: ProtectedResourceType): int32 {
-        return value as int32
+        return 0 // TODO: value as int32
     }
     static ProtectedResourceType_FromOrdinal(ordinal: int32): ProtectedResourceType {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
