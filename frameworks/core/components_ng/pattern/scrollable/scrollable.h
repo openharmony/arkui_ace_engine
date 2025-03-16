@@ -192,7 +192,7 @@ public:
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info, bool isFromPanEnd = false);
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
@@ -569,6 +569,8 @@ private:
     void SetOnActionUpdate();
     void SetOnActionEnd();
     void SetOnActionCancel();
+    void SetPanEndCallback();
+    void ProcessPanActionEndEvents(const GestureEvent& info);
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position, int32_t source = SCROLL_FROM_ANIMATION);
