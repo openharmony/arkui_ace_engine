@@ -489,10 +489,12 @@ void ListItemDragManager::HandleDragEndAnimation()
 
 void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
 {
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHotZoneScrollCallback(nullptr);
     if (scrolling_) {
-        auto parent = listNode_.Upgrade();
-        CHECK_NULL_VOID(parent);
-        auto pattern = parent->GetPattern<ListPattern>();
         pattern->HandleLeaveHotzoneEvent();
         scrolling_ = false;
     }
@@ -508,6 +510,15 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
 void ListItemDragManager::HandleOnItemDragCancel()
 {
     HandleDragEndAnimation();
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHotZoneScrollCallback(nullptr);
+    if (scrolling_) {
+        pattern->HandleLeaveHotzoneEvent();
+        scrolling_ = false;
+    }
 }
 
 int32_t ListItemDragManager::GetIndex() const
