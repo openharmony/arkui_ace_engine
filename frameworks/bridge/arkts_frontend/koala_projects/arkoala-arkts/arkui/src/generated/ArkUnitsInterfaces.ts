@@ -23,16 +23,14 @@ import { Resource } from "./ArkResourceInterfaces"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
 import { BorderStyle, Color, FontWeight, FontStyle } from "./ArkEnumsInterfaces"
 import { OutlineStyle } from "./ArkCommonInterfaces"
-import { Length, PX, VP, FP, LPX, Percentage, Dimension, ResourceColor } from "@ohos/arkui"
-export { Length, PX, VP, FP, LPX, Percentage, Dimension, ResourceColor } from "@ohos/arkui"
-// export type Length = string | number | Resource;
-// export type PX = string;
-// export type VP = string | number;
-// export type FP = string;
-// export type LPX = string;
-// export type Percentage = string;
+export type Length = string | number | Resource;
+export type PX = string;
+export type VP = string | number;
+export type FP = string;
+export type LPX = string;
+export type Percentage = string;
 export type Degree = string;
-// export type Dimension = PX | VP | FP | LPX | Percentage | Resource;
+export type Dimension = PX | VP | FP | LPX | Percentage | Resource;
 export type ResourceStr = string | Resource;
 export interface Padding {
     top?: Length;
@@ -113,7 +111,7 @@ export interface Offset {
     dx: Length;
     dy: Length;
 }
-// export type ResourceColor = Color | number | string | Resource;
+export type ResourceColor = Color | number | string | Resource;
 export interface LengthConstrain {
     minLength: Length;
     maxLength: Length;
