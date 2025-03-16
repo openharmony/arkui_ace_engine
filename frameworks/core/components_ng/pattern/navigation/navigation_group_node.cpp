@@ -1151,14 +1151,7 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
         preContext->UpdateZIndex(0);
         return;
     }
-    auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
-    if (shallowBuilder) {
-        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-    }
-    // remove old navdestination node
-    if (navDestinationNode->GetContentNode()) {
-        navDestinationNode->GetContentNode()->Clean();
-    }
+    navDestinationNode->CleanContent();
     auto parent = AceType::DynamicCast<FrameNode>(preNode->GetParent());
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(preNode);
@@ -1464,14 +1457,7 @@ void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
         if (!navDestinationPattern) {
             continue;
         }
-        auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
-        if (shallowBuilder) {
-            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-        }
-        auto contentNode = navDestination->GetContentNode();
-        if (contentNode) {
-            contentNode->Clean();
-        }
+        navDestination->CleanContent();
         parent->RemoveChild(navDestination);
     }
     hideNodes_.clear();
@@ -1488,14 +1474,7 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
         navDestinationPattern->SetIsOnShow(false);
     }
     pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
-    auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
-    if (shallowBuilder) {
-        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-    }
-    auto contentNode = navDestination->GetContentNode();
-    if (contentNode) {
-        contentNode->Clean();
-    }
+    navDestination->CleanContent();
     contentNode_->RemoveChild(navDestination, true);
 }
 
