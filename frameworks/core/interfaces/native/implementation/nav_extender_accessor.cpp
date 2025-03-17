@@ -29,25 +29,32 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
     auto stack = peer;
     CHECK_NULL_VOID(stack);
     auto updater = [callback = CallbackHelper(*callback)]() {
-        callback.Invoke();
+        Converter::ConvContext ctx;
+        auto name = Converter::ArkValue<Ark_String>("", &ctx);
+        callback.Invoke(name);
     };
     stack->SetUpdateCallback(std::move(updater));
 }
 void SyncStackImpl(Ark_NavPathStack peer)
 {
 }
-Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer, Ark_Int32 flag)
+Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
+                                Ark_Int32 index)
 {
     return {};
 }
-void SetNavigationOptionsImpl(Ark_NativePointer peer, Ark_NavPathStack pathStack)
-{
-}
-Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation, Ark_Int32 index)
+Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,
+                                       Ark_Int32 flag)
 {
     return {};
 }
-void SetNavDestinationNodeImpl(Ark_NavPathStack pathStack, Ark_Int32 index, Ark_NativePointer node)
+void SetNavigationOptionsImpl(Ark_NativePointer navigation,
+                              Ark_NavPathStack stack)
+{
+}
+void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
+                               Ark_Int32 index,
+                               Ark_NativePointer node)
 {
 }
 } // NavExtenderAccessor

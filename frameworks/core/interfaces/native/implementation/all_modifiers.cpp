@@ -73,12 +73,12 @@ namespace GeneratedApiImpl {
     void SetChildTotalCount(Ark_NodeHandle node, Ark_Int32 totalCount);
     void ShowCrash(Ark_CharPtr message);
     void SetCallbackMethod(GENERATED_Ark_APICallbackMethod* method);
-    void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event);
 } // namespace OHOS::Ace::NG::GeneratedApiImpl
 
 namespace GeneratedBridge {
     Ark_NodeHandle CreateNode(GENERATED_Ark_NodeType type, Ark_Int32 id, Ark_Int32 flags);
 }
+
 
 }
 
@@ -205,6 +205,7 @@ const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor();
+const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
 const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
 const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor();
@@ -495,6 +496,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUnifiedDataAccessor,
         GetLazyForEachOpsAccessor,
         GetSystemOpsAccessor,
+        GetFocusControllerAccessor,
         GetDrawingCanvasAccessor,
         GetLengthMetricsAccessor,
         GetColorMetricsAccessor,

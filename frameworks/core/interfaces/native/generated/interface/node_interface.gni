@@ -93,6 +93,7 @@ generated_sources = [
   "implementation/file_selector_result_accessor.cpp",
   "implementation/flex_modifier.cpp",
   "implementation/flow_item_modifier.cpp",
+  "implementation/focus_controller_accessor.cpp",
   "implementation/folder_stack_modifier.cpp",
   "implementation/form_component_modifier.cpp",
   "implementation/form_link_modifier.cpp",

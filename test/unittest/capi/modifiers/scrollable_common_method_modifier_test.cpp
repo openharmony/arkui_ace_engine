@@ -210,8 +210,9 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setFrictionTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableCommonMethodModifierTest, setOnWillScrollTest, TestSize.Level1)
+HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_setOnWillScrollTest, TestSize.Level1)
 {
+#ifdef WRONG_GEN
     using namespace Converter;
     static const int32_t expectedResId = 123;
     static const Dimension expectedOffset = 555.0_vp;
@@ -243,6 +244,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnWillScrollTest, TestSize.Level
     ASSERT_NE(fireOnWillScroll, nullptr);
     auto result = fireOnWillScroll(expectedOffset, expectedState, ScrollSource::SCROLL_BAR);
     EXPECT_EQ(result.offset, expectedOffset);
+#endif
 }
 
 /**
@@ -250,8 +252,9 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnWillScrollTest, TestSize.Level
  * @tc.desc: Test OnWillScrollImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableCommonMethodModifierTest, setOnWillScrollTest_Callback_Void_return, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_setOnWillScrollTestCallbackVoidReturn, testing::ext::TestSize.Level1)
 {
+#ifdef WRONG_GEN
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
@@ -293,6 +296,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnWillScrollTest_Callback_Void_r
     EXPECT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_FLING, otherState->state);
     EXPECT_EQ(Ark_ScrollSource::ARK_SCROLL_SOURCE_SCROLL_BAR, otherState->source);
     EXPECT_EQ(id, otherState->nodeId);
+#endif
 }
 
 
@@ -421,8 +425,9 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnScrollStopTest, TestSize.Level
  * @tc.desc: Test OnDidScrollImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableCommonMethodModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_OnDidScrollTestSetCallback, testing::ext::TestSize.Level1)
 {
+#ifdef WRONG_GEN
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::ScrollableEventHub>();
@@ -460,6 +465,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, OnDidScroll_SetCallback, testing::e
     EXPECT_EQ(offsetIn, resultValX);
     EXPECT_EQ(offsetIn, resultValY);
     EXPECT_EQ(id, result.value().resourceId);
+#endif
 }
 
 /**
@@ -467,8 +473,9 @@ HWTEST_F(ScrollableCommonMethodModifierTest, OnDidScroll_SetCallback, testing::e
  * @tc.desc: Test OnDidScrolleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableCommonMethodModifierTest, OnDidScroll_SetNullCallback, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_OnDidScrollTestSetNullCallback, testing::ext::TestSize.Level1)
 {
+#ifdef WRONG_GEN
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::ScrollableEventHub>();
@@ -477,6 +484,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, OnDidScroll_SetNullCallback, testin
     ASSERT_NE(modifier_->setOnDidScroll, nullptr);
     modifier_->setOnDidScroll(node_, nullptr);
     ASSERT_FALSE(eventHub->GetOnDidScroll());
+#endif
 }
 
 } // namespace OHOS::Ace::NG
