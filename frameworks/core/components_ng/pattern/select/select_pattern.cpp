@@ -302,10 +302,20 @@ void SelectPattern::RegisterOnHover()
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
+        auto selectRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(selectRenderContext);
         // update hover status, repaint background color
         if (isHover) {
+            float scaleHover = theme->GetSelectHoverOrFocusedScale();
+            VectorF scale(scaleHover, scaleHover);
+            auto&& transform = selectRenderContext->GetOrCreateTransform();
+            CHECK_NULL_VOID(transform);
+            if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
+                selectRenderContext->SetScale(scaleHover, scaleHover);
+            }
             pattern->SetBgBlendColor(theme->GetHoverColor());
         } else {
+            selectRenderContext->SetScale(1.0f, 1.0f);
             pattern->SetBgBlendColor(Color::TRANSPARENT);
         }
         pattern->PlayBgColorAnimation();
@@ -470,7 +480,7 @@ void SelectPattern::SetFocusStyle()
         GetShadowFromTheme(shadowStyle, shadow);
         selectRenderContext->UpdateBackShadow(shadow);
     }
-    float scaleFocus = selectTheme->GetSelectFocusedScale();
+    float scaleFocus = selectTheme->GetSelectHoverOrFocusedScale();
     VectorF scale(scaleFocus, scaleFocus);
     if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
         scaleModify_ = true;
@@ -1101,7 +1111,6 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(newSelectedPros);
     newSelectedPros->UpdateNeedDivider(false);
-    newSelectedNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SelectPattern::UpdateText(int32_t index)
@@ -1442,6 +1451,16 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateAlignType(menuAlign.alignType);
     menuLayoutProps->UpdateOffset(menuAlign.offset);
+}
+
+void SelectPattern::SetAvoidance(const Avoidance& avoidance)
+{
+    avoidance_ = avoidance;
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateSelectAvoidanceMode(avoidance.mode);
 }
 
 std::string SelectPattern::ProvideRestoreInfo()

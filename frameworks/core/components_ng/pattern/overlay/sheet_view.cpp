@@ -43,7 +43,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SHEET_DETENTS_TWO = 2;
 constexpr int32_t SHEET_DETENTS_THREE = 3;
-constexpr int32_t BUTTON_ZINDEX_VALUE = 1;
 constexpr Dimension WINDOW_RADIUS = 16.0_vp;
 } // namespace
 RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<UINode> builder,
@@ -68,7 +67,6 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     CHECK_NULL_RETURN(operationColumn, nullptr);
     operationColumn->MountToParent(sheetNode);
     sheetPattern->SetTitleBuilderNode(WeakPtr<FrameNode>(operationColumn));
-    CreateCloseIconButtonNode(sheetNode, sheetStyle);
     auto scrollNode = CreateScrollNode(sheetStyle);
     CHECK_NULL_RETURN(scrollNode, nullptr);
     sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
@@ -77,6 +75,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     scrollNode->MountToParent(sheetNode);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    CreateCloseIconButtonNode(sheetNode, sheetStyle);
     sheetNode->MarkModifyDone();
     return sheetNode;
 }
@@ -169,9 +168,6 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
-    auto renderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateZIndex(BUTTON_ZINDEX_VALUE);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto pipeline = PipelineContext::GetCurrentContext();

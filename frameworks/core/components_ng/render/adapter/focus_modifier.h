@@ -43,15 +43,9 @@ public:
         auto cornBottomLeft = rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS);
         auto cornBottomRight = rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS);
 #ifndef USE_ROSEN_DRAWING
-#ifndef USE_GRAPHIC_TEXT_GINE
-        roundRect_.SetRect(
-            rosen::Rect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
-        InitRoundRect(cornTopLeft, cornTopRight, cornBottomLeft, cornBottomRight);
-#else
         roundRect_.SetRect(
             RSRect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
         InitRoundRect(cornTopLeft, cornTopRight, cornBottomLeft, cornBottomRight);
-#endif
 #else
         roundRect_.SetRect(
             RSRect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));

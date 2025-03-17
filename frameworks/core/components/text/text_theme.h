@@ -58,16 +58,6 @@ public:
             theme->textStyle_.SetFontStyle(FontStyle::NORMAL);
             theme->textStyle_.SetFontWeight(FontWeight::NORMAL);
             theme->textStyle_.SetTextDecoration(TextDecoration::NONE);
-            InitThemeDefaultsClock(theme);
-        }
-
-        void InitThemeDefaultsClock(const RefPtr<TextTheme>& theme) const
-        {
-            CHECK_NULL_VOID(theme);
-            // Styles below do not need to get from ThemeConstants, directly set at here.
-            theme->textStyleClock_.SetFontStyle(FontStyle::NORMAL);
-            theme->textStyleClock_.SetFontWeight(FontWeight::NORMAL);
-            theme->textStyleClock_.SetTextDecoration(TextDecoration::NONE);
         }
 
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextTheme>& theme) const
@@ -80,13 +70,7 @@ public:
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
                                                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
-            theme->textStyleClock_.SetTextColor(
-                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::GRAY)
-                    .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
-            theme->textStyleClock_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
             theme->caretColor_ = pattern->GetAttr<Color>("text_caret_color", Color(0xff006cde));
-            theme->SetTextParseFailedColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
-                                               .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->textStyle_.SetLineSpacing(pattern->GetAttr<Dimension>("text_line_spacing", 0.0_vp));
             theme->textStyle_.SetFontWeight(static_cast<FontWeight>(pattern->GetAttr<double>("text_font_weight", 0.0)));
             theme->textStyle_.SetTextAlign(static_cast<TextAlign>(pattern->GetAttr<double>("text_align", 0.0)));
@@ -128,11 +112,6 @@ public:
     const Color& GetCaretColor() const
     {
         return caretColor_;
-    }
-
-    const TextStyle& GetTextStyleClock() const
-    {
-        return textStyleClock_;
     }
 
     const Color& GetSelectedColor() const
@@ -204,20 +183,9 @@ public:
         return marqueeStartPolicy_;
     }
 
-    const Color& GetTextParseFailedColor() const
-    {
-        return textClockParseFailedColor_;
-    }
-
-    void SetTextParseFailedColor(const Color& textColor)
-    {
-        textClockParseFailedColor_ = textColor;
-    }
-
 protected:
     TextTheme() = default;
     TextStyle textStyle_;
-    TextStyle textStyleClock_;
 
 private:
     Color caretColor_;
@@ -235,9 +203,6 @@ private:
     Color urlDefaultColor_;
     Color urlHoverColor_;
     Color urlPressColor_;
-
-    // For Parse Failed
-    Color textClockParseFailedColor_;
 };
 
 } // namespace OHOS::Ace

@@ -39,10 +39,18 @@ enum class ListItemSwipeIndex {
     SWIPER_ACTION = 2,
 };
 
+using PendingSwipeFunc = std::function<void()>;
+
 class ACE_EXPORT ListItemPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemPattern, Pattern);
 
 public:
+    void SwipeCommon(ListItemSwipeIndex targetState);
+
+    void SwipeForward();
+
+    void SwipeBackward();
+
     explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
     explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
         : listItemStyle_(listItemStyle), shallowBuilder_(shallowBuilder)
@@ -231,6 +239,8 @@ public:
         }
     }
 
+    SwipeActionState GetSwipeActionState();
+
 protected:
     void OnModifyDone() override;
     virtual void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
@@ -310,6 +320,8 @@ private:
     bool isLayouted_ = false;
     bool isSpringMotionRunning_ = false;
     bool isDragging_ = false;
+    
+    PendingSwipeFunc pendingSwipeFunc_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };

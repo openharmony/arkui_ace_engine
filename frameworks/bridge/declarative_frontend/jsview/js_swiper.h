@@ -82,6 +82,7 @@ protected:
 
     private:
         static WeakPtr<JSIndicatorController> jSIndicatorController_;
+        static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);
 };
 
 class JSSwiperController final : public Referenced {

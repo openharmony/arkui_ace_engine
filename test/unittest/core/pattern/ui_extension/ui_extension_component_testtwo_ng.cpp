@@ -780,4 +780,103 @@ HWTEST_F(UIExtensionComponentTestTwoNg, TransferAccessibilityRectInfoTest001, Te
     pattern->TransferAccessibilityRectInfo();
 #endif
 }
+
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->OnWindowSceneVisibleChange(true);
+    pattern->OnWindowSceneVisibleChange(false);
+    UIExtCallbackEventId eventId = UIExtCallbackEventId::ON_DRAW_FIRST;
+    pattern->onDrawReadyCallback_ = nullptr;
+    pattern->OnExtensionEvent(eventId);
+    UIExtCallbackEventId eventId2 = static_cast<UIExtCallbackEventId>(-1);
+    pattern->OnExtensionEvent(eventId2);
+
+    int32_t instanceId = 1;
+    pattern->UnRegisterUIExtensionManagerEvent(instanceId);
+    auto host = pattern->GetHost();
+    host->GetFocusHub()->SetCurrentFocus(true);
+    pattern->UnRegisterUIExtensionManagerEvent(instanceId);
+    pattern->UnRegisterEvent(instanceId);
+    EXPECT_EQ(pattern->hasDetachContext_, true);
+#endif
+}
+
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    PipelineContext* rawContext = AceType::RawPtr(context);
+    auto instanceId = context->GetInstanceId();
+    pattern->instanceId_ = context->GetInstanceId();
+    pattern->OnDetachContext(rawContext);
+    EXPECT_EQ(pattern->hasDetachContext_, true);
+    
+    pattern->OnDetachContext(rawContext);
+    pattern->hasDetachContext_ = false;
+    auto host = pattern->GetHost();
+    host->setIsMoving(true);
+    EXPECT_EQ(pattern->IsMoving(), true);
+    pattern->OnDetachContext(rawContext);
+    EXPECT_EQ(pattern->hasDetachContext_, false);
+    pattern->instanceId_ += 1;
+    pattern->OnDetachContext(rawContext);
+    EXPECT_EQ(pattern->hasDetachContext_, false);
+#endif
+}
+
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTwoTest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->AttachToFrameNode(uiExtensionNode);
+    pattern->OnModifyDone();
+    pattern->OnModifyDone();
+    EXPECT_NE(pattern->touchEvent_, nullptr);
+
+    auto focusHub = uiExtensionNode->GetFocusHub();
+    pattern->InitKeyEventOnKeyEvent(focusHub);
+    KeyEvent keyEvent;
+    pattern->SetForceProcessOnKeyEventInternal(false);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_TAB);
+    keyEvent.isPreIme = true;
+    focusHub->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
+    EXPECT_EQ(pattern->forceProcessOnKeyEventInternal_, false);
+
+    auto onError = [](int32_t code, const std::string& name, const std::string& message) {};
+    pattern->lastError_.code = 1;
+    pattern->SetOnErrorCallback(std::move(onError));
+    pattern->onSyncOnCallbackList_ = {nullptr, nullptr};
+    pattern->FireSyncCallbacks();
+    pattern->onAsyncOnCallbackList_ = {nullptr, nullptr};
+    pattern->FireAsyncCallbacks();
+    auto host = pattern->GetHost();
+    host->setIsMoving(true);
+    pattern->HandleVisibleAreaChange(false, 0.0);
+    EXPECT_EQ(pattern->IsMoving(), true);
+#endif
+}
 } // namespace OHOS::Ace::NG

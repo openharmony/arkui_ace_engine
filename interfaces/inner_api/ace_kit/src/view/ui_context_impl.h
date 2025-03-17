@@ -39,6 +39,7 @@ public:
     void OnBackPressed() override;
 
     ColorMode GetLocalColorMode() override;
+    ColorMode GetColorMode() override;
     float GetFontScale() override;
 
     RefPtr<OverlayManager> GetOverlayManager() override;

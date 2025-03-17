@@ -255,6 +255,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController001, TestSize.Level
     EXPECT_EQ(textLineStyle->GetWordBreak(), WordBreak::BREAK_ALL);
     EXPECT_EQ(textLineStyle->GetTextIndent(), TEST_TEXT_INDENT);
     EXPECT_EQ(textLineStyle->GetLineHeight(), LINE_HEIGHT_VALUE);
+    EXPECT_EQ(textLineStyle->GetParagraphSpacing(), std::nullopt);
 }
 
 /**

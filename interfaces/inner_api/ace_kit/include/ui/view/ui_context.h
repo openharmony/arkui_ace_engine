@@ -42,6 +42,7 @@ public:
 
     // ui infos
     virtual ColorMode GetLocalColorMode() = 0;
+    virtual ColorMode GetColorMode() = 0;
     virtual float GetFontScale() = 0;
 
     // overlay manager

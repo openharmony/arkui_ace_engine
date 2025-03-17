@@ -383,12 +383,29 @@ void ScrollableModelNG::SetBackToTop(bool backToTop)
     SetBackToTop(frameNode, backToTop);
 }
 
+void ScrollableModelNG::ResetBackToTop()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ResetBackToTop(frameNode);
+}
+
 void ScrollableModelNG::SetBackToTop(FrameNode* frameNode, bool backToTop)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBackToTop(backToTop);
+    pattern->UseDefaultBackToTop(false);
+}
+
+void ScrollableModelNG::ResetBackToTop(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetBackToTop();
+    pattern->UseDefaultBackToTop(true);
 }
 
 bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
