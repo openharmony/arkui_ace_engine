@@ -35,6 +35,7 @@ public:
 
     std::vector<Rosen::Rect> GetHotAreas();
     sptr<Rosen::Session> GetSession();
+    bool BorderUnoccupied() const override;
 
 protected:
     void OnAttachToFrameNode() override;
