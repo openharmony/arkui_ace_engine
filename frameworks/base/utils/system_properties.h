@@ -695,6 +695,7 @@ public:
     }
 
     static int32_t GetDragDropFrameworkStatus();
+    static int32_t GetTouchAccelarate();
 
     static bool IsSuperFoldDisplayDevice();
 
@@ -781,6 +782,7 @@ private:
     static double scrollableDistance_;
     static bool taskPriorityAdjustmentEnable_;
     static int32_t dragDropFrameworkStatus_;
+    static int32_t touchAccelarate_;
 };
 
 } // namespace OHOS::Ace

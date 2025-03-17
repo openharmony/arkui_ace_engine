@@ -14,7 +14,6 @@
  */
 
 /// <reference path='./import.ts' />
-/// <reference path="../../state_mgmt/src/lib/common/utils.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function getUINativeModule(): any {
   if (arkUINativeModule) {
@@ -150,9 +149,6 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  if (Utils.isApiVersionEQAbove(18)) {
-    return false;
-  }
   return (stageValue.bundleName === value.bundleName) &&
     (stageValue.moduleName === value.moduleName) &&
     (stageValue.id === value.id) &&
@@ -270,6 +266,48 @@ class BindMenuModifier extends ModifierWithKey<ArkBindMenu> {
       getUINativeModule().common.resetBindMenu(node);
     } else {
       getUINativeModule().common.setBindMenu(node, this.value.content, this.value.options);
+    }
+  }
+}
+
+class SearchAutoCapitalizationModifier extends ModifierWithKey<ArkSearchAutoCapitalization> {
+  constructor(value: ArkSearchAutoCapitalization) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchAutoCapitalization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetAutoCapitalizationMode(node);
+    } else {
+      getUINativeModule().search.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+}
+
+class TextAreaAutoCapitalizationModifier extends ModifierWithKey<ArkTextAreaAutoCapitalization> {
+  constructor(value: ArkTextAreaAutoCapitalization) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaAutoCapitalization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetAutoCapitalizationMode(node);
+    } else {
+      getUINativeModule().textArea.setAutoCapitalizationMode(node, this.value);
+    }
+  }
+}
+
+class TextInputAutoCapitalizationModifier extends ModifierWithKey<ArkTextInputAutoCapitalization> {
+  constructor(value: ArkTextInputAutoCapitalization) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputAutoCapitalization');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetAutoCapitalizationMode(node);
+    } else {
+      getUINativeModule().textInput.setAutoCapitalizationMode(node, this.value);
     }
   }
 }
@@ -4826,6 +4864,27 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     arkBindMenu.content = content;
     arkBindMenu.options = options;
     modifierWithKey(this._modifiersWithKeys, BindMenuModifier.identity, BindMenuModifier, arkBindMenu);
+    return this;
+  }
+
+  searchAutoCapitalization(autoCapitalizationMode: AutoCapitalizationMode): this {
+    let ArkSearchAutoCapitalization = new ArkSearchAutoCapitalization();
+    ArkSearchAutoCapitalization.autoCapitalizationMode = autoCapitalizationMode;
+    modifierWithKey(this._modifiersWithKeys, SearchAutoCapitalizationModifier.identity, SearchAutoCapitalizationModifier, ArkSearchAutoCapitalization);
+    return this;
+  }
+
+  textAreaAutoCapitalization(autoCapitalizationMode: AutoCapitalizationMode): this {
+    let ArkTextAreaAutoCapitalization = new ArkTextAreaAutoCapitalization();
+    ArkTextAreaAutoCapitalization.autoCapitalizationMode = autoCapitalizationMode;
+    modifierWithKey(this._modifiersWithKeys, TextAreaAutoCapitalizationModifier.identity, TextAreaAutoCapitalizationModifier, ArkTextAreaAutoCapitalization);
+    return this;
+  }
+
+  textInputAutoCapitalization(autoCapitalizationMode: AutoCapitalizationMode): this {
+    let ArkTextInputAutoCapitalization = new ArkTextInputAutoCapitalization();
+    ArkTextInputAutoCapitalization.autoCapitalizationMode = autoCapitalizationMode;
+    modifierWithKey(this._modifiersWithKeys, TextAreaAutoCapitalizationModifier.identity, TextAreaAutoCapitalizationModifier, ArkTextInputAutoCapitalization);
     return this;
   }
 

@@ -75,7 +75,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    if (window->GetSurfaceNode()) {
+    if (window && window->GetSurfaceNode()) {
         rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
     }
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
@@ -272,7 +272,11 @@ int64_t RosenWindow::GetVSyncPeriod() const
 
 std::string RosenWindow::GetWindowName() const
 {
-    return rsWindow_->GetWindowName();
+    std::string windowName;
+    if (rsWindow_) {
+        windowName = rsWindow_->GetWindowName();
+    }
+    return windowName;
 }
 
 void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)

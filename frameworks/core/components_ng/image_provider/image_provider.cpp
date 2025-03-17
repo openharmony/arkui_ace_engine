@@ -370,17 +370,17 @@ void ImageProvider::DownLoadImage(const ImageSourceInfo& src, const WeakPtr<Imag
         }
         ImageProvider::DownLoadSuccessCallback(imageObj, taskKey, sync, containerId);
     };
-    downloadCallback.failCallback = [ctxWp, taskKey, containerId = src.GetContainerId()](
+    downloadCallback.failCallback = [ctxWp, taskKey, sync, containerId = src.GetContainerId()](
                                         std::string errorMessage, bool async, int32_t instanceId) {
         ContainerScope scope(instanceId);
-        ImageProvider::FailCallback(taskKey, errorMessage, containerId);
+        ImageProvider::FailCallback(taskKey, errorMessage, sync, containerId);
     };
     downloadCallback.cancelCallback = downloadCallback.failCallback;
     if (ctx->GetOnProgressCallback()) {
-        downloadCallback.onProgressCallback = [ctxWp, taskKey, containerId = src.GetContainerId()](
+        downloadCallback.onProgressCallback = [ctxWp, taskKey, sync, containerId = src.GetContainerId()](
                                                   uint32_t dlTotal, uint32_t dlNow, bool async, int32_t instanceId) {
             ContainerScope scope(instanceId);
-            ImageProvider::DownLoadOnProgressCallback(taskKey, async, dlNow, dlTotal, containerId);
+            ImageProvider::DownLoadOnProgressCallback(taskKey, sync, dlNow, dlTotal, containerId);
         };
     }
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src.GetSrc(), sync, src.GetImageDfxConfig().nodeId_);
@@ -515,7 +515,7 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     if (image) {
         SuccessCallback(image, key, imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     } else {
-        FailCallback(key, "Failed to decode image", obj->GetSourceInfo().GetContainerId());
+        FailCallback(key, "Failed to decode image", imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     }
 }
 } // namespace OHOS::Ace::NG

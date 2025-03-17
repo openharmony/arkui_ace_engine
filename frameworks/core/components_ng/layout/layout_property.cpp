@@ -668,15 +668,13 @@ void LayoutProperty::UpdateContentConstraint()
     ConstraintContentByPadding();
     ConstraintContentByBorder();
     ConstraintContentBySafeAreaPadding();
-    ConstraintViewPosRef();
+    if (needLazyLayout_ && contentConstraint_->viewPosRef.has_value()) {
+        ConstraintViewPosRef(contentConstraint_->viewPosRef.value());
+    }
 }
 
-void LayoutProperty::ConstraintViewPosRef()
+void LayoutProperty::ConstraintViewPosRef(ViewPosReference& posRef)
 {
-    if (!needLazyLayout_ || !contentConstraint_->viewPosRef.has_value()) {
-        return;
-    }
-    auto& posRef = contentConstraint_->viewPosRef.value();
     auto axis = posRef.axis;
     float adjStart = 0.0f;
     float adjEnd = 0.0f;

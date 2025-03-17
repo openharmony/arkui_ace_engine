@@ -311,7 +311,7 @@ void UiSessionManagerOhos::GetWebViewLanguage()
     }
 }
 
-void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback)
+void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     pipelineContextPageNameCallback_ = std::move(callback);
@@ -325,9 +325,9 @@ void UiSessionManagerOhos::GetCurrentPageName()
     }
 }
 
-void UiSessionManagerOhos::SendCurrentPageName(const std::string result)
+void UiSessionManagerOhos::SendCurrentPageName(const std::string& result)
 {
-    for (auto pair : reportObjectMap_) {
+    for (auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->SendCurrentPageName(result);

@@ -212,7 +212,7 @@ public:
     {
         return dataDetectorAdapter_;
     }
-    const std::map<int32_t, AISpan>& GetAISpanMap()
+    virtual const std::map<int32_t, AISpan>& GetAISpanMap()
     {
         return dataDetectorAdapter_->aiSpanMap_;
     }

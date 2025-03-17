@@ -920,8 +920,8 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest001, TestSize.Level1)
      * @tc.steps: step3. Set backToTop to true and call OnStatusBarClick when pipeline onShow_ is false.
      * @tc.expected: Neither the list nor the scroll is scrolling.
      */
-    listPattern->SetBackToTop(true);
-    scrollPattern->SetBackToTop(true);
+    listPattern->backToTop_ = true;
+    scrollPattern->backToTop_ = true;
     MockAnimationManager::GetInstance().SetTicks(1);
     scrollPattern->OnStatusBarClick();
     listPattern->OnStatusBarClick();
@@ -958,10 +958,11 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
     auto scrollScrollable = GetScrollable(rootNode);
     auto listScrollable = GetScrollable(listNode);
     /**
-     * @tc.steps: step2. Scroll backward and call OnStatusBarClick when pipeline onShow_ is true.
+     * @tc.steps: step2. Scroll backward and call OnStatusBarClick when pipeline onShow_ and onFocus_ is true.
      * @tc.expected: Neither the list nor the scroll is scrolling.
      */
     MockPipelineContext::GetCurrent()->onShow_ = true;
+    MockPipelineContext::GetCurrent()->onFocus_ = true;
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
     FlushUITasks(rootNode);
@@ -977,7 +978,7 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
      * @tc.steps: step3. Set listPattern backToTop is true.
      * @tc.expected: Only list scroll to top.
      */
-    listPattern->SetBackToTop(true);
+    listPattern->backToTop_ = true;
     MockAnimationManager::GetInstance().SetTicks(1);
     listPattern->OnStatusBarClick();
     scrollPattern->OnStatusBarClick();
@@ -993,7 +994,7 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
      * @tc.steps: step4. Set scrollPattern backToTop is true.
      * @tc.expected: Scroll component scroll back to top.
      */
-    scrollPattern->SetBackToTop(true);
+    scrollPattern->backToTop_ = true;
     MockAnimationManager::GetInstance().SetTicks(1);
     scrollPattern->OnStatusBarClick();
     FlushUITasks(rootNode);
@@ -1034,12 +1035,13 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest003, TestSize.Level1)
      * @tc.expected: Both list and scroll component scroll to top.
      */
     MockPipelineContext::GetCurrent()->onShow_ = true;
+    MockPipelineContext::GetCurrent()->onFocus_ = true;
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
     FlushUITasks(rootNode);
     FlushUITasks(listNode);
-    listPattern->SetBackToTop(true);
-    scrollPattern->SetBackToTop(true);
+    listPattern->backToTop_ = true;
+    scrollPattern->backToTop_ = true;
     MockAnimationManager::GetInstance().SetTicks(1);
     scrollPattern->OnStatusBarClick();
     listPattern->OnStatusBarClick();
@@ -1085,14 +1087,15 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
      * @tc.expected: Scroll and list stop animation.
      */
     MockPipelineContext::GetCurrent()->onShow_ = true;
+    MockPipelineContext::GetCurrent()->onFocus_ = true;
     DragStart(listScrollable);
     DragUpdate(listScrollable, -200);
     listScrollable->lastMainDelta_ = 0.0;
     DragEnd(listScrollable, 0);
     FlushUITasks(rootNode);
     FlushUITasks(listNode);
-    listPattern->SetBackToTop(true);
-    scrollPattern->SetBackToTop(true);
+    listPattern->backToTop_ = true;
+    scrollPattern->backToTop_ = true;
     scrollPattern->OnStatusBarClick();
     listPattern->OnStatusBarClick();
 

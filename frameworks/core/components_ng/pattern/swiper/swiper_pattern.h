@@ -816,6 +816,7 @@ protected:
     std::optional<int32_t> fastCurrentIndex_;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
+    SwiperLayoutAlgorithm::PositionMap itemPositionWillInvisible_;
     std::optional<int32_t> targetIndex_;
     float swiperProportion_ = 2.0f;
     int32_t newMinTurnPageVelocity_ = NEW_STYLE_MIN_TURN_PAGE_VELOCITY;

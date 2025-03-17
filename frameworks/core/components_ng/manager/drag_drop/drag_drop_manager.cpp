@@ -1980,7 +1980,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
 
 bool DragDropManager::IsNeedDoDragMoveAnimate(const DragPointerEvent& pointerEvent)
 {
-    if (!(IsNeedDisplayInSubwindow() || isDragWithContextMenu_) || isDragFwkShow_) {
+    if (isDragFwkShow_) {
         return false;
     }
     auto x = pointerEvent.GetPoint().GetX();
@@ -2257,6 +2257,8 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     }
     CHECK_NULL_VOID(info_.imageNode);
     isDragFwkShow_ = false;
+    dragAnimationPointerEvent_ = DragPointerEvent(event.GetGlobalLocation().GetX(), event.GetGlobalLocation().GetY(),
+        event.GetScreenLocation().GetX(), event.GetScreenLocation().GetY());
     ResetPullMoveReceivedForCurrentDrag();
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(info_.imageNode);
     Point point = { static_cast<int32_t>(event.GetGlobalLocation().GetX()),
@@ -2329,13 +2331,32 @@ void DragDropManager::SetDragStartAnimationOption(AnimationOption& option, int32
     option.SetDuration(animateDuration);
     option.SetOnFinishEvent([weakManager = WeakClaim(this), containerId]() {
         auto dragDropManager = weakManager.Upgrade();
-        if (dragDropManager->IsAllStartAnimationFinished()) {
-            dragDropManager->SetStartAnimation(true);
-        }
-        if (dragDropManager && !dragDropManager->IsPullMoveReceivedForCurrentDrag()) {
-            dragDropManager->TransDragWindowToDragFwk(containerId);
-        }
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->HandleStartDragAnimationFinish(containerId);
     });
+}
+
+void DragDropManager::HandleStartDragAnimationFinish(int32_t containerId)
+{
+    if (IsAllStartAnimationFinished()) {
+        SetStartAnimation(true);
+    }
+    if (IsPullMoveReceivedForCurrentDrag()) {
+        TransDragWindowToDragFwk(containerId);
+    }
+    auto overlayManager = GetDragAnimationOverlayManager(containerId);
+    CHECK_NULL_VOID(overlayManager);
+    auto gatherNode = overlayManager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto info = overlayManager->GetGatherNodeChildrenInfo();
+    int cnt = 0;
+    for (auto iter = info.rbegin(); iter != info.rend(); iter++) {
+        auto imageNode = (*iter).imageNode.Upgrade();
+        if (cnt > 1) {
+            gatherNode->RemoveChild(imageNode);
+        }
+        cnt++;
+    }
 }
 
 void DragDropManager::DragStartTransitionAnimation(
@@ -2523,9 +2544,11 @@ void DragDropManager::UpdateGatherNodePosition(const RefPtr<OverlayManager>& ove
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenterToScreen(imageNode);
     gatherNodeCenter -= DragDropFuncWrapper::GetCurrentWindowOffset(gatherNode->GetContextRefPtr());
     OffsetF offset;
-    auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
-    for (const auto& child : gatherNodeChildrenInfo) {
+    auto info = overlayManager->GetGatherNodeChildrenInfo();
+    for (auto iter = info.rbegin(); iter != info.rend(); iter++) {
+        auto& child = (*iter);
         auto imageNode = child.imageNode.Upgrade();
+        CHECK_NULL_VOID(imageNode);
         offset.SetX(gatherNodeCenter.GetX() - child.halfWidth);
         offset.SetY(gatherNodeCenter.GetY() - child.halfHeight);
         DragDropFuncWrapper::UpdateNodePositionToWindow(imageNode, offset);

@@ -48,6 +48,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const double DIMENSIONVALUE = 1.0;
+const double DIMENSIONVALUETWO = 2.0;
+const double DIMENSIONVALUENE = -1.0;
 const std::string TITLE = "title";
 const std::string SUBTITLE = "subtitle";
 const std::string MESSAGE = "hello world";
@@ -63,9 +65,37 @@ const NG::BorderRadiusProperty BORDERRADIUS = BorderRadiusProperty(Dimension(DIM
 
 class DialogPatternAdditionalTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 };
+
+void DialogPatternAdditionalTestNg::SetUpTestCase()
+{
+    MockPipelineContext::SetUp();
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == DialogTheme::TypeId()) {
+            return AceType::MakeRefPtr<DialogTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+}
+
+void DialogPatternAdditionalTestNg::TearDownTestCase()
+{
+    MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
 
 /**
  * @tc.name: DialogPatternAdditionalTestNgDump001
@@ -489,5 +519,334 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump009, Te
     EXPECT_TRUE(jsonPtr->Contains("Shadow"));
     EXPECT_TRUE(jsonPtr->Contains("MaskColor"));
     EXPECT_TRUE(jsonPtr->Contains("MaskRect"));
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgHandle001
+ * @tc.desc: Test DialogPattern Handle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgHandle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    DialogProperties props;
+    props.isSysBlurStyle = true;
+    if (!props.backgroundBlurStyle.has_value()) {
+        props.backgroundBlurStyle.emplace();
+    }
+    auto backgroundBlurStyle = static_cast<int>(BlurStyle::THIN);
+    props.backgroundBlurStyle.value() = backgroundBlurStyle;
+    pattern->UpdateContentRenderContext(frameNode, props);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->HandleBlurEvent();
+    pattern->HandleFocusEvent();
+    ASSERT_NE(pattern->contentRenderContext_, nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgToJsonValue001
+ * @tc.desc: Test DialogPattern ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgToJsonValue001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::unique_ptr<JsonValue> jsonPtr = JsonUtil::Create(false);
+    ASSERT_NE(jsonPtr, nullptr);
+    auto filterJson = InspectorFilter();
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->ToJsonValue(jsonPtr, filterJson);
+    EXPECT_TRUE(jsonPtr->Contains("title"));
+    EXPECT_TRUE(jsonPtr->Contains("subtitle"));
+    EXPECT_TRUE(jsonPtr->Contains("message"));
+
+    jsonPtr.reset();
+    jsonPtr = JsonUtil::Create(false);
+    ASSERT_NE(jsonPtr, nullptr);
+    const std::string attr = "color";
+    filterJson.AddFilterAttr(attr);
+    pattern->ToJsonValue(jsonPtr, filterJson);
+    EXPECT_FALSE(jsonPtr->Contains("title"));
+    EXPECT_FALSE(jsonPtr->Contains("subtitle"));
+    EXPECT_FALSE(jsonPtr->Contains("message"));
+
+    jsonPtr.reset();
+    jsonPtr = JsonUtil::Create(false);
+    ASSERT_NE(jsonPtr, nullptr);
+    frameNode->tag_ = "UINode";
+    pattern->ToJsonValue(jsonPtr, filterJson);
+    EXPECT_FALSE(jsonPtr->Contains("title"));
+    EXPECT_FALSE(jsonPtr->Contains("subtitle"));
+    EXPECT_FALSE(jsonPtr->Contains("message"));
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgOnDetachFromFrameNode001
+ * @tc.desc: Test DialogPattern OnDetachFromFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgOnDetachFromFrameNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stageNode, nullptr);
+    FrameNode& ref = *stageNode;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->foldDisplayModeChangedCallbackId_.reset();
+    pattern->hoverModeChangedCallbackId_.reset();
+    pattern->OnDetachFromFrameNode(&ref);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgOnAttachToMainTree001
+ * @tc.desc: Test DialogPattern OnAttachToMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgOnAttachToMainTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(parent, nullptr);
+    frameNode->SetParent(parent);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->OnAttachToMainTree();
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgUpdateHostWindowRect001
+ * @tc.desc: Test DialogPattern UpdateHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgUpdateHostWindowRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->isUIExtensionSubWindow_ = true;
+    pattern->UpdateHostWindowRect();
+    EXPECT_TRUE(pipeline->GetInstanceId() < MIN_SUBCONTAINER_ID);
+    pipeline->instanceId_ = MIN_SUBCONTAINER_ID + 1;
+    pattern->UpdateHostWindowRect();
+    EXPECT_FALSE(pipeline->GetInstanceId() < MIN_SUBCONTAINER_ID);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgParseBorderRadius001
+ * @tc.desc: Test DialogPattern ParseBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgParseBorderRadius001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogTheme_->radius_ = Radius(DIMENSIONVALUETWO, DIMENSIONVALUETWO);
+    BorderRadiusProperty raidus = {};
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->ParseBorderRadius(raidus);
+    EXPECT_EQ(raidus.radiusTopLeft.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+    EXPECT_EQ(raidus.radiusTopRight.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+    EXPECT_EQ(raidus.radiusBottomLeft.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+    EXPECT_EQ(raidus.radiusBottomRight.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+
+    raidus.radiusTopLeft->SetValue(DIMENSIONVALUENE);
+    raidus.radiusTopRight->SetValue(DIMENSIONVALUENE);
+    raidus.radiusBottomLeft->SetValue(DIMENSIONVALUENE);
+    raidus.radiusBottomRight->SetValue(DIMENSIONVALUENE);
+    pattern->ParseBorderRadius(raidus);
+    EXPECT_EQ(raidus.radiusTopLeft.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+    EXPECT_EQ(raidus.radiusTopRight.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+    EXPECT_EQ(raidus.radiusBottomLeft.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+    EXPECT_EQ(raidus.radiusBottomRight.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+
+    raidus.radiusTopLeft->SetValue(DIMENSIONVALUE);
+    raidus.radiusTopRight->SetValue(DIMENSIONVALUE);
+    raidus.radiusBottomLeft->SetValue(DIMENSIONVALUE);
+    raidus.radiusBottomRight->SetValue(DIMENSIONVALUE);
+    pattern->ParseBorderRadius(raidus);
+    EXPECT_NE(raidus.radiusTopLeft.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+    EXPECT_NE(raidus.radiusTopRight.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+    EXPECT_NE(raidus.radiusBottomLeft.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+    EXPECT_NE(raidus.radiusBottomRight.value().Value(), pattern->dialogTheme_->GetRadius().GetX().Value());
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgAddExtraMaskNode001
+ * @tc.desc: Test DialogPattern AddExtraMaskNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgAddExtraMaskNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    DialogProperties props = {};
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    auto totalChildCount = frameNode->GetTotalChildCount();
+    pattern->isUIExtensionSubWindow_ = true;
+    props.isModal = false;
+    pattern->AddExtraMaskNode(props);
+    EXPECT_EQ(totalChildCount, frameNode->GetTotalChildCount());
+
+    pattern->isUIExtensionSubWindow_ = true;
+    props.isModal = true;
+    pattern->AddExtraMaskNode(props);
+    EXPECT_EQ(totalChildCount + 1, frameNode->GetTotalChildCount());
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgParseButtonFontColorAndBgColor001
+ * @tc.desc: Test DialogPattern ParseButtonFontColorAndBgColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgParseButtonFontColorAndBgColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogTheme_->buttonHighlightBgColor_ = Color::BLACK;
+    pattern->dialogTheme_->buttonDefaultBgColor_ = Color::GREEN;
+    pattern->dialogTheme_->buttonDefaultFontColor_ = Color::BLUE;
+    ButtonInfo params;
+    params.dlgButtonStyle = DialogButtonStyle::DEFAULT;
+    params.textColor = MESSAGE;
+    params.defaultFocus = false;
+    std::string textColor;
+    std::optional<Color> bgColor;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->ParseButtonFontColorAndBgColor(params, textColor, bgColor);
+    EXPECT_EQ(textColor, MESSAGE);
+
+    params.dlgButtonStyle.reset();
+    params.textColor = "";
+    textColor = "";
+    params.defaultFocus = true;
+    pattern->isFirstDefaultFocus_ = false;
+    pattern->ParseButtonFontColorAndBgColor(params, textColor, bgColor);
+    EXPECT_EQ(textColor, pattern->dialogTheme_->GetButtonDefaultFontColor().ColorToString());
+    EXPECT_EQ(bgColor, pattern->dialogTheme_->GetButtonDefaultBgColor());
+
+    params.dlgButtonStyle.reset();
+    params.textColor = "";
+    textColor = "";
+    params.defaultFocus = true;
+    bgColor.reset();
+    pattern->isFirstDefaultFocus_ = true;
+    pattern->dialogTheme_->button_type_ = 1;
+    pattern->ParseButtonFontColorAndBgColor(params, textColor, bgColor);
+    EXPECT_EQ(textColor, pattern->dialogTheme_->GetButtonDefaultFontColor().ColorToString());
+    EXPECT_EQ(bgColor, pattern->dialogTheme_->GetButtonDefaultBgColor());
+
+    params.dlgButtonStyle.reset();
+    params.defaultFocus = true;
+    pattern->isFirstDefaultFocus_ = true;
+    pattern->dialogTheme_->button_type_ = 0;
+    bgColor.reset();
+    pattern->ParseButtonFontColorAndBgColor(params, textColor, bgColor);
+    EXPECT_EQ(bgColor, pattern->dialogTheme_->GetButtonHighlightBgColor());
 }
 } // namespace OHOS::Ace::NG

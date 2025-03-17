@@ -144,6 +144,14 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     int32_t beforeLastStandardIndex = lastStandardIndex_;
     auto preLastStandardNode = AceType::DynamicCast<NavDestinationGroupNode>(
         navigationContentNode->GetChildAtIndex(beforeLastStandardIndex));
+    if (pattern->GetIsPreForceSetList()) {
+        // if page is force set, some node may not on the tree, so we need get page from preNavPathList.
+        auto preNodes = pattern->GetAllNavDestinationNodesPrev();
+        if (beforeLastStandardIndex < preNodes.size() && beforeLastStandardIndex >= 0) {
+            preLastStandardNode = AceType::DynamicCast<NavDestinationGroupNode>(
+                NavigationGroupNode::GetNavDestinationNode(preNodes[beforeLastStandardIndex].second.Upgrade()));
+        }
+    }
 
     //save preLastStandardIndex_ before update and check whether standard page changed
     preLastStandardIndex_ = lastStandardIndex_;
@@ -182,7 +190,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
         if (navDestination == nullptr) {
-            if (pattern->GetNavigationStack()->IsFromRecovery(i)) {
+            if (pattern->GetNavigationStack()->IsFromRecovery(i) || pattern->GetNavigationStack()->GetIsForceSet(i)) {
                 continue;
             }
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get destination node failed");
@@ -243,7 +251,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             hasChanged = true;
             continue;
         }
-        navDestination->SetCanReused(false);
+        navDestination->SetInCurrentStack(false);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         if (eventHub) {
             eventHub->FireChangeEvent(false);
@@ -1143,14 +1151,7 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
         preContext->UpdateZIndex(0);
         return;
     }
-    auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
-    if (shallowBuilder) {
-        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-    }
-    // remove old navdestination node
-    if (navDestinationNode->GetContentNode()) {
-        navDestinationNode->GetContentNode()->Clean();
-    }
+    navDestinationNode->CleanContent();
     auto parent = AceType::DynamicCast<FrameNode>(preNode->GetParent());
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(preNode);
@@ -1456,14 +1457,7 @@ void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
         if (!navDestinationPattern) {
             continue;
         }
-        auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
-        if (shallowBuilder) {
-            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-        }
-        auto contentNode = navDestination->GetContentNode();
-        if (contentNode) {
-            contentNode->Clean();
-        }
+        navDestination->CleanContent();
         parent->RemoveChild(navDestination);
     }
     hideNodes_.clear();
@@ -1480,14 +1474,7 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
         navDestinationPattern->SetIsOnShow(false);
     }
     pattern->NotifyDestinationLifecycle(navDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
-    auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
-    if (shallowBuilder) {
-        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-    }
-    auto contentNode = navDestination->GetContentNode();
-    if (contentNode) {
-        contentNode->Clean();
-    }
+    navDestination->CleanContent();
     contentNode_->RemoveChild(navDestination, true);
 }
 

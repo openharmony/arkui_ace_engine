@@ -932,6 +932,7 @@ class c3 extends ViewPU {
         }
     }
     onShowMenuWithTimer() {
+        this.onCancelMenuTimer();
         if (!this.hideSplit && this.isFocused) {
             this.showMenuTimeoutId = setTimeout(() => {
                 this.isShowMenu = true;

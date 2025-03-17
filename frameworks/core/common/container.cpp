@@ -316,6 +316,8 @@ std::vector<std::string> Container::GetFontFamilyName(const std::string& path)
     std::string manifestContent = ReadFileToString(path, manifest);
     auto json = JsonUtil::ParseJsonString(manifestContent);
     if (!json || !json->IsValid()) {
+        TAG_LOGI(AceLogTag::ACE_FONT, "Json is null or Json is not Valid, manifestContentLength:%{public}zu",
+            manifestContent.length());
         return fontFamilyName;
     }
     std::string ttfFileSrc = json->GetString("ttfFileSrc");

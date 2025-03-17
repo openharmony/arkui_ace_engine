@@ -204,6 +204,7 @@ public:
     bool IsClickEventsEmpty() const;
     GestureEventFunc GetClickEvent();
     void BindMenu(GestureEventFunc&& showMenu);
+    void RegisterMenuOnTouch(TouchEventFunc&& callback);
     bool IsLongClickable() const;
     void SetRedirectClick(bool redirectClick);
     bool ActLongClick();
@@ -297,7 +298,7 @@ public:
     void HandleOnDragCancel();
     void StartLongPressActionForWeb();
     void CancelDragForWeb();
-    void StartDragTaskForWeb();
+    bool StartDragTaskForWeb();
     void ResetDragActionForWeb();
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
@@ -432,6 +433,7 @@ private:
 
     // used in bindMenu, need to delete the old callback when bindMenu runs again
     RefPtr<ClickEvent> showMenu_;
+    RefPtr<TouchEventImpl> bindMenuTouch_;
 
     HitTestMode hitTestMode_ = HitTestMode::HTMDEFAULT;
     bool recreateGesture_ = true;

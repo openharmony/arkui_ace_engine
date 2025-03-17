@@ -1927,7 +1927,11 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag and start drag task for web,"
         "is mouse event: %{public}d", isMouseEvent_);
-    gestureHub->StartDragTaskForWeb();
+    bool result = gestureHub->StartDragTaskForWeb();
+    if (!result && isMouseEvent_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web fail, reset drag action");
+        ResetDragAction();
+    }
     return true;
 }
 
@@ -3449,20 +3453,6 @@ void WebPattern::RecordWebEvent(bool isInit)
         };
         delegate_->RegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME, methodList, false);
         EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
-        return;
-    }
-    auto cacheJsCode = EventRecorder::Get().GetCacheJsCode();
-    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB) || cacheJsCode.empty()) {
-        return;
-    }
-    delegate_->ExecuteTypeScript(cacheJsCode, [](std::string result) {});
-    EventRecorder::Get().HandleJavascriptItems(onDocumentEndScriptItems_, onDocumentEndScriptItemsByOrder_);
-    if (onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
-        UpdateJavaScriptOnDocumentEndByOrder();
-        delegate_->JavaScriptOnDocumentEndByOrder();
-    } else if (onDocumentEndScriptItems_.has_value()) {
-        UpdateJavaScriptOnDocumentEnd();
-        delegate_->JavaScriptOnDocumentEnd();
     }
 #endif
 }
@@ -6062,7 +6052,6 @@ void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
-    EventRecorder::Get().SaveJavascriptItems(scriptItems, scriptItemsByOrder);
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEndByOrder();
@@ -6085,7 +6074,6 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptItemsByOrder_ = std::nullopt;
-    EventRecorder::Get().SaveJavascriptItems(scriptItems);
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();

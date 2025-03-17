@@ -57,6 +57,7 @@ public:
     void Output(const std::string& content);
 
 private:
+    uint32_t fileSize_ = 0;
     std::function<bool()> frameDumpFunc_;
     std::unique_ptr<JsonValue> recordTree_;
     std::map<int64_t, std::unique_ptr<JsonValue>> records_;

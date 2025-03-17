@@ -45,6 +45,7 @@ public:
     void EstimateItemSize();
     void UpdatePosMap();
     void SetPosMap(int32_t index, const GridItemMainPos& pos);
+    void SetCachedPosMap(int32_t index, const GridItemMainPos& pos);
     void SetSpace(float space);
     void SetLanes(int32_t lanes);
     void SetTotalItemCount(int32_t count);
@@ -57,9 +58,8 @@ public:
 
     bool NeedPredict() const;
 private:
-    float UpdatePosMapStart();
-    void UpdatePosMapEnd();
-    float UpdateSpaceStart();
+    float UpdatePosMapStart(int32_t updateStart, int32_t updateEnd);
+    void UpdatePosMapEnd(int32_t updateEnd);
     float UpdatePosWithIter(std::map<int, GridItemMainPos>::iterator &it, int32_t& prevIndex, float& prevPos) const;
 
 private:
@@ -85,6 +85,8 @@ private:
     float cacheEndPos_ = 0.0f;
     int32_t cachedStartIndex_ = -1;
     int32_t cachedEndIndex_ = -1;
+    int32_t cachedUpdatedStart_ = INT_MAX;
+    int32_t cachedUpdatedEnd_ = -1;
     std::optional<int64_t> deadline_;
 
     friend class LazyGridLayoutAlgorithm;

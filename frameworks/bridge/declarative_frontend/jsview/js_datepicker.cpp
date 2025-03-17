@@ -511,6 +511,9 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
+        DatePickerModel::GetInstance()->UpdateUserSetSelectColor();
+    }
 }
 
 void JSDatePicker::JsOpacity(const JSCallbackInfo& info)
@@ -1198,8 +1201,8 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) ||
-        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()
         && !info[0]->IsEmpty())) {
         return;
     }
@@ -1607,6 +1610,9 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
     }
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
+        TimePickerModel::GetInstance()->UpdateUserSetSelectColor();
+    }
 }
 
 void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
@@ -1783,8 +1789,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) ||
-        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()
         && !info[0]->IsEmpty())) {
         return;
     }

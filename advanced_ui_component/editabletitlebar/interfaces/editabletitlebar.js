@@ -274,6 +274,13 @@ export class EditableTitleBar extends ViewPU {
             Row.width('100%');
             Row.flexShrink(1);
             Row.accessibilityGroup(true);
+            Row.accessibilityDescription({
+                'id': -1,
+                'type': 10003,
+                params: ['sys.string.subheader_accessibility_title'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
         }, Row);
         this.observeComponentCreation2((i66, j66) => {
             If.create();

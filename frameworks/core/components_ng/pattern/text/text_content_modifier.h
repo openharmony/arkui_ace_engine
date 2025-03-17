@@ -185,6 +185,7 @@ private:
     {
         return marqueeState_ == state;
     }
+    bool IsMarqueeVisible() const;
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;

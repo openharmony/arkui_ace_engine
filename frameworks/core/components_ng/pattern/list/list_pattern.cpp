@@ -961,6 +961,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
     currentDelta_ = lastDelta + userOffset;
+    MarkScrollBarProxyDirty();
     return true;
 }
 

@@ -1,5 +1,7 @@
 {
   "src": [
-    "pages/Index"
+    "pages/Index",
+    "pages/Scrollable/ScrollableMainPage",
+    "pages/Scrollable/ListNestedScroll1"
   ]
 }

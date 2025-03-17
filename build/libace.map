@@ -65,6 +65,8 @@
       OHOS::Ace::Platform::AceApplicationInfoImpl::*;
       OHOS::Ace::Platform::AceContainer::*;
       OHOS::Ace::Platform::FlutterAceView::*;
+      "OHOS::Ace::Platform::WindowFreeContainer::CreateWindowFreeContainer(void*, void*)";
+      "OHOS::Ace::Platform::WindowFreeContainer::DestroyWindowFreeContainer()";
       OHOS::Ace::PluginComponentManager::*;
       OHOS::Ace::Scheduler::*;
       OHOS::Ace::ScopedDelegate::*;

@@ -650,6 +650,13 @@ public:
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
     SelectionInfo GetSpansInfoByRange(int32_t start, int32_t end);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
+    bool CheckStyledStringRangeValid(int32_t start, int32_t length);
+    void UpdateSelectStyledStringStyle(int32_t start, int32_t end, KeyCode code);
+    template<typename T>
+    void UpdateSpansStyleInRange(int32_t start, int32_t end, const RefPtr<SpanBase>& baseSpan,
+        std::function<RefPtr<T>(const RefPtr<T>&)>&& updateSpanFunc);
+    void UpdateStyledStringFontStyle(int32_t start, int32_t end, const Font& font);
+    void UpdateStyledStringDecorationType(int32_t start, int32_t end, const TextDecoration& type);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
     struct UpdateSpanStyle GetUpdateSpanStyle();
@@ -1090,7 +1097,7 @@ public:
         IF_TRUE(!focusHub->RequestFocusImmediately(), isOnlyRequestFocus_ = false);
     }
 
-    DisplayMode GetBarDisplayMode()
+    DisplayMode GetBarDisplayMode() const
     {
         return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
@@ -1203,6 +1210,16 @@ public:
             return pipelineContext->GetTheme<T>(GetThemeScopeId());
         }
         return pipelineContext->GetTheme<T>();
+    }
+
+    const std::map<int32_t, AISpan>& GetAISpanMap() override
+    {
+        auto& aiSpanMap = dataDetectorAdapter_->aiSpanMap_;
+        if (aiSpanMap != lastAISpanMap_) {
+            paragraphCache_.Clear();
+            lastAISpanMap_ = aiSpanMap;
+        }
+        return aiSpanMap;
     }
 
 protected:
@@ -1692,6 +1709,7 @@ private:
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
     LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
+    std::map<int32_t, AISpan> lastAISpanMap_;
 };
 } // namespace OHOS::Ace::NG
 

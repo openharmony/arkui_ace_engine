@@ -229,6 +229,7 @@ export struct EditableTitleBar {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(true)
+        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
 
         Row() {
           this.rightMenuItemsLayout();

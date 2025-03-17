@@ -401,6 +401,7 @@ void SwiperPattern::OnModifyDone()
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
+    StopAndResetSpringAnimation();
 
     if (NeedForceMeasure()) {
         ResetOnForceMeasure();
@@ -1137,6 +1138,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         itemPositionInAnimation_ = algo->GetItemsPositionInAnimation();
         FireContentDidScrollEvent();
     }
+    itemPositionWillInvisible_.clear();
 
     UpdateLayoutProperties(algo);
     PostIdleTask(GetHost());
@@ -1674,12 +1676,14 @@ std::set<int32_t> SwiperPattern::CalcVisibleIndex(float offset) const
             pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index + 1, displayCount) : index + 1;
         }
         auto currentIndex = index - 1;
-        while (currentIndex >= pageStartIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex >= targetIndex_.value_or(currentIndex) && currentIndex >= pageStartIndex &&
+               itemPosition_.find(currentIndex) == itemPosition_.end()) {
             visibleIndex.insert(GetLoopIndex(currentIndex));
             currentIndex--;
         }
         currentIndex = index + 1;
-        while (currentIndex <= pageEndIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex <= targetIndex_.value_or(currentIndex) && currentIndex <= pageEndIndex &&
+               itemPosition_.find(currentIndex) == itemPosition_.end()) {
             visibleIndex.insert(GetLoopIndex(currentIndex));
             currentIndex++;
         }
@@ -1726,13 +1730,15 @@ void SwiperPattern::CalculateAndUpdateItemInfo(float offset)
             pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index + 1, displayCount) : index + 1;
         }
         auto currentIndex = index - 1;
-        while (currentIndex >= pageStartIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex >= targetIndex_.value_or(currentIndex) && currentIndex >= pageStartIndex &&
+               itemPosition_.find(currentIndex) == itemPosition_.end()) {
             UpdateItemInfoInCustomAnimation(currentIndex, startPos - itemPosDiff * (index - currentIndex),
                 endPos - itemPosDiff * (index - currentIndex));
             currentIndex--;
         }
         currentIndex = index + 1;
-        while (currentIndex <= pageEndIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex <= targetIndex_.value_or(currentIndex) && currentIndex <= pageEndIndex &&
+               itemPosition_.find(currentIndex) == itemPosition_.end()) {
             UpdateItemInfoInCustomAnimation(currentIndex, startPos + itemPosDiff * (currentIndex - index),
                 endPos + itemPosDiff * (currentIndex - index));
             currentIndex++;
@@ -1802,7 +1808,7 @@ void SwiperPattern::FireSwiperCustomAnimationEvent()
 
 void SwiperPattern::FireContentDidScrollEvent()
 {
-    if (indexsInAnimation_.empty()) {
+    if (indexsInAnimation_.empty() || itemPositionInAnimation_.empty()) {
         return;
     }
 
@@ -1810,7 +1816,11 @@ void SwiperPattern::FireContentDidScrollEvent()
     auto event = *onContentDidScroll_;
     CHECK_NULL_VOID(event);
     auto selectedIndex = GetCurrentIndex();
-    for (auto& item : itemPositionInAnimation_) {
+
+    SwiperLayoutAlgorithm::PositionMap mergeMap;
+    mergeMap.insert(itemPositionInAnimation_.begin(), itemPositionInAnimation_.end());
+    mergeMap.insert(itemPositionWillInvisible_.begin(), itemPositionWillInvisible_.end());
+    for (auto& item : mergeMap) {
         if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
             continue;
         }
@@ -1844,6 +1854,10 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
     }
 
     if (timeout == 0) {
+        auto item = itemPositionInAnimation_.find(index);
+        if (item != itemPositionInAnimation_.end()) {
+            itemPositionWillInvisible_[index] = item->second;
+        }
         needUnmountIndexs_.erase(index);
         itemPositionInAnimation_.erase(index);
         MarkDirtyNodeSelf();
@@ -2495,7 +2509,7 @@ void SwiperPattern::InitIndicator()
             indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
                 [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
         }
-        swiperNode->AddChild(indicatorNode);
+        swiperNode->UINode::AddChild(indicatorNode);
     } else {
         indicatorNode =
             DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetIndicatorId())));
@@ -2509,7 +2523,7 @@ void SwiperPattern::InitIndicator()
             RemoveIndicatorNode();
             indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
                 [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
-            swiperNode->AddChild(indicatorNode);
+            swiperNode->UINode::AddChild(indicatorNode);
         }
     }
     lastSwiperIndicatorType_ = indicatorType;

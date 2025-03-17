@@ -4813,6 +4813,8 @@ bool TextFieldPattern::CloseCustomKeyboard()
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
+void TextFieldPattern::OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value) {}
+
 void TextFieldPattern::UpdatePasswordIconColor(const Color& color)
 {
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
@@ -4943,8 +4945,7 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
         CalcCounterAfterFilterInsertValue(originLength, insertValue,
             static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
     }
-    int32_t newCaretIndex = offset + caretMoveLength;
-    selectController_->UpdateCaretIndex(newCaretIndex);
+    selectController_->UpdateCaretIndex(offset + caretMoveLength);
 
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, offset);
@@ -4961,6 +4962,7 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
     TwinklingByFocus();
     CloseSelectOverlay(true);
     ScrollToSafeArea();
+    ProcessResponseArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return selectController_->GetCaretIndex();
 }
@@ -6742,6 +6744,24 @@ std::string TextFieldPattern::TextInputActionToString() const
     }
 }
 
+std::string TextFieldPattern::AutoCapTypeToString() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    switch (GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) {
+        case AutoCapitalizationMode::NONE:
+            return "AutoCapitalizationMode.NONE";
+        case AutoCapitalizationMode::WORDS:
+            return "AutoCapitalizationMode.WORDS";
+        case AutoCapitalizationMode::SENTENCES:
+            return "AutoCapitalizationMode.SENTENCES";
+        case AutoCapitalizationMode::ALL_CHARACTERS:
+            return "AutoCapitalizationMode.ALL_CHARACTERS";
+        default:
+            return "AutoCapitalizationMode.NONE";
+    }
+}
+
 std::string TextFieldPattern::GetPlaceholderFont() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -7599,6 +7619,7 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     jsonShowCounter->Put("options", jsonShowCounterOptions);
     json->PutExtAttr("showCounter", jsonShowCounter, filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(keyboardAppearance_), filter);
+    json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);
 }
 
 void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -7827,6 +7848,7 @@ void TextFieldPattern::DumpInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("Content:").append(GetDumpTextValue()));
+    dumpLog.AddDesc(std::string("AutocapitalizationMode:").append(AutoCapTypeToString()));
     dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
@@ -9166,7 +9188,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     CHECK_NULL_VOID(layoutProperty);
     if (!hasPreviewText_) {
         auto fullStr = GetTextUtf16Value();
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSelected()) {
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && IsSelected()) {
             uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
             uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
             if (startIndex < fullStr.length() && endIndex <= fullStr.length()) {

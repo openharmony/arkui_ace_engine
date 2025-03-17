@@ -199,14 +199,20 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
-    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
-    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
+    void UpdateBackBlurStyle(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateBackgroundEffect(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions()) override;
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
-    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateBackBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) override;
     void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
-    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateFrontBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
-    void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
+    void UpdateFrontBlurStyle(
+        const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions = SysOptions()) override;
     void OnForegroundEffectUpdate(float radius) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
@@ -386,7 +392,7 @@ public:
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
-    void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
+    void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
     void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;

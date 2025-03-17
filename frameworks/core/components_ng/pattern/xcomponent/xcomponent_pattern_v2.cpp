@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 
@@ -72,6 +73,7 @@ void XComponentPatternV2::OnAttachToMainTree()
         XComponentPattern::OnAttachToMainTree();
         return;
     }
+    isOnTree_ = true;
     if (autoInitialize_) {
         HandleSurfaceCreated();
     }
@@ -84,9 +86,7 @@ void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& co
         XComponentPattern::BeforeSyncGeometryProperties(config);
         return;
     }
-    if (config.skipMeasure) {
-        return;
-    }
+    CHECK_EQUAL_VOID(config.skipMeasure, true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
@@ -98,6 +98,9 @@ void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& co
         return;
     }
     localPosition_ = geometryNode->GetContentOffset();
+    if (IsSupportImageAnalyzerFeature()) {
+        UpdateAnalyzerUIConfig(geometryNode);
+    }
     const auto& [offsetChanged, sizeChanged] = UpdateSurfaceRect();
     HandleSurfaceChangeEvent(offsetChanged, sizeChanged, config.frameOffsetChange);
     AddAfterLayoutTaskForExportTexture();
@@ -151,6 +154,7 @@ void XComponentPatternV2::XComponentSizeChange(const RectF& surfaceRect)
     CHECK_NULL_VOID(renderSurface_);
     auto width = surfaceRect.Width();
     auto height = surfaceRect.Height();
+    needNotifySizeChanged_ = true;
     renderSurface_->UpdateSurfaceSizeInUserData(
         static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     renderSurface_->AdjustNativeWindowSize(
@@ -171,6 +175,7 @@ void XComponentPatternV2::OnSurfaceChanged(const RectF& surfaceRect)
             callback(surfaceHolder_, surfaceRect.Width(), surfaceRect.Height());
         }
     }
+    needNotifySizeChanged_ = false;
 }
 
 void XComponentPatternV2::OnDetachFromMainTree()
@@ -180,6 +185,7 @@ void XComponentPatternV2::OnDetachFromMainTree()
         XComponentPattern::OnDetachFromMainTree();
         return;
     }
+    isOnTree_ = false;
     if (autoInitialize_) {
         HandleSurfaceDestroyed();
     }
@@ -225,6 +231,7 @@ void XComponentPatternV2::InitSurface()
     } else if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetRenderContext(renderContext);
         renderSurface_->SetIsTexture(true);
+        renderContext->OnNodeNameUpdate(GetId());
     }
     renderSurface_->InitSurface();
     renderSurface_->UpdateSurfaceConfig();
@@ -238,9 +245,7 @@ void XComponentPatternV2::InitSurface()
 
 int32_t XComponentPatternV2::HandleSurfaceCreated()
 {
-    if (isInitialized_) {
-        return ERROR_CODE_XCOMPONENT_STATE_INVALID;
-    }
+    CHECK_EQUAL_RETURN(isInitialized_, true, ERROR_CODE_XCOMPONENT_STATE_INVALID);
     CHECK_NULL_RETURN(renderSurface_, ERROR_CODE_PARAM_INVALID);
     renderSurface_->RegisterSurface();
     surfaceId_ = renderSurface_->GetUniqueId();
@@ -256,14 +261,15 @@ int32_t XComponentPatternV2::HandleSurfaceCreated()
             }
         }
     }
+    if (needNotifySizeChanged_) {
+        OnSurfaceChanged(paintRect_);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
 int32_t XComponentPatternV2::HandleSurfaceDestroyed()
 {
-    if (!isInitialized_) {
-        return ERROR_CODE_XCOMPONENT_STATE_INVALID;
-    }
+    CHECK_EQUAL_RETURN(isInitialized_, false, ERROR_CODE_XCOMPONENT_STATE_INVALID);
     isInitialized_ = false;
     CHECK_NULL_RETURN(renderSurface_, ERROR_CODE_PARAM_INVALID);
     renderSurface_->ReleaseSurfaceBuffers();
@@ -284,27 +290,21 @@ int32_t XComponentPatternV2::HandleSurfaceDestroyed()
 
 int32_t XComponentPatternV2::Initialize()
 {
-    if (usesSuperMethod_) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_EQUAL_RETURN(usesSuperMethod_, true, ERROR_CODE_PARAM_INVALID);
     isLifecycleInterfaceCalled_ = true;
     return HandleSurfaceCreated();
 }
 
 int32_t XComponentPatternV2::Finalize()
 {
-    if (usesSuperMethod_) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_EQUAL_RETURN(usesSuperMethod_, true, ERROR_CODE_PARAM_INVALID);
     isLifecycleInterfaceCalled_ = true;
     return HandleSurfaceDestroyed();
 }
 
 int32_t XComponentPatternV2::SetAutoInitialize(bool autoInitialize)
 {
-    if (usesSuperMethod_) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_EQUAL_RETURN(usesSuperMethod_, true, ERROR_CODE_PARAM_INVALID);
     isLifecycleInterfaceCalled_ = true;
     autoInitialize_ = autoInitialize;
     return ERROR_CODE_NO_ERROR;
@@ -312,9 +312,7 @@ int32_t XComponentPatternV2::SetAutoInitialize(bool autoInitialize)
 
 int32_t XComponentPatternV2::IsInitialized(bool& isInitialized)
 {
-    if (usesSuperMethod_) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_EQUAL_RETURN(usesSuperMethod_, true, ERROR_CODE_PARAM_INVALID);
     isLifecycleInterfaceCalled_ = true;
     isInitialized = isInitialized_;
     return ERROR_CODE_NO_ERROR;
@@ -326,9 +324,7 @@ void XComponentPatternV2::OnWindowHide()
         XComponentPattern::OnWindowHide();
         return;
     }
-    if (hasReleasedSurface_) {
-        return;
-    }
+    CHECK_EQUAL_VOID(hasReleasedSurface_, true);
     if (renderSurface_) {
         renderSurface_->OnWindowStateChange(false);
     }
@@ -341,9 +337,7 @@ void XComponentPatternV2::OnWindowShow()
         XComponentPattern::OnWindowShow();
         return;
     }
-    if (!hasReleasedSurface_) {
-        return;
-    }
+    CHECK_EQUAL_VOID(hasReleasedSurface_, false);
     if (renderSurface_) {
         renderSurface_->OnWindowStateChange(true);
     }

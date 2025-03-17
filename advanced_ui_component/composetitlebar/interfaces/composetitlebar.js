@@ -212,6 +212,13 @@ class ComposeTitleBar extends ViewPU {
         this.observeComponentCreation2((n20, o20) => {
             Row.create();
             Row.accessibilityGroup(true);
+            Row.accessibilityDescription({
+                'id': -1,
+                'type': 10003,
+                params: ['sys.string.subheader_accessibility_title'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            });
         }, Row);
         this.observeComponentCreation2((j20, k20) => {
             If.create();

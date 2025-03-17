@@ -101,6 +101,7 @@ ohos_source_set("preview_osal_source") {
       "trace_id_impl.cpp",
       "view_data_wrap_impl.cpp",
       "want_wrap_preview.cpp",
+      "websocket_manager.cpp",
     ]
 
     if (defined(resourceschedule_ffrt_support) &&

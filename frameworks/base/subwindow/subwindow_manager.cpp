@@ -1467,7 +1467,7 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId, Subwin
         displayId = container->GetCurrentDisplayId();
         searchKey.foldStatus =
             isSuperFoldDisplayDevice_ && (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID)
-                ? container->GetCurrentFoldStatus()
+                ? container->GetFoldStatusFromListener()
                 : FoldStatus::UNKNOWN;
     }
 

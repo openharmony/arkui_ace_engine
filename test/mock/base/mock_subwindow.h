@@ -38,6 +38,7 @@ public:
         void(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
             const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset));
     MOCK_METHOD1(ShowPreviewNG, bool(bool isStartDraggingFromSubWindow));
+    MOCK_METHOD1(SetWindowTouchable, void(bool touchable));
     MOCK_METHOD0(HidePreviewNG, void());
     MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
     MOCK_METHOD2(HideMenuNG, void(bool showPreviewAnimation, bool startDrag));

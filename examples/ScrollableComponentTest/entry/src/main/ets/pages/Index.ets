@@ -13,26 +13,46 @@
  * limitations under the License.
  */
 
+import router from '@system.router';
+
+class TextList {
+  public id: number;
+  public text: string;
+  public uri: string;
+
+  constructor(id: number, text: string, uri: string) {
+    this.id = id;
+    this.text = text;
+    this.uri = uri;
+  }
+}
+
 @Entry
 @Component
-struct Index {
-  @State message: string = 'Hello World';
-
+struct IndexPage {
+  scroll: Scroller = new Scroller()
+  @State arr: TextList[] = [
+    new TextList(1, 'ScrollableMainPage', 'pages/Scrollable/ScrollableMainPage'),
+  ]
+  @State fontSize: Resource | undefined = undefined
   build() {
-    RelativeContainer() {
-      Text(this.message)
-        .id('HelloWorld')
-        .fontSize($r('app.float.page_text_font_size'))
-        .fontWeight(FontWeight.Bold)
-        .alignRules({
-          center: { anchor: '__container__', align: VerticalAlign.Center },
-          middle: { anchor: '__container__', align: HorizontalAlign.Center }
-        })
-        .onClick(() => {
-          this.message = 'Welcome';
-        })
+    Column() {
+      Scroll(this.scroll) {
+        Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center }) {
+          ForEach(this.arr, (item: TextList) => {
+            Button(item.text)
+              .width(300)
+              .height(50)
+              .margin(10)
+              .padding({ top: 5, bottom: 5 })
+              .onClick(() => {
+                router.push({ uri: item.uri })
+              })
+          }, (item: TextList) => JSON.stringify(item.id))
+        }
+        .width('100%')
+      }
+      .scrollBar(BarState.Off)
     }
-    .height('100%')
-    .width('100%')
   }
 }

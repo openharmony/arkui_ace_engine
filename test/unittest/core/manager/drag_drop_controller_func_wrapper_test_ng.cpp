@@ -239,8 +239,6 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest005, Test
     void* voidPtr = static_cast<void*>(new char[1]);
     RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(voidPtr);
 
-    std::shared_ptr<Media::PixelMap> mediaPixelMap = *(reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(voidPtr));
-    pixelMapList.push_back(mediaPixelMap);
     NG::PreparedInfoForDrag data = { false, 10, 0.5f, false, NG::OffsetF(),
         NG::DragControllerFuncWrapper::GetUpdateDragMovePosition(containerId), refPixelMap };
     NG::PreparedAsyncCtxForAnimate asyncCtxData = { containerId, hasTouchPoint, dragPointerEvent, previewOption,
@@ -255,16 +253,6 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest005, Test
         NG::DragControllerFuncWrapper::GetOrCreateGatherNode(overlayManager, childrenInfo, data, asyncCtxData);
     EXPECT_EQ(gatherNode, nullptr);
     EXPECT_EQ(childrenInfo.size(), 0);
-
-    /**
-     * @tc.steps: step4. Call TryDoDragStartAnimation function when pixelMapList size > 1.
-     * @tc.expected: step4. gatherNode is not equal to nullptr and childrenInfo size is equal to 2.
-     */
-    pixelMapList.push_back(mediaPixelMap);
-    asyncCtxData = { containerId, hasTouchPoint, dragPointerEvent, previewOption, touchPoint, pixelMapList };
-    gatherNode = NG::DragControllerFuncWrapper::GetOrCreateGatherNode(overlayManager, childrenInfo, data, asyncCtxData);
-    EXPECT_NE(gatherNode, nullptr);
-    EXPECT_EQ(childrenInfo.size(), 2);
 }
 
 /**

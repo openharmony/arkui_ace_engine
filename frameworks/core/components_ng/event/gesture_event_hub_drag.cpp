@@ -214,19 +214,19 @@ void GestureEventHub::ResetDragActionForWeb()
     dragDropManager->ResetDragging();
 }
 
-void GestureEventHub::StartDragTaskForWeb()
+bool GestureEventHub::StartDragTaskForWeb()
 {
     if (!isReceivedDragGestureInfo_) {
         TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop StartDragTaskForWeb failed,"
                                      "because not recv gesture info");
-        return;
+        return false;
     }
 
     isReceivedDragGestureInfo_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     auto taskScheduler = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskScheduler);
+    CHECK_NULL_RETURN(taskScheduler, false);
 
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop post a task to start drag for web");
     taskScheduler->PostTask(
@@ -240,6 +240,7 @@ void GestureEventHub::StartDragTaskForWeb()
             dragEventActuator->StartDragTaskForWeb(*gestureHub->gestureInfoForWeb_);
         },
         TaskExecutor::TaskType::UI, "ArkUIGestureWebStartDrag");
+    return true;
 }
 
 RefPtr<PixelMap> CreatePixelMapFromString(const std::string& filePath)
@@ -680,6 +681,11 @@ bool GestureEventHub::ParsePixelMapAsync(DragDropInfo& dragDropInfo, const DragD
         }
     }
 
+    if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode == nullptr && dragPreviewInfo.pixelMap == nullptr &&
+        dragPreviewInfo.customNode == nullptr && pixelMap_ != nullptr && !frameNode->GetDragPreview().onlyForLifting) {
+        dragDropInfo.pixelMap = pixelMap_;
+        return true;
+    }
     if (dragPreviewInfo.pixelMap != nullptr) {
         ACE_SCOPED_TRACE("drag: handling with pixelmap directly");
         dragDropInfo.pixelMap = dragPreviewInfo.pixelMap;
@@ -905,7 +911,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto isNeedCreateTiled =
         DragDropFuncWrapper::IsNeedCreateTiledPixelMap(frameNode, dragEventActuator_, info.GetSourceDevice());
     PreparedInfoForDrag data = { isMenuShow, recordsSize, defaultPixelMapScale, isNeedCreateTiled, OffsetF(),
-        dragDropManager->GetUpdateDragMovePosition(), pixelMap, nullptr };
+        OffsetF(), pixelMap, nullptr };
     data.dragPreviewRect = RectF(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
     dragDropManager->ResetContextMenuDragPosition();
     RefPtr<Subwindow> subWindow = nullptr;
@@ -1656,6 +1662,10 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     auto overlayManager = dragNodePipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     auto isExpandDisplay = DragDropFuncWrapper::IsExpandDisplay(context);
+    auto dragDropManager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(context, dragNodePipeline,
+        subWindow, isExpandDisplay, container->GetInstanceId());
+    CHECK_NULL_RETURN(dragDropManager, false);
+    dragDropManager->SetIsDragWithContextMenu(data.isMenuShow);
 
     // create text node
     auto subWindowOffset = isExpandDisplay ? subWindow->GetWindowRect().GetOffset() : OffsetF();
@@ -1687,8 +1697,6 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     overlayManager->RemovePixelMap();
     DragAnimationHelper::ShowBadgeAnimation(textNode);
     DragAnimationHelper::HideDragNodeCopy(overlayManager);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, false);
 
     dragDropManager->DoDragStartAnimation(
         subWindowOverlayManager, info, eventHub->GetOrCreateGestureEventHub(), data);

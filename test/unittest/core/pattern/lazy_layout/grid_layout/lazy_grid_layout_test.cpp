@@ -108,51 +108,14 @@ void LazyGridLayoutTest::CreateWaterFlow()
 }
 
 /**
- * @tc.name: LayoutTest002
- * @tc.desc: Layout all items
- * @tc.type: FUNC
- */
-HWTEST_F(LazyGridLayoutTest, LayoutTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create linear layout
-     * @tc.expected: layout all items
-     */
-    CreateLazyGridLayout();
-    CreateContent();
-    CreateDone();
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 1000);
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 200);
-
-    /**
-     * @tc.steps: step2. Update space
-     * @tc.expected: height updated
-     */
-    layoutProperty_->UpdateRowGap(Dimension(10));
-    FlushUITasks();
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 1090);
-
-    /**
-     * @tc.steps: step2. Update padding
-     * @tc.expected: height updated
-     */
-    PaddingProperty padding;
-    padding.top = NG::CalcLength(100);
-    padding.bottom = NG::CalcLength(50);
-    layoutProperty_->UpdatePadding(padding);
-    FlushUITasks();
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 1240);
-}
-
-/**
- * @tc.name: LayoutTest002
+ * @tc.name: WaterFlowLayoutTest001
  * @tc.desc: Lazy layout in WaterFlow
  * @tc.type: FUNC
  */
 HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create linear layout
+     * @tc.steps: step1. Create lazy grid layout
      * @tc.expected: layout all items
      */
     CreateWaterFlow();

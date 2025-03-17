@@ -1025,6 +1025,14 @@ let SearchType;
   SearchType[SearchType.URL = 13] = 'URL';
 })(SearchType || (SearchType = {}));
 
+let AutoCapitalizationMode;
+(function (AutoCapitalizationMode) {
+  AutoCapitalizationMode[AutoCapitalizationMode["NONE"] = 0] = "NONE";
+  AutoCapitalizationMode[AutoCapitalizationMode["WORDS"] = 1] = "WORDS";
+  AutoCapitalizationMode[AutoCapitalizationMode["SENTENCES"] = 2] = "SENTENCES";
+  AutoCapitalizationMode[AutoCapitalizationMode["ALL_CHARACTERS"] = 3] = "ALL_CHARACTERS";
+})(AutoCapitalizationMode || (AutoCapitalizationMode = {}));
+
 let TextAreaType;
 (function (TextAreaType) {
   TextAreaType[TextAreaType.NORMAL = 0] = 'NORMAL';
@@ -2272,6 +2280,7 @@ class NavPathInfo {
     this.fromRecovery = false;
     this.mode = undefined;
     this.singletonMoved = false;
+    this.isForceSet = undefined;
   }
 }
 
@@ -2294,6 +2303,12 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
+  }
+  getPathStack() {
+    return this.nativeStack?.getPathStack(this);
+  }
+  setPathStack(pathStack, animated) {
+    this.nativeStack?.setPathStack(this, pathStack, animated);
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {

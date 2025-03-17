@@ -684,6 +684,7 @@ public:
         TAG_LOGI(AceLogTag::ACE_WINDOW, "fold status is changed, foldStatus: %{public}d", foldStatus);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
+        container->SetFoldStatusFromListener(static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus)));
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         ContainerScope scope(instanceId_);
@@ -2064,6 +2065,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (window_->IsDecorEnable()) {
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
+    container->InitFoldStatusFromListener();
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
@@ -3593,6 +3595,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
         container->SetApiTargetVersion(bundleInfo.targetVersion % 1000);
     }
+    container->InitFoldStatusFromListener();
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
     if (IfNeedTouchOutsideListener(window_->GetWindowName())) {
@@ -4903,7 +4906,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
     RegisterGetCurrentPageName(pipeline);
 }
 
-void UIContentImpl::RegisterGetCurrentPageName(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline)
 {
     auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
