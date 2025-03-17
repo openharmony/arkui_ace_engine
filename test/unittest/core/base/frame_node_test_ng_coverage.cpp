@@ -1352,6 +1352,45 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodIsFrameDisappear03
+ * @tc.desc: Test the function IsFrameDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->isActive_ = true;
+    frameNode->isActive_ = false;
+    frameNode->onMainTree_ = true;
+    auto context = frameNode->GetContext();
+    context->onShow_ = true;
+    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto parentLayoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function IsFrameDisappear.
+     */
+    parentNode->SetLayoutProperty(parentLayoutProperty);
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->IsFrameDisappear(TIMESTAMP_1);
+    EXPECT_TRUE(parentNode->isActive_);
+    EXPECT_TRUE(frameNode->onMainTree_);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+}
+
+/**
  * @tc.name: FrameNodeTriggerVisibleAreaChangeCallback01
  * @tc.desc: Test the function TriggerVisibleAreaChangeCallback
  * @tc.type: FUNC
@@ -2142,5 +2181,306 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithTransition0
     EXPECT_TRUE(frameNode->isActive_);
     EXPECT_TRUE(frameNode->isLayoutNode_);
     EXPECT_EQ(frameNode->overlayNode_, 1);
+}
+
+/**
+ * @tc.name: FrameNodeProcessThrottledVisibleCallback01
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    /**
+     * @tc.steps: step2. set VisibleAreaUserCallback.
+     */
+    VisibleCallbackInfo callbackInfo;
+    constexpr uint32_t minInterval = 100; // 100ms
+    int flag = 0;
+    callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
+    callbackInfo.period = minInterval;
+    frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+
+    /**
+     * @tc.steps: step3. call the function ProcessThrottledVisibleCallback.
+     */
+    frameNode->ProcessThrottledVisibleCallback(true);
+    EXPECT_TRUE(frameNode->eventHub_->GetThrottledVisibleAreaCallback().callback);
+}
+
+/**
+ * @tc.name: FrameNodeProcessThrottledVisibleCallback02
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. set VisibleAreaUserCallback.
+     */
+    VisibleCallbackInfo callbackInfo;
+    constexpr uint32_t minInterval = 100; // 100ms
+    int flag = 0;
+    callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
+    callbackInfo.period = minInterval;
+    frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+    auto context = MockPipelineContext::GetCurrentContext();
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    /**
+     * @tc.steps: step3. call the function ProcessThrottledVisibleCallback.
+     */
+    frameNode->throttledCallbackOnTheWay_ = true;
+    frameNode->ProcessThrottledVisibleCallback(false);
+    EXPECT_EQ(frameNode->throttledCallbackOnTheWay_, true);
+}
+
+/**
+ * @tc.name: FrameNodeProcessThrottledVisibleCallback03
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. set VisibleAreaUserCallback.
+     */
+    VisibleCallbackInfo callbackInfo;
+    constexpr uint32_t minInterval = 100; // 100ms
+    int flag = 0;
+    callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
+    callbackInfo.period = minInterval;
+    frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+    auto context = MockPipelineContext::GetCurrentContext();
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    
+    /**
+     * @tc.steps: step2. call the function ProcessThrottledVisibleCallback.
+     */
+    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
+    frameNode->throttledCallbackOnTheWay_ = false;
+    frameNode->ProcessThrottledVisibleCallback(false);
+    EXPECT_EQ(frameNode->throttledCallbackOnTheWay_, false);
+}
+
+/**
+ * @tc.name: FrameNodeProcessThrottledVisibleCallback04
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback04, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. set VisibleAreaUserCallback.
+     */
+    VisibleCallbackInfo callbackInfo;
+    constexpr uint32_t minInterval = 100; // 100ms
+    int flag = 0;
+    callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
+    callbackInfo.period = minInterval;
+    frameNode->lastThrottledTriggerTime_ = GetCurrentTimestamp();
+    frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+    auto context = MockPipelineContext::GetCurrentContext();
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    /**
+     * @tc.steps: step2. call the function ProcessThrottledVisibleCallback.
+     */
+    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
+    frameNode->throttledCallbackOnTheWay_ = false;
+    frameNode->ProcessThrottledVisibleCallback(false);
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionListForTouch01
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListForTouch01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. construct parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.emplace_back(responseRect);
+
+    /**
+     * @tc.steps: step3. call GetResponseRegionList.
+     * @tc.expected: expect ResponseRegion is not empty.
+     */
+    auto gestureEventHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegion(responseRegion);
+
+    auto paintRect = frameNode->renderContext_->GetPaintRectWithoutTransform();
+    frameNode->GetResponseRegionListForTouch(paintRect);
+    EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionListForTouch02
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListForTouch02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. construct parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.emplace_back(responseRect);
+
+    /**
+     * @tc.steps: step3. call GetResponseRegionList.
+     * @tc.expected: expect ResponseRegion is not empty.
+     */
+    auto gestureEventHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegion(responseRegion);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+
+    auto paintRect = frameNode->renderContext_->GetPaintRectWithoutTransform();
+    frameNode->GetResponseRegionListForTouch(paintRect);
+    EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionListForTouch03
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListForTouch03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. construct parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step3. call GetResponseRegionList.
+     * @tc.expected: expect ResponseRegion is not empty.
+     */
+    auto gestureEventHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+
+    auto paintRect = frameNode->renderContext_->GetPaintRectWithoutTransform();
+    auto responseRegionList = frameNode->GetResponseRegionListForTouch(paintRect);
+    EXPECT_FALSE(responseRegionList.empty());
+}
+
+/**
+ * @tc.name: FrameNodeProcessMouseTestHit01
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessMouseTestHit01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. construct parameters.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+
+    /**
+     * @tc.steps: step3. eventHub_ is nullptr, call ProcessMouseTestHit.
+     * @tc.expected: expect ProcessMouseTestHit is false.
+     */
+    frameNode->eventHub_ = nullptr;
+    EXPECT_FALSE(frameNode->ProcessMouseTestHit(globalPoint, parentLocalPoint, touchRestrict, result));
+
+    /**
+     * @tc.steps: step4. eventHub_ is gestureEventHub, call ProcessMouseTestHit.
+     * @tc.expected: expect ProcessMouseTestHit is false.
+     */
+    auto gestureEventHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    EXPECT_FALSE(frameNode->ProcessMouseTestHit(globalPoint, parentLocalPoint, touchRestrict, result));
+
+    /**
+     * @tc.steps: step3. call ProcessMouseTestHit.
+     * @tc.expected: expect ProcessMouseTestHit is false.
+     */
+    auto inputEventHub = frameNode->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    EXPECT_FALSE(frameNode->ProcessMouseTestHit(globalPoint, parentLocalPoint, touchRestrict, result));
+
+    /**
+     * @tc.steps: step4. call ProcessMouseTestHit.
+     * @tc.expected: expect ProcessMouseTestHit is false.
+     */
+    touchRestrict.touchEvent.SetSourceTool(SourceTool::PEN);
+    touchRestrict.touchEvent.SetType(TouchType::PROXIMITY_IN);
+    EXPECT_FALSE(frameNode->ProcessMouseTestHit(globalPoint, parentLocalPoint, touchRestrict, result));
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionListByTraversal01
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListByTraversal01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionListByTraversal.
+     * @tc.expected: expect ResponseRegion is not empty.
+     */
+    NG::RectF responseRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    std::vector<RectF> responseRegionList;
+    responseRegionList.emplace_back(responseRect);
+    auto context = MockPipelineContext::GetCurrentContext();
+    frameNode->GetResponseRegionListByTraversal(responseRegionList);
 }
 } // namespace OHOS::Ace::NG
