@@ -261,7 +261,9 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     scaleOption.SetCurve(motion);
     float previewScale = 1.0f;
-    if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE) {
+    if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE ||
+        (menuWrapperPattern->GetMenuParam().isPreviewContainScale &&
+            menuWrapperPattern->GetMenuParam().disappearScaleToTarget)) {
         auto previewGeometryNode = previewChild->GetGeometryNode();
         CHECK_NULL_VOID(previewGeometryNode);
         auto preivewSize = previewGeometryNode->GetFrameSize();
