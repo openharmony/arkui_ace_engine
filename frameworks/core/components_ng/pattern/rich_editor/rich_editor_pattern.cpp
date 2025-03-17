@@ -1305,9 +1305,13 @@ void RichEditorPattern::UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::op
         auto theme = GetTheme<RichEditorTheme>();
         CHECK_NULL_VOID(theme);
         const auto& themeTextStyle = theme->GetTextStyle();
-        spanNode->UpdateTextColor(themeTextStyle.GetTextColor());
+        const auto& textColor = themeTextStyle.GetTextColor();
+        spanNode->UpdateTextColor(textColor);
+        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(textColor));
     } else {
-        spanNode->UpdateTextColor(GetUrlSpanColor());
+        const auto& urlSpanColor = GetUrlSpanColor();
+        spanNode->UpdateTextColor(urlSpanColor);
+        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(urlSpanColor));
     }
 }
 
