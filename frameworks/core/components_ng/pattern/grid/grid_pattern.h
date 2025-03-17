@@ -239,6 +239,8 @@ public:
 
     bool IsPredictOutOfRange(int32_t index) const;
 
+    bool IsPredictInRange(int32_t index) const;
+
     bool IsReverse() const override;
 
     Axis GetAxis() const override

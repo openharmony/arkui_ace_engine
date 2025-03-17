@@ -91,7 +91,10 @@ void DragDropInitiatingStateLifting::HandlePanOnReject()
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsGatherWithMenu()) {
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (manager->IsGatherWithMenu() || !params.hasGatherNode) {
         return;
     }
     manager->RemoveGatherNodeWithAnimation();
@@ -211,7 +214,8 @@ bool DragDropInitiatingStateLifting::CheckDoShowPreview(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(frameNode, false);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
-    if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview()) {
+    bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
+    if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() || isMenuShow) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because of bind context menu");
         return false;
     }

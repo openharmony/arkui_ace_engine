@@ -40,7 +40,7 @@ Rect SvgPath::GetobjectBoundingBox(const SvgLengthScaleRule& lengthRule)
 {
     if (lengthRule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
         LOGD("SvgPath::GetobjectBoundingBox : objectBoundingBox");
-        return lengthRule.GetBaseRect();
+        return lengthRule.GetContainerRect();
     }
     LOGD("SvgPath::GetobjectBoundingBox : userSpaceOnUse");
     Rect objectBoundingBox(0, 0, 1, 1);

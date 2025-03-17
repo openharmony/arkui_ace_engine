@@ -23,6 +23,7 @@ class __RepeatImpl<T> {
     //
     private mkRepeatItem_: (item: T, index?: number) =>__RepeatItemFactoryReturn<T>;
     private onMoveHandler_?: OnMoveHandler;
+    private itemDragEventHandler?: ItemDragEventHandler;
 
     private key2Item_ = new Map<string, __RepeatItemInfo<T>>();
 
@@ -38,6 +39,7 @@ class __RepeatImpl<T> {
         this.keyGenFunction_ = config.keyGenFunc;
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
+        this.itemDragEventHandler = config.itemDragEventHandler;
 
         isInitialRender ? this.initialRender() : this.reRender();
     }
@@ -71,7 +73,7 @@ class __RepeatImpl<T> {
         });
         let removedChildElmtIds = new Array<number>();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
-        RepeatNative.onMove(this.onMoveHandler_);
+        RepeatNative.onMove(this.onMoveHandler_, this.itemDragEventHandler);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`__RepeatImpl: initialRender elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
@@ -151,14 +153,14 @@ class __RepeatImpl<T> {
         // C++  tempChildren.clear() , trigger re-layout
         let removedChildElmtIds = new Array<number>();
         // Fetch the removedChildElmtIds from C++ to unregister those elmtIds with UINodeRegisterProxy
-        RepeatNative.onMove(this.onMoveHandler_);
+        RepeatNative.onMove(this.onMoveHandler_, this.itemDragEventHandler);
         RepeatNative.finishRender(removedChildElmtIds);
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         stateMgmtConsole.debug(`__RepeatImpl: reRender elmtIds need unregister after repeat render: ${JSON.stringify(removedChildElmtIds)}`);
     }
 
     private afterAddChild(): void {
-        if (this.onMoveHandler_ == undefined || this.onMoveHandler_ == null) {
+        if (this.onMoveHandler_ === undefined || this.onMoveHandler_ === null) {
             return;
         }
         RepeatNative.afterAddChild();

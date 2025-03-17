@@ -39,9 +39,7 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t he
     InitBitmap();
     // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetDefaultTextAlign();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         isPathChanged_ = false;
         isPath2dChanged_ = false;
     }

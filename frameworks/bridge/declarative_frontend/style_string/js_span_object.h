@@ -78,6 +78,7 @@ public:
     static void ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsWordBreak(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsLeadingMargin(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseParagraphSpacing(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
         std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin);
     void GetTextAlign(const JSCallbackInfo& info);
@@ -92,6 +93,8 @@ public:
     void GetWordBreak(const JSCallbackInfo& info);
     void SetLeadingMargin(const JSCallbackInfo& info);
     void GetLeadingMargin(const JSCallbackInfo& info);
+    void GetParagraphSpacing(const JSCallbackInfo& info);
+    void SetParagraphSpacing(const JSCallbackInfo& info);
 
     static bool IsPixelMap(const JSRef<JSVal>& jsValue);
 

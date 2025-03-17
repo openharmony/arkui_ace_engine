@@ -114,11 +114,7 @@ public:
         return unit_;
     }
 
-    double GetDensity()
-    {
-        double density = PipelineBase::GetCurrentDensity();
-        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
-    }
+    double GetDensity();
 
 private:
     TransformParam transform_;

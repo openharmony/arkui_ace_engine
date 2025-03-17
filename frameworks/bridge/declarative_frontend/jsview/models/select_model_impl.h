@@ -58,6 +58,7 @@ public:
     void SetSpace(const Dimension& value) override;
     void SetArrowPosition(const ArrowPosition value) override;
     void SetMenuAlign(const MenuAlign& menuAlign) override;
+    void SetAvoidance(const Avoidance& avoidance) override;
     void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
     void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
     void SetOptionWidth(const Dimension& value) override;
