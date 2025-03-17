@@ -258,7 +258,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             hasChanged = true;
             continue;
         }
-        navDestination->SetCanReused(false);
+        navDestination->SetInCurrentStack(false);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         if (eventHub) {
             eventHub->FireChangeEvent(false);
