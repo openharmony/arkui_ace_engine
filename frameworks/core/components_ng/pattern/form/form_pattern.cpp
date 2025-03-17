@@ -2576,11 +2576,11 @@ void FormPattern::ReAddStaticFormSnapshotTimer()
     TAG_LOGI(AceLogTag::ACE_FORM, "ReAddStaticFormSnapshotTimer.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::string nodeIdStr = std::to_string(host->GetId());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
+    std::string nodeIdStr = std::to_string(host->GetId());
     executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
     HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S, nodeIdStr);
 }
