@@ -9,6 +9,6 @@
         "panda:sdk:sync": "node ./sync-panda-on-device.mjs"
     },
     "dependencies": {
-        "@panda/sdk": "file:./panda-sdk-1.5.0-dev.21851.tgz"
+        "@panda/sdk": "file:./panda-sdk-1.5.0-dev.22843.tgz"
     }
 }
