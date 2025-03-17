@@ -993,6 +993,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         itemPositionInAnimation_ = algo->GetItemsPositionInAnimation();
         FireContentDidScrollEvent();
     }
+    itemPositionWillInvisible_.clear();
 
     autoLinearReachBoundary = false;
     bool isJump = false;
@@ -1542,14 +1543,18 @@ void SwiperPattern::FireSwiperCustomAnimationEvent()
 
 void SwiperPattern::FireContentDidScrollEvent()
 {
-    if (indexsInAnimation_.empty()) {
+    if (indexsInAnimation_.empty() || itemPositionInAnimation_.empty()) {
         return;
     }
 
     CHECK_NULL_VOID(onContentDidScroll_);
     auto event = *onContentDidScroll_;
     auto selectedIndex = GetCurrentIndex();
-    for (auto& item : itemPositionInAnimation_) {
+
+    SwiperLayoutAlgorithm::PositionMap mergeMap;
+    mergeMap.insert(itemPositionInAnimation_.begin(), itemPositionInAnimation_.end());
+    mergeMap.insert(itemPositionWillInvisible_.begin(), itemPositionWillInvisible_.end());
+    for (auto& item : mergeMap) {
         if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
             continue;
         }
@@ -1584,6 +1589,10 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
     }
 
     if (timeout == 0) {
+        auto item = itemPositionInAnimation_.find(index);
+        if (item != itemPositionInAnimation_.end()) {
+            itemPositionWillInvisible_[index] = item->second;
+        }
         needUnmountIndexs_.erase(index);
         itemPositionInAnimation_.erase(index);
         MarkDirtyNodeSelf();
