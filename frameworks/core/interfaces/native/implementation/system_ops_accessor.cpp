@@ -46,7 +46,9 @@ void RestoreInstanceIdImpl()
     ContainerScope::UpdateCurrent(restoreInstanceIds_.back());
     restoreInstanceIds_.pop_back();
 }
-Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName, const Ark_String* moduleName, const Array_String* params)
+Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
+                            const Ark_String* moduleName,
+                            const Array_String* params)
 {
     auto valueBundleName = Converter::Convert<std::string>(*bundleName);
     auto valueModuleName = Converter::Convert<std::string>(*moduleName);
