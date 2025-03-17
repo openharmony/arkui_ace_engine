@@ -45,8 +45,7 @@ const auto ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE = "FontStyle.Normal";
 const auto ATTRIBUTE_FONT_WEIGHT_NAME = "fontWeight";
 const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE = "FontWeight.Normal";
 const auto ATTRIBUTE_FONT_FAMILY_NAME = "fontFamily";
-const auto ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE = "Harmony"
-                                                 "OS Sans";
+const auto ATTRIBUTE_FONT_FAMILY_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_TEXT_SHADOW_I_RADIUS_NAME = "radius";
 const auto ATTRIBUTE_TEXT_SHADOW_I_RADIUS_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_TEXT_SHADOW_I_TYPE_NAME = "type";
@@ -504,7 +503,7 @@ HWTEST_F(TextClockModifierTest, setFontWeightTestFontWeightInvalidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockModifierTest, DISABLED_setFontFamilyTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextClockModifierTest, setFontFamilyTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -551,7 +550,7 @@ HWTEST_F(TextClockModifierTest, setFontFamilyTestFontFamilyValidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockModifierTest, DISABLED_setFontFamilyTestFontFamilyInvalidValues, TestSize.Level1)
+HWTEST_F(TextClockModifierTest, setFontFamilyTestFontFamilyInvalidValues, TestSize.Level1)
 {
     Ark_ResourceStr initValueFontFamily;
 

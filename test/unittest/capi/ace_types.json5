@@ -5070,8 +5070,6 @@
                 "setTextClockOptionsTestValidValues",
                 "setDateTimeOptionsTestValidValues",
                 "setFontSizeTestFontSizeInvalidValues",
-                "setFontFamilyTestDefaultValues",
-                "setFontFamilyTestFontFamilyInvalidValues",
                 "setTextShadowTestDefaultValues",
                 "setTextShadowTestTextShadowShadowOptionsRadiusValidValues",
                 "setTextShadowTestTextShadowShadowOptionsRadiusInvalidValues",
@@ -5118,7 +5116,7 @@
                 },
                 {
                     "name": "fontFamily",
-                    "default": "Harmony\"\"OS Sans",
+                    "default": "",
                     "type": "FontFamily"
                 },
                 {
@@ -5148,7 +5146,7 @@
                             "name": "fill",
                             "default": ""
                         },
-                   ]
+                    ]
                 },
                 {
                     "name": "fontFeature",
