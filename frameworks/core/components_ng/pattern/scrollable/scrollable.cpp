@@ -79,9 +79,6 @@ constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.00025f;
 
-constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
-constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
-constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
 constexpr float CROWN_START_FRICTION_VELOCITY_THRESHOLD = 6.0f;
 #else
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
@@ -101,6 +98,10 @@ Scrollable::~Scrollable()
         PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
         AceAsyncTraceEndCommercial(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") +
             nodeTag_).c_str());
+        if (!context_.Invalid()) {
+            auto context = context_.Upgrade();
+            context->SetUiDvsyncSwitch(false);
+        }
     }
     StopFrictionAnimation();
     StopSpringAnimation();
@@ -173,6 +174,7 @@ void Scrollable::InitPanRecognizerNG()
     SetOnActionUpdate();
     SetOnActionEnd();
     SetOnActionCancel();
+    SetPanEndCallback();
 }
 
 void Scrollable::SetOnActionStart()
@@ -204,18 +206,37 @@ void Scrollable::SetOnActionEnd()
         auto scroll = weakScroll.Upgrade();
         CHECK_NULL_VOID(scroll);
         scroll->HandleDragEnd(info);
-        if (scroll->panActionEndEvents_.empty()) {
-            scroll->isDragging_ = false;
-            return;
-        }
-        std::for_each(scroll->panActionEndEvents_.begin(), scroll->panActionEndEvents_.end(),
-            [info](GestureEventFunc& event) {
-                auto gestureInfo = info;
-                event(gestureInfo);
-            });
+        scroll->ProcessPanActionEndEvents(info);
         scroll->isDragging_ = false;
     };
     panRecognizerNG_->SetOnActionEnd(actionEnd);
+}
+
+void Scrollable::SetPanEndCallback()
+{
+    CHECK_NULL_VOID(panRecognizerNG_);
+    auto panEndCallback = [weakScroll = AceType::WeakClaim(this)](GestureEvent& info) {
+        auto scroll = weakScroll.Upgrade();
+        if (scroll) {
+            auto tempInfo = info;
+            tempInfo.SetMainDelta(0.0);
+            tempInfo.SetMainVelocity(0.0);
+            ACE_SCOPED_TRACE("Trigger PanEndCallback, id:%d, tag:%s", scroll->nodeId_, scroll->nodeTag_.c_str());
+            scroll->HandleDragEnd(tempInfo, true);
+            scroll->ProcessPanActionEndEvents(tempInfo);
+            scroll->isDragging_ = false;
+        }
+    };
+    panRecognizerNG_->SetPanEndCallback(panEndCallback);
+}
+
+void Scrollable::ProcessPanActionEndEvents(const GestureEvent& info)
+{
+    CHECK_NULL_VOID(!panActionEndEvents_.empty());
+    std::for_each(panActionEndEvents_.begin(), panActionEndEvents_.end(), [info](GestureEventFunc& event) {
+        auto gestureInfo = info;
+        event(gestureInfo);
+    });
 }
 
 void Scrollable::SetOnActionCancel()
@@ -262,6 +283,16 @@ void Scrollable::ListenDigitalCrownEvent(const RefPtr<FrameNode>& frameNode)
         return true;
     };
     focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto scroll = weak.Upgrade();
+        CHECK_NULL_VOID(scroll);
+        GestureEvent info;
+        info.SetSourceDevice(SourceType::CROWN);
+        info.SetSourceTool(SourceTool::UNKNOWN);
+        scroll->HandleCrownActionCancel(info);
+    };
+    focusHub->SetOnBlurInternal(std::move(blurTask));
 }
 
 double Scrollable::GetCrownRotatePx(const CrownEvent& event) const
@@ -316,16 +347,13 @@ void Scrollable::HandleCrownEvent(const CrownEvent& event, const OffsetF& center
 
     switch (event.action) {
         case CrownAction::BEGIN:
-            reachBoundary_ = false;
             crownEventNum_ = 0;
             TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->BEGIN]");
             HandleCrownActionBegin(event.timeStamp, mainDelta, info);
-            StartVibrateFeedback();
             break;
         case CrownAction::UPDATE:
             TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->UPDATE]");
             HandleCrownActionUpdate(event.timeStamp, mainDelta, info);
-            StartVibrateFeedback();
             break;
         case CrownAction::END:
             TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->END]");
@@ -352,6 +380,9 @@ void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainD
 
 void Scrollable::HandleCrownActionUpdate(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info)
 {
+    if (!isCrownEventDragging_) {
+        return;
+    }
     UpdateCrownVelocity(timeStamp, mainDelta, false);
     info.SetMainDelta(mainDelta);
     info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
@@ -360,6 +391,9 @@ void Scrollable::HandleCrownActionUpdate(const TimeStamp& timeStamp, double main
 
 void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info)
 {
+    if (!isCrownEventDragging_) {
+        return;
+    }
     if (NearZero(mainDelta)) {
         info.SetMainDelta(crownVelocityTracker_.GetMainAxisDeltaPos());
         info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
@@ -390,7 +424,7 @@ void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDel
 
 void Scrollable::HandleCrownActionCancel(GestureEvent& info)
 {
-    if (!isDragging_) {
+    if (!isDragging_ || !isCrownEventDragging_) {
         return;
     }
 
@@ -407,19 +441,6 @@ void Scrollable::HandleCrownActionCancel(GestureEvent& info)
         });
     isDragging_ = false;
     isCrownDragging_ = false;
-}
-
-void Scrollable::StartVibrateFeedback()
-{
-    if (!GetCrownEventDragging()) {
-        return;
-    }
-    crownEventNum_ = (reachBoundary_ ? 0 : (crownEventNum_ + 1));
-    if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
-    } else if (reachBoundary_) {
-        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
-    }
 }
 #endif
 
@@ -744,7 +765,7 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
     currentVelocity_ = std::clamp(currentVelocity_, -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
 }
 
-void Scrollable::HandleDragEnd(const GestureEvent& info)
+void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
 {
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s, "
         "dragCnt:%{public}d", info.GetMainVelocity(), nodeId_, nodeTag_.c_str(), dragCount_);
@@ -754,12 +775,14 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         return;
     }
     // avoid no render frame when drag end
-    if (NearZero(info.GetMainDelta())) {
-        auto tempInfo = info;
-        tempInfo.SetMainDelta(lastMainDelta_);
-        HandleDragUpdate(tempInfo);
-    } else {
-        HandleDragUpdate(info);
+    if (!isFromPanEnd) {
+        if (NearZero(info.GetMainDelta())) {
+            auto tempInfo = info;
+            tempInfo.SetMainDelta(lastMainDelta_);
+            HandleDragUpdate(tempInfo);
+        } else {
+            HandleDragUpdate(info);
+        }
     }
     ReportToDragFRCScene(info.GetMainVelocity(), NG::SceneStatus::END);
     bool isScrollFromTouchPad = info.GetSourceTool() == SourceTool::TOUCHPAD;

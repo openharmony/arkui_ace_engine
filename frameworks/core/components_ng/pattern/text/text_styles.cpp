@@ -82,6 +82,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
         UPDATE_TEXT_STYLE(textLineStyle, LineBreakStrategy, SetLineBreakStrategy);
         UPDATE_TEXT_STYLE(textLineStyle, AllowScale, SetAllowScale);
+        UPDATE_TEXT_STYLE(textLineStyle, ParagraphSpacing, SetParagraphSpacing);
     }
 }
 

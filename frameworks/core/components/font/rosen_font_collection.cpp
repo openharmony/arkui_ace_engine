@@ -63,65 +63,85 @@ void RosenFontCollection::InitializeFontCollection()
     });
 }
 
-void RosenFontCollection::LoadThemeFont(const char* fontFamily, std::unique_ptr<char[]> buffer, size_t size)
+void RosenFontCollection::LoadThemeFont(
+    const char* fontFamily, const std::vector<std::pair<const uint8_t*, size_t>>& data)
 {
     const std::string familyName = fontFamily;
-    const uint8_t* data = reinterpret_cast<uint8_t*>(buffer.get());
-    if (fontCollection_) {
-        fontCollection_->LoadThemeFont("", nullptr, 0);
-        TAG_LOGI(AceLogTag::ACE_FONT, "LoadThemeFont [%{public}s:%{public}d]", familyName.c_str(),
-            static_cast<int32_t>(size));
-        fontCollection_->LoadThemeFont(familyName, data, size);
+    CHECK_NULL_VOID(fontCollection_);
+    fontCollection_->ClearThemeFont();
+    TAG_LOGI(AceLogTag::ACE_FONT, "LoadThemeFont:%{public}s", familyName.c_str());
+    auto typeface = fontCollection_->LoadThemeFont(familyName, data);
+    if (typeface.size() != data.size()) {
+        fontCollection_->ClearThemeFont();
+        TAG_LOGW(AceLogTag::ACE_FONT, "LoadThemeFont failed, familyName:%{public}s", familyName.c_str());
     }
 }
 
-void RosenFontCollection::LoadFontFamily(const char* fontFamily, const char* familySrc)
+void RosenFontCollection::LoadFontFamily(const char* fontFamily, const std::vector<std::string>& familySrc)
 {
-    const std::string path = familySrc;
-    if (currentFamily_ == path) {
+    if (currentFamily_.size() == familySrc.size() &&
+        std::equal(currentFamily_.begin(), currentFamily_.end(), familySrc.begin())) {
         TAG_LOGI(AceLogTag::ACE_FONT, "This font has already been registered.");
         return;
     }
     InitializeFontCollection();
-    auto ret = StdFilesystemExists(path);
-    if (!ret) {
-        TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily %{public}s not exist", path.c_str());
+    for (const auto& path : familySrc) {
+        auto ret = StdFilesystemExists(path);
+        if (!ret) {
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily %{public}s not exist", path.c_str());
+            return;
+        }
+    }
+    std::vector<std::pair<std::unique_ptr<char[]>, size_t>> buffers;
+    if (!LoadFontBuffers(familySrc, buffers)) {
         return;
     }
+    currentFamily_ = familySrc;
+    std::vector<std::pair<const uint8_t*, size_t>> fontData;
+    for (const auto& buffer : buffers) {
+        fontData.emplace_back(reinterpret_cast<const uint8_t*>(buffer.first.get()), buffer.second);
+    }
+    LoadThemeFont(fontFamily, fontData);
+}
 
-    std::ifstream ifs(path, std::ios_base::in);
-    if (!ifs.is_open()) {
-        TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily file open fail, %{public}s", path.c_str());
-        return;
-    }
-    ifs.seekg(0, ifs.end);
-    if (!ifs.good()) {
+bool RosenFontCollection::LoadFontBuffers(
+    const std::vector<std::string>& familySrc, std::vector<std::pair<std::unique_ptr<char[]>, size_t>>& buffers)
+{
+    for (const auto& path : familySrc) {
+        std::ifstream ifs(path, std::ios_base::in);
+        if (!ifs.is_open()) {
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily file open fail, %{public}s", path.c_str());
+            return false;
+        }
+        ifs.seekg(0, ifs.end);
+        if (!ifs.good()) {
+            ifs.close();
+            TAG_LOGW(AceLogTag::ACE_FONT, "font file is bad");
+            return false;
+        }
+        auto size = ifs.tellg();
+        if (ifs.fail()) {
+            ifs.close();
+            TAG_LOGW(AceLogTag::ACE_FONT, "get size failed");
+            return false;
+        }
+        ifs.seekg(ifs.beg);
+        if (!ifs.good()) {
+            ifs.close();
+            TAG_LOGW(AceLogTag::ACE_FONT, "file seek failed");
+            return false;
+        }
+        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size);
+        ifs.read(buffer.get(), size);
+        if (!ifs.good()) {
+            ifs.close();
+            TAG_LOGW(AceLogTag::ACE_FONT, "read file failed");
+            return false;
+        }
         ifs.close();
-        TAG_LOGW(AceLogTag::ACE_FONT, "font file is bad");
-        return;
+        buffers.emplace_back(std::move(buffer), static_cast<size_t>(size));
     }
-    auto size = ifs.tellg();
-    if (ifs.fail()) {
-        ifs.close();
-        TAG_LOGW(AceLogTag::ACE_FONT, "get size failed");
-        return;
-    }
-    ifs.seekg(ifs.beg);
-    if (!ifs.good()) {
-        ifs.close();
-        TAG_LOGW(AceLogTag::ACE_FONT, "file seek failed");
-        return;
-    }
-    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size);
-    ifs.read(buffer.get(), size);
-    if (!ifs.good()) {
-        ifs.close();
-        TAG_LOGW(AceLogTag::ACE_FONT, "read file failed");
-        return;
-    }
-    ifs.close();
-    currentFamily_ = path;
-    LoadThemeFont(fontFamily, std::move(buffer), size);
+    return true;
 }
 
 bool RosenFontCollection::StdFilesystemExists(const std::string &path)

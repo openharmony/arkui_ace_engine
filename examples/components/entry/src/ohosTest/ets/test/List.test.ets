@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import AlphabetIndexerBootcampTest from './InformationDisplay/AlphabetIndexerBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  AlphabetIndexerBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

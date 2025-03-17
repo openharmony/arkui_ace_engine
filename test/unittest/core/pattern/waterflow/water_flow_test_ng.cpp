@@ -80,6 +80,7 @@ void WaterFlowTestNg::TearDown()
     pattern_ = nullptr;
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
+    paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
@@ -94,6 +95,7 @@ void WaterFlowTestNg::GetWaterFlow()
     pattern_ = frameNode_->GetPattern<WaterFlowPattern>();
     eventHub_ = frameNode_->GetEventHub<WaterFlowEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<WaterFlowLayoutProperty>();
+    paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<WaterFlowAccessibilityProperty>();
     positionController_ = pattern_->GetOrCreatePositionController();
 }
@@ -309,6 +311,22 @@ RectF WaterFlowTestNg::GetLazyChildRect(int32_t itemIndex)
 RefPtr<FrameNode> WaterFlowTestNg::GetItem(int32_t index, bool isCache)
 {
     return AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(index, isCache));
+}
+
+RefPtr<WaterFlowPaintMethod> WaterFlowTestNg::UpdateOverlayModifier()
+{
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<WaterFlowPaintMethod> paintMethod = AceType::DynamicCast<WaterFlowPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    return paintMethod;
+}
+
+RefPtr<WaterFlowPaintMethod> WaterFlowTestNg::UpdateContentModifier()
+{
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<WaterFlowPaintMethod> paintMethod = AceType::DynamicCast<WaterFlowPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    return paintMethod;
 }
 
 /**

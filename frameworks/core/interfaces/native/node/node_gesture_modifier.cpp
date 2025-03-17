@@ -236,6 +236,7 @@ void ConvertTouchPointsToPoints(GestureEvent& info, std::vector<TouchPoint>& tou
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(touchPoint.sourceTool);
         points[i].operatingHand = fingureIterator == fingureEnd ? 0 : fingureIterator->operatingHand_;
@@ -322,6 +323,7 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
     rawInputEvent.actionTouchPoint.tiltX = info->GetTiltX().value_or(0.0f);
     rawInputEvent.actionTouchPoint.tiltY = info->GetTiltY().value_or(0.0f);
+    rawInputEvent.actionTouchPoint.rollAngle = info->GetRollAngle().value_or(0.0f);
     rawInputEvent.actionTouchPoint.toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
     rawInputEvent.actionTouchPoint.pressure = info->GetForce();
     std::array<ArkUITouchPoint, MAX_POINTS> points;
@@ -337,6 +339,7 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
         points[i].nodeY = fingureIterator->localLocation_.GetY();
         points[i].tiltX = rawInputEvent.actionTouchPoint.tiltX;
         points[i].tiltY = rawInputEvent.actionTouchPoint.tiltY;
+        points[i].rollAngle = rawInputEvent.actionTouchPoint.rollAngle;
         fingureIterator++;
     }
     rawInputEvent.touchPointes = &(points[0]);
@@ -730,10 +733,13 @@ void setGestureInterrupterToNodeWithUserData(
     ArkUINodeHandle node, void* userData, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     auto onGestureRecognizerJudgeBegin =
-        [frameNode, userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
+        [weak = AceType::WeakClaim(frameNode), userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
             const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        auto node = weak.Upgrade();
+        CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
         GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
@@ -768,8 +774,7 @@ void setGestureInterrupterToNodeWithUserData(
         ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
         interruptInfo.inputEvent = &inputEvent;
         interruptInfo.gestureEvent = &arkUIGestureEvent;
-
-        auto touchRecognizers = CreateTouchRecognizers(frameNode, info, interruptInfo);
+        auto touchRecognizers = CreateTouchRecognizers(AceType::RawPtr(node), info, interruptInfo);
         auto result = interrupter(&interruptInfo);
         delete[] othersRecognizer;
         DestroyTouchRecognizers(touchRecognizers, interruptInfo);

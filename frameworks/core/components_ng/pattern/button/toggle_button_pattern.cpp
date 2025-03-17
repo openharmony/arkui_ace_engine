@@ -186,6 +186,14 @@ void ToggleButtonPattern::HandleHoverEvent(bool isHover)
         CHECK_NULL_VOID(renderContext);
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             MOUSE_HOVER_DURATION, Curves::FRICTION);
+        if (isHover) {
+            SetToggleScale(renderContext);
+        } else {
+            if (isScale_) {
+                isScale_ = false;
+                renderContext->SetScale(1.0f, 1.0f);
+            }
+        }
     }
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
@@ -336,8 +344,6 @@ void ToggleButtonPattern::SetFocusButtonStyle(RefPtr<FrameNode>& textNode,
     CHECK_NULL_VOID(textLayoutProperty);
     CHECK_NULL_VOID(toggleTheme_);
     CHECK_NULL_VOID(renderContext);
-    auto&& transform = renderContext->GetOrCreateTransform();
-    CHECK_NULL_VOID(transform);
 
     isTextColor_ = textLayoutProperty->GetTextColor() == toggleTheme_->GetTextColor();
     if (isTextColor_) {
@@ -345,12 +351,7 @@ void ToggleButtonPattern::SetFocusButtonStyle(RefPtr<FrameNode>& textNode,
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
     }
-    float sacleFocus = toggleTheme_->GetScaleFocus();
-    VectorF scale(sacleFocus, sacleFocus);
-    if (!transform->HasTransformScale() || transform->GetTransformScaleValue() == scale) {
-        isScale_ = true;
-        renderContext->SetScale(sacleFocus, sacleFocus);
-    }
+    SetToggleScale(renderContext);
     Shadow shadowValue = isOffState
         ? Shadow::CreateShadow(static_cast<ShadowStyle>(toggleTheme_->GetShadowNormal()))
         : Shadow::CreateShadow(ShadowStyle::None);
@@ -418,6 +419,19 @@ void ToggleButtonPattern::HandleBlurEvent()
     SetIsFocus(false);
     RemoveIsFocusActiveUpdateEvent();
     UpdateButtonStyle();
+}
+
+void ToggleButtonPattern::SetToggleScale(RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(toggleTheme_);
+    auto&& transform = renderContext->GetOrCreateTransform();
+    CHECK_NULL_VOID(transform);
+    float sacleHoverOrFocus = toggleTheme_->GetScaleHoverOrFocus();
+    VectorF scale(sacleHoverOrFocus, sacleHoverOrFocus);
+    if (!transform->HasTransformScale() || transform->GetTransformScaleValue() == scale) {
+        isScale_ = true;
+        renderContext->SetScale(sacleHoverOrFocus, sacleHoverOrFocus);
+    }
 }
 
 void ToggleButtonPattern::SetAccessibilityAction()

@@ -364,6 +364,13 @@ void SelectModelNG::SetMenuAlign(const MenuAlign& menuAlign)
     pattern->SetMenuAlign(menuAlign);
 }
 
+void SelectModelNG::SetAvoidance(const Avoidance& avoidance)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAvoidance(avoidance);
+}
+
 void SelectModelNG::SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent)
 {
     auto hub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<SelectEventHub>();
@@ -578,6 +585,13 @@ void SelectModelNG::SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlig
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuAlign(menuAlign);
+}
+
+void SelectModelNG::SetAvoidance(FrameNode* frameNode, const Avoidance& avoidance)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAvoidance(avoidance);
 }
 
 void SelectModelNG::SetValue(FrameNode* frameNode, const std::string& value)

@@ -177,7 +177,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     MeasureRow(layoutWrapper, leftRow, childConstraint);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
-    float contentWidth;
+    float contentWidth = 0.0f;
     if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         contentWidth = leftRowWidth + rightRowWidth + middleSpace_;
     } else {
@@ -229,7 +229,7 @@ void MenuItemLayoutAlgorithm::MeasureRow(LayoutWrapper* layoutWrapper, const Ref
     float rowWidth = 0.0f;
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    float rowHeight;
+    float rowHeight = 0.0f;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         rowHeight = isOption_ ? 0.0f : minItemHeight_;
     } else {
@@ -319,7 +319,7 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     itemHeight += GetDividerStroke(layoutWrapper);
     auto clickableArea = layoutWrapper->GetOrCreateChildByIndex(CLICKABLE_AREA_VIEW_INDEX);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        float height;
+        float height = 0.0f;
         if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             height = std::max(itemHeight, minItemHeight_);
         } else {
@@ -612,8 +612,8 @@ void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const
     auto leftRowSize = leftRow ? leftRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     auto rightRowSize = rightRow ? rightRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
-    float rowsHeight;
-    float itemHeight;
+    float rowsHeight = 0.0f;
+    float itemHeight = 0.0f;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         rowsHeight = GreatNotEqual(userHeight_, 0.0f)
             ? userHeight_ - padding_.Height()

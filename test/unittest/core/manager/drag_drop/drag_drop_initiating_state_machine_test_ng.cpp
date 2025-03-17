@@ -80,6 +80,7 @@ HWTEST_F(DragDropInitiatingStateMachineTestNG, DragDropInitiatingStateMachineTes
         ASSERT_NE(handler, nullptr);
         auto machine = handler->initiatingFlow_;
         ASSERT_NE(machine, nullptr);
+        machine->InitializeState();
         machine->currentState_ = static_cast<int32_t>(testCase.originStatus);
         EXPECT_TRUE(DragDropInitiatingStateTestNG::CheckDragDropInitiatingStatus(
             caseNum, static_cast<DragDropInitiatingStatus>(machine->currentState_), testCase.expectStatus));

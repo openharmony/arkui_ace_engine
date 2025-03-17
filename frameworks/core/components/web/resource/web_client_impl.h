@@ -292,7 +292,7 @@ public:
     bool OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
         OHOS::NWeb::SslError error, const std::vector<std::string>& certChainData) override;
 
-    void OnAccessibilityEvent(int64_t accessibilityId, int32_t eventType) override;
+    void OnAccessibilityEventV2(int64_t accessibilityId, int32_t eventType, const std::string& argument) override;
 
     bool IsCurrentFocus() override;
 

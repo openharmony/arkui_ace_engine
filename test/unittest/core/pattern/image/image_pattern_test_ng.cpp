@@ -397,7 +397,7 @@ HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
     imagePattern->animator_->AttachScheduler(pipeline);
     SystemProperties::debugEnabled_ = true;
     imagePattern->animator_->status_ = OHOS::Ace::Animator::Status::PAUSED;
-    imagePattern->imageType_ = ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
     imagePattern->OnVisibleAreaChange(true, 1.0f);
     EXPECT_EQ(imagePattern->animator_->status_, OHOS::Ace::Animator::Status::RUNNING);
 }
