@@ -20,7 +20,7 @@ import { LazyForEachType, PeerNode, PeerNodeType } from "./PeerNode";
 import { LazyForEachOps } from "./generated/ArkLazyForEachOpsMaterialized"
 import { DataChangeListener, InternalListener } from "./DataChangeListener";
 
-export { DataChangeListener } from "./DataChangeListener"; // temporary compilation workaround
+export { DataChangeListener } from "./DataChangeListener";
 
 /**
  * Developers need to implement this interface to provide data to LazyForEach component.
@@ -159,25 +159,26 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
-    let current = rememberMutableState<int32>(-1)
-    let mark = rememberMutableState<pointer>(nullptr)
+    let startIndex = rememberMutableState<int32>(-1)
+    let endIndex = rememberMutableState<int32>(-1)
 	let version = rememberMutableState<int32>(0)
 	// console.log(`LazyForEach current=${current.value} version=${version.value} mark=${mark.value}`)
 
     let parent = contextNode<PeerNode>()
     const offset = getOffset(parent, __id())
 
-    let listener = remember(() => new InternalListener(parent.peer.ptr))
-    listener.flush(offset)
+    let listener = remember(() => new InternalListener(parent.peer.ptr, version))
+    const changeIndex = listener.flush(offset) // first item index that's affected by DataChange
 
-    const currentLocal = current.value >= 0 ? Math.max(current.value - offset, 0) as int32 : -1; // translated to local index
-    const visibleRange = new VisibleRange(parent, currentLocal, currentLocal)
+    const localStart = startIndex.value >= 0 ? Math.max(startIndex.value - offset, 0) as int32 : -1; // translated to local index
+    const localEnd = localStart + endIndex.value - startIndex.value
+    const visibleRange = new VisibleRange(parent, localStart, localEnd)
     remember(() => {
         dataSource.registerDataChangeListener(listener)
-        LazyForEachManager.OnRangeUpdate(visibleRange.parent, dataSource.totalCount() as int32, (currentIndex: int32, currentMark: pointer, end: int32) => {
+        LazyForEachManager.OnRangeUpdate(visibleRange.parent, dataSource.totalCount() as int32, (start: int32, currentMark: pointer, end: int32) => {
             // console.log(`LazyForEach[${parent}]: current updated to ${currentIndex} ${currentMark} end=${end}`)
-            current.value = currentIndex
-            mark.value = currentMark
+            startIndex.value = start
+            endIndex.value = end
             version.value++
         })
     })
@@ -188,13 +189,14 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
     let index: number = visibleRange.indexUp as number
 
     LazyForEachManager.Prepare(parent, dataSource.totalCount() as int32, offset)
-    LazyForEachManager.SetInsertMark(parent, mark.value, false)
+    LazyForEachManager.SetInsertMark(parent, nullptr, false)
 	while (true) {
         // console.log(`LazyForEach[${parent}]: index=${index}`)
-	    if (index < 0 || index >= dataSource.totalCount()) break
-	    const element: T = dataSource.getData(index as number)
-	    memoEntry2<T, number, void>(
-	        __context(),
+        if (index < 0 || index >= dataSource.totalCount()) break
+        if (index >= changeIndex) break // detach nodes after ChangeIndex
+        const element: T = dataSource.getData(index as number)
+        memoEntry2<T, number, void>(
+            __context(),
             generator(element, index),
             (element: T, index: number): void => { itemGenerator(element, index) },
 	        element,
@@ -203,11 +205,12 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
         let moreUp = visibleRange.needFillUp()
         if (moreUp && visibleRange.indexUp > 0) {
             index = --visibleRange.indexUp
+        } else if (index < visibleRange.indexDown) {
+            ++index // to prune unnecessary interops. These are existing scopes, so SetInsertMark can be arbitrary
         } else if (visibleRange.needFillDown()) {
             index = ++visibleRange.indexDown
         } else {
-            // console.log("No more needed")
-            index = -1
+            index = -1 // terminate
         }
         LazyForEachManager.SetInsertMark(parent, moreUp ? visibleRange.markUp : visibleRange.markDown, moreUp)
 	}

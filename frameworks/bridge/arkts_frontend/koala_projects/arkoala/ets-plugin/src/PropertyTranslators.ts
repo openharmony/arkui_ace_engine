@@ -112,6 +112,12 @@ export abstract class PropertyTranslator {
     translateToUpdate(): ts.Statement | undefined {
         return undefined
     }
+    /**
+     * re-assign values when struct is reused. Called in RebindStates
+     */
+    translateToReuse(): ts.Statement | undefined {
+        return this.translateToUpdate()
+    }
 
     createStateOf(type: ts.TypeNode | undefined, ...initializer: ts.Expression[]): ts.Expression {
         return createStateOf(this.context.importer, type, ...initializer)
@@ -486,6 +492,14 @@ class State extends PropertyTranslator {
             )
         )
     }
+
+    override translateToReuse(): ts.Statement | undefined {
+        const name = this.propertyName
+        return ts.factory.createIfStatement(
+            createNullableAccessor(initializers(), name),
+            assignToField(name, createNotNullAccessor(initializers(), name))
+        )
+    }
 }
 
 class Prop extends PropertyTranslator {
@@ -527,6 +541,11 @@ class Link extends PropertyTranslator {
     }
     translateToInitialization(): ts.Statement {
         return translateToInitializationFromInitializers(backingField(this.propertyName))
+    }
+
+    override translateToReuse(): ts.Statement | undefined {
+        const name = this.propertyName
+        return assignToBackingField(name, createNotNullAccessor(initializers(), backingField(name)))
     }
 }
 

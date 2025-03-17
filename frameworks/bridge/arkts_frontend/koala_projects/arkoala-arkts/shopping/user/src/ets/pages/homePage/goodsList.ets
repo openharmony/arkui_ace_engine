@@ -43,6 +43,55 @@ class GoodListSource implements IDataSource<Number> {
   listeners: Array<DataChangeListener> = new Array<DataChangeListener>()
 }
 
+@Reusable
+@Component
+struct GGGItem {
+  @State data: ProductDataModel = new ProductDataModel('/resources/homeImg/imgLoads/product001.png', 'XX设备 优惠直购', '尊享', '￥4122.0', 0)
+  @State ratio: number = 1
+  build() {
+    GridItem() {
+      Column() {
+        Image(this.data.uri)
+          .width('100%')
+          .height('40%')
+          .objectFit(ImageFit.Contain)
+          .margin({ bottom: 40 } as Margin)
+        Text(this.data.title)
+          .fontSize(16 * this.ratio)
+          .fontWeight(600)
+          .margin({ bottom: 10, left: 10 } as Margin)
+        Row() {
+          Text(this.data.labels)
+            .fontSize(10 * this.ratio)
+            .border({ width: 1, color: '#FA808080' } as BorderOptions)
+            .margin({ bottom: 2, left: 10 } as Margin)
+            .padding(2)
+        }
+      .margin({ bottom: 2 } as Margin)
+
+        Text(`￥`)
+          .fontSize(16 * this.ratio)
+          .fontColor(Color.Red)
+          .margin({ left: 10 } as Margin)
+      }
+      .alignItems(HorizontalAlign.Start)
+    }
+    .width('95%')
+    .height(300)
+    .border({ width: 1, color: '#70808080', radius: 10 } as BorderOptions)
+    .margin({ top: 3, bottom: 3 } as Margin)
+    .backgroundColor(Color.White)
+  }
+
+  aboutToReuse(parma: Object) {
+    console.log(`reusing, new data = ${this.data}`)
+  }
+
+  aboutToRecycle() {
+    console.log("recycling")
+  }
+}
+
 @Component
 export struct GoodsList {
   @State data: GoodListSource = new GoodListSource();
@@ -61,45 +110,14 @@ export struct GoodsList {
     Column() {
       Grid() {
         LazyForEach<Number>(this.data, (item: Number, index: number): void => {
-          GridItem() {
-            Column() {
-              Image(this.productData[item.valueOf() % 14].uri)
-                .width('100%')
-                .height('40%')
-                .objectFit(ImageFit.Contain)
-                .margin({ bottom: 40 } as Margin)
-              Text(this.productData[item.valueOf() % 14].title)
-                .fontSize(16 * this.ratio)
-                .fontWeight(600)
-                .margin({ bottom: 10, left: 10 } as Margin)
-              Row() {
-                Text(this.productData[item.valueOf() % 14].labels)
-                  .fontSize(10 * this.ratio)
-                  .border({ width: 1, color: '#FA808080' } as BorderOptions)
-                  .margin({ bottom: 2, left: 10 } as Margin)
-                  .padding(2)
-              }
-              .margin({ bottom: 2 } as Margin)
-
-              Text(`￥${item.valueOf() + 1}`)
-                .fontSize(16 * this.ratio)
-                .fontColor(Color.Red)
-                .margin({ left: 10 } as Margin)
-            }
-            .alignItems(HorizontalAlign.Start)
-          }
-          .width('95%')
-          .height(300)
-          .border({ width: 1, color: '#70808080', radius: 10 } as BorderOptions)
-          .margin({ top: 3, bottom: 3 } as Margin)
-          .backgroundColor(Color.White)
+          GGGItem({ data: this.productData[item.valueOf() % 14], ratio: this.ratio })
         }, (item: Number, index: number): string => JSON.stringify(item.valueOf()))
       }
       .columnsTemplate('1fr 1fr')
-      .padding({ bottom: 60 } as Padding)
-      .onScrollIndex((first: number, second: number) => {
-        this.GridIndex = Number(first)
-      })
+        .padding({ bottom: 60 } as Padding)
+        .onScrollIndex((first: number, second: number) => {
+          this.GridIndex = Number(first)
+        })
     }
     .width('100%')
     .backgroundColor('#10000000')

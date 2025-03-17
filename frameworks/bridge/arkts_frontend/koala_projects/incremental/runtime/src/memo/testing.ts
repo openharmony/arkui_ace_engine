@@ -17,6 +17,7 @@ import { uint32 } from "@koalaui/common"
 import { GlobalStateManager } from "../states/GlobalStateManager"
 import { ComputableState, State, StateManager } from "../states/State"
 import { IncrementalNode } from "../tree/IncrementalNode"
+import { Disposable } from "../states/Disposable"
 import { memoRoot } from "./entry"
 import { NodeAttach } from "./node"
 
@@ -45,6 +46,28 @@ export class TestNode extends IncrementalNode {
         content: (node: TestNode) => void
     ) {
         NodeAttach(() => new TestNode(), content)
+    }
+
+}
+
+/* parent node that has a Reusable pool */
+export class ReusableTestNode extends TestNode {
+    reusePool = new Map<string, Array<Disposable>>()
+
+    override reuse(reuseKey: string): Disposable | undefined {
+        if (this.reusePool!.has(reuseKey)) {
+            const scopes = this.reusePool!.get(reuseKey)!;
+            return scopes.pop();
+        }
+        return undefined;
+    }
+
+    override recycle(reuseKey: string, child: Disposable): boolean {
+        if (!this.reusePool!.has(reuseKey)) {
+            this.reusePool!.set(reuseKey, new Array<Disposable>());
+        }
+        this.reusePool!.get(reuseKey)!.push(child);
+        return true
     }
 }
 

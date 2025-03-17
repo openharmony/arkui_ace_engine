@@ -16,6 +16,7 @@
 import { pointer, nullptr } from "@koalaui/interop";
 import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation, DataMoveOperation, DataExchangeOperation, LazyForEachOps } from "./generated";
 import { int32 } from "@koalaui/common"
+import { MutableState } from "@koalaui/runtime";
 
 export interface DataChangeListener {
     onDataReloaded(): void;
@@ -31,93 +32,114 @@ export interface DataChangeListener {
 }
 
 export class InternalListener implements DataChangeListener {
-    parent: pointer = nullptr
-    startIndex = Number.NEGATIVE_INFINITY // Tracks the minimum item index that has changed
-    endIndex = Number.NEGATIVE_INFINITY
-    changeCount = 0 // Tracks the number of items added or deleted
+    parent: pointer
+    startIndex: number // Tracks the minimum item index that has changed
+    endIndex: number
+    changeCount: number // Tracks the number of items added or deleted
+    version: MutableState<int32> // reference to mark LazyForEach dirty
 
-    constructor(parent: pointer) {
-        this.parent = parent;
+    constructor(parent: pointer, version: MutableState<int32>) {
+        this.parent = parent
+        this.startIndex = Number.POSITIVE_INFINITY
+        this.endIndex = Number.NEGATIVE_INFINITY
+        this.changeCount = 0
+        this.version = version
     }
     /**
      * Notify the change of data to backend
+     * @return the index of the first changed item
      */
-    flush(offset: int32): void {
-        if (this.startIndex === Number.NEGATIVE_INFINITY) {
-            return
+    flush(offset: int32): number {
+        if (this.startIndex === Number.POSITIVE_INFINITY) {
+            return Number.POSITIVE_INFINITY // none affected
         }
-        // Notify the change with the cached index and count
         LazyForEachOps.NotifyChange(
             this.parent,
             this.startIndex as int32 + offset,
             this.endIndex as int32 + offset,
             this.changeCount as int32
         );
+        const firstAffected = this.startIndex
         // Reset the cache after flushing
-        this.startIndex = Number.NEGATIVE_INFINITY;
+        this.startIndex = Number.POSITIVE_INFINITY;
         this.endIndex = Number.NEGATIVE_INFINITY;
         this.changeCount = 0;
+        return firstAffected
     }
 
     onDataReloaded(): void {
         this.startIndex = 0;
         this.endIndex = Number.POSITIVE_INFINITY
+        ++this.version.value
     }
 
     onDataAdd(index: number): void {
+        if (index < 0) return
         this.startIndex = Math.min(this.startIndex, index);
         ++this.changeCount
+        ++this.version.value
     }
 
     onDataMove(from: number, to: number): void {
+        if (from < 0 || to < 0) return
         this.startIndex = Math.min(this.startIndex, Math.min(from, to));
         this.endIndex = Math.max(this.endIndex, Math.max(from, to));
+        ++this.version.value
     }
 
     onDataDelete(index: number): void {
+        if (index < 0) return
         this.startIndex = Math.min(this.startIndex, index);
         --this.changeCount
+        ++this.version.value
     }
 
     onDataChange(index: number): void {
+        if (index < 0) return
         this.startIndex = Math.min(this.startIndex, index);
+        ++this.version.value
     }
 
     onDatasetChange(dataOperations: DataOperation[]): void {
-        // Iterate through each operation and update the cache
+        let startIndex = Number.NEGATIVE_INFINITY
+        let endIndex = Number.NEGATIVE_INFINITY
+        let changeCount = 0
         for (const operation of dataOperations) {
             switch (operation.type) {
                 case DataOperationType.ADD: {
-                    const addOp = operation as DataAddOperation;
-                    this.onDataAdd(addOp.index)
+                    startIndex = Math.min(startIndex, (operation as DataAddOperation).index);
+                    ++changeCount
                     break;
                 }
                 case DataOperationType.DELETE: {
-                    const deleteOp = operation as DataDeleteOperation;
-                    this.onDataDelete(deleteOp.index)
+                    startIndex = Math.min(startIndex, (operation as DataDeleteOperation).index);
+                    --changeCount
                     break;
                 }
                 case DataOperationType.CHANGE: {
-                    const changeOp = operation as DataChangeOperation;
-                    this.onDataChange(changeOp.index)
+                    startIndex = Math.min(startIndex, (operation as DataChangeOperation).index);
                     break;
                 }
                 case DataOperationType.MOVE: {
                     const moveOp = operation as DataMoveOperation;
-                    this.onDataMove(moveOp.index.from, moveOp.index.to)
+                    startIndex = Math.min(startIndex, Math.min(moveOp.index.from, moveOp.index.to));
+                    endIndex = Math.max(endIndex, Math.max(moveOp.index.from, moveOp.index.to));
                     break;
                 }
                 case DataOperationType.EXCHANGE: {
                     const exchangeOp = operation as DataExchangeOperation;
-                    this.onDataMove(exchangeOp.index.start, exchangeOp.index.end)
+                    startIndex = Math.min(startIndex, Math.min(exchangeOp.index.start, exchangeOp.index.end));
+                    endIndex = Math.max(endIndex, Math.max(exchangeOp.index.start, exchangeOp.index.end));
                     break;
                 }
                 case DataOperationType.RELOAD: {
-                    this.onDataReloaded()
+                    startIndex = 0;
+                    endIndex = Number.POSITIVE_INFINITY
                     break;
                 }
             }
         }
+        this.flush(startIndex as int32) // this.flush(startIndex, endIndex, changeCount)
     }
 
     /* deprecated */

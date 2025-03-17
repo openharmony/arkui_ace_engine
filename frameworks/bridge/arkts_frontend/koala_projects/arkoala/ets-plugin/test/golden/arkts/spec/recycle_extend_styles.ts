@@ -1,4 +1,4 @@
-import { ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, ArkCommonMethodInterface, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, Color, ColumnOptions, stateOf } from "@koalaui/arkts-arkui";
+import { ArkButton, ArkButtonComponent, ArkColumn, ArkCommonMethodComponent, ArkCommonMethodInterface, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkReusableStruct, ArkText, ArkTextComponent, Color, ColumnOptions, stateOf } from "@koalaui/arkts-arkui";
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
@@ -9,7 +9,7 @@ function fancybut__Button<T extends ArkButtonComponent>(ButtonInstance: T, color
         .height(100);
 }
 /** @memo:stable */
-class ArkExtendComponentComponent extends ArkStructBase<ArkExtendComponentComponent, ExtendComponentOptions> {
+class ArkExtendComponentComponent extends ArkReusableStruct<ArkExtendComponentComponent, ExtendComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
     /** @memo */
@@ -22,6 +22,10 @@ class ArkExtendComponentComponent extends ArkStructBase<ArkExtendComponentCompon
     }
     private set width_value(value: string) {
         this.__backing_width_value!.value = observableProxy(value);
+    }
+    __rebindStates(initializers?: ExtendComponentOptions): void {
+        if (initializers?.width_value)
+            this.width_value = initializers!.width_value!;
     }
     /** @memo */
     __build(/**/
@@ -44,7 +48,7 @@ function globalFancy<T extends ArkCommonMethodInterface<T>>(CommonInstance: T): 
     return CommonInstance.backgroundColor(Color.Red);
 }
 /** @memo:stable */
-class ArkStylesComponentComponent extends ArkStructBase<ArkStylesComponentComponent, StylesComponentOptions> {
+class ArkStylesComponentComponent extends ArkReusableStruct<ArkStylesComponentComponent, StylesComponentOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
     /** @memo */
@@ -73,6 +77,12 @@ class ArkStylesComponentComponent extends ArkStructBase<ArkStylesComponentCompon
     }
     private set size_value(value: number) {
         this.__backing_size_value!.value = observableProxy(value);
+    }
+    __rebindStates(initializers?: StylesComponentOptions): void {
+        if (initializers?.width_value)
+            this.width_value = initializers!.width_value!;
+        if (initializers?.size_value)
+            this.size_value = initializers!.size_value!;
     }
     /** @memo */
     componentFancy<T extends ArkCommonMethodInterface<T>>(CommonInstance: T): T {
@@ -130,7 +140,7 @@ content?: () => void, initializers?: ExtendComponentOptions): void {
     const updatedInitializers: ExtendComponentOptions = {
         __backing_width_value: initializers?.__backing_width_value
     };
-    ArkExtendComponentComponent._instantiate(style, () => new ArkExtendComponentComponent, content, updatedInitializers);
+    ArkExtendComponentComponent._instantiate(style, () => new ArkExtendComponentComponent, content, updatedInitializers, "ArkExtendComponentComponent");
 }
 /** @memo */
 export function StylesComponent(/**/
@@ -143,7 +153,7 @@ content?: () => void, initializers?: StylesComponentOptions): void {
         __backing_width_value: initializers?.__backing_width_value,
         __backing_size_value: initializers?.__backing_size_value
     };
-    ArkStylesComponentComponent._instantiate(style, () => new ArkStylesComponentComponent, content, updatedInitializers);
+    ArkStylesComponentComponent._instantiate(style, () => new ArkStylesComponentComponent, content, updatedInitializers, "ArkStylesComponentComponent");
 }
 export interface ExtendComponentOptions {
     __backing_width_value?: MutableState<string>;

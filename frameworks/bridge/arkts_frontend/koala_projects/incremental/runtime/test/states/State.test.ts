@@ -24,7 +24,7 @@ export function key(value: string): KoalaCallsiteKey {
     return parseInt(hash, 16)
 }
 
-function assertNode(state: State<TestNode>, presentation: string) {
+export function assertNode(state: State<TestNode>, presentation: string) {
     assert.isFalse(state.modified) // the same node
     assert.equal(state.value.toHierarchy(), presentation)
 }

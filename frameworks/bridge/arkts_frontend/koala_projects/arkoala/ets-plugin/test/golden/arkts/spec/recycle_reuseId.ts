@@ -1,4 +1,4 @@
-import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, Color, SyncedProperty, propState, stateOf } from "@koalaui/arkts-arkui";
+import { ArkColumn, ArkCommonMethodComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkReusableStruct, ArkStructBase, Color, SyncedProperty, propState, stateOf } from "@koalaui/arkts-arkui";
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
@@ -56,7 +56,7 @@ class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent,
     }
 }
 /** @memo:stable */
-class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
+class ArkchildComponent extends ArkReusableStruct<ArkchildComponent, childOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
     /** @memo */
@@ -81,6 +81,10 @@ class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
     /** @memo */
     __updateStruct(initializers: childOptions | undefined): void {
         this.__backing_propvalue?.update(initializers?.propvalue);
+    }
+    __rebindStates(initializers?: childOptions): void {
+        this.__backing_propvalue?.update(initializers?.propvalue);
+        this.__backing_linkvalue = initializers!.__backing_linkvalue!;
     }
     /** @memo */
     __build(/**/
@@ -115,7 +119,7 @@ content?: () => void, initializers?: childOptions): void {
         __backing_propvalue: initializers?.__backing_propvalue,
         __backing_linkvalue: initializers?.__backing_linkvalue
     };
-    ArkchildComponent._instantiate(style, () => new ArkchildComponent, content, updatedInitializers);
+    ArkchildComponent._instantiate(style, () => new ArkchildComponent, content, updatedInitializers, "ArkchildComponent");
 }
 export interface HomeComponentOptions {
     __backing_state_value?: MutableState<string>;

@@ -20,6 +20,7 @@ import { Importer } from "./Importer";
 
 export const ComponentDecorator = "Component"
 export const EntryDecorator = "Entry"
+export const ReusableDecorator = "Reusable"
 export const LocalStoragePropertyName = "_entry_local_storage_"
 
 export const StateDecorator = "State"
@@ -63,6 +64,7 @@ export enum RewriteNames {
     Initializers = "initializers",
     InitializeStruct = "__initializeStruct",
     UpdateStruct = "__updateStruct",
+    RebindStates = "__rebindStates",
     ApplyStyle = "__applyStyle",
     ApplyAnimatableExtend = "__applyAnimatableExtend"
 }

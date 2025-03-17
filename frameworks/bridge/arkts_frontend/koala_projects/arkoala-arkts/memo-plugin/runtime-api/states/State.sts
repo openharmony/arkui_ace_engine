@@ -65,7 +65,7 @@ export declare interface StateContext {
     namedState<Value>(name: string, create: () => Value, global?: boolean, equivalent?: Equivalent<Value>, tracker?: ValueTracker<Value>): MutableState<Value>
     stateBy<Value>(name: string, global?: boolean): MutableState<Value> | undefined
     valueBy<Value>(name: string, global?: boolean): Value
-    scope<Value>(id: KoalaCallsiteKey, paramCount?: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean): InternalScope<Value>
+    scope<Value>(id: KoalaCallsiteKey, paramCount?: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean, reuseKey?: string): InternalScope<Value>
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope
 }
 export declare interface ValueTracker<Value> {

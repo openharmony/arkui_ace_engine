@@ -1,5 +1,5 @@
 import { int32 } from "@koalaui/common"
-import { IncrementalNode } from "@koalaui/runtime"
+import { Disposable, IncrementalNode, scheduleCallback } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer } from "./generated/peers/ArkStaticComponentsPeer"
@@ -16,6 +16,11 @@ export class PeerNode extends IncrementalNode {
     protected static currentId: int32 = InitialID
     static nextId(): int32 { return ++PeerNode.currentId }
     private id: int32
+    private _onReuse?: () => void
+    private _onRecycle?: () => void
+    // Pool to store recycled child scopes, grouped by type
+    private _reusePool?: Map<string, Array<Disposable>>
+    private _reusable: boolean = false
 
     setId(id: int32) {
         PeerNode.peerNodeMap.delete(this.id)
@@ -25,6 +30,55 @@ export class PeerNode extends IncrementalNode {
 
     getId(): int32 {
         return this.id
+    }
+
+    onReuse(): void {
+        if (!this._reusable) {
+            this._reusable = true // becomes reusable after initial mount
+        } else {
+            this._onReuse?.() // could change states
+        }
+        // traverse subtree to notify all children
+        for (let child = this.firstChild; child; child = child!.nextSibling) {
+            if (child instanceof PeerNode)
+                (child as PeerNode)!.onReuse()
+        }
+    }
+
+    onRecycle(): void {
+        this._onRecycle?.()
+        // traverse subtree to notify all children
+        for (let child = this.firstChild; child; child = child!.nextSibling) {
+            if (child instanceof PeerNode)
+                (child as PeerNode)!.onRecycle()
+        }
+    }
+
+    override reuse(reuseKey: string): Disposable | undefined {
+        if (this._reusePool === undefined)
+            return undefined
+        if (this._reusePool!.has(reuseKey)) {
+            const scopes = this._reusePool!.get(reuseKey)!;
+            return scopes.pop();
+        }
+        return undefined;
+    }
+
+    override recycle(reuseKey: string, child: Disposable): boolean {
+        if (!this._reusePool)
+            this._reusePool = new Map<string, Array<Disposable>>()
+        if (!this._reusePool!.has(reuseKey)) {
+            this._reusePool!.set(reuseKey, new Array<Disposable>());
+        }
+        this._reusePool!.get(reuseKey)!.push(child);
+        return true
+    }
+
+    setOnRecycle(cb: () => void): void {
+        this._onRecycle = cb
+    }
+    setOnReuse(cb: () => void): void {
+        this._onReuse = cb
     }
 
     private static peerNodeMap = new Map<number, PeerNode>()
@@ -66,21 +120,35 @@ export class PeerNode extends IncrementalNode {
                     if (node!.isKind(PeerNodeType)) {
                         sibling = node as PeerNode
                         break
+                    }
                 }
+                this.peer.insertChildAfter(peerPtr, sibling?.peer?.ptr ?? nullptr)
+                scheduleCallback(() => peer!.onReuse())
             }
-            this.peer.insertChildAfter(peerPtr, sibling?.peer?.ptr ?? nullptr)
+        }
+        this.onChildRemoved = (child: IncrementalNode) => {
+            if (child.isKind(PeerNodeType) && !child.disposed) {
+                const peer = child as PeerNode
+                peer.onRecycle()
             }
         }
         this.name = name
     }
-    applyAttributes(attrs: Object) {}
-    dispose(): void {
+    applyAttributes(attrs: Object) { }
+
+    override dispose(): void {
         let parent = this.parent
         if (parent != undefined && parent.isKind(PeerNodeType)) {
             (parent as PeerNode).peer.removeChild(this.peer.ptr)
         }
         this.peer.close()
         PeerNode.peerNodeMap.delete(this.id)
+        this._reusePool?.forEach((value: Array<Disposable>) =>
+            value.forEach((disposable: Disposable) => disposable.dispose())
+        )
+        this._reusePool = undefined
+        this._onRecycle = undefined
+        this._onReuse = undefined
         super.dispose()
     }
 }
