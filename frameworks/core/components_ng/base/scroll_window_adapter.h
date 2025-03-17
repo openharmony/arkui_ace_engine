@@ -64,7 +64,7 @@ public:
     // return the mark item which new item will insert after or before.
     FrameNode* NeedMoreElements(FrameNode* markItem, FillDirection direction);
 
-    void RegisterUpdater(std::function<void(int32_t, void*)>&& updater)
+    void RegisterUpdater(std::function<void(int32_t, int32_t, void*)>&& updater)
     {
         updaters_.emplace_back(updater); // need to figure out when to detach updaters
     }
@@ -90,11 +90,11 @@ private:
     FrameNode* GetChildPtrByIndex(uint32_t index);
 
     /**
-     * @brief Call updaters with @c markIdx to request recomposition.
+     * @brief Call updaters with @c range to request recomposition.
      *
-     * @param markIdx
+     * @param currentrange
      */
-    void RequestRecompose(int32_t markIdx) const;
+    void RequestRecompose(const ItemRange& currentRange) const;
 
     /**
      * @brief Determine if more items can be filled in @c direction to reach targetIdx_
@@ -106,11 +106,11 @@ private:
     RefPtr<FillAlgorithm> fillAlgorithm_;
     FrameNode* container_ = nullptr;
 
-    int32_t markIndex_ = -1;
+    ItemRange range_;
     int32_t totalCount_ = 0;
 
-    using FrontendUpdater = std::function<void(int32_t, void*)>;
-    std::list<FrontendUpdater> updaters_;
+    using FrontendUpdater = std::function<void(int32_t, int32_t, void*)>;
+    std::list<FrontendUpdater> updaters_; // use list to support multiple LazyForEach
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> indexToNode_;
     std::unordered_map<FrameNode*, int32_t> nodeToIndex_;
@@ -129,6 +129,6 @@ private:
     };
     std::unique_ptr<PendingJump> jumpPending_; // to perform a jump on the next recomposition
     std::unique_ptr<PendingJump> target_;      // to scroll with animation to target index
-    bool rangeMode_ = false;                   // true if providing item range to frontend directly
+    bool parallelMode_ = false;                // true if providing item range to frontend directly
 };
 } // namespace OHOS::Ace::NG

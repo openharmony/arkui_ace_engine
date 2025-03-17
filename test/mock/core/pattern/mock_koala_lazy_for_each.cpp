@@ -23,24 +23,27 @@ namespace OHOS::Ace::NG {
 void MockKoalaLazyForEach::Register()
 {
     auto adapter = parent_->GetPattern()->GetOrCreateScrollWindowAdapter();
-    adapter->RegisterUpdater([this](int32_t s, void* pointer) {
-        // frontend
-        std::cout << "update " << s << std::endl;
-        Update(s, pointer);
+    adapter->RegisterUpdater([this](int32_t s, int32_t e, void* pointer) {
+        // mocked frontend
+        Update(s, e, pointer);
     });
     adapter->SetTotalCount(totalCnt_);
 }
 
-void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, void* pointer)
+void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, int32_t e, void* pointer)
 {
     bool insertInFront = false;
     auto* insertRef = (FrameNode*)pointer;
-    VisibleRange visibleRange(parent_, s, s);
+    VisibleRange visibleRange(parent_, s, e);
     int32_t index = s;
 
     parent_->GetScrollWindowAdapter()->Prepare(0);
     while (true) {
         if (index < 0 || index >= totalCnt_) {
+            break;
+        }
+        if (index >= changeIndex_) {
+            visibleRange.indexDown_ = changeIndex_;
             break;
         }
 
@@ -56,6 +59,8 @@ void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, void* pointer)
         bool moreUp = visibleRange.NeedFillUp();
         if (moreUp && visibleRange.indexUp_ > 0) {
             index = --visibleRange.indexUp_;
+        } else if (index < visibleRange.indexDown_) {
+            ++index;
         } else if (visibleRange.NeedFillDown()) {
             index = ++visibleRange.indexDown_;
         } else {
@@ -75,9 +80,10 @@ void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, void* pointer)
             ++it;
         }
     }
+    changeIndex_ = INT_MAX;
 }
 
-void MockKoalaLazyForEach::RangeModeUpdate(int32_t s, int32_t e)
+void MockKoalaLazyForEach::ParallelModeUpdate(int32_t s, int32_t e)
 {
     while (!parent_->GetChildren().empty()) {
         parent_->RemoveChildAtIndex(0);
@@ -91,9 +97,9 @@ void MockKoalaLazyForEach::RangeModeUpdate(int32_t s, int32_t e)
     parent_->GetScrollWindowAdapter()->Prepare(0);
 }
 
-void MockKoalaLazyForEach::Update(int32_t s, void* pointer)
+void MockKoalaLazyForEach::Update(int32_t s, int32_t e, void* pointer)
 {
-    taskQ_.push([=]() { NormalModeUpdate(s, pointer); });
+    taskQ_.push([=]() { NormalModeUpdate(s, e, pointer); });
 }
 
 RefPtr<FrameNode> MockKoalaLazyForEach::CreateItem(int32_t idx)
@@ -132,5 +138,10 @@ bool VisibleRange::NeedFillDown()
         return false;
     markDown_ = more;
     return true;
+}
+
+void MockKoalaLazyForEach::MarkDataUpdate(int32_t changeIndex)
+{
+    changeIndex_ = changeIndex;
 }
 } // namespace OHOS::Ace::NG

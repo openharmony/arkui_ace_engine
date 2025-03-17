@@ -64,30 +64,30 @@ HWTEST_F(WaterFlowArkoalaTest, Basic001, TestSize.Level1)
 
     UpdateCurrentOffset(-400.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 12));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 12));
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 2);
     EXPECT_EQ(GetChildRect(frameNode_, 12).ToString(), "RectT (0.00, 670.00) - [240.00 x 137.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (240.00, -100.00) - [240.00 x 287.00]");
 
     UpdateCurrentOffset(-500.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(7, 18));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 17));
     EXPECT_EQ(GetChildRect(frameNode_, 10).ToString(), "RectT (0.00, 52.00) - [240.00 x 118.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 15).ToString(), "RectT (0.00, 476.00) - [240.00 x 234.00]");
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(480.0f), CalcLength(1200.0f)));
     FlushLayoutTask(frameNode_);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(7, 22));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(7, 20));
     EXPECT_EQ(GetChildRect(frameNode_, 19).ToString(), "RectT (0.00, 918.00) - [240.00 x 270.00]");
 
     UpdateCurrentOffset(300.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(5, 18));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(5, 20));
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 4));
 
     UpdateCurrentOffset(-51.0f);
-    IncrementAndLayout(__LINE__);
+    EXPECT_FALSE(lazy_.NeedRecompose());
     EXPECT_EQ(lazy_.GetRange(), std::pair(5, 20));
 
     UpdateCurrentOffset(2.0f);

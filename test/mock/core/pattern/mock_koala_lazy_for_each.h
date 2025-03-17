@@ -44,13 +44,18 @@ public:
 
     void Register();
 
-    void Update(int32_t s, void* pointer);
+    void Update(int32_t s, int32_t e, void* pointer);
 
-    void RangeModeUpdate(int32_t s, int32_t e);
+    void ParallelModeUpdate(int32_t s, int32_t e);
 
-    void NormalModeUpdate(int32_t s, void* pointer);
+    void NormalModeUpdate(int32_t s, int32_t e, void* pointer);
 
     RefPtr<FrameNode> CreateItem(int32_t idx);
+
+    /**
+     * @brief Notify that data has changed from index @c changeIndex
+     */
+    void MarkDataUpdate(int32_t changeIndex);
 
     /**
      * @brief mock trigger frontend update
@@ -74,6 +79,7 @@ private:
     FrameNode* parent_ = nullptr;
     int32_t totalCnt_ = 0;
     std::queue<std::function<void()>> taskQ_;
-    std::pair<int32_t, int32_t> range_ { 0, 0 };
+    int32_t changeIndex_ = INT_MAX;
+    std::pair<int32_t, int32_t> range_ { 0, 0 }; // last loaded item range
 };
 } // namespace OHOS::Ace::NG
