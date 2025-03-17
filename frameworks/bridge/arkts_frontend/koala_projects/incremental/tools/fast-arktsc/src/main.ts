@@ -132,6 +132,7 @@ function produceNinjafile(compiler: string,
     let all: string[] = []
     let basename = path.basename(compiler)
     let linker = compiler.replace(basename, 'arklink')
+    const groupSize = 100;
 
     let prefix = `
 rule arkts_compiler
@@ -145,7 +146,23 @@ rule arkts_linker
         result.push(`build ${it.output}: arkts_compiler ${it.input}\n`)
     })
     result.push(`build compile: phony ${all.join(' ')}`)
-    result.push(`build ${outputDir}/${linkName}.abc: arkts_linker ${all.join(' ')}\n`)
+
+    if (all.length <= groupSize) {
+        result.push(`build ${outputDir}/${linkName}.abc: arkts_linker ${all.join(' ')}\n`)
+    } else {
+        // If too much file, divide into groups avoid 'posix_spawn: Argument list too long' issue
+        const allParts = []
+
+        for (let i = 0; i < all.length; i += groupSize) {
+            const batch = all.slice(i, i + groupSize)
+            const partName:string = `${outputDir}/${linkName}.part${allParts.length + 1}.abc`
+            allParts.push(partName);
+
+            result.push(`build ${partName}: arkts_linker ${batch.join(' ')}\n`)
+        }
+        result.push(`build ${outputDir}/${linkName}.abc: arkts_linker ${allParts.join(' ')}`)
+    }
+
     result.push(`build link: phony ${outputDir}/${linkName}.abc`)
     result.push(`build all: phony link`)
     result.push("default all\n")
@@ -208,7 +225,7 @@ function mainAot(abc: string) {
             console.log(`Command ${aot} ${args.join(" ")} failed with return code ${code}`)
         else
             console.log(`Produced AOT file ${result}: ${Math.round(fs.statSync(result).size / 1024 / 1024)}M`)
-        process.exit(code)
+        process.exit(code ?? undefined)
     })
     child.on('exit', (code, signal) => {
         if (signal) {

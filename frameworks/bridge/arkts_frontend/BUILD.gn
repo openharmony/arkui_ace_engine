@@ -23,7 +23,10 @@ ohos_source_set("arkts_frontend") {
   ]
 
   if (build_ohos_sdk) {
-    deps -= [ ":ArkoalaNative_ark" ]
+    deps -= [
+      ":ArkoalaNative_ark",
+      "arkoala:arkoala_prebuild",
+    ]
   }
 
   sources = [ "arkts_frontend.cpp" ]

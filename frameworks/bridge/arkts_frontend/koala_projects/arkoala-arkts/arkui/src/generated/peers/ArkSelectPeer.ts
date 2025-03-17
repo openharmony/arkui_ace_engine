@@ -339,7 +339,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_menuBackgroundBlurStyle(this.peer.ptr, ((value as BlurStyle) as int32))
     }
     controlSizeAttribute(value: ControlSize): void {
-        ArkUIGeneratedNativeModule._SelectAttribute_controlSize(this.peer.ptr, ((value as ControlSize) as int32))
+        ArkUIGeneratedNativeModule._SelectAttribute_controlSize(this.peer.ptr, 0) // TODO: ((value as ControlSize) as int32))
     }
     menuItemContentModifierAttribute(value: ContentModifier<object>): void {
         const thisSerializer : Serializer = Serializer.hold()

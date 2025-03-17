@@ -120,7 +120,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ButtonAttribute_buttonStyle(this.peer.ptr, ((value as ButtonStyleMode) as int32))
     }
     controlSizeAttribute(value: ControlSize): void {
-        ArkUIGeneratedNativeModule._ButtonAttribute_controlSize(this.peer.ptr, ((value as ControlSize) as int32))
+        ArkUIGeneratedNativeModule._ButtonAttribute_controlSize(this.peer.ptr, 0) // TODO: ((value as ControlSize) as int32))
     }
     roleAttribute(value: ButtonRole): void {
         ArkUIGeneratedNativeModule._ButtonAttribute_role(this.peer.ptr, ((value as ButtonRole) as int32))
