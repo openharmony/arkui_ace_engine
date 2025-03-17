@@ -26,9 +26,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor();
 
 namespace OffscreenCanvasRenderingContext2DAccessor {
-const Ark_Number ARK_ERROR_VALUE = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(-1);
-const auto EMPTY_STRING = "";
-const Ark_String ARK_EMPTY_STRING = Converter::ArkValue<Ark_String>(EMPTY_STRING, Converter::FC);
 void DestroyPeerImpl(Ark_OffscreenCanvasRenderingContext2D peer)
 {
     auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);
@@ -57,11 +54,11 @@ Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
                          const Opt_String* type,
                          const Opt_Float32* quality)
 {
-    CHECK_NULL_RETURN(peer, ARK_EMPTY_STRING);
+    CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, ARK_EMPTY_STRING);
-    CHECK_NULL_RETURN(type, ARK_EMPTY_STRING);
-    CHECK_NULL_RETURN(quality, ARK_EMPTY_STRING);
+    CHECK_NULL_RETURN(peerImpl, {});
+    CHECK_NULL_RETURN(type, {});
+    CHECK_NULL_RETURN(quality, {});
     auto optType = Converter::OptConvert<std::string>(*type);
     auto optQuality = Converter::OptConvert<float>(*quality);
     auto result = peerImpl->ToDataURL(optType, optQuality);
@@ -69,10 +66,11 @@ Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
 }
 Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvasRenderingContext2D peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);
-    CHECK_NULL_RETURN(peerImpl, nullptr);
-    auto bitmap = reinterpret_cast<ImageBitmapPeer*>(GetImageBitmapAccessor()->ctor(&ARK_EMPTY_STRING));
+    CHECK_NULL_RETURN(peerImpl, {});
+    Ark_String emptyString;
+    auto bitmap = GetImageBitmapAccessor()->ctor(&emptyString);
     return peerImpl->TransferToImageBitmap(bitmap);
 }
 } // OffscreenCanvasRenderingContext2DAccessor

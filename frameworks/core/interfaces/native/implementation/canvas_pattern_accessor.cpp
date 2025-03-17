@@ -20,7 +20,6 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {
-const auto SCALE_LIMIT_MIN = 0.0;
 void DestroyPeerImpl(Ark_CanvasPattern peer)
 {
     if (peer) {
