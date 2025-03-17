@@ -14,7 +14,6 @@
  */
 
 #include "core/interfaces/native/implementation/ui_common_event_peer.h"
-
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -23,6 +22,15 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    class MockFrameNode : public FrameNode {
+    public:
+        MockFrameNode() : FrameNode("TEST", 0, AceType::MakeRefPtr<Pattern>()) {}
+    
+        MOCK_METHOD(void, MarkDirtyNode, (PropertyChangeFlag));
+    };
+} // namespace
 
 static const int expectedResId = 123;
 
@@ -41,6 +49,11 @@ class UICommonEventAccessorTest : public AccessorTestBase<GENERATED_ArkUIUICommo
  */
 HWTEST_F(UICommonEventAccessorTest, setOnClickTest, TestSize.Level1)
 {
+    const auto frameNode = AceType::MakeRefPtr<MockFrameNode>();
+    ASSERT_NE(frameNode, nullptr);
+    peer_->node = frameNode;
+    auto hub = frameNode->GetOrCreateGestureEventHub();
+
     static std::optional<TestEvent> testEvent = std::nullopt;
 
     auto onClickFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ClickEvent event) {
@@ -53,6 +66,10 @@ HWTEST_F(UICommonEventAccessorTest, setOnClickTest, TestSize.Level1)
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->setOnClick(peer_, &optCallback);
+
+   // auto func = hub->userParallelClickEventActuator_;
+   // f();
+
     /*TestEvent evt;
     (reinterpret_cast<MockRotationGesture*>(Referenced::RawPtr(peer_->gesture)))->HandleOnClick(evt);
     ASSERT_TRUE(rotationEvent);
@@ -66,6 +83,11 @@ HWTEST_F(UICommonEventAccessorTest, setOnClickTest, TestSize.Level1)
  */
 HWTEST_F(UICommonEventAccessorTest, setOnTouchTest, TestSize.Level1)
 {
+    const auto frameNode = AceType::MakeRefPtr<MockFrameNode>();
+    ASSERT_NE(frameNode, nullptr);
+    peer_->node = frameNode;
+    auto hub = frameNode->GetOrCreateGestureEventHub();
+
     static std::optional<TestEvent> testEvent = std::nullopt;
 
     auto onTouchFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_TouchEvent event) {
@@ -78,6 +100,12 @@ HWTEST_F(UICommonEventAccessorTest, setOnTouchTest, TestSize.Level1)
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->setOnTouch(peer_, &optCallback);
+
+    TestEvent evt;
+    auto func = hub->GetOnTouchIntercept();
+    func(&evt);
+    ASSERT_TRUE(testEvent);
+    EXPECT_EQ(testEvent->resourceId, expectedResId);
 }
 
 /**
