@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import SideBarContainerBootcampTest from './GridAndColumnLayout/SideBarContainerBootcamp.test'
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  SideBarContainerBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

@@ -79,16 +79,20 @@ void CalendarDialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (calendarHeight <= scrollHeight) {
         scrollHeight = calendarHeight;
     }
-    FireIsFoldStatusChanged(calendarMonthFrameNode);
+    FireIsFoldStatusChanged(swiperNode);
     props->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(scrollHeight))));
     LinearLayoutAlgorithm::Measure(layoutWrapper);
 }
 
-void CalendarDialogLayoutAlgorithm::FireIsFoldStatusChanged(RefPtr<FrameNode>& calendarMonthNode)
+void CalendarDialogLayoutAlgorithm::FireIsFoldStatusChanged(RefPtr<UINode>& swiperNode)
 {
-    auto calendarMonthPattern = calendarMonthNode->GetPattern<CalendarMonthPattern>();
-    CHECK_NULL_VOID(calendarMonthPattern);
-    calendarMonthPattern->FireIsFoldStatusChanged();
+    for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
+        auto calenderMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
+        CHECK_NULL_VOID(calenderMonthFrameNode);
+        auto calenderMonthPattern = calenderMonthFrameNode->GetPattern<CalendarMonthPattern>();
+        CHECK_NULL_VOID(calenderMonthPattern);
+        calenderMonthPattern->FireIsFoldStatusChanged();
+    }
 }
 
 float CalendarDialogLayoutAlgorithm::GetYearRowHeight(RefPtr<FrameNode>& columnNode)

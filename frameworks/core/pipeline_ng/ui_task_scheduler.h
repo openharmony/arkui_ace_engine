@@ -159,6 +159,7 @@ private:
     bool NeedAdditionalLayout();
     void FlushAllSingleNodeTasks();
     void SetLayoutNodeRect();
+
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -172,8 +173,7 @@ private:
             if (nodeLeft->GetPageId() != nodeRight->GetPageId()) {
                 return nodeLeft->GetPageId() < nodeRight->GetPageId();
             }
-            if (nodeLeft->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
-                nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
+            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
                 return nodeLeft->IsOnMainTree();
             }
             if (nodeLeft->GetDepth() != nodeRight->GetDepth()) {

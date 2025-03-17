@@ -58,7 +58,7 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         return;
     }
     // api 16 trigger onActive and onInactive observer
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && (
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && (
         state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
         return;
     }
@@ -141,6 +141,19 @@ void UIObserverHandler::NotifyDidClick(
         Container::Current()->GetModuleName()
     };
     didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+}
+
+void UIObserverHandler::NotifyPanGestureStateChange(const GestureEvent& gestureEventInfo,
+    const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode, const PanGestureInfo& panGestureInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(panGestureHandleFunc_);
+    auto getCurrent = Container::Current();
+    CHECK_NULL_VOID(getCurrent);
+    AbilityContextInfo info = { AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(), getCurrent->GetModuleName() };
+
+    panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
 }
 
 void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
@@ -356,6 +369,11 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetPanGestureHandleFunc(PanGestureHandleFunc func)
+{
+    panGestureHandleFunc_ = func;
 }
 
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)

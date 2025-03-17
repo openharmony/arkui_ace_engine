@@ -43,9 +43,8 @@ public:
 
     void FireLoadEvent(const std::string& xcomponentId) const
     {
-        if (loadEvent_) {
-            loadEvent_(xcomponentId);
-        }
+        CHECK_NULL_VOID(loadEvent_);
+        loadEvent_(xcomponentId);
     }
 
     void SetOnDestroy(DestroyEvent&& destroyEvent)
@@ -55,9 +54,8 @@ public:
 
     void FireDestroyEvent(const std::string& xcomponentId) const
     {
-        if (destroyEvent_) {
-            destroyEvent_(xcomponentId);
-        }
+        CHECK_NULL_VOID(destroyEvent_);
+        destroyEvent_(xcomponentId);
     }
 
     void SetOnSurfaceInitEvent(ExternalEvent&& surfaceInitEvent)
@@ -67,9 +65,8 @@ public:
 
     void FireSurfaceInitEvent(const std::string& componentId, const uint32_t nodeId) const
     {
-        if (surfaceInitEvent_) {
-            surfaceInitEvent_(componentId, nodeId, false);
-        }
+        CHECK_NULL_VOID(surfaceInitEvent_);
+        surfaceInitEvent_(componentId, nodeId, false);
     }
 
     void SetDetachEvent(DetachEvent&& detachEvent)
@@ -79,9 +76,8 @@ public:
 
     void FireDetachEvent(const std::string& componentId)
     {
-        if (detachEvent_) {
-            detachEvent_(componentId);
-        }
+        CHECK_NULL_VOID(detachEvent_);
+        detachEvent_(componentId);
     }
 
     void SetControllerCreatedEvent(SurfaceCreatedEvent&& controllerCreatedEvent)
@@ -91,9 +87,8 @@ public:
 
     void FireControllerCreatedEvent(const std::string& surfaceId, const std::string& xcomponentId) const
     {
-        if (controllerCreatedEvent_) {
-            controllerCreatedEvent_(surfaceId, xcomponentId);
-        }
+        CHECK_NULL_VOID(controllerCreatedEvent_);
+        controllerCreatedEvent_(surfaceId, xcomponentId);
     }
 
     void SetControllerChangedEvent(SurfaceChangedEvent&& controllerChangedEvent)
@@ -103,9 +98,8 @@ public:
 
     void FireControllerChangedEvent(const std::string& surfaceId, const RectF& rect) const
     {
-        if (controllerChangedEvent_) {
-            controllerChangedEvent_(surfaceId, rect);
-        }
+        CHECK_NULL_VOID(controllerChangedEvent_);
+        controllerChangedEvent_(surfaceId, rect);
     }
 
     void SetControllerDestroyedEvent(SurfaceDestroyedEvent&& controllerDestroyedEvent)
@@ -115,9 +109,8 @@ public:
 
     void FireControllerDestroyedEvent(const std::string& surfaceId, const std::string& xcomponentId) const
     {
-        if (controllerDestroyedEvent_) {
-            controllerDestroyedEvent_(surfaceId, xcomponentId);
-        }
+        CHECK_NULL_VOID(controllerDestroyedEvent_);
+        controllerDestroyedEvent_(surfaceId, xcomponentId);
     }
 
 private:

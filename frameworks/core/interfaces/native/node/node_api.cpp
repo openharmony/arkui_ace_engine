@@ -1974,11 +1974,6 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
     return CustomDialog::SetLevelOrder(handle, levelOrder);
 }
 
-ArkUI_Int32 SetFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
-{
-    return CustomDialog::SetFocusable(handle, focusable);
-}
-
 ArkUI_Int32 RegisterOnWillAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
 {
     return CustomDialog::RegisterOnWillAppearDialog(handle, userData, callback);
@@ -1999,14 +1994,85 @@ ArkUI_Int32 RegisterOnDidDisappear(ArkUIDialogHandle handle, void* userData, voi
     return CustomDialog::RegisterOnDidDisappearDialog(handle, userData, callback);
 }
 
-ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId))
+ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle handle, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom,
+    ArkUI_Float32 left, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetDialogBorderWidth(handle, top, right, bottom, left, unit);
+}
+
+ArkUI_Int32 SetDialogBorderColor(ArkUIDialogHandle handle, uint32_t top, uint32_t right, uint32_t bottom, uint32_t left)
+{
+    return CustomDialog::SetDialogBorderColor(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogBorderStyle(ArkUIDialogHandle handle, int32_t top, int32_t right, int32_t bottom, int32_t left)
+{
+    return CustomDialog::SetDialogBorderStyle(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogWidth(ArkUIDialogHandle handle, float width, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetWidth(handle, width, unit);
+}
+
+ArkUI_Int32 SetDialogHeight(ArkUIDialogHandle handle, float height, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetHeight(handle, height, unit);
+}
+
+ArkUI_Int32 SetDialogShadow(ArkUIDialogHandle handle, ArkUI_Int32 shadow)
+{
+    return CustomDialog::SetShadow(handle, shadow);
+}
+
+ArkUI_Int32 SetDialogCustomShadow(ArkUIDialogHandle handle, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
+{
+    return CustomDialog::SetDialogCustomShadow(handle, shadows, length);
+}
+
+ArkUI_Int32 SetDialogBackgroundBlurStyle(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle)
+{
+    return CustomDialog::SetBackgroundBlurStyle(handle, blurStyle);
+}
+
+ArkUI_Int32 SetDialogKeyboardAvoidMode(ArkUIDialogHandle handle, ArkUI_Int32 keyboardAvoidMode)
+{
+    return CustomDialog::SetKeyboardAvoidMode(handle, keyboardAvoidMode);
+}
+
+ArkUI_Int32 EnableDialogHoverMode(ArkUIDialogHandle handle, ArkUI_Bool enableHoverMode)
+{
+    return CustomDialog::EnableHoverMode(handle, enableHoverMode);
+}
+
+ArkUI_Int32 SetDialogHoverModeArea(ArkUIDialogHandle handle, ArkUI_Int32 hoverModeAreaType)
+{
+    return CustomDialog::SetHoverModeArea(handle, hoverModeAreaType);
+}
+
+ArkUI_Int32 SetDialogFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
+{
+    return CustomDialog::SetFocusable(handle, focusable);
+}
+
+ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
 {
     return CustomDialog::OpenCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void(*callback)(int32_t dialogId))
+{
+    return CustomDialog::UpdateCustomDialog(handle, callback);
 }
 
 ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
 {
     return CustomDialog::CloseCustomDialog(dialogId);
+}
+
+ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
+{
+    return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
 }
 
 const ArkUIDialogAPI* GetDialogAPI()
@@ -2036,13 +2102,26 @@ const ArkUIDialogAPI* GetDialogAPI()
         .setLevelUniqueId = SetDialogLevelUniqueId,
         .setImmersiveMode = SetDialogImmersiveMode,
         .setLevelOrder = SetLevelOrder,
-        .setFocusable = SetFocusable,
         .registerOnWillAppear = RegisterOnWillAppear,
         .registerOnDidAppear = RegisterOnDidAppear,
         .registerOnWillDisappear = RegisterOnWillDisappear,
         .registerOnDidDisappear = RegisterOnDidDisappear,
+        .setBorderWidth = SetDialogBorderWidth,
+        .setBorderColor = SetDialogBorderColor,
+        .setBorderStyle = SetDialogBorderStyle,
+        .setWidth = SetDialogWidth,
+        .setHeight = SetDialogHeight,
+        .setShadow = SetDialogShadow,
+        .setCustomShadow = SetDialogCustomShadow,
+        .setBackgroundBlurStyle = SetDialogBackgroundBlurStyle,
+        .setKeyboardAvoidMode = SetDialogKeyboardAvoidMode,
+        .enableHoverMode = EnableDialogHoverMode,
+        .setHoverModeArea = SetDialogHoverModeArea,
+        .setFocusable = SetDialogFocusable,
         .openCustomDialog = OpenCustomDialog,
+        .updateCustomDialog = UpdateCustomDialog,
         .closeCustomDialog = CloseCustomDialog,
+        .setSubwindowMode = SetDialogSubwindowMode
     };
     CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;

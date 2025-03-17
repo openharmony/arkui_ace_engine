@@ -736,4 +736,32 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest013, TestSize.Level1)
     gt_->SyncGeometryPropertiesAfterLayout(weakNode1.Upgrade());
     EXPECT_TRUE(PipelineContext::GetCurrentContext() != nullptr);
 }
+
+/**
+ * @tc.name: GeometryTransitionTest014
+ * @tc.desc: Test GetWindowBoundaryNode()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with node.
+     */
+    Create(weakNode1, true, true);
+    /**
+     * @tc.steps: step2. test GetWindowBoundaryNode().
+     * @tc.expected: pipeline not null
+     */
+    auto node = weakNode1.Upgrade();
+    node->SetParent(node2);
+
+    node->SetWindowBoundary(true);
+    EXPECT_TRUE(gt_->GetWindowBoundaryNode(node) == node);
+
+    node->SetWindowBoundary(false);
+    EXPECT_TRUE(gt_->GetWindowBoundaryNode(node) == node2);
+
+    node->SetParent(nullptr);
+    EXPECT_TRUE(gt_->GetWindowBoundaryNode(node) == node);
+}
 } // namespace OHOS::Ace::NG

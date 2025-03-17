@@ -30,6 +30,7 @@ group("core_pattern_unittest") {
     "checkbox:checkbox_test_ng",
     "checkboxgroup:checkboxgroup_test_ng",
     "common_view:common_view_test_ng",
+    "container_modal:container_modal_pattern_enhance_test_ng",
     "container_modal:container_modal_test_ng",
     "counter:counter_test_ng",
     "custom:custom_test_ng",
@@ -54,6 +55,7 @@ group("core_pattern_unittest") {
     "image:image_test_ng",
     "image_animator:image_animator_test_ng",
     "indexer:indexer_test_ng",
+    "lazy_layout:lazy_grid_layout_test",
     "linear_indicator:linear_indicator_test_ng",
     "linear_layout:linear_layout_test_ng",
     "linear_split:linear_split_test_ng",
@@ -61,7 +63,6 @@ group("core_pattern_unittest") {
     "loading_progress:loading_progress_test_ng",
     "marquee:marquee_test_ng",
     "menu:menu_test_ng",
-    "model:model_test_ng",
     "movingphoto:movingphoto_test_ng",
     "navigation:navigation_test_ng",
     "navigator:navigator_test_ng",
@@ -118,6 +119,11 @@ group("core_pattern_unittest") {
     "withtheme:withtheme_test_ng",
     "xcomponent:xcomponent_test_ng",
   ]
+
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.graphic_graphic_3d)) {
+    deps += [ "model:model_test_ng" ]
+  }
 
   if (ace_engine_feature_enable_split_mode &&
       defined(vendor_configs.ace_engine_advanced_split_mode_pattern_test_ng)) {

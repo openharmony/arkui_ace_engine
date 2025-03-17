@@ -66,6 +66,16 @@ struct CJBindPopupParams {
     char* secondaryValue;
     void (*secondaryAction)();
     void (*onStateChange)(bool);
+};
+
+struct CJBindPopupParamsV2 {
+    char* message;
+    bool placementOnTop;
+    char* primaryValue;
+    void (*primaryAction)();
+    char* secondaryValue;
+    void (*secondaryAction)();
+    void (*onStateChange)(bool);
     uint32_t textColor;
     char* fontWeight;
     double fontSize;
@@ -100,6 +110,17 @@ struct CJBindPopupParams {
 };
 
 struct CJBindCustomPopup {
+    bool isShow;
+    void (*builder)();
+    int32_t placement;
+    uint32_t maskColor;
+    uint32_t backgroundColor;
+    bool enableArrow;
+    bool autoCancel;
+    void (*onStateChange)(bool);
+};
+
+struct CJBindCustomPopupV2 {
     bool isShow;
     void (*builder)();
     int32_t placement;
@@ -661,11 +682,13 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMaskByShape(int64_t shapeId);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractPop();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOverlay(const char* title, int32_t align, double x, double y);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindPopup(bool isShow, CJBindPopupParams bindPopupParams);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindPopupV2(bool isShow, CJBindPopupParamsV2 bindPopupParams);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByFuncKey(
     int32_t value, int32_t* keysArray, int64_t size, void (*callback)(void));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     const char* value, int32_t* keysArray, int64_t size, void (*callback)(void));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindCustomPopupV2(CJBindCustomPopupV2 value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindMenu(
     VectorMenuValuePtr vectorMenuValue, void (*menuActionCallback)(const char*));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindCustomMenu(void (*builder)());
@@ -823,8 +846,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDraggable(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithBuilder(void (*builder)());
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithDragItemInfo(CJDragItemInfo value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(
-    const char* source, CBorderImageOption option);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(const char* source, CBorderImageOption option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithLinearGradient(
     LinearGradientParam source, CBorderImageOption option);
 }
