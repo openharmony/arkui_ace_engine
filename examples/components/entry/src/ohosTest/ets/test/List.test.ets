@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import QRCodeBootcampTest from './InformationDisplay/QRCodeBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  QRCodeBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

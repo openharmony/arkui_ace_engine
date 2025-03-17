@@ -66,6 +66,11 @@ public:
     void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
     bool ShowPreviewNG(bool isStartDraggingFromSubWindow = false) override;
+    void SetWindowTouchable(bool touchable) override
+    {
+        CHECK_NULL_VOID(window_);
+        window_->SetTouchable(touchable);
+    }
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
@@ -78,6 +83,9 @@ public:
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) override;
+    void ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+        int32_t appearingTimeWithContinuousOperation) override;
+    void HideTipsNG(int32_t targetId, int32_t disappearingTime) override;
     void HidePopupNG(int32_t targetId) override;
     void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;
     bool CancelPopup(const std::string& id) override;
@@ -85,6 +93,7 @@ public:
     void ClearMenu() override;
     void ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimation = false) override;
     void ClearPopupNG() override;
+    void ClearPopupNG(bool isForceClear) override;
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
         const RefPtr<NG::UINode>& customNode) override;

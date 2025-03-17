@@ -16,7 +16,6 @@
 #include "swiper_helper.h"
 
 #include "base/log/dump_log.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 
 namespace OHOS::Ace::NG {
 void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak)
@@ -91,6 +90,24 @@ void SwiperHelper::SetChangeIndexWithModeImpl(const RefPtr<SwiperController>& co
     });
 }
 
+void SwiperHelper::SaveDigitIndicatorIgnoreSize(const SwiperPattern& swiper,
+    const std::shared_ptr<SwiperDigitalParameters>& digitalParams,
+    RefPtr<SwiperIndicatorLayoutProperty>& indicatorProps, bool isSidebarMiddle, bool isShowArrow)
+{
+    CHECK_NULL_VOID(digitalParams);
+    auto axis = swiper.GetDirection();
+    bool hasBottomValue = digitalParams->dimBottom.has_value() ? true : false;
+    bool ignoreSizeForHorizontal = (axis == Axis::HORIZONTAL) && (!hasBottomValue ||
+        (hasBottomValue && digitalParams->dimBottom == 0.0_vp));
+    bool ignoreSizeForVertical = (axis == Axis::VERTICAL) && hasBottomValue &&
+        (digitalParams->dimBottom == 0.0_vp) && (!isShowArrow || (isShowArrow && isSidebarMiddle));
+    if (digitalParams->ignoreSizeValue.has_value() && (ignoreSizeForHorizontal || ignoreSizeForVertical)) {
+        indicatorProps->UpdateIgnoreSize(digitalParams->ignoreSizeValue.value());
+    } else {
+        indicatorProps->UpdateIgnoreSize(false);
+    }
+}
+
 void SwiperHelper::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode, SwiperPattern& swiper)
 {
     CHECK_NULL_VOID(indicatorNode);
@@ -114,11 +131,6 @@ void SwiperHelper::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicator
     if (digitalParams->dimBottom.has_value()) {
         indicatorProps->UpdateBottom(digitalParams->dimBottom.value());
     }
-    if (digitalParams->ignoreSizeValue.has_value()) {
-        indicatorProps->UpdateIgnoreSize(digitalParams->ignoreSizeValue.value());
-    } else {
-        indicatorProps->UpdateIgnoreSize(false);
-    }
     indicatorProps->UpdateFontColor(
         digitalParams->fontColor.value_or(theme->GetDigitalIndicatorTextStyle().GetTextColor()));
     indicatorProps->UpdateSelectedFontColor(
@@ -133,6 +145,9 @@ void SwiperHelper::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicator
         digitalParams->selectedFontWeight.value_or(theme->GetDigitalIndicatorTextStyle().GetFontWeight()));
     auto props = swiper.GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(props);
+    auto isSidebarMiddle = props->GetIsSidebarMiddleValue(false);
+    auto isShowArrow = props->GetDisplayArrowValue(false);
+    SaveDigitIndicatorIgnoreSize(swiper, digitalParams, indicatorProps, isSidebarMiddle, isShowArrow);
     props->UpdateLeft(digitalParams->dimLeft.value_or(0.0_vp));
     props->UpdateTop(digitalParams->dimTop.value_or(0.0_vp));
     props->UpdateRight(digitalParams->dimRight.value_or(0.0_vp));
@@ -431,7 +446,6 @@ std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParam
         "maxDisplayCount", (params->maxDisplayCountVal.has_value()) ? params->maxDisplayCountVal.value() : 0);
     jsonValue->Put("space", params->dimSpace.value_or(8.0_vp).ToString().c_str());
     jsonValue->Put("ignoreSize", params->ignoreSizeValue.value_or(false) ? "true" : "false");
-    jsonValue->Put("setIgnoreSize", params->setIgnoreSizeValue.value_or(false) ? "true" : "false");
     return jsonValue->ToString();
 }
 
@@ -463,7 +477,6 @@ std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDig
     jsonValue->Put("selectedFontWeight",
         V2::ConvertWrapFontWeightToStirng(params->selectedFontWeight.value_or(FontWeight::NORMAL)).c_str());
     jsonValue->Put("ignoreSize", params->ignoreSizeValue.value_or(false) ? "true" : "false");
-    jsonValue->Put("setIgnoreSize", params->setIgnoreSizeValue.value_or(false) ? "true" : "false");
     return jsonValue->ToString();
 }
 

@@ -172,6 +172,7 @@ public:
     void DeleteLeft();
     void DeleteRight();
     void InsertValueDone(const std::string& appendElement);
+    void SyncGeometryProperties() override;
 
     void SetInputFilter(const std::string& inputFilter)
     {

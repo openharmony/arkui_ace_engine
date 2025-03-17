@@ -22,6 +22,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #undef private
 #undef protected

@@ -78,6 +78,12 @@ ColorMode UIContextImpl::GetLocalColorMode()
     return static_cast<ColorMode>(context_->GetLocalColorMode());
 }
 
+ColorMode UIContextImpl::GetColorMode()
+{
+    CHECK_NULL_RETURN(context_, ColorMode::COLOR_MODE_UNDEFINED);
+    return static_cast<ColorMode>(context_->GetColorMode());
+}
+
 float UIContextImpl::GetFontScale()
 {
     CHECK_NULL_RETURN(context_, 1.0f);

@@ -303,6 +303,7 @@ void TabsPattern::OnModifyDone()
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
     SetSwiperPaddingAndBorder();
     InitFocusEvent();
+    InitAccessibilityZIndex();
 
     if (onChangeEvent_) {
         return;
@@ -566,6 +567,33 @@ RefPtr<FocusHub> TabsPattern::GetCurrentFocusNode(FocusIntension intension)
         }
     }
     return nullptr;
+}
+
+void TabsPattern::InitAccessibilityZIndex()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsLayoutProperty = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    BarPosition barPosition = tabsLayoutProperty->GetTabBarPositionValue(BarPosition::START);
+    if (barPosition != barPosition_) {
+        barPosition_ = barPosition;
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        auto swiperAccessibilityProperty = swiperNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(swiperAccessibilityProperty);
+        auto tabBarAccessibilityProperty = tabBarNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(tabBarAccessibilityProperty);
+        if (barPosition == BarPosition::START) {
+            swiperAccessibilityProperty->SetAccessibilityZIndex(1);
+            tabBarAccessibilityProperty->SetAccessibilityZIndex(0);
+        } else {
+            swiperAccessibilityProperty->SetAccessibilityZIndex(0);
+            tabBarAccessibilityProperty->SetAccessibilityZIndex(1);
+        }
+    }
 }
 
 void TabsPattern::BeforeCreateLayoutWrapper()

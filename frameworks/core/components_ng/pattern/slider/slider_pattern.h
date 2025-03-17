@@ -172,7 +172,7 @@ public:
     }
     void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
-    
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
     {
@@ -324,12 +324,9 @@ private:
     void AccessibilityVirtualNodeRenderTask();
     bool CheckCreateAccessibilityVirtualNode();
     void InitAccessibilityHoverEvent();
-    void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
     bool InitAccessibilityVirtualNode();
     void ModifyAccessibilityVirtualNode();
     void AddStepPointsAccessibilityVirtualNode();
-    void HandleTextOnAccessibilityFocusCallback();
-    void HandleSliderOnAccessibilityFocusCallback();
     void UpdateStepAccessibilityVirtualNode();
     void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);

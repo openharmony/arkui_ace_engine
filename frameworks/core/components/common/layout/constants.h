@@ -951,6 +951,13 @@ enum class XComponentType {
     NODE,
 };
 
+enum class XComponentNodeType {
+    UNKNOWN = -1,
+    TYPE_NODE = 0,
+    DECLARATIVE_NODE,
+    CNODE,
+};
+
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
 
 inline constexpr uint32_t STATE_NORMAL = 0;

@@ -685,6 +685,14 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg017, TestSize.Level1)
      */
     pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
     EXPECT_NE(stageManager->stageNode_, nullptr);
+    /**
+     * @tc.steps: step4. Call OnDetachFromFrameNode.
+     * @tc.expected: Check the stageNode_.
+     */
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    pattern->UpdateFoldDisplayModeChangedCallbackId(1);
+    pattern->UpdateHoverModeChangedCallbackId(1);
+    EXPECT_NE(stageManager->stageNode_, nullptr);
 }
 
 /**
@@ -1220,6 +1228,8 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg030, TestSize.Level1)
     DialogProperties props;
     auto dialog = DialogView::CreateDialogNode(props, nullptr);
     ASSERT_NE(dialog, nullptr);
+    auto extraMaskNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    extraMaskNode->MountToParent(dialog);
     auto dialogPattern = dialog->GetPattern<DialogPattern>();
     ASSERT_NE(dialogPattern, nullptr);
     auto dialogContext = dialog->GetRenderContext();
@@ -1229,17 +1239,19 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg030, TestSize.Level1)
     ASSERT_NE(dialogLayoutAlgorithm, nullptr);
     RefPtr<DialogLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
     ASSERT_NE(layoutAlgorithm, nullptr);
-
-    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog, false);
-    EXPECT_FALSE(dialogContext->GetClipShape().value());
-
-    layoutAlgorithm->hostWindowRect_ = RectF(OffsetF(), SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog, true);
-    EXPECT_TRUE(dialogContext->GetClipShape().value());
-
+    layoutAlgorithm->hostWindowRect_ = RectF(OffsetF(), SizeF(FULL_SCREEN_WIDTH / 2, FULL_SCREEN_HEIGHT / 2));
     layoutAlgorithm->expandDisplay_ = true;
-    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog, true);
-    EXPECT_TRUE(dialogContext->GetClipShape().value());
+    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog);
+    NG::BorderRadiusPropertyT<Dimension> borderRadius;
+    borderRadius.SetRadius(Dimension(16.0, OHOS::Ace::DimensionUnit::VP));
+    auto maskNode = AceType::DynamicCast<FrameNode>(dialog->GetChildAtIndex(1));
+    EXPECT_EQ(maskNode->GetRenderContext()->GetBorderRadius().value(), borderRadius);
+
+    layoutAlgorithm->expandDisplay_ = false;
+    layoutAlgorithm->ClipUIExtensionSubWindowContent(dialog);
+    auto maskNodeProp = maskNode->GetLayoutProperty();
+    EXPECT_EQ(maskNodeProp->GetCalcLayoutConstraint()->selfIdealSize.value(),
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
 }
 
 /**
@@ -1753,7 +1765,7 @@ HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode001, TestSize.Level1)
  */
 HWTEST_F(DialogModelTestNg, DialogPatternTest032, TestSize.Level1)
 {
-     /**
+    /**
      * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
      * @tc.expected: mock successfully.
      */
@@ -1783,16 +1795,21 @@ HWTEST_F(DialogModelTestNg, DialogPatternTest032, TestSize.Level1)
      */
     DialogProperties props;
     props.isSysBlurStyle = true;
-    props.blurStyleOption->policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
-    props.blurStyleOption->blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-    pattern->UpdateContentRenderContext(dialogNode, props);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    blurStyleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    if (!props.blurStyleOption.has_value()) {
+        props.blurStyleOption.emplace();
+    }
+    props.blurStyleOption.value() = blurStyleOption;
 
+    pattern->UpdateContentRenderContext(dialogNode, props);
     auto renderContext = pattern->contentRenderContext_;
     ASSERT_NE(renderContext, nullptr);
 
+    EXPECT_FALSE(renderContext->GetBackgroundEffect().has_value());
     EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
-    EXPECT_NE(renderContext->GetBackBlurStyle()->policy, props.blurStyleOption->policy);
-    EXPECT_EQ(renderContext->GetBackBlurStyle()->blurStyle, props.blurStyleOption->blurStyle);
+    EXPECT_EQ(renderContext->GetBackBlurStyle().value(), blurStyleOption);
 }
 
 /**
@@ -1802,7 +1819,7 @@ HWTEST_F(DialogModelTestNg, DialogPatternTest032, TestSize.Level1)
  */
 HWTEST_F(DialogModelTestNg, DialogPatternTest033, TestSize.Level1)
 {
-     /**
+    /**
      * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
      * @tc.expected: mock successfully.
      */
@@ -1838,12 +1855,127 @@ HWTEST_F(DialogModelTestNg, DialogPatternTest033, TestSize.Level1)
         props.effectOption.emplace();
     }
     props.effectOption.value() = effectOption;
-    pattern->UpdateContentRenderContext(dialogNode, props);
 
+    pattern->UpdateContentRenderContext(dialogNode, props);
     auto renderContext = pattern->contentRenderContext_;
     ASSERT_NE(renderContext, nullptr);
 
+    EXPECT_FALSE(renderContext->GetBackBlurStyle().has_value());
     EXPECT_TRUE(renderContext->GetBackgroundEffect().has_value());
-    EXPECT_EQ(renderContext->GetBackgroundEffect()->policy, props.effectOption->policy);
+    EXPECT_EQ(renderContext->GetBackgroundEffect().value(), effectOption);
+}
+
+/**
+ * @tc.name: DialogPatternTest034
+ * @tc.desc: Test dialogPattern.BuildTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogPatternTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogTheme.
+     * @tc.expected: the dialogTheme created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    /**
+     * @tc.steps: step3. create dialogNode.
+     * @tc.expected: the dialogNode created successfully.
+     */
+    RefPtr<FrameNode> dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps: step4. create pattern.
+     * @tc.expected: the pattern created successfully.
+     */
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step5. execute UpdateContentRenderContext.
+     * @tc.expected: UpdateContentRenderContext successfully.
+     */
+    DialogProperties props;
+    props.isSysBlurStyle = true;
+
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    blurStyleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+    if (!props.blurStyleOption.has_value()) {
+        props.blurStyleOption.emplace();
+    }
+    props.blurStyleOption.value() = blurStyleOption;
+
+    EffectOption effectOption;
+    effectOption.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
+    if (!props.effectOption.has_value()) {
+        props.effectOption.emplace();
+    }
+    props.effectOption.value() = effectOption;
+
+    pattern->UpdateContentRenderContext(dialogNode, props);
+    auto renderContext = pattern->contentRenderContext_;
+    ASSERT_NE(renderContext, nullptr);
+
+    EXPECT_FALSE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_TRUE(renderContext->GetBackgroundEffect().has_value());
+    EXPECT_EQ(renderContext->GetBackgroundEffect().value(), effectOption);
+}
+
+/**
+ * @tc.name: DialogPatternTest035
+ * @tc.desc: Test dialogPattern.BuildTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, DialogPatternTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogTheme.
+     * @tc.expected: the dialogTheme created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    /**
+     * @tc.steps: step3. create dialogNode.
+     * @tc.expected: the dialogNode created successfully.
+     */
+    RefPtr<FrameNode> dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    /**
+     * @tc.steps: step4. create pattern.
+     * @tc.expected: the pattern created successfully.
+     */
+    auto pattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step5. execute UpdateContentRenderContext.
+     * @tc.expected: UpdateContentRenderContext successfully.
+     */
+    DialogProperties props;
+    props.isSysBlurStyle = true;
+    if (!props.backgroundBlurStyle.has_value()) {
+        props.backgroundBlurStyle.emplace();
+    }
+    auto backgroundBlurStyle = static_cast<int>(BlurStyle::THIN);
+    props.backgroundBlurStyle.value() = backgroundBlurStyle;
+
+    pattern->UpdateContentRenderContext(dialogNode, props);
+    auto renderContext = pattern->contentRenderContext_;
+    ASSERT_NE(renderContext, nullptr);
+
+    EXPECT_FALSE(renderContext->GetBackgroundEffect().has_value());
+    EXPECT_TRUE(renderContext->GetBackBlurStyle().has_value());
+    EXPECT_EQ(static_cast<int>(renderContext->GetBackBlurStyle().value().blurStyle), backgroundBlurStyle);
 }
 } // namespace OHOS::Ace::NG

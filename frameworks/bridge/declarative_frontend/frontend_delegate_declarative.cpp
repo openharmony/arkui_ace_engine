@@ -1859,9 +1859,14 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
-        .customBuilderWithId = dialogAttr.customBuilderWithId, .borderWidth = dialogAttr.borderWidth,
+        .customBuilderWithId = dialogAttr.customBuilderWithId,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption,
+        .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
-        .width = dialogAttr.width, .height = dialogAttr.height, .maskRect = dialogAttr.maskRect,
+        .width = dialogAttr.width, .height = dialogAttr.height,
+        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
+        .maskRect = dialogAttr.maskRect,
         .transitionEffect = dialogAttr.transitionEffect, .dialogTransitionEffect = dialogAttr.dialogTransitionEffect,
         .maskTransitionEffect = dialogAttr.maskTransitionEffect, .contentNode = dialogAttr.contentNode,
         .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
@@ -1869,13 +1874,10 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
         .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
         .levelOrder = dialogAttr.levelOrder,
+        .focusable = dialogAttr.focusable,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
-        .blurStyleOption = dialogAttr.blurStyleOption,
-        .effectOption = dialogAttr.effectOption,
-        .focusable = dialogAttr.focusable,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

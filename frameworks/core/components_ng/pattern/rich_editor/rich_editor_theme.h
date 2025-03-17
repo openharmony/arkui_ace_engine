@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RICH_EDITOR_RICH_EDITOR_THEME_H
 
 #include "base/geometry/dimension.h"
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"

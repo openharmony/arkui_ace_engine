@@ -890,4 +890,52 @@ HWTEST_F(CalendarPickerPatternTestNg, ReportChangeEvent002, TestSize.Level1)
     EXPECT_TRUE(CalendarDialogView::CanReportChangeEvent(reportedPickerDate, pickerDate));
     EXPECT_FALSE(CalendarDialogView::CanReportChangeEvent(reportedPickerDate, pickerDate));
 }
+
+/**
+ * @tc.name: CalendarDialogLayoutAlgorithmTest
+ * @tc.desc: MeasureWithAssertions Funtion Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarDialogLayoutAlgorithmTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     * @tc.expected: step1. Create success.
+     */
+    CreateCalendarPicker();
+    auto node = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(node->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(node));
+    auto layoutWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetChildAtIndex(0));
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto calendarNode = dialogPattern->GetCalendarFrameNode();
+    ASSERT_NE(calendarNode, nullptr);
+    EXPECT_EQ(calendarNode->GetTag(), V2::CALENDAR_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Create LayoutAlgorithm.
+     * @tc.expected: step2. Create success.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dialogNode, geometryNode, dialogNode->GetLayoutProperty());
+    auto layoutAlgorithm = AceType::DynamicCast<CalendarDialogLayoutAlgorithm>(dialogPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapperNode->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. Measure with assertions.
+     * @tc.expected: step3. Measure success.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize = OptionalSizeF(0.f, 0.f);
+    layoutWrapperNode->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutAlgorithm->Measure(AceType::RawPtr(layoutWrapperNode));
+    EXPECT_EQ(layoutWrapperNode->GetGeometryNode()->GetFrameSize().Width(), 0.f);
+    EXPECT_EQ(layoutWrapperNode->GetGeometryNode()->GetFrameSize().Height(), 0.f);
+}
 } // namespace OHOS::Ace::NG

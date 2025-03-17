@@ -25,6 +25,7 @@ build_component_ng("xcomponent_pattern_ng") {
     "xcomponent_model_ng.cpp",
     "xcomponent_paint_method.cpp",
     "xcomponent_pattern.cpp",
+    "xcomponent_pattern_v2.cpp",
   ]
 
   if (is_ohos_standard_system) {
