@@ -856,7 +856,7 @@ BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
 template<>
 OverlayOptions Convert(const Ark_OverlayOptions& src)
 {
-    OverlayOptions dst;
+    OverlayOptions dst { .align = Alignment::TOP_LEFT};
     auto align = Converter::OptConvert<Alignment>(src.align);
     if (align) {
         dst.align = align.value();
@@ -3252,19 +3252,26 @@ void OnDragStartImpl(Ark_NativePointer node,
         auto arkDragInfo = Converter::ArkValue<Ark_DragEvent>(info);
         auto arkExtraParam = Converter::ArkValue<Opt_String>(extraParams);
 
-        auto parseCustBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
-            if (auto fnode = weakNode.Upgrade(); fnode) {
-                result.customNode = CallbackHelper(val).BuildSync(fnode.GetRawPtr());
+        auto parseBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
+            if (auto frameNode = weakNode.Upgrade(); frameNode) {
+                result.customNode = CallbackHelper(val).BuildSync(frameNode.GetRawPtr());
             }
         };
-        auto parseDragI = [&result](const Ark_DragItemInfo& value) {
+        auto parseItemInfo = [&result, weakNode](const Ark_DragItemInfo& value) {
             result.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
             result.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            if (builder) {
+                auto frameNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                result.customNode = CallbackHelper(builder.value()).BuildSync(frameNode.GetRawPtr());
+            }
         };
-        auto handler = [custB = std::move(parseCustBuilder), dragI = std::move(parseDragI)](const void *rawResultPtr) {
+        auto handler = [builder = std::move(parseBuilder), dragItemInfo = std::move(parseItemInfo)]
+            (const void *rawResultPtr) {
             auto arkResultPtr = reinterpret_cast<const Ark_Union_CustomBuilder_DragItemInfo*>(rawResultPtr);
             CHECK_NULL_VOID(arkResultPtr);
-            Converter::VisitUnion(*arkResultPtr, custB, dragI, []() {});
+            Converter::VisitUnion(*arkResultPtr, builder, dragItemInfo, []() {});
         };
 
         PipelineContext::SetCallBackNode(weakNode);
@@ -3369,22 +3376,26 @@ void DragPreviewImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    std::optional<DragDropInfo> convValue = {};
+    DragDropInfo dragDropInfo;
     Converter::VisitUnion(*value,
-        [&convValue](const Ark_String& val) {
-            convValue->extraInfo = Converter::Convert<std::string>(val);
+        [&dragDropInfo](const Ark_String& val) {
+            dragDropInfo.inspectorId = Converter::Convert<std::string>(val);
         },
-        [node, frameNode, &convValue](const CustomNodeBuilder& val) {
-            convValue->customNode = CallbackHelper(val).BuildSync(node);
+        [node, frameNode, &dragDropInfo](const CustomNodeBuilder& val) {
+            dragDropInfo.customNode = CallbackHelper(val).BuildSync(node);
         },
-        [frameNode, &convValue](const Ark_DragItemInfo& value) {
-            LOGE("ARKOALA: Convert to [DragDropInfo.PixelMap] from [Ark_DragItemInfo] is not supported\n");
-            convValue = std::nullopt;
+        [node, frameNode, &dragDropInfo](const Ark_DragItemInfo& value) {
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            if (builder) {
+                dragDropInfo.customNode = CallbackHelper(builder.value()).BuildSync(node);
+            }
+            dragDropInfo.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
+            dragDropInfo.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
         },
         []() {
             LOGE("DragPreviewImpl(): Invalid union argument");
         });
-    ViewAbstract::SetDragPreview(frameNode, convValue);
+    ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
 }
 void OnPreDragImpl(Ark_NativePointer node,
                    const Callback_PreDragStatus_Void* value)
@@ -4207,27 +4218,29 @@ void OverlayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    OverlayOptions overlay { .align = Alignment::TOP_LEFT};
     if (options) {
-        auto overlay = Converter::OptConvert<OverlayOptions>(*options);
-        if (!overlay.has_value()) {
-            ViewAbstract::SetOverlay(frameNode, overlay);
-            return;
-        }
-        Converter::VisitUnion(*value,
-            [&overlay](const Ark_String& src) {
-                overlay->content = Converter::Convert<std::string>(src);
-            },
-            [node, frameNode, &overlay](const CustomNodeBuilder& src) {
-                overlay->content = CallbackHelper(src).BuildSync(node);
-            },
-            [](const Ark_ComponentContent& src) {
-                LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
-            },
-            []() {
-                LOGE("OverlayImpl(): Invalid union argument");
-            });
-        ViewAbstract::SetOverlay(frameNode, overlay);
+        overlay = Converter::OptConvert<OverlayOptions>(*options).value_or(overlay);
     }
+    Converter::VisitUnion(*value,
+        [frameNode, &overlay](const Ark_String& src) {
+            overlay.content = Converter::Convert<std::string>(src);
+            ViewAbstract::SetOverlay(frameNode, overlay);
+        },
+        [node, frameNode, &overlay](const CustomNodeBuilder& builder) {
+             auto builderFunc = [callback = CallbackHelper(builder), node, weakNode = AceType::WeakClaim(frameNode)]() {
+                PipelineContext::SetCallBackNode(weakNode);
+                auto uiNode = callback.BuildSync(node);
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            ViewAbstract::SetOverlayBuilder(frameNode, std::move(builderFunc), overlay.align, overlay.x, overlay.y);
+        },
+        [](const Ark_ComponentContent& src) {
+            LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
+        },
+        []() {
+            LOGE("OverlayImpl(): Invalid union argument");
+        });
 }
 void BlendModeImpl(Ark_NativePointer node,
                    Ark_BlendMode value,
