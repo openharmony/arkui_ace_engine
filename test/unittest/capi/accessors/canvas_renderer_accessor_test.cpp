@@ -16,6 +16,8 @@
 #include "test/mock/core/pattern/mock_canvas_pattern.h"
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
+#include "gmock/gmock-actions.h"
+#include "gmock/gmock-matchers.h"
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
@@ -35,25 +37,22 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
+class MockCanvasRenderingContext2DModel;
 const auto EXPECTED_NUMBER_OF_CALLS = 3;
-const auto ALPHA_LIMIT_MIN = 0.0;
-const auto ALPHA_LIMIT_MAX = 1.0;
-const auto SIZE_LIMIT_MIN = 0.0;
-const auto SEGMENT_LIMIT_MIN = 0.0;
-const auto SCALE_LIMIT_MIN = 0.0;
 const auto EXPECTED_TRUE = true;
 const auto EXPECTED_FALSE = false;
-
 const double DEFAULT_DOUBLE_VALUE = 10.0;
 const double DEFAULT_SCALE_VALUE = 1.0;
 const std::string DEFAULT_STRING_VALUE = "text";
 const std::string INVALID_STRING_VALUE = "";
-const auto INVALID_COMPOSITE_VALUE = static_cast<CompositeOperation>(-1);
 constexpr double MATH_2_PI = 2 * M_PI;
 constexpr double DIFF = 1e-10;
 const int32_t DEFAULT_ZERO_VALUE = 0;
 const Opt_Boolean OPT_BOOLEAN_FALSE = Converter::ArkValue<Opt_Boolean>(false);
-
+const double FLT_PRECISION = 0.001;
+const double DEFAULT_DENSITY = 1.0;
+const double DENSITY_1_25 = 1.25;
+const double DENSITY_2_50 = 2.50;
 // test plan
 std::vector<std::tuple<Ark_Number, double>> ARK_NUMBER_TEST_PLAN = {
     { Converter::ArkValue<Ark_Number>(100), 100 },
@@ -73,11 +72,19 @@ std::vector<std::tuple<Ark_Number, double>> ARK_NUMBER_ALPHA_TEST_PLAN = {
 };
 std::vector<std::vector<double>> ARRAY_NUMBER_TEST_PLAN = {
     { 100, 10.25, 2.35, 5.42, 12.34 },
-    { 100, 10.25, 0, 5.42, 12.34 },
+    { 100, 10.25, 0, 5.42, 12.34, -1.05 },
     { 100, -10.25, 0, -5.42, 12.34 },
-    { 0, 0, 0, 0, 0 },
+    { 0, 0, 0, 0, 0, 0 },
     { -100, -10.25, -2.35, -5.42, -12.34 },
     {},
+};
+std::vector<std::pair<std::vector<double>, std::vector<double>>> ARRAY_LINE_DASH_TEST_PLAN = {
+    { { 100, 10.25, 2.35 }, { 100, 10.25, 2.35, 100, 10.25, 2.35 } },
+    { { 0, 5.42 }, { 0, 5.42 } },
+    { { 0, -5.42, 12.34 }, { 0, -5.42, 12.34, 0, -5.42, 12.34 } },
+    { { 0, 0, 0, 0 }, { 0, 0, 0, 0 } },
+    { { -100, -10.25, -2.35 }, { -100, -10.25, -2.35, -100, -10.25, -2.35 } },
+    { {}, {} },
 };
 std::vector<std::tuple<Ark_String, std::string>> ARK_STRING_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>("string text"), "string text" },
@@ -94,6 +101,14 @@ std::vector<std::tuple<Opt_Number, std::optional<double>>> OPT_NUMBER_TEST_PLAN 
     { Converter::ArkValue<Opt_Number>(-56.73), -56.73 },
     { Converter::ArkValue<Opt_Number>(Ark_Empty()), std::make_optional<double>() },
 };
+std::vector<std::tuple<Opt_Number, std::optional<double>>> OPT_MAX_WIDTH_TEST_PLAN = {
+    { Converter::ArkValue<Opt_Number>(100), 100 },
+    { Converter::ArkValue<Opt_Number>(0), 0 },
+    { Converter::ArkValue<Opt_Number>(-100), -100 },
+    { Converter::ArkValue<Opt_Number>(12.34), 12.34 },
+    { Converter::ArkValue<Opt_Number>(-56.73), -56.73 },
+    { Converter::ArkValue<Opt_Number>(Ark_Empty()), FLT_MAX },
+};
 std::vector<std::tuple<Ark_String, CompositeOperation>> ARK_COMPOSITE_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>("source-over"), CompositeOperation::SOURCE_OVER },
     { Converter::ArkValue<Ark_String>("source-atop"), CompositeOperation::SOURCE_ATOP },
@@ -106,14 +121,14 @@ std::vector<std::tuple<Ark_String, CompositeOperation>> ARK_COMPOSITE_TEST_PLAN 
     { Converter::ArkValue<Ark_String>("lighter"), CompositeOperation::LIGHTER },
     { Converter::ArkValue<Ark_String>("copy"), CompositeOperation::COPY },
     { Converter::ArkValue<Ark_String>("xor"), CompositeOperation::XOR },
-    { Converter::ArkValue<Ark_String>(""), static_cast<CompositeOperation>(-1) },
-    { Converter::ArkValue<Ark_String>("unknown value"), static_cast<CompositeOperation>(-1) },
+    { Converter::ArkValue<Ark_String>(""), CompositeOperation::SOURCE_OVER},
+    { Converter::ArkValue<Ark_String>("unknown value"), CompositeOperation::SOURCE_OVER },
 };
 std::vector<std::tuple<Ark_String, Color>> ARK_STRING_COLOR_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>("#ff0000ff"), Color(0xff0000ff) },
     { Converter::ArkValue<Ark_String>("#00000000"), Color(0x00000000) },
     { Converter::ArkValue<Ark_String>("#80ffffff"), Color(0x80ffffff) },
-    { Converter::ArkValue<Ark_String>(""), Color::BLACK },
+    { Converter::ArkValue<Ark_String>(""), Color(0x00000000) },
     { Converter::ArkValue<Ark_String>("invalid color"), Color::BLACK },
 };
 std::vector<std::tuple<Ark_Boolean, bool>> ARK_BOOL_TEST_PLAN = {
@@ -287,7 +302,6 @@ public:
     int32_t width = 0;
     int32_t height = 0;
 };
-
 class MockCanvasRenderingContext2DModel : public NG::CanvasRenderingContext2DModelNG {
 public:
     MockCanvasRenderingContext2DModel() = default;
@@ -295,6 +309,35 @@ public:
 
     MOCK_METHOD(void, BeginPath, (), (override));
     MOCK_METHOD(void, SetStrokeRuleForPath, (const CanvasFillRule&), (override));
+    MOCK_METHOD(void, SetLineDash, (const std::vector<double>&), (override));
+    MOCK_METHOD(void, ClearRect, (const Rect&), (override));
+    MOCK_METHOD(void, FillRect, (const Rect&), (override));
+    MOCK_METHOD(void, StrokeRect, (const Rect&), (override));
+    MOCK_METHOD(void, Restore, (), (override));
+    MOCK_METHOD(void, CanvasRendererSave, (), (override));
+    MOCK_METHOD(void, ResetTransform, (), (override));
+    MOCK_METHOD(void, CanvasRendererRotate, (double), (override));
+    MOCK_METHOD(void, CanvasRendererScale, (double, double), (override));
+    MOCK_METHOD(void, Translate, (double, double), (override));
+    MOCK_METHOD(void, SaveLayer, (), (override));
+    MOCK_METHOD(void, RestoreLayer, (), (override));
+    MOCK_METHOD(void, Reset, (), (override));
+    MOCK_METHOD(void, SetGlobalAlpha, (double), (override));
+    MOCK_METHOD(void, SetFillText, (const PaintState&, const FillTextInfo&), (override));
+    MOCK_METHOD(void, SetStrokeText, (const PaintState&, const FillTextInfo&), (override));
+    MOCK_METHOD(void, SetTransform, (TransformParam&, bool), (override));
+    MOCK_METHOD(void, Transform, (const TransformParam&), (override));
+    MOCK_METHOD(void, SetCompositeType, (const CompositeOperation&), (override));
+    MOCK_METHOD(void, SetFilterParam, (const std::string&), (override));
+    MOCK_METHOD(void, SetSmoothingEnabled, (bool), (override));
+    MOCK_METHOD(void, SetLineDashOffset, (double), (override));
+    MOCK_METHOD(void, SetLineWidth, (double), (override));
+    MOCK_METHOD(void, SetMiterLimit, (double), (override));
+    MOCK_METHOD(void, SetShadowBlur, (double), (override));
+    MOCK_METHOD(void, SetShadowColor, (const Color&), (override));
+    MOCK_METHOD(void, SetShadowOffsetX, (double), (override));
+    MOCK_METHOD(void, SetShadowOffsetY, (double), (override));
+    MOCK_METHOD(void, SetStrokeRuleForPath2D, (const CanvasFillRule&, const RefPtr<CanvasPath2D>&), (override));
 };
 class MockCanvasRenderingContext2DPeer : public GeneratedModifier::CanvasRenderingContext2DPeerImpl {
 public:
@@ -316,6 +359,7 @@ public:
     using ImageBitmapPeer::SetHeight;
     using ImageBitmapPeer::SetWidth;
 };
+
 } // namespace
 
 class CanvasRendererAccessorTest
@@ -336,8 +380,23 @@ public:
         if (renderingModel_) {
             renderingModel_->DecRefCount();
         }
+        auto pipelineContext =
+            AceType::DynamicCast<NG::MockPipelineContext>(NG::MockPipelineContext::GetCurrentContext());
+        pipelineContext->SetDensity(DEFAULT_DENSITY);
         renderingModel_ = nullptr;
         renderingContext_ = nullptr;
+    }
+
+    void ChangeDensity(const double density)
+    {
+        auto pipelineContext =
+            AceType::DynamicCast<NG::MockPipelineContext>(NG::MockPipelineContext::GetCurrentContext());
+        pipelineContext->SetDensity(density);
+        if (renderingContext_) {
+            delete renderingContext_;
+        }
+        renderingContext_ = new MockCanvasRenderingContext2DPeer(renderingModel_);
+        peer_ = reinterpret_cast<CanvasRendererPeer*>(renderingContext_);
     }
 
     RefPtr<MockCanvasRenderingContext2DModel> renderingModel_ = nullptr;
@@ -377,40 +436,25 @@ HWTEST_F(CanvasRendererAccessorTest, stroke0Test, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setLineDashTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setLineDashTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->setLineDash, nullptr);
-
-    for (const auto& expected : ARRAY_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-
-        Converter::ArkArrayHolder<Array_Number> arrayHolder(expected);
-        const auto segments = arrayHolder.ArkValue();
-
+    double density = DENSITY_1_25;
+    ChangeDensity(density);
+    for (const auto& [actual, expected] : ARRAY_LINE_DASH_TEST_PLAN) {
+        const auto segments = Converter::ArkValue<Array_Number>(actual, Converter::FC);
+        std::vector<double> target;
+        if (actual.size() > 0) {
+            EXPECT_CALL(*renderingModel_, SetLineDash(_)).WillOnce(DoAll(SaveArg<0>(&target)));
+        } else {
+            EXPECT_CALL(*renderingModel_, SetLineDash(_)).Times(0);
+        }
         accessor_->setLineDash(peer_, &segments);
-        bool isNegative = false;
-        if (expected.size() == SIZE_LIMIT_MIN) {
-            EXPECT_FALSE(holder->isCalled);
-            continue;
-        }
-        for (const auto& value : expected) {
-            if (value < SEGMENT_LIMIT_MIN) {
-                isNegative = true;
-                break;
-            }
-        }
-        if (isNegative) {
-            EXPECT_FALSE(holder->isCalled);
-            continue;
-        }
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(expected.size(), holder->segments.size());
+        ASSERT_EQ(target.size(), expected.size());
         for (size_t i = 0; i < expected.size(); i++) {
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->segments[i], expected[i]));
+            EXPECT_NEAR(target[i], expected[i] * density, FLT_PRECISION);
         }
     }
-    holder->TearDown();
 }
 
 /**
@@ -418,36 +462,27 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setLineDashTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_clearRectTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, clearRectTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->clearRect, nullptr);
-
     auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            auto rect = Ace::Rect(expectedX, expectedY, DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE);
+            EXPECT_CALL(*renderingModel_, ClearRect(rect)).Times(1);
             accessor_->clearRect(peer_, &x, &y, &arkD, &arkD);
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetOffset().GetX(), expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetOffset().GetY(), expectedY));
         }
     }
+    // with density
+    double density = DENSITY_2_50;
+    ChangeDensity(density);
     for (const auto& [w, expectedW] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [h, expectedH] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            auto rect = Ace::Rect(DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE, expectedW, expectedH);
+            EXPECT_CALL(*renderingModel_, ClearRect(rect * density)).Times(1);
             accessor_->clearRect(peer_, &arkD, &arkD, &w, &h);
-            if (!(expectedW > SIZE_LIMIT_MIN && expectedH > SIZE_LIMIT_MIN)) {
-                EXPECT_FALSE(holder->isCalled);
-                continue;
-            }
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetSize().Width(), expectedW));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetSize().Height(), expectedH));
         }
     }
-    holder->TearDown();
 }
 
 /**
@@ -455,36 +490,27 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_clearRectTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_fillRectTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, fillRectTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->fillRect, nullptr);
-
     auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            auto rect = Ace::Rect(expectedX, expectedY, DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE);
+            EXPECT_CALL(*renderingModel_, FillRect(rect)).Times(1);
             accessor_->fillRect(peer_, &x, &y, &arkD, &arkD);
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetOffset().GetX(), expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetOffset().GetY(), expectedY));
         }
     }
+    // with density
+    double density = DENSITY_1_25;
+    ChangeDensity(density);
     for (const auto& [w, expectedW] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [h, expectedH] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            auto rect = Ace::Rect(DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE, expectedW, expectedH);
+            EXPECT_CALL(*renderingModel_, FillRect(rect * density)).Times(1);
             accessor_->fillRect(peer_, &arkD, &arkD, &w, &h);
-            if (!(expectedW > SIZE_LIMIT_MIN && expectedH > SIZE_LIMIT_MIN)) {
-                EXPECT_FALSE(holder->isCalled);
-                continue;
-            }
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetSize().Width(), expectedW));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetSize().Height(), expectedH));
         }
     }
-    holder->TearDown();
 }
 
 /**
@@ -492,36 +518,27 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_fillRectTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_strokeRectTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, strokeRectTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->strokeRect, nullptr);
-
     auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            auto rect = Ace::Rect(expectedX, expectedY, DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE);
+            EXPECT_CALL(*renderingModel_, StrokeRect(rect)).Times(1);
             accessor_->strokeRect(peer_, &x, &y, &arkD, &arkD);
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetOffset().GetX(), expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetOffset().GetY(), expectedY));
         }
     }
+    // with density
+    double density = DENSITY_2_50;
+    ChangeDensity(density);
     for (const auto& [w, expectedW] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [h, expectedH] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            auto rect = Ace::Rect(DEFAULT_DOUBLE_VALUE, DEFAULT_DOUBLE_VALUE, expectedW, expectedH);
+            EXPECT_CALL(*renderingModel_, StrokeRect(rect * density)).Times(1);
             accessor_->strokeRect(peer_, &arkD, &arkD, &w, &h);
-            if (!(expectedW > SIZE_LIMIT_MIN && expectedH > SIZE_LIMIT_MIN)) {
-                EXPECT_FALSE(holder->isCalled);
-                continue;
-            }
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetSize().Width(), expectedW));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->rect.GetSize().Height(), expectedH));
         }
     }
-    holder->TearDown();
 }
 
 /**
@@ -529,19 +546,13 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_strokeRectTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_restoreTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, restoreTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->restore, nullptr);
-
+    EXPECT_CALL(*renderingModel_, Restore()).Times(EXPECTED_NUMBER_OF_CALLS);
     accessor_->restore(peer_);
     accessor_->restore(peer_);
     accessor_->restore(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
 }
 
 /**
@@ -549,19 +560,13 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_restoreTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_saveTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, saveTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->save, nullptr);
-
+    EXPECT_CALL(*renderingModel_, CanvasRendererSave()).Times(EXPECTED_NUMBER_OF_CALLS);
     accessor_->save(peer_);
     accessor_->save(peer_);
     accessor_->save(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
 }
 
 /**
@@ -569,19 +574,13 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_saveTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_resetTransformTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, resetTransformTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->resetTransform, nullptr);
-
+    EXPECT_CALL(*renderingModel_, ResetTransform()).Times(EXPECTED_NUMBER_OF_CALLS);
     accessor_->resetTransform(peer_);
     accessor_->resetTransform(peer_);
     accessor_->resetTransform(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
 }
 
 /**
@@ -589,21 +588,15 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_resetTransformTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_rotateTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, rotateTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->rotate, nullptr);
-
     for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-
+        double target;
+        EXPECT_CALL(*renderingModel_, CanvasRendererRotate(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->rotate(peer_, &actual);
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+        EXPECT_NEAR(target, expected, FLT_PRECISION);
     }
-    holder->TearDown();
 }
 
 /**
@@ -611,28 +604,19 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_rotateTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_scaleTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, scaleTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->scale, nullptr);
-
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            double targetX, targetY;
+            EXPECT_CALL(*renderingModel_, CanvasRendererScale(_, _))
+                .WillOnce(DoAll(SaveArg<0>(&targetX), SaveArg<1>(&targetY)));
             accessor_->scale(peer_, &x, &y);
-
-            if (expectedX < SCALE_LIMIT_MIN || expectedY < SCALE_LIMIT_MIN) {
-                EXPECT_FALSE(holder->isCalled);
-                continue;
-            }
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->y, expectedY));
+            EXPECT_NEAR(targetX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(targetY, expectedY, FLT_PRECISION);
         }
     }
-    holder->TearDown();
 }
 
 /**
@@ -640,24 +624,30 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_scaleTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_translateTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, translateTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->translate, nullptr);
-
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            double targetX, targetY;
+            EXPECT_CALL(*renderingModel_, Translate(_, _)).WillOnce(DoAll(SaveArg<0>(&targetX), SaveArg<1>(&targetY)));
             accessor_->translate(peer_, &x, &y);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->y, expectedY));
+            EXPECT_NEAR(targetX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(targetY, expectedY, FLT_PRECISION);
         }
     }
-    holder->TearDown();
+    // with density
+    double density = DENSITY_1_25;
+    ChangeDensity(density);
+    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+            double targetX, targetY;
+            EXPECT_CALL(*renderingModel_, Translate(_, _)).WillOnce(DoAll(SaveArg<0>(&targetX), SaveArg<1>(&targetY)));
+            accessor_->translate(peer_, &x, &y);
+            EXPECT_NEAR(targetX, expectedX * density, FLT_PRECISION);
+            EXPECT_NEAR(targetY, expectedY * density, FLT_PRECISION);
+        }
+    }
 }
 
 /**
@@ -665,19 +655,13 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_translateTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_saveLayerTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, saveLayerTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->saveLayer, nullptr);
-
+    EXPECT_CALL(*renderingModel_, SaveLayer()).Times(EXPECTED_NUMBER_OF_CALLS);
     accessor_->saveLayer(peer_);
     accessor_->saveLayer(peer_);
     accessor_->saveLayer(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
 }
 
 /**
@@ -685,19 +669,13 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_saveLayerTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_restoreLayerTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, restoreLayerTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->restoreLayer, nullptr);
-
+    EXPECT_CALL(*renderingModel_, RestoreLayer()).Times(EXPECTED_NUMBER_OF_CALLS);
     accessor_->restoreLayer(peer_);
     accessor_->restoreLayer(peer_);
     accessor_->restoreLayer(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
 }
 
 /**
@@ -705,19 +683,13 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_restoreLayerTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_resetTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, resetTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->reset, nullptr);
-
+    EXPECT_CALL(*renderingModel_, Reset()).Times(EXPECTED_NUMBER_OF_CALLS);
     accessor_->reset(peer_);
     accessor_->reset(peer_);
     accessor_->reset(peer_);
-
-    EXPECT_EQ(holder->counter, EXPECTED_NUMBER_OF_CALLS);
-    holder->TearDown();
 }
 
 /**
@@ -725,25 +697,15 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_resetTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setGlobalAlphaTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setGlobalAlphaTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setGlobalAlpha, nullptr);
-
     for (const auto& [actual, expected] : ARK_NUMBER_ALPHA_TEST_PLAN) {
-        holder->SetUp();
+        double target;
+        EXPECT_CALL(*renderingModel_, SetGlobalAlpha(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setGlobalAlpha(peer_, &actual);
-
-        if (expected < ALPHA_LIMIT_MIN || expected > ALPHA_LIMIT_MAX) {
-            EXPECT_FALSE(holder->isCalled);
-            continue;
-        }
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+        EXPECT_NEAR(target, expected, FLT_PRECISION);
     }
-    holder->TearDown();
 }
 
 /**
@@ -751,45 +713,40 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setGlobalAlphaTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_fillTextTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, fillTextTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->fillText, nullptr);
-
-    auto arkT = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
+    auto arkT = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
     auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
     auto arkOpt = Converter::ArkValue<Opt_Number>(arkD);
-
     for (const auto& [actual, expected] : ARK_STRING_TEST_PLAN) {
-        holder->SetUp();
+        FillTextInfo target;
+        EXPECT_CALL(*renderingModel_, SetFillText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
         accessor_->fillText(peer_, &actual, &arkD, &arkD, &arkOpt);
-
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(holder->text, expected);
+        EXPECT_EQ(target.text, expected);
     }
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            FillTextInfo target;
+            EXPECT_CALL(*renderingModel_, SetFillText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
             accessor_->fillText(peer_, &arkT, &x, &y, &arkOpt);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->y, expectedY));
+            EXPECT_NEAR(target.x, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.y, expectedY, FLT_PRECISION);
         }
     }
-    for (const auto& [actual, expected] : OPT_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-        accessor_->fillText(peer_, &arkT, &arkD, &arkD, &actual);
-
-        EXPECT_EQ(holder->maxWidth.has_value(), expected.has_value());
-        if (expected.has_value()) {
-            EXPECT_TRUE(LessOrEqualCustomPrecision(*holder->maxWidth, *expected));
+    for (const auto& [actual, expected] : OPT_MAX_WIDTH_TEST_PLAN) {
+        FillTextInfo target;
+        if (expected && expected.value() < 0) {
+            EXPECT_CALL(*renderingModel_, SetFillText(_, _)).Times(0);
+            accessor_->fillText(peer_, &arkT, &arkD, &arkD, &actual);
+        } else {
+            EXPECT_CALL(*renderingModel_, SetFillText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
+            accessor_->fillText(peer_, &arkT, &arkD, &arkD, &actual);
+            EXPECT_EQ(target.maxWidth.has_value(), expected.has_value());
+            EXPECT_NEAR(target.maxWidth ? *target.maxWidth : DEFAULT_DOUBLE_VALUE,
+                expected ? *expected : DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
         }
-        EXPECT_TRUE(holder->isCalled);
     }
-    holder->TearDown();
 }
 
 /**
@@ -797,45 +754,40 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_fillTextTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_strokeTextTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, strokeTextTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->strokeText, nullptr);
-
-    auto arkT = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE);
+    auto arkT = Converter::ArkValue<Ark_String>(DEFAULT_STRING_VALUE, Converter::FC);
     auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
     auto arkOpt = Converter::ArkValue<Opt_Number>(arkD);
-
     for (const auto& [actual, expected] : ARK_STRING_TEST_PLAN) {
-        holder->SetUp();
+        FillTextInfo target;
+        EXPECT_CALL(*renderingModel_, SetStrokeText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
         accessor_->strokeText(peer_, &actual, &arkD, &arkD, &arkOpt);
-
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(holder->text, expected);
+        EXPECT_EQ(target.text, expected);
     }
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            FillTextInfo target;
+            EXPECT_CALL(*renderingModel_, SetStrokeText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
             accessor_->strokeText(peer_, &arkT, &x, &y, &arkOpt);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->x, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->y, expectedY));
+            EXPECT_NEAR(target.x, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.y, expectedY, FLT_PRECISION);
         }
     }
-    for (const auto& [actual, expected] : OPT_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-        accessor_->strokeText(peer_, &arkT, &arkD, &arkD, &actual);
-
-        EXPECT_EQ(holder->maxWidth.has_value(), expected.has_value());
-        if (expected.has_value()) {
-            EXPECT_TRUE(LessOrEqualCustomPrecision(*holder->maxWidth, *expected));
+    for (const auto& [actual, expected] : OPT_MAX_WIDTH_TEST_PLAN) {
+        FillTextInfo target;
+        if (expected && expected.value() < 0) {
+            EXPECT_CALL(*renderingModel_, SetStrokeText(_, _)).Times(0);
+            accessor_->strokeText(peer_, &arkT, &arkD, &arkD, &actual);
+        } else {
+            EXPECT_CALL(*renderingModel_, SetStrokeText(_, _)).WillOnce(DoAll(SaveArg<1>(&target)));
+            accessor_->strokeText(peer_, &arkT, &arkD, &arkD, &actual);
+            EXPECT_EQ(target.maxWidth.has_value(), expected.has_value());
+            EXPECT_NEAR(target.maxWidth ? *target.maxWidth : DEFAULT_DOUBLE_VALUE,
+                expected ? *expected : DEFAULT_DOUBLE_VALUE, FLT_PRECISION);
         }
-        EXPECT_TRUE(holder->isCalled);
     }
-    holder->TearDown();
 }
 
 /**
@@ -843,51 +795,50 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_strokeTextTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform0Test, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setTransform0Test, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setTransform0, nullptr);
-
     auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
     auto arkS = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_SCALE_VALUE));
-
     for (const auto& [x, expectedX] : ARK_NUMBER_ALPHA_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_ALPHA_TEST_PLAN) {
-            holder->SetUp();
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->setTransform0(peer_, &x, &arkD, &arkD, &y, &arkD, &arkD);
-
-            if (expectedX < SCALE_LIMIT_MIN || expectedY < SCALE_LIMIT_MIN) {
-                EXPECT_FALSE(holder->isCalled);
-                continue;
-            }
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleY, expectedY));
+            EXPECT_NEAR(target.scaleX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.scaleY, expectedY, FLT_PRECISION);
         }
     }
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->setTransform0(peer_, &arkS, &x, &y, &arkS, &arkD, &arkD);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewY, expectedY));
+            EXPECT_NEAR(target.skewX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.skewY, expectedY, FLT_PRECISION);
         }
     }
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->setTransform0(peer_, &arkS, &arkD, &arkD, &arkS, &x, &y);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->transX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->transY, expectedY));
+            EXPECT_NEAR(target.translateX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.translateY, expectedY, FLT_PRECISION);
         }
     }
-    holder->TearDown();
+    // with density
+    double density = DENSITY_1_25;
+    ChangeDensity(density);
+    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
+            accessor_->setTransform0(peer_, &arkS, &arkD, &arkD, &arkS, &x, &y);
+            EXPECT_NEAR(target.translateX, expectedX * density, FLT_PRECISION);
+            EXPECT_NEAR(target.translateY, expectedY * density, FLT_PRECISION);
+        }
+    }
 }
 
 /**
@@ -895,51 +846,50 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform0Test, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_transformTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, transformTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->transform, nullptr);
-
     auto arkD = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
     auto arkS = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_SCALE_VALUE));
-
     for (const auto& [x, expectedX] : ARK_NUMBER_ALPHA_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_ALPHA_TEST_PLAN) {
-            holder->SetUp();
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->transform(peer_, &x, &arkD, &arkD, &y, &arkD, &arkD);
-
-            if (expectedX < SCALE_LIMIT_MIN || expectedY < SCALE_LIMIT_MIN) {
-                EXPECT_FALSE(holder->isCalled);
-                continue;
-            }
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleY, expectedY));
+            EXPECT_NEAR(target.scaleX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.scaleY, expectedY, FLT_PRECISION);
         }
     }
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->transform(peer_, &arkS, &x, &y, &arkS, &arkD, &arkD);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewY, expectedY));
+            EXPECT_NEAR(target.skewX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.skewY, expectedY, FLT_PRECISION);
         }
     }
     for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
-            holder->SetUp();
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
             accessor_->transform(peer_, &arkS, &arkD, &arkD, &arkS, &x, &y);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->transX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->transY, expectedY));
+            EXPECT_NEAR(target.translateX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.translateY, expectedY, FLT_PRECISION);
         }
     }
-    holder->TearDown();
+    // with density
+    double density = DENSITY_2_50;
+    ChangeDensity(density);
+    for (const auto& [x, expectedX] : ARK_NUMBER_TEST_PLAN) {
+        for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, Transform(_)).WillOnce(DoAll(SaveArg<0>(&target)));
+            accessor_->transform(peer_, &arkS, &arkD, &arkD, &arkS, &x, &y);
+            EXPECT_NEAR(target.translateX, expectedX * density, FLT_PRECISION);
+            EXPECT_NEAR(target.translateY, expectedY * density, FLT_PRECISION);
+        }
+    }
 }
 
 /**
@@ -947,25 +897,13 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_transformTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setGlobalCompositeOperationTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setGlobalCompositeOperationTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setGlobalCompositeOperation, nullptr);
-
     for (const auto& [actual, expected] : ARK_COMPOSITE_TEST_PLAN) {
-        holder->SetUp();
+        EXPECT_CALL(*renderingModel_, SetCompositeType(expected)).Times(1);
         accessor_->setGlobalCompositeOperation(peer_, &actual);
-
-        if (expected == INVALID_COMPOSITE_VALUE) {
-            EXPECT_FALSE(holder->isCalled);
-            continue;
-        }
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(holder->composite, expected);
     }
-    holder->TearDown();
 }
 
 /**
@@ -973,25 +911,14 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setGlobalCompositeOperationTest, T
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setFilterTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setFilterTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setFilter, nullptr);
-
     for (const auto& [actual, expected] : ARK_STRING_TEST_PLAN) {
-        holder->SetUp();
+        auto nCalls = expected.empty() ? 0 : 1;
+        EXPECT_CALL(*renderingModel_, SetFilterParam(expected)).Times(nCalls);
         accessor_->setFilter(peer_, &actual);
-
-        if (expected == INVALID_STRING_VALUE) {
-            EXPECT_FALSE(holder->isCalled);
-            continue;
-        }
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(holder->text, expected);
     }
-    holder->TearDown();
 }
 
 /**
@@ -999,21 +926,13 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setFilterTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setImageSmoothingEnabledTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingEnabledTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setImageSmoothingEnabled, nullptr);
-
     for (const auto& [actual, expected] : ARK_BOOL_TEST_PLAN) {
-        holder->SetUp();
-
+        EXPECT_CALL(*renderingModel_, SetSmoothingEnabled(expected)).Times(1);
         accessor_->setImageSmoothingEnabled(peer_, actual);
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(holder->enabled, expected);
     }
-    holder->TearDown();
 }
 
 /**
@@ -1021,21 +940,15 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setImageSmoothingEnabledTest, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setLineDashOffsetTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setLineDashOffsetTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setLineDashOffset, nullptr);
-
     for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-
+        double target;
+        EXPECT_CALL(*renderingModel_, SetLineDashOffset(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setLineDashOffset(peer_, &actual);
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+        EXPECT_NEAR(target, expected, FLT_PRECISION);
     }
-    holder->TearDown();
 }
 
 /**
@@ -1043,21 +956,15 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setLineDashOffsetTest, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setLineWidthTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setLineWidthTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setLineWidth, nullptr);
-
     for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-
+        double target;
+        EXPECT_CALL(*renderingModel_, SetLineWidth(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setLineWidth(peer_, &actual);
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+        EXPECT_NEAR(target, expected, FLT_PRECISION);
     }
-    holder->TearDown();
 }
 
 /**
@@ -1065,21 +972,15 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setLineWidthTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setMiterLimitTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setMiterLimitTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setMiterLimit, nullptr);
-
     for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-
+        double target;
+        EXPECT_CALL(*renderingModel_, SetMiterLimit(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setMiterLimit(peer_, &actual);
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+        EXPECT_NEAR(target, expected, FLT_PRECISION);
     }
-    holder->TearDown();
 }
 
 /**
@@ -1087,21 +988,15 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setMiterLimitTest, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setShadowBlurTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setShadowBlurTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setShadowBlur, nullptr);
-
     for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-
+        double target;
+        EXPECT_CALL(*renderingModel_, SetShadowBlur(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setShadowBlur(peer_, &actual);
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+        EXPECT_NEAR(target, expected, FLT_PRECISION);
     }
-    holder->TearDown();
 }
 
 /**
@@ -1109,26 +1004,13 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setShadowBlurTest, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setShadowColorTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setShadowColorTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setShadowColor, nullptr);
-
     for (const auto& [actual, expected] : ARK_STRING_COLOR_TEST_PLAN) {
-        holder->SetUp();
+        EXPECT_CALL(*renderingModel_, SetShadowColor(expected)).Times(1);
         accessor_->setShadowColor(peer_, &actual);
-
-        if (expected == Color::BLACK) {
-            EXPECT_FALSE(holder->isCalled);
-            continue;
-        }
-
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(holder->color.ToString(), expected.ToString());
     }
-    holder->TearDown();
 }
 
 /**
@@ -1136,21 +1018,15 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setShadowColorTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setShadowOffsetXTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetXTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setShadowOffsetX, nullptr);
-
     for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-
+        double target;
+        EXPECT_CALL(*renderingModel_, SetShadowOffsetX(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setShadowOffsetX(peer_, &actual);
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+        EXPECT_NEAR(target, expected, FLT_PRECISION);
     }
-    holder->TearDown();
 }
 
 /**
@@ -1158,21 +1034,15 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setShadowOffsetXTest, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setShadowOffsetYTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setShadowOffsetYTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setShadowOffsetY, nullptr);
-
     for (const auto& [actual, expected] : ARK_NUMBER_TEST_PLAN) {
-        holder->SetUp();
-
+        double target;
+        EXPECT_CALL(*renderingModel_, SetShadowOffsetY(_)).WillOnce(DoAll(SaveArg<0>(&target)));
         accessor_->setShadowOffsetY(peer_, &actual);
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(holder->value, expected));
+        EXPECT_NEAR(target, expected, FLT_PRECISION);
     }
-    holder->TearDown();
 }
 
 /**
@@ -1180,43 +1050,15 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setShadowOffsetYTest, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_stroke1Test, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, stroke1Test, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->stroke1, nullptr);
-
     auto peerImpl = Referenced::MakeRefPtr<Path2DPeer>();
     Ark_Path2D arkPath = Referenced::RawPtr(peerImpl);
-
-    for (const auto& expected : PATH2D_TEST_PLAN) {
-        holder->SetUp();
-        auto path = AceType::MakeRefPtr<CanvasPath2D>();
-        auto cmd = std::get<0>(expected);
-        auto x = std::get<1>(expected);
-        auto y = std::get<2>(expected);
-
-        if (cmd == PathCmd::MOVE_TO) {
-            path->MoveTo(x, y);
-        } else {
-            path->LineTo(x, y);
-        }
-        peerImpl->SetCanvasPath2d(path);
-
-        accessor_->stroke1(peer_, arkPath);
-
-        auto result = holder->path->GetCaches();
-        auto rcmd = result[0].first;
-        auto rx = result[0].second.para1;
-        auto ry = result[0].second.para2;
-
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(rcmd, cmd);
-        EXPECT_TRUE(LessOrEqualCustomPrecision(rx, x));
-        EXPECT_TRUE(LessOrEqualCustomPrecision(ry, y));
-    }
-    holder->TearDown();
+    auto path = AceType::MakeRefPtr<CanvasPath2D>();
+    peerImpl->SetCanvasPath2d(path);
+    EXPECT_CALL(*renderingModel_, SetStrokeRuleForPath2D(CanvasFillRule::NONZERO, path)).Times(1);
+    accessor_->stroke1(peer_, arkPath);
 }
 
 /**
@@ -1224,42 +1066,29 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_stroke1Test, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform1ScaleTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setTransform1ScaleTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setTransform1, nullptr);
-
     Ark_Matrix2D arkMatrix;
     auto peer = new Matrix2DPeer();
     arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
-
-    auto valD = DEFAULT_DOUBLE_VALUE;
-
     for (const auto& expectedX : NUMBER_ALPHA_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_ALPHA_TEST_PLAN) {
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_FALSE)).WillOnce(DoAll(SaveArg<0>(&target)));
             peer->SetScaleX(expectedX);
             peer->SetScaleY(expectedY);
-            peer->SetRotateX(valD);
-            peer->SetRotateY(valD);
-            peer->SetTranslateX(valD);
-            peer->SetTranslateY(valD);
-
-            holder->SetUp();
             accessor_->setTransform1(peer_, &optMatrix);
-
-            if (expectedX < SCALE_LIMIT_MIN || expectedY < SCALE_LIMIT_MIN) {
-                EXPECT_FALSE(holder->isCalled);
-                continue;
-            }
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleY, expectedY));
+            EXPECT_NEAR(target.scaleX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.scaleY, expectedY, FLT_PRECISION);
         }
     }
-    holder->TearDown();
+    // with optional
+    Opt_Matrix2D emptyMatrix = Converter::ArkValue<Opt_Matrix2D>();
+    EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_FALSE)).Times(0);
+    EXPECT_CALL(*renderingModel_, ResetTransform()).Times(1);
+    accessor_->setTransform1(peer_, &emptyMatrix);
 }
 
 /**
@@ -1267,39 +1096,24 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform1ScaleTest, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform1SkewTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setTransform1SkewTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setTransform1, nullptr);
-
     Ark_Matrix2D arkMatrix;
     auto peer = new Matrix2DPeer();
     arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
-
-    auto valD = DEFAULT_DOUBLE_VALUE;
-    auto valS = DEFAULT_SCALE_VALUE;
-
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            peer->SetScaleX(valS);
-            peer->SetScaleY(valS);
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_FALSE)).WillOnce(DoAll(SaveArg<0>(&target)));
             peer->SetRotateX(expectedX);
             peer->SetRotateY(expectedY);
-            peer->SetTranslateX(valD);
-            peer->SetTranslateY(valD);
-
-            holder->SetUp();
             accessor_->setTransform1(peer_, &optMatrix);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewY, expectedY));
+            EXPECT_NEAR(target.skewX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.skewY, expectedY, FLT_PRECISION);
         }
     }
-    holder->TearDown();
 }
 
 /**
@@ -1307,39 +1121,38 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform1SkewTest, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTransform1TranslateTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setTransform1TranslateTest, TestSize.Level1)
 {
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-
     ASSERT_NE(accessor_->setTransform1, nullptr);
-
     Ark_Matrix2D arkMatrix;
     auto peer = new Matrix2DPeer();
     arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
-
-    auto valD = DEFAULT_DOUBLE_VALUE;
-    auto valS = DEFAULT_SCALE_VALUE;
-
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            peer->SetScaleX(valS);
-            peer->SetScaleY(valS);
-            peer->SetRotateX(valD);
-            peer->SetRotateY(valD);
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_FALSE)).WillOnce(DoAll(SaveArg<0>(&target)));
             peer->SetTranslateX(expectedX);
             peer->SetTranslateY(expectedY);
-
-            holder->SetUp();
             accessor_->setTransform1(peer_, &optMatrix);
-
-            EXPECT_TRUE(holder->isCalled);
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->transX, expectedX));
-            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->transY, expectedY));
+            EXPECT_NEAR(target.translateX, expectedX, FLT_PRECISION);
+            EXPECT_NEAR(target.translateY, expectedY, FLT_PRECISION);
         }
     }
-    holder->TearDown();
+    // with density
+    double density = DENSITY_2_50;
+    ChangeDensity(density);
+    for (const auto& expectedX : NUMBER_TEST_PLAN) {
+        for (const auto& expectedY : NUMBER_TEST_PLAN) {
+            TransformParam target;
+            EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_FALSE)).WillOnce(DoAll(SaveArg<0>(&target)));
+            peer->SetTranslateX(expectedX);
+            peer->SetTranslateY(expectedY);
+            accessor_->setTransform1(peer_, &optMatrix);
+            EXPECT_NEAR(target.translateX, expectedX * density, FLT_PRECISION);
+            EXPECT_NEAR(target.translateY, expectedY * density, FLT_PRECISION);
+        }
+    }
 }
 
 #ifdef PIXEL_MAP_SUPPORTED
