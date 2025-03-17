@@ -7660,6 +7660,10 @@ AccessibilityParentRectInfo JsAccessibilityManager::GetTransformRectInfoRelative
 
 void JsAccessibilityManager::UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode)
 {
+    auto accessibilityWorkMode = GenerateAccessibilityWorkMode();
+    if (!accessibilityWorkMode.isTouchExplorationEnabled) {
+        return;
+    }
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
