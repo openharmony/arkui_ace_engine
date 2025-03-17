@@ -517,6 +517,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();

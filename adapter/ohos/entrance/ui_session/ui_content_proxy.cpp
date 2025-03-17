@@ -384,7 +384,7 @@ int32_t UIContentServiceProxy::GetWebViewCurrentLanguage(const EventCallback& ev
         LOGW("GetWebViewCurrentLanguage send request failed");
         return REPLY_ERROR;
     }
-    return REPLY_ERROR;
+    return NO_ERROR;
 }
 
 int32_t UIContentServiceProxy::GetCurrentPageName(const std::function<void(std::string)>& finishCallback)
@@ -409,7 +409,7 @@ int32_t UIContentServiceProxy::GetCurrentPageName(const std::function<void(std::
         LOGW("GetCurrentPageName send request failed");
         return REPLY_ERROR;
     }
-    return REPLY_ERROR;
+    return NO_ERROR;
 }
 
 int32_t UIContentServiceProxy::StartWebViewTranslate(

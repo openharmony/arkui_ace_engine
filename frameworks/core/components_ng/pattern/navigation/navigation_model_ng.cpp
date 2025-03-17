@@ -730,19 +730,13 @@ void NavigationModelNG::SetHideNavBar(bool hideNavBar)
 
 void NavigationModelNG::SetEnableToolBarAdaptation(bool enable)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navigationGroupNode);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
-    CHECK_NULL_VOID(toolBarNode);
-    toolBarNode->SetEnableToolBarAdaptation(enable);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableToolBarAdaptation, enable);
 }
 
 void NavigationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
     const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-    const std::vector<std::string>& nameList)
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+    const std::string& backButtonAccessibilityText)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -763,6 +757,14 @@ void NavigationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::F
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    if (userDefinedAccessibilityText) {
+        NavigationTitleUtil::SetAccessibility(backButtonNode, backButtonAccessibilityText);
+    } else {
+        std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+        NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+    }
 }
 
 void NavigationModelNG::SetHideBackButton(bool hideBackButton)
@@ -1412,13 +1414,7 @@ void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBa
 
 void NavigationModelNG::SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable)
 {
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navigationGroupNode);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
-    CHECK_NULL_VOID(toolBarNode);
-    toolBarNode->SetEnableToolBarAdaptation(enable);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableToolBarAdaptation, enable, frameNode);
 }
 
 void NavigationModelNG::SetEnableDragBar(bool enableDragBar)

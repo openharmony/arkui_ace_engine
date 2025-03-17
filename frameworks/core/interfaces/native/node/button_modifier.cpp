@@ -129,7 +129,7 @@ void ResetButtonType(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_SIXTEEN);
     } else {
         ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);

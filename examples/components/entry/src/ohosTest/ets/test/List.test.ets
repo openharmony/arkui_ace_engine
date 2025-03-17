@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import LoadingProgressBootcampTest from './InformationDisplay/LoadingProgressBootcamp.test'
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  LoadingProgressBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

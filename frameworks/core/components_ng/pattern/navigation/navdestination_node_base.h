@@ -186,6 +186,11 @@ public:
         return animationId_;
     }
 
+    virtual RefPtr<UINode> GetNavigationNode()
+    {
+        return nullptr;
+    }
+
 protected:
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> menu_;

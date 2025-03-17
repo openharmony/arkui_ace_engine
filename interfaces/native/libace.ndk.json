@@ -480,6 +480,10 @@
         "name": "OH_ArkUI_PointerEvent_GetTiltY"
     },
     {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_PointerEvent_GetRollAngle"
+    },
+    {
         "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_GetInteractionHand"
     },
@@ -2764,75 +2768,75 @@
         "name": "OH_ArkUI_KeyframeAnimateOption_GetExpectedFrameRate"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_VisibleAreaEventOptions_Create"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_VisibleAreaEventOptions_Dispose"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_VisibleAreaEventOptions_SetRatios"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetRatios"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GestureInterrupter_GetUserData"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_DirectMask"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_FingerCount"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_limitFingerCount"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_repeat"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_distance"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_speed"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_duration"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_angle"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_GetGestureParam_distanceThreshold"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_AxisEvent_SetPropagation"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_AxisEvent_GetScrollStep"
     },
     {
@@ -2848,35 +2852,35 @@
         "name": "OH_ArkUI_NotifyDragEndPendingDone"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetWidth"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetHeight"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetPositionX"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetPositionY"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_UIInputEvent_GetModifierKeyStates"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_HoverEvent_IsHovered"
     },
     {
@@ -2884,39 +2888,39 @@
         "name": "OH_ArkUI_FocusSetKeyProcessingMode"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_CreateClonedEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_DestroyClonedEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventLocalPosition"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventActionType"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_PointerEvent_PostClonedEvent"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "15",
         "name": "OH_ArkUI_NodeUtils_GetPositionToParent"
     },
     {
@@ -3072,19 +3076,19 @@
         "name": "OH_ArkUI_SwiperArrowStyle_Destroy"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_CreateOptions"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_DisposeOptions"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_OpenDialog"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_CloseDialog"
     },
     {
@@ -3098,6 +3102,102 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_CustomDialog_SetImmersiveMode"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_UpdateDialog"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBackgroundColor"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetCornerRadius"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBorderWidth"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBorderColor"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBorderStyle"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetWidth"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetHeight"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetShadow"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetCustomShadow"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBackgroundBlurStyle"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetAlignment"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetModalMode"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetAutoCancel"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetSubwindowMode"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetMask"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetKeyboardAvoidMode"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetHoverModeEnabled"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetHoverModeArea"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnWillDismissCallback"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnWillAppearCallback"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnDidAppearCallback"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnWillDisappearCallback"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback"
     },
     {
         "first_introduced": "16",
@@ -3162,5 +3262,37 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_XComponent_IsInitialized"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextPickerRangeContentArray_Create"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextPickerRangeContentArray_SetIconAtIndex"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextPickerRangeContentArray_SetTextAtIndex"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextPickerRangeContentArray_Destroy"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextCascadePickerRangeContentArray_Create"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextCascadePickerRangeContentArray_SetTextAtIndex"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_TextCascadePickerRangeContentArray_Destroy"
     }
 ]

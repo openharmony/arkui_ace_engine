@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 namespace OHOS {
@@ -47,4 +48,4 @@ private:
 } // namespace Ace
 } // namespace OHOS
 
-#endif // FOUNDATION_ACE_INTERFACE_BASE_TASK_POOL_H
+#endif // FOUNDATION_ACE_INTERFACE_BASE_TASK_POOL_H

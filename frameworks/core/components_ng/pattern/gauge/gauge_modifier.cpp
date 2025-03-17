@@ -613,7 +613,7 @@ void GaugeModifier::PaintMultiSegmentGradientCircular(
         info.drawSweepDegree = (weights[index] / totalWeight) * sweepDegree;
         info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
         info.colorStopArray = colors.at(index);
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
         } else {
             DrawSingleSegmentGradientExtend(canvas, data, paintProperty, info, index);
@@ -651,7 +651,7 @@ void GaugeModifier::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas, Re
         info.drawSweepDegree = (weights[index] / totalWeight) * data.sweepDegree;
         info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
         info.colorStopArray = colors.at(index);
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
         } else {
             DrawSingleSegmentGradientExtend(canvas, data, paintProperty, info, index);

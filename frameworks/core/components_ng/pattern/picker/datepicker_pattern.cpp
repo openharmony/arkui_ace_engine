@@ -377,7 +377,7 @@ void DatePickerPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(datePickerRowLayoutProperty);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         ColumnPatternInitHapticController();
         isHapticChanged_ = false;
     }
@@ -425,10 +425,22 @@ void DatePickerPattern::InitDisabled()
     enabled_ = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto opacity = curOpacity_;
     if (!enabled_) {
-        renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        renderContext->UpdateOpacity(curOpacity_);
+        opacity *= DISABLE_ALPHA;
+        renderContext->UpdateOpacity(opacity);
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        renderContext->UpdateOpacity(opacity);
+    }
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        for (const auto& child : host->GetChildren()) {
+            auto stackNode = DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(stackNode);
+            auto renderContext = stackNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateOpacity(opacity);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -593,6 +605,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     pickerProperty->UpdateDisappearColor(
         GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
     if (isPicker_) {
+        OnModifyDone();
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
@@ -2889,17 +2902,17 @@ bool DatePickerPattern::IsCircle()
 
 void DatePickerPattern::ClearFocus()
 {
-    if (!IsCircle()) {
-        return;
-    }
-
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    CHECK_EQUAL_VOID(isFirstTimeSetFocus_, true);
+    CHECK_EQUAL_VOID(lastTimeIsLuanar_, CurrentIsLunar());
     if (!selectedColumnId_.empty()) {
         const auto& allChildNode = GetAllChildNode();
         auto it = allChildNode.find(selectedColumnId_);
         if (it != allChildNode.end()) {
             auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
-            CHECK_NULL_VOID(tmpPattern);
-            tmpPattern->SetSelectedMark(false, false);
+            if (tmpPattern) {
+                tmpPattern->SetSelectedMark(false, false);
+            }
         }
         selectedColumnId_ = "";
     }
@@ -2907,10 +2920,12 @@ void DatePickerPattern::ClearFocus()
 
 void DatePickerPattern::SetDefaultFocus()
 {
-    if (!IsCircle()) {
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    if (!isFirstTimeSetFocus_ && (lastTimeIsLuanar_ == CurrentIsLunar())) {
         return;
     }
-
+    isFirstTimeSetFocus_ = false;
+    lastTimeIsLuanar_ = CurrentIsLunar();
     std::function<void(std::string& focusId)> call =  [weak = WeakClaim(this)](std::string& focusId) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -2965,6 +2980,32 @@ void DatePickerPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
         pickerColumnPattern->SetDigitalCrownSensitivity(crownSensitivity);
     }
 #endif
+}
+
+void DatePickerPattern::UpdateUserSetSelectColor()
+{
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto&& children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->UpdateUserSetSelectColor();
+    }
+}
+
+bool DatePickerPattern::CurrentIsLunar()
+{
+    auto rowLayoutProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_RETURN(rowLayoutProperty, true);
+    return rowLayoutProperty->GetLunarValue(false);
 }
 
 } // namespace OHOS::Ace::NG

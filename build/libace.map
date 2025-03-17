@@ -65,6 +65,8 @@
       OHOS::Ace::Platform::AceApplicationInfoImpl::*;
       OHOS::Ace::Platform::AceContainer::*;
       OHOS::Ace::Platform::FlutterAceView::*;
+      "OHOS::Ace::Platform::WindowFreeContainer::CreateWindowFreeContainer(void*, void*)";
+      "OHOS::Ace::Platform::WindowFreeContainer::DestroyWindowFreeContainer()";
       OHOS::Ace::PluginComponentManager::*;
       OHOS::Ace::Scheduler::*;
       OHOS::Ace::ScopedDelegate::*;
@@ -97,6 +99,7 @@
       OHOS::Ace::NG::ViewAdvancedRegister::*;
       "OHOS::Ace::AnimatableColor::AnimatableColor()";
       "OHOS::Ace::AnimatableColor::~AnimatableColor()";
+      "OHOS::Ace::NG::LayoutProperty::~LayoutProperty()";
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -480,6 +483,7 @@
 
       virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
+      virtual?thunk?to?OHOS::Ace::NG::LayoutProperty::*;
 
       vtable?for?OHOS::Ace::NG::AccessibilityProperty;
       vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -524,6 +528,8 @@
       "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
       "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
       "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
+      OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
+      OHOS::Ace::TouchEventTarget::GetAttachedNode*;
     };
   local:
     *;

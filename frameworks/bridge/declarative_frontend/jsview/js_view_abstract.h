@@ -152,6 +152,7 @@ public:
     static void ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption);
     static void ParseBackgroundImageOption(const JSCallbackInfo& jsOption, int32_t& repeatIndex, bool& syncMode);
     static void ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption);
+    static void ParseSysOptions(const JSRef<JSObject>& jsSysOptions, SysOptions& sysOptions);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
     static void JsBackgroundEffect(const JSCallbackInfo& info);
     static void ParseEffectOption(const JSRef<JSObject>& jsObj, EffectOption& effectOption);
@@ -501,6 +502,7 @@ public:
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);
+    static void JsBindTips(const JSCallbackInfo& info);
     static void SetPopupDismiss(
         const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
     static PopupOnWillDismiss ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);

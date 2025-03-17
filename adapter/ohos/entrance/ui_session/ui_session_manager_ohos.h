@@ -53,9 +53,9 @@ public:
     void SaveGetPixelMapFunction(GetPixelMapFunction&& function) override;
     void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager) override;
     void GetWebViewLanguage() override;
-    void RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback) override;
+    void RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback) override;
     void GetCurrentPageName() override;
-    void SendCurrentPageName(const std::string result) override;
+    void SendCurrentPageName(const std::string& result) override;
     void SaveProcessId(std::string key, int32_t id) override;
     void SendCurrentLanguage(std::string result) override;
     void GetWebTranslateText(std::string extraData, bool isContinued) override;

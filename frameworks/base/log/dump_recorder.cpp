@@ -19,11 +19,12 @@
 
 #include "base/log/dump_log.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
 
 namespace {
-constexpr uint32_t MAX_FILE_SIZE = 100000;
+constexpr uint32_t MAX_FILE_SIZE = 100 * 1024 * 1024;
 constexpr char REC_FILE_NAME[] = "/arkui_dump.rec";
 const std::vector<std::string> SKIP_COMPARE_PARAMS = { "time", "children" };
 } // namespace
@@ -33,10 +34,17 @@ DumpRecorder::~DumpRecorder() = default;
 
 void DumpRecorder::Init()
 {
-    recordTree_.reset();
+    Clear();
     recordTree_ = JsonUtil::Create(true);
     auto jsonNodeArray = JsonUtil::CreateArray(true);
     recordTree_->PutRef("infos", std::move(jsonNodeArray));
+}
+
+void DumpRecorder::Clear()
+{
+    fileSize_ = 0;
+    records_.clear();
+    recordTree_.reset();
 }
 
 void DumpRecorder::Start(std::function<bool()>&& func)
@@ -53,25 +61,35 @@ void DumpRecorder::Stop()
     if (!frameDumpFunc_) {
         return;
     }
-    CHECK_NULL_VOID(recordTree_);
-    Output(recordTree_->ToString());
     frameDumpFunc_ = nullptr;
-    recordTree_.reset();
+    auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        []() -> void { DumpRecorder::GetInstance().StopInner(); }, TaskExecutor::TaskType::BACKGROUND, "ArkUIDumpStop");
 }
 
-void DumpRecorder::Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json, WeakPtr<TaskExecutor> taskExecutor)
+void DumpRecorder::StopInner()
+{
+    CHECK_NULL_VOID(recordTree_);
+    Output(recordTree_->ToString());
+    Clear();
+}
+
+void DumpRecorder::Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json)
 {
     records_[timestamp] = std::move(json);
     if (static_cast<int32_t>(records_.size()) > 1) {
-        auto executor = taskExecutor.Upgrade();
-        CHECK_NULL_VOID(executor);
-        executor->PostTask([timestamp]() -> void { DumpRecorder::GetInstance().Diff(timestamp); },
+        auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([timestamp]() -> void { DumpRecorder::GetInstance().Diff(timestamp); },
             TaskExecutor::TaskType::BACKGROUND, "ArkUIDumpDiff");
     } else {
         auto info = JsonUtil::Create();
         info->Put("startTime", timestamp);
         auto& infoJson = records_.at(timestamp);
         info->Put("info", infoJson);
+        std::string infoContent = info->ToString();
+        fileSize_ += static_cast<uint32_t>(infoContent.size());
         auto infos = recordTree_->GetValue("infos");
         infos->PutRef(std::move(info));
     }
@@ -99,10 +117,11 @@ void DumpRecorder::Diff(int64_t timestamp)
         auto infoJson = JsonUtil::ParseJsonString(diff);
         info->PutRef("info", std::move(infoJson));
     }
+    std::string infoContent = info->ToString();
+    fileSize_ += static_cast<uint32_t>(infoContent.size());
     auto infos = recordTree_->GetValue("infos");
     infos->PutRef(std::move(info));
-    auto output = recordTree_->ToString();
-    if (sizeof(output) > MAX_FILE_SIZE) {
+    if (fileSize_ > MAX_FILE_SIZE) {
         Stop();
     }
     records_.erase(timestamp);
