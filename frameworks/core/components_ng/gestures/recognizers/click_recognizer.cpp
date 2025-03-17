@@ -142,6 +142,9 @@ ClickInfo ClickRecognizer::GetClickInfo()
     if (touchPoint.tiltY.has_value()) {
         info.SetTiltY(touchPoint.tiltY.value());
     }
+    if (touchPoint.rollAngle.has_value()) {
+        info.SetRollAngle(touchPoint.rollAngle.value());
+    }
     info.SetSourceTool(touchPoint.sourceTool);
     return info;
 }
@@ -495,6 +498,9 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     if (touchPoint.tiltY.has_value()) {
         info.SetTiltY(touchPoint.tiltY.value());
     }
+    if (touchPoint.rollAngle.has_value()) {
+        info.SetRollAngle(touchPoint.rollAngle.value());
+    }
     info.SetSourceTool(touchPoint.sourceTool);
 #ifdef SECURITY_COMPONENT_ENABLE
     info.SetDisplayX(touchPoint.screenX);
@@ -574,6 +580,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     }
     if (touchPoint.tiltY.has_value()) {
         info->SetTiltY(touchPoint.tiltY.value());
+    }
+    if (touchPoint.rollAngle.has_value()) {
+        info->SetRollAngle(touchPoint.rollAngle.value());
     }
     info->SetSourceTool(touchPoint.sourceTool);
     if (sysJudge_) {

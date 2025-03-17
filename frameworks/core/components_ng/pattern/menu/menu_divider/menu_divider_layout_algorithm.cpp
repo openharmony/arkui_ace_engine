@@ -32,8 +32,12 @@ std::optional<SizeF> MenuDividerLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(geometryNode, SizeF());
     auto property = host->GetPaintProperty<MenuDividerPaintProperty>();
     CHECK_NULL_RETURN(property, SizeF());
-    auto strokeWidth = property->GetStrokeWidthValue(Dimension());
+    auto strokeWidth = property->GetStrokeWidthValue(Dimension(0, DimensionUnit::INVALID));
     auto itemSize = geometryNode->GetFrameSize();
-    return SizeF(itemSize.Width(), strokeWidth.ConvertToPxWithSize(itemSize.Height()));
+    if (strokeWidth.Unit() != DimensionUnit::INVALID) {
+        return SizeF(itemSize.Width(), strokeWidth.ConvertToPxWithSize(itemSize.Height()));
+    } else {
+        return SizeF(itemSize.Width(), themeStrokeWidth_.ConvertToPx());
+    }
 }
 } // namespace OHOS::Ace::NG

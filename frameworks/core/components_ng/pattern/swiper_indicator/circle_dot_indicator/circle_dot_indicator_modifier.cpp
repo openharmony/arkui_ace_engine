@@ -85,6 +85,7 @@ CircleDotIndicatorModifier::CircleDotIndicatorModifier()
       containerBorderWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_CONTAINER_BORDER_WIDTH.ConvertToPx())),
       itemRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_ITEM_RADIUS.ConvertToPx())),
       itemSelectWidth_(AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_ITEM_SELECT_WIDTH.ConvertToPx())),
+      backgroundOffset_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       updateMaskColor_(AceType::MakeRefPtr<PropertyBool>(false))
 {
     AttachProperty(backgroundColor_);
@@ -100,6 +101,7 @@ CircleDotIndicatorModifier::CircleDotIndicatorModifier()
     AttachProperty(containerBorderWidth_);
     AttachProperty(itemRadius_);
     AttachProperty(itemSelectWidth_);
+    AttachProperty(backgroundOffset_);
     AttachProperty(updateMaskColor_);
 }
 
@@ -117,6 +119,7 @@ void CircleDotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.containerBorderWidth = containerBorderWidth_->Get();
     contentProperty.itemRadius = itemRadius_->Get();
     contentProperty.itemSelectWidth = itemSelectWidth_->Get();
+    contentProperty.backgroundOffset = backgroundOffset_->Get();
 
     PaintIndicatorMask(context, contentProperty);
     PaintBackground(context, contentProperty);
@@ -152,8 +155,6 @@ void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const 
     float width = contentProperty.containerBorderWidth;
     if (touchBottomType_ != TouchBottomType::NONE) {
         width -= QUARTER * touchBottomRate_ * width;
-    } else {
-        backgroundOffset_ = 0;
     }
     float dotActiveAngle = contentProperty.dotActiveAngle;
     auto itemSize = contentProperty.vectorBlackPointAngle.size();
@@ -174,8 +175,7 @@ void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const 
     } else {
         startAngle = HALF_CIRCLE_ANGLE + (allPointArcAngle / HALF_DIVISOR);
     }
-
-    float drawAngle = - (allPointArcAngle + backgroundOffset_);
+    float drawAngle = - (allPointArcAngle + contentProperty.backgroundOffset);
     if (touchBottomType_ == TouchBottomType::START) {
         startAngle = startAngle - allPointArcAngle;
         drawAngle *= OBTAIN_OPPOSITE;
@@ -184,6 +184,7 @@ void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const 
         startAngle = -startAngle;
         drawAngle = -drawAngle;
     }
+    PaintBackgroundSetAngle(itemSize, contentProperty.backgroundOffset, startAngle);
     auto drawPoint = GetArcPoint(contentProperty);
     canvas.AttachPen(pen);
     canvas.DrawArc(
@@ -191,6 +192,17 @@ void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const 
         startAngle, drawAngle);
     canvas.DetachPen();
     canvas.Restore();
+}
+
+void CircleDotIndicatorModifier::PaintBackgroundSetAngle(int32_t itemSize, float backgroundOffset, float& startAngle)
+{
+    if (touchBottomType_ == TouchBottomType::NONE) {
+        if (arcDirection_ == SwiperArcDirection::THREE_CLOCK_DIRECTION && currentIndex_ < itemSize / HALF_DIVISOR) {
+            startAngle = startAngle - backgroundOffset;
+        } else if (currentIndex_ < itemSize / HALF_DIVISOR) {
+            startAngle = startAngle + backgroundOffset;
+        }
+    }
 }
 
 float CircleDotIndicatorModifier::GetAllPointArcAngle(int32_t itemSize, float dotPaddingAngle,
@@ -227,7 +239,7 @@ void CircleDotIndicatorModifier::UpdateTouchBottomAnimation(const LinearVector<f
                                     vectorBlackPointCenterX, longPointCenterX, backgroundOffset]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->SetBackgroundOffset(backgroundOffset);
+        modifier->backgroundOffset_->Set(backgroundOffset);
         modifier->dotActiveStartAngle_->Set(longPointCenterX.first);
         modifier->dotActiveEndAngle_->Set(longPointCenterX.second);
         modifier->vectorBlackPointAngle_->Set(vectorBlackPointCenterX);
@@ -515,6 +527,7 @@ void CircleDotIndicatorModifier::UpdatePressToNormalPaintProperty(const LinearVe
                                      vectorBlackPointRadius, longPointAngle]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
+        modifier->backgroundOffset_->Set(0.0f);
         modifier->UpdateNormalPaintProperty(normalItemSizes, vectorBlackPointAngle, vectorBlackPointRadius,
                                             longPointAngle);
     });

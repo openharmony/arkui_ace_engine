@@ -1233,4 +1233,137 @@ HWTEST_F(TextPickerColumnTestOneNg, GetShiftDistance002, TestSize.Level1)
     distance = columnPattern->GetShiftDistance(index, dir);
     EXPECT_EQ(distance, 0.0);
 }
+
+/**
+ * @tc.name: HandleDragEnd002
+ * @tc.desc: Test TextPickerColumnPattern HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, HandleDragEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerColumnPattern and call HandleDragEnd.
+     * @tc.expected: step1. Create success and HandleDragEnd success.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->HandleDragEnd();
+
+    /**
+     * @tc.steps: step2. Check the result.
+     * @tc.expected: step2. The toss is not playing and pressed is false.
+     */
+    EXPECT_FALSE(columnPattern->GetToss()->GetTossPlaying());
+    EXPECT_FALSE(columnPattern->pressed_);
+}
+
+/**
+ * @tc.name: HandleDragEnd003
+ * @tc.desc: Test TextPickerColumnPattern HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, HandleDragEnd003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerColumnPattern.
+     * @tc.expected: step1. Create success.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set the toss and call HandleDragEnd.
+     * @tc.expected: step2. The toss is not playing and pressed is false.
+     */
+    columnPattern->overscroller_.SetOverScroll(100.0f);
+    auto toss = columnPattern->GetToss();
+    toss->timeEnd_ = 10.0f;
+    auto weak = AceType::WeakClaim(Referenced::RawPtr(toss));
+    auto ref = weak.Upgrade();
+    auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
+    ASSERT_NE(column, nullptr);
+    column->mainVelocity_ = 0.0f;
+
+    columnPattern->animationCreated_ = false;
+    columnPattern->yOffset_ = 100.f;
+    columnPattern->yLast_ = 100.f;
+    columnPattern->HandleDragEnd();
+
+    /**
+     * @tc.steps: step3. Check the result.
+     * @tc.expected: steps. yLast and yOffset reset to 0.
+     */
+    EXPECT_DOUBLE_EQ(columnPattern->yOffset_, 0.f);
+    EXPECT_DOUBLE_EQ(columnPattern->yLast_, 0.f);
+}
+
+/**
+ * @tc.name: HandleDragEnd004
+ * @tc.desc: Test TextPickerColumnPattern HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, HandleDragEnd004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerColumnPattern.
+     * @tc.expected: step1. Create success.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set the optionProperties and call HandleDragEnd.
+     */
+    columnPattern->animationCreated_ = true;
+    columnPattern->scrollDelta_ = 10.f;
+    columnPattern->optionProperties_.resize(6);
+    columnPattern->optionProperties_[5].nextDistance = 20.f;
+    columnPattern->optionProperties_[5].prevDistance = 10.f;
+
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+    pickerNodeLayout->UpdateCanLoop(false);
+    columnPattern->HandleDragEnd();
+
+    /**
+     * @tc.steps: step3. Check the result.
+     * @tc.expected: step2. yLast and yOffset reset to 0 and scrollDelta is -10.f.
+     */
+    EXPECT_DOUBLE_EQ(columnPattern->yOffset_, 0.f);
+    EXPECT_DOUBLE_EQ(columnPattern->yLast_, 0.f);
+    EXPECT_DOUBLE_EQ(columnPattern->scrollDelta_, 0.f);
+}
 } // namespace OHOS::Ace::NG

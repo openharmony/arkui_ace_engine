@@ -123,12 +123,14 @@ void RelativeContainerLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         padding_ = relativeContainerLayoutProperty->CreatePaddingAndBorder();
         MinusPaddingToSize(padding_, containerSizeWithoutPaddingBorder_);
     }
+    CollectNodesById(layoutWrapper);
+    CalcGuideline(layoutWrapper);
+    CalcBarrier(layoutWrapper);
+    CheckChain(layoutWrapper);
 }
 
 void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* layoutWrapper)
 {
-    CollectNodesById(layoutWrapper);
-    CheckChain(layoutWrapper);
     if (TopologicalResultHit(layoutWrapper)) {
         return;
     }
@@ -280,6 +282,27 @@ void RelativeContainerLayoutAlgorithm::CalcGuideline(LayoutWrapper* layoutWrappe
     }
 }
 
+void CalcBarrierRect(BarrierDirection barrierDirection, RelativeContainerLayoutAlgorithm::BarrierRect& barrierRect,
+    OffsetF& recordOffset)
+{
+    switch (barrierDirection) {
+        case BarrierDirection::LEFT:
+            barrierRect.minLeft = std::min(barrierRect.minLeft, recordOffset.GetX());
+            break;
+        case BarrierDirection::RIGHT:
+            barrierRect.maxRight = std::max(barrierRect.maxRight, recordOffset.GetX());
+            break;
+        case BarrierDirection::TOP:
+            barrierRect.minTop = std::min(barrierRect.minTop, recordOffset.GetY());
+            break;
+        case BarrierDirection::BOTTOM:
+            barrierRect.maxBottom = std::max(barrierRect.maxBottom, recordOffset.GetY());
+            break;
+        default:
+            break;
+    }
+}
+
 bool RelativeContainerLayoutAlgorithm::IsGuideline(const std::string& id)
 {
     CHECK_NULL_RETURN(versionGreatorOrEqualToEleven_, false);
@@ -308,34 +331,24 @@ RelativeContainerLayoutAlgorithm::BarrierRect RelativeContainerLayoutAlgorithm::
 {
     BarrierRect barrierRect;
     for (const auto& nodeName : referencedIds) {
+        auto iterator = recordOffsetMap_.find(nodeName);
+        if (iterator == recordOffsetMap_.end()) {
+            continue;
+        }
+        auto& recordOffset = iterator->second;
         if (IsGuideline(nodeName)) {
-            if (guidelines_[nodeName].first == LineDirection::VERTICAL) {
-                barrierRect.minLeft = std::min(barrierRect.minLeft, recordOffsetMap_[nodeName].GetX());
-                barrierRect.maxRight = std::max(barrierRect.maxRight, recordOffsetMap_[nodeName].GetX());
+            if (guidelines_.find(nodeName)->second.first == LineDirection::VERTICAL) {
+                barrierRect.minLeft = std::min(barrierRect.minLeft, recordOffset.GetX());
+                barrierRect.maxRight = std::max(barrierRect.maxRight, recordOffset.GetX());
             } else {
-                barrierRect.minTop = std::min(barrierRect.minTop, recordOffsetMap_[nodeName].GetY());
-                barrierRect.maxBottom = std::max(barrierRect.maxBottom, recordOffsetMap_[nodeName].GetY());
+                barrierRect.minTop = std::min(barrierRect.minTop, recordOffset.GetY());
+                barrierRect.maxBottom = std::max(barrierRect.maxBottom, recordOffset.GetY());
             }
             continue;
         }
 
         if (IsBarrier(nodeName)) {
-            switch (barriers_[nodeName].first) {
-                case BarrierDirection::LEFT:
-                    barrierRect.minLeft = std::min(barrierRect.minLeft, recordOffsetMap_[nodeName].GetX());
-                    break;
-                case BarrierDirection::RIGHT:
-                    barrierRect.maxRight = std::max(barrierRect.maxRight, recordOffsetMap_[nodeName].GetX());
-                    break;
-                case BarrierDirection::TOP:
-                    barrierRect.minTop = std::min(barrierRect.minTop, recordOffsetMap_[nodeName].GetY());
-                    break;
-                case BarrierDirection::BOTTOM:
-                    barrierRect.maxBottom = std::max(barrierRect.maxBottom, recordOffsetMap_[nodeName].GetY());
-                    break;
-                default:
-                    break;
-            }
+            CalcBarrierRect(barriers_.find(nodeName)->second.first, barrierRect, recordOffset);
             continue;
         }
         auto it = idNodeMap_.find(nodeName);
@@ -344,7 +357,6 @@ RelativeContainerLayoutAlgorithm::BarrierRect RelativeContainerLayoutAlgorithm::
         auto childLayoutProp = childWrapper->GetLayoutProperty();
         CHECK_NULL_CONTINUE(childLayoutProp);
         CHECK_NULL_CONTINUE(childLayoutProp->GetVisibility() != VisibleType::GONE);
-        auto& recordOffset = recordOffsetMap_[nodeName];
         barrierRect.minLeft = std::min(barrierRect.minLeft, recordOffset.GetX());
         barrierRect.minTop = std::min(barrierRect.minTop, recordOffset.GetY());
         barrierRect.maxRight = std::max(
@@ -621,7 +633,7 @@ bool RelativeContainerLayoutAlgorithm::IsNodeInHorizontalChain(const std::string
     auto it = horizontalChainNodeMap_.find(nodeName);
     if (it != horizontalChainNodeMap_.end()) {
         chainName = it->second;
-        return true;
+        return horizontalChains_.find(chainName) != horizontalChains_.end();
     }
     return false;
 }
@@ -632,9 +644,19 @@ bool RelativeContainerLayoutAlgorithm::IsNodeInVerticalChain(const std::string& 
     auto it = verticalChainNodeMap_.find(nodeName);
     if (it != verticalChainNodeMap_.end()) {
         chainName = it->second;
-        return true;
+        return verticalChains_.find(chainName) != verticalChains_.end();
     }
     return false;
+}
+
+bool RelativeContainerLayoutAlgorithm::IsNodeInChain(
+    const std::string& nodeName, std::string& chainName, LineDirection direction)
+{
+    if (direction == LineDirection::HORIZONTAL) {
+        return IsNodeInHorizontalChain(nodeName, chainName);
+    } else {
+        return IsNodeInVerticalChain(nodeName, chainName);
+    }
 }
 
 float RelativeContainerLayoutAlgorithm::GetHorizontalAnchorValueByAlignRule(AlignRule& alignRule)
@@ -897,11 +919,11 @@ void RelativeContainerLayoutAlgorithm::MeasureChainWeight(LayoutWrapper* layoutW
             CalcOffsetParam(layoutWrapper, nodeName);
             continue;
         }
-        if (IsNodeInHorizontalChain(nodeName, chainName) && HasWeight(flexItem, LineDirection::HORIZONTAL)) {
-            CalcChainWeightSize(flexItem, childConstraint, chainName, LineDirection::HORIZONTAL);
+        if (HasWeight(flexItem, LineDirection::HORIZONTAL)) {
+            CalcChainWeightSize(flexItem, childConstraint, nodeName, LineDirection::HORIZONTAL);
         }
-        if (IsNodeInVerticalChain(nodeName, chainName) && HasWeight(flexItem, LineDirection::VERTICAL)) {
-            CalcChainWeightSize(flexItem, childConstraint, chainName, LineDirection::VERTICAL);
+        if (HasWeight(flexItem, LineDirection::VERTICAL)) {
+            CalcChainWeightSize(flexItem, childConstraint, nodeName, LineDirection::VERTICAL);
         }
         childWrapper->Measure(childConstraint);
         if (IsNodeInHorizontalChain(nodeName, chainName)) {
@@ -916,22 +938,22 @@ void RelativeContainerLayoutAlgorithm::MeasureChainWeight(LayoutWrapper* layoutW
     }
 }
 
-void RelativeContainerLayoutAlgorithm::InitRemainingSpace(const std::string & chainName, LineDirection direction)
+void RelativeContainerLayoutAlgorithm::InitRemainingSpace(ChainParam& chainParam, LineDirection direction)
 {
-    std::unordered_map<std::string, ChainParam> &chains =
-        (direction == LineDirection::HORIZONTAL) ? horizontalChains_ : verticalChains_;
-    CHECK_NULL_VOID(!chains[chainName].isWeightCalculated);
+    if (chainParam.isWeightCalculated) {
+        return;
+    }
     float start = 0.0f;
     float end = 0.0f;
     if (direction == LineDirection::HORIZONTAL) {
-        start = GetHorizontalAnchorValueByAlignRule(chains[chainName].anchorHead);
-        end = GetHorizontalAnchorValueByAlignRule(chains[chainName].anchorTail);
+        start = GetHorizontalAnchorValueByAlignRule(chainParam.anchorHead);
+        end = GetHorizontalAnchorValueByAlignRule(chainParam.anchorTail);
     } else {
-        start = GetVerticalAnchorValueByAlignRule(chains[chainName].anchorHead);
-        end = GetVerticalAnchorValueByAlignRule(chains[chainName].anchorTail);
+        start = GetVerticalAnchorValueByAlignRule(chainParam.anchorHead);
+        end = GetVerticalAnchorValueByAlignRule(chainParam.anchorTail);
     }
-    chains[chainName].remainingSpace += end - start;
-    chains[chainName].isWeightCalculated = true;
+    chainParam.remainingSpace += end - start;
+    chainParam.isWeightCalculated = true;
 }
 
 bool RelativeContainerLayoutAlgorithm::HasWeight(
@@ -947,15 +969,18 @@ bool RelativeContainerLayoutAlgorithm::HasWeight(
 
 void RelativeContainerLayoutAlgorithm::CalcChainWeightSize(
     const std::unique_ptr<FlexItemProperty>& flexItem, LayoutConstraintF& childConstraint,
-    const std::string & chainName, LineDirection direction)
+    const std::string& nodeName, LineDirection direction)
 {
-    float childIdealSize = 0.0f;
-    std::unordered_map<std::string, ChainParam> &chains =
-        (direction == LineDirection::HORIZONTAL) ? horizontalChains_ : verticalChains_;
-    if (!chains[chainName].isWeightCalculated) {
-        InitRemainingSpace(chainName, direction);
+    std::string chainName;
+    if (!IsNodeInChain(nodeName, chainName, direction)) {
+        return;
     }
-    if (chains[chainName].remainingSpace <= DEFAULT_WEIGHT) {
+    float childIdealSize = 0.0f;
+    std::unordered_map<std::string, ChainParam>& chains =
+        (direction == LineDirection::HORIZONTAL) ? horizontalChains_ : verticalChains_;
+    auto& chainParam = chains.find(chainName)->second;
+    InitRemainingSpace(chainParam, direction);
+    if (chainParam.remainingSpace <= DEFAULT_WEIGHT) {
         (direction == LineDirection::HORIZONTAL) ?
         childConstraint.selfIdealSize.SetWidth(0.0f) : childConstraint.selfIdealSize.SetHeight(0.0f);
     } else {
@@ -963,7 +988,7 @@ void RelativeContainerLayoutAlgorithm::CalcChainWeightSize(
         auto directionChainWeight = (direction == LineDirection::HORIZONTAL) ?
             chainWeight->first.value_or(DEFAULT_WEIGHT) :
             chainWeight->second.value_or(DEFAULT_WEIGHT);
-        childIdealSize = chains[chainName].remainingSpace * directionChainWeight / chains[chainName].totalChainWeight;
+        childIdealSize = chainParam.remainingSpace * directionChainWeight / chainParam.totalChainWeight;
         (direction == LineDirection::HORIZONTAL) ?
         childConstraint.selfIdealSize.SetWidth(childIdealSize) :
         childConstraint.selfIdealSize.SetHeight(childIdealSize);
@@ -1100,8 +1125,6 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
             .id = GetOrCreateNodeInspectorId(childHostNode) };
         idNodeMap_.emplace(childMeasureWrapper.id, childMeasureWrapper);
     }
-    CalcGuideline(layoutWrapper);
-    CalcBarrier(layoutWrapper);
 }
 
 void RelativeContainerLayoutAlgorithm::GetDependencyRelationshipInChain(

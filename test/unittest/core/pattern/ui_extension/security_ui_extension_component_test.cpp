@@ -1348,4 +1348,242 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, GetAccessibilityRectInfo, TestSize.
     ASSERT_FALSE(isAncestorNodeTransformChange);
 #endif
 }
+
+/**
+ * @tc.name: SecurityUIExtensionComponentTestNg001
+ * @tc.desc: Test the method of pattern UpdateWMSUIExtProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentTestNg001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateWMSUIExtProperty
+     */
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+    AAFwk::Want data;
+    RSSubsystemId id = RSSubsystemId::ARKUI_UIEXT;
+    pattern->UpdateWMSUIExtProperty(code, data, id);
+    pattern->state_ = SecurityUIExtensionPattern::AbilityState::FOREGROUND;
+    pattern->UpdateWMSUIExtProperty(code, data, id);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentTestNg002
+ * @tc.desc: Test the method of pattern GetInstanceIdFromHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentTestNg002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetInstanceIdFromHost
+     */
+    pattern->instanceId_ = -999;
+    EXPECT_EQ(pattern->GetInstanceIdFromHost(), pattern->GetHostInstanceId());
+    pattern->instanceId_ = pattern->GetHostInstanceId();
+    EXPECT_EQ(pattern->GetInstanceIdFromHost(), pattern->GetHostInstanceId());
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentTestNg003
+ * @tc.desc: Test the method of pattern OnUIExtBusinessReceiveReply and OnUIExtBusinessReceive
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentTestNg003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnUIExtBusinessReceiveReply and OnUIExtBusinessReceive
+     */
+    AAFwk::Want data;
+    std::optional<AAFwk::Want> reply;
+    auto callback = [](const AAFwk::Want& data, std::optional<AAFwk::Want>& reply) -> int32_t { return -1; };
+    pattern->RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::TRANSFORM_PARAM, callback);
+    pattern->OnUIExtBusinessReceiveReply(UIContentBusinessCode::UNDEFINED, data, reply);
+    pattern->OnUIExtBusinessReceive(UIContentBusinessCode::UNDEFINED, data);
+    pattern->OnUIExtBusinessReceiveReply(UIContentBusinessCode::TRANSFORM_PARAM, data, reply);
+    pattern->OnUIExtBusinessReceive(UIContentBusinessCode::TRANSFORM_PARAM, data);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentTestNg004
+ * @tc.desc: Test the method of pattern RegisterEventProxyFlagCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentTestNg004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test RegisterEventProxyFlagCallback
+     */
+    pattern->RegisterEventProxyFlagCallback();
+    AAFwk::Want want;
+    auto ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::EVENT_PROXY)(want);
+    EXPECT_EQ(ret, -1);
+
+    want.SetParam("type", std::string("OccupyEvents"));
+    ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::EVENT_PROXY)(want);
+    EXPECT_EQ(ret, 0);
+
+    want.SetParam("eventFlags", std::string("eventFlags"));
+    ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::EVENT_PROXY)(want);
+    EXPECT_EQ(ret, 0);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentTestNg005
+ * @tc.desc: Test the method of pattern RegisterEventProxyFlagCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentTestNg005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test RegisterEventProxyFlagCallback
+     */
+    pattern->frameNode_ = uiExtensionNode;
+    ASSERT_NE(pattern->frameNode_.Upgrade(), nullptr);
+    ASSERT_EQ(pattern->frameNode_.Upgrade()->GetNodeStatus(), NodeStatus::NORMAL_NODE);
+    pattern->OnMountToParentDone();
+
+    pattern->frameNode_.Upgrade()->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+    ASSERT_NE(pattern->frameNode_.Upgrade()->GetNodeStatus(), NodeStatus::NORMAL_NODE);
+    pattern->OnMountToParentDone();
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentTestNg006
+ * @tc.desc: Test pattern SetEventProxyFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentTestNg006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    auto pattern = CreateSecurityUEC();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. test SetEventProxyFlag
+     */
+    auto host = pattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    pattern->platformEventProxy_ = nullptr;
+    pattern->SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
+
+    pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
+    ASSERT_NE(pattern->platformEventProxy_, nullptr);
+    pattern->SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT));
+
+    pattern->platformEventProxy_ = nullptr;
+    pattern->SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_PAN_GESTURE_LEFT));
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionComponentTestNg007
+ * @tc.desc: Test pattern HandleKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentTestNg007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent Node
+     */
+    auto pattern = CreateSecurityUEC();
+    ValidSessionWrapper(pattern);
+
+    /**
+     * @tc.steps: step2. test HandleKeyEvent
+     */
+    KeyEvent event;
+    pattern->HandleKeyEvent(event);
+
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    event.pressedCodes = { KeyCode::KEY_TAB, KeyCode::KEY_MOVE_HOME, KeyCode::KEY_MOVE_END };
+    EXPECT_TRUE(event.IsDirectionalKey());
+    EXPECT_TRUE(event.IsKey({ KeyCode::KEY_MOVE_END }));
+    pattern->HandleKeyEvent(event);
+
+    event.pressedCodes = { KeyCode::KEY_TAB, KeyCode::KEY_MOVE_END, KeyCode::KEY_MOVE_HOME };
+    EXPECT_TRUE(event.IsKey({ KeyCode::KEY_MOVE_HOME }));
+    pattern->HandleKeyEvent(event);
+
+    event.pressedCodes = { KeyCode::KEY_MOVE_HOME, KeyCode::KEY_MOVE_END, KeyCode::KEY_TAB };
+    EXPECT_TRUE(event.IsKey({ KeyCode::KEY_TAB }));
+    pattern->HandleKeyEvent(event);
+
+    event.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB };
+    EXPECT_TRUE(event.IsShiftWith(KeyCode::KEY_TAB));
+    pattern->HandleKeyEvent(event);
+
+    event.code = KeyCode::KEY_ESCAPE;
+    EXPECT_TRUE(event.IsEscapeKey());
+    pattern->HandleKeyEvent(event);
+#endif
+}
 } //namespace OHOS::Ace::NG

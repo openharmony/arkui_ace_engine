@@ -187,12 +187,12 @@ public:
         springVelocityScale_ = scale;
     }
 
-    void HandleTouchDown();
+    void HandleTouchDown(bool fromcrown = false);
     void HandleTouchUp();
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info, bool isFromPanEnd = false);
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
@@ -492,11 +492,7 @@ public:
         return endPos_;
     }
 
-    void SetMaxFlingVelocity(double max)
-    {
-        double density = PipelineBase::GetCurrentDensity();
-        maxFlingVelocity_ = max * density;
-    }
+    void SetMaxFlingVelocity(double max);
 
     double GetMaxFlingVelocity() const
     {
@@ -544,11 +540,6 @@ public:
     {
         isCrownEventDragging_ = draging;
     }
-
-    void SetReachBoundary(bool flag)
-    {
-        reachBoundary_ = flag;
-    }
 #endif
 
     void SetOverScrollOffsetCallback(std::function<double()> overScrollOffsetCallback)
@@ -578,6 +569,8 @@ private:
     void SetOnActionUpdate();
     void SetOnActionEnd();
     void SetOnActionCancel();
+    void SetPanEndCallback();
+    void ProcessPanActionEndEvents(const GestureEvent& info);
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position, int32_t source = SCROLL_FROM_ANIMATION);

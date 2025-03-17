@@ -25,6 +25,7 @@
 namespace OHOS::Ace {
 class PluginSubContainer;
 class PluginManagerDelegate;
+class DrawDelegate;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -46,6 +47,9 @@ public:
     {
         return MakeRefPtr<PluginEventHub>();
     }
+
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern);
 

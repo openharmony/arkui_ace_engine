@@ -25,6 +25,12 @@ ace_unittest("drag_animation_helper_test_ng") {
   sources = [ "drag_animation_helper_test_ng.cpp" ]
 }
 
+ace_unittest("drag_drop_controller_func_wrapper_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "drag_drop_controller_func_wrapper_test_ng.cpp" ]
+}
+
 ace_unittest("drag_drop_func_wrapper_test_ng") {
   type = "new"
   module_output = "manager"
@@ -154,6 +160,7 @@ group("core_manager_unittest") {
     ":display_sync_manager_test_ng",
     ":drag_animation_helper_test_ng",
     ":drag_drop_behavior_reporter_test_ng",
+    ":drag_drop_controller_func_wrapper_test_ng",
     ":drag_drop_func_wrapper_test_ng",
     ":drag_drop_initiating_state_test_ng",
     ":drag_drop_manager_test_ng",

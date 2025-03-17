@@ -82,6 +82,7 @@ struct UpdateSpanStyle {
         updateTextShadows.reset();
         updateFontFeature.reset();
         updateTextBackgroundStyle.reset();
+        updateUrlAddress.reset();
 
         updateLineHeight.reset();
         updateHalfLeading.reset();
@@ -187,11 +188,13 @@ struct UpdateParagraphStyle {
         leadingMargin.reset();
         wordBreak.reset();
         lineBreakStrategy.reset();
+        paragraphSpacing.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<WordBreak> wordBreak;
     std::optional<LineBreakStrategy> lineBreakStrategy;
+    std::optional<Dimension> paragraphSpacing;
 
     std::string ToString() const
     {
@@ -200,6 +203,7 @@ struct UpdateParagraphStyle {
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, leadingMargin);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, wordBreak);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, lineBreakStrategy);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paragraphSpacing);
         return jsonValue->ToString();
     }
 };

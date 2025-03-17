@@ -55,7 +55,13 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
         curFocusNode_ = curFocusNode;
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension switch focus");
         auto pattern = curFocusNode->GetPattern();
-        if (!pattern->NeedSoftKeyboard()) {
+#ifdef WINDOW_SCENE_SUPPORTED
+        auto needCloseKeyboard = !NG::WindowSceneHelper::IsWindowScene(curFocusNode) ||
+            !NG::WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(curFocusNode);
+#else
+        auto needCloseKeyboard = true;
+#endif
+        if (!pattern->NeedSoftKeyboard() && needCloseKeyboard) {
             HideKeyboardAcrossProcesses();
         }
     }
@@ -91,6 +97,14 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
         NG::WindowSceneHelper::IsWindowSceneCloseKeyboard(curFocusNode);
         return;
     }
+
+    if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
+        curFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension(%{public}s/%{public}d) not need to process.",
+            curFocusNode->GetTag().c_str(), curFocusNode->GetId());
+        return;
+    }
+
     // In window scene, focus change, need close keyboard.
     auto pattern = curFocusNode->GetPattern();
     if (!pattern->NeedSoftKeyboard()) {

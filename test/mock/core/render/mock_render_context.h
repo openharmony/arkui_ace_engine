@@ -96,14 +96,15 @@ public:
     void UpdateTranslateInXY(const OffsetF& offset) override;
 #endif
 
-
-    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
+    void UpdateBackBlurStyle(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
 
-    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+    void UpdateBackgroundEffect(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions())
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propEffectOption = effectOption;
