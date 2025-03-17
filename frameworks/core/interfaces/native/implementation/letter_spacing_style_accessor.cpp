@@ -15,6 +15,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
 
@@ -26,13 +27,13 @@ void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
 }
 Ark_LetterSpacingStyle CtorImpl(Ark_LengthMetrics value)
 {
-    RefPtr<LetterSpacingSpan> span;
+    std::optional<Dimension> spacing;
+    Dimension defaultSpacing = Dimension(0, DimensionUnit::VP);
     if (value) {
-        auto spacing = Converter::Convert<Dimension>(value);
-        span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing);
-    } else {
-        span = AceType::MakeRefPtr<LetterSpacingSpan>();
+        spacing = Converter::OptConvert<Dimension>(value);
+        Validator::ValidateNonPercent(spacing);
     }
+    RefPtr<LetterSpacingSpan> span = AceType::MakeRefPtr<LetterSpacingSpan>(spacing.value_or(defaultSpacing));
     return new LetterSpacingStylePeer{ .span = span };
 }
 Ark_NativePointer GetFinalizerImpl()

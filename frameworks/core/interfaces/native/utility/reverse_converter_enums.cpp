@@ -625,7 +625,10 @@ void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecoratio
         case OHOS::Ace::TextDecorationStyle::DOTTED: dst = ARK_TEXT_DECORATION_STYLE_DOTTED; break;
         case OHOS::Ace::TextDecorationStyle::DASHED: dst = ARK_TEXT_DECORATION_STYLE_DASHED; break;
         case OHOS::Ace::TextDecorationStyle::WAVY: dst = ARK_TEXT_DECORATION_STYLE_WAVY; break;
-        default: LOGE("Unexpected enum value in Ark_TextDecorationStyle: %{public}d", src);
+        default: {
+            dst = static_cast<Ark_TextDecorationStyle>(-1);
+            LOGE("Unexpected enum value in Ark_TextDecorationStyle: %{public}d", src);
+        }
     }
 }
 
