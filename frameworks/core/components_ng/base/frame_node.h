@@ -89,7 +89,6 @@ struct CacheMatrixInfo {
 };
 
 struct FRCSceneFpsInfo {
-    std::string scene;
     int32_t duration_120 = 0;
     int32_t duration_90 = 0;
     int32_t duration_72 = 0;
@@ -798,7 +797,7 @@ public:
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
 
-    void FrameRateDurationsStatisticsStart(const std::string &scene);
+    void FrameRateDurationsStatisticsStart();
 
     void FrameRateDurationsStatisticsRunning(int32_t expectedRate, const std::string &scene);
 
