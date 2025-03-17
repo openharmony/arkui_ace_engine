@@ -434,6 +434,10 @@ void PipelineContext::FlushPendingDeleteCustomNode()
         pendingStack.pop();
         if (AceType::InstanceOf<NG::CustomNode>(node)) {
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            if (!customNode->CheckFireOnAppear()) {
+                customNode->FireOnAppear();
+                customNode->FireDidBuild();
+            }
             customNode->FireOnDisappear();
             customNode->Reset();
         }
