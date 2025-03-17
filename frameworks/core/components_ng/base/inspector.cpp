@@ -519,7 +519,7 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
     ACE_SCOPED_TRACE("Inspector::GetRectangleById_Id=%d_Tag=%s_Key=%s",
         frameNode->GetId(), frameNode->GetTag().c_str(), key.c_str());
-    LOGI("GetRectangleById Id:%{public}d key:%{public}s localOffset:%{public}s"
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetRectangleById Id:%{public}d key:%{public}s localOffset:%{public}s"
          "screenRect:%{public}s",
         frameNode->GetId(), key.c_str(), rectangle.localOffset.ToString().c_str(),
         rectangle.screenRect.ToString().c_str());
