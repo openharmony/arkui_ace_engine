@@ -581,7 +581,7 @@ export struct SubHeaderV2 {
       return '';
     }
     if (this.operationItems[0]?.accessibilityDescription && this.operationItems[0]?.accessibilityDescription !== '') {
-      return this.toStringFormat(this.operationItems[0]?.accessibilityDescription)
+      return this.operationItems[0]?.accessibilityDescription as string;
     }
     return '';
   }
@@ -821,26 +821,24 @@ export struct SubHeaderV2 {
   IconGroupStyle(): void {
     Row() {
       ForEach(this.operationItems, (item: SubHeaderV2OperationItem, index: number) => {
-        if (Util.isResourceType(this.operationItems?.[index].content)) {
-          if (index <= INDEX_TWO) {
-            SingleIconStyle({
-              item: {
-                iconOptions: this.operationItems?.[index].content,
-                action: this.operationItems?.[index].action,
-                defaultFocus: this.operationItems?.[index].defaultFocus,
-                accessibilityLevel: this.operationItems?.[index].accessibilityLevel,
-                accessibilityText: this.operationItems?.[index].accessibilityText,
-                accessibilityDescription: this.operationItems?.[index].accessibilityDescription,
-              },
-              isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER,
+        if (index <= INDEX_TWO) {
+          SingleIconStyle({
+            item: {
+              iconOptions: this.operationItems?.[index].content,
+              action: this.operationItems?.[index].action,
+              defaultFocus: this.operationItems?.[index].defaultFocus,
+              accessibilityLevel: this.operationItems?.[index].accessibilityLevel,
+              accessibilityText: this.operationItems?.[index].accessibilityText,
+              accessibilityDescription: this.operationItems?.[index].accessibilityDescription,
+            },
+            isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER,
+          })
+            .margin({
+              start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
+              bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level3')),
             })
-              .margin({
-                start: LengthMetrics.vp(getResourceValue('sys.float.padding_level4')),
-                bottom: LengthMetrics.vp(getResourceValue('sys.float.padding_level3')),
-              })
-          } else {
-            // 最大支持3个ICON,此场景不支持
-          }
+        } else {
+          // 最大支持3个ICON,此场景不支持
         }
       }, (item: SubHeaderV2OperationItem, index: number) => {
         return `${index}`;
@@ -866,6 +864,9 @@ export struct SubHeaderV2 {
     }
     if (this.operationType === SubHeaderV2OperationType.LOADING) {
       this.LoadingProcessStyle();
+    }
+    if (this.operationType === undefined && (this.operationItems && this.operationItems.length > 0)) {
+      this.ButtonStyle();
     }
   }
 
@@ -946,7 +947,7 @@ export struct SubHeaderV2 {
       return '';
     }
     if (this.operationItems[0]?.accessibilityText && this.operationItems[0]?.accessibilityText !== '') {
-      return this.toStringFormat(this.operationItems[0].accessibilityText);
+      return this.operationItems[0].accessibilityText as string;
     } else {
       if (this.operationType === SubHeaderV2OperationType.TEXT_ARROW &&
         this.operationItems[0]?.content.toString().length <= 0) {
@@ -1034,22 +1035,6 @@ export struct SubHeaderV2 {
     }
   }
 
-  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
-    if (typeof resource === 'string' || typeof resource === 'undefined') {
-      return resource;
-    } else {
-      let resourceString: string = '';
-      try {
-        resourceString = getContext()?.resourceManager?.getStringSync(resource);
-      } catch (err) {
-        let code: number = (err as BusinessError)?.code;
-        let message: string = (err as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
-      }
-      return resourceString;
-    }
-  }
-
   private getRightAreaAccessibilityLevel(): string {
     if (this.operationItems![0].accessibilityLevel && this.operationItems![0].accessibilityLevel !== '') {
       return this.operationItems![0].accessibilityLevel;
@@ -1124,9 +1109,7 @@ struct SingleIconStyle {
 
   private getRightIconAccessibilityText(): string | undefined {
     if (this.item?.accessibilityText) {
-      let iconAccessibilityText = typeof this.item.accessibilityText === 'string' ? this.item.accessibilityText :
-      getContext()?.resourceManager?.getStringSync(this.item.accessibilityText)
-      return iconAccessibilityText;
+      return this.item.accessibilityText as string;
     }
     return '';
   }
@@ -1138,25 +1121,9 @@ struct SingleIconStyle {
     return 'auto';
   }
 
-  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
-    if (typeof resource === 'string' || typeof resource === 'undefined') {
-      return resource;
-    } else {
-      let resourceString: string = '';
-      try {
-        resourceString = getContext()?.resourceManager?.getStringSync(resource);
-      } catch (err) {
-        let code: number = (err as BusinessError)?.code;
-        let message: string = (err as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
-      }
-      return resourceString;
-    }
-  }
-
   private getRightIconAccessibilityDescription(): string | undefined {
     if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
-      return this.toStringFormat(this.item?.accessibilityDescription);
+      return this.item?.accessibilityDescription as string;
     }
     return '';
   }

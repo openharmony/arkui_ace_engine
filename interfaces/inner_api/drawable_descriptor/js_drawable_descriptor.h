@@ -20,15 +20,17 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+#include "base/marcos.h"
+
 namespace OHOS::Ace::Napi {
 class JsDrawableDescriptor {
 public:
-    static ACE_EXPORT napi_value Export(napi_env env, napi_value exports);
+    static DRAWABLE_FORCE_EXPORT napi_value Export(napi_env env, napi_value exports);
 
-    static ACE_EXPORT napi_value ToNapi(napi_env, DrawableDescriptor*,
+    static DRAWABLE_FORCE_EXPORT napi_value ToNapi(napi_env, DrawableDescriptor*,
         DrawableDescriptor::DrawableType type = DrawableDescriptor::DrawableType::LAYERED);
 
-    static ACE_EXPORT constexpr char MODULE_NAME[] = "arkui.drawableDescriptor";
+    static DRAWABLE_FORCE_EXPORT constexpr char MODULE_NAME[] = "arkui.drawableDescriptor";
     static std::shared_ptr<Media::PixelMap> GetPixelMapFromNapi(napi_env env, napi_value napiValue);
     static std::shared_ptr<Media::PixelMap> GetPixelMapFromDrawableNapi(napi_env env, napi_value napiValue);
 

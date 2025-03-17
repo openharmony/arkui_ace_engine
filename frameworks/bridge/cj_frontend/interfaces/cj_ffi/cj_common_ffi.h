@@ -165,7 +165,7 @@ struct CJDatePickerResult {
     uint32_t index;
 };
 
-struct CJImageComplete {
+struct CJImageCompleteV2 {
     double width;
     double height;
     double componentWidth;
@@ -177,10 +177,23 @@ struct CJImageComplete {
     double contentOffsetY;
 };
 
-struct CJImageError {
+struct CJImageComplete {
+    double width;
+    double height;
+    double componentWidth;
+    double componentHeight;
+    int32_t loadingStatus;
+};
+
+struct CJImageErrorV2 {
     double componentWidth;
     double componentHeight;
     const char* message;
+};
+
+struct CJImageError {
+    double componentWidth;
+    double componentHeight;
 };
 
 struct CJPosition {
@@ -257,7 +270,7 @@ struct CJFingerInfo {
     double localY;
 };
 
-struct CJGestureEvent {
+struct CJGestureEventV2 {
     int64_t timestamp;
     CJEventTarget* target;
     bool repeat;
@@ -284,6 +297,22 @@ struct CJGestureEvent {
     const OHOS::Ace::BaseEventInfo* baseEventInfoPtr;
 };
 
+struct CJGestureEvent {
+    int64_t timestamp;
+    CJEventTarget* target;
+    bool repeat;
+    CJFingerInfo* fingerList;
+    int32_t fingerListSize;
+    int32_t source;
+    double offsetX;
+    double offsetY;
+    double scale;
+    double pinchCenterX;
+    double pinchCenterY;
+    double angle;
+    double speed;
+};
+
 struct CJDragInfo {
     const char* extraParams;
     CJPosition* position;
@@ -298,7 +327,7 @@ struct CJDragEvent {
 struct CJDragItemInfo {
     int64_t pixelMapId;
     void (*builder)();
-    const char* extraInfo;
+    char* extraInfo;
 };
 
 struct CJBaseEvent {
@@ -389,6 +418,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCall
 
 CJ_EXPORT int64_t FfiGeneralSizeOfPointer();
 
+CJ_EXPORT bool FfiOHOSAceFrameworkCanIUse(char* syscapString);
+
 struct CJIndicator {
     double left;
     int32_t leftUnit;
@@ -416,5 +447,7 @@ void AssambleCJEventTarget(
 
 void AssambleCJClickInfo(const OHOS::Ace::GestureEvent& event, CJClickInfo& clickInfo, CJEventTarget& eventTarget,
     CJArea& area, CJPosition& position, CJPosition& globalPosition);
+
+void ReleaseCJDragItemInfo(CJDragItemInfo& info);
 } // namespace OHOS::Ace
 #endif // OHOS_ACE_FRAMEWORK_CJ_COMMON_FFI_H

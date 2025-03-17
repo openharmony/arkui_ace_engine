@@ -6582,7 +6582,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * 
-     * @since 16
+     * @since 15
      */
     NODE_DISPATCH_KEY_EVENT = 24,
 
@@ -6596,7 +6596,8 @@ typedef enum {
      */
     NODE_ON_AXIS = 25,
 
-    /* @brief Defines the event triggered when the bound component is clicked.
+    /**
+     * @brief Defines the event triggered when the bound component is clicked.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}.  \n

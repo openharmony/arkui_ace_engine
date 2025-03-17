@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import HyperlinkBootcampTest from './TextAndInput/HyperlinkBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  HyperlinkBootcampTest()
+  ListItemGroupBootcampTest();
+
 }

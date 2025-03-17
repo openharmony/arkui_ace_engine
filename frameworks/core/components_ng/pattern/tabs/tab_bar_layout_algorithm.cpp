@@ -491,13 +491,17 @@ void TabBarLayoutAlgorithm::MeasureFocusIndex(LayoutWrapper* layoutWrapper, Layo
     auto startPos = endMainPos_;
     auto endIndex = focusIndex_.value();
     auto endPos = 0.0f;
-    if (focusIndex_.value() < visibleItemPosition_.begin()->first) {
+
+    auto iter = visibleItemPosition_.find(focusIndex_.value());
+    if ((iter != visibleItemPosition_.end() && LessNotEqual(iter->second.startPos, 0.0f)) ||
+        focusIndex_.value() < visibleItemPosition_.begin()->first) {
         if (focusIndex_.value() == 0) {
             endPos += scrollMargin_;
         }
         startIndex = endIndex - 1;
         startPos = endPos;
-    } else if (focusIndex_.value() > visibleItemPosition_.rbegin()->first) {
+    } else if ((iter != visibleItemPosition_.end() && GreatNotEqual(iter->second.endPos, contentMainSize_)) ||
+               focusIndex_.value() > visibleItemPosition_.rbegin()->first) {
         if (focusIndex_.value() == childCount_ - 1) {
             startPos -= scrollMargin_;
         }
