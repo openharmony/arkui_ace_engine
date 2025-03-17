@@ -3167,7 +3167,8 @@ export struct TextPickerBootcamp {
               })
 
               CompEventMonopolizationBlocks({
-                enableCompMonopolizeEvents: $enableCompMonopolizeEvents, compMonopolizeEvents: $enableCompMonopolizeEvents
+                enableCompMonopolizeEvents: $enableCompMonopolizeEvents,
+                compMonopolizeEvents: $enableCompMonopolizeEvents
               })
 
               CompCursorControlBlocks({
