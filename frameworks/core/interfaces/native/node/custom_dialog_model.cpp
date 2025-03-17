@@ -109,8 +109,6 @@ ArkUIDialogHandle CreateDialog()
         .widthUnit = DimensionUnit::VP,
         .heightValue = std::optional<ArkUI_Float32>(),
         .heightUnit = DimensionUnit::VP,
-        .shadowStyle = ShadowStyle::OuterDefaultMD,
-        .customShadow = Shadow(),
         .blurStyle = ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK,
         .keyboardAvoidMode = OHOS::Ace::KeyboardAvoidMode::DEFAULT,
         .enableHoverMode = false,
@@ -344,17 +342,6 @@ void ParseDialogHeight(DialogProperties& dialogProperties, ArkUIDialogHandle con
     }
 }
 
-void ParseDialogShadowStyle(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
-{
-    CHECK_NULL_VOID(controllerHandler);
-    if (controllerHandler->shadowStyle < OHOS::Ace::ShadowStyle::OuterDefaultXS ||
-        controllerHandler->shadowStyle > OHOS::Ace::ShadowStyle::None) {
-        dialogProperties.shadow = Shadow::CreateShadow(OHOS::Ace::ShadowStyle::None);
-    } else {
-        dialogProperties.shadow = Shadow::CreateShadow(controllerHandler->shadowStyle);
-    }
-}
-
 void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
@@ -374,7 +361,9 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.keyboardAvoidMode = controllerHandler->keyboardAvoidMode;
     dialogProperties.enableHoverMode = controllerHandler->enableHoverMode;
     dialogProperties.hoverModeArea = controllerHandler->hoverModeAreaType;
-    dialogProperties.shadow = controllerHandler->customShadow;
+    if (controllerHandler->customShadow.has_value()) {
+        dialogProperties.shadow = controllerHandler->customShadow;
+    }
     if (!dialogProperties.isShowInSubWindow) {
         dialogProperties.levelOrder = std::make_optional(controllerHandler->levelOrder);
     }
@@ -440,7 +429,6 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     ParseDialogBorderStyle(dialogProperties, controllerHandler);
     ParseDialogWidth(dialogProperties, controllerHandler);
     ParseDialogHeight(dialogProperties, controllerHandler);
-    ParseDialogShadowStyle(dialogProperties, controllerHandler);
 }
 
 PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties &dialogProps)
@@ -885,13 +873,6 @@ ArkUI_Int32 SetHeight(ArkUIDialogHandle controllerHandler, float height, ArkUI_I
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 SetShadow(ArkUIDialogHandle controllerHandler, ArkUI_Int32 shadow)
-{
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->shadowStyle = static_cast<OHOS::Ace::ShadowStyle>(shadow);
-    return ERROR_CODE_NO_ERROR;
-}
-
 bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
     if (shadowStyle == ShadowStyle::None) {
@@ -907,6 +888,20 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     auto colorMode = container->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
+}
+
+ArkUI_Int32 SetShadow(ArkUIDialogHandle controllerHandler, ArkUI_Int32 shadow)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    if (static_cast<OHOS::Ace::ShadowStyle>(shadow) < OHOS::Ace::ShadowStyle::OuterDefaultXS ||
+        static_cast<OHOS::Ace::ShadowStyle>(shadow) >= OHOS::Ace::ShadowStyle::None) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        Shadow shadows;
+        GetShadowFromTheme(static_cast<OHOS::Ace::ShadowStyle>(shadow), shadows);
+        controllerHandler->customShadow = shadows;
+    }
+    return ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_Int32 SetDialogCustomShadow(
