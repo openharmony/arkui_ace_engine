@@ -46,6 +46,10 @@ public:
     void UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t totalCount, uint32_t invalidateContainerLayoutFromChildIndex,
         std::map<int32_t, uint32_t>& l1Rd4Index) override;
     void OnMove(int32_t repeatElmtId, std::function<void(int32_t, int32_t)>&& onMove) override;
+    void SetItemDragHandler(int32_t repeatElmtId, std::function<void(int32_t)>&& onLongPress,
+        std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+        std::function<void(int32_t)>&& onDrop) override;
+    void SetCreateByTemplate(bool isCreatedByTemplate) override;
 };
 
 } // namespace OHOS::Ace::NG

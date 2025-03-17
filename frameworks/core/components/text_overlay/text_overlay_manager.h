@@ -27,15 +27,9 @@
 #include "frameworks/core/common/ime/text_editing_value.h"
 #include "frameworks/core/pipeline/base/overlay_show_option.h"
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-namespace txt {
-class Paragraph;
-}
-#else
 namespace OHOS::Rosen {
 class Typography;
 }
-#endif
 
 #ifndef USE_ROSEN_DRAWING
 class SkCanvas;
@@ -157,11 +151,7 @@ public:
     bool IsSelectedText(const Offset& pos, const Offset& globalOffset);
 
 protected:
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::shared_ptr<txt::Paragraph> paragraph_;
-#else
     std::shared_ptr<Rosen::Typography> paragraph_;
-#endif
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
     Offset clickOffset_;

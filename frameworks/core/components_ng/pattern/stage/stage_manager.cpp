@@ -40,7 +40,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(pagePattern);
     auto eventHub = page->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
             eventHub->SetEnabled(false);
         }
@@ -638,7 +638,7 @@ void StageManager::SyncPageSafeArea(bool keyboardSafeArea)
 bool StageManager::CheckPageFocus()
 {
     auto pageNode = GetLastPage();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         pageNode = GetLastPageWithTransition();
     }
     CHECK_NULL_RETURN(pageNode, true);

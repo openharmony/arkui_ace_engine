@@ -1260,6 +1260,12 @@ export class ArcSlider extends ViewV2 {
                     this.onTouchEvent(event);
                 }
             });
+            Button.onTouchIntercept((event) => {
+                if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+                    return HitTestMode.Block;
+                }
+                return HitTestMode.Transparent;
+            });
             Button.focusable(true);
             Button.focusOnTouch(true);
             Button.onDigitalCrown((event) => {

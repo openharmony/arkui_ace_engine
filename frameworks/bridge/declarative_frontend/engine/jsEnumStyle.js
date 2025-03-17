@@ -1025,6 +1025,14 @@ let SearchType;
   SearchType[SearchType.URL = 13] = 'URL';
 })(SearchType || (SearchType = {}));
 
+let AutoCapitalizationMode;
+(function (AutoCapitalizationMode) {
+  AutoCapitalizationMode[AutoCapitalizationMode["NONE"] = 0] = "NONE";
+  AutoCapitalizationMode[AutoCapitalizationMode["WORDS"] = 1] = "WORDS";
+  AutoCapitalizationMode[AutoCapitalizationMode["SENTENCES"] = 2] = "SENTENCES";
+  AutoCapitalizationMode[AutoCapitalizationMode["ALL_CHARACTERS"] = 3] = "ALL_CHARACTERS";
+})(AutoCapitalizationMode || (AutoCapitalizationMode = {}));
+
 let TextAreaType;
 (function (TextAreaType) {
   TextAreaType[TextAreaType.NORMAL = 0] = 'NORMAL';
@@ -2272,6 +2280,7 @@ class NavPathInfo {
     this.fromRecovery = false;
     this.mode = undefined;
     this.singletonMoved = false;
+    this.isForceSet = undefined;
   }
 }
 
@@ -2294,6 +2303,12 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
+  }
+  getPathStack() {
+    return this.nativeStack?.getPathStack(this);
+  }
+  setPathStack(pathStack, animated) {
+    this.nativeStack?.setPathStack(this, pathStack, animated);
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {
@@ -3044,6 +3059,12 @@ let MenuAlignType;
   MenuAlignType[MenuAlignType.END = 2] = 'END';
 })(MenuAlignType || (MenuAlignType = {}));
 
+let AvoidanceMode;
+(function (AvoidanceMode) {
+  AvoidanceMode[AvoidanceMode.COVER_TARGET = 0] = 'COVER_TARGET';
+  AvoidanceMode[AvoidanceMode.AVOID_AROUND_TARGET = 1] = 'AVOID_AROUND_TARGET';
+})(AvoidanceMode || (AvoidanceMode = {}));
+
 let ToolbarItemStatus;
 (function (ToolbarItemStatus) {
   ToolbarItemStatus[ToolbarItemStatus.NORMAL = 0] = 'NORMAL';
@@ -3396,8 +3417,16 @@ let DragPreviewMode;
   DragPreviewMode.ENABLE_DEFAULT_SHADOW = 3;
   DragPreviewMode.ENABLE_DEFAULT_RADIUS = 4;
   DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT = 5;
-  DragPreviewMode.ENABLE_MULTI_TILE_EFFECT  = 6;
+  DragPreviewMode.ENABLE_MULTI_TILE_EFFECT = 6;
+  DragPreviewMode.ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW = 7;
 })(DragPreviewMode || (DragPreviewMode = {}));
+
+let DraggingSizeChangeEffect;
+(function (DraggingSizeChangeEffect) {
+    DraggingSizeChangeEffect.DEFAULT = 0;
+    DraggingSizeChangeEffect.SIZE_TRANSITION = 1;
+    DraggingSizeChangeEffect.SIZE_CONTENT_TRANSITION = 2;
+})(DraggingSizeChangeEffect || (DraggingSizeChangeEffect = {}));
 
 let FoldStatus;
 (function (FoldStatus) {

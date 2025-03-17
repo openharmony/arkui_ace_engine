@@ -66,7 +66,7 @@ abstract class BaseNode extends ViewBuildNodeBase {
   }
   create(builder: (...args: Object[]) => void, params: Object, update: (instanceId: number, nodePtr: NodePtr) => void,
     updateConfiguration, supportLazyBuild: boolean): NodePtr {
-      return this.builderBaseNode_.create(builder.bind(this), params, update, updateConfiguration, supportLazyBuild);
+      return this.builderBaseNode_.create(builder.bind(this), params, update.bind(this), updateConfiguration.bind(this), supportLazyBuild);
     }
   finishUpdateFunc(): void {
     return this.builderBaseNode_.finishUpdateFunc();

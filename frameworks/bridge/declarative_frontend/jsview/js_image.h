@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_H
 
+#include "base/image/image_defines.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/image/image_event.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -29,11 +30,10 @@ JSRef<JSVal> LoadImageFailEventToJSValue(const LoadImageFailEvent& eventInfo);
 class JSImage : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
-    static bool CheckIsCard();
-    static bool CheckResetImage(const JSCallbackInfo& info);
     static void CreateImage(const JSCallbackInfo& info, bool isImageSpan = false);
-    static void CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps,
-        int32_t duration, int32_t iterations);
+    static void CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations);
+    static void CheckIsCard(std::string& src, const JSRef<JSVal>& jsValue);
+    static bool CheckResetImage(const bool& srcValid, const JSCallbackInfo& info);
     static void HandleLoadImageSuccess(const BaseEventInfo& param);
     static void HandleLoadImageFail(const BaseEventInfo& param);
     static void SetAlt(const JSCallbackInfo& args);
@@ -75,16 +75,18 @@ public:
     static void SetCopyOption(const JSCallbackInfo& info);
 
     static void EnableAnalyzer(bool isEnableAnalyzer);
-    static void AnalyzerConfig(const JSCallbackInfo &info);
+    static void AnalyzerConfig(const JSCallbackInfo& info);
     static void ParseResizableSlice(const JSRef<JSObject>& info);
     static void ParseResizableLattice(const JSRef<JSObject>& info);
     static void JsImageResizable(const JSCallbackInfo& info);
     static bool IsDrawable(const JSRef<JSVal>& jsValue);
+    static ImageType ParseImageType(const JSRef<JSVal>& jsValue);
 
 protected:
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
     static void UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult);
+    static void ParseImageAIOptions(const JSCallbackInfo& info);
 };
 
 class JSColorFilter : public AceType {

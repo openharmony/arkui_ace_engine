@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 #define private public
@@ -31,8 +32,8 @@ class ListLayoutTestNg : public ListTestNg {
 public:
     void CreateGroupWithSettingWithComponentContent(
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
-    void UpdateContentModifier();
-    RefPtr<ListPaintMethod> UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper);
+    RefPtr<ListPaintMethod> UpdateOverlayModifier();
+    RefPtr<ListPaintMethod> UpdateContentModifier();
     void UpdateDividerMap();
     void PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber, bool isClip = false);
     void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber);
@@ -52,18 +53,19 @@ void ListLayoutTestNg::CreateGroupWithSettingWithComponentContent(
     }
 }
 
-void ListLayoutTestNg::UpdateContentModifier()
+RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateOverlayModifier()
 {
-    RefPtr<NodePaintMethod> paint = pattern_->CreateNodePaintMethod();
-    RefPtr<ListPaintMethod> listPaint = AceType::DynamicCast<ListPaintMethod>(paint);
     auto paintWrapper = frameNode_->CreatePaintWrapper();
-    listPaint->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    RefPtr<ListPaintMethod> paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    return paintMethod;
 }
 
-RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateOverlayModifier(RefPtr<PaintWrapper> paintWrapper)
+RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateContentModifier()
 {
-    auto paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
-    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<ListPaintMethod> paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
     return paintMethod;
 }
 
@@ -701,17 +703,17 @@ HWTEST_F(ListLayoutTestNg, PaintMethod001, TestSize.Level1)
     model.SetScrollBar(DisplayMode::ON);
     CreateListItemGroup(V2::ListItemGroupStyle::NONE); // no ListItem in ListItemGroup
     CreateDone();
-    auto paintWrapper = frameNode_->CreatePaintWrapper();
 
     /**
      * @tc.steps: step2. UnScrollable List
      * @tc.expected: Not need paint scrollBar
      */
-    auto paintMethod = UpdateOverlayModifier(paintWrapper);
+    auto paintMethod = UpdateOverlayModifier();
     auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
     auto scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_NE(scrollBar, nullptr);
     EXPECT_FALSE(scrollBar->NeedPaint());
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
     PaintDivider(paintWrapper, 0);
 
     /**
@@ -738,8 +740,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
     model.SetScrollBar(DisplayMode::ON);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    auto paintWrapper = frameNode_->CreatePaintWrapper();
-    RefPtr<ListPaintMethod> paintMethod = UpdateOverlayModifier(paintWrapper);
+    RefPtr<ListPaintMethod> paintMethod = UpdateOverlayModifier();
     auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
     auto scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_EQ(scrollBarOverlayModifier->positionMode_, PositionMode::RIGHT);
@@ -754,8 +755,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
     model.SetListDirection(Axis::HORIZONTAL);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    paintWrapper = frameNode_->CreatePaintWrapper();
-    paintMethod = UpdateOverlayModifier(paintWrapper);
+    paintMethod = UpdateOverlayModifier();
     scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
     scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_TRUE(scrollBar->NeedPaint());
@@ -769,8 +769,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
     model.SetScrollBar(DisplayMode::OFF);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    paintWrapper = frameNode_->CreatePaintWrapper();
-    paintMethod = UpdateOverlayModifier(paintWrapper);
+    paintMethod = UpdateOverlayModifier();
     scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_EQ(scrollBar, nullptr);
 }
@@ -2595,5 +2594,81 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest003, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(pattern_->GetEndIndex(), 5);
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_TRUE(paintProperty_->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty_->GetFadingEdgeLength().value(), fadingEdgeLength);
+
+    /**
+     * @tc.steps: step2. Change FadingEdge to false
+     * @tc.expected: There is no fading edge
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false, fadingEdgeLength);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_FALSE(paintProperty_->GetFadingEdge().value_or(false));
+}
+
+/**
+ * @tc.name: FadingEdge002
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The list at top
+     * @tc.expected: Fading bottom
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step3. The list at middle
+     * @tc.expected: Fading both
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step4. The list at bottom
+     * @tc.expected: Fading top
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
 }
 } // namespace OHOS::Ace::NG
