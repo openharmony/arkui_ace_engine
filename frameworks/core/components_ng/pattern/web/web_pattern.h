@@ -213,7 +213,7 @@ public:
 
     void SetWebSrc(const std::string& webSrc)
     {
-        if (webSrc_ != webSrc_) {
+        if (webSrc_ != webSrc) {
             OnWebSrcUpdate();
             webSrc_ = webSrc;
         }

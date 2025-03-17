@@ -2178,7 +2178,7 @@ void WebPattern::KeyboardReDispatch(
     const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed)
 {
     CHECK_NULL_VOID(event);
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2968,12 +2968,15 @@ void WebPattern::OnModifyDone()
     renderContext->SetHandleChildBounds(true);
     if (!delegate_) {
         // first create case,
-        delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContextSafelyWithCheck(), nullptr, "",
-            Container::CurrentId());
-        instanceId_ = Container::CurrentId();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        instanceId_ = context->GetInstanceId();
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnModify, instanceId:%{public}d", instanceId_);
+        CHECK_NULL_VOID(instanceId_);
+        ContainerScope scope(instanceId_);
+        delegate_ = AceType::MakeRefPtr<WebDelegate>(context, nullptr, "", instanceId_);
         CHECK_NULL_VOID(delegate_);
-        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(
-            delegate_, PipelineContext::GetCurrentContextSafelyWithCheck());
+        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, context);
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
         delegate_->SetRenderMode(renderMode_);
@@ -2988,11 +2991,11 @@ void WebPattern::OnModifyDone()
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
-            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContextSafelyWithCheck());
+            delegate_->InitOHOSWeb(context);
         } else {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
-            int32_t instanceId = Container::CurrentId();
+            int32_t instanceId = instanceId_;
             CHECK_NULL_VOID(renderSurface_);
             CHECK_NULL_VOID(popupRenderSurface_);
             CHECK_NULL_VOID(renderContextForSurface_);
@@ -3021,7 +3024,7 @@ void WebPattern::OnModifyDone()
             renderSurface_->SetTransformHint(rotation_);
             TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
             renderSurface_->UpdateSurfaceConfig();
-            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContextSafelyWithCheck(), renderSurface_);
+            delegate_->InitOHOSWeb(context, renderSurface_);
 #if defined(ENABLE_ROSEN_BACKEND)
             delegate_->SetPopupSurface(popupRenderSurface_);
 #endif
@@ -4456,7 +4459,7 @@ HintToTypeWrap WebPattern::GetHintTypeAndMetadata(const std::string& attribute, 
         // try hint2Type
         auto host = GetHost();
         CHECK_NULL_RETURN(host, hintToTypeWrap);
-        auto container = Container::Current();
+        auto container = Container::CurrentSafely();
         if (container == nullptr) {
             container = Container::GetActive();
         }
@@ -4639,7 +4642,7 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
         nodeInfo->SetPageNodeRect(rectF);
     }
 
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     if (container == nullptr) {
         container = Container::GetActive();
     }
@@ -4659,7 +4662,7 @@ bool WebPattern::RequestAutoSave()
     auto instanceId = context->GetInstanceId();
     CHECK_NULL_RETURN(instanceId, false);
     ContainerScope scope(instanceId);
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     if (container == nullptr) {
         container = Container::GetActive();
     }
@@ -4680,7 +4683,7 @@ bool WebPattern::UpdateAutoFillPopup()
     auto instanceId = context->GetInstanceId();
     CHECK_NULL_RETURN(instanceId, false);
     ContainerScope scope(instanceId);
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     if (container == nullptr) {
         container = Container::GetActive();
     }
@@ -4698,7 +4701,7 @@ bool WebPattern::CloseAutoFillPopup()
     auto instanceId = context->GetInstanceId();
     CHECK_NULL_RETURN(instanceId, false);
     ContainerScope scope(instanceId);
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     if (container == nullptr) {
         container = Container::GetActive();
     }
@@ -5204,7 +5207,7 @@ bool WebPattern::ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChoo
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -5255,7 +5258,7 @@ bool WebPattern::ShowTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser>
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -5303,7 +5306,7 @@ bool WebPattern::ShowDateTimeSuggestionDialog(std::shared_ptr<OHOS::NWeb::NWebDa
     const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
     std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback)
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(pipelineContext, false);
@@ -6273,7 +6276,7 @@ void WebPattern::CalculateVerticalDrawRect()
 void WebPattern::PostTaskToUI(const std::function<void()>&& task, const std::string& name) const
 {
     CHECK_NULL_VOID(task);
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);
