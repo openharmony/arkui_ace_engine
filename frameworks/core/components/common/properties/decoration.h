@@ -102,6 +102,14 @@ enum class HapticFeedbackMode {
     AUTO,
 };
 
+struct SysOptions {
+    bool disableSystemAdaptation = true;
+    bool operator==(const SysOptions& other) const
+    {
+        return disableSystemAdaptation == other.disableSystemAdaptation;
+    }
+};
+
 struct MenuPreviewAnimationOptions {
     float scaleFrom { -1.0f };
     float scaleTo { -1.0f };

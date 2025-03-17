@@ -736,6 +736,7 @@ void NavigationPattern::UpdateNavPathList()
     // lastRecoveredStandardIndex will be only used in recovery case
     int32_t lastRecoveredStandardIndex = 0;
     int32_t removeSize = 0; // push destination failed size
+    bool isCurForceSetList = false;
     for (int32_t index = 0; index < pathListSize; ++index) {
         auto pathName = pathNames[index];
         RefPtr<UINode> uiNode = nullptr;
@@ -766,9 +767,16 @@ void NavigationPattern::UpdateNavPathList()
             }
             continue;
         }
+        bool isPageForceSet = navigationStack_->GetIsForceSet(arrayIndex);
+        if (isPageForceSet) {
+            isCurForceSetList = true;
+        }
+        auto navDestinationId = navigationStack_->GetNavDestinationIdInt(arrayIndex);
         if (index == pathListSize - 1 && addByNavRouter_) {
             addByNavRouter_ = false;
             uiNode = navigationStack_->Get();
+        } else if (isPageForceSet && navDestinationId != -1) {
+            uiNode = FindNavDestinationNodeInPreList(navDestinationId);
         } else {
             uiNode = navigationStack_->Get(pathIndex);
         }
@@ -786,6 +794,7 @@ void NavigationPattern::UpdateNavPathList()
             auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(
                 NavigationGroupNode::GetNavDestinationNode(uiNode));
             if (navDestinationGroupNode && navDestinationGroupNode->GetCanReused()) {
+                navigationStack_->ResetIsForceSetFlag(arrayIndex);
                 navPathList.emplace_back(std::make_pair(pathName, uiNode));
                 continue;
             }
@@ -799,10 +808,16 @@ void NavigationPattern::UpdateNavPathList()
             auto navDestination =
                 DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
             if (navDestination) {
+                navDestination->SetInCurrentStack(true);
                 auto eventHub = navDestination->GetEventHub<EventHub>();
                 CHECK_NULL_VOID(eventHub);
                 eventHub->SetEnabledInternal(true);
+                navigationStack_->ResetIsForceSetFlag(arrayIndex);
             }
+            continue;
+        }
+        if (isPageForceSet) {
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
         }
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
@@ -822,7 +837,11 @@ void NavigationPattern::UpdateNavPathList()
         }
         navPathList.emplace_back(std::make_pair(pathName, uiNode));
     }
+    if (isCurForceSetList) {
+        GenerateLastStandardPage(navPathList);
+    }
     navigationStack_->SetNavPathList(navPathList);
+    navigationStack_->SetIsCurForceSetList(isCurForceSetList);
 }
 
 void NavigationPattern::RefreshNavDestination()
@@ -1261,7 +1280,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
-            preTopNavDestination->CleanContent();
+            preTopNavDestination->CleanContent(false, true);
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preTopNavDestination, true);
@@ -1272,7 +1291,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
             DealTransitionVisibility(preTopNavDestination, needVisible, false);
             if (preTopNavDestination->NeedRemoveInPush()) {
-                preTopNavDestination->CleanContent();
+                preTopNavDestination->CleanContent(false, true);
                 auto parent = preTopNavDestination->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(preTopNavDestination, true);
@@ -1301,7 +1320,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
 
     // navDestination pop to navBar
     if (preTopNavDestination) {
-        preTopNavDestination->CleanContent();
+        preTopNavDestination->CleanContent(false, true);
         auto parent = preTopNavDestination->GetParent();
         CHECK_NULL_VOID(parent);
         parent->RemoveChild(preTopNavDestination, true);
@@ -1331,9 +1350,7 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
             // remove preTopNavDestination node in pop
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
-            if (preTopNavDestination->GetContentNode()) {
-                preTopNavDestination->GetContentNode()->Clean();
-            }
+            preTopNavDestination->CleanContent();
             parent->RemoveChild(preTopNavDestination);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -1709,6 +1726,31 @@ int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex,
 
 bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node)
 {
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    do {
+        if (parentNode_.Upgrade() || !host) {
+            break;
+        }
+        auto context = host->GetContext();
+        // Avoid the loading problem of atomicservice on the home page
+        if ((context && !context->GetInstallationFree()) || !context) {
+            break;
+        }
+        RefPtr<UINode> parentCustomNode;
+        auto curNode = host->GetParent();
+        while (curNode) {
+            auto curTag = curNode->GetTag();
+            if (curTag == V2::JS_VIEW_ETS_TAG) {
+                parentCustomNode = curNode;
+                break;
+            }
+            curNode = curNode->GetParent();
+        }
+        auto pattern = host->GetPattern<NavigationPattern>();
+        if (pattern && parentCustomNode) {
+            pattern->SetParentCustomNode(parentCustomNode);
+        }
+    } while (false);
     bool isCreate = navigationStack_->CreateNodeByIndex(index, parentNode_, node);
     if (node) {
         node->SetFreeze(true, true);
@@ -1722,8 +1764,6 @@ bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& nod
     if (navigationNode && navDestinationPattern) {
         navDestinationPattern->SetNavigationNode(navigationNode);
         navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
-        navigationStack_->SetDestinationIdToJsStack(
-            index, std::to_string(navDestinationPattern->GetNavDestinationId()));
     }
     auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, isCreate);
@@ -2983,6 +3023,7 @@ void NavigationPattern::RecoveryToLastStack(
 {
     if (preTopDestination) {
         preTopDestination->SetIsOnAnimation(false);
+        preTopDestination->SetInCurrentStack(true);
     }
     if (newTopDestination) {
         newTopDestination->SetIsOnAnimation(false);
@@ -3512,6 +3553,65 @@ void NavigationPattern::FireNavigationLifecycle(const RefPtr<UINode>& uiNode, Na
                 NavigationGroupNode::GetNavDestinationNode(navigationStack->Get())), lifecycle, reason);
         }
     }
+}
+
+void NavigationPattern::GenerateLastStandardPage(NavPathList& navPathList)
+{
+    int64_t lastPageIndex = navPathList.size() - 1;
+    // if top page is nullptr or is dialog node, we need to generate node util standard page is found.
+    while (lastPageIndex >= 0 &&
+        (navPathList[lastPageIndex].second == nullptr || !IsStandardPage(navPathList[lastPageIndex].second))) {
+        auto pageNode = navPathList[lastPageIndex].second;
+        // existed dialog node is no need to generate
+        bool isExistedNode = (pageNode != nullptr);
+        if (!pageNode && !GenerateUINodeByIndex(lastPageIndex, pageNode)) {
+            std::string replacedName;
+            int32_t replacedIndex = -1;
+            if (navigationStack_->CheckIsReplacedDestination(lastPageIndex, replacedName, replacedIndex)) {
+                navigationStack_->SetRecoveryFromReplaceDestination(lastPageIndex, false);
+                continue;
+            }
+            navPathList.erase(navPathList.begin() + lastPageIndex);
+            lastPageIndex--;
+            continue;
+        }
+        navPathList[lastPageIndex].second = pageNode;
+        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(pageNode));
+        if (!isExistedNode && navDestinationNode && navigationStack_->GetIsForceSet(lastPageIndex)) {
+            navigationStack_->ResetIsForceSetFlag(lastPageIndex);
+        }
+        if (navDestinationNode && navDestinationNode->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
+            break;
+        }
+        lastPageIndex--;
+    }
+}
+
+bool NavigationPattern::IsStandardPage(const RefPtr<UINode>& uiNode) const
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(uiNode));
+    CHECK_NULL_RETURN(navDestinationNode, false);
+    return navDestinationNode->GetNavDestinationMode() == NavDestinationMode::STANDARD;
+}
+
+RefPtr<UINode> NavigationPattern::FindNavDestinationNodeInPreList(const uint64_t navDestinationId) const
+{
+    CHECK_NULL_RETURN(navigationStack_, nullptr);
+    auto preNavDestinationList = navigationStack_->GetAllNavDestinationNodesPrev();
+    for (auto preNavDestinationInfo : preNavDestinationList) {
+        auto preNavDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(preNavDestinationInfo.second.Upgrade()));
+        CHECK_NULL_CONTINUE(preNavDestinationNode);
+        auto pattern = preNavDestinationNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_CONTINUE(pattern);
+        auto preId = pattern->GetNavDestinationId();
+        if (preId == navDestinationId) {
+            return preNavDestinationInfo.second.Upgrade();
+        }
+    }
+    return nullptr;
 }
 
 void NavigationPattern::FireOnNewParam(const RefPtr<UINode>& uiNode)

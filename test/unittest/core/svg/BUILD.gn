@@ -96,6 +96,7 @@ ohos_unittest("parse_test_ng") {
     "$ace_root/test/mock/core/svg/mock_svg_utils.cpp",
     "parse_test_ng.cpp",
     "parse_testtwo_ng.cpp",
+    "parse_transform_test_ng.cpp",
     "svg_manager_test_ng.cpp",
   ]
   defines = [ "USE_ROSEN_DRAWING" ]

@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import SwiperBootcampTest from './ScrollAndSwipe/SwiperBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  SwiperBootcampTest()
+  ListItemGroupBootcampTest();
+
 }

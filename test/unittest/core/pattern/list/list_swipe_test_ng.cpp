@@ -1751,4 +1751,132 @@ HWTEST_F(ListSwipeTestNg, SetBuilderComponent01, TestSize.Level1)
     swiperIndex = itemPattern_->GetSwiperIndex();
     EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 }
+
+/**
+ * @tc.name: SwipeForward001
+ * @tc.desc: Test SwipeForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, SwipeForward001, TestSize.Level1)
+{
+    CreateList();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    itemPattern_->swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
+    itemPattern_->SwipeForward();
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
+}
+
+/**
+ * @tc.name: SwipeForward002
+ * @tc.desc: Test SwipeForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, SwipeForward002, TestSize.Level1)
+{
+    CreateList();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    itemPattern_->swipeActionState_ = SwipeActionState::COLLAPSED;
+    itemPattern_->SwipeForward();
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
+}
+
+/**
+ * @tc.name: SwipeForward003
+ * @tc.desc: Test SwipeForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, SwipeForward003, TestSize.Level1)
+{
+    CreateList();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    itemPattern_->swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
+    itemPattern_->SwipeForward();
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
+}
+
+/**
+ * @tc.name: SwipeBackward001
+ * @tc.desc: Test SwipeBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, SwipeBackward001, TestSize.Level1)
+{
+    CreateList();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    itemPattern_->swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
+    itemPattern_->SwipeBackward();
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
+}
+
+/**
+ * @tc.name: SwipeBackward002
+ * @tc.desc: Test SwipeBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, SwipeBackward002, TestSize.Level1)
+{
+    CreateList();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    itemPattern_->swipeActionState_ = SwipeActionState::COLLAPSED;
+    itemPattern_->SwipeBackward();
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::COLLAPSED);
+}
+
+/**
+ * @tc.name: SwipeBackward003
+ * @tc.desc: Test SwipeBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, SwipeBackward003, TestSize.Level1)
+{
+    CreateList();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    itemPattern_->swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
+    itemPattern_->SwipeBackward();
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(),  SwipeActionState::COLLAPSED);
+}
+
+/**
+ * @tc.name: FireSwipeActionStateChange001
+ * @tc.desc: Test FireSwipeActionStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, FireSwipeActionStateChange001, TestSize.Level1)
+{
+    CreateList();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    ListItemSwipeIndex newSwiperIndex = ListItemSwipeIndex::SWIPER_END;
+    itemPattern_->FireSwipeActionStateChange(newSwiperIndex);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(),  SwipeActionState::EXPANDED);
+}
+
+/**
+ * @tc.name: FireSwipeActionStateChange002
+ * @tc.desc: Test FireSwipeActionStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, FireSwipeActionStateChange002, TestSize.Level1)
+{
+    CreateList();
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItem(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    ListItemSwipeIndex newSwiperIndex = ListItemSwipeIndex::SWIPER_START;
+    itemPattern_->FireSwipeActionStateChange(newSwiperIndex);
+    EXPECT_EQ(itemPattern_->GetSwipeActionState(), SwipeActionState::EXPANDED);
+}
 } // namespace OHOS::Ace::NG

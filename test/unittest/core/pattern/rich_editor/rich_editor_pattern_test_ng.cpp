@@ -210,44 +210,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestRequestKeyboard001, TestS
 }
 
 /**
- * @tc.name: RichEditorPatternTestInitMouseEvent001
- * @tc.desc: test InitMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestInitMouseEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->InitMouseEvent();
-
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    ASSERT_NE(inputHub, nullptr);
-
-    MouseInfo mouseInfo;
-    auto mouseEventActuator = inputHub->mouseEventActuator_;
-    ASSERT_NE(mouseEventActuator, nullptr);
-    auto mouseInputEvents = mouseEventActuator->inputEvents_;
-    for (auto input : mouseInputEvents) {
-        input->GetOnMouseEventFunc()(mouseInfo);
-    }
-
-    auto hoverEventActuator = inputHub->hoverEventActuator_;
-    ASSERT_NE(hoverEventActuator, nullptr);
-    auto hoverInputEvents = hoverEventActuator->inputEvents_;
-    for (auto input : hoverInputEvents) {
-        input->GetOnHoverEventFunc()(true);
-    }
-
-    ASSERT_EQ(richEditorPattern->mouseEventInitialized_, true);
-}
-
-/**
  * @tc.name: RichEditorPatternTestCloseCustomKeyboard001
  * @tc.desc: test CloseCustomKeyboard
  * @tc.type: FUNC

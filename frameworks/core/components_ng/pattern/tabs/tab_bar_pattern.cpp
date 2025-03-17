@@ -517,6 +517,7 @@ void TabBarPattern::AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem)
             auto host = tabBar->GetHost();
             CHECK_NULL_VOID(host);
             auto index = host->GetChildFlatIndex(tabBarItemId).second;
+            tabBar->accessibilityFocusIndicator_ = index;
             tabBar->FocusCurrentOffset(index);
         }
     });
@@ -1031,37 +1032,19 @@ void TabBarPattern::FocusCurrentOffset(int32_t index)
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
-    auto childCount = tabBarNode->TotalChildCount() - MASK_COUNT;
     auto mainSize = GetContentSize().MainSize(axis);
 
     if (barMode == TabBarMode::SCROLLABLE && !visibleItemPosition_.empty()) {
-        auto visibleItemStartIndex = visibleItemPosition_.begin()->first;
-        auto visibleItemEndIndex = visibleItemPosition_.rbegin()->first;
-        auto visibleItemStartPos = visibleItemPosition_.begin()->second.startPos;
-        auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
-        if (index == visibleItemStartIndex) {
-            auto delta = -visibleItemStartPos;
-            if (index == 0) {
-                delta = scrollMargin_ - visibleItemStartPos;
+        auto iter = visibleItemPosition_.find(index);
+        if (iter != visibleItemPosition_.end()) {
+            auto startPos = iter->second.startPos;
+            auto endPos = iter->second.endPos;
+            if (GreatOrEqual(startPos, 0.0f) && LessOrEqual(endPos, mainSize)) {
+                return;
             }
-            if (isRTL_ && axis_ == Axis::HORIZONTAL) {
-                delta -= delta;
-            }
-            UpdateCurrentOffset(delta);
-        } else if (index == visibleItemEndIndex) {
-            auto delta = mainSize - visibleItemEndPos;
-            if (index == childCount - 1) {
-                delta = mainSize - scrollMargin_ - visibleItemEndPos;
-            }
-            if (isRTL_ && axis_ == Axis::HORIZONTAL) {
-                delta -= delta;
-            }
-            UpdateCurrentOffset(delta);
-        } else if ((index >= 0  && index < visibleItemStartIndex) ||
-            (index <= childCount - 1 && index > visibleItemEndIndex)) {
-            focusIndex_ = index;
-            tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
+        focusIndex_ = index;
+        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
 }
 
@@ -1341,10 +1324,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     isFirstLayout_ = false;
     if (focusIndex_) {
         focusIndex_.reset();
-        if (accessibilityScroll_) {
-            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-            accessibilityScroll_ = false;
-        }
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
     indicator_ = layoutProperty->GetIndicatorValue(0);
 
@@ -2959,10 +2939,9 @@ void TabBarPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
             frameNode->TotalChildCount() - MASK_COUNT > 1) {
-            auto visibleItemEndIndex = pattern->visibleItemPosition_.rbegin()->first;
-            visibleItemEndIndex == frameNode->TotalChildCount() - MASK_COUNT - 1 ?
-                pattern->FocusCurrentOffset(visibleItemEndIndex) : pattern->FocusCurrentOffset(visibleItemEndIndex + 1);
-            pattern->accessibilityScroll_ = true;
+            auto index =
+                std::clamp(pattern->accessibilityFocusIndicator_ + 1, 0, frameNode->TotalChildCount() - MASK_COUNT - 1);
+            pattern->FocusCurrentOffset(index);
             // AccessibilityEventType::SCROLL_END
         }
     });
@@ -2976,10 +2955,9 @@ void TabBarPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
            frameNode->TotalChildCount() - MASK_COUNT > 1) {
-            auto visibleItemStartIndex = pattern->visibleItemPosition_.begin()->first;
-            visibleItemStartIndex == 0 ? pattern->FocusCurrentOffset(visibleItemStartIndex) :
-                pattern->FocusCurrentOffset(visibleItemStartIndex - 1);
-            pattern->accessibilityScroll_ = true;
+            auto index =
+                std::clamp(pattern->accessibilityFocusIndicator_ - 1, 0, frameNode->TotalChildCount() - MASK_COUNT - 1);
+            pattern->FocusCurrentOffset(index);
             // AccessibilityEventType::SCROLL_END
         }
     });

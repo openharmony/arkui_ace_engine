@@ -156,6 +156,15 @@ public:
         return tiltY_;
     }
 
+    void SetRollAngle(float rollAngle)
+    {
+        rollAngle_ = rollAngle;
+    }
+    std::optional<float> GetRollAngle() const
+    {
+        return rollAngle_;
+    }
+
     void SetSourceTool(SourceTool tool)
     {
         sourceTool_ = tool;
@@ -243,6 +252,7 @@ protected:
     float force_ = 0.0f;
     std::optional<float> tiltX_;
     std::optional<float> tiltY_;
+    std::optional<float> rollAngle_;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
     int64_t deviceId_ = 0;
     // Will be used in drag.

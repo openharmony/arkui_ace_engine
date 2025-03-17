@@ -316,24 +316,15 @@ shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<
 
 void AddCommonMatrixProperties(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& obj)
 {
-    static auto jsCopy = runtime->NewFunction(Copy);
-    static auto jsCombine = runtime->NewFunction(Combine);
-    static auto jsInvert = runtime->NewFunction(Invert);
-    static auto jsTranslate = runtime->NewFunction(Translate);
-    static auto jsScale = runtime->NewFunction(Scale);
-    static auto jsSkew = runtime->NewFunction(Skew);
-    static auto jsRotate = runtime->NewFunction(Rotate);
-    static auto jsTransformPoint = runtime->NewFunction(TransformPoint);
-    static auto jsSetPolyToPoly = runtime->NewFunction(SetPolyToPoly);
-    obj->SetProperty(runtime, MATRIX_COPY, jsCopy);
-    obj->SetProperty(runtime, MATRIX_COMBINE, jsCombine);
-    obj->SetProperty(runtime, MATRIX_INVERT, jsInvert);
-    obj->SetProperty(runtime, MATRIX_TRANSLATE, jsTranslate);
-    obj->SetProperty(runtime, MATRIX_SCALE, jsScale);
-    obj->SetProperty(runtime, MATRIX_SKEW, jsSkew);
-    obj->SetProperty(runtime, MATRIX_ROTATE, jsRotate);
-    obj->SetProperty(runtime, MATRIX_TRANSFORM_POINT, jsTransformPoint);
-    obj->SetProperty(runtime, MATRIX_SET_POLY_TO_POLY, jsSetPolyToPoly);
+    obj->SetProperty(runtime, MATRIX_COPY, runtime->NewFunction(Copy));
+    obj->SetProperty(runtime, MATRIX_COMBINE, runtime->NewFunction(Combine));
+    obj->SetProperty(runtime, MATRIX_INVERT, runtime->NewFunction(Invert));
+    obj->SetProperty(runtime, MATRIX_TRANSLATE, runtime->NewFunction(Translate));
+    obj->SetProperty(runtime, MATRIX_SCALE, runtime->NewFunction(Scale));
+    obj->SetProperty(runtime, MATRIX_SKEW, runtime->NewFunction(Skew));
+    obj->SetProperty(runtime, MATRIX_ROTATE, runtime->NewFunction(Rotate));
+    obj->SetProperty(runtime, MATRIX_TRANSFORM_POINT, runtime->NewFunction(TransformPoint));
+    obj->SetProperty(runtime, MATRIX_SET_POLY_TO_POLY, runtime->NewFunction(SetPolyToPoly));
 }
 
 shared_ptr<JsValue> Copy(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
