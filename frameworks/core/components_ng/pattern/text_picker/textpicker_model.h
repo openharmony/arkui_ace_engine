@@ -20,6 +20,7 @@
 #include <mutex>
 
 #include "base/geometry/dimension.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -97,7 +98,7 @@ public:
     virtual void SetDisableTextStyleAnimation(const bool value) = 0;
     virtual void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) = 0;
     virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) = 0;
-
+    virtual void UpdateUserSetSelectColor() = 0;
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
     static std::once_flag onceFlag_;

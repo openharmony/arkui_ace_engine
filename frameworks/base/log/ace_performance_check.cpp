@@ -20,7 +20,7 @@
 #include "base/log/event_report.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
-
+#include "base/websocket/websocket_manager.h"
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t BASE_YEAR = 1900;
@@ -32,6 +32,7 @@ constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@Compile
 constexpr char NEW_PATH[] = "entry|entry|1.0.0|src/main/ets/";
 constexpr char TS_SUFFIX[] = ".ts";
 constexpr char ETS_SUFFIX[] = ".ets";
+constexpr char CHECK_RESULT[] = "{\"message_type\": \"SendArkPerformanceCheckResult\", \"performance_check_result\": ";
 } // namespace
 
 // ============================== survival interval of JSON files ============================================
@@ -52,14 +53,19 @@ void AcePerformanceCheck::Stop()
     if (performanceInfo_) {
         LOGI("performance check stop");
         auto info = performanceInfo_->ToString();
-        // output info to json file
-        auto filePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui_bestpractice.json";
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(filePath);
-        CHECK_NULL_VOID(ss);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        DumpLog::GetInstance().Print(info);
-        DumpLog::GetInstance().Reset();
-        AceChecker::NotifyCaution("AcePerformanceCheck::Stop, json data generated, store in " + filePath);
+        if (AceChecker::IsWebSocketCheckEnabled()) {
+            info = CHECK_RESULT + info + "}";
+            WebSocketManager::SendMessage(info);
+        } else {
+            // output info to json file
+            auto filePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui_bestpractice.json";
+            std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(filePath);
+            CHECK_NULL_VOID(ss);
+            DumpLog::GetInstance().SetDumpFile(std::move(ss));
+            DumpLog::GetInstance().Print(info);
+            DumpLog::GetInstance().Reset();
+            AceChecker::NotifyCaution("AcePerformanceCheck::Stop, json data generated, store in " + filePath);
+        }
         performanceInfo_.reset(nullptr);
     }
 }
@@ -90,6 +96,11 @@ bool AceScopedPerformanceCheck::CheckIsRuleContainsPage(const std::string& ruleT
 {
     // check for the presence of rule json
     CHECK_NULL_RETURN(AcePerformanceCheck::performanceInfo_, false);
+    if (AceChecker::IsWebSocketCheckEnabled()) {
+        if (!CheckIsRuleWebsocket(ruleType)) {
+            return true;
+        }
+    }
     if (!AcePerformanceCheck::performanceInfo_->Contains(ruleType)) {
         AcePerformanceCheck::performanceInfo_->Put(ruleType.c_str(), JsonUtil::CreateArray(true));
         return false;
@@ -376,5 +387,17 @@ RefPtr<Framework::RevSourceMap> AceScopedPerformanceCheck::GetCurrentSourceMap()
         }
     }
     return nullptr;
+}
+
+bool AceScopedPerformanceCheck::CheckIsRuleWebsocket(const std::string& ruleType)
+{
+    if (AceChecker::GetCheckMessge().empty()) {
+        return false;
+    }
+
+    if (AceChecker::GetCheckMessge().find(ruleType, 0) != std::string::npos) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace

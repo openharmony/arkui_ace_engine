@@ -16,7 +16,9 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
@@ -53,7 +55,7 @@ void ResetFontColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = pipelineContext->GetTheme<TextClockTheme>();
     CHECK_NULL_VOID(theme);
     TextClockModelNG::SetFontColor(frameNode, theme->GetTextParseFailedColor());
 }
@@ -187,6 +189,25 @@ void SetTextClockTimeZoneOffset(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffs
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetHoursWest(frameNode, timeZoneOffset);
 }
+
+void SetTextClockOnDateChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDateChange = reinterpret_cast<ChangeEvent*>(callback);
+        TextClockModelNG::SetOnDateChange(frameNode, std::move(*onDateChange));
+    } else {
+        TextClockModelNG::SetOnDateChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextClockOnDateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextClockModelNG::SetOnDateChange(frameNode, nullptr);
+}
 } // namespace TextClockModifier
 
 namespace NodeModifier {
@@ -213,6 +234,8 @@ const ArkUITextClockModifier* GetTextClockModifier()
         .setDateTimeOptions = TextClockModifier::SetDateTimeOptions,
         .resetDateTimeOptions = TextClockModifier::ResetDateTimeOptions,
         .setTextClockTimeZoneOffset = TextClockModifier::SetTextClockTimeZoneOffset,
+        .setTextClockOnDateChange = TextClockModifier::SetTextClockOnDateChange,
+        .resetTextClockOnDateChange = TextClockModifier::ResetTextClockOnDateChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

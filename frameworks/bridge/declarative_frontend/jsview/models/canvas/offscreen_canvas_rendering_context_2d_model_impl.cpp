@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/components/custom_paint/custom_paint_component.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
