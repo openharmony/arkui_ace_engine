@@ -5910,7 +5910,7 @@ void PipelineContext::FlushMouseEventForHover()
         windowSizeChangeReason_ == WindowSizeChangeReason::MOVE) {
         return;
     }
-    CHECK_RUN_ON(TaskExecutor::TaskType::UI);
+    CHECK_RUN_ON(UI);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     MouseEvent event;
