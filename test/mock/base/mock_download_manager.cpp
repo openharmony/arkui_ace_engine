@@ -63,6 +63,11 @@ public:
     {
         return false;
     }
+
+    bool fetchCachedResult(const std::string& /* url */, std::string& /* result */) override
+    {
+        return false;
+    }
 };
 
 DownloadManager* DownloadManager::GetInstance()

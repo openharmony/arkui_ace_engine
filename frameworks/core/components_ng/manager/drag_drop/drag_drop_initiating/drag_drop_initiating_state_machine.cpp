@@ -22,21 +22,32 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_ready.h"
 #include "core/gestures/drag_event.h"
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_DRAG_DROP_INITIATING_STATE_SIZE = 5;
+}
 DragDropInitiatingStateMachine::DragDropInitiatingStateMachine(const RefPtr<FrameNode>& frameNode)
 {
     currentState_ = 0;
     dragDropInitiatingParams_.frameNode = frameNode;
-    InitializeState();
 }
 
 void DragDropInitiatingStateMachine::InitializeState()
 {
-    dragDropInitiatingState_.clear();
-    dragDropInitiatingState_.emplace_back(MakeRefPtr<DragDropInitiatingStateIdle>(AceType::WeakClaim(this)));
-    dragDropInitiatingState_.emplace_back(MakeRefPtr<DragDropInitiatingStateReady>(AceType::WeakClaim(this)));
-    dragDropInitiatingState_.emplace_back(MakeRefPtr<DragDropInitiatingStatePress>(AceType::WeakClaim(this)));
-    dragDropInitiatingState_.emplace_back(MakeRefPtr<DragDropInitiatingStateLifting>(AceType::WeakClaim(this)));
-    dragDropInitiatingState_.emplace_back(MakeRefPtr<DragDropInitiatingStateMoving>(AceType::WeakClaim(this)));
+    if (!dragDropInitiatingState_.empty()) {
+        return;
+    }
+    dragDropInitiatingState_ =
+        std::vector<RefPtr<DragDropInitiatingStateBase>>(DEFAULT_DRAG_DROP_INITIATING_STATE_SIZE);
+    dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::IDLE)] =
+        MakeRefPtr<DragDropInitiatingStateIdle>(AceType::WeakClaim(this));
+    dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::READY)] =
+        MakeRefPtr<DragDropInitiatingStateReady>(AceType::WeakClaim(this));
+    dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::PRESS)] =
+        MakeRefPtr<DragDropInitiatingStatePress>(AceType::WeakClaim(this));
+    dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::LIFTING)] =
+        MakeRefPtr<DragDropInitiatingStateLifting>(AceType::WeakClaim(this));
+    dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::MOVING)] =
+        MakeRefPtr<DragDropInitiatingStateMoving>(AceType::WeakClaim(this));
 }
 
 void DragDropInitiatingStateMachine::HandleLongPressOnAction(const GestureEvent& info)

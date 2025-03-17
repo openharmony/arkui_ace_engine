@@ -230,7 +230,7 @@ private:
     RefPtr<MovingPhotoController> controller_;
     RefPtr<PixelMap> pixelMap_;
 
-    int32_t fd_ = -1;
+    SharedFd fd_;
     int64_t autoPlayPeriodStartTime_ = -1;
     int64_t autoPlayPeriodEndTime_ = -1;
     std::string uri_ = "";

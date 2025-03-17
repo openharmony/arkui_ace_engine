@@ -431,6 +431,11 @@ public:
         return navigationStack_->GetAllNavDestinationNodesPrev();
     }
 
+    bool GetIsPreForceSetList()
+    {
+        return navigationStack_->GetIsPreForceSetList();
+    }
+
     void DialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible);
 
@@ -584,6 +589,9 @@ private:
     void UnregisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
     virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode, bool skipCheck = false);
     void UpdateToobarFocusColor();
+    void GenerateLastStandardPage(NavPathList& navPathList);
+    RefPtr<UINode> FindNavDestinationNodeInPreList(const uint64_t navDestinationId) const;
+    bool IsStandardPage(const RefPtr<UINode>& uiNode) const;
     void UpdateDividerBackgroundColor();
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;

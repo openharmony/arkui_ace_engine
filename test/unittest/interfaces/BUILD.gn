@@ -392,7 +392,6 @@ ohos_unittest("drawable_descriptor_test") {
 
   sources = [
     "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp",
-    "$ace_root/interfaces/inner_api/drawable_descriptor/image_converter.cpp",
     "$ace_root/interfaces/native/node/native_drawable_descriptor.cpp",
     "drawable_descriptor_test.cpp",
   ]
@@ -710,6 +709,69 @@ ohos_unittest("ui_input_event_test") {
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "ui_input_event_test.cpp",
+    "ui_input_event_test_one.cpp",
+  ]
+
+  configs = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    ":c_api_configs",
+  ]
+
+  include_dirs = [
+    "$ace_root/frameworks/core/interfaces/arkoala",
+    "$ace_root/frameworks/",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+  ]
+}
+
+ohos_unittest("ui_input_event_first_test") {
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/interfaces/native/event/ui_input_event.cpp",
+    "$ace_root/interfaces/native/node/animate_impl.cpp",
+    "$ace_root/interfaces/native/node/dialog_model.cpp",
+    "$ace_root/interfaces/native/node/event_converter.cpp",
+    "$ace_root/interfaces/native/node/gesture_impl.cpp",
+    "$ace_root/interfaces/native/node/native_impl.cpp",
+    "$ace_root/interfaces/native/node/native_node_napi.cpp",
+    "$ace_root/interfaces/native/node/node_extened.cpp",
+    "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
+    "$ace_root/interfaces/native/node/node_transition.cpp",
+    "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "ui_input_event_first_test.cpp",
   ]
 
   configs = [
@@ -1107,9 +1169,19 @@ ohos_unittest("js_drawable_descriptor_test") {
   module_out_path = interface_test_output_path
 
   sources = [
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/file_uri_utils_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/image_data_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/pixel_map_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/resource_adapter_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/adapter/preview/task_pool_preview.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/base/source_info.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/core/pixelmap_drawable_descriptor.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp",
-    "$ace_root/interfaces/inner_api/drawable_descriptor/image_converter.cpp",
     "$ace_root/interfaces/inner_api/drawable_descriptor/js_drawable_descriptor.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/loader/image_loader.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/loader/resource_image_loader.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/utils/napi_utils.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/utils/resource_manager.cpp",
     "$ace_root/interfaces/native/node/native_drawable_descriptor.cpp",
     "js_drawable_descriptor_test.cpp",
   ]
@@ -1204,6 +1276,7 @@ group("interfaces_unittest") {
     ":node_transition_test",
     ":ui_content_test",
     ":ui_event_test",
+    ":ui_input_event_first_test",
     ":ui_input_event_test",
     ":viewport_config_test",
     ":xcomponent_controller_test",

@@ -57,7 +57,7 @@ struct NativeRichEditorLayoutStyleResult {
 
 struct NativeRichEditorGesture {
     void (*onClick)(CJClickInfo clickInfo);
-    void (*onLongPress)(CJGestureEvent info);
+    void (*onLongPress)(CJGestureEventV2 info);
 };
 
 struct NativeRichEditorTextStyle {

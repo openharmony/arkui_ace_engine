@@ -117,6 +117,8 @@ public:
     int32_t icon_;
     SecCompBackground bg_;
 
+    bool hasNonCompatileChange_ = false;
+    double blurRadius_ = 0.0;
     int32_t windowId_;
     uint64_t displayId_ = 0;
     int32_t nodeId_;

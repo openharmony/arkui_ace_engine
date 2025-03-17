@@ -60,6 +60,7 @@ public:
     virtual void SetEnableCascade(bool isEnableCascade) = 0;
 
     virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
+    virtual void UpdateUserSetSelectColor() = 0;
 private:
     static std::unique_ptr<TimePickerModel> timePickerInstance_;
     static std::once_flag onceFlag_;

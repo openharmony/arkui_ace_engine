@@ -120,7 +120,6 @@ protected:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
-    void UpdateUnitLayout(LayoutWrapper* layoutWrapper);
     ParagraphStyle GetParagraphStyle(
         const TextStyle& textStyle, const std::u16string& content, const float fontSize) const;
     void GetInlineMeasureItem(
