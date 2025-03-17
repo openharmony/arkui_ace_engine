@@ -19,7 +19,15 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 ohos_shared_library("curves_ani") {
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]
-  sources = [ "./src/curves.cpp" ]
+  sources = [
+    "${ace_root}/frameworks/core/animation/cubic_curve.cpp",
+    "${ace_root}/frameworks/core/animation/spring_animation.cpp",
+    "${ace_root}/frameworks/core/animation/spring_curve.cpp",
+    "${ace_root}/frameworks/core/animation/spring_model.cpp",
+    "${ace_root}/frameworks/core/animation/spring_motion.cpp",
+    "${ace_root}/frameworks/core/common/container_scope.cpp",
+    "./src/curves.cpp",
+  ]
   external_deps = [
     #"runtime_core:libarkruntime",
     "napi:ace_napi",
