@@ -41,13 +41,13 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Matrix2D IdentityImpl(Ark_Matrix2D peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     peer->Identity();
     return peer;
 }
 Ark_Matrix2D InvertImpl(Ark_Matrix2D peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    CHECK_NULL_RETURN(peer, {});
     peer->Invert();
     return peer;
 }
@@ -55,24 +55,24 @@ Ark_Matrix2D MultiplyImpl(Ark_Matrix2D peer,
                           const Opt_Matrix2D* other)
 {
     LOGE("ARKOALA Matrix2DAccessor::MultiplyImpl is not implemented as deprecated.");
-    return nullptr;
+    return {};
 }
 Ark_Matrix2D Rotate0Impl(Ark_Matrix2D peer,
                          const Opt_Number* rx,
                          const Opt_Number* ry)
 {
     LOGE("ARKOALA Matrix2DAccessor::Rotate0Impl is not implemented as deprecated.");
-    return nullptr;
+    return {};
 }
 Ark_Matrix2D Rotate1Impl(Ark_Matrix2D peer,
                          const Ark_Number* degree,
                          const Opt_Number* rx,
                          const Opt_Number* ry)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    CHECK_NULL_RETURN(degree, nullptr);
-    CHECK_NULL_RETURN(rx, nullptr);
-    CHECK_NULL_RETURN(ry, nullptr);
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(degree, {});
+    CHECK_NULL_RETURN(rx, {});
+    CHECK_NULL_RETURN(ry, {});
     auto angle = static_cast<double>(Converter::Convert<float>(*degree));
     auto optX = Converter::OptConvert<float>(*rx);
     auto optY = Converter::OptConvert<float>(*ry);
@@ -83,9 +83,9 @@ Ark_Matrix2D TranslateImpl(Ark_Matrix2D peer,
                            const Opt_Number* tx,
                            const Opt_Number* ty)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    CHECK_NULL_RETURN(tx, nullptr);
-    CHECK_NULL_RETURN(ty, nullptr);
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(tx, {});
+    CHECK_NULL_RETURN(ty, {});
     auto optX = Converter::OptConvert<float>(*tx);
     auto optY = Converter::OptConvert<float>(*ty);
     peer->Translate(optX, optY);
@@ -95,9 +95,9 @@ Ark_Matrix2D ScaleImpl(Ark_Matrix2D peer,
                        const Opt_Number* sx,
                        const Opt_Number* sy)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    CHECK_NULL_RETURN(sx, nullptr);
-    CHECK_NULL_RETURN(sy, nullptr);
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(sx, {});
+    CHECK_NULL_RETURN(sy, {});
     auto optX = Converter::OptConvert<float>(*sx);
     auto optY = Converter::OptConvert<float>(*sy);
     peer->Scale(optX, optY);
