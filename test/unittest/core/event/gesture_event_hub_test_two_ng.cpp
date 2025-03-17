@@ -489,8 +489,6 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
     auto containerId = Container::CurrentId();
     auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
     SubwindowManager::GetInstance()->AddSubwindow(containerId, subwindow);
-    EXPECT_CALL(*subwindow, ShowPreviewNG(false)).WillRepeatedly(testing::Return(true));
-    EXPECT_CALL(*subwindow, GetOverlayManager()).WillRepeatedly(testing::Return(overlayManager));
     MockContainer::SetUp();
     MockContainer::Current();
     /**

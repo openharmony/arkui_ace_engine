@@ -38,6 +38,7 @@ public:
         paintProperty->propMaskColor_ = CloneMaskColor();
         paintProperty->propEnableArrow_ = CloneEnableArrow();
         paintProperty->propUseCustom_ = CloneUseCustom();
+        paintProperty->propIsTips_ = CloneIsTips();
         paintProperty->propBackgroundColor_ = CloneBackgroundColor();
         paintProperty->propArrowOffset_ = CloneArrowOffset();
         paintProperty->propPlacement_ = ClonePlacement();
@@ -54,6 +55,7 @@ public:
         ResetEnableArrow();
         ResetMaskColor();
         ResetUseCustom();
+        ResetIsTips();
         ResetPlacement();
         ResetArrowOffset();
         ResetPrimaryButtonShow();
@@ -66,6 +68,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placement, Placement, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseCustom, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsTips, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowOffset, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrimaryButtonShow, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondaryButtonShow, bool, PROPERTY_UPDATE_RENDER);

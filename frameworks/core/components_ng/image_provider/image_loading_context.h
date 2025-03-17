@@ -42,7 +42,6 @@ public:
         const ImageDfxConfig& imageDfxConfig = {});
     ~ImageLoadingContext() override;
 
-    static RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit);
     // return true if calling MakeCanvasImage is necessary
     bool MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoResize, ImageFit imageFit,
         const std::optional<SizeF>& sourceSize = std::nullopt, bool hasValidSlice = false);
@@ -95,9 +94,6 @@ public:
     void FailCallback(const std::string& errorMsg);
     const std::string GetCurrentLoadingState();
     void ResizableCalcDstSize();
-    void DownloadImage();
-    void PerformDownload();
-    void CacheDownloadedImage();
     bool Downloadable();
     void OnDataReady();
 
@@ -157,9 +153,16 @@ public:
     }
 
 
-    ImageDfxConfig GetImageDfxConfig()
+    const ImageDfxConfig& GetImageDfxConfig()
     {
         return imageDfxConfig_;
+    }
+
+    void DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal);
+
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> GetOnProgressCallback()
+    {
+        return onProgressCallback_;
     }
 
 private:
@@ -180,10 +183,6 @@ private:
     void OnMakeCanvasImage();
     void OnLoadSuccess();
     void OnLoadFail();
-    bool NotifyReadyIfCacheHit();
-    void DownloadImageSuccess(const std::string& imageData);
-    void DownloadImageFailed(const std::string& errorMessage);
-    void DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal);
     // round up int to the nearest 2-fold proportion of image width
     // REQUIRE: value > 0, image width > 0
     int32_t RoundUp(int32_t value);
@@ -198,7 +197,6 @@ private:
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
     RefPtr<CanvasImage> canvasImage_;
-    std::string downloadedUrlData_;
 
     // [LoadNotifier] contains 3 tasks to notify whom uses [ImageLoadingContext] of loading results
     LoadNotifier notifiers_;
@@ -222,8 +220,6 @@ private:
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
     ImageDfxConfig imageDfxConfig_;
-    // If the API version is greater or equal than 14, use the preload module to download the URL.
-    const bool usePreload_ = false;
 
     ImageFit imageFit_ = ImageFit::COVER;
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;

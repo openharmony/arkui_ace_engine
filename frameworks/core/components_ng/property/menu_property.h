@@ -69,7 +69,7 @@ struct MenuParam {
     bool hasPreviewTransitionEffect = false;
     RefPtr<NG::ChainedTransitionEffect> previewTransition;
     MenuType type = MenuType::MENU;
-    MenuPreviewMode previewMode = MenuPreviewMode::NONE;
+    std::optional<MenuPreviewMode> previewMode;
     MenuPreviewAnimationOptions previewAnimationOptions;
     bool isShowHoverImage = false;
     MenuPreviewAnimationOptions hoverImageAnimationOptions;
@@ -83,6 +83,8 @@ struct MenuParam {
     bool isPreviewContainScale = false;
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
+    HapticFeedbackMode hapticFeedbackMode = HapticFeedbackMode::DISABLED;
+    bool disappearScaleToTarget = false;
 };
 
 } // namespace OHOS::Ace::NG
