@@ -22,7 +22,6 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
-#include "transaction/rs_transaction_proxy.h"
 #endif
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -686,13 +685,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
-#ifdef ENABLE_ROSEN_BACKEND
-    auto isCmdEmpty = false;
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        isCmdEmpty = transactionProxy->IsEmpty();
-    }
-#endif
     FlushMessages();
     FlushWindowPatternInfo();
     InspectDrew();
@@ -705,15 +697,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
             FlushFocusScroll();
         }
     }
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!isCmdEmpty) {
-        HandleOnAreaChangeEvent(nanoTimestamp);
-        HandleVisibleAreaChangeEvent(nanoTimestamp);
-    }
-#else
     HandleOnAreaChangeEvent(nanoTimestamp);
     HandleVisibleAreaChangeEvent(nanoTimestamp);
-#endif
     FlushMouseEventInVsync();
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
