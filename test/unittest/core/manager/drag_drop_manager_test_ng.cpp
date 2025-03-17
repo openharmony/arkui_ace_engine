@@ -2131,4 +2131,109 @@ HWTEST_F(DragDropManagerTestNg, DoDragMoveAnimate002, TestSize.Level1)
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     EXPECT_EQ(needDoDragMoveAnimate, false);
 }
+
+/**
+ * @tc.name: HandleSyncOnDragStart002
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, HandleSyncOnDragStart002, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::READY);
+    dragDropManager->HandleSyncOnDragStart(DragStartRequestStatus::WAITING);
+    EXPECT_EQ(
+        DragDropGlobalController::GetInstance().GetDragStartRequestStatus(),
+        DragStartRequestStatus::WAITING);
+    
+    bool callbackCalled = false;
+    auto callback = [&callbackCalled]() { callbackCalled = true; };
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback(callback);
+    dragDropManager->HandleSyncOnDragStart(DragStartRequestStatus::READY);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(
+        DragDropGlobalController::GetInstance().GetDragStartRequestStatus(),
+        DragStartRequestStatus::READY);
+  
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback(nullptr);
+    DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::WAITING);
+    dragDropManager->HandleSyncOnDragStart(DragStartRequestStatus::READY);
+    EXPECT_EQ(
+        DragDropGlobalController::GetInstance().GetDragStartRequestStatus(),
+        DragStartRequestStatus::WAITING);
+
+    auto invalidStatus = static_cast<DragStartRequestStatus>(99);
+    dragDropManager->HandleSyncOnDragStart(invalidStatus);
+    EXPECT_EQ(
+        DragDropGlobalController::GetInstance().GetDragStartRequestStatus(),
+        DragStartRequestStatus::WAITING);
+}
+
+/**
+ * @tc.name: GetWindowId001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, GetWindowId001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    int32_t result = dragDropManager->GetWindowId();
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: ResetDraggingStatus001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, ResetDraggingStatus001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    TouchEvent touchPoint;
+  
+    touchPoint.id = 1;
+    dragDropManager->currentPointerId_ = 1;
+    dragDropManager->draggingPressedState_ = true;
+    dragDropManager->ResetDraggingStatus(touchPoint);
+
+    dragDropManager->dragDropState_ = DragDropMgrState::DRAGGING;
+    auto draggedGridFrameNode_ = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->ResetDraggingStatus(touchPoint);
+    EXPECT_EQ(dragDropManager->currentPointerId_, 1);
+}
+
+/**
+ * @tc.name: ResetDraggingStatus002
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, ResetDraggingStatus002, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    TouchEvent touchPoint;
+    touchPoint.type = TouchType::CANCEL;
+    dragDropManager->ResetDraggingStatus(touchPoint);
+    EXPECT_EQ(dragDropManager->dragDropState_, DragDropMgrState::IDLE);
+}
+
+/**
+ * @tc.name: HandleOnDragEnd001
+ * @tc.desc: ResetPreTargetFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, HandleOnDragEnd001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+    string extraInfo = "Test";
+    auto dragFrameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->HandleOnDragEnd(pointerEvent, extraInfo, dragFrameNode);
+    EXPECT_FALSE(dragDropManager->IsDragging());
+}
 } // namespace OHOS::Ace::NG
