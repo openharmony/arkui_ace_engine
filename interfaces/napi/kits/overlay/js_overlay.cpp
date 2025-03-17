@@ -181,13 +181,19 @@ static napi_value JSSetOverlayManagerOptions(napi_env env, napi_callback_info in
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data));
     NAPI_ASSERT(env, argc >= 1, "wrong number of argument\n");
 
-    auto overlayInfo = NG::OverlayManagerInfo { .renderRootOverlay = true };
+    auto overlayInfo = NG::OverlayManagerInfo {
+        .renderRootOverlay = true,
+        .enableBackPressedEvent = false,
+    };
     napi_value renderRootOverlayNApi = nullptr;
+    napi_value enableBackPressedEventNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv, &valueType);
     if (valueType == napi_object) {
         napi_get_named_property(env, argv, "renderRootOverlay", &renderRootOverlayNApi);
+        napi_get_named_property(env, argv, "enableBackPressedEvent", &enableBackPressedEventNApi);
         napi_get_value_bool(env, renderRootOverlayNApi, &overlayInfo.renderRootOverlay);
+        napi_get_value_bool(env, enableBackPressedEventNApi, &overlayInfo.enableBackPressedEvent);
     } else if (valueType != napi_undefined && valueType != napi_null) {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return nullptr;

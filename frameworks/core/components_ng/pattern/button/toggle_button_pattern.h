@@ -121,6 +121,7 @@ private:
     void InitHoverEvent();
     void HandleHoverEvent(bool isHover);
     void InitEvent();
+    void SetToggleScale(RefPtr<RenderContext>& renderContext);
 
     RefPtr<FrameNode> BuildContentModifierNode();
     std::function<void(bool)> isFocusActiveUpdateEvent_;

@@ -16,6 +16,7 @@
 #include "bridge/cj_frontend/cppview/matrix2d.h"
 
 #include "core/components_ng/render/adapter/matrix2d.h"
+#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 
@@ -72,4 +73,9 @@ void NativeMatrix2d::Scale(double sx, double sy)
     NG::Matrix2D::Scale(transform_, sx, sy);
 }
 
+double NativeMatrix2d::GetDensity()
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
+}
 } // namespace OHOS::Ace::Framework

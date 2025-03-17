@@ -324,15 +324,19 @@ ArkUINativeModuleValue ImageBridge::SetResizableLattice(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-    if (info.Length() > 1 && info[1]->IsObject()) {
-        auto drawingLattice = Ace::Framework::CreateDrawingLattice(info[1]);
-        if (drawingLattice) {
-            Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(INDEX_0);
-            CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-            auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-            ImageModelNG::SetResizableLattice(reinterpret_cast<FrameNode*>(nativeNode), drawingLattice);
-        }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> latticeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (latticeArg->IsUndefined() || latticeArg->IsNull() || !latticeArg->IsObject(vm)) {
+        GetArkUINodeModifiers()->getImageModifier()->resetResizable(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto lattice = ArkTSUtils::UnwrapNapiValue(vm, latticeArg);
+    if (lattice) {
+        GetArkUINodeModifiers()->getImageModifier()->setResizableLattice(nativeNode, lattice);
+    } else {
+        GetArkUINodeModifiers()->getImageModifier()->resetResizableLattice(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }

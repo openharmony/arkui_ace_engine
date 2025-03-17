@@ -20,6 +20,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+class LayoutWrapper;
 struct ScrollableUtils {
     /**
      * @brief Checks if contentHeight needs to expand based on safeArea property.

@@ -217,6 +217,11 @@ public:
 
     void SetIsEntryByIndex(int32_t index, bool isEntry) override;
 
+    int32_t GetSize() const
+    {
+        return size_;
+    }
+
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
     int8_t lifecycleIndex_ = 0;
@@ -228,6 +233,7 @@ private:
     std::vector<RefPtr<MockNavPathInfo>> mockPathArray_;
     std::vector<RefPtr<MockNavPathInfo>> mockPopArray_;
     std::map<int32_t, bool> mockIsEntryMap_;
+    int32_t size_ = 0;
 };
 } // namespace NG
 #endif

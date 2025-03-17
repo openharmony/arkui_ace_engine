@@ -358,6 +358,8 @@ struct GridLayoutInfo {
     void PrintMatrix();
     void PrintLineHeight();
 
+    bool CheckGridMatrix(int32_t cachedCount);
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
@@ -420,6 +422,8 @@ struct GridLayoutInfo {
 
     // default cached count
     int32_t defCachedCount_ = 1;
+
+    int32_t times_ = 0;
 
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;

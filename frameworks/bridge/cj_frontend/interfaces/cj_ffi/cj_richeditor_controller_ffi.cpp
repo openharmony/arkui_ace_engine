@@ -71,11 +71,11 @@ std::vector<MarginType> MARGIN_TYPES = {
     MarginType::MARGIN_PLACEHOLDER
 };
 
-std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*callback)(CJGestureEvent info))
+std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*callback)(CJGestureEventV2 info))
 {
     std::function<void(const GestureEvent& event)> result = [ffiOnAction = CJLambda::Create(callback)](
                                                                 const GestureEvent& event) -> void {
-        CJGestureEvent ffiGestureEvent {};
+        CJGestureEventV2 ffiGestureEvent {};
         CJEventTarget ffiEventTarget {};
         CJArea ffiArea {};
         CJPosition ffiPosition {};
@@ -772,7 +772,7 @@ void NativeRichEditorController::ParseUserGesture(const NativeRichEditorGesture&
 
 void NativeRichEditorController::ParseTextShadow(VectorNativeTextShadows nativeShadows, std::vector<Shadow>& shadows)
 {
-    auto nativeTextShadowVec = *reinterpret_cast<std::vector<NativeTextShadow>*>(nativeShadows);
+    auto nativeTextShadowVec = *reinterpret_cast<std::vector<NativeTextShadowV2>*>(nativeShadows);
     for (size_t i = 0; i < nativeTextShadowVec.size(); i++) {
         Dimension dOffsetX(nativeTextShadowVec[i].offsetX, DimensionUnit::VP);
         Dimension dOffsetY(nativeTextShadowVec[i].offsetY, DimensionUnit::VP);

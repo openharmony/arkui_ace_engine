@@ -32,6 +32,7 @@ public:
     DragDropInitiatingStateMachine(const RefPtr<FrameNode>& frameNode);
     ~DragDropInitiatingStateMachine() = default;
 
+    void InitializeState();
     void HandleLongPressOnAction(const GestureEvent& info);
     void HandleLongPressOnActionEnd(const GestureEvent& info);
     void HandleLongPressOnActionCancel(const GestureEvent& info);
@@ -65,9 +66,6 @@ public:
     {
         return static_cast<DragDropInitiatingStatus>(currentState_);
     }
-
-private:
-    void InitializeState();
 
 private:
     DragDropInitiatingParams dragDropInitiatingParams_;
