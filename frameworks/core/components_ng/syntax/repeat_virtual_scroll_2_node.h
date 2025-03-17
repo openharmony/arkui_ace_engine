@@ -109,10 +109,7 @@ public:
 
     ~RepeatVirtualScroll2Node() override = default;
 
-    void UpdateTotalCount(uint32_t totalCount)
-    {
-        totalCount_ = totalCount;
-    }
+    void UpdateTotalCount(uint32_t totalCount);
 
     // Number of children that Repeat can product
     // returns TotalCount
@@ -193,6 +190,9 @@ public:
 
     // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
+
     void MoveData(int32_t from, int32_t to) override;
     void FireOnMove(int32_t from, int32_t to) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);
@@ -238,6 +238,9 @@ private:
 
     // tell TS to purge nodes exceeding cachedCount
     void Purge();
+
+    // freeze spare node in L2
+    void FreezeSpareNode();
 
     // check whether index is in the L1 cache range
     bool CheckNode4IndexInL1(

@@ -69,11 +69,10 @@ public:
         return resource_;
     }
 
+    std::string ToString() const;
+
 private:
-    static SrcType ResolveSrcType(const std::string& src)
-    {
-        return SrcType::RESOURCE;
-    }
+    static SrcType ResolveSrcType(const std::string& src);
 
     std::string src_;
     Resource resource_;

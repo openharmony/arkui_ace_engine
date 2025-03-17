@@ -187,8 +187,8 @@ public:
 
     bool SubscribeToastObserver();
     bool UnsubscribeToastObserver();
-    bool SubscribeStateObserver(int eventType);
-    bool UnsubscribeStateObserver(int eventType);
+    bool SubscribeStateObserver(uint32_t eventType);
+    bool UnsubscribeStateObserver(uint32_t eventType);
     int RegisterInteractionOperation(int windowId);
     void DeregisterInteractionOperation();
 
@@ -260,7 +260,9 @@ public:
         const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset = 0) override;
     bool ExecuteExtensionActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
-    Rect GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node) override;
+    int32_t GetTransformDegreeRelativeToWindow(const RefPtr<NG::FrameNode>& node, bool excludeSelf = false);
+    AccessibilityParentRectInfo GetTransformRectInfoRelativeToWindow(
+        const RefPtr<NG::FrameNode>& node, const RefPtr<PipelineBase>& context) override;
 #ifdef WEB_SUPPORTED
     void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) override;
@@ -354,7 +356,13 @@ public:
     void RegisterUIExtBusinessConsumeCallback();
     void RegisterGetParentRectHandler();
 
-    bool IsScreenReaderEnabled() override;
+    bool IsScreenReaderEnabled() override
+    {
+        return isScreenReaderEnabled_;
+    }
+
+    void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) override;
+    void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) override;
 
     void SetFocusMoveResultWithNode(
         const WeakPtr<NG::FrameNode>& hostNode,
@@ -483,10 +491,16 @@ private:
             pipeline_ = pipeline;
         }
 
+        void SetEventType(uint32_t eventType)
+        {
+            eventType_ = eventType;
+        }
+
     private:
         // Do not upgrade accessibilityManager_ on async thread, destructor might cause freeze
         WeakPtr<JsAccessibilityManager> accessibilityManager_;
         WeakPtr<PipelineBase> pipeline_;
+        uint32_t eventType_;
     };
 
     bool AccessibilityActionEvent(const Accessibility::ActionType& action,
@@ -673,11 +687,12 @@ private:
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
-    std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;
+    std::unordered_map<uint32_t, std::shared_ptr<JsAccessibilityStateObserver>> stateObserver_;
     std::shared_ptr<ToastAccessibilityConfigObserver> toastObserver_ = nullptr;
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
     int64_t currentFocusNodeId_ = -1;
+    bool isScreenReaderEnabled_ = false;
 
     int64_t lastElementId_ = -1;
     WeakPtr<NG::FrameNode> lastFrameNode_;

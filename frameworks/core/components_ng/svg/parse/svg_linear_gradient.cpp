@@ -67,14 +67,15 @@ SvgLinearGradientInfo SvgLinearGradient::GetLinearGradientInfo(
     const SvgCoordinateSystemContext& svgCoordinateSystemContext)
 {
     Rect defaultRect(0, 0, 1, 1);
+    Size viewPort = svgCoordinateSystemContext.GetViewPort();
     SvgLengthScaleRule gradientRule =
         linearGradientAttr_.gradientUnits == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX ?
-        SvgLengthScaleRule(defaultRect, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) :
+        SvgLengthScaleRule(defaultRect, viewPort, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) :
         svgCoordinateSystemContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
-    auto measuredX1 = GetMeasuredPosition(linearGradientAttr_.x1, gradientRule, SvgLengthType::HORIZONTAL);
-    auto measuredY1 = GetMeasuredPosition(linearGradientAttr_.y1, gradientRule, SvgLengthType::VERTICAL);
-    auto measuredX2 = GetMeasuredPosition(linearGradientAttr_.x2, gradientRule, SvgLengthType::HORIZONTAL);
-    auto measuredY2 = GetMeasuredPosition(linearGradientAttr_.y2, gradientRule, SvgLengthType::VERTICAL);
+    auto measuredX1 = GetRegionPosition(linearGradientAttr_.x1, gradientRule, SvgLengthType::HORIZONTAL);
+    auto measuredY1 = GetRegionPosition(linearGradientAttr_.y1, gradientRule, SvgLengthType::VERTICAL);
+    auto measuredX2 = GetRegionPosition(linearGradientAttr_.x2, gradientRule, SvgLengthType::HORIZONTAL);
+    auto measuredY2 = GetRegionPosition(linearGradientAttr_.y2, gradientRule, SvgLengthType::VERTICAL);
     return {
         .x1 = measuredX1, .x2 = measuredX2, .y1 = measuredY1, .y2 = measuredY2,
         .spreadMethod = static_cast<int32_t>(linearGradientAttr_.spreadMethod),

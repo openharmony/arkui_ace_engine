@@ -47,6 +47,7 @@ group("core_common_unittest") {
   deps = [
     ":common_test",
     "form:form_manager_test",
+    "key_event_manager:key_event_manager_test",
     "plugin:plugin_manager_test",
   ]
 }
