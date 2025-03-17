@@ -662,7 +662,8 @@ namespace OHOS::Ace::NG::Converter {
         };
     }
 
-    template<typename Ark_Type, typename Peer, typename AceEvent>
+    template<typename Ark_Type, typename Peer = std::remove_pointer_t<Ark_Type>,
+        typename AceEvent = typename Peer::AceEventInfo>
     class SyncEvent {
     public:
         SyncEvent(AceEvent& eventInfo)
@@ -671,6 +672,11 @@ namespace OHOS::Ace::NG::Converter {
         }
         ~SyncEvent()
         {
+            // Copying the event info if the peer was saved by an user.
+            if (info_.use_count() > 1) {
+                info_->object = *info_->ptr;
+                info_->ptr = &info_->object.value();
+            }
         }
 
         Ark_Type ArkValue() const
@@ -680,24 +686,17 @@ namespace OHOS::Ace::NG::Converter {
 
     private:
         Peer* const peer_ = new Peer();
+        const std::shared_ptr<typename Peer::EventInfo> info_ = peer_->eventInfo;
     };
 
-    using ArkAccessibilityHoverEventSync
-        = SyncEvent<Ark_AccessibilityHoverEvent, AccessibilityHoverEventPeer, OHOS::Ace::AccessibilityHoverInfo>;
-    using ArkClickEventSync
-        = SyncEvent<Ark_ClickEvent, ClickEventPeer, OHOS::Ace::GestureEvent>;
-    using ArkGestureEventSync
-        = SyncEvent<Ark_GestureEvent, GestureEventPeer, OHOS::Ace::GestureEvent>;
-    using ArkHoverEventSync
-        = SyncEvent<Ark_HoverEvent, HoverEventPeer, OHOS::Ace::HoverInfo>;
-    using ArkKeyEventSync
-        = SyncEvent<Ark_KeyEvent, KeyEventPeer, OHOS::Ace::KeyEventInfo>;
-    using ArkMouseEventSync
-        = SyncEvent<Ark_MouseEvent, MouseEventPeer, OHOS::Ace::MouseInfo>;
-    using ArkSubmitEventSync
-        = SyncEvent<Ark_SubmitEvent, SubmitEventPeer, OHOS::Ace::NG::TextFieldCommonEvent>;
-    using ArkTouchEventSync
-        = SyncEvent<Ark_TouchEvent, TouchEventPeer, OHOS::Ace::TouchEventInfo>;
+    using ArkAccessibilityHoverEventSync = SyncEvent<Ark_AccessibilityHoverEvent>;
+    using ArkClickEventSync = SyncEvent<Ark_ClickEvent>;
+    using ArkGestureEventSync = SyncEvent<Ark_GestureEvent>;
+    using ArkHoverEventSync = SyncEvent<Ark_HoverEvent>;
+    using ArkKeyEventSync = SyncEvent<Ark_KeyEvent>;
+    using ArkMouseEventSync = SyncEvent<Ark_MouseEvent>;
+    using ArkSubmitEventSync = SyncEvent<Ark_SubmitEvent>;
+    using ArkTouchEventSync = SyncEvent<Ark_TouchEvent>;
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H
