@@ -1068,7 +1068,7 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             menuParam.hasPreviewTransitionEffect = true;
             menuParam.previewTransition = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
         }
-        if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
+        if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::CUSTOM ||
             menuParam.hasPreviewTransitionEffect || menuParam.hasTransitionEffect ||
             menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
@@ -1348,7 +1348,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
     // arrow is disabled for contextMenu with preview
-    if (menuParam.previewMode != MenuPreviewMode::NONE) {
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE) {
         menuParam.enableArrow = false;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
@@ -2094,8 +2094,8 @@ void JSViewAbstract::ParseContentMenuCommonParam(
     auto preview = menuObj->GetProperty("preview");
     if (preview->IsNumber()) {
         auto previewMode = preview->ToNumber<int32_t>();
+        menuParam.previewMode = static_cast<MenuPreviewMode>(previewMode);
         if (previewMode == static_cast<int32_t>(MenuPreviewMode::IMAGE)) {
-            menuParam.previewMode = static_cast<MenuPreviewMode>(previewMode);
             ParseContentPreviewAnimationOptionsParam(info, menuObj, menuParam);
         }
     }
