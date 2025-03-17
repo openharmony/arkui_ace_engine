@@ -96,6 +96,12 @@ public:
             theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
             theme->fontPrimaryColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
+            auto tipsDoubleBorderEnable = pattern->GetAttr<std::string>("tips_double_border_enable", "1");
+            theme->tipsDoubleBorderEnable_ = StringUtils::StringToInt(tipsDoubleBorderEnable);
+            theme->tipsOuterBorderWidth_ = pattern->GetAttr<Dimension>("tips_outer_border_width", 1.0_vp);
+            theme->tipsOuterBorderColor_ = pattern->GetAttr<Color>("tips_outer_border_color", Color::TRANSPARENT);
+            theme->tipsInnerBorderWidth_ = pattern->GetAttr<Dimension>("tips_inner_border_width", 1.0_vp);
+            theme->tipsInnerBorderColor_ = pattern->GetAttr<Color>("tips_inner_border_color", Color::TRANSPARENT);
             theme->popupShadowStyle_ = static_cast<ShadowStyle>(
                 pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
             theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
@@ -332,6 +338,31 @@ public:
         return popupInnerBorderColor_;
     }
 
+    int32_t GetTipsDoubleBorderEnable() const
+    {
+        return tipsDoubleBorderEnable_;
+    }
+
+    Dimension GetTipsOuterBorderWidth() const
+    {
+        return tipsOuterBorderWidth_;
+    }
+
+    Color GetTipsOuterBorderColor() const
+    {
+        return tipsOuterBorderColor_;
+    }
+
+    Dimension GetTipsInnerBorderWidth() const
+    {
+        return tipsInnerBorderWidth_;
+    }
+
+    Color GetTipsInnerBorderColor() const
+    {
+        return tipsInnerBorderColor_;
+    }
+
     Color GetButtonFontColor() const
     {
         return buttonFontColor_;
@@ -403,6 +434,11 @@ private:
     Color popupOuterBorderColor_ = Color::TRANSPARENT;
     Dimension popupInnerBorderWidth_ = 0.8_vp;
     Color popupInnerBorderColor_ = Color::TRANSPARENT;
+    int32_t tipsDoubleBorderEnable_ = 0;
+    Dimension tipsOuterBorderWidth_ = 1.0_vp;
+    Color tipsOuterBorderColor_ = Color::TRANSPARENT;
+    Dimension tipsInnerBorderWidth_ = 1.0_vp;
+    Color tipsInnerBorderColor_ = Color::TRANSPARENT;
 
     TextStyle textStyle_;
     Radius radius_;

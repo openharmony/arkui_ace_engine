@@ -715,6 +715,7 @@ private:
     float maxScale_ = 0.0f;
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
+    int32_t accessibilityFocusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     std::unordered_map<int32_t, TabBarParamType> tabBarType_;
     std::optional<int32_t> animationDuration_;
@@ -776,7 +777,6 @@ private:
     float barGridMargin_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
-    bool accessibilityScroll_ = false;
     bool isTabBarFocusActive_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     Color tabBarItemDefaultBgColor_ = Color::TRANSPARENT;

@@ -449,6 +449,11 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(customTitleNode);
     customTitleNode->FireAppTitleCallback(title);
 
+    // call setTitle() callback for backButton bar
+    auto controllButtonRow = GetCustomButtonNode();
+    CHECK_NULL_VOID(controllButtonRow);
+    controllButtonRow->FireAppTitleCallback(title);
+
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
     customFloatingTitleNode->FireAppTitleCallback(title);

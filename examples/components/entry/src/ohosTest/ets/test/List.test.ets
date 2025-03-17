@@ -14,11 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import ImageBootcampTest from './ImagesAndVideos/ImageBootcamp.test';
-import ChipBootcampTest from './InformationDisplay/ChipBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  ChipBootcampTest()
-  ImageBootcampTest()
+  ListItemGroupBootcampTest();
+
 }
