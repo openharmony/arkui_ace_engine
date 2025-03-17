@@ -37,6 +37,8 @@ constexpr char PARAM_NAME_PARAM_ERROR[] = "paramError";
 constexpr char PARAM_MSG_PARAM_ERROR[] = "Param error";
 constexpr char PARAM_NAME_NOT_SUPPORT_UI_CONTENT_TYPE[] = "notSupportUIContentType";
 constexpr char PARAM_MSG_NOT_SUPPORT_UI_CONTENT_TYPE[] = "Not support uIContent type";
+constexpr char PARAM_NAME_EXCEED_MAX_NUM[] = "exceedMaxNum";
+constexpr char PARAM_MSG_EXCEED_MAX_NUM[] = "Workers exceed Max Num";
 const char ENABLE_DEBUG_DC_KEY[] = "persist.ace.debug.dc.enabled";
 
 bool IsDebugDCEnabled()
@@ -107,6 +109,10 @@ void DynamicPattern::HandleErrorCallback(DCResultCode resultCode)
             FireOnErrorCallbackOnUI(
                 resultCode, PARAM_NAME_NOT_SUPPORT_UI_CONTENT_TYPE, PARAM_MSG_NOT_SUPPORT_UI_CONTENT_TYPE);
             break;
+        case DCResultCode::DC_WORKER_EXCEED_MAX_NUM:
+            FireOnErrorCallbackOnUI(
+                resultCode, PARAM_NAME_EXCEED_MAX_NUM, PARAM_MSG_EXCEED_MAX_NUM);
+            break;
         default:
             PLATFORM_LOGI("HandleErrorCallback code: %{public}d is invalid.", resultCode);
     }
@@ -141,6 +147,22 @@ DCResultCode DynamicPattern::CheckConstraint()
     return IsDebugDCEnabled() ? DCResultCode::DC_NO_ERRORS : DCResultCode::DC_ONLY_RUN_ON_SCB;
 }
 
+bool DynamicPattern::CheckDynamicRendererConstraint(void* runtime)
+{
+    CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
+    if (dynamicComponentRenderer_->HasWorkerUsing(runtime)) {
+        HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+        return false;
+    }
+
+    if (!dynamicComponentRenderer_->CheckWorkerMaxConstraint()) {
+        HandleErrorCallback(DCResultCode::DC_WORKER_EXCEED_MAX_NUM);
+        return false;
+    }
+
+    return true;
+}
+
 void DynamicPattern::InitializeRender(void* runtime)
 {
     auto host = GetHost();
@@ -159,9 +181,7 @@ void DynamicPattern::InitializeRender(void* runtime)
         SetHostNode(host);
         dynamicComponentRenderer_ =
             DynamicComponentRenderer::Create(GetHost(), runtime, curDynamicInfo_);
-        CHECK_NULL_VOID(dynamicComponentRenderer_);
-        if (dynamicComponentRenderer_->HasWorkerUsing(runtime)) {
-            HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+        if (!CheckDynamicRendererConstraint(runtime)) {
             return;
         }
 
@@ -393,8 +413,8 @@ void DynamicPattern::DumpInfo()
 void DynamicPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("dynamicId", platformId_);
-    json->Put("entryPoint", curDynamicInfo_.reourcePath.c_str());
-    json->Put("reourcePath", curDynamicInfo_.entryPoint.c_str());
+    json->Put("entryPoint", curDynamicInfo_.resourcePath.c_str());
+    json->Put("resourcePath", curDynamicInfo_.entryPoint.c_str());
     json->Put("createLimitedWorkerTime", std::to_string(dynamicDumpInfo_.createLimitedWorkerTime).c_str());
 
     CHECK_NULL_VOID(dynamicComponentRenderer_);

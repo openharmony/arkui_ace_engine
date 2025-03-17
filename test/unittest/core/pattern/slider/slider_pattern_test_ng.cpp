@@ -1509,7 +1509,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest006, TestSize.Level1
     accessibilityProperty->OnAccessibilityFocusCallback(true);
     auto sliderAccessibilityProperty = sliderNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(sliderAccessibilityProperty, nullptr);
-    EXPECT_EQ(sliderAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::NO_STR);
+    EXPECT_EQ(sliderAccessibilityProperty->accessibilityLevel_, std::nullopt);
 }
 
 /**
@@ -1576,11 +1576,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest008, TestSize.Level1
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     AccessibilityHoverInfo info;
     auto actuator = eventHub->accessibilityHoverEventActuator_;
-    ASSERT_NE(actuator, nullptr);
-    auto callback = actuator->userCallback_;
-    ASSERT_NE(callback, nullptr);
-    auto hoverFunc = callback->GetOnAccessibilityHoverFunc();
-    ASSERT_NE(hoverFunc, nullptr);
+    EXPECT_EQ(actuator, nullptr);
 }
 
 /**
@@ -1917,7 +1913,7 @@ HWTEST_F(SliderPatternTestNg, InitHapticControllerTest001, TestSize.Level1)
     ASSERT_NE(sliderNode, nullptr);
     sliderPattern->InitHapticController();
     EXPECT_EQ(sliderPattern->hapticController_, nullptr);
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     sliderPattern->isEnableHaptic_ = true;
     sliderPattern->InitHapticController();
     EXPECT_NE(sliderPattern->hapticController_, nullptr);

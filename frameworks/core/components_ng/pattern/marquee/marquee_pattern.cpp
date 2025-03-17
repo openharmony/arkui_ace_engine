@@ -154,7 +154,7 @@ void MarqueePattern::StartMarqueeAnimation()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto repeatCount = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
-    if (pipeline->IsFormRender()) {
+    if (pipeline->IsFormRenderExceptDynamicComponent()) {
         repeatCount = 1;
     }
     FireStartEvent();

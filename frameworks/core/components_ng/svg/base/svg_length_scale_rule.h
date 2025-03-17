@@ -33,22 +33,30 @@ enum class SvgLengthScaleUnit {
 
 class SvgLengthScaleRule {
 public:
-    SvgLengthScaleRule(Rect baseRect, SvgLengthScaleUnit lengthScaleUnit) : baseRect_(baseRect),
-        lengthScaleUnit_(lengthScaleUnit) {}
+    SvgLengthScaleRule(Rect containerRect, Size viewPort, SvgLengthScaleUnit lengthScaleUnit)
+        : containerRect_(containerRect), viewPort_(viewPort), lengthScaleUnit_(lengthScaleUnit) {}
     SvgLengthScaleRule() = default;
     ~SvgLengthScaleRule() = default;
     SvgLengthScaleUnit GetLengthScaleUnit() const
     {
         return lengthScaleUnit_;
     }
-    const Rect& GetBaseRect() const
+    const Rect& GetContainerRect() const
     {
-        return baseRect_;
+        return containerRect_;
     }
+    
+    const Size& GetViewPort() const
+    {
+        return viewPort_;
+    }
+
     bool operator==(const SvgLengthScaleRule& lengthRule)
     {
-        return baseRect_ == lengthRule.GetBaseRect() && lengthScaleUnit_ == lengthRule.GetLengthScaleUnit();
+        return containerRect_ == lengthRule.GetContainerRect() && viewPort_ == lengthRule.GetViewPort()
+            && lengthScaleUnit_ == lengthRule.GetLengthScaleUnit();
     }
+
     void SetPathTransform(bool transform)
     {
         pathTransform_ = transform;
@@ -58,10 +66,22 @@ public:
     {
         return pathTransform_;
     }
+    
+    bool UseFillColor() const
+    {
+        return useFillColor_;
+    }
+
+    void SetUseFillColor(bool useFillColor)
+    {
+        useFillColor_ = useFillColor;
+    }
 private:
-    Rect baseRect_;
+    Rect containerRect_;
+    Size viewPort_;
     SvgLengthScaleUnit lengthScaleUnit_;
     bool pathTransform_ = false;
+    bool useFillColor_ = true;
 };
 }
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_BASE_LENGTH_SCALE_RULE_H

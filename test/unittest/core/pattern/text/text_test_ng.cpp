@@ -16,6 +16,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "text_base.h"
 #include "ui/base/geometry/dimension.h"
@@ -2633,6 +2634,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     MockPipelineContext::SetUp();
+    MockPipelineContext::GetCurrent()->onShow_ = true;
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -2640,6 +2642,18 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     // call onDraw function(textRacing_ = true)
     // call onDraw function(MarqueeState::RUNNING == marqueeState_)
     MarqueeOption option;
+    textPattern->GetHost()->onMainTree_ = true;
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->SetPaintRectWithTransform(RectF(0, 0, 100, 100));
+    textPattern->GetHost()->renderContext_ = mockRenderContext;
+    auto mockParent = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    mockParent->isActive_ = true;
+    textPattern->GetHost()->isActive_ = true;
+    textPattern->GetHost()->parent_ = mockParent;
+    textPattern->GetHost()->isCalculateInnerVisibleRectClip_ = false;
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, 100, 100));
+    mockParent->renderContext_ = mockParentRenderContext;
     textContentModifier.StartTextRace(option);
     EXPECT_EQ(textContentModifier.marqueeState_, MarqueeState::RUNNING);
     context.width = CONTEXT_LARGE_WIDTH_VALUE;

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -22,13 +23,9 @@ extern "C" ACE_FORCE_EXPORT XComponentControllerErrorCode OHOS_ACE_ChangeXCompon
     void* frameNode, char mode)
 {
     auto* xcFrameNode = reinterpret_cast<NG::FrameNode*>(frameNode);
-    if (!xcFrameNode) {
-        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(xcFrameNode, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     auto* xcPattern = xcFrameNode->GetPatternPtr<NG::XComponentPattern>();
-    if (!xcPattern) {
-        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(xcPattern, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     xcPattern->ChangeSurfaceCallbackMode(static_cast<SurfaceCallbackMode>(mode));
     return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR;
 }
@@ -36,51 +33,41 @@ extern "C" ACE_FORCE_EXPORT XComponentControllerErrorCode OHOS_ACE_ChangeXCompon
 XComponentControllerErrorCode XComponentControllerNG::GetGlobalPosition(float& offsetX, float& offsetY)
 {
     auto pattern = pattern_.Upgrade();
-    if (!pattern) {
-        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(pattern, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     if (pattern->GetType() != XComponentType::SURFACE) {
         return XCOMPONENT_CONTROLLER_TYPE_ERROR;
     }
     auto globalPostion = pattern->GetOffsetRelativeToWindow();
     offsetX = globalPostion.GetX();
     offsetY = globalPostion.GetY();
-    return XCOMPONENT_CONTROLLER_NO_ERROR;
+    return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR;
 }
 
 XComponentControllerErrorCode XComponentControllerNG::GetSize(float& width, float& height)
 {
     auto pattern = pattern_.Upgrade();
-    if (!pattern) {
-        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(pattern, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     if (pattern->GetType() != XComponentType::SURFACE) {
         return XCOMPONENT_CONTROLLER_TYPE_ERROR;
     }
     auto drawSize = pattern->GetDrawSize();
     width = drawSize.Width();
     height = drawSize.Height();
-    return XCOMPONENT_CONTROLLER_NO_ERROR;
+    return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR;
 }
 
 XComponentControllerErrorCode XComponentControllerNG::SetExtController(
     std::shared_ptr<XComponentController> xcomponentController)
 {
     auto pattern = pattern_.Upgrade();
-    if (!pattern) {
-        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(pattern, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     if (pattern->GetType() != XComponentType::SURFACE) {
         return XCOMPONENT_CONTROLLER_TYPE_ERROR;
     }
     auto extController = std::static_pointer_cast<NG::XComponentControllerNG>(xcomponentController);
-    if (!extController) {
-        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(extController, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     auto extPattern = extController->GetPattern();
-    if (!extPattern) {
-        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(extPattern, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     if (extPattern->GetType() != XComponentType::SURFACE) {
         return XCOMPONENT_CONTROLLER_TYPE_ERROR;
     }
@@ -91,17 +78,14 @@ XComponentControllerErrorCode XComponentControllerNG::ResetExtController(
     std::shared_ptr<XComponentController> xcomponentController)
 {
     auto pattern = pattern_.Upgrade();
-    if (!pattern) {
-        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(pattern, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     if (pattern->GetType() != XComponentType::SURFACE) {
         return XCOMPONENT_CONTROLLER_TYPE_ERROR;
     }
     auto extController = std::static_pointer_cast<NG::XComponentControllerNG>(xcomponentController);
+    CHECK_NULL_RETURN(extController, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     auto extPattern = extController->GetPattern();
-    if (!extPattern) {
-        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(extPattern, XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     if (extPattern->GetType() != XComponentType::SURFACE) {
         return XCOMPONENT_CONTROLLER_TYPE_ERROR;
     }

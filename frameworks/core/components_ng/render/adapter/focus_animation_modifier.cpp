@@ -19,6 +19,7 @@
 #include <tuple>
 
 #include "base/log/log_wrapper.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"

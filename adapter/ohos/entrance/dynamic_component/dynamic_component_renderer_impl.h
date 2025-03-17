@@ -52,11 +52,11 @@ public:
     void Dump(RendererDumpInfo &rendererDumpInfo) override;
     void RegisterErrorEventHandler();
     void FireOnErrorCallback(int32_t code, const std::string& name, const std::string& msg);
-    void InitUiContent(
-        OHOS::AbilityRuntime::Context *abilityContext, const std::shared_ptr<Framework::JsValue>& jsContext);
+    void InitUiContent(OHOS::AbilityRuntime::Context *abilityContext);
     void SetUIContentType(UIContentType uIContentType) override;
     bool IsRestrictedWorkerThread() override;
     bool HasWorkerUsing(void *worker) override;
+    bool CheckWorkerMaxConstraint() override;
 
     void SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
@@ -86,11 +86,12 @@ private:
     RefPtr<TaskExecutor> GetHostTaskExecutor();
     void AddWorkerUsing(void *worker);
     void DeleteWorkerUsing(void *worker);
+    void OnDestroyContent();
+    void AfterDestroyContent();
 
     void CreateIsolatedContent();
     void CreateDynamicContent();
-    void SetUIContentJsContext(
-        const std::shared_ptr<Framework::JsValue>& jsContext);
+    void SetUIContentJsContext();
 
     void AttachRenderContext();
     void AttachRenderContextInIsolatedComponent();
@@ -125,6 +126,7 @@ private:
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     AceLogTag aceLogTag_ = AceLogTag::ACE_DEFAULT_DOMAIN;
     bool isForeground_ = true;
+    std::weak_ptr<Framework::JsValue> hostJsContext_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRendererImpl);
 };

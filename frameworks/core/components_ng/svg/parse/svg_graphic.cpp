@@ -74,7 +74,8 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     }
     auto bounds = path.GetBounds();
     Rect boundingRect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
-    SvgCoordinateSystemContext svgCoordinateSystemContext(boundingRect, GetSvgContainerRect());
+    SvgCoordinateSystemContext svgCoordinateSystemContext(boundingRect, lengthRule.GetViewPort());
+    svgCoordinateSystemContext.SetUseFillColor(lengthRule.UseFillColor());
     auto fillType = GetFillType();
     if (fillType != PaintType::NONE) {
         OnGraphicFill(canvas, svgCoordinateSystemContext, path, fillType);
@@ -245,7 +246,7 @@ bool SvgGraphic::InitBrush(RSCanvas& canvas, RSBrush& brush,
     bool setBrushResult = true;
     switch (type) {
         case PaintType::COLOR:
-            SetBrushColor(brush);
+            SetBrushColor(brush, svgCoordinateSystemContext.UseFillColor());
             break;
         case PaintType::LINEAR_GRADIENT:
             setBrushResult = SetBrushLinearGradient(brush, svgCoordinateSystemContext);
@@ -262,11 +263,12 @@ bool SvgGraphic::InitBrush(RSCanvas& canvas, RSBrush& brush,
     return setBrushResult;
 }
 
-void SvgGraphic::SetBrushColor(RSBrush& brush)
+// subgraph does not use image components parameter fillColor, example: mask
+void SvgGraphic::SetBrushColor(RSBrush& brush, bool useFillColor)
 {
     auto curOpacity = GetFillOpacity();
     auto imageComponentColor = GetFillColor();
-    if (!imageComponentColor.has_value() || attributes_.fillState.IsFillNone()) {
+    if (!imageComponentColor.has_value() || attributes_.fillState.IsFillNone() || !useFillColor) {
         brush.SetColor(attributes_.fillState.GetColor().BlendOpacity(curOpacity).GetValue());
         return;
     }
@@ -320,7 +322,7 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
         return SetGradientStyle(curOpacity);
     } else {
         Color fillColor;
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             fillColor = (color) ? *color : fillState_.GetColor();
         } else {
             fillColor = (color && !fillState_.IsFillNone()) ? *color : fillState_.GetColor();
@@ -376,7 +378,7 @@ RSMatrix SvgGraphic::GetLocalMatrix(SvgLengthScaleUnit gradientUnits,
     const SvgCoordinateSystemContext& svgCoordinateSystemContext)
 {
     if (gradientUnits == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
-        auto bounds = svgCoordinateSystemContext.GetBoundingBoxRect();
+        auto bounds = svgCoordinateSystemContext.GetContainerRect();
         RSMatrix m;
         RSMatrix t;
         m.SetScale(bounds.Width(), bounds.Height());

@@ -263,6 +263,23 @@ class UIContext {
         this.instanceId_ = instanceId;
     }
 
+    static createUIContextWithoutWindow(context) {
+        let utils = globalThis.requireNapi('arkui.containerUtils');
+        let uicontext = undefined;
+        if (utils) {
+            uicontext = utils.createContainerWithoutWindow(context);
+        }
+
+        return uicontext;
+    }
+
+    static destroyUIContextWithoutWindow() {
+        let utils = globalThis.requireNapi('arkui.containerUtils');
+        if (utils) {
+            utils.destroyContainerWithoutWindow();
+        }
+    }
+
     getDragController() {
         this.dragController_ = new DragController(this.instanceId_);
         return this.dragController_;

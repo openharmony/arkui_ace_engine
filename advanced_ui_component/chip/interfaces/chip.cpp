@@ -29,7 +29,7 @@ namespace OHOS::Ace::Napi {
 extern "C" ACE_FORCE_EXPORT void NAPI_arkui_advanced_Chip_GetABCCode(
     const char** buf, int* buflen)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (buf != nullptr) {
             *buf = _binary_chip_v16_abc_start;
         }
