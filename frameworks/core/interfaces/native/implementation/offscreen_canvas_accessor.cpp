@@ -25,8 +25,6 @@ const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor();
 const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanvasRenderingContext2DAccessor();
 
 namespace OffscreenCanvasAccessor {
-const auto EMPTY_STRING = "";
-const Ark_String ARK_EMPTY_STRING = Converter::ArkValue<Ark_String>(EMPTY_STRING, Converter::FC);
 const double ERROR_VALUE = -1;
 const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Number>(ERROR_VALUE);
 
@@ -40,8 +38,8 @@ void DestroyPeerImpl(Ark_OffscreenCanvas peer)
 Ark_OffscreenCanvas CtorImpl(const Ark_Number* width,
                              const Ark_Number* height)
 {
-    CHECK_NULL_RETURN(width, nullptr);
-    CHECK_NULL_RETURN(height, nullptr);
+    CHECK_NULL_RETURN(width, {});
+    CHECK_NULL_RETURN(height, {});
     auto cw = static_cast<double>(Converter::Convert<float>(*width));
     auto ch = static_cast<double>(Converter::Convert<float>(*height));
     auto peer = new OffscreenCanvasPeer();
@@ -54,19 +52,19 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_ImageBitmap TransferToImageBitmapImpl(Ark_OffscreenCanvas peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    auto bitmap = reinterpret_cast<ImageBitmapPeer*>(GetImageBitmapAccessor()->ctor(&ARK_EMPTY_STRING));
+    CHECK_NULL_RETURN(peer, {});
+    Ark_String emptyString;
+    auto bitmap = GetImageBitmapAccessor()->ctor(&emptyString);
     return peer->TransferToImageBitmap(bitmap);
 }
 Ark_OffscreenCanvasRenderingContext2D GetContext2dImpl(Ark_OffscreenCanvas peer,
                                                        const Opt_RenderingContextSettings* options)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    CHECK_NULL_RETURN(options, nullptr);
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(options, {});
     auto width = Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetWidth()));
     auto height = Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetHeight()));
-    auto offscreenContext = reinterpret_cast<OffscreenCanvasRenderingContext2DPeer*>(
-        GetOffscreenCanvasRenderingContext2DAccessor()->ctor(&width, &height, options));
+    auto offscreenContext = GetOffscreenCanvasRenderingContext2DAccessor()->ctor(&width, &height, options);
     auto offscreenSettings = Converter::OptConvert<RenderingContextSettingsPeer*>(*options).value_or(nullptr);
     return peer->GetContext2D(offscreenContext, offscreenSettings);
 }
