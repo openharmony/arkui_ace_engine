@@ -14,6 +14,7 @@
  */
 
 #include "base/log/event_report.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
 
@@ -107,8 +108,6 @@ void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, 
 void EventReport::ReportClipboardFailEvent(const std::string& errorType)
 {}
 
-void EventReport::SendDiffFrameRatesDuring(const std::string &scene, int32_t frameRateDuring_60,
-    int32_t frameRateDuring_72, int32_t frameRateDuring_90, int32_t frameRateDuring_120)
+void EventReport::SendDiffFrameRatesDuring(const std::string &scene, const NG::FRCSceneFpsInfo &curFRCSceneFpsInfo_)
 {}
-
 } // namespace OHOS::Ace
