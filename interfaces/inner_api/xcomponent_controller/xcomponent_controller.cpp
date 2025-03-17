@@ -15,6 +15,7 @@
 
 #include "xcomponent_controller.h"
 
+#include "utils.h"
 #include "js_native_api.h"
 
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
@@ -23,7 +24,39 @@
 namespace OHOS::Ace {
 namespace {
 const char* NODEPTR_OF_UINODE = "nodePtr_";
+constexpr char XCOMPONENT_GET_CONTROLLER_FUNC[] = "OHOS_ACE_GetXComponentController";
+constexpr char XCOMPONENT_CHANGE_SURFACE_CALLBACKMODE_FUNC[] = "OHOS_ACE_ChangeXComponentSurfaceCallbackMode";
+using GetControllerFunc = void (*)(void*, void*);
+using ChangeSurfaceCallbackModeFunc = XComponentControllerErrorCode (*)(void*, char);
 } // namespace
+void GetController(void* jsController, void* controller)
+{
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+    if (handle == nullptr) {
+        return;
+    }
+    auto entry = reinterpret_cast<GetControllerFunc>(LOADSYM(handle, XCOMPONENT_GET_CONTROLLER_FUNC));
+    if (entry == nullptr) {
+        FREELIB(handle);
+        return;
+    }
+    entry(jsController, controller);
+}
+
+XComponentControllerErrorCode ChangeSurfaceCallbackMode(void* frameNode, char mode)
+{
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+    if (handle == nullptr) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    auto entry =
+        reinterpret_cast<ChangeSurfaceCallbackModeFunc>(LOADSYM(handle, XCOMPONENT_CHANGE_SURFACE_CALLBACKMODE_FUNC));
+    if (entry == nullptr) {
+        FREELIB(handle);
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    return entry(frameNode, mode);
+}
 std::shared_ptr<XComponentController> XComponentController::GetXComponentControllerFromNapiValue(
     napi_env env, napi_value napiValue)
 {
@@ -35,12 +68,9 @@ std::shared_ptr<XComponentController> XComponentController::GetXComponentControl
     if (localRef->IsNull()) {
         return nullptr;
     }
-    auto* jsXComponentController = static_cast<Framework::JSXComponentController*>(
-        Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0));
-    if (!jsXComponentController) {
-        return nullptr;
-    }
-    return jsXComponentController->GetController();
+    std::shared_ptr<XComponentController> controller;
+    GetController(Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0), &controller);
+    return controller;
 }
 
 XComponentControllerErrorCode XComponentController::SetSurfaceCallbackMode(
@@ -62,15 +92,6 @@ XComponentControllerErrorCode XComponentController::SetSurfaceCallbackMode(
     if (!nodePtr->IsNativePointer(vm)) {
         return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
     }
-    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nodePtr->ToNativePointer(vm)->Value());
-    if (!frameNode) {
-        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
-    auto* xcPattern = frameNode->GetPatternPtr<NG::XComponentPattern>();
-    if (!xcPattern) {
-        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
-    xcPattern->ChangeSurfaceCallbackMode(mode);
-    return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR;
+    return ChangeSurfaceCallbackMode(nodePtr->ToNativePointer(vm)->Value(), static_cast<char>(mode));
 }
 } // namespace OHOS::Ace

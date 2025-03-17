@@ -207,35 +207,19 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto id = paramObject->GetProperty("id");
-
-    auto type = paramObject->GetProperty("type");
-    auto libraryNameValue = paramObject->GetProperty("libraryname");
-    std::optional<std::string> idOpt = std::nullopt;
-    std::optional<std::string> libraryNameOpt = std::nullopt;
-    if (id->IsString()) {
-        idOpt = id->ToString();
-    }
-    if (libraryNameValue->IsString()) {
-        libraryNameOpt = libraryNameValue->ToString();
-    }
-    auto controller = paramObject->GetProperty("controller");
-    auto aiOptions = paramObject->GetProperty("imageAIOptions");
-    std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
+    XComponentOptions options;
     JSRef<JSObject> controllerObj;
-    if (controller->IsObject()) {
-        controllerObj = JSRef<JSObject>::Cast(controller);
-        xcomponentController = GetXComponentController(controllerObj, idOpt, info.GetExecutionContext());
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto aiOptions = paramObject->GetProperty("imageAIOptions");
+    ExtractInfoToXComponentOptions(options, controllerObj, info);
+    if (options.id == std::nullopt && options.xcomponentController == nullptr &&
+        (options.xcomponentType == XComponentType::SURFACE || options.xcomponentType == XComponentType::TEXTURE)) {
+        XComponentModel::GetInstance()->Create(options.xcomponentType);
+    } else {
+        XComponentModel::GetInstance()->Create(
+            options.id, options.xcomponentType, options.libraryName, options.xcomponentController);
     }
-    XComponentType xcomponentType = XComponentType::SURFACE;
-    if (type->IsString()) {
-        xcomponentType = ConvertToXComponentType(type->ToString());
-    } else if (type->IsNumber()) {
-        xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
-    }
-    XComponentModel::GetInstance()->Create(idOpt, xcomponentType, libraryNameOpt, xcomponentController);
-    if (!libraryNameOpt.has_value() && xcomponentController && !controllerObj->IsUndefined()) {
+    if (!options.libraryName.has_value() && options.xcomponentController && !controllerObj->IsUndefined()) {
         SetControllerCallback(controllerObj, info.GetExecutionContext());
     }
 
@@ -249,17 +233,32 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         auto soPath = info[1]->ToString();
         XComponentModel::GetInstance()->SetSoPath(soPath);
     }
+    ParseImageAIOptions(aiOptions);
+}
 
-    if (aiOptions->IsObject()) {
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        CHECK_NULL_VOID(nativeEngine);
-        panda::Local<JsiValue> value = aiOptions.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
-        XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
+void JSXComponent::ExtractInfoToXComponentOptions(
+    XComponentOptions& options, JSRef<JSObject>& controllerObj, const JSCallbackInfo& info)
+{
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto id = paramObject->GetProperty("id");
+    auto type = paramObject->GetProperty("type");
+    auto libraryNameValue = paramObject->GetProperty("libraryname");
+    auto controller = paramObject->GetProperty("controller");
+
+    if (id->IsString()) {
+        options.id = id->ToString();
+    }
+    if (libraryNameValue->IsString()) {
+        options.libraryName = libraryNameValue->ToString();
+    }
+    if (controller->IsObject()) {
+        controllerObj = JSRef<JSObject>::Cast(controller);
+        options.xcomponentController = GetXComponentController(controllerObj, options.id, info.GetExecutionContext());
+    }
+    if (type->IsString()) {
+        options.xcomponentType = ConvertToXComponentType(type->ToString());
+    } else if (type->IsNumber()) {
+        options.xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
     }
 }
 
@@ -298,6 +297,22 @@ void* JSXComponent::Create(const XComponentParams& params)
         TaskExecutor::TaskType::JS, "ArkUIXComponentCreate");
 
     return jsXComponent;
+}
+
+void JSXComponent::ParseImageAIOptions(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    panda::Local<JsiValue> value = jsValue.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
 }
 
 bool JSXComponent::ChangeRenderType(int32_t renderType)
@@ -743,7 +758,7 @@ void JSXComponent::JsHdrBrightness(const JSCallbackInfo& args)
 void JSXComponent::JsBlendMode(const JSCallbackInfo& args)
 {
     auto type = XComponentModel::GetInstance()->GetType();
-    if (type == XComponentType::TEXTURE && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (type == XComponentType::TEXTURE && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 

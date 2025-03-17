@@ -27,6 +27,4 @@
         }                           \
     } while (0)
 
-#define DRWABLE_TRACE(fmt, ...) DrawableScopedTrace drawableScopedTrace(fmt, ##__VA_ARGS__)
-
 #endif // FOUNDATION_ACE_INTERFACE_INNERAPI_BASE_MARCOS_H

@@ -540,6 +540,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     auto dialog = GetHost();
     contentColumn->MountToParent(dialog);
+    AddExtraMaskNode(props);
     UpdateTextFontScale();
     if (isSuitableForElderly_ && NeedsButtonDirectionChange(props.buttons)) {
         //remove buttonContainer when Button text is too long
@@ -553,6 +554,28 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     UpdateTextFontScale();
 }
 
+void DialogPattern::AddExtraMaskNode(const DialogProperties& props)
+{
+    auto dialog = GetHost();
+    CHECK_NULL_VOID(dialog);
+    auto pipeline = dialog->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    if (IsUIExtensionSubWindow() && props.isModal) {
+        auto extraMaskNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        CHECK_NULL_VOID(extraMaskNode);
+        auto extraMaskNodeContext = extraMaskNode->GetRenderContext();
+        CHECK_NULL_VOID(extraMaskNodeContext);
+        auto maskLayoutProps = extraMaskNode->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(maskLayoutProps);
+        extraMaskNodeContext->UpdateBackgroundColor(props.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+        extraMaskNodeContext->UpdateZIndex(-1);
+        extraMaskNode->MountToParent(dialog);
+    }
+}
+
 void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode)
 {
     auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -564,6 +587,7 @@ void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr
     customNode->MountToParent(contentWrapper);
     auto dialog = GetHost();
     contentWrapper->MountToParent(dialog);
+    AddExtraMaskNode(props);
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
@@ -1979,6 +2003,37 @@ bool DialogPattern::IsShowInFreeMultiWindow()
         }
     }
     return container->IsFreeMultiWindow();
+}
+
+bool DialogPattern::IsWaterfallWindowMode()
+{
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+
+    auto currentId = pipeline->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(currentId);
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
+            return false;
+        }
+    }
+
+    auto halfFoldStatus = container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+    auto isWaterfallWindow = container->IsWaterfallWindow();
+    return halfFoldStatus && isWaterfallWindow;
 }
 
 bool DialogPattern::IsShowInFloatingWindow()

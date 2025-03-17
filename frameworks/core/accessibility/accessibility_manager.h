@@ -39,7 +39,7 @@ namespace OHOS::Ace {
 
 constexpr int32_t ZERO_ANGLE = 0;
 constexpr int32_t QUARTER_ANGLE = 90;
-constexpr int32_t HALFG_ANGLE = 180;
+constexpr int32_t HALF_ANGLE = 180;
 constexpr int32_t THREE_QUARTER_ANGLE = 270;
 constexpr int32_t FULL_ANGLE = 360;
 
@@ -70,6 +70,8 @@ struct AccessibilityEvent {
     double currentItemIndex = 0.0;
     double itemCount = 0.0;
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
+    int32_t startIndex = 0;
+    int32_t endIndex = 0;
 };
 
 enum class OperatorType {
@@ -221,7 +223,8 @@ public:
     virtual bool IsVisibleChangeNodeExists(NodeId nodeId) = 0;
     virtual void UpdateEventTarget(NodeId id, BaseEventInfo& info) = 0;
     virtual void SetWindowPos(int32_t left, int32_t top, int32_t windowId) = 0;
-    virtual Rect GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node) { return {}; }
+    virtual AccessibilityParentRectInfo GetTransformRectInfoRelativeToWindow(
+        const RefPtr<NG::FrameNode>& node, const RefPtr<PipelineBase>& context) { return {}; }
 #ifdef WINDOW_SCENE_SUPPORTED
     virtual void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
@@ -340,6 +343,8 @@ public:
     }
 
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
+    virtual void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) {}
+    virtual void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) {}
 
     virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
     {
@@ -365,14 +370,15 @@ private:
     void calculateNewCenter(float cx, float cy, float rectCx, float rectCy,
         int angle, float& newCx, float& newCy)
     {
+        int addDouble = 2;
         switch (angle) {
             case QUARTER_ANGLE:
                 newCx = cx - (rectCy - cy);
                 newCy = cy + (rectCx - cx);
                 break;
-            case HALFG_ANGLE:
-                newCx = 2 * cx - rectCx;
-                newCy = 2 * cy - rectCy;
+            case HALF_ANGLE:
+                newCx = addDouble * cx - rectCx;
+                newCy = addDouble * cy - rectCy;
                 break;
             case THREE_QUARTER_ANGLE:
                 newCx = cx + (rectCy - cy);
@@ -403,7 +409,7 @@ public:
         return height_;
     }
 
-    void SetPoistion(float x, float y)
+    void SetPosition(float x, float y)
     {
         x_ = x;
         y_ = y;

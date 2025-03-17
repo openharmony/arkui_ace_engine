@@ -17,6 +17,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/grid_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -133,6 +134,10 @@ void TruncateSafeAreaPadding(const std::optional<float>& range, std::optional<fl
     }
 }
 } // namespace
+
+LayoutProperty::LayoutProperty() = default;
+
+LayoutProperty::~LayoutProperty() = default;
 
 void LayoutProperty::Reset()
 {
@@ -397,6 +402,9 @@ std::pair<std::vector<std::string>, std::vector<std::string>> LayoutProperty::Ca
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
+    if (!needLazyLayout_) {
+        layoutConstraint_->viewPosRef.reset();
+    }
     if (margin_) {
         marginResult_.reset();
         auto margin = CreateMargin();
@@ -660,6 +668,38 @@ void LayoutProperty::UpdateContentConstraint()
     ConstraintContentByPadding();
     ConstraintContentByBorder();
     ConstraintContentBySafeAreaPadding();
+    if (needLazyLayout_ && contentConstraint_->viewPosRef.has_value()) {
+        ConstraintViewPosRef(contentConstraint_->viewPosRef.value());
+    }
+}
+
+void LayoutProperty::ConstraintViewPosRef(ViewPosReference& posRef)
+{
+    auto axis = posRef.axis;
+    float adjStart = 0.0f;
+    float adjEnd = 0.0f;
+    if (padding_) {
+        auto paddingF = ConvertToPaddingPropertyF(
+            *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+        adjStart = axis == Axis::HORIZONTAL ? paddingF.left.value_or(0) : paddingF.top.value_or(0);
+        adjEnd = axis == Axis::HORIZONTAL ? paddingF.right.value_or(0) : paddingF.bottom.value_or(0);
+    }
+    if (borderWidth_) {
+        auto border = ConvertToBorderWidthPropertyF(
+            *borderWidth_, contentConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+        adjStart += axis == Axis::HORIZONTAL ? border.leftDimen.value_or(0) : border.topDimen.value_or(0);
+        adjEnd += axis == Axis::HORIZONTAL ? border.rightDimen.value_or(0) : border.bottomDimen.value_or(0);
+    }
+    if (margin_) {
+        auto margin = CreateMargin();
+        adjStart += axis == Axis::HORIZONTAL ? margin.left.value_or(0) : margin.top.value_or(0);
+        adjEnd += axis == Axis::HORIZONTAL ? margin.right.value_or(0) : margin.bottom.value_or(0);
+    }
+    if (posRef.referenceEdge == ReferenceEdge::START) {
+        posRef.referencePos = posRef.referencePos + adjStart;
+    } else {
+        posRef.referencePos = posRef.referencePos - adjEnd;
+    }
 }
 
 void LayoutProperty::ConstraintContentByPadding()
@@ -2023,5 +2063,10 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     borderImageProperty->SetEdgeOutset(BorderImageDirection::LEFT, leftOutset);
     borderImageProperty->SetEdgeOutset(BorderImageDirection::RIGHT, rightOutset);
     target->UpdateBorderImage(borderImageProperty);
+}
+
+RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
+{
+    return geometryTransition_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

@@ -143,7 +143,8 @@ private:
 
     void InnerPopToIndex(int32_t index, std::optional<std::string> result, bool animated, bool needFireOnResult)
     {
-        if (pathArray_.size() == 0 || index >= pathArray_.size()) {
+        if (pathArray_.size() == static_cast<unsigned long>(0) ||
+            static_cast<unsigned long>(index) >= pathArray_.size()) {
             return;
         }
         CJNavPathInfo currentPathInfo = pathArray_.back();
@@ -167,7 +168,7 @@ private:
         pathArray_[index].param = info.param;
         pathArray_[index].onPop = info.onPop;
         pathArray_[index].index = -1;
-        if (index != pathArray_.size() - 1) {
+        if (static_cast<unsigned long>(index) != pathArray_.size() - 1) {
             auto targetInfo = pathArray_[index];
             pathArray_.erase(pathArray_.begin() + index);
             if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {

@@ -16,9 +16,11 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("TextInputTest") {
   type = "new"
   sources = [
+    "text_area_base.cpp",
     "text_area_decoration_test.cpp",
     "text_area_menu_test.cpp",
     "text_area_test.cpp",
+    "text_area_test_two.cpp",
     "text_field_algorithm_test.cpp",
     "text_field_content_modifier_test.cpp",
     "text_field_controller_test.cpp",
@@ -28,6 +30,7 @@ ace_unittest("TextInputTest") {
     "text_field_pattern_func_test.cpp",
     "text_field_pattern_onwill.cpp",
     "text_field_pattern_test.cpp",
+    "text_field_pattern_testeight.cpp",
     "text_field_pattern_testfive.cpp",
     "text_field_pattern_testfour.cpp",
     "text_field_pattern_testseven.cpp",

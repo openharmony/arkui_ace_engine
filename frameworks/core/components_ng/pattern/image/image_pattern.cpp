@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,16 +26,19 @@
 #include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_DURATION = 1000; // ms
-constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less than this, use more cacheImages.
+constexpr uint32_t CRITICAL_TIME = 50;     // ms. If show time of image is less than this, use more cacheImages.
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
@@ -276,7 +279,7 @@ void ImagePattern::RegisterVisibleAreaChange(bool isCalcClip)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // add visibleAreaChangeNode(inner callback)
-    std::vector<double> ratioList = {0.0};
+    std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, isCalcClip);
 }
 
@@ -309,8 +312,7 @@ void ImagePattern::CalAndUpdateSelectOverlay()
     SelectOverlayInfo info;
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    SizeF handleSize = {
-        SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
+    SizeF handleSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
         geometryNode->GetContentSize().Height() };
     info.firstHandle.paintRect = RectF(rect.GetOffset(), handleSize);
     CheckHandles(info.firstHandle);
@@ -619,13 +621,11 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         CHECK_NULL_RETURN(host, nullptr);
         sensitive = host->IsPrivacySensitive();
     }
-    ImagePaintMethodConfig imagePaintMethodConfig {
-        .sensitive = sensitive,
+    ImagePaintMethodConfig imagePaintMethodConfig { .sensitive = sensitive,
         .selected = isSelected_,
         .imageOverlayModifier = overlayMod_,
         .imageContentModifier = contentMod_,
-        .interpolation = interpolationDefault_
-    };
+        .interpolation = interpolationDefault_ };
     // Callback function executed after the graphics rendering is complete.
     auto drawCompleteCallback = [weakPattern = WeakClaim(this)](const RenderedImageInfo& renderedImageInfo) {
         auto pattern = weakPattern.Upgrade();
@@ -652,7 +652,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 void ImagePattern::CreateModifier()
 {
     if (!contentMod_) {
-        contentMod_ = MakeRefPtr<ImageContentModifier>();
+        contentMod_ = MakeRefPtr<ImageContentModifier>(WeakClaim(this));
     }
     if (!overlayMod_) {
         overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
@@ -676,6 +676,11 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+
+    if (imageType_ == ImageType::PIXELMAP_DRAWABLE) {
+        return true;
+    }
+
     const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
     StartDecoding(dstSize);
     if (loadingCtx_) {
@@ -798,14 +803,16 @@ void ImagePattern::LoadImageDataIfNeed()
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            ContainerScope scope(pattern->GetHostInstanceId());
-            pattern->CreateAnalyzerOverlay();
-            auto host = pattern->GetHost();
-            pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
-        }, "ArkUIImageUpdateAnalyzerUIConfig");
+        uiTaskExecutor.PostTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->GetHostInstanceId());
+                pattern->CreateAnalyzerOverlay();
+                auto host = pattern->GetHost();
+                pattern->UpdateAnalyzerUIConfig(host->GetGeometryNode());
+            },
+            "ArkUIImageUpdateAnalyzerUIConfig");
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
@@ -849,21 +856,22 @@ void ImagePattern::OnModifyDone()
         case ImageType::BASE:
             OnImageModifyDone();
             break;
-        case ImageType::ANIMATION:
+        case ImageType::ANIMATED_DRAWABLE:
             OnAnimatedModifyDone();
+            break;
+        case ImageType::PIXELMAP_DRAWABLE:
+            OnPixelMapDrawableModifyDone();
             break;
         default:
             break;
     }
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        InitOnKeyEvent();
-    }
+    InitOnKeyEvent();
 }
 
 void ImagePattern::InitOnKeyEvent()
 {
-    if (keyEventCallback_) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) || keyEventCallback_) {
         return;
     }
 
@@ -972,26 +980,131 @@ void ImagePattern::OnImageModifyDone()
     Pattern::OnModifyDone();
     LoadImageDataIfNeed();
     UpdateGestureAndDragWhenModify();
-    if (copyOption_ != CopyOptions::None) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        bool hasObscured = false;
-        if (host->GetRenderContext()->GetObscured().has_value()) {
-            auto obscuredReasons = host->GetRenderContext()->GetObscured().value();
-            hasObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-                [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-        }
-        if (!hasObscured) {
-            InitCopy();
-            return;
-        }
-    }
-
+    CHECK_EQUAL_VOID(CheckImagePrivacyForCopyOption(), true);
     CloseSelectOverlay();
+    UpdateOffsetForImageAnalyzerOverlay();
+    SetFrameOffsetForOverlayNode();
+}
 
+void ImagePattern::OnPixelMapDrawableModifyDone()
+{
+    Pattern::OnModifyDone();
+    UpdateGestureAndDragWhenModify();
+    CHECK_EQUAL_VOID(CheckImagePrivacyForCopyOption(), true);
+    CloseSelectOverlay();
+    UpdateOffsetForImageAnalyzerOverlay();
+    SetFrameOffsetForOverlayNode();
+    // Data loading is not managed by image. Therefore, during component
+    // attribute initilizationm, the dirty node mark of image needs to
+    // be registered withe Drawable. Drawable triggers drawing again after
+    // data loading is complete.
+    RegisterDrawableRedrawCallback();
+}
+
+void ImagePattern::RegisterDrawableRedrawCallback()
+{
+    if (isRegisterRedrawCallback_) {
+        return;
+    }
+    CHECK_NULL_VOID(drawable_);
+    drawable_->RegisterRedrawCallback([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto context = pattern->GetContext();
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weak = weak] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->Validate();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIImageDrawableMarkRender");
+    });
+    isRegisterRedrawCallback_ = true;
+}
+
+void ImagePattern::Validate()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("[Drawable][%d] validate callback", host->GetId());
+    // first mark dirty render
+    host->MarkNeedRenderOnly();
+    CHECK_NULL_VOID(contentMod_);
+    // because drawable is not a drawing attribute of the
+    // content modifier, redrawing cannot be trigged when
+    // drawable validates the content modifier. Therefore
+    // count attribute in the modifier needs to be used to
+    // forcibly refresh the content modifier.
+    contentMod_->SetContentChange();
+}
 
+ImagePaintConfig ImagePattern::CreatePaintConfig()
+{
+    ImagePaintConfig config;
+    auto lp = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(lp, config);
+    config.imageFit_ = lp->GetImageFit().value_or(ImageFit::COVER);
+    return config;
+}
+
+void ImagePattern::DrawDrawable(RSCanvas& canvas)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("[Drawable][%d] draw to canvas", host->GetId());
+    CHECK_NULL_VOID(drawable_);
+    auto config = CreatePaintConfig();
+    drawable_->Draw(canvas, config);
+}
+
+std::optional<SizeF> ImagePattern::GetImageSizeForMeasure()
+{
+    if ((!loadingCtx_ || !loadingCtx_->GetImageSize().IsPositive()) &&
+        (!altLoadingCtx_ || !altLoadingCtx_->GetImageSize().IsPositive())) {
+        return std::nullopt;
+    }
+    auto rawImageSize = SizeF(-1.0, -1.0);
+    if (loadingCtx_) {
+        rawImageSize = loadingCtx_->GetImageSize();
+    }
+    if (rawImageSize.IsNegative() && altLoadingCtx_) {
+        rawImageSize = altLoadingCtx_->GetImageSize();
+    }
+    return std::make_optional<SizeF>(rawImageSize.Width(), rawImageSize.Height());
+}
+
+void ImagePattern::FinishMeasureForOnComplete()
+{
+    CHECK_NULL_VOID(loadingCtx_);
+    loadingCtx_->FinishMearuse();
+    loadingCtx_->CallbackAfterMeasureIfNeed();
+}
+
+bool ImagePattern::CheckImagePrivacyForCopyOption()
+{
+    if (copyOption_ == CopyOptions::None) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    bool hasObscured = false;
+    if (host->GetRenderContext()->GetObscured().has_value()) {
+        auto obscuredReasons = host->GetRenderContext()->GetObscured().value();
+        hasObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+            [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    }
+    if (!hasObscured) {
+        InitCopy();
+        return true;
+    }
+    return false;
+}
+
+void ImagePattern::UpdateOffsetForImageAnalyzerOverlay()
+{
     if (imageAnalyzerManager_ && imageAnalyzerManager_->IsOverlayCreated()) {
         if (!IsSupportImageAnalyzerFeature()) {
             DestroyAnalyzerOverlay();
@@ -999,8 +1112,13 @@ void ImagePattern::OnImageModifyDone()
             UpdateAnalyzerOverlayLayout();
         }
     }
+}
 
-    // SetUsingContentRectForRenderFrame is set for image paint
+// SetUsingContentRectForRenderFrame is set for image paint
+void ImagePattern::SetFrameOffsetForOverlayNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto overlayNode = host->GetOverlayNode();
     if (overlayNode) {
         auto layoutProperty = host->GetLayoutProperty();
@@ -1008,7 +1126,7 @@ void ImagePattern::OnImageModifyDone()
         auto padding = layoutProperty->CreatePaddingAndBorder();
         auto renderContext = overlayNode->GetRenderContext();
         if (renderContext) {
-            renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
+            renderContext->SetRenderFrameOffset({ -padding.Offset().GetX(), -padding.Offset().GetY() });
         }
     }
 }
@@ -1101,12 +1219,11 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 
 bool ImagePattern::RecycleImageData()
 {
-    //when image component is [onShow] , [no cache], do not clean image data
-    bool isDataNoCache =
-        (!loadingCtx_ ||
-        (loadingCtx_->GetSourceInfo().GetSrcType() == SrcType::NETWORK &&
-        SystemProperties::GetDownloadByNetworkEnabled() &&
-        DownloadManager::GetInstance()->IsContains(loadingCtx_->GetSourceInfo().GetSrc()) == false));
+    // when image component is [onShow] , [no cache], do not clean image data
+    bool isDataNoCache = (!loadingCtx_ || (loadingCtx_->GetSourceInfo().GetSrcType() == SrcType::NETWORK &&
+                                              SystemProperties::GetDownloadByNetworkEnabled() &&
+                                              DownloadManager::GetInstance()->IsContains(
+                                                  loadingCtx_->GetSourceInfo().GetSrc()) == false));
     if (isShow_ || isDataNoCache) {
         return false;
     }
@@ -1385,8 +1502,7 @@ void ImagePattern::OpenSelectOverlay()
     CHECK_NULL_VOID(geometryNode);
     auto rect = host->GetTransformRectRelativeToWindow();
     SelectOverlayInfo info;
-    SizeF handleSize = {
-        SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
+    SizeF handleSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(),
         geometryNode->GetContentSize().Height() };
     info.firstHandle.paintRect = RectF(rect.GetOffset(), handleSize);
     OffsetF offset(rect.Width() - handleSize.Width(), rect.Height() - handleSize.Height());
@@ -1489,11 +1605,7 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     }
     json->PutExtAttr("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str(), filter);
     json->PutExtAttr("orientation", std::to_string(static_cast<int>(userOrientation_)).c_str(), filter);
-    Matrix4 defaultMatrixValue = Matrix4(
-        1.0f, 0, 0, 0,
-        0, 1.0f, 0, 0,
-        0, 0, 1.0f, 0,
-        0, 0, 0, 1.0f);
+    Matrix4 defaultMatrixValue = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
     Matrix4 matrixValue = renderProp->HasImageMatrix() ? renderProp->GetImageMatrixValue() : defaultMatrixValue;
     json->PutExtAttr("imageMatrix", matrixValue.ToString().c_str(), filter);
 }
@@ -1868,7 +1980,7 @@ void ImagePattern::EnableAnalyzer(bool value)
 }
 
 // As an example
-void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
+void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
 {
     if (!isEnableAnalyzer_) {
         return;
@@ -1896,7 +2008,7 @@ bool ImagePattern::IsSupportImageAnalyzerFeature()
 {
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return isEnableAnalyzer_ && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && loadingCtx_->GetFrameCount() <= 1 &&
-        imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+           imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
 void ImagePattern::CreateAnalyzerOverlay()
@@ -2031,8 +2143,8 @@ void ImagePattern::SetShowingIndex(int32_t index)
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     if (index >= static_cast<int32_t>(images_.size())) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnimator update index error, index: %{public}d, size: %{public}zu",
-            index, images_.size());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnimator update index error, index: %{public}d, size: %{public}zu", index,
+            images_.size());
         return;
     }
     CHECK_NULL_VOID(images_[index].pixelMap);
@@ -2082,11 +2194,11 @@ void ImagePattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNod
     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(images_[index].pixelMap));
     SetColorFilter(imageFrameNode);
     SetImageFit(imageFrameNode);
-    //use the size of first pixelmap when no size is set
-    auto &&layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    // use the size of first pixelmap when no size is set
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!layoutConstraint || !layoutConstraint->selfIdealSize.has_value()) {
-        CalcSize realSize = {
-            CalcLength(images_[0].pixelMap->GetWidth()), CalcLength(images_[0].pixelMap->GetHeight()) };
+        CalcSize realSize = { CalcLength(images_[0].pixelMap->GetWidth()),
+            CalcLength(images_[0].pixelMap->GetHeight()) };
         imageLayoutProperty->UpdateUserDefinedIdealSize(realSize);
         imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
         imageFrameNode->MarkModifyDone();
@@ -2105,8 +2217,8 @@ void ImagePattern::UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNod
 void ImagePattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index)
 {
     if (index >= static_cast<int32_t>(images_.size())) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "PrepareImageInfo index error, index: %{public}d, size: %{public}zu",
-            index, images_.size());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "PrepareImageInfo index error, index: %{public}d, size: %{public}zu", index,
+            images_.size());
         return;
     }
     auto host = GetHost();
@@ -2128,11 +2240,11 @@ void ImagePattern::UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t in
     }
     SetColorFilter(cacheImage.imageNode);
     SetImageFit(cacheImage.imageNode);
-    //use the size of first pixelmap when no size is set
-    auto &&layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    // use the size of first pixelmap when no size is set
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!layoutConstraint || !layoutConstraint->selfIdealSize.has_value()) {
-        CalcSize realSize = {
-            CalcLength(images_[0].pixelMap->GetWidth()), CalcLength(images_[0].pixelMap->GetHeight()) };
+        CalcSize realSize = { CalcLength(images_[0].pixelMap->GetWidth()),
+            CalcLength(images_[0].pixelMap->GetHeight()) };
         imageLayoutProperty->UpdateUserDefinedIdealSize(realSize);
         cacheImage.imageNode->MarkModifyDone();
         return;
@@ -2192,8 +2304,7 @@ void ImagePattern::AdaptSelfSize()
     }
     CHECK_NULL_VOID(images_[0].pixelMap);
     hasSizeChanged = true;
-    CalcSize realSize = {
-        CalcLength(images_[0].pixelMap->GetWidth()), CalcLength(images_[0].pixelMap->GetHeight()) };
+    CalcSize realSize = { CalcLength(images_[0].pixelMap->GetWidth()), CalcLength(images_[0].pixelMap->GetHeight()) };
 
     const auto& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!layoutConstraint || !layoutConstraint->selfIdealSize) {
@@ -2251,8 +2362,8 @@ void ImagePattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameN
 bool ImagePattern::IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const RefPtr<PixelMap>& src)
 {
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    return imageLayoutProperty->HasImageSourceInfo()
-        && imageLayoutProperty->GetImageSourceInfoValue().GetPixmap() == src;
+    return imageLayoutProperty->HasImageSourceInfo() &&
+           imageLayoutProperty->GetImageSourceInfoValue().GetPixmap() == src;
 }
 
 bool ImagePattern::IsFormRender()
@@ -2261,8 +2372,8 @@ bool ImagePattern::IsFormRender()
     CHECK_NULL_RETURN(pipeline, false);
 
     auto container = Container::Current();
-    bool isDynamicComponent = container && container->IsDynamicRender() &&
-                              container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    bool isDynamicComponent =
+        container && container->IsDynamicRender() && container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
     return pipeline->IsFormRender() && !isDynamicComponent;
 }
 
@@ -2621,5 +2732,31 @@ void ImagePattern::AddPixelMapToUiManager()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddPixelMap(host->GetId(), pixmap);
+}
+
+FocusPattern ImagePattern::GetFocusPattern() const
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+    } else {
+        return { FocusType::NODE, false };
+    }
+}
+
+void ImagePattern::OnActive()
+{
+    if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (!animator_->HasScheduler()) {
+            auto context = host->GetContextRefPtr();
+            if (context) {
+                animator_->AttachScheduler(context);
+            } else {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+            }
+        }
+        animator_->Forward();
+    }
 }
 } // namespace OHOS::Ace::NG

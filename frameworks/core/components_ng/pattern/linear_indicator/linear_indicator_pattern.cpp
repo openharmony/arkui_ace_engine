@@ -15,11 +15,28 @@
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/linear_indicator/linear_indicator_accessibility_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/linear_indicator/linear_indicator_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
+
+LinearIndicatorPattern::LinearIndicatorPattern()
+    : LinearLayoutPattern(false), direction_(TextDirection::AUTO), hasVisibleChangeRegistered_(false),
+      isVisibleChangePause_(false)
+{
+    controller_ = AceType::MakeRefPtr<LinearIndicatorController>(AceType::WeakClaim(this));
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    theme_ = pipeline->GetThemeManager()->GetTheme<LinearIndicatorTheme>();
+    CHECK_NULL_VOID(theme_);
+    strokeWidth_ = theme_->GetDefaultStrokeWidth();
+    strokeRadius_ = theme_->GetDefaultStrokeRadius();
+    trackBackgroundColor_ = theme_->GetTrackBackgroundColor();
+    trackColor_ = theme_->GetTrackColor();
+};
+
+LinearIndicatorPattern::~LinearIndicatorPattern() = default;
 
 RefPtr<LayoutProperty> LinearIndicatorPattern::CreateLayoutProperty()
 {

@@ -1276,6 +1276,9 @@ void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
 
 void AccessibilityProperty::SetFocusDrawLevel(int32_t drawLevel)
 {
+    if (static_cast<FocusDrawLevel>(drawLevel) == focusDrawLevel_) {
+        return;
+    }
     focusDrawLevel_ = static_cast<FocusDrawLevel>(drawLevel);
 }
 
@@ -1284,4 +1287,26 @@ int32_t AccessibilityProperty::GetFocusDrawLevel()
     return static_cast<int32_t>(focusDrawLevel_);
 }
 
+void AccessibilityProperty::SetAccessibilityZIndex(const int32_t& accessibilityZIndex)
+{
+    accessibilityZIndex_ = accessibilityZIndex;
+}
+
+int32_t AccessibilityProperty::GetAccessibilityZIndex() const
+{
+    return accessibilityZIndex_;
+}
+
+void AccessibilityProperty::OnAccessibilityDetachFromMainTree()
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        auto frameNode = host_.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        auto accessibilityManager = context->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->OnAccessbibilityDetachFromMainTree(frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

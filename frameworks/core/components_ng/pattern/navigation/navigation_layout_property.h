@@ -53,6 +53,7 @@ public:
         copy->propNoPixMap_ = CloneNoPixMap();
         copy->propImageSource_ = CloneImageSource();
         copy->propPixelMap_ = ClonePixelMap();
+        copy->propEnableToolBarAdaptation_ = CloneEnableToolBarAdaptation();
         return copy;
     }
 
@@ -71,6 +72,7 @@ public:
         ResetNoPixMap();
         ResetImageSource();
         ResetPixelMap();
+        ResetEnableToolBarAdaptation();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -117,6 +119,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PixelMap, RefPtr<PixelMap>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableToolBarAdaptation, bool, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

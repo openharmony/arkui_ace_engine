@@ -83,6 +83,7 @@ public:
     void SetDisableTextStyleAnimation(const bool value) override {};
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override {};
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override {};
+    void UpdateUserSetSelectColor() override {};
 };
 
 class ACE_EXPORT TextPickerDialogModelImpl : public TextPickerDialogModel {

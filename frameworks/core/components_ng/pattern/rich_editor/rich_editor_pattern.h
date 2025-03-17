@@ -553,6 +553,7 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
+        CHECK_NULL_VOID(!customKeyboardBuilder_ || !isCustomKeyboardAttached_);
 
         // lost focus in floating window mode
         auto windowMode = GetWindowMode();
@@ -619,6 +620,7 @@ public:
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
+    void HandleCurrentPositionParagraphInfo(float& lastLineTop, float& paragraphSpacing);
     bool IsCustomSpanInCaretPos(int32_t position, bool downStreamFirst);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
     void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
@@ -648,6 +650,13 @@ public:
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
     SelectionInfo GetSpansInfoByRange(int32_t start, int32_t end);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
+    bool CheckStyledStringRangeValid(int32_t start, int32_t length);
+    void UpdateSelectStyledStringStyle(int32_t start, int32_t end, KeyCode code);
+    template<typename T>
+    void UpdateSpansStyleInRange(int32_t start, int32_t end, const RefPtr<SpanBase>& baseSpan,
+        std::function<RefPtr<T>(const RefPtr<T>&)>&& updateSpanFunc);
+    void UpdateStyledStringFontStyle(int32_t start, int32_t end, const Font& font);
+    void UpdateStyledStringDecorationType(int32_t start, int32_t end, const TextDecoration& type);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
     struct UpdateSpanStyle GetUpdateSpanStyle();
@@ -805,7 +814,7 @@ public:
         if (!customKeyboardBuilder_ && keyboardBuilder) {
             // close system keyboard and request custom keyboard
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-            if (imeShown_) {
+            if (isEditing_) {
                 CloseKeyboard(true);
                 customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
                 RequestKeyboard(false, true, true);
@@ -1088,7 +1097,7 @@ public:
         IF_TRUE(!focusHub->RequestFocusImmediately(), isOnlyRequestFocus_ = false);
     }
 
-    DisplayMode GetBarDisplayMode()
+    DisplayMode GetBarDisplayMode() const
     {
         return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
@@ -1197,7 +1206,20 @@ public:
     {
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
-        return pipelineContext->GetTheme<T>(GetThemeScopeId());
+        if (isAPI20Plus) {
+            return pipelineContext->GetTheme<T>(GetThemeScopeId());
+        }
+        return pipelineContext->GetTheme<T>();
+    }
+
+    const std::map<int32_t, AISpan>& GetAISpanMap() override
+    {
+        auto& aiSpanMap = dataDetectorAdapter_->aiSpanMap_;
+        if (aiSpanMap != lastAISpanMap_) {
+            paragraphCache_.Clear();
+            lastAISpanMap_ = aiSpanMap;
+        }
+        return aiSpanMap;
     }
 
 protected:
@@ -1390,7 +1412,8 @@ private:
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
 
     void GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
-        std::optional<struct UpdateParagraphStyle>& spanParaStyle, const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
+        std::optional<struct UpdateParagraphStyle>& spanParaStyle, std::optional<std::u16string>& urlAddress,
+        const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
     void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::u16string& insertValue,
         int32_t textIndex, std::optional<TextStyle> textStyle, std::optional<struct UpdateParagraphStyle> paraStyle,
         std::optional<std::u16string> urlAddress = std::nullopt, bool isCreate = false, bool fixDel = true);
@@ -1480,6 +1503,7 @@ private:
     void CloseSystemMenu();
     void SetAccessibilityAction() override;
     void SetAccessibilityEditAction();
+    bool IsAccessibilityClick();
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
     bool CheckTripClickEvent(GestureEvent& info);
@@ -1555,6 +1579,8 @@ private:
 #endif
     const bool isAPI14Plus;
     const bool isAPI16Plus;
+    const bool isAPI18Plus;
+    const bool isAPI20Plus;
     bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
@@ -1684,6 +1710,7 @@ private:
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
     LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
+    std::map<int32_t, AISpan> lastAISpanMap_;
 };
 } // namespace OHOS::Ace::NG
 

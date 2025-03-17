@@ -772,6 +772,9 @@ void GetWebContentIfNeed(const RefPtr<FrameNode>& node, const InspectorTreeParam
     if (node->GetTag() == V2::WEB_ETS_TAG && funcParams.params.enableWeb && !funcParams.params.webContentJs.empty()) {
         auto pattern = node->GetPattern<WebPattern>();
         CHECK_NULL_VOID(pattern);
+        if (!pattern->GetActiveStatus()) {
+            return;
+        }
         auto lambda = [webId = node->GetId(), collector = funcParams.collector](const std::string& result) {
             std::string key = "Web_" + std::to_string(webId);
             collector->GetJson()->Put(key.c_str(), result.c_str());
@@ -797,13 +800,13 @@ void GetSimplifiedInspectorChildren(const RefPtr<NG::UINode>& parent,
     auto jsonNode = JsonUtil::Create(true);
     auto node = AceType::DynamicCast<FrameNode>(parent);
     auto isActive = funcParams.isActive && node->IsActive();
-    if (!isActive) {
+    if (!isActive && !funcParams.params.enableAllNodes) {
         return;
     }
     auto lp = node->GetLayoutProperty();
     CHECK_NULL_VOID(lp);
     bool isVisible = lp->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE;
-    if (!isVisible) {
+    if (!isVisible && !funcParams.params.enableAllNodes) {
         return;
     }
     jsonNode->Put(INSPECTOR_ID, node->GetId());

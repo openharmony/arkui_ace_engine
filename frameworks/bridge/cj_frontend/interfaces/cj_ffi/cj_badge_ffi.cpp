@@ -80,6 +80,17 @@ BadgeParameters CreateBase(CJBadgeStyle style, int32_t position)
     badgeParameters.badgeFontSize = Dimension(style.fontSize, DimensionUnit::VP);
     badgeParameters.badgeCircleSize = Dimension(style.badgeSize, DimensionUnit::VP);
     badgeParameters.badgeColor = Color(style.badgeColor);
+    return badgeParameters;
+}
+
+BadgeParameters CreateBaseV2(CJBadgeStyleV2 style, int32_t position)
+{
+    BadgeParameters badgeParameters;
+    badgeParameters.badgePosition = position;
+    badgeParameters.badgeTextColor = Color(style.color);
+    badgeParameters.badgeFontSize = Dimension(style.fontSize, DimensionUnit::VP);
+    badgeParameters.badgeCircleSize = Dimension(style.badgeSize, DimensionUnit::VP);
+    badgeParameters.badgeColor = Color(style.badgeColor);
     badgeParameters.badgeFontWeight = ConvertStrToFontWeight(FontWeightIntNumberToStr(style.fontWeight));
     badgeParameters.badgeBorderColor = Color(style.borderColor);
     badgeParameters.badgeBorderWidth = Dimension(style.borderWidth, DimensionUnit(style.borderWidthUnit));
@@ -96,9 +107,24 @@ void FfiOHOSAceFrameworkBadgeCreate(int32_t count, CJBadgeStyle style, int32_t p
     BadgeModel::GetInstance()->Create(badgeParameters);
 }
 
+void FfiOHOSAceFrameworkBadgeCreateV2(int32_t count, CJBadgeStyleV2 style, int32_t position, int32_t maxCount)
+{
+    BadgeParameters badgeParameters = CreateBaseV2(style, position);
+    badgeParameters.badgeCount = count;
+    badgeParameters.badgeMaxCount = maxCount;
+    BadgeModel::GetInstance()->Create(badgeParameters);
+}
+
 void FfiOHOSAceFrameworkBadgeCreateText(const char* value, CJBadgeStyle style, int32_t position)
 {
     BadgeParameters badgeParameters = CreateBase(style, position);
+    badgeParameters.badgeValue = value;
+    BadgeModel::GetInstance()->Create(badgeParameters);
+}
+
+void FfiOHOSAceFrameworkBadgeCreateTextV2(const char* value, CJBadgeStyleV2 style, int32_t position)
+{
+    BadgeParameters badgeParameters = CreateBaseV2(style, position);
     badgeParameters.badgeValue = value;
     BadgeModel::GetInstance()->Create(badgeParameters);
 }

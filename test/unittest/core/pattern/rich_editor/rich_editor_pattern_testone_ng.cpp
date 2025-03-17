@@ -478,35 +478,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CreateDecorationSpanByTextStyle001, TestSiz
 }
 
 /**
- * @tc.name: MouseDoubleClickParagraphEnd001
- * @tc.desc: test RichEditorPattern MouseDoubleClickParagraphEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, MouseDoubleClickParagraphEnd001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    AddSpan("TEST123");
-    std::u16string content = u"TEST123";
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    richEditorPattern->InsertValueInStyledString(content);
-
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    int32_t index = 7;
-    int32_t index2 = 2;
-    richEditorPattern->MouseDoubleClickParagraphEnd(index2);
-    richEditorPattern->MouseDoubleClickParagraphEnd(index);
-    EXPECT_EQ(richEditorPattern->GetParagraphEndPosition(index), 7);
-}
-
-/**
  * @tc.name: CreateImageSourceInfo002
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC

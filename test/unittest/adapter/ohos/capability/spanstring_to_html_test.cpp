@@ -32,6 +32,95 @@ namespace {
 }
 
 /**
+ * @tc.name: SpanStringConvert000
+ * @tc.desc: This test case checks the conversion of a SpanString containing a mixture of different
+ *           spans including font, letter spacing, baseline offset, text decoration, text shadow,
+ *           and paragraph styles. It ensures that all styles are applied correctly and the conversion
+ *           between HTML and SpanString is accurate.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, SpanStringConvert000, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a mutable SpanString with an image option and create a SpanString with
+     *             mixed styles (font, letter spacing, baseline offset, text decoration, etc.).
+     * @tc.expected: The SpanString should properly handle different types of spans and apply them correctly.
+     */
+    auto imageOption = GetImageOption("src/icon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto spanString3 = AceType::MakeRefPtr<SpanString>(u"012345678\n9");
+
+    // Add font spans with different font styles
+    spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
+    spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 3, 5));
+    spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
+
+    // Add baseline offset span
+    spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
+
+    // Add letter spacing span
+    spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
+
+    // Add text decoration (line through) span
+    spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::LINE_THROUGH, Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
+
+    // Add paragraph style span
+    auto spanParagraphStyle = GetDefaultParagraphStyle();
+    auto paraSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 2, 5);
+    spanString3->AddSpan(paraSpan);
+
+    // Add text shadow spans
+    Shadow textShadow;
+    textShadow.SetBlurRadius(0.0);
+    textShadow.SetColor(Color::BLUE);
+    textShadow.SetOffsetX(5.0);
+    textShadow.SetOffsetY(5.0);
+
+    Shadow textShadow1;
+    textShadow1.SetBlurRadius(1.0);
+    textShadow1.SetColor(Color::BLUE);
+    textShadow1.SetOffsetX(10.0);
+    textShadow1.SetOffsetY(10.0);
+
+    vector<Shadow> textShadows { textShadow, textShadow1 };
+    spanString3->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(textShadows, 3, 6));
+
+    // Insert the span string into the mutable string
+    mutableStr->InsertSpanString(1, spanString3);
+
+    /**
+     * @tc.steps2: Create another SpanString with Chinese text, add font spans, letter spacing,
+     *             and insert it into the mutable string.
+     * @tc.expected: The second span string should be properly inserted and apply the added styles correctly.
+     */
+    auto spanString2 = AceType::MakeRefPtr<SpanString>(u"测试一下中文，\n看看是什么情况");
+    spanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 5));
+    spanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 6, 10));
+    spanString2->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(10), 12, 14));
+
+    // Insert this new SpanString into the mutable string
+    mutableStr->InsertSpanString(5, spanString2);
+
+    /**
+     * @tc.steps3: Convert the mutable SpanString to HTML using the SpanToHtml converter.
+     * @tc.expected: The HTML conversion should preserve all the added spans and their properties.
+     */
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*mutableStr);
+
+    /**
+     * @tc.steps4: Convert the resulting HTML back to a SpanString and validate the number of span items.
+     * @tc.expected: The number of span items should match the total number of spans added.
+     */
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_EQ(items.size(), 17);
+}
+
+/**
  * @tc.name: SpanStringConvert001
  * @tc.desc: This test case verifies the conversion of a `SpanString` object to HTML and
  *           back from HTML to `SpanString`.
@@ -305,6 +394,48 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert006, TestSize.Level1)
      *               the converted SpanString.
      */
     EXPECT_EQ(items.size(), spanString->GetSpanItems().size());
+}
+
+/**
+ * @tc.name: SpanStringConvert007
+ * @tc.desc: This test case checks the conversion of a MutableSpanString containing an image span and text.
+ *           It tests the handling of image spans during encoding and decoding to ensure proper HTML conversion.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, SpanStringConvert007, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a MutableSpanString with an image span and a text span, and encode the
+     *             MutableSpanString to a buffer.
+     * @tc.expected: The image span should be correctly encoded, and the HTML conversion hould match
+     *               the expected result.
+     */
+    auto imageOption = GetImageOption("src/icon-1.png");
+    auto imageSpan = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto mutableStr2 = AceType::MakeRefPtr<MutableSpanString>(u"123456");
+    imageSpan->AppendSpanString(mutableStr2);
+
+    std::vector<uint8_t> buffer;
+    imageSpan->EncodeTlv(buffer);
+
+    SpanToHtml convert;
+    auto u8ToHtml = convert.ToHtml(buffer);
+    EXPECT_NE(u8ToHtml.empty(), true);
+
+    auto out = convert.ToHtml(*imageSpan);
+    EXPECT_NE(out.empty(), true);
+    EXPECT_EQ(out, u8ToHtml);
+
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_NE(dstSpan, nullptr);
+
+    auto dstHtml = convert.ToHtml(*dstSpan);
+    EXPECT_EQ(out, dstHtml);
+
+    // image is invalid，to html discart image the first char is not black space
+    auto spans = dstSpan->GetSpans(0, 6);
+    EXPECT_EQ(spans.size(), 2);
 }
 
 /**

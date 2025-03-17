@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ export enum ToolBarV2ItemState {
 }
 
 // “更多”栏图标
-const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
+const PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
 const IMAGE_SIZE: VP = '24vp';
 const DEFAULT_TOOLBAR_HEIGHT: number = 56;
 const TOOLBAR_MAX_LENGTH: number = 5;
@@ -43,11 +43,32 @@ const VERTICAL_SCREEN_TEXT_MAX_LINES: number = 6;
 const HORIZONTAL_SCREEN_TEXT_MAX_LINES: number = 1;
 const FOCUS_BOX_MARGIN: number = -2;
 const FOCUS_BOX_BORDER_WIDTH: number = 2;
+const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 interface MenuController {
   value: ResourceStr;
   action: () => void;
   enabled?: boolean;
+}
+
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource: Resource = resourceStr as Resource;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
 }
 
 @ObservedV2
@@ -315,31 +336,33 @@ export struct ToolBarV2 {
 
   @Builder
   MoreTabBuilder(index: number): void {
-    Column() {
-      Image(PUBLIC_MORE)
-        .width(IMAGE_SIZE)
-        .height(IMAGE_SIZE)
-        .fillColor(this.theme.iconPrimaryColor)
-        .margin({ bottom: $r('sys.float.padding_level1') })
-        .objectFit(ImageFit.Contain)
-        .draggable(false)
-      Text(this.moreText)
-        .fontColor(this.theme.fontPrimaryColor)
-        .fontSize($r('sys.float.ohos_id_text_size_caption'))
-        .fontWeight(FontWeight.Medium)
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .textAlign(TextAlign.Center)
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Column() {
+        SymbolGlyph(PUBLIC_MORE)
+          .fontSize(IMAGE_SIZE)
+          .fontColor([this.theme.iconPrimaryColor])
+          .draggable(false)
+          .margin({ bottom: $r('sys.float.padding_level1') })
+        Text(this.moreText)
+          .fontColor(this.theme.fontPrimaryColor)
+          .fontSize($r('sys.float.ohos_id_text_size_caption'))
+          .fontWeight(FontWeight.Medium)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAlign(TextAlign.Center)
+          .focusable(true)
+          .focusOnTouch(true)
+      }
+      .width('100%')
+      .height('100%')
+      .justifyContent(FlexAlign.Center)
+      .padding({
+        start: LengthMetrics.resource($r('sys.float.padding_level2')),
+        end: LengthMetrics.resource($r('sys.float.padding_level2')),
+      })
+      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     }
-    .width('100%')
-    .height('100%')
-    .justifyContent(FlexAlign.Center)
-    .padding({
-      start: LengthMetrics.resource($r('sys.float.padding_level2')),
-      end: LengthMetrics.resource($r('sys.float.padding_level2')),
-    })
-    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-    .accessibilityText(this.moreText)
+    .accessibilityGroup(true)
     .focusable(true)
     .focusOnTouch(true)
     .focusBox({
@@ -347,7 +370,10 @@ export struct ToolBarV2 {
       strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
       strokeColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_focused_outline'))
     })
-    .bindMenu(this.menus, { placement: Placement.TopRight, offset: { x: -12, y: -10 } })
+    .width('100%')
+    .height('100%')
+    .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y: -10 } })
+    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .backgroundColor(this.toolBarList[index].backgroundColor)
     .onHover((isHover: boolean) => {
       if (isHover) {
@@ -367,47 +393,58 @@ export struct ToolBarV2 {
 
   @Builder
   TabBuilder(index: number): void {
-    Column() {
-      if (this.toolBarList[index]?.symbol) {
-        SymbolGlyph()
-          .fontSize(IMAGE_SIZE)
-          .symbolEffect(new SymbolEffect(), false)
-          .attributeModifier(this.getToolBarSymbolModifier(index))
-          .margin({ bottom: $r('sys.float.padding_level1') })
-      } else {
-        Image(this.toolBarList[index]?.image?.src)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor(this.getIconColor(index))
-          .margin({ bottom: $r('sys.float.padding_level1') })
-          .objectFit(ImageFit.Contain)
-          .draggable(false)
+    Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Column() {
+        if (this.toolBarList[index]?.symbol) {
+          SymbolGlyph()
+            .fontSize(IMAGE_SIZE)
+            .symbolEffect(new SymbolEffect(), false)
+            .attributeModifier(this.getToolBarSymbolModifier(index))
+            .margin({ bottom: $r('sys.float.padding_level1') })
+        } else if (Util.isSymbolResource(this.toolBarList[index]?.image?.src)) {
+          SymbolGlyph(this.toolBarList[index]?.image?.src as Resource)
+            .fontSize(IMAGE_SIZE)
+            .fontColor([this.getIconColor(index)])
+            .margin({ bottom: $r('sys.float.padding_level1') })
+        } else {
+          Image(this.toolBarList[index]?.image?.src)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .fillColor(this.getIconColor(index))
+            .margin({ bottom: $r('sys.float.padding_level1') })
+            .objectFit(ImageFit.Contain)
+            .draggable(false)
+        }
+        Text(this.toolBarList[index]?.content.text)
+          .fontColor(this.getTextColor(index))
+          .fontSize($r('sys.float.ohos_id_text_size_caption'))
+          .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
+          .minFontSize(9)
+          .fontWeight(FontWeight.Medium)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textAlign(TextAlign.Center)
+          .focusable(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
+          .focusOnTouch(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
       }
-      Text(this.toolBarList[index]?.content.text)
-        .fontColor(this.getTextColor(index))
-        .fontSize($r('sys.float.ohos_id_text_size_caption'))
-        .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
-        .minFontSize(9)
-        .fontWeight(FontWeight.Medium)
-        .maxLines(1)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .textAlign(TextAlign.Center)
+      .justifyContent(FlexAlign.Center)
+      .width('100%')
+      .height('100%')
+      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+      .padding({
+        start: LengthMetrics.resource($r('sys.float.padding_level2')),
+        end: LengthMetrics.resource($r('sys.float.padding_level2')),
+      })
     }
-    .justifyContent(FlexAlign.Center)
+    .accessibilityGroup(true)
+    .accessibilityText(this.toolBarList[index]?.accessibilityText as Resource ??
+      this.toolBarList[index]?.content?.text as Resource)
+    .accessibilityDescription(this.toolBarList[index]?.accessibilityDescription as string ?? '')
+    .accessibilityLevel(this.toolBarList[index]?.accessibilityLevel ?? 'auto')
+    .enabled(this.toolBarList[index]?.state !== ToolBarV2ItemState.DISABLE)
     .width('100%')
     .height('100%')
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-    .padding({
-      start: LengthMetrics.resource($r('sys.float.padding_level2')),
-      end: LengthMetrics.resource($r('sys.float.padding_level2')),
-    })
-    .opacity(this.toolBarList[index]?.state !== ToolBarV2ItemState.DISABLE ? 1 : 0.4)
-    .enabled(this.toolBarList[index]?.state !== ToolBarV2ItemState.DISABLE)
-    .accessibilityGroup(true)
-    .accessibilityText(this.toStringFormat(this.toolBarList[index]?.accessibilityText) ??
-    this.toStringFormat(this.toolBarList[index]?.content?.text))
-    .accessibilityDescription(this.toStringFormat(this.toolBarList[index]?.accessibilityDescription) ?? '')
-    .accessibilityLevel(this.toStringFormat(this.toolBarList[index]?.accessibilityLevel) ?? 'auto')
     .focusable(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
     .focusOnTouch(!(this.toolBarList[index]?.state === ToolBarV2ItemState.DISABLE))
     .focusBox({
@@ -450,6 +487,14 @@ export struct ToolBarV2 {
               top: $r('sys.float.padding_level24'),
               bottom: $r('sys.float.padding_level8'),
             })
+        } else if (Util.isSymbolResource(item.image?.src)) {
+          SymbolGlyph(item.image?.src as Resource)
+            .fontColor([$r('sys.color.icon_primary')])
+            .fontSize(DIALOG_IMAGE_SIZE)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
         } else {
           Image(item.image?.src)
             .width(DIALOG_IMAGE_SIZE)
@@ -483,6 +528,10 @@ export struct ToolBarV2 {
           SymbolGlyph()
             .attributeModifier(this.getToolBarSymbolModifier(index))
             .symbolEffect(new SymbolEffect(), false)
+            .fontColor([$r('sys.color.icon_primary')])
+            .fontSize(DIALOG_IMAGE_SIZE)
+        } else if (Util.isSymbolResource(item.image?.src)) {
+          SymbolGlyph(item.image?.src as Resource)
             .fontColor([$r('sys.color.icon_primary')])
             .fontSize(DIALOG_IMAGE_SIZE)
         } else {
@@ -530,21 +579,6 @@ export struct ToolBarV2 {
       return this.toolBarList[index]?.content.activatedColor?.color ?? this.theme.fontActivatedPrimaryColor;
     }
     return this.toolBarList[index]?.content.color?.color ?? this.theme.fontPrimaryColor;
-  }
-
-  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
-    if (typeof resource === 'string' || typeof resource === 'undefined') {
-      return resource;
-    }
-    let resourceString: string = '';
-    try {
-      resourceString = getContext()?.resourceManager?.getStringSync(resource?.id);
-    } catch (err) {
-      let code: number = (err as BusinessError)?.code;
-      let message: string = (err as BusinessError)?.message;
-      hilog.error(0x3900, 'Ace', `Faild to toolBar toStringFormat, code: ${code}, message: ${message}`);
-    }
-    return resourceString;
   }
 
   private toLengthString(value?: LengthMetrics): string {
@@ -633,6 +667,11 @@ export struct ToolBarV2 {
               });
             })
             .onActionEnd(() => {
+              if (this.itemDialogId) {
+                promptAction.closeCustomDialog(this.itemDialogId);
+              }
+            })
+            .onActionCancel(() => {
               if (this.itemDialogId) {
                 promptAction.closeCustomDialog(this.itemDialogId);
               }

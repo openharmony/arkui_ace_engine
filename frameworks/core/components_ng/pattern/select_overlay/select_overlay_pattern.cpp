@@ -178,9 +178,11 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto hotZone = theme->GetHandleHotZoneRadius().ConvertToPx();
-    firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 + firstHandle.Height() });
+    info_->firstHandle.isTouchable ? firstHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 + firstHandle.Height() })
+        : firstHandleRegion_.Reset();
     auto firstHandleOffsetX = (firstHandle.Left() + firstHandle.Right()) / 2;
-    secondHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 + secondHandle.Height() });
+    info_->secondHandle.isTouchable ? secondHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 + secondHandle.Height() })
+        : secondHandleRegion_.Reset();
     auto secondHandleOffsetX = (secondHandle.Left() + secondHandle.Right()) / 2;
     std::vector<DimensionRect> responseRegion;
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
@@ -832,7 +834,7 @@ void SelectOverlayPattern::OnDpiConfigurationUpdate()
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->UpdateToolBar(true, true);
+    host->UpdateToolBarFromMainWindow(true, true);
 }
 
 void SelectOverlayPattern::SwitchHandleToOverlayMode(bool afterRender)
@@ -865,6 +867,13 @@ void SelectOverlayPattern::OnColorConfigurationUpdate()
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     host->UpdateSelectMenuBg();
-    host->UpdateToolBar(true, true);
+    host->UpdateToolBarFromMainWindow(true, true);
+}
+
+void SelectOverlayPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    host->UpdateToolBarFromMainWindow(true, true);
 }
 } // namespace OHOS::Ace::NG

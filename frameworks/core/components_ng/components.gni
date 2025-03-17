@@ -136,9 +136,6 @@ template("build_component_ng") {
           "graphic_2d:2d_graphics",
           "opengles:libGLES",
         ]
-        if (enable_graphic_text_gine) {
-          external_deps += [ "graphic_2d:rosen_text" ]
-        }
         if (defined(vendor_configs.ace_engine_advanced)) {
           include_dirs += vendor_configs.ace_advance_dirs
         }
