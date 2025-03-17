@@ -1989,7 +1989,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(sheetNode, nullptr);
-    auto buttonNode = sheetNode->GetChildAtIndex(1);
+    auto buttonNode = sheetNode->GetChildAtIndex(2);
     ASSERT_NE(buttonNode, nullptr);
     auto iconNode = buttonNode->GetChildAtIndex(0);
     ASSERT_NE(iconNode, nullptr);
@@ -2009,7 +2009,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     sheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(sheetNode, nullptr);
-    buttonNode = sheetNode->GetChildAtIndex(1);
+    buttonNode = sheetNode->GetChildAtIndex(2);
     ASSERT_NE(buttonNode, nullptr);
     iconNode = buttonNode->GetChildAtIndex(0);
     ASSERT_NE(iconNode, nullptr);

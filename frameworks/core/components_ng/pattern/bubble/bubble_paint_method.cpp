@@ -208,6 +208,7 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(paintWrapper, false);
     auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(paintProperty, false);
+    isTips_ = paintProperty->GetIsTips().value_or(false);
     enableArrow_ = paintProperty->GetEnableArrow().value_or(true);
     arrowPlacement_ = paintProperty->GetPlacement().value_or(Placement::BOTTOM);
     if (!enableArrow_ || !showArrow_) {
@@ -224,6 +225,9 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, false);
     padding_ = popupTheme->GetPadding();
+    if (isTips_) {
+        return enableArrow_ && showArrow_ && popupTheme->GetTipsDoubleBorderEnable();
+    }
     return popupTheme->GetPopupDoubleBorderEnable() && childSize_.IsPositive();
 }
 
@@ -251,6 +255,8 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
     if (!IsPaintDoubleBorder(paintWrapper)) {
         return;
     }
+    auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
+    isTips_ = paintProperty->GetIsTips().value_or(false);
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto host = renderContext->GetHost();
@@ -264,8 +270,13 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));
     paint.SetFilter(filter);
     paint.SetAntiAlias(true);
-    paint.SetWidth(outerBorderWidth_);
-    paint.SetColor(popupTheme->GetPopupOuterBorderColor().GetValue());
+    if (isTips_) {
+        paint.SetWidth(popupTheme->GetTipsOuterBorderWidth().ConvertToPx());
+        paint.SetColor(popupTheme->GetTipsOuterBorderColor().GetValue());
+    } else {
+        paint.SetWidth(outerBorderWidth_);
+        paint.SetColor(popupTheme->GetPopupOuterBorderColor().GetValue());
+    }
     canvas.AttachPen(paint);
     needPaintOuterBorder_ = true;
     PaintDoubleBorderWithArrow(canvas, paintWrapper);
@@ -278,6 +289,8 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
     if (!IsPaintDoubleBorder(paintWrapper)) {
         return;
     }
+    auto paintProperty = DynamicCast<BubbleRenderProperty>(paintWrapper->GetPaintProperty());
+    isTips_ = paintProperty->GetIsTips().value_or(false);
     CHECK_NULL_VOID(paintWrapper);
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -292,8 +305,13 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));
     paint.SetFilter(filter);
     paint.SetAntiAlias(true);
-    paint.SetWidth(innerBorderWidth_);
-    paint.SetColor(popupTheme->GetPopupInnerBorderColor().GetValue());
+    if (isTips_) {
+        paint.SetWidth(popupTheme->GetTipsInnerBorderWidth().ConvertToPx());
+        paint.SetColor(popupTheme->GetTipsInnerBorderColor().GetValue());
+    } else {
+        paint.SetWidth(innerBorderWidth_);
+        paint.SetColor(popupTheme->GetPopupInnerBorderColor().GetValue());
+    }
     canvas.AttachPen(paint);
     PaintDoubleBorderWithArrow(canvas, paintWrapper);
     canvas.DetachPen();

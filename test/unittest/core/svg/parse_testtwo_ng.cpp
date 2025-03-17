@@ -933,7 +933,7 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest005, TestSize.Level1)
      * @tc.steps: step4. set fill
      * @tc.expected: The property is set successfully
      */
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 
@@ -1060,7 +1060,7 @@ HWTEST_F(ParseTestTwoNg, ParseAnimation003, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, ParseStopTest001, TestSize.Level1)
 {
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 

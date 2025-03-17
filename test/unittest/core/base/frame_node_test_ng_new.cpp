@@ -2137,13 +2137,20 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSafeAreaInfo, TestSize.Level1)
      */
     frameNode->DumpSafeAreaInfo(json);
 
+    SafeAreaExpandOpts opts;
+    opts.switchToNone = true;
+    frameNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    SafeAreaInsets safeArea;
+    frameNode->GetLayoutProperty()->UpdateSafeAreaInsets(safeArea);
+    frameNode->DumpSafeAreaInfo(json);
+
     /**
      * @tc.steps: step6. safeAreaExpandOpts_ is nullptr.
      * @tc.expected: expect is FALSE.
      */
     const auto& valueExpandOpts = json->GetValue("SafeAreaExpandOpts");
     bool hasKeyExpandOpts = !(valueExpandOpts->IsNull());
-    EXPECT_FALSE(hasKeyExpandOpts);
+    EXPECT_TRUE(hasKeyExpandOpts);
     
     /**
      * @tc.steps: step7. safeAreaInsets_ is nullptr.
@@ -2151,7 +2158,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSafeAreaInfo, TestSize.Level1)
      */
     const auto& valueInsets = json->GetValue("SafeAreaInsets");
     bool hasKeyInsets = !(valueInsets->IsNull());
-    EXPECT_FALSE(hasKeyInsets);
+    EXPECT_TRUE(hasKeyInsets);
 
     /**
      * @tc.steps: step8. OrParentExpansive_ is nullptr.
@@ -2229,21 +2236,43 @@ HWTEST_F(FrameNodeTestNg, FrameNodeBuildLayoutInfo, TestSize.Level1)
      */
     frameNode->BuildLayoutInfo(json);
 
+    auto layoutConstraintF_ = LayoutConstraintF();
+    layoutConstraintF_.maxSize = CONTAINER_SIZE;
+    layoutConstraintF_.percentReference = CONTAINER_SIZE;
+    frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraintF_);
+    frameNode->geometryNode_->SetFrameOffset(OffsetF(1.0f, 0.0f));
+    frameNode->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
+    PaddingProperty padding;
+    padding.left = CalcLength(0.0f);
+    padding.right = CalcLength(0.0f);
+    padding.top = CalcLength(0.0f);
+    padding.bottom = CalcLength(0.0f);
+    frameNode->layoutProperty_->UpdatePadding(padding);
+    frameNode->layoutProperty_->UpdateSafeAreaPadding(padding);
+    BorderWidthProperty overCountBorderWidth;
+    overCountBorderWidth.SetBorderWidth(Dimension(10, DimensionUnit::VP));
+    frameNode->layoutProperty_->UpdateBorderWidth(overCountBorderWidth);
+    MarginProperty marginProperty;
+    frameNode->layoutProperty_->UpdateMargin(marginProperty);
+    NG::RectF testRect = { 10.0f, 10.0f, 10.0f, 10.0f };
+    frameNode->layoutProperty_->SetLayoutRect(testRect);
+    frameNode->BuildLayoutInfo(json);
+
     /**
      * @tc.steps: step5. ParentLayoutConstraint is nullptr.
      * @tc.expected: expect is FALSE.
      */
     const auto& valueConstraint = json->GetValue("ParentLayoutConstraint");
     bool hasKeyConstraint = !(valueConstraint->IsNull());
-    EXPECT_FALSE(hasKeyConstraint);
+    EXPECT_TRUE(hasKeyConstraint);
 
     const auto& valuetop = json->GetValue("top");
     bool hasKeytop = !(valuetop->IsNull());
-    EXPECT_FALSE(hasKeytop);
+    EXPECT_TRUE(hasKeytop);
 
     const auto& valueleft = json->GetValue("left");
     bool hasKeyleft = !(valueleft->IsNull());
-    EXPECT_FALSE(hasKeyleft);
+    EXPECT_TRUE(hasKeyleft);
 
     const auto& valueActive = json->GetValue("Active");
     bool hasKeyActive = !(valueActive->IsNull());
@@ -2251,27 +2280,23 @@ HWTEST_F(FrameNodeTestNg, FrameNodeBuildLayoutInfo, TestSize.Level1)
 
     const auto& valueVisible = json->GetValue("Visible");
     bool hasKeyVisible = !(valueVisible->IsNull());
-    EXPECT_FALSE(hasKeyVisible);
+    EXPECT_TRUE(hasKeyVisible);
 
     const auto& valuePadding = json->GetValue("Padding");
     bool hasKeyPadding = !(valuePadding->IsNull());
-    EXPECT_FALSE(hasKeyPadding);
-
-    const auto& valueSafeArea = json->GetValue("SafeArea Padding");
-    bool hasKeySafeArea = !(valueSafeArea->IsNull());
-    EXPECT_FALSE(hasKeySafeArea);
+    EXPECT_TRUE(hasKeyPadding);
 
     const auto& valueBorder = json->GetValue("Border");
     bool hasKeyBorder = !(valueBorder->IsNull());
-    EXPECT_FALSE(hasKeyBorder);
+    EXPECT_TRUE(hasKeyBorder);
 
     const auto& valueMargin = json->GetValue("Margin");
     bool hasKeyMargin = !(valueMargin->IsNull());
-    EXPECT_FALSE(hasKeyMargin);
+    EXPECT_TRUE(hasKeyMargin);
 
     const auto& valueLayout = json->GetValue("LayoutRect");
     bool hasKeyLayout = !(valueLayout->IsNull());
-    EXPECT_FALSE(hasKeyLayout);
+    EXPECT_TRUE(hasKeyLayout);
 }
 
 /**
@@ -2914,6 +2939,22 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpCommonInfo, TestSize.Level1)
      */
     frameNode->DumpCommonInfo(json);
 
+    frameNode->renderContext_->UpdateBackgroundColor(Color::BLUE);
+    MeasureProperty constraint;
+    frameNode->layoutProperty_->UpdateCalcLayoutProperty(constraint);
+    frameNode->propInspectorId_ = "test";
+    frameNode->DumpCommonInfo(json);
+    MarginProperty marginProperty;
+    frameNode->layoutProperty_->UpdateMargin(marginProperty);
+    frameNode->DumpCommonInfo(json);
+    BorderWidthProperty overCountBorderWidth;
+    overCountBorderWidth.SetBorderWidth(Dimension(10, DimensionUnit::VP));
+    frameNode->layoutProperty_->UpdateBorderWidth(overCountBorderWidth);
+    frameNode->DumpCommonInfo(json);
+    PaddingProperty padding;
+    frameNode->layoutProperty_->UpdatePadding(padding);
+    frameNode->DumpCommonInfo(json);
+
     const auto& valueFrameRect = json->GetValue("FrameRect");
     bool hasvalueFrameRect = !(valueFrameRect->IsNull());
     EXPECT_TRUE(hasvalueFrameRect);
@@ -2924,8 +2965,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpCommonInfo, TestSize.Level1)
 
     const auto& valueBackgroundColor= json->GetValue("BackgroundColor");
     bool hasvalueBackgroundColor = !(valueBackgroundColor->IsNull());
-    EXPECT_FALSE(hasvalueBackgroundColor);
+    EXPECT_TRUE(hasvalueBackgroundColor);
 
+    frameNode->DumpInfo(json);
+    frameNode->DumpAdvanceInfo(json);
     const auto& valueConstraint = json->GetValue("ParentLayoutConstraint");
     bool hasKeyConstraint = !(valueConstraint->IsNull());
     EXPECT_FALSE(hasKeyConstraint);

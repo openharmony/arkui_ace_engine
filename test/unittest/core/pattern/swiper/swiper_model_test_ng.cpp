@@ -1806,4 +1806,226 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg036, TestSize.Level1)
     FlushUITasks(indicatorNode_);
     EXPECT_NE(indicatorPattern->RealTotalCount(), 2);
 }
+
+/**
+ * @tc.name: OnKeyEvent001
+ * @tc.desc: OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, OnKeyEvent001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG swiperModel) {
+        swiperModel.SetBindIndicator(true);
+        swiperModel.SetDirection(Axis::HORIZONTAL);
+    });
+    IndicatorModelNG model;
+    model.Create();
+    model.SetDirection(Axis::HORIZONTAL);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    indicatorNode_ = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    KeyEvent event;
+    event.action = KeyAction::UP;
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    EXPECT_FALSE(indicatorPattern->OnKeyEvent(event));
+}
+ 
+/**
+ * @tc.name: OnKeyEvent002
+ * @tc.desc: OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, OnKeyEvent002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG swiperModel) {
+        swiperModel.SetBindIndicator(true);
+        swiperModel.SetDirection(Axis::HORIZONTAL);
+    });
+    IndicatorModelNG model;
+    model.Create();
+    model.SetDirection(Axis::HORIZONTAL);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    indicatorNode_ = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    EXPECT_TRUE(indicatorPattern->OnKeyEvent(event));
+}
+ 
+/**
+ * @tc.name: OnKeyEvent003
+ * @tc.desc: OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, OnKeyEvent003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG swiperModel) {
+        swiperModel.SetBindIndicator(true);
+        swiperModel.SetDirection(Axis::HORIZONTAL);
+    });
+    IndicatorModelNG model;
+    model.Create();
+    model.SetDirection(Axis::HORIZONTAL);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    indicatorNode_ = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    EXPECT_TRUE(indicatorPattern->OnKeyEvent(event));
+}
+ 
+/**
+ * @tc.name: OnKeyEvent004
+ * @tc.desc: OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, OnKeyEvent004, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG swiperModel) {
+        swiperModel.SetBindIndicator(true);
+        swiperModel.SetDirection(Axis::HORIZONTAL);
+    });
+    IndicatorModelNG model;
+    model.Create();
+    model.SetDirection(Axis::HORIZONTAL);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    indicatorNode_ = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_DPAD_UP;
+    EXPECT_FALSE(indicatorPattern->OnKeyEvent(event));
+}
+ 
+/**
+ * @tc.name: OnKeyEvent005
+ * @tc.desc: OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, OnKeyEvent005, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG swiperModel) {
+        swiperModel.SetBindIndicator(true);
+        swiperModel.SetDirection(Axis::HORIZONTAL);
+    });
+    IndicatorModelNG model;
+    model.Create();
+    model.SetDirection(Axis::HORIZONTAL);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    indicatorNode_ = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    indicatorController_ = indicatorPattern->GetIndicatorController();
+    EXPECT_NE(indicatorController_, nullptr);
+    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
+    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
+    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    FlushUITasks(indicatorNode_);
+    EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
+    auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
+    swiperLayoutProperty->UpdateDirection(Axis::VERTICAL);
+    EXPECT_EQ(indicatorPattern->GetDirection(), Axis::VERTICAL);
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_DPAD_UP;
+    EXPECT_TRUE(indicatorPattern->OnKeyEvent(event));
+}
+ 
+/**
+ * @tc.name: OnKeyEvent006
+ * @tc.desc: OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, OnKeyEvent006, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG swiperModel) {
+        swiperModel.SetBindIndicator(true);
+        swiperModel.SetDirection(Axis::HORIZONTAL);
+    });
+    IndicatorModelNG model;
+    model.Create();
+    model.SetDirection(Axis::HORIZONTAL);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    indicatorNode_ = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    indicatorController_ = indicatorPattern->GetIndicatorController();
+    EXPECT_NE(indicatorController_, nullptr);
+    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
+    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
+    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    FlushUITasks(indicatorNode_);
+    EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
+    auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
+    swiperLayoutProperty->UpdateDirection(Axis::VERTICAL);
+    EXPECT_EQ(indicatorPattern->GetDirection(), Axis::VERTICAL);
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_DPAD_DOWN;
+    EXPECT_TRUE(indicatorPattern->OnKeyEvent(event));
+}
+
+ /**
+ * @tc.name: OnIndexChangeInSingleMode001
+ * @tc.desc: OnIndexChangeInSingleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, OnIndexChangeInSingleMode001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG swiperModel) {
+        swiperModel.SetBindIndicator(true);
+        swiperModel.SetDirection(Axis::HORIZONTAL);
+        swiperModel.SetLoop(true);
+    });
+    IndicatorModelNG model;
+    model.Create();
+    model.SetDirection(Axis::HORIZONTAL);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    indicatorNode_ = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    indicatorPattern->isPressed_ = true;
+    indicatorPattern->isHover_ = false;
+    indicatorPattern->OnIndexChangeInSingleMode(5);
+    EXPECT_EQ(indicatorPattern->currentIndexInSingleMode_, 1);
+}
+
+/**
+ * @tc.name: OnIndexChangeInSingleMode002
+ * @tc.desc: OnIndexChangeInSingleMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, OnIndexChangeInSingleMode002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG swiperModel) {
+        swiperModel.SetBindIndicator(true);
+        swiperModel.SetDirection(Axis::HORIZONTAL);
+        swiperModel.SetLoop(true);
+    });
+    IndicatorModelNG model;
+    model.Create();
+    model.SetDirection(Axis::HORIZONTAL);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    indicatorNode_ = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    indicatorPattern->isPressed_ = false;
+    indicatorPattern->isHover_ = true;
+    indicatorPattern->OnIndexChangeInSingleMode(-5);
+    EXPECT_EQ(indicatorPattern->currentIndexInSingleMode_, 0);
+}
 } // namespace OHOS::Ace::NG

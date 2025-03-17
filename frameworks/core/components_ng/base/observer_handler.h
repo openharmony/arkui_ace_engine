@@ -149,6 +149,16 @@ struct TabContentInfo {
     {}
 };
 
+enum class PanGestureState {
+    BEFORE = 0,
+    AFTER = 1,
+};
+
+struct PanGestureInfo {
+    PanGestureState gestureState;
+    CurrentCallbackState callbackState;
+};
+
 class ACE_FORCE_EXPORT UIObserverHandler {
 public:
     UIObserverHandler() = default;
@@ -162,6 +172,9 @@ public:
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
     void NotifyDidClick(const GestureEvent& gestureEventInfo,
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
+    void NotifyPanGestureStateChange(const GestureEvent& gestureEventInfo,
+        const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+        const PanGestureInfo& panGestureInfo);
     void NotifyTabContentStateUpdate(const TabContentInfo& info);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
     std::shared_ptr<NavDestinationInfo> GetNavDestinationInfo(const RefPtr<UINode>& current);
@@ -181,6 +194,8 @@ public:
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
     using DidClickHandleFunc = void (*)(
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
+    using PanGestureHandleFunc = void (*)(AbilityContextInfo&, const GestureEvent&,
+        const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>&, const NG::PanGestureInfo& panGestureInfo);
     using TabContentStateHandleFunc = void (*)(const TabContentInfo&);
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
@@ -195,6 +210,7 @@ public:
     void SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func);
     void SetWillClickFunc(WillClickHandleFunc func);
     void SetDidClickFunc(DidClickHandleFunc func);
+    void SetPanGestureHandleFunc(PanGestureHandleFunc func);
     void SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
@@ -206,6 +222,7 @@ private:
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
+    PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
 
     napi_value GetUIContextValue();

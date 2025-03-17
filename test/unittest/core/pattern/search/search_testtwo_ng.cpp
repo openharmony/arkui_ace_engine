@@ -1219,6 +1219,11 @@ HWTEST_F(SearchTestTwoNg, SetProperty005, TestSize.Level1)
     searchModelInstance.SetSearchEnterKeyType(frameNode, TextInputAction::NEXT);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     EXPECT_EQ(TextInputAction::NEXT, textFieldPattern->GetTextInputActionValue(TextInputAction::UNSPECIFIED));
+
+    //test SetSearchCapitalizationMode
+    searchModelInstance.SetSearchCapitalizationMode(AutoCapitalizationMode::SENTENCES);
+    EXPECT_EQ(AutoCapitalizationMode::SENTENCES,
+        textFieldPattern->GetAutoCapitalizationMode());
 }
 /**
  * @tc.name: SetEnterKeyType001
@@ -1235,6 +1240,22 @@ HWTEST_F(SearchTestTwoNg, SetEnterKeyType001, TestSize.Level1)
     auto textFieldChild = AceType::DynamicCast<FrameNode>(fNode->GetChildren().front());
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     EXPECT_EQ(TextInputAction::SEARCH, textFieldPattern->GetTextInputActionValue(TextInputAction::UNSPECIFIED));
+}
+
+/**
+ * @tc.name: SetCapitalizationMode001
+ * @tc.desc: test search set CapitalizationMode default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SetCapitalizationMode001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto fNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    searchModelInstance.SetSearchCapitalizationMode(AutoCapitalizationMode::NONE);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(fNode->GetChildren().front());
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    EXPECT_EQ(AutoCapitalizationMode::NONE, textFieldPattern->GetAutoCapitalizationMode());
 }
 
 /**

@@ -377,6 +377,9 @@ void LongPressRecognizer::SendCallbackMsg(
         if (lastTouchEvent_.tiltY.has_value()) {
             info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
+        if (lastTouchEvent_.rollAngle.has_value()) {
+            info.SetRollAngle(lastTouchEvent_.rollAngle.value());
+        }
         info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPointerEvent(lastPointEvent_);
         Platform::UpdatePressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
@@ -505,6 +508,9 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
     }
     if (trackPoint.tiltY.has_value()) {
         info->SetTiltY(trackPoint.tiltY.value());
+    }
+    if (trackPoint.rollAngle.has_value()) {
+        info->SetRollAngle(trackPoint.rollAngle.value());
     }
     info->SetSourceTool(trackPoint.sourceTool);
     if (gestureRecognizerJudgeFunc) {
