@@ -56,6 +56,7 @@ const char SVG_ALIGN_XMAX_YMAX[] = "xMaxYMax";
 const char SVG_ALIGN_NONE[] = "none";
 const char SVG_ALIGN_MEET[] = "meet";
 const char SVG_ALIGN_SLICE[] = "slice";
+constexpr float PERCENT_RANGE_MAX = 100.0;
 }
 
 LineCapStyle SvgAttributesParser::GetLineCapStyle(const std::string& val)
@@ -271,7 +272,7 @@ bool SvgAttributesParser::ParseColor(std::string value, Color& color)
         return true;
     }
     value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)
         && ParseRGBAMagicColor(value, color)) {
         return true;
     }
@@ -294,6 +295,42 @@ Color SvgAttributesParser::GetColor(const std::string& value)
 Dimension SvgAttributesParser::ParseDimension(const std::string& value, bool useVp)
 {
     return StringUtils::StringToDimension(value, useVp);
+}
+
+void SvgAttributesParser::StringToDimensionWithUnitSvg(const std::string& value, Dimension& dimension)
+{
+    errno = 0;
+    if (std::strcmp(value.c_str(), "auto") == 0) {
+        return;
+    }
+    char* pEnd = nullptr;
+    double result = std::strtod(value.c_str(), &pEnd);
+    if ((pEnd == nullptr) || (pEnd == value.c_str()) || (errno == ERANGE)) {
+        return;
+    }
+    if (std::strcmp(pEnd, "%") == 0) {
+        // Parse percent, transfer from [0, 100] to [0, 1]
+        dimension = Dimension(result / PERCENT_RANGE_MAX, DimensionUnit::PERCENT);
+    } else if (std::strcmp(pEnd, "px") == 0) {
+        dimension = Dimension(result, DimensionUnit::PX);
+    } else if (std::strcmp(pEnd, "vp") == 0) {
+        dimension = Dimension(result, DimensionUnit::VP);
+    } else if (std::strcmp(pEnd, "fp") == 0) {
+        dimension = Dimension(result, DimensionUnit::FP);
+    } else if (std::strcmp(pEnd, "lpx") == 0) {
+        dimension = Dimension(result, DimensionUnit::LPX);
+    } else if (std::strcmp(pEnd, "\0") == 0) {
+        dimension = Dimension(result, DimensionUnit::PX);
+    }
+}
+
+void SvgAttributesParser::ParseDimension(const std::string& value, Dimension& dimension, bool useVp)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        dimension = StringUtils::StringToDimension(value, useVp);
+        return;
+    }
+    StringToDimensionWithUnitSvg(value, dimension);
 }
 
 double SvgAttributesParser::ParseDouble(const std::string& value)

@@ -57,6 +57,7 @@ public:
         const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
         const MenuParam& menuParam, const MenuType& type);
+    static void UpdatePreviewInfo(const RefPtr<FrameNode>& targetNode, MenuParam& menuParam);
 
     static void CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode);
     static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,

@@ -150,7 +150,7 @@ private:
      */
     void PostMeasureSelf(float selfCrossLen);
 
-    float MeasureChild(int32_t idx, size_t lane) const;
+    float MeasureChild(int32_t idx, size_t lane, bool forward = true) const;
 
     /**
      * @brief Fill cache items back to lanes_ to prepare for Layout phase.
@@ -195,6 +195,8 @@ private:
 
     // convert FlowItem's index to children node index.
     inline int32_t nodeIdx(int32_t idx) const;
+
+    void MeasureLazyChild(int32_t startIdx, int32_t endIdx) const override;
 
     RefPtr<WaterFlowLayoutInfoSW> info_;
     RefPtr<WaterFlowSections> sections_;

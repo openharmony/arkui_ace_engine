@@ -1733,4 +1733,180 @@ HWTEST_F(OverlayManagerTestOneNG, ShowMenu001, TestSize.Level1)
     overlayManager->ShowMenu(targetId, OffsetF(), menuNode1);
     EXPECT_FALSE(overlayManager->menuMap_.find(menuNode1) != overlayManager->menuMap_.end());
 }
+
+/**
+ * @tc.name: GetBoolFromTipsEnterAndLeaveInfo001
+ * @tc.desc: Test GetBoolFromTipsEnterAndLeaveInfo of OverlayManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, GetBoolFromTipsEnterAndLeaveInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and OverlayManager.
+     */
+    auto rootNode = CreateRootNode();
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    /**
+     * @tc.steps: step2. call function.
+     */
+    bool result = overlayManager->GetBoolFromTipsEnterAndLeaveInfo(1, 1);
+    EXPECT_FALSE(result);
+    overlayManager->tipsEnterAndLeaveInfoMap_[1] = { { 2, true } };
+    result = overlayManager->GetBoolFromTipsEnterAndLeaveInfo(1, 1);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetTipsEnterAndLeaveInfo001
+ * @tc.desc: Test GetTipsEnterAndLeaveInfo of OverlayManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, GetTipsEnterAndLeaveInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and OverlayManager.
+     */
+    auto rootNode = CreateRootNode();
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    /**
+     * @tc.steps: step2. call function.
+     */
+    auto result = overlayManager->GetTipsEnterAndLeaveInfo(1);
+    EXPECT_EQ(result, -1);
+    overlayManager->tipsEnterAndLeaveInfoMap_[1] = {};
+    result = overlayManager->GetTipsEnterAndLeaveInfo(1);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: UpdateTipsEnterAndLeaveInfo001
+ * @tc.desc: Test UpdateTipsEnterAndLeaveInfo of OverlayManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, UpdateTipsEnterAndLeaveInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and OverlayManager.
+     */
+    auto rootNode = CreateRootNode();
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    /**
+     * @tc.steps: step2. call function.
+     */
+    overlayManager->tipsEnterAndLeaveInfoMap_[1] = {};
+    overlayManager->UpdateTipsEnterAndLeaveInfo(1);
+    overlayManager->UpdateTipsEnterAndLeaveInfo(1);
+    EXPECT_TRUE(overlayManager->GetBoolFromTipsEnterAndLeaveInfo(1, 1));
+}
+
+/**
+ * @tc.name: UpdateTipsEnterAndLeaveInfoBool001
+ * @tc.desc: Test UpdateTipsEnterAndLeaveInfoBool of OverlayManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, UpdateTipsEnterAndLeaveInfoBool001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and OverlayManager.
+     */
+    auto rootNode = CreateRootNode();
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    /**
+     * @tc.steps: step2. call function.
+     */
+    overlayManager->tipsEnterAndLeaveInfoMap_[1] = {};
+    overlayManager->UpdateTipsEnterAndLeaveInfoBool(1);
+    EXPECT_FALSE(overlayManager->GetBoolFromTipsEnterAndLeaveInfo(1, 1));
+    overlayManager->tipsEnterAndLeaveInfoMap_[1] = { { 1, true } };
+    overlayManager->UpdateTipsEnterAndLeaveInfoBool(1);
+    EXPECT_FALSE(overlayManager->GetBoolFromTipsEnterAndLeaveInfo(1, 1));
+    overlayManager->UpdateTipsEnterAndLeaveInfoBool(1);
+    EXPECT_FALSE(overlayManager->GetBoolFromTipsEnterAndLeaveInfo(1, 1));
+}
+
+/**
+ * @tc.name: EraseTipsEnterAndLeaveInfo001
+ * @tc.desc: Test EraseTipsEnterAndLeaveInfo of OverlayManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, EraseTipsEnterAndLeaveInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and OverlayManager.
+     */
+    auto rootNode = CreateRootNode();
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    /**
+     * @tc.steps: step2. call function.
+     */
+    overlayManager->tipsEnterAndLeaveInfoMap_[1] = { { 2, true } };
+    overlayManager->EraseTipsEnterAndLeaveInfo(1, 1);
+    EXPECT_EQ(overlayManager->tipsEnterAndLeaveInfoMap_.size(), 1);
+    overlayManager->EraseTipsEnterAndLeaveInfo(1, 2);
+    EXPECT_EQ(overlayManager->tipsEnterAndLeaveInfoMap_.size(), 0);
+}
+
+/**
+ * @tc.name: UpdatePreviousDisappearingTime001
+ * @tc.desc: Test UpdatePreviousDisappearingTime && EraseTipsInfo of OverlayManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, UpdatePreviousDisappearingTime001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and OverlayManager.
+     */
+    auto rootNode = CreateRootNode();
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    /**
+     * @tc.steps: step2. call function.
+     */
+    PopupInfo popupInfo;
+    overlayManager->tipsInfoList_.emplace_back(1, popupInfo);
+    overlayManager->tipsInfoList_.emplace_back(3, popupInfo);
+    overlayManager->UpdatePreviousDisappearingTime(2);
+    EXPECT_FALSE(overlayManager->GetBoolFromTipsEnterAndLeaveInfo(1, 1));
+    overlayManager->EraseTipsInfo(3);
+    EXPECT_EQ(overlayManager->tipsInfoList_.size(), 1);
+}
+
+/**
+ * @tc.name: UpdateTipsInfo001
+ * @tc.desc: Test UpdateTipsInfo of OverlayManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestOneNG, UpdateTipsInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and OverlayManager.
+     */
+    auto rootNode = CreateRootNode();
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    /**
+     * @tc.steps: step2. call function.
+     */
+    PopupInfo popupInfo;
+    popupInfo.popupId = 1;
+    PopupInfo popupInfo2;
+    popupInfo2.popupId = 2;
+    overlayManager->tipsInfoList_.emplace_back(1, popupInfo);
+    overlayManager->tipsInfoList_.emplace_back(3, popupInfo);
+    overlayManager->UpdateTipsInfo(1, popupInfo2);
+    auto popupInfoGet = overlayManager->GetTipsInfo(1);
+    EXPECT_EQ(popupInfoGet.popupId, popupInfo2.popupId);
+}
 } // namespace OHOS::Ace::NG
