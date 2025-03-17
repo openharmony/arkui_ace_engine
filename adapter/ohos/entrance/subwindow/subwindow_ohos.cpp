@@ -1223,7 +1223,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         parentOverlay->SetSubWindowId(childContainerId_);
     }
     ResizeWindow();
-    ShowWindow();
+    ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
