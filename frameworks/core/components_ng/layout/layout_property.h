@@ -382,6 +382,18 @@ public:
         markAnchorStart_ = markAnchorStart;
     }
 
+    void SetNeedLazyLayout(bool value)
+    {
+        needLazyLayout_ = true;
+    }
+
+    bool GetNeedLazyLayout() const
+    {
+        return needLazyLayout_;
+    }
+
+    void ConstraintViewPosRef(ViewPosReference& viewPosRef);
+
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
     void CheckMarkAnchorPosition(TextDirection layoutDirection);
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
@@ -468,6 +480,7 @@ private:
     bool widthPercentSensitive_ = false;
     bool needPositionLocalizedEdges_ = false;
     bool needOffsetLocalizedEdges_ = false;
+    bool needLazyLayout_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

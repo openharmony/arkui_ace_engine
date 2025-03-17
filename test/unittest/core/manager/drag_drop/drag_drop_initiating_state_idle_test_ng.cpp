@@ -233,6 +233,7 @@ HWTEST_F(DragDropInitiatingStateIdleTestNG, DragDropInitiatingStateIdleTestNG001
         ASSERT_NE(handler, nullptr);
         auto machine = handler->initiatingFlow_;
         ASSERT_NE(machine, nullptr);
+        machine->InitializeState();
         machine->currentState_ = static_cast<int32_t>(testCase.originStatus);
         DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(testCase.isMenuShow);
         gestureEventHub->SetTextDraggable(testCase.isTextDraggable);

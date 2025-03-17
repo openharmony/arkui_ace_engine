@@ -146,6 +146,8 @@ void AddCustomButtonComponent(const panda::Local<panda::ObjectRef>& obj)
     CHECK_NULL_VOID(customNode);
     BindingCustomBaseFromJS(object, vm, customNode);
     BindingCustomButtonFromJS(object, vm, customNode);
+    // bind app title callback for backButton bar
+    BindingCustomTitleFromJS(object, vm, customNode);
     NG::ViewStackProcessor::GetInstance()->SetCustomButtonNode(customNode);
 }
 

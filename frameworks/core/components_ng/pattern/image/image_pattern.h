@@ -21,6 +21,7 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "base/geometry/offset.h"
+#include "base/image/drawable_descriptor.h"
 #include "base/image/image_defines.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
@@ -53,6 +54,8 @@ class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
+    using OnProgressCallback = std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>;
+
     ImagePattern();
     ~ImagePattern() override;
 
@@ -75,7 +78,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_);
+        return MakeRefPtr<ImageLayoutAlgorithm>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -287,7 +290,7 @@ public:
 
     bool GetIsAnimation() const
     {
-        return imageType_ == ImageType::ANIMATION;
+        return imageType_ == ImageType::ANIMATED_DRAWABLE;
     }
 
     bool IsAtomicNode() const override
@@ -372,6 +375,19 @@ public:
     }
     void AddPixelMapToUiManager();
 
+    void SetDrawable(const RefPtr<DrawableDescriptor>& drawable)
+    {
+        drawable_ = drawable;
+    }
+
+    // this method for measure content
+    std::optional<SizeF> GetImageSizeForMeasure();
+
+    // this method for on complete callback execute after measuring
+    void FinishMeasureForOnComplete();
+
+    void DrawDrawable(RSCanvas& canvas);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
@@ -400,7 +416,14 @@ private:
     void OnDetachFromMainTree() override;
 
     void OnModifyDone() override;
+    void OnPixelMapDrawableModifyDone();
+    ImagePaintConfig CreatePaintConfig();
+    void Validate();
+    void RegisterDrawableRedrawCallback();
     void UpdateGestureAndDragWhenModify();
+    bool CheckImagePrivacyForCopyOption();
+    void UpdateOffsetForImageAnalyzerOverlay();
+    void SetFrameOffsetForOverlayNode();
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -517,6 +540,7 @@ private:
     bool enableDrag_ = false;
 
     std::function<bool(const KeyEvent& event)> keyEventCallback_ = nullptr;
+    OnProgressCallback onProgressCallback_ = nullptr;
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
@@ -535,9 +559,15 @@ private:
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
 
+    // The component has an internal encapsulation class drawable of the image.
+    // The internal drawable has an external raw pointer.
+    RefPtr<DrawableDescriptor> drawable_;
+    bool isRegisterRedrawCallback_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
-    // animation
+    // After the animated drawable descriptor code goes online, need to
+    // remove all the following codes.
     ImageType imageType_ = ImageType::BASE;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
@@ -560,8 +590,6 @@ private:
     bool isSrcUndefined_ = false;
     bool isComponentSnapshotNode_ = false;
     bool isNeedReset_ = false;
-
-    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

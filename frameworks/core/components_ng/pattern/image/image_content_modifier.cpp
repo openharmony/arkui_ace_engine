@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,16 @@
  */
 
 #include "core/components_ng/pattern/image/image_content_modifier.h"
+
+#include "core/common/ace_application_info.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace::NG {
-ImageContentModifier::ImageContentModifier()
+ImageContentModifier::ImageContentModifier(const WeakPtr<ImagePattern>& pattern)
 {
+    pattern_ = pattern;
     sensitive_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(sensitive_);
     size_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
@@ -31,6 +34,7 @@ ImageContentModifier::ImageContentModifier()
 
 void ImageContentModifier::onDraw(DrawingContext& drawingContext)
 {
+    DrawDrawable(drawingContext);
     CHECK_NULL_VOID(canvasImageWrapper_);
     auto canvasImage = canvasImageWrapper_->Get().GetCanvasImage();
     CHECK_NULL_VOID(canvasImage);
@@ -39,6 +43,13 @@ void ImageContentModifier::onDraw(DrawingContext& drawingContext)
     if (!sensitive_->Get()) {
         imagePainter.DrawImage(drawingContext.canvas, {}, size_->Get());
     }
+}
+
+void ImageContentModifier::DrawDrawable(DrawingContext& drawingContext)
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->DrawDrawable(drawingContext.canvas);
 }
 
 void ImageContentModifier::UpdateSvgColorFilter(const RefPtr<CanvasImage>& canvasImage)

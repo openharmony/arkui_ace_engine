@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import RelativeContainerBootcampTest from './RowsColumnsAndStacking/RelativeContainerBootcamp.test'
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  RelativeContainerBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

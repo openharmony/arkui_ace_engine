@@ -107,6 +107,7 @@ public:
     void OnCustomSelectMenuAppear();
     void FireCustomMenuChangeEvent(bool isMenuShow);
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
+    void UpdateToolBarFromMainWindow(bool menuItemChanged, bool noAnimation = false);
 
 private:
     void CreateToolBar();
@@ -129,6 +130,7 @@ private:
     void ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     bool IsShowOnTargetAPIVersion();
+    bool IsShowTranslateOnTargetAPIVersion();
     std::function<void()> GetDefaultOptionCallback();
     std::function<void(WeakPtr<NG::FrameNode>)> GetSymbolFunc(const std::string& symbolId);
     std::vector<OptionParam> GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info);

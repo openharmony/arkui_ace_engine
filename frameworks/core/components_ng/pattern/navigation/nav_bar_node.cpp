@@ -115,4 +115,9 @@ bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
     bool isInvisible = navigation->GetNavigationMode() == NavigationMode::STACK && lastStandardIndex >= 0;
     return isInvisible;
 }
+
+RefPtr<UINode> NavBarNode::GetNavigationNode()
+{
+    return GetParentFrameNode();
+}
 } // namespace OHOS::Ace::NG

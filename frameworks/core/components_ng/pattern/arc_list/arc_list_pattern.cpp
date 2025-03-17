@@ -50,10 +50,6 @@ constexpr float ARC_LIST_DRAG_OVER_RATES = 0.6f;
 constexpr float ARC_LIST_DRAG_OVER_KVALUE = 0.84f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
-#ifdef SUPPORT_DIGITAL_CROWN
-constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
-constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.base.short.6";
-#endif
 } // namespace
 
 ArcListPattern::ArcListPattern()
@@ -117,6 +113,9 @@ bool ArcListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
     startHeaderPos_ = listLayoutAlgorithm->GetStartHeaderPos();
     headerOffset_ = listLayoutAlgorithm->GetHeaderOffset();
+    oldHeaderSize_ = listLayoutAlgorithm->GetOldHeaderSize();
+    oldFirstItemSize_ = listLayoutAlgorithm->GetOldFirstItemSize();
+    headerStayNear_ = listLayoutAlgorithm->GetHeaderStayNear();
     return ListPattern::OnDirtyLayoutWrapperSwap(dirty, config);
 }
 
@@ -139,46 +138,14 @@ RefPtr<LayoutAlgorithm> ArcListPattern::CreateLayoutAlgorithm()
     if (!posMap_) {
         posMap_ = MakeRefPtr<ArcListPositionMap>(itemStartIndex_);
     }
-    if (childrenSize_) {
-        listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
-        listLayoutAlgorithm->SetListPositionMap(posMap_);
-    }
-    bool needUseInitialIndex = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) ?
-        !isInitialized_ && !jumpIndex_ : !isInitialized_;
-    if (needUseInitialIndex) {
-        jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(0);
-    }
-    if (jumpIndex_) {
-        listLayoutAlgorithm->SetIndex(jumpIndex_.value());
-        jumpIndex_.reset();
-    }
-    if (targetIndex_) {
-        listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
-    }
-    if (predictSnapOffset_.has_value()) {
-        listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
-        listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
-    }
-    listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
-    listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
-    listLayoutAlgorithm->SetIsNeedCheckOffset(isNeedCheckOffset_);
-    listLayoutAlgorithm->SetItemsPosition(itemPosition_);
-    listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
-    if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
-        listLayoutAlgorithm->SetOverScrollFeature();
-    }
-    listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
-    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom());
-    if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
-        SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
-        SetChainAnimationToPosMap();
-    }
-    if (predictSnapEndPos_.has_value()) {
-        listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
-    }
+
+    SetLayoutAlgorithmParams(listLayoutAlgorithm, listLayoutProperty);
+
     listLayoutAlgorithm->SetStartHeaderPos(startHeaderPos_);
     listLayoutAlgorithm->SetHeaderOffset(headerOffset_);
+    listLayoutAlgorithm->SetOldHeaderSize(oldHeaderSize_);
+    listLayoutAlgorithm->SetOldFirstItemSize(oldFirstItemSize_);
+    listLayoutAlgorithm->SetHeaderStayNear(headerStayNear_);
     return listLayoutAlgorithm;
 }
 
@@ -546,27 +513,5 @@ float ArcListPattern::GetScrollUpdateFriction(float overScroll)
     }
     return -exp(-ARC_LIST_DRAG_OVER_KVALUE * scale) + 1;
 }
-
-void ArcListPattern::OnMidIndexChanged(int32_t lastIndex, int32_t curIndex)
-{
-#ifdef SUPPORT_DIGITAL_CROWN
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
-
-    StartVibrator(curIndex == 0 || curIndex == totalCnt - 1);
-#endif
-}
-
-#ifdef SUPPORT_DIGITAL_CROWN
-void ArcListPattern::StartVibrator(bool bEdge)
-{
-    if (!GetCrownEventDragging()) {
-        return;
-    }
-    const char* effectId = bEdge ? HAPTIC_STRENGTH5 : HAPTIC_STRENGTH1;
-    VibratorUtils::StartVibraFeedback(effectId);
-}
-#endif
 
 } // namespace OHOS::Ace::NG

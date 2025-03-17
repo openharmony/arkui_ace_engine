@@ -426,5 +426,27 @@ public:
     static shared_ptr<JsValue> instanceFunc(const shared_ptr<JsRuntime>& runtime,
         const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 };
+class JSMockViewBuildNodeBase {
+public:
+    JSMockViewBuildNodeBase() = default;
+    ~JSMockViewBuildNodeBase() = default;
+
+    static void JSBind(BindingTarget globalObj);
+    static void ConstructorCallback(const JSCallbackInfo& info) {}
+    static void DestructorCallback(JSMockViewBuildNodeBase* node) {}
+    static void SetArkThemeScopeManager(const JSCallbackInfo& info) {}
+    void Id(const JSCallbackInfo& info) {}
+    void DebugInfo(const JSCallbackInfo& info) {}
+    void DebugInfoElmtId(const JSCallbackInfo& info) {}
+    void GetChildById(const JSCallbackInfo& info) {}
+    void AddChild(const JSCallbackInfo& info) {}
+    void PurgeDeletedElmtIds(const JSCallbackInfo& info) {}
+    void UpdateStateVarsOfChildByElmtId(const JSCallbackInfo& info) {}
+    void CreateOrGetNode(const JSCallbackInfo& info) {}
+    void IfElseBranchUpdateFunction(const JSCallbackInfo& info) {}
+    void OnWillApplyThemeInternally(const JSCallbackInfo& info) {}
+    void OnWillApplyTheme(const JSCallbackInfo& info) {}
+    void OnGlobalThemeChanged(const JSCallbackInfo& info) {}
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MOCK_H
