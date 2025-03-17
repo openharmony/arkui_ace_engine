@@ -177,6 +177,7 @@ private:
     void UpdateFontSize();
 
     bool isExist_ = false;
+    bool isAdaptive_ = false;
     Dimension minFontSize_;
     Dimension defaultFontSize_;
     RefPtr<SecurityComponentLayoutProperty> secCompProperty_;
