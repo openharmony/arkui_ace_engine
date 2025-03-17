@@ -943,7 +943,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest001, TestSize.Lev
  */
 HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest002, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
     ASSERT_NE(textPickerColumnPattern, nullptr);
     auto columnNode = textPickerColumnPattern->GetHost();
@@ -959,7 +959,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest002, TestSize.Lev
  */
 HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest003, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
     ASSERT_NE(textPickerColumnPattern, nullptr);
     auto columnNode = textPickerColumnPattern->GetHost();
@@ -976,7 +976,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest003, TestSize.Lev
  */
 HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest004, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
     ASSERT_NE(textPickerColumnPattern, nullptr);
     auto columnNode = textPickerColumnPattern->GetHost();
@@ -1002,7 +1002,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest004, TestSize.Lev
  */
 HWTEST_F(TextPickerColumnExtendTestNg, InitHapticControllerTest005, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
     ASSERT_NE(textPickerColumnPattern, nullptr);
     auto columnNode = textPickerColumnPattern->GetHost();
@@ -1147,7 +1147,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, TextPickerModelNGSetEnableHapticFeedback0
  */
 HWTEST_F(TextPickerColumnExtendTestNg, TextPickerDialogViewShowTest002, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
 
     auto func = [](const std::string& /* info */) {};
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
@@ -1245,7 +1245,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, ColumnPatternInitHapticController001, Tes
     ASSERT_NE(textPickerPattern, nullptr);
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     textPickerPattern->ColumnPatternInitHapticController();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     textPickerPattern->isHapticChanged_ = false;
     textPickerPattern->ColumnPatternInitHapticController();
     EXPECT_FALSE(textPickerPattern->isHapticChanged_);

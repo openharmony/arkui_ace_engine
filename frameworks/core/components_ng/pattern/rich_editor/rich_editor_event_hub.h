@@ -284,14 +284,14 @@ public:
     void SetReplacementString(const RefPtr<SpanStringBase>& styledString);
     const RefPtr<SpanStringBase> GetReplacementString() const;
 
-    void SetPreviewText(const std::u16string& previewText);
-    const std::u16string& GetPreviewText() const;
+    void SetPreviewText(const RefPtr<SpanStringBase>& previewText);
+    const RefPtr<SpanStringBase> GetPreviewText() const;
 
 private:
     TextRange rangeBefore_;
     TextRange rangeAfter_;
     RefPtr<SpanStringBase> replacementString_;
-    std::u16string previewText_;
+    RefPtr<SpanStringBase> previewText_;
 };
 
 class RichEditorEventHub : public EventHub {

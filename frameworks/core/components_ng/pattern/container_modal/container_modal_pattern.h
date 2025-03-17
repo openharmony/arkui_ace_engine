@@ -251,7 +251,7 @@ protected:
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
     Color activeColor_;
     Color inactiveColor_;
-    void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
+    void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow, bool isFloating);
 protected:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(

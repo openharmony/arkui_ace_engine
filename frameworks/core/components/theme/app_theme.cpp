@@ -63,6 +63,8 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
         static_cast<bool>(pattern->GetAttr<double>("app_theme_focus_navigation_always_handle_click", 1.0));
     theme->pageTransitionAmplitudeRatio_ =
         themeStyle->GetAttr<double>("page_transition_amplitude_ratio", DEFAULT_AMPLITUDE_RATIO);
+    theme->dragPanDistanceMouse_ =
+        pattern->GetAttr<Dimension>("app_theme_drag_pan_distance_mouse", 1.0_vp);
     return theme;
 }
 } // namespace OHOS::Ace

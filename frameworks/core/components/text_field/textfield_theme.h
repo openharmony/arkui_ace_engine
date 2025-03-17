@@ -247,7 +247,7 @@ public:
             theme->directionKeysMoveFocusOut_ =
                 static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
             theme->cancelIconSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 theme->cancelIconSize_ = pattern->GetAttr<Dimension>("textfield_cancel_icon_size", 16.0_vp);
             }
         }

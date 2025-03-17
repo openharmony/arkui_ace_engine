@@ -30,6 +30,7 @@ ArkUINativeModuleValue ContainerSpanBridge::SetTextBackgroundStyle(ArkUIRuntimeC
     std::vector<ArkUI_Int32> valueUnits;
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getContainerSpanModifier()->resetContainerSpanTextBackgroundStyle(nativeNode);
@@ -46,6 +47,7 @@ ArkUINativeModuleValue ContainerSpanBridge::ResetTextBackgroundStyle(ArkUIRuntim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getContainerSpanModifier()->resetContainerSpanTextBackgroundStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);

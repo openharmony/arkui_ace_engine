@@ -484,12 +484,12 @@ const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() con
     return replacementString_;
 }
 
-void StyledStringChangeValue::SetPreviewText(const std::u16string& previewText)
+void StyledStringChangeValue::SetPreviewText(const RefPtr<SpanStringBase>& previewText)
 {
     previewText_ = previewText;
 }
 
-const std::u16string& StyledStringChangeValue::GetPreviewText() const
+const RefPtr<SpanStringBase> StyledStringChangeValue::GetPreviewText() const
 {
     return previewText_;
 }

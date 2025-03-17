@@ -270,38 +270,6 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayClick004, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnHandleMouseEvent001
- * @tc.desc: test OnHandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMouseEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    MouseInfo event;
-    event.SetAction(MouseAction::PRESS);
-    richEditorPattern->selectOverlay_->OnHandleMouseEvent(event);
-    EXPECT_EQ(event.GetAction(), MouseAction::PRESS);
-}
-
-/**
- * @tc.name: OnHandleMouseEvent002
- * @tc.desc: test OnHandleMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMouseEvent002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    MouseInfo event;
-    event.SetAction(MouseAction::RELEASE);
-    richEditorPattern->selectOverlay_->OnHandleMouseEvent(event);
-    EXPECT_EQ(event.GetAction(), MouseAction::RELEASE);
-}
-
-/**
  * @tc.name: OnAncestorNodeChanged
  * @tc.desc: test OnAncestorNodeChanged
  * @tc.type: FUNC

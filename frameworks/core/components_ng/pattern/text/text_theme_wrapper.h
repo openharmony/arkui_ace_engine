@@ -56,7 +56,6 @@ public:
     {
         if (const auto& colors = theme.Colors(); colors) {
             textStyle_.SetTextColor(colors->FontPrimary());
-            textStyleClock_.SetTextColor(colors->FontSecondary());
         }
     }
 
