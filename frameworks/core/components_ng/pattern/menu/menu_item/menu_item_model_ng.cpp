@@ -55,7 +55,9 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     renderContext->UpdateBorderRadius(border);
 
     CHECK_NULL_VOID(customNode);
-    menuItem->AddChild(customNode);
+    if (menuItem->GetChildren().empty()) {
+        menuItem->AddChild(customNode);
+    }
 }
 
 /*
@@ -92,26 +94,29 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     }
     renderContext->UpdateBorderRadius(border);
 
-    auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    if (menuItem->GetChildren().empty()) {
+        auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    CHECK_NULL_VOID(leftRow);
-    auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(leftRowLayoutProps);
-    leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+        CHECK_NULL_VOID(leftRow);
+        auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(leftRowLayoutProps);
+        leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+        leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+        leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 
-    leftRow->MountToParent(menuItem);
-    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    CHECK_NULL_VOID(rightRow);
-    auto rightRowLayoutProps = rightRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(rightRowLayoutProps);
-    rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
-    rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+        leftRow->MountToParent(menuItem);
+        auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+        CHECK_NULL_VOID(rightRow);
+        auto rightRowLayoutProps = rightRow->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(rightRowLayoutProps);
+        rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+        rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+        rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 
-    rightRow->MountToParent(menuItem);
+        rightRow->MountToParent(menuItem);
+    }
+    
     auto buildFunc = menuItemProps.buildFunc;
     auto pattern = menuItem->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
