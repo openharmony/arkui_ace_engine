@@ -213,6 +213,30 @@ public:
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetHorizontalAxisValue(ArkUIRuntimeCallInfo* info);
     static Local<JSValueRef> JsGetVerticalAxisValue(ArkUIRuntimeCallInfo* info);
+
+    template<typename T>
+    static panda::Local<panda::JSValueRef> ToJSValueWithVM(const EcmaVM* vm, T val)
+    {
+        if constexpr (std::is_same_v<T, bool>) {
+            return panda::BooleanRef::New(vm, val);
+        } else if constexpr (std::is_same_v<T, int64_t>) {
+            return panda::NumberRef::New(vm, val);
+        } else if constexpr (std::is_integral<T>::value && std::is_signed<T>::value) {
+            return panda::IntegerRef::New(vm, val);
+        } else if constexpr (std::is_unsigned_v<T>) {
+            return panda::IntegerRef::NewFromUnsigned(vm, val);
+        } else if constexpr (std::is_floating_point_v<T>) {
+            return panda::NumberRef::New(vm, val);
+        } else if constexpr (std::is_same_v<T, std::string>) {
+            return panda::StringRef::NewFromUtf8(vm, val.c_str());
+        } else if constexpr (std::is_same_v<T, const char*>) {
+            return panda::StringRef::NewFromUtf8(vm, val);
+        } else if constexpr (std::is_same_v<T, std::u16string>) {
+            return panda::StringRef::NewFromUtf16(vm, val.c_str());
+        }
+        return panda::JSValueRef::Undefined(vm);
+    }
+    static Local<panda::ArrayRef> ChoosePointToJSValue(const EcmaVM* vm, std::vector<int> input);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

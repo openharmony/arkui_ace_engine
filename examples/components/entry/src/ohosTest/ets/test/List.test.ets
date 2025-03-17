@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import DataPanelBootcampTest from './InformationDisplay/DataPanelBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  DataPanelBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

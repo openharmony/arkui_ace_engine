@@ -25,6 +25,7 @@
 #include "base/utils/utils.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/search/search_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -67,6 +68,38 @@ const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__" };
 } // namespace
+
+bool SearchPattern::NeedToRequestKeyboardOnFocus() const
+{
+    auto textField = textField_.Upgrade();
+    CHECK_NULL_RETURN(textField, false);
+    auto pattern = textField->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    auto curPattern = DynamicCast<TextFieldPattern>(pattern);
+    return curPattern->NeedToRequestKeyboardOnFocus();
+}
+
+std::string SearchPattern::ConvertCopyOptionsToString(CopyOptions copyOptions)
+{
+    std::string result;
+    switch (copyOptions) {
+        case CopyOptions::None:
+            result = "CopyOptions.None";
+            break;
+        case CopyOptions::InApp:
+            result = "CopyOptions.InApp";
+            break;
+        case CopyOptions::Local:
+            result = "CopyOptions.Local";
+            break;
+        case CopyOptions::Distributed:
+            result = "CopyOptions.Distributed";
+            break;
+        default:
+            break;
+    }
+    return result;
+}
 
 void SearchPattern::UpdateChangeEvent(const std::u16string& textValue, int16_t style)
 {
@@ -507,6 +540,7 @@ void SearchPattern::InitTextFieldValueChangeEvent()
         auto searchChangeFunc = [weak = AceType::WeakClaim(this)]
         (const ChangeValueInfo& info) {
             auto searchPattern = weak.Upgrade();
+            CHECK_NULL_VOID(searchPattern);
             searchPattern->UpdateChangeEvent(info.value);
         };
         eventHub->SetOnChange(std::move(searchChangeFunc));
@@ -1720,6 +1754,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     textFieldPattern->ToJsonValueSelectOverlay(json, filter);
     json->PutExtAttr("stopBackPress", textFieldLayoutProperty->GetStopBackPressValue(true), filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(textFieldPattern->GetKeyboardAppearance()), filter);
+    json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback() ? "true" : "false", filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -2463,7 +2498,9 @@ void SearchPattern::SetRightIconSrcPath(const std::string& src)
 void SearchPattern::SetCancelButtonStyle(const CancelButtonStyle& style)
 {
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
     UpdateChangeEvent(textFieldPattern->GetTextUtf16Value(), static_cast<int16_t>(style));
 }
 
@@ -2654,7 +2691,9 @@ void SearchPattern::UpdateIconChangeEvent()
 {
     CHECK_NULL_VOID(GetSearchNode());
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
     UpdateChangeEvent(textFieldPattern->GetTextUtf16Value());
 }
 

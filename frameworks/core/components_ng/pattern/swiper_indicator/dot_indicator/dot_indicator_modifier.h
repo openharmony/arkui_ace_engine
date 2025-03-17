@@ -121,7 +121,8 @@ public:
     void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter,
         const LinearVector<float>& itemHalfSizes, bool isOverlong = false);
     void PaintMask(DrawingContext& context);
-    void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
+    void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty, int32_t maxDisplayCount = 0,
+        bool isBindIndicator = false);
     virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
     void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
@@ -330,6 +331,17 @@ public:
     {
         return indicatorDotItemSpace_;
     }
+
+    std::pair<float, float> GetTargetCenter() const
+    {
+        return bottomCenterX_;
+    }
+
+    bool GetIsBottomAnimationFinished() const
+    {
+        return isBottomAnimationFinished_;
+    }
+    void FinishAnimationToTargetImmediately(std::pair<float, float> centerX);
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -355,6 +367,8 @@ protected:
     RefPtr<InterpolatingSpring> GetTailCurve();
     AnimationOption CreateTailOption(
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState, bool isNormal);
+    std::tuple<float, float, float, float> CalcAndAdjustIndicatorPaintRect(
+        const ContentProperty& contentProperty, float& rectWidth, float& rectHeight);
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -382,6 +396,8 @@ protected:
     RefPtr<AnimatablePropertyColor> touchBottomPointColor_;
     bool isTouchBottomLoop_ = false;
     bool ifNeedFinishCallback_ = false;
+    bool isBottomAnimationFinished_ = true;
+    std::pair<float, float> bottomCenterX_;
     TouchBottomAnimationStage animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     std::optional<int32_t> normalToHoverIndex_ = std::nullopt;
     std::optional<int32_t> hoverToNormalIndex_ = std::nullopt;

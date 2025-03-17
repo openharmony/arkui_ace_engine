@@ -1049,51 +1049,19 @@ AccessibilityParentRectInfo SecurityUIExtensionPattern::GetAccessibilityRectInfo
     AccessibilityParentRectInfo rectInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, rectInfo);
-    auto rect = host->GetTransformRectRelativeToWindow(true);
-    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
-    
-    rectInfo.left = static_cast<int32_t>(rect.Left());
-    rectInfo.top = static_cast<int32_t>(rect.Top());
-    rectInfo.scaleX = finalScale.x;
-    rectInfo.scaleY = finalScale.y;
     auto pipeline = host->GetContextRefPtr();
     if (pipeline) {
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
-            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            auto rectFinal = accessibilityManager->GetFinalRealRectInfo(host);
-            rectInfo.left = static_cast<int32_t>(rectFinal.Left());
-            rectInfo.top = static_cast<int32_t>(rectFinal.Top());
-            RotateTransform rotateData;
-            RotateTransform windowRotateData = windowInfo.rotateTransform;
-            rotateData.rotateDegree = host->GetTransformRotateRelativeToWindow();
-            AccessibilityRect rotateRect(rectFinal.Left(), rectFinal.Top(),
-                rectFinal.Width(), rectFinal.Height());
-            if (windowRotateData.rotateDegree) {
-                rotateRect.Rotate(windowRotateData.innerCenterX, windowRotateData.innerCenterY,
-                    windowRotateData.rotateDegree);
-                rotateRect.ApplyTransformation(windowRotateData, windowInfo.scaleX, windowInfo.scaleY);
-                rotateData.rotateDegree += windowRotateData.rotateDegree;
-            } else {
-                RotateTransform roateDataTemp(0, windowInfo.left, windowInfo.top, 0, 0);
-                rotateRect.ApplyTransformation(roateDataTemp, windowInfo.scaleX, windowInfo.scaleY);
-            }
-            rectInfo.left = rotateRect.GetX();
-            rectInfo.top = rotateRect.GetY();
-            rectInfo.scaleX *= windowInfo.scaleX;
-            rectInfo.scaleY *= windowInfo.scaleY;
-            if (rotateData.rotateDegree) {
-                rotateData.centerX = static_cast<int32_t>(rotateRect.GetWidth()) * 0.5f + rotateRect.GetX();
-                rotateData.centerY = static_cast<int32_t>(rotateRect.GetHeight()) * 0.5f + rotateRect.GetY();
-                auto renderContext = host->GetRenderContext();
-                CHECK_NULL_RETURN(renderContext, rectInfo);
-                auto rectOrigin = renderContext->GetPaintRectWithoutTransform();
-                rotateData.innerCenterX = rectOrigin.Width() * 0.5f;
-                rotateData.innerCenterY = rectOrigin.Height() * 0.5f;
-            }
-            rectInfo.rotateTransform = rotateData;
+            return accessibilityManager->GetTransformRectInfoRelativeToWindow(host, pipeline);
         }
     }
+    auto rect = host->GetTransformRectRelativeToWindow(true);
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    rectInfo.left = static_cast<int32_t>(rect.Left());
+    rectInfo.top = static_cast<int32_t>(rect.Top());
+    rectInfo.scaleX = finalScale.x;
+    rectInfo.scaleY = finalScale.y;
     return rectInfo;
 }
 
@@ -1114,8 +1082,9 @@ void SecurityUIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
     data.SetParam("innerCenterX", parentRectInfo.rotateTransform.innerCenterX);
     data.SetParam("innerCenterY", parentRectInfo.rotateTransform.innerCenterY);
     data.SetParam("rotateDegree", parentRectInfo.rotateTransform.rotateDegree);
-    UIEXT_LOGI("SecUEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
-        parentRectInfo.scaleX, parentRectInfo.scaleY);
+    UIEXT_LOGI("SecUEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f],"
+        "rotateDegree: %{public}d.", parentRectInfo.scaleX, parentRectInfo.scaleY,
+        parentRectInfo.rotateTransform.rotateDegree);
     SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);
 }
 

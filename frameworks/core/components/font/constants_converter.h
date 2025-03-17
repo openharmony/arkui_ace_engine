@@ -16,31 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_CONSTANTS_CONVERTER_H
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/placeholder_run.h"
-#include "txt/text_baseline.h"
-#include "txt/text_decoration.h"
-#include "txt/text_style.h"
-#include "include/core/SkColor.h"
-#else
 #include "rosen_text/typography_types.h"
 #include "SkColor.h"
-#endif
 
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/pipeline_base.h"
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-namespace txt {
-enum class FontWeight;
-enum class FontStyle;
-enum class TextAlign;
-enum class RectHeightStyle;
-enum class RectWidthStyle;
-enum class TextDirection;
-enum class TextDecorationStyle;
-} // namespace txt
-#else
 namespace OHOS::Rosen {
 enum class FontWeight;
 enum class FontStyle;
@@ -59,7 +40,6 @@ namespace Drawing {
 class RectF;
 } // namespace Drawing
 } // namespace OHOS::Rosen
-#endif
 
 namespace OHOS::Ace {
 
@@ -78,38 +58,6 @@ enum class SymbolType;
 
 namespace Constants {
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-txt::FontWeight ConvertTxtFontWeight(FontWeight fontWeight);
-
-txt::FontStyle ConvertTxtFontStyle(FontStyle fontStyle);
-
-txt::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
-
-txt::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
-
-txt::Paragraph::RectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle);
-
-txt::Paragraph::RectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle);
-
-txt::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
-
-txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
-
-txt::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle);
-
-void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle);
-
-void ConvertTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle);
-
-void ConvertSymbolTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle);
-
-Rect ConvertSkRect(SkRect skRect);
-
-txt::PlaceholderAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration);
-
-void ConvertPlaceholderRun(const PlaceholderRun& span, txt::PlaceholderRun& txtSpan);
-
-#else
 OHOS::Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight);
 
 OHOS::Rosen::SymbolType ConvertTxtSymbolType(SymbolType symbolType);
@@ -141,7 +89,6 @@ Rect ConvertSkRect(const Rosen::Drawing::RectF &skRect);
 OHOS::Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration);
 
 void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderSpan& txtSpan);
-#endif
 
 SkColor ConvertSkColor(Color color);
 

@@ -63,6 +63,7 @@ void LengthLimitingFormatter::Format(const TextEditingValue& oldValue, TextEditi
             if (static_cast<size_t>(eraseStart + exceedLen) > text.length()) {
                 return;
             }
+            eraseStart = std::clamp(eraseStart, 0, static_cast<int32_t>(text.length()));
             text.erase(eraseStart, removeBeforeExtent);
             newValue.selection.Update(eraseStart);
         }

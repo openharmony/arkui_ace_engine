@@ -352,6 +352,7 @@ struct PromptDialogAttr {
     LevelMode dialogLevelMode = LevelMode::OVERLAY;
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
+    WeakPtr<NG::UINode> customCNode;
 };
 
 } // namespace OHOS::Ace

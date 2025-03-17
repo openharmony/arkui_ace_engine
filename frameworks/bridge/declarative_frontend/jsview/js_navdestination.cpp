@@ -303,7 +303,16 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     if (isSymbol) {
         SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
-
+    std::string backButtonAccessibilityText;
+    if (info.Length() > 1) {
+        if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
+            std::string backButtonAccessibilityText;
+            ParseJsString(info[1], backButtonAccessibilityText);
+            NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList,
+                true, backButtonAccessibilityText);
+            return;
+        }
+    }
     NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
 

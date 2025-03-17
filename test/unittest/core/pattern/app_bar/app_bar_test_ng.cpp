@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -402,6 +403,65 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout016, TestSize.Level1)
     pattern->settedColorMode = true;
     pattern->OnColorConfigurationUpdate();
     pattern->UpdateColor(false);
+    EXPECT_EQ(appBar->sessionId_, 0);
+}
+
+/**
+ * @tc.name: TestUpdateIconLayout017
+ * @tc.desc: Test UpdateOverlayLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestUpdateIconLayout017, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    auto atom = appBar->Create(stage);
+    auto menuBar = appBar->BuildMenuBar();
+    auto button = appBar->BuildButton(true);
+    auto driver = appBar->BuildDivider();
+    atom->AddChild(menuBar);
+    atom->AddChild(button);
+    atom->AddChild(driver);
+
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    pattern->UpdateOverlayLayout();
+    pattern->UpdateColor(std::nullopt);
+    theme->clickEffectColorLight_ = Color::RED;
+    theme->focusedOutlineColorLight_ = Color::RED;
+    pattern->UpdateButtonColor(theme, button, true);
+    pattern->UpdateDividerColor(theme, driver, true);
+    auto buttonPattern1 = button->GetPattern<ButtonPattern>();
+    EXPECT_EQ(buttonPattern1->clickedColor_, Color::RED);
+    EXPECT_EQ(buttonPattern1->focusBorderColor_, Color::RED);
+
+    theme->clickEffectColorDark_ = Color::BLUE;
+    theme->focusedOutlineColorDark_ = Color::BLUE;
+    pattern->UpdateButtonColor(theme, button, false);
+    pattern->UpdateDividerColor(theme, driver, false);
+    auto buttonPattern2 = button->GetPattern<ButtonPattern>();
+    EXPECT_EQ(buttonPattern2->clickedColor_, Color::BLUE);
+    EXPECT_EQ(buttonPattern2->focusBorderColor_, Color::BLUE);
+}
+
+/**
+ * @tc.name: TestUpdateIconLayout018
+ * @tc.desc: Test BeforeCreateLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestUpdateIconLayout018, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    auto atom = appBar->Create(stage);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    pattern->BeforeCreateLayoutWrapper();
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetSafeAreaManager();
+    manager->keyboardSafeAreaEnabled_ = true;
+    pattern->BeforeCreateLayoutWrapper();
     EXPECT_EQ(appBar->sessionId_, 0);
 }
 } // namespace OHOS::Ace::NG

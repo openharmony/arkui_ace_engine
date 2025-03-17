@@ -107,7 +107,8 @@ public:
         auto children = node->GetChildren();
         int32_t index = 0;
         for (const auto& child : children) {
-            if (checkStart && index++ < itemStartIndex_) {  // ignore start header if exist
+            index++;
+            if (checkStart && index <= itemStartIndex_) {  // ignore start header if exist
                 continue;
             }
             if (AceType::InstanceOf<FrameNode>(child)) {

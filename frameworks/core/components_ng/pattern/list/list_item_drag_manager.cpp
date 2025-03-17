@@ -126,6 +126,7 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(forEach);
     totalCount_ = forEach->FrameCount();
     fromIndex_ = GetIndex();
+    forEach->FireOnDragStart(fromIndex_);
 }
 
 void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
@@ -135,6 +136,9 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
+    forEach->FireOnLongPress(GetIndex());
     if (renderContext->HasTransformScale()) {
         prevScale_ = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
     } else {
@@ -405,10 +409,13 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     HandleAutoScroll(from, point, frameRect);
 
     int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
     if (to == from) {
         return;
     }
     HandleSwapAnimation(from, to);
+    forEach->FireOnMoveThrough(fromIndex_, to);
 }
 
 void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
@@ -495,10 +502,12 @@ void ListItemDragManager::HandleDragEndAnimation()
 
 void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
 {
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHotZoneScrollCallback(nullptr);
     if (scrolling_) {
-        auto parent = listNode_.Upgrade();
-        CHECK_NULL_VOID(parent);
-        auto pattern = parent->GetPattern<ListPattern>();
         pattern->HandleLeaveHotzoneEvent();
         scrolling_ = false;
     }
@@ -507,6 +516,7 @@ void ListItemDragManager::HandleOnItemDragEnd(const GestureEvent& info)
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_VOID(forEach);
     forEach->FireOnMove(fromIndex_, to);
+    forEach->FireOnDrop(to);
     SetDragState(dragState_ = ListItemDragState::IDLE);
 }
 
@@ -514,6 +524,12 @@ void ListItemDragManager::HandleOnItemDragCancel()
 {
     HandleDragEndAnimation();
     SetDragState(dragState_ = ListItemDragState::IDLE);
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_VOID(parent);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleLeaveHotzoneEvent();
+    pattern->SetHotZoneScrollCallback(nullptr);
 }
 
 int32_t ListItemDragManager::GetIndex() const

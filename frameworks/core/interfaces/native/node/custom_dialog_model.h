@@ -18,6 +18,8 @@
 
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "base/geometry/dimension.h"
+#include "frameworks/core/components/common/properties/shadow.h"
+#include "frameworks/core/components/dialog/dialog_properties.h"
 
 struct _ArkUIDialog {
     void* dialogHandle;
@@ -44,7 +46,6 @@ struct _ArkUIDialog {
     ArkUI_Int32 levelUniqueId;
     ArkUI_Int32 immersiveMode;
     ArkUI_Float64 levelOrder;
-    ArkUI_Int32 focusable;
     void* onWillAppearData;
     void* onDidAppearData;
     void* onWillDisappearData;
@@ -53,6 +54,21 @@ struct _ArkUIDialog {
     void (*onDidAppear)(void*);
     void (*onWillDisappear)(void*);
     void (*onDidDisappear)(void*);
+    ArkUIBorderWidth* borderWidthEdgeWidths;
+    OHOS::Ace::DimensionUnit borderWidthUnit;
+    ArkUIBorderColor* borderColors;
+    ArkUIBorderStyle* borderStyles;
+    std::optional<ArkUI_Float32> widthValue;
+    OHOS::Ace::DimensionUnit widthUnit;
+    std::optional<ArkUI_Float32> heightValue;
+    OHOS::Ace::DimensionUnit heightUnit;
+    OHOS::Ace::ShadowStyle shadowStyle;
+    OHOS::Ace::Shadow customShadow;
+    ArkUI_Int32 blurStyle;
+    OHOS::Ace::KeyboardAvoidMode keyboardAvoidMode;
+    ArkUI_Bool enableHoverMode;
+    OHOS::Ace::HoverModeAreaType hoverModeAreaType;
+    ArkUI_Int32 focusable;
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -82,13 +98,30 @@ ArkUI_Int32 SetLevelMode(ArkUIDialogHandle handle, ArkUI_Int32 mode);
 ArkUI_Int32 SetLevelUniqueId(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId);
 ArkUI_Int32 SetImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode);
 ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder);
-ArkUI_Int32 SetFocusable(ArkUIDialogHandle handle, bool focusable);
 ArkUI_Int32 RegisterOnWillAppearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
 ArkUI_Int32 RegisterOnDidAppearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
 ArkUI_Int32 RegisterOnWillDisappearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
 ArkUI_Int32 RegisterOnDidDisappearDialog(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData));
 ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
 ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId);
+ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void (*callback)(ArkUI_Int32 dialogId));
+ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, bool showInSubWindow);
+ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle handle, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom,
+    ArkUI_Float32 left, ArkUI_Int32 unit);
+ArkUI_Int32 SetDialogBorderColor(
+    ArkUIDialogHandle handle, ArkUI_Uint32 top, ArkUI_Uint32 right, ArkUI_Uint32 bottom, ArkUI_Uint32 left);
+ArkUI_Int32 SetDialogBorderStyle(
+    ArkUIDialogHandle controllerHandler, ArkUI_Int32 top, ArkUI_Int32 right, ArkUI_Int32 bottom, ArkUI_Int32 left);
+ArkUI_Int32 SetWidth(ArkUIDialogHandle handle, float width, ArkUI_Int32 unit);
+ArkUI_Int32 SetHeight(ArkUIDialogHandle handle, float height, ArkUI_Int32 unit);
+ArkUI_Int32 SetShadow(ArkUIDialogHandle controllerHandler, ArkUI_Int32 shadow);
+ArkUI_Int32 SetDialogCustomShadow(
+    ArkUIDialogHandle controllerHandler, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length);
+ArkUI_Int32 SetBackgroundBlurStyle(ArkUIDialogHandle controllerHandler, ArkUI_Int32 blurStyle);
+ArkUI_Int32 SetKeyboardAvoidMode(ArkUIDialogHandle controllerHandler, ArkUI_Int32 keyboardAvoidMode);
+ArkUI_Int32 EnableHoverMode(ArkUIDialogHandle controllerHandler, bool enableHoverMode);
+ArkUI_Int32 SetHoverModeArea(ArkUIDialogHandle controllerHandler, ArkUI_Int32 hoverModeAreaType);
+ArkUI_Int32 SetFocusable(ArkUIDialogHandle handle, bool focusable);
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif
