@@ -445,6 +445,7 @@ void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
     AceContainer::DestroyContainer(instanceId_);
+    rsWindow_ = nullptr;
 }
 
 uint32_t UIContentImpl::GetBackgroundColor()
