@@ -14,6 +14,7 @@
  */
 
 #include "base/log/event_report.h"
+#include "core/components_ng/base/frame_node.h"
 
 #include <unistd.h>
 
@@ -167,18 +168,17 @@ void EventReport::SendJsCardRenderTimeEvent(
         STATISTIC_DURATION, timeDelay);
 }
 
-void EventReport::SendDiffFrameRatesDuring(const std::string &scene, int32_t frameRateDuring_60,
-    int32_t frameRateDuring_72, int32_t frameRateDuring_90, int32_t frameRateDuring_120)
+void EventReport::SendDiffFrameRatesDuring(const std::string &scene, const NG::FRCSceneFpsInfo &curFRCSceneFpsInfo_)
 {
     auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
     std::string eventName = "FRC_SCENE_INFO";
     if (packageName.size() > MAX_PACKAGE_NAME_LENGTH) {
         StrTrim(packageName);
     }
-    auto frameRateDuring_60_ms = frameRateDuring_60 / NS_TO_MS;
-    auto frameRateDuring_72_ms = frameRateDuring_72 / NS_TO_MS;
-    auto frameRateDuring_90_ms = frameRateDuring_90 / NS_TO_MS;
-    auto frameRateDuring_120_ms = frameRateDuring_120 / NS_TO_MS;
+    auto frameRateDuring_60_ms = curFRCSceneFpsInfo_.duration_60 / NS_TO_MS;
+    auto frameRateDuring_72_ms = curFRCSceneFpsInfo_.duration_72 / NS_TO_MS;
+    auto frameRateDuring_90_ms = curFRCSceneFpsInfo_.duration_90 / NS_TO_MS;
+    auto frameRateDuring_120_ms = curFRCSceneFpsInfo_.duration_120 / NS_TO_MS;
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_SCENE, scene,
