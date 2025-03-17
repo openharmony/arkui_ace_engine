@@ -53,7 +53,7 @@ const AppInfo KOALA_APP_INFO = {
     "start",
     ":J",
     "enter",
-    "II:Z",
+    "IIJ:Z",
     "emitEvent",
     "IIII:V",
 };
@@ -66,25 +66,35 @@ const AppInfo KOALA_APP_INFO = {
 //     }
 // }
 
-// void RunArkoalaEventLoop(EtsEnv& env, ets_object app)
-// {
-//     ets_class appClass = env.FindClass(KOALA_APP_INFO.className);
-//     if (!appClass) {
-//         LOGE("Cannot load main class %s\n", KOALA_APP_INFO.className);
-//         return;
-//     }
-//     ets_method enter = env.Getp_method(appClass, KOALA_APP_INFO.enterMethodName, nullptr /*appInfo->enterMethodSig */);
-//     if (!enter) {
-//         LOGE("Cannot find enter method %s", KOALA_APP_INFO.enterMethodName);
-//         TryEmitError(env);
-//         return;
-//     }
-//     auto terminate = env.CallBooleanMethod((ets_object)(app), (ets_method)(enter), (ets_int)0, (ets_int)0);
-//     TryEmitError(env);
-//     if (terminate) {
-//         exit(0);
-//     }
-// }
+void RunArkoalaEventLoop(ani_env* env, ani_ref app)
+{
+    ani_class appClass;
+    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+        LOGE("[%{public}s] Cannot load main class %{}s", __func__, KOALA_APP_INFO.className);
+        return;
+    }
+ 
+    ani_method enter = nullptr;
+    if (env->Class_FindMethod(appClass, KOALA_APP_INFO.enterMethodName, KOALA_APP_INFO.enterMethodSig, &enter) !=
+        ANI_OK) {
+        LOGE("[%{public}s] Cannot find enter method %{public}s", __func__, KOALA_APP_INFO.enterMethodName);
+        // TryEmitError(env);
+        return;
+    }
+ 
+    ani_int arg0 = 0;
+    ani_int arg1 = 0;
+    ani_boolean result;
+    if (env->Object_CallMethod_Boolean(static_cast<ani_object>(app), enter, &result, arg0, arg1, nullptr) != ANI_OK) {
+        LOGE("[%{public}s] Call enter method failed", __func__);
+        return;
+    }
+    // auto terminate = env.CallBooleanMethod((ets_object)(app), (ets_method)(enter), (ets_int)0, (ets_int)0);
+    // TryEmitError(env);
+    // if (terminate) {
+    //     exit(0);
+    // }
+}
 } // namespace
 
 UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::string& params)
@@ -210,8 +220,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     }
 
     // TODO: init event loop
-    // CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
-    // pipeline_->SetVsyncListener([env = env_, app]() { RunArkoalaEventLoop(*env, app); });
+    CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
+    pipeline_->SetVsyncListener([env = env_, app]() { RunArkoalaEventLoop(env, app); });
 
     return UIContentErrorCode::NO_ERRORS;
 }

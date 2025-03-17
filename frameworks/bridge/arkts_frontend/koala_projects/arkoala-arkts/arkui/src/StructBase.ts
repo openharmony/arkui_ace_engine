@@ -1,6 +1,6 @@
 import { ArkStructBase } from './ArkStructBase'
 import { ArkCommonMethodComponent } from './generated';
-
+import { InteropNativeModule } from "@koalaui/interop"
 class Delegate<T, OptionsT> extends ArkStructBase<Delegate<T, OptionsT>, OptionsT> {
     instance: StructBase<T, OptionsT>;
 
@@ -18,6 +18,22 @@ class Delegate<T, OptionsT> extends ArkStructBase<Delegate<T, OptionsT>, Options
         initializers?: OptionsT | undefined): void {
         this.instance._build(undefined, content, undefined)
     }
+    aboutToAppear(): void {
+        InteropNativeModule._NativeLog("ARKTS: aboutToAppear")
+        this.instance.aboutToAppear()
+    }
+    aboutToDisappear(): void {
+        InteropNativeModule._NativeLog("ARKTS: aboutToDisappear")
+        this.instance.aboutToAppear()
+    }
+    onPageShow(): void {
+        InteropNativeModule._NativeLog("ARKTS: onPageShow")
+        this.instance.aboutToAppear()
+    }
+    onPageHide(): void {
+        InteropNativeModule._NativeLog("ARKTS: onPageHide")
+        this.instance.aboutToAppear()
+    }
 }
 
 export abstract class StructBase<T, OptionsT> {
@@ -32,7 +48,14 @@ export abstract class StructBase<T, OptionsT> {
     ) {
         Delegate._instantiate(undefined, () => new Delegate<S, OptionsS>(factory()), content, options);
     }
-
+    aboutToAppear(): void {
+    }
+    aboutToDisappear(): void {
+    }
+    onPageShow(): void {
+    }
+    onPageHide(): void {
+    }
     /** @memo */
     abstract _build(
         /** @memo */
