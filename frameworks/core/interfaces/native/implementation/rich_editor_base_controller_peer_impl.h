@@ -58,16 +58,16 @@ public:
         }
     }
 
-    std::optional<struct UpdateSpanStyle> GetTypingStyle()
+    std::optional<UpdateSpanStyle> GetTypingStyle()
     {
         if (auto controller = handler_.Upgrade(); controller) {
             return controller->GetTypingStyle();
         }
-        std::optional<struct UpdateSpanStyle> empty;
+        std::optional<UpdateSpanStyle> empty;
         return empty;
     }
 
-    void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle)
+    void SetTypingStyle(std::optional<UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle)
     {
         if (auto controller = handler_.Upgrade(); controller) {
             controller->SetTypingStyle(typingStyle, textStyle);
