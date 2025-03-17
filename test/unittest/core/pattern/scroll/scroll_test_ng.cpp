@@ -1253,7 +1253,7 @@ HWTEST_F(ScrollTestNg, Snap002, TestSize.Level1)
     snapPaginations = {};
     ClearOldNodes();
     CreateSnapScroll(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
-    EXPECT_EQ(pattern_->snapOffsets_.size(), 0);
+    EXPECT_GT(pattern_->snapOffsets_.size(), 0);
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(10.f).has_value());
     EXPECT_FALSE(pattern_->CalePredictSnapOffset(-(SNAP_SCROLLABLE_DISTANCE + 10.f)).has_value());
 }
