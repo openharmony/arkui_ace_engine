@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ColorBlock, Drawer, RadioBlock, SliderBlock, useEnabled } from "common"
+import { ColorBlock, Drawer, RadioBlock, SliderBlock, useEnabled } from 'common'
 import {
   DimensionNoPercentage,
   ItemRestriction,
@@ -20,7 +20,7 @@ import {
   SegmentButtonItemTuple,
   SegmentButtonOptions,
   SegmentButtonTextItem
-} from "@ohos.arkui.advanced.SegmentButton";
+} from '@ohos.arkui.advanced.SegmentButton';
 import { LengthUnit } from '@kit.ArkUI';
 
 @Component
