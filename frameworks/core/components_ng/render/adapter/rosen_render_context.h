@@ -419,6 +419,11 @@ public:
     void SetTranslate(float translateX, float translateY, float translateZ) override;
     void SetHostNode(const WeakPtr<FrameNode>& host) override;
 
+    OffsetF GetBaseTransalteInXY() const override;
+    void SetBaseTranslateInXY(const OffsetF& offset) override;
+    float GetBaseRotateInZ() const override;
+    void SetBaseRotateInZ(float degree) override;
+
     void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) override;
     void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) override;
@@ -737,6 +742,10 @@ protected:
     // translate and scale modifier for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;
+    std::shared_ptr<Rosen::RSRotationXModifier> rotationXUserModifier_;
+    std::shared_ptr<Rosen::RSRotationYModifier> rotationYUserModifier_;
+    std::shared_ptr<Rosen::RSRotationModifier> rotationZUserModifier_;
+    std::shared_ptr<Rosen::RSCameraDistanceModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
@@ -746,6 +755,10 @@ protected:
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
 
     std::optional<OffsetF> frameOffset_;
+
+    // for page orientation feature.
+    std::shared_ptr<Rosen::RSTranslateModifier> baseTranslateInXY_;
+    std::shared_ptr<Rosen::RSRotationModifier> baseRotateInZ_;
 
     // graphics modifiers
     struct GraphicModifiers {

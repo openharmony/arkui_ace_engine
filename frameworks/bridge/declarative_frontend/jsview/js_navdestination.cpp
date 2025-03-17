@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
