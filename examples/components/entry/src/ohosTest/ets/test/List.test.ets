@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import SideBarContainerBootcampTest from './GridAndColumnLayout/SideBarContainerBootcamp.test'
 
 export default function testsuite() {
   abilityTest();
+  SideBarContainerBootcampTest();
 }
