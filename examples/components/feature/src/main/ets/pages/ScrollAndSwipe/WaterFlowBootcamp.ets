@@ -914,6 +914,9 @@ export struct WaterFlowBootcamp {
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
 
+  @State enableBackToTop: boolean = true;
+  @State backToTop: boolean = false;
+
   scroller1: Scroller = new Scroller();
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller1)
@@ -2052,6 +2055,7 @@ export struct WaterFlowBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .backToTop(useEnabled(this.enableBackToTop, this.backToTop))
       }
       .height(400)
 
@@ -2374,6 +2378,16 @@ export struct WaterFlowBootcamp {
             { label: 'false', value: false }
           ]
         })
+        
+        RadioBlock({
+          title: 'backToTop',
+          isEnabled: $enableBackToTop,
+          value: $backToTop,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })        
       }
       .width('100%')
     }
