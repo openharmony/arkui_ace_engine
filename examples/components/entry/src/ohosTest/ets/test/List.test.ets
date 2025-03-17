@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import RowSplitBootcampTest from './GridAndColumnLayout/RowSplitBootcamp.test'
 
 export default function testsuite() {
   abilityTest();
+  RowSplitBootcampTest();
 }
