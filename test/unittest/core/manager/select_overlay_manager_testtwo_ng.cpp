@@ -629,4 +629,177 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, ConvertPointRelativeToNode001, TestSize.
     content.ConvertPointRelativeToNode(frameNode, point);
     EXPECT_EQ(content.selectionHoldId_, -1);
 }
+
+/**
+ * @tc.name: IsTouchInNormalSelectOverlayArea001
+ * @tc.desc: test select_content_overlay_manager.cpp IsTouchInNormalSelectOverlayArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, IsTouchInNormalSelectOverlayArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = false;
+    selectInfo.menuInfo.showCut = true;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+    content.selectOverlayNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(content.selectOverlayNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step3. call IsTouchInNormalSelectOverlayArea
+     */
+    content.IsTouchInNormalSelectOverlayArea(PointF(0.0, 0.0));
+    ASSERT_NE(content.selectOverlayNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: IsTouchInNormalSelectOverlayArea002
+ * @tc.desc: test select_content_overlay_manager.cpp IsTouchInNormalSelectOverlayArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, IsTouchInNormalSelectOverlayArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.isUsingMouse = true;
+    selectInfo.enableHandleLevel = false;
+    selectInfo.menuInfo.showCut = true;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    auto wrapperNode_ = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode_, nullptr);
+    content.selectOverlayNode_ = AceType::WeakClaim(AceType::RawPtr(wrapperNode_));
+    ASSERT_NE(content.selectOverlayNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step3. call IsTouchInNormalSelectOverlayArea
+     */
+    content.IsTouchInNormalSelectOverlayArea(PointF(0.0, 0.0));
+    ASSERT_NE(content.selectOverlayNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: GetHandleOverlayNode001
+ * @tc.desc: test select_content_overlay_manager.cpp GetHandleOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, GetHandleOverlayNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+    auto handleNode =
+        SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_, SelectOverlayMode::HANDLE_ONLY);
+    ASSERT_NE(handleNode, nullptr);
+    content.handleNode_ = AceType::WeakClaim(AceType::RawPtr(handleNode));
+    ASSERT_NE(content.handleNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step3. call GetHandleOverlayNode
+     */
+    auto weakHandleNode = content.GetHandleOverlayNode();
+    ASSERT_NE(weakHandleNode, nullptr);
+}
+
+/**
+ * @tc.name: MarkHandleDirtyNode001
+ * @tc.desc: test select_content_overlay_manager.cpp MarkHandleDirtyNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, MarkHandleDirtyNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    selectInfo.isUseOverlayNG = true;
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+    auto handleNode =
+        SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_, SelectOverlayMode::HANDLE_ONLY);
+    ASSERT_NE(handleNode, nullptr);
+    content.handleNode_ = AceType::WeakClaim(AceType::RawPtr(handleNode));
+    ASSERT_NE(content.handleNode_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps: step3. call MarkHandleDirtyNode
+     */
+    content.MarkHandleDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    ASSERT_NE(content.handleNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateRightClickSubWindowMenuProps001
+ * @tc.desc: test select_content_overlay_manager.cpp UpdateRightClickSubWindowMenuProps
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, UpdateRightClickSubWindowMenuProps001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.isUsingMouse = true;
+    selectInfo.enableHandleLevel = false;
+    selectInfo.menuInfo.showCut = true;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    auto wrapperNode_ = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode_, nullptr);
+    content.selectOverlayNode_ = AceType::WeakClaim(AceType::RawPtr(wrapperNode_));
+    auto selectoverlayNode = content.selectOverlayNode_.Upgrade();
+    ASSERT_NE(selectoverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step3. call UpdateRightClickSubWindowMenuProps
+     */
+    content.UpdateRightClickSubWindowMenuProps(selectoverlayNode);
+    ASSERT_NE(content.selectOverlayNode_.Upgrade(), nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -470,14 +470,14 @@ HWTEST_F(GridCommonTestNg, FireDrag001, TestSize.Level1)
 
     /**
      * @tc.steps: step1. Drag 1st item to out of Grid.
-     * @tc.expected: GetOriginalIndex return number of GridItem.
+     * @tc.expected: GetOriginalIndex unchange.
      */
     ItemDragInfo dragInfo;
     dragInfo.SetX(0);
     dragInfo.SetY(0);
     eventHub_->FireOnItemDragEnter(dragInfo);
-    eventHub_->FireOnItemDragLeave(dragInfo, NULL_VALUE);
-    EXPECT_EQ(pattern_->GetOriginalIndex(), 11);
+    eventHub_->FireOnItemDragLeave(dragInfo, 0);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
     FlushUITasks();
 
     /**
@@ -549,14 +549,14 @@ HWTEST_F(GridCommonTestNg, FireDrag002, TestSize.Level1)
 
     /**
      * @tc.steps: step1. Drag 1st item to out of Grid.
-     * @tc.expected: GetOriginalIndex return number of GridItem.
+     * @tc.expected: GetOriginalIndex unchange.
      */
     ItemDragInfo dragInfo;
     dragInfo.SetX(0);
     dragInfo.SetY(0);
     eventHub_->FireOnItemDragEnter(dragInfo);
-    eventHub_->FireOnItemDragLeave(dragInfo, NULL_VALUE);
-    EXPECT_EQ(pattern_->GetOriginalIndex(), itemCount);
+    eventHub_->FireOnItemDragLeave(dragInfo, 0);
+    EXPECT_EQ(pattern_->GetOriginalIndex(), -1);
     FlushUITasks();
 
     /**
@@ -1272,5 +1272,71 @@ HWTEST_F(GridCommonTestNg, IsInViewPort001, TestSize.Level1)
     FlushUITasks();
     EXPECT_FALSE(pattern_->focusHandler_.IsInViewport(0, true));
     EXPECT_FALSE(pattern_->focusHandler_.IsInViewport(0, false));
+}
+
+/**
+ * @tc.name: FireDrag004
+ * @tc.desc: Drag an item which is from another Grid, test layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FireDrag004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEditable(true);
+    model.SetSupportAnimation(true);
+    CreateFixedItems(4);
+    CreateDone();
+
+    GestureEvent info;
+    Point globalPoint = Point(270.f, 50.f);
+    info.SetGlobalPoint(globalPoint);
+    eventHub_->HandleOnItemDragStart(info);
+
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(0);
+    dragInfo.SetY(0);
+    eventHub_->FireOnItemDragEnter(dragInfo);
+    // drag an extraneous item to [3] in this Grid.
+    eventHub_->FireOnItemDragMove(dragInfo, -1, 3);
+    FlushUITasks();
+
+    const decltype(pattern_->info_.gridMatrix_) cmp = { { 0, { { 0, 0 }, { 1, 1 } } }, { 1, { { 0, 2 }, { 1, -1 } } },
+        { 2, { { 0, 3 }, { 1, 3 } } } };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, cmp);
+    /*
+     *  0 1
+     *  2
+     *  3
+     */
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(1), Rect(120, 0, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(2), Rect(0, 100, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(3), Rect(0, 200, WIDTH / 2, ITEM_MAIN_SIZE)));
+
+    // drag the item out of this Grid.
+    eventHub_->FireOnItemDragLeave(dragInfo, -1);
+    FlushUITasks();
+    /*
+     *  0 1
+     *  2 3
+     */
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(1), Rect(120, 0, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(2), Rect(0, 100, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(3), Rect(120, 100, WIDTH / 2, ITEM_MAIN_SIZE)));
+
+    // drag item [1] in this grid to [0]
+    eventHub_->FireOnItemDragMove(dragInfo, 1, 0);
+    FlushUITasks();
+
+    /*
+     *  1 0
+     *  2 3
+     */
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(120, 0, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(1), Rect(0, 0, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(2), Rect(0, 100, WIDTH / 2, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(3), Rect(120, 100, WIDTH / 2, ITEM_MAIN_SIZE)));
 }
 } // namespace OHOS::Ace::NG

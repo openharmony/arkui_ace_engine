@@ -90,22 +90,38 @@ float GetHoursWest(float hoursWest)
 extern "C" {
 VectorNativeTextShadow FFICJCreateVectorNativeTextShadow(int64_t size)
 {
-    LOGI("Create NativeTextShadow Vector");
     return new std::vector<NativeTextShadow>(size);
+}
+
+VectorNativeTextShadow FFICJCreateVectorNativeTextShadowV2(int64_t size)
+{
+    return new std::vector<NativeTextShadowV2>(size);
 }
 
 void FFICJVectorNativeTextShadowSetElement(
     VectorNativeTextShadow vec, int64_t index, NativeTextShadow textShadow)
 {
-    LOGI("NativeTextShadow Vector Set Element");
     auto actualVec = reinterpret_cast<std::vector<NativeTextShadow>*>(vec);
     (*actualVec)[index] = textShadow;
-    LOGI("NativeTextShadow Vector Set Element Success");
 }
+
+void FFICJVectorNativeTextShadowSetElementV2(
+    VectorNativeTextShadow vec, int64_t index, NativeTextShadowV2 textShadow)
+{
+    auto actualVec = reinterpret_cast<std::vector<NativeTextShadowV2>*>(vec);
+    (*actualVec)[index] = textShadow;
+}
+
 
 void FFICJVectorNativeTextShadowDelete(VectorNativeTextShadow vec)
 {
     auto actualVec = reinterpret_cast<std::vector<NativeTextShadow>*>(vec);
+    delete actualVec;
+}
+
+void FFICJVectorNativeTextShadowDeleteV2(VectorNativeTextShadow vec)
+{
+    auto actualVec = reinterpret_cast<std::vector<NativeTextShadowV2>*>(vec);
     delete actualVec;
 }
 
@@ -122,11 +138,29 @@ void FfiOHOSAceFrameworkTextClockCreateDefault(int64_t controllerId)
     }
 }
 
-void FfiOHOSAceFrameworkTextClockCreate(float timeZoneOffset, int64_t controllerId)
+void FfiOHOSAceFrameworkTextClockCreateV2(float timeZoneOffset, int64_t controllerId)
+{
+    auto textClock = TextClockModel::GetInstance()->Create();
+    if (HoursWestIsValid_(static_cast<int32_t>(timeZoneOffset))) {
+        float hourWest = GetHoursWest(timeZoneOffset);
+        TextClockModel::GetInstance()->SetHoursWest(hourWest);
+    } else {
+        TextClockModel::GetInstance()->SetHoursWest(NAN);
+    }
+
+    auto controller = FFIData::GetData<NativeTextClockController>(controllerId);
+    if (controller != nullptr) {
+        controller->SetController(textClock);
+    } else {
+        LOGE("textClockControllerId is invalid ");
+    }
+}
+
+void FfiOHOSAceFrameworkTextClockCreate(int32_t timeZoneOffset, int64_t controllerId)
 {
     auto textClock = TextClockModel::GetInstance()->Create();
     if (HoursWestIsValid_(timeZoneOffset)) {
-        float hourWest = GetHoursWest(timeZoneOffset);
+        float hourWest = GetHoursWest(static_cast<float>(timeZoneOffset));
         TextClockModel::GetInstance()->SetHoursWest(hourWest);
     } else {
         TextClockModel::GetInstance()->SetHoursWest(NAN);
@@ -224,12 +258,25 @@ void FfiOHOSAceFrameworkTextClockDateTimeOptions(const char* hourOptions)
 void FfiOHOSAceFrameworkTextClockTextShadow(VectorStringPtr vecContent)
 {
     auto nativeTextShadowVec = *reinterpret_cast<std::vector<NativeTextShadow>*>(vecContent);
-    
     std::vector<Shadow> shadows(nativeTextShadowVec.size());
     for (size_t i = 0; i < nativeTextShadowVec.size(); i++) {
         Dimension dOffsetX(nativeTextShadowVec[i].offsetX, DimensionUnit::VP);
         Dimension dOffsetY(nativeTextShadowVec[i].offsetY, DimensionUnit::VP);
+        shadows[i].SetBlurRadius(nativeTextShadowVec[i].radius);
+        shadows[i].SetOffsetX(dOffsetX.Value());
+        shadows[i].SetOffsetY(dOffsetY.Value());
+        shadows[i].SetColor(Color(nativeTextShadowVec[i].color));
+    }
+    TextClockModel::GetInstance()->SetTextShadow(shadows);
+}
 
+void FfiOHOSAceFrameworkTextClockTextShadowV2(VectorStringPtr vecContent)
+{
+    auto nativeTextShadowVec = *reinterpret_cast<std::vector<NativeTextShadowV2>*>(vecContent);
+    std::vector<Shadow> shadows(nativeTextShadowVec.size());
+    for (size_t i = 0; i < nativeTextShadowVec.size(); i++) {
+        Dimension dOffsetX(nativeTextShadowVec[i].offsetX, DimensionUnit::VP);
+        Dimension dOffsetY(nativeTextShadowVec[i].offsetY, DimensionUnit::VP);
         shadows[i].SetBlurRadius(nativeTextShadowVec[i].radius);
         shadows[i].SetOffsetX(dOffsetX.Value());
         shadows[i].SetOffsetY(dOffsetY.Value());
@@ -237,7 +284,6 @@ void FfiOHOSAceFrameworkTextClockTextShadow(VectorStringPtr vecContent)
         shadows[i].SetIsFilled(nativeTextShadowVec[i].isFilled);
         shadows[i].SetShadowType(nativeTextShadowVec[i].type == 0 ? ShadowType::COLOR : ShadowType::BLUR);
     }
-    
     TextClockModel::GetInstance()->SetTextShadow(shadows);
 }
 

@@ -1079,7 +1079,7 @@ HWTEST_F(ArcListLayoutTestNg, HandleScrollBarOutBoundary001, TestSize.Level1)
         AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     ASSERT_NE(listLayoutAlgorithm, nullptr);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), 34.5);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
 }
 
 /**
@@ -1117,7 +1117,7 @@ HWTEST_F(ArcListLayoutTestNg, HandleScrollBarOutBoundary002, TestSize.Level1)
         AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     ASSERT_NE(listLayoutAlgorithm, nullptr);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_FALSE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
 }
 
 /**

@@ -58,15 +58,10 @@ struct MenuItemInfo {
 };
 
 struct PreviewMenuAnimationInfo {
-    float previewScale = -1.0f;
-    float menuScale = -1.0f;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(Dimension(-1.0f));
 
     // for hoverScale animation
     float clipRate = -1.0f;
-
-    OffsetF previewOffset = OffsetF();
-    OffsetF menuOffset = OffsetF();
 };
 
 class MenuPattern : public Pattern, public FocusView {

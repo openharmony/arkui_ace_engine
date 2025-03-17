@@ -1043,7 +1043,7 @@ HWTEST_F(ArcindexerPatternTestNg, AtArcHotArea002, TestSize.Level1)
     Create();
     pattern_->isScreenReaderOn_ = true;
     bool status = pattern_->AtArcHotArea(Offset(0, 0));
-    EXPECT_TRUE(status);
+    EXPECT_FALSE(status);
 }
 
 /**

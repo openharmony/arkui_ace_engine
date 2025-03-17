@@ -1398,6 +1398,40 @@ RefPtr<FrameNode> SheetPresentationPattern::GetTitleNode()
     return DynamicCast<FrameNode>(operationNode->GetChildAtIndex(1));
 }
 
+void SheetPresentationPattern::UpdateTitleTextColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto firstChild = host->GetChildAtIndex(0);
+    CHECK_NULL_VOID(firstChild);
+    auto sheetTitleColumn = firstChild->GetChildAtIndex(1);
+    CHECK_NULL_VOID(sheetTitleColumn);
+    auto mainRow = sheetTitleColumn->GetChildAtIndex(0);
+    CHECK_NULL_VOID(mainRow);
+    auto mainTitleText = DynamicCast<FrameNode>(mainRow->GetChildAtIndex(0));
+    CHECK_NULL_VOID(mainTitleText);
+    auto mainTitleProp = mainTitleText->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(mainTitleProp);
+    mainTitleProp->UpdateTextColor(sheetTheme->GetTitleTextFontColor());
+
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.sheetSubtitle.has_value()) {
+        auto subRow = sheetTitleColumn->GetChildAtIndex(1);
+        CHECK_NULL_VOID(subRow);
+        auto subTitleText = DynamicCast<FrameNode>(subRow->GetChildAtIndex(0));
+        CHECK_NULL_VOID(subTitleText);
+        auto subTitleProp = subTitleText->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(subTitleProp);
+        subTitleProp->UpdateTextColor(sheetTheme->GetSubtitleTextFontColor());
+    }
+}
+
 void SheetPresentationPattern::UpdateTitlePadding()
 {
     auto host = GetHost();
@@ -1535,11 +1569,15 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
 
 void SheetPresentationPattern::OnColorConfigurationUpdate()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    auto sheetCloseIcon = GetSheetCloseIcon();
+
+    UpdateTitleTextColor();
+    auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
     CHECK_NULL_VOID(sheetCloseIcon);
     auto renderContext = sheetCloseIcon->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

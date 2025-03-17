@@ -118,6 +118,8 @@ public:
     }
 
     bool IsNestScroller() const;
+
+    void MarkScrollBarDirty() const;
 private:
     /*
      * Drag the built-in or external scroll bar to slide the Scroll.
