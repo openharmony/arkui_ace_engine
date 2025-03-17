@@ -61,16 +61,6 @@ public:
         hasValidContent_ = has;
     }
 
-    void SetEnableToolBarAdaptation(bool enable)
-    {
-        enableToolBarAdaptation_ = enable;
-    }
-
-    bool GetEnableToolBarAdaptation() const
-    {
-        return enableToolBarAdaptation_;
-    }
-
     bool HasValidContent() const
     {
         return hasValidContent_;
@@ -90,7 +80,6 @@ private:
     RefPtr<UINode> toolbarContainerNode_;
     bool isNewToolbar_ = false;
     bool hasValidContent_ = false;
-    bool enableToolBarAdaptation_ = true;
     bool isHideItemText_ = false;
 };
 } // namespace OHOS::Ace::NG

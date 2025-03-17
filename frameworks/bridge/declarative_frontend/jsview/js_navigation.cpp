@@ -429,6 +429,15 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
     if (isSymbol) {
         SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
+    if (info.Length() > 1) {
+        if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
+            std::string backButtonAccessibilityText;
+            ParseJsString(info[1], backButtonAccessibilityText);
+            NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList,
+                true, backButtonAccessibilityText);
+            return;
+        }
+    }
     NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
 

@@ -29,6 +29,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/constant.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
@@ -470,6 +471,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
         twinklingInterval_ = 3000; // 3000 : for AtuoUITest
     }
     ResetOriginCaretPosition();
+    callbackOldPreviewText_.offset = -1;
 }
 
 bool TextFieldPattern::GetIndependentControlKeyboard()
@@ -2580,6 +2582,7 @@ void TextFieldPattern::InitDragDropCallBack()
         if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
             pattern->afterDragSelect_ = true;
         }
+        pattern->CloseKeyboard(true);
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 
@@ -2666,7 +2669,8 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(selectOverlay_);
     CHECK_NULL_VOID(multipleClickRecognizer_);
-    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) || !focusHub->IsFocusable()) {
+    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsValidClick(info)) ||
+        !focusHub->IsFocusable()) {
         return;
     }
     focusIndex_ = FocuseIndex::TEXT;
@@ -2690,7 +2694,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     selectOverlay_->SetUsingMouse(info.GetSourceDevice() == SourceType::MOUSE);
     lastClickTimeStamp_ = info.GetTimeStamp();
-    multipleClickRecognizer_->Start(info);
+    multipleClickRecognizer_->StartCounting(info);
     // register click event
     if (multipleClickRecognizer_->IsTripleClick()) {
         HandleTripleClickEvent(info);
@@ -4061,6 +4065,9 @@ void TextFieldPattern::InitPanEvent()
             host->IsDraggable() && pattern->IsPressSelectedBox()) {
             return GestureJudgeResult::REJECT;
         }
+        if (pattern->GetCancelButtonTouchInfo()) {
+            return GestureJudgeResult::REJECT;
+        }
         return GestureJudgeResult::CONTINUE;
     });
 }
@@ -4806,6 +4813,8 @@ bool TextFieldPattern::CloseCustomKeyboard()
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
+void TextFieldPattern::OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value) {}
+
 void TextFieldPattern::UpdatePasswordIconColor(const Color& color)
 {
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
@@ -4936,8 +4945,7 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
         CalcCounterAfterFilterInsertValue(originLength, insertValue,
             static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
     }
-    int32_t newCaretIndex = offset + caretMoveLength;
-    selectController_->UpdateCaretIndex(newCaretIndex);
+    selectController_->UpdateCaretIndex(offset + caretMoveLength);
 
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, offset);
@@ -4954,6 +4962,7 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
     TwinklingByFocus();
     CloseSelectOverlay(true);
     ScrollToSafeArea();
+    ProcessResponseArea();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return selectController_->GetCaretIndex();
 }
@@ -5763,6 +5772,21 @@ void TextFieldPattern::RecordSubmitEvent() const
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
+#if !defined(ENABLE_STANDARD_INPUT)
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    if (layoutProperty && layoutProperty->HasMaxLength()) {
+        bool textChange = false;
+        auto result = UtfUtils::Str8DebugToStr16(value->text);
+        contentController_->FilterTextInputStyle(textChange, result);
+        auto resultLen = static_cast<int32_t>(result.length());
+        auto maxLen = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+        if (resultLen != maxLen) {
+            showCountBorderStyle_ = resultLen > maxLen;
+            HandleCountStyle();
+        }
+    }
+#endif
+
     UpdateEditingValueToRecord();
     contentController_->SetTextValue(UtfUtils::Str8DebugToStr16(value->text));
     selectController_->UpdateCaretIndex(value->selection.baseOffset);
@@ -5772,8 +5796,6 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
@@ -6722,6 +6744,24 @@ std::string TextFieldPattern::TextInputActionToString() const
     }
 }
 
+std::string TextFieldPattern::AutoCapTypeToString() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    switch (GetAutoCapitalizationModeValue(AutoCapitalizationMode::NONE)) {
+        case AutoCapitalizationMode::NONE:
+            return "AutoCapitalizationMode.NONE";
+        case AutoCapitalizationMode::WORDS:
+            return "AutoCapitalizationMode.WORDS";
+        case AutoCapitalizationMode::SENTENCES:
+            return "AutoCapitalizationMode.SENTENCES";
+        case AutoCapitalizationMode::ALL_CHARACTERS:
+            return "AutoCapitalizationMode.ALL_CHARACTERS";
+        default:
+            return "AutoCapitalizationMode.NONE";
+    }
+}
+
 std::string TextFieldPattern::GetPlaceholderFont() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -7579,6 +7619,7 @@ void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, co
     jsonShowCounter->Put("options", jsonShowCounterOptions);
     json->PutExtAttr("showCounter", jsonShowCounter, filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(keyboardAppearance_), filter);
+    json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);
 }
 
 void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -7807,6 +7848,7 @@ void TextFieldPattern::DumpInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("Content:").append(GetDumpTextValue()));
+    dumpLog.AddDesc(std::string("AutocapitalizationMode:").append(AutoCapTypeToString()));
     dumpLog.AddDesc(std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
     dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
@@ -8381,7 +8423,10 @@ void TextFieldPattern::CheckPasswordAreaState()
     }
     auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
     CHECK_NULL_VOID(passwordArea);
-    passwordArea->SetObscured(!showPasswordState.value());
+    if (!showPasswordState_.has_value() || showPasswordState_.value() != showPasswordState.value()) {
+        passwordArea->SetObscured(!showPasswordState.value());
+        showPasswordState_ = showPasswordState.value();
+    }
 }
 
 void TextFieldPattern::AfterLayoutProcessCleanResponse(
@@ -9143,7 +9188,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     CHECK_NULL_VOID(layoutProperty);
     if (!hasPreviewText_) {
         auto fullStr = GetTextUtf16Value();
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && IsSelected()) {
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && IsSelected()) {
             uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
             uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
             if (startIndex < fullStr.length() && endIndex <= fullStr.length()) {
@@ -10581,6 +10626,7 @@ void TextFieldPattern::ClearTextContent()
     if (contentController_->IsEmpty()) {
         return;
     }
+    showCountBorderStyle_ = false;
     InputCommandInfo inputCommandInfo;
     inputCommandInfo.deleteRange = { 0, contentController_->GetTextUtf16Value().length() };
     inputCommandInfo.insertOffset = 0;
@@ -10635,26 +10681,32 @@ void TextFieldPattern::InitCancelButtonMouseEvent()
     CHECK_NULL_VOID(imageTouchHub);
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(imageInputHub);
-    auto imageHoverTask = [weak = WeakClaim(this), cleanNodeResponseArea = cleanNodeResponseArea_](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnHover(isHover);
-            pattern->HandleButtonMouseEvent(cleanNodeResponseArea, isHover);
-        }
+    auto imageHoverTask = [weak = WeakClaim(this),
+        cleanNodeResponseAreaWeak = WeakPtr<TextInputResponseArea>(cleanNodeResponseArea_)](bool isHover) {
+            auto cleanNodeResponseArea = cleanNodeResponseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(cleanNodeResponseArea);
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->OnHover(isHover);
+                pattern->HandleButtonMouseEvent(cleanNodeResponseArea, isHover);
+            }
     };
     imageHoverEvent_ = MakeRefPtr<InputEvent>(std::move(imageHoverTask));
     imageInputHub->AddOnHoverEvent(imageHoverEvent_);
 
-    auto imageTouchTask = [weak = WeakClaim(this), cleanNodeResponseArea = cleanNodeResponseArea_](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto touchType = info.GetTouches().front().GetTouchType();
-        if (touchType == TouchType::DOWN) {
-            pattern->HandleCancelButtonTouchDown(cleanNodeResponseArea);
-        }
-        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            pattern->HandleCancelButtonTouchUp();
-        }
+    auto imageTouchTask = [weak = WeakClaim(this), cleanNodeResponseAreaWeak =
+        WeakPtr<TextInputResponseArea>(cleanNodeResponseArea_)](const TouchEventInfo& info) {
+            auto cleanNodeResponseArea = cleanNodeResponseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(cleanNodeResponseArea);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto touchType = info.GetTouches().front().GetTouchType();
+            if (touchType == TouchType::DOWN) {
+                pattern->HandleCancelButtonTouchDown(cleanNodeResponseArea);
+            }
+            if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+                pattern->HandleCancelButtonTouchUp();
+            }
     };
 
     imageTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(imageTouchTask));
@@ -10672,26 +10724,32 @@ void TextFieldPattern::InitPasswordButtonMouseEvent()
     CHECK_NULL_VOID(imageTouchHub);
     auto imageInputHub = stackNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(imageInputHub);
-    auto imageHoverTask = [weak = WeakClaim(this), responseArea = responseArea_](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->OnHover(isHover);
-            pattern->HandleButtonMouseEvent(responseArea, isHover);
-        }
+    auto imageHoverTask =
+        [weak = WeakClaim(this), responseAreaWeak = WeakPtr<TextInputResponseArea>(responseArea_)](bool isHover) {
+            auto responseArea = responseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(responseArea);
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->OnHover(isHover);
+                pattern->HandleButtonMouseEvent(responseArea, isHover);
+            }
     };
     imageHoverEvent_ = MakeRefPtr<InputEvent>(std::move(imageHoverTask));
     imageInputHub->AddOnHoverEvent(imageHoverEvent_);
 
-    auto imageTouchTask = [weak = WeakClaim(this), responseArea = responseArea_](const TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto touchType = info.GetTouches().front().GetTouchType();
-        if (touchType == TouchType::DOWN) {
-            pattern->HandleCancelButtonTouchDown(responseArea);
-        }
-        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            pattern->HandleCancelButtonTouchUp();
-        }
+    auto imageTouchTask = [weak = WeakClaim(this), responseAreaWeak = WeakPtr<TextInputResponseArea>(responseArea_)]
+        (const TouchEventInfo& info) {
+            auto responseArea = responseAreaWeak.Upgrade();
+            CHECK_NULL_VOID(responseArea);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto touchType = info.GetTouches().front().GetTouchType();
+            if (touchType == TouchType::DOWN) {
+                pattern->HandleCancelButtonTouchDown(responseArea);
+            }
+            if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+                pattern->HandleCancelButtonTouchUp();
+            }
     };
     imageTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(imageTouchTask));
     imageTouchHub->AddTouchEvent(imageTouchEvent_);
@@ -10711,6 +10769,7 @@ void TextFieldPattern::HandleCancelButtonTouchDown(const RefPtr<TextInputRespons
     roundRectVector.push_back(mouseRect);
     CHECK_NULL_VOID(textFieldOverlayModifier_);
     textFieldOverlayModifier_->SetHoverColorAndRects(roundRectVector, touchColor.GetValue());
+    cancelButtonTouched_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -10720,6 +10779,7 @@ void TextFieldPattern::HandleCancelButtonTouchUp()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(textFieldOverlayModifier_);
     textFieldOverlayModifier_->ClearHoverColorAndRects();
+    cancelButtonTouched_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
 
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
 namespace OHOS::Ace::NG {

@@ -47,7 +47,8 @@ public:
 
     RefPtr<RenderNode> CreateRenderNode() override
     {
-        if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+        if (SystemProperties::GetDeviceType() == DeviceType::WATCH ||
+            SystemProperties::GetDeviceType() == DeviceType::WEARABLE) {
             LOGI("device type is watch, create stage render node.");
             return RenderStage::Create();
         }

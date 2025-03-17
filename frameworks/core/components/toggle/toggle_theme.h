@@ -79,7 +79,7 @@ public:
                 togglePattern->GetAttr<double>("shadow_default_status_button", SHADOW_NONE));
             theme->shadowFocus_ = static_cast<uint32_t>(
                 togglePattern->GetAttr<double>("shadow_focus_status_button", SHADOW_NONE));
-            theme->scaleFocus_ = togglePattern->GetAttr<double>("scale_focus_status_button", 1.0);
+            theme->scaleHoverOrFocus_ = togglePattern->GetAttr<double>("scale_focus_status_button", 1.0);
             theme->borderWidth_ = togglePattern->GetAttr<Dimension>("border_width_status_button", Dimension());
             theme->borderColorChecked_ = togglePattern->GetAttr<Color>("border_color_status_button_checked", Color());
             theme->borderColorUnchecked_ = togglePattern->GetAttr<Color>(
@@ -200,9 +200,9 @@ public:
         return shadowFocus_;
     }
 
-    float GetScaleFocus() const
+    float GetScaleHoverOrFocus() const
     {
-        return scaleFocus_;
+        return scaleHoverOrFocus_;
     }
 
 protected:
@@ -230,7 +230,7 @@ private:
     Color textColorFocus_;
     uint32_t shadowNormal_;
     uint32_t shadowFocus_;
-    float scaleFocus_;
+    float scaleHoverOrFocus_;
     static constexpr double SHADOW_NONE = 6.0;
 };
 

@@ -370,7 +370,7 @@ void JSViewFullUpdate::ConstructorCallback(const JSCallbackInfo& info)
         return;
     }
 
-    int argc = info.Length();
+    uint32_t argc = info.Length();
     if (argc > 1 && (info[0]->IsNumber() || info[0]->IsString())) {
         std::string viewId = info[0]->ToString();
         auto instance = AceType::MakeRefPtr<JSViewFullUpdate>(viewId, info.This(), JSRef<JSFunc>::Cast(renderFunc));
@@ -1175,7 +1175,7 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
     info->Put("processID", getpid());
     info->Put("windowID", (int32_t)pipeline->GetWindowId());
     TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", info->ToString().c_str());
-    LayoutInspector::SendStateProfilerMessage(info->ToString());
+    LayoutInspector::SendMessage(info->ToString());
 #endif
 }
 
