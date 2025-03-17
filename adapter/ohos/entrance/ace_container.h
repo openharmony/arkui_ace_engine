@@ -776,6 +776,13 @@ public:
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
+
+    bool IsWaterfallWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->IsWaterfallModeEnabled();
+    }
+
     Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
     {
         CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());

@@ -693,6 +693,11 @@ public:
         return false;
     }
 
+    virtual bool IsWaterfallWindow() const
+    {
+        return false;
+    }
+
     virtual Rect GetUIExtensionHostWindowRect(int32_t instanceId)
     {
         return Rect();
