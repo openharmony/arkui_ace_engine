@@ -49,9 +49,13 @@ struct CJBaseGestureEvent {
 CJ_EXPORT void FfiOHOSAceFrameworkGestureCreate(int32_t priority, int32_t mask);
 CJ_EXPORT void FfiOHOSAceFrameworkGestureSetTag(const char* tag);
 CJ_EXPORT void FfiOHOSAceFrameworkGestureOnAction(void (*callback)(CJGestureEvent info));
+CJ_EXPORT void FfiOHOSAceFrameworkGestureOnActionV2(void (*callback)(CJGestureEventV2 info));
 CJ_EXPORT void FfiOHOSAceFrameworkGestureOnActionStart(void (*callback)(CJGestureEvent info));
+CJ_EXPORT void FfiOHOSAceFrameworkGestureOnActionStartV2(void (*callback)(CJGestureEventV2 info));
 CJ_EXPORT void FfiOHOSAceFrameworkGestureOnActionUpdate(void (*callback)(CJGestureEvent info));
+CJ_EXPORT void FfiOHOSAceFrameworkGestureOnActionUpdateV2(void (*callback)(CJGestureEventV2 info));
 CJ_EXPORT void FfiOHOSAceFrameworkGestureOnActionEnd(void (*callback)(CJGestureEvent info));
+CJ_EXPORT void FfiOHOSAceFrameworkGestureOnActionEndV2(void (*callback)(CJGestureEventV2 info));
 CJ_EXPORT void FfiOHOSAceFrameworkGestureOnActionCancel(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkGestureFinish();
 CJ_EXPORT void FfiOHOSAceFrameworkGesturePop();
@@ -78,10 +82,12 @@ CJ_EXPORT int64_t FfiOHOSAceFrameworkPanGestureHandlerCtor(int32_t fingers, uint
 CJ_EXPORT int64_t FfiOHOSAceFrameworkGestureGroupHandlerCtor(int32_t mode, VectorInt64Handle vectorHandle);
 CJ_EXPORT void FfiOHOSAceFrameworkGestureGroupHandlerSetOnCancel(int64_t id, void (*onCancel)());
 CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetTag(int64_t id, const char* tag);
-CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnAction(int64_t id, void (*onActionCallback)(CJGestureEvent));
-CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionStart(int64_t id, void (*onActionCallback)(CJGestureEvent));
-CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionUpdate(int64_t id, void (*onActionCallback)(CJGestureEvent));
-CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionEnd(int64_t id, void (*onActionCallback)(CJGestureEvent));
+CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnAction(int64_t id, void (*onActionCallback)(CJGestureEventV2));
+CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionStart(
+    int64_t id, void (*onActionCallback)(CJGestureEventV2));
+CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionUpdate(
+    int64_t id, void (*onActionCallback)(CJGestureEventV2));
+CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionEnd(int64_t id, void (*onActionCallback)(CJGestureEventV2));
 CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionCancel(int64_t id, void (*onCancel)());
 CJ_EXPORT bool FfiOHOSAceFrameworkGestureGetModifierKeyState(void* baseEventInfoPtr, VectorStringHandle vectorHandle);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGestureHandler(

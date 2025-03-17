@@ -572,6 +572,8 @@ public:
 
     void UpdateMaskBackgroundColorRender();
 
+    void UpdateTitleTextColor();
+
     Color GetMaskBackgroundColor() const
     {
         return sheetMaskColor_;

@@ -21,6 +21,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/snapshot_param.h"
 
+namespace OHOS::Rosen {
+class RSNode;
+}
+
 namespace OHOS::Ace::NG {
 
 class ACE_FORCE_EXPORT ComponentSnapshot {

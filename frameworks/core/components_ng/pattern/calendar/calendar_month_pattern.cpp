@@ -23,9 +23,8 @@
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
-#include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -44,6 +43,63 @@ constexpr int32_t FRIDAY_INDEX = 5;
 constexpr int32_t SATURDAY_INDEX = 6;
 constexpr int32_t WEEK_ROW_INDEX = 1;
 } // namespace
+
+RefPtr<NodePaintMethod> CalendarMonthPattern::CreateNodePaintMethod()
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        InitCurrentVirtualNode();
+    }
+    CalendarPaintParams params;
+    params.startDate = startDate_;
+    params.endDate = endDate_;
+    params.markToday = markToday_;
+    params.disabledDateRange = disabledDateRange_;
+    return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, params, isCalendarDialog_);
+}
+
+void CalendarMonthPattern::SetCalendarDay(const CalendarDay& calendarDay)
+{
+    calendarDay_ = calendarDay;
+    if (monthState_ == MonthState::CUR_MONTH && !obtainedMonth_.days.empty()) {
+        for (auto& day : obtainedMonth_.days) {
+            if (day.month.year == calendarDay.month.year && day.month.month == calendarDay.month.month &&
+                day.day == calendarDay.day) {
+                day.focused = true;
+            }
+        }
+    }
+}
+
+void CalendarMonthPattern::InitFoldState()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->InitIsFoldable();
+    if (container->IsFoldable()) {
+        currentFoldStatus_ = container->GetCurrentFoldStatus();
+    }
+}
+
+void CalendarMonthPattern::FireIsFoldStatusChanged()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (!container->IsFoldable()) {
+        return;
+    }
+    auto foldStatus = container->GetCurrentFoldStatus();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx();
+    if (foldStatus != currentFoldStatus_ && colSpace_ != colSpace && monthState_ == MonthState::CUR_MONTH) {
+        currentFoldStatus_ = foldStatus;
+        InitCalendarVirtualNode();
+        SetFocusNode(focusedCalendarDay_.index, true);
+    }
+}
+
 void CalendarMonthPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();

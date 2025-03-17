@@ -100,9 +100,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     CHECK_NULL_RETURN(pattern, dialog);
     pattern->SetDialogProperties(param);
 
-    auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
-    if ((isSubWindow && dialogLayoutProp->GetIsModal().value_or(true)) ||
-        !dialogLayoutProp->GetIsModal().value_or(true)) {
+    if (dialogLayoutProp->GetShowInSubWindowValue(false) || !dialogLayoutProp->GetIsModal().value_or(true)) {
         dialogContext->UpdateBackgroundColor(Color(0x00000000));
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));

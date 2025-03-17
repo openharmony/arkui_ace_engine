@@ -181,6 +181,7 @@ public:
         }
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
+        paintMethod->SetTouchBottomRate(touchBottomRate_);
         paintMethod->SetTouchBottomTypeLoop(singleIndicatorTouchBottomTypeLoop_);
         singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
         paintMethod->SetFirstIndex(lastIndex_);
@@ -213,6 +214,8 @@ public:
     void OnModifyDone() override;
     int32_t GetTouchCurrentIndex() const override;
     std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex) override;
+    bool CheckIsTouchBottom(const TouchLocationInfo& info);
+    void HandleDragEnd(double dragVelocity) override;
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -248,6 +251,7 @@ private:
     bool isCustomSize_ = false;
     TouchBottomTypeLoop singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     int32_t lastIndex_ = 0;
+    float touchBottomRate_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG
 

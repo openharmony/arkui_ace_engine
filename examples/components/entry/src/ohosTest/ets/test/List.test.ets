@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import TextClockBootcampTest from './InformationDisplay/TextClockBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  TextClockBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

@@ -181,30 +181,46 @@ void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
     appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
 }
 
+bool LocaleDiff(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig,
+    const std::shared_ptr<Global::Resource::ResConfig>& newResConfig)
+{
+    auto oldLocaleInfo = oldResConfig->GetLocaleInfo();
+    auto newLocaleInfo = newResConfig->GetLocaleInfo();
+    if ((!oldLocaleInfo && newLocaleInfo) || (oldLocaleInfo && !newLocaleInfo)) {
+        return true;
+    }
+    if (oldLocaleInfo && newLocaleInfo) {
+        if (!StringUtils::CStringEqual(oldLocaleInfo->getLanguage(), newLocaleInfo->getLanguage()) ||
+            !StringUtils::CStringEqual(oldLocaleInfo->getScript(), newLocaleInfo->getScript()) ||
+            !StringUtils::CStringEqual(oldLocaleInfo->getCountry(), newLocaleInfo->getCountry())) {
+            return true;
+        }
+    }
+    auto oldPreferredLocaleInfo = oldResConfig->GetPreferredLocaleInfo();
+    auto newPreferredLocaleInfo = newResConfig->GetPreferredLocaleInfo();
+    if ((!oldPreferredLocaleInfo && newPreferredLocaleInfo) || (oldPreferredLocaleInfo && !newPreferredLocaleInfo)) {
+        return true;
+    }
+    if (oldPreferredLocaleInfo && newPreferredLocaleInfo) {
+        if (!StringUtils::CStringEqual(oldPreferredLocaleInfo->getLanguage(), newPreferredLocaleInfo->getLanguage()) ||
+            !StringUtils::CStringEqual(oldPreferredLocaleInfo->getScript(), newPreferredLocaleInfo->getScript()) ||
+            !StringUtils::CStringEqual(oldPreferredLocaleInfo->getCountry(), newPreferredLocaleInfo->getCountry())) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ResourceAdapterImplV2::NeedUpdateResConfig(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig,
     const std::shared_ptr<Global::Resource::ResConfig>& newResConfig)
 {
-    if (oldResConfig == nullptr) {
-        return true;
-    }
-    auto oldLocaleInfo = oldResConfig->GetLocaleInfo();
-    auto newLocaleInfo = newResConfig->GetLocaleInfo();
-    bool isLocaleChange = false;
-    if (newLocaleInfo == nullptr) {
-        isLocaleChange = false;
-    } else if (oldLocaleInfo == nullptr) {
-        isLocaleChange = true;
-    } else {
-        isLocaleChange = std::string(oldLocaleInfo->getLanguage()) != std::string(newLocaleInfo->getLanguage()) ||
-                         std::string(oldLocaleInfo->getScript()) != std::string(newLocaleInfo->getScript()) ||
-                         std::string(oldLocaleInfo->getCountry()) != std::string(newLocaleInfo->getCountry());
-    }
+    CHECK_NULL_RETURN(oldResConfig, true);
 
-    return oldResConfig->GetDeviceType() != newResConfig->GetDeviceType() ||
+    return LocaleDiff(oldResConfig, newResConfig) || oldResConfig->GetDeviceType() != newResConfig->GetDeviceType() ||
            oldResConfig->GetDirection() != newResConfig->GetDirection() ||
            oldResConfig->GetScreenDensity() != newResConfig->GetScreenDensity() ||
            oldResConfig->GetColorMode() != newResConfig->GetColorMode() ||
-           oldResConfig->GetInputDevice() != newResConfig->GetInputDevice() || isLocaleChange;
+           oldResConfig->GetInputDevice() != newResConfig->GetInputDevice();
 }
 
 void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bool themeFlag)

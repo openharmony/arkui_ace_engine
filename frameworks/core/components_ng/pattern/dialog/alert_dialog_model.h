@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 
 namespace OHOS::Ace {
