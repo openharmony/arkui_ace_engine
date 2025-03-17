@@ -14,7 +14,9 @@
  */
 
 import abilityTest from './Ability.test';
+import TextPickerBootcampTest from './ButtonsAndSelections/TextPickerBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
+  TextPickerBootcampTest()
 }
