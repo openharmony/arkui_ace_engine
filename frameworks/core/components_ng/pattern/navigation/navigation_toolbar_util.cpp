@@ -337,7 +337,8 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
 
 void BuildToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode, bool enabled)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         BuildSymbolToolbarMoreItemNode(barItemNode, enabled);
     } else {
         BuildImageToolbarMoreItemNode(barItemNode, enabled);

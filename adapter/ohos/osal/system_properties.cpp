@@ -824,6 +824,11 @@ float SystemProperties::GetDragStartPanDistanceThreshold()
     return dragStartPanDisThreshold_;
 }
 
+bool SystemProperties::IsNeedSymbol()
+{
+    return true;
+}
+
 ACE_WEAK_SYM bool SystemProperties::IsSmallFoldProduct()
 {
     InitFoldScreenTypeBySystemProperty();

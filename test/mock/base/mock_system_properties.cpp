@@ -192,6 +192,11 @@ float SystemProperties::GetDragStartPanDistanceThreshold()
     return dragStartPanDisThreshold_;
 }
 
+bool SystemProperties::IsNeedSymbol()
+{
+    return true;
+}
+
 bool SystemProperties::IsSmallFoldProduct()
 {
     return false;
