@@ -37,7 +37,8 @@ namespace {} // namespace
 
 class MockTextInputClient : public TextInputClient {
     public:
-        MOCK_METHOD(void, UpdateEditingValue, (const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent),
+        MOCK_METHOD(void, UpdateEditingValue, (
+            const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent),
             (override));
         MOCK_METHOD(void, PerformAction, (TextInputAction action, bool forceCloseKeyboard), (override));
 };
@@ -49,7 +50,8 @@ class MockTextInputConnection : public TextInputConnection {
         {}
     
         MOCK_METHOD(void, Show, (bool isFocusViewChanged, int32_t instanceId), (override));
-        MOCK_METHOD(void, SetEditingState, (const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
+        MOCK_METHOD(void, SetEditingState, (
+            const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
             (override));
         MOCK_METHOD(void, Close, (int32_t instanceId), (override));
     };
@@ -998,11 +1000,11 @@ HWTEST_F(TextFieldPatternTestEight, InitValueText001, TestSize.Level0)
     EXPECT_FALSE(ret);
 
     pattern_->hasPreviewText_ = false;
-    pattern_->deleteBackwardOperations_.push(11); 
+    pattern_->deleteBackwardOperations_.push(11);
     ret = pattern_->InitValueText(content);
     EXPECT_FALSE(ret);
 
-    pattern_->deleteBackwardOperations_.pop(); 
+    pattern_->deleteBackwardOperations_.pop();
     content = u"";
     auto host = pattern_->GetHost();
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -1049,7 +1051,8 @@ HWTEST_F(TextFieldPatternTestEight, InitPanEvent001, TestSize.Level0)
     auto gestureInfo1 =gestureHub->panEventActuator_->panRecognizer_->GetOrCreateGestureInfo();
     EXPECT_EQ(gestureInfo1->type_, GestureTypeName::TEXTFIELD_BOXSELECT);
 
-    RefPtr<GestureInfo> gestureInfo = AceType::MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE, GestureTypeName::PAN_GESTURE, false);
+    RefPtr<GestureInfo> gestureInfo = AceType::MakeRefPtr<GestureInfo>(
+        GestureTypeName::PAN_GESTURE, GestureTypeName::PAN_GESTURE, false);
     std::shared_ptr<BaseGestureEvent> info = nullptr;
     gestureInfo->type_ = GestureTypeName::BOXSELECT;
     gestureInfo->inputEventType_ = InputEventType::MOUSE_BUTTON;
