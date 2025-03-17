@@ -845,6 +845,7 @@ void AceContainer::SetView(AceViewPreview* view, sptr<Rosen::Window> rsWindow, d
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    window->Init();
     auto rsUIDirector = window->GetRSUIDirector();
     CHECK_NULL_VOID(rsUIDirector);
     rsUIDirector->SetFlushEmptyCallback(AcePreviewHelper::GetInstance()->GetCallbackFlushEmpty());

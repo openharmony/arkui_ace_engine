@@ -251,7 +251,7 @@ class JSBuilderNode extends BaseNode {
       classObject && 'pop' in classObject ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       __JSScopeUtil__.syncInstanceId(this.instanceId_);
-      if (Utils.isApiVersionEQAbove(16)) {
+      if (Utils.isApiVersionEQAbove(18)) {
         ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
       }
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
@@ -275,7 +275,7 @@ class JSBuilderNode extends BaseNode {
         ObserveV2.getObserve().stopRecordDependencies();
       }
       ViewStackProcessor.StopGetAccessRecording();
-      if (Utils.isApiVersionEQAbove(16)) {
+      if (Utils.isApiVersionEQAbove(18)) {
         ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
       }
       __JSScopeUtil__.restoreInstanceId();

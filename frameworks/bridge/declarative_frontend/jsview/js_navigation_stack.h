@@ -126,6 +126,10 @@ public:
     bool IsTopFromSingletonMoved() override;
     void ResetSingletonMoved() override;
 
+    uint64_t GetNavDestinationIdInt(int32_t index) override;
+    bool GetIsForceSet(int32_t index) override;
+    void ResetIsForceSetFlag(int32_t index) override;
+
 protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;

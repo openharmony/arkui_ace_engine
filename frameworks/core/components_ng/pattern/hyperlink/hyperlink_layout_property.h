@@ -60,7 +60,7 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             if (propColor_.has_value()) {
                 json->PutExtAttr("color", propColor_.value().ColorToString().c_str(), filter);
             } else {

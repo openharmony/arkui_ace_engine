@@ -104,6 +104,12 @@ TouchEvent& TouchEvent::SetTiltY(std::optional<float> tiltY)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetRollAngle(std::optional<float> rollAngle)
+{
+    this->rollAngle = rollAngle;
+    return *this;
+}
+
 TouchEvent& TouchEvent::SetDeviceId(int64_t deviceId)
 {
     this->deviceId = deviceId;
@@ -237,6 +243,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.force = force;
     event.tiltX = tiltX;
     event.tiltY = tiltY;
+    event.rollAngle = rollAngle;
     event.deviceId = deviceId;
     event.targetDisplayId = targetDisplayId;
     event.sourceType = sourceType;
@@ -282,6 +289,11 @@ void TouchEvent::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (tiltY.has_value()) {
         json->Put("ty", tiltY.value());
     }
+    int32_t hasRollAngle = rollAngle.has_value() ? 1 : 0;
+    json->Put("ha", hasRollAngle);
+    if (rollAngle.has_value()) {
+        json->Put("ta", rollAngle.value());
+    }
     json->Put("d", deviceId);
     json->Put("sty", static_cast<int32_t>(sourceType));
     json->Put("sto", static_cast<int32_t>(sourceTool));
@@ -307,6 +319,10 @@ void TouchEvent::FromJson(const std::unique_ptr<JsonValue>& json)
     }
     if (hasTiltY) {
         tiltY = json->GetDouble("ty");
+    }
+    int32_t hasRollAngle = json->GetInt("ha");
+    if (hasRollAngle) {
+        rollAngle = json->GetDouble("ta");
     }
     deviceId = json->GetInt64("d");
     sourceType = static_cast<SourceType>(json->GetInt("sty"));
@@ -830,6 +846,7 @@ TouchEvent TouchEventInfo::ConvertToTouchEvent() const
         touchEvent.type = changedTouches_.front().GetTouchType();
         touchEvent.tiltX = changedTouches_.front().GetTiltX();
         touchEvent.tiltY = changedTouches_.front().GetTiltY();
+        touchEvent.rollAngle = changedTouches_.front().GetRollAngle();
         touchEvent.width = changedTouches_.front().GetWidth();
         touchEvent.height = changedTouches_.front().GetHeight();
         touchEvent.pressedTime = changedTouches_.front().GetPressedTime();

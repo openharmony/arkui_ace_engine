@@ -219,6 +219,15 @@ public:
         }
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void StartVibrateFeedback();
+
+    void SetReachBoundary(bool flag)
+    {
+        reachBoundary_ = flag;
+    }
+#endif
+
     Dimension GetIntervalSize() const
     {
         return intervalSize_;
@@ -447,6 +456,12 @@ private:
     // dump info
     std::list<ScrollLayoutInfo> scrollLayoutInfos_;
     std::list<ScrollMeasureInfo> scrollMeasureInfos_;
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    int32_t crownEventNum_ = 0;
+    bool reachBoundary_ = false;
+    int64_t lastTime_ = 0;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

@@ -43,6 +43,15 @@ struct MenuAlign {
     DimensionOffset offset = DimensionOffset(Dimension(0, DimensionUnit::VP), Dimension(0, DimensionUnit::VP));
 };
 
+enum class AvoidanceMode {
+    COVER_TARGET = 0,
+    AVOID_AROUND_TARGET,
+};
+
+struct Avoidance {
+    AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
+};
+
 struct SelectParam {
     std::string text;
     std::string icon;
@@ -89,6 +98,7 @@ public:
     virtual void SetSpace(const Dimension& value);
     virtual void SetArrowPosition(const ArrowPosition value);
     virtual void SetMenuAlign(const MenuAlign& menuAlign);
+    virtual void SetAvoidance(const Avoidance& avoidance);
     virtual void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent);
     virtual void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent);
     virtual void SetOptionWidth(const Dimension& value);

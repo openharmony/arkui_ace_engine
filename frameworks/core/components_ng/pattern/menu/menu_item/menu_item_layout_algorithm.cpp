@@ -63,7 +63,7 @@ void MenuItemLayoutAlgorithm::CheckNeedMatchParent(LayoutWrapper* layoutWrapper,
     auto menuNode = layoutWrapper->GetHostNode();
     auto menuItemPattern = menuNode ? menuNode->GetPattern<MenuItemPattern>() : nullptr;
     SubMenuExpandingMode expandingMode;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         expandingMode = menuItemPattern ? menuItemPattern->GetExpandingMode() : SubMenuExpandingMode::SIDE;
     } else {
         expandingMode = menuItemPattern ? menuItemPattern->GetExpandingMode() : SubMenuExpandingMode::STACK;
@@ -103,7 +103,7 @@ void MenuItemLayoutAlgorithm::CheckUserHeight(LayoutWrapper* layoutWrapper)
 
 float MenuItemLayoutAlgorithm::CalcItemHeight(float leftRowHeight, float rightRowHeight)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (userSetPadding_) {
             return GreatNotEqual(userHeight_, 0.0f) ? userHeight_ - padding_.Height()
                 : std::max(leftRowHeight, rightRowHeight);
@@ -142,14 +142,14 @@ void MenuItemLayoutAlgorithm::CalcContentExpandWidth(std::optional<LayoutConstra
 
     idealWidth_ = 0.0f;
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
-        if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             idealWidth_ = maxRowWidth_;
         } else {
             idealWidth_ = std::max(layoutConstraint->minSize.Width(),
                 std::min(layoutConstraint->maxSize.Width(), layoutConstraint->selfIdealSize.Width().value()));
         }
         float newLeftRowWidth = idealWidth_ - rightRowWidth - middleSpace_;
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) || !userSetPadding_) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) || !userSetPadding_) {
             newLeftRowWidth -= padding_.Width();
         }
         if (newLeftRowWidth > leftRowWidth) {
@@ -177,8 +177,8 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     MeasureRow(layoutWrapper, leftRow, childConstraint);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
-    float contentWidth;
-    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    float contentWidth = 0.0f;
+    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         contentWidth = leftRowWidth + rightRowWidth + middleSpace_;
     } else {
         contentWidth = leftRowWidth + rightRowWidth + padding_.Width() + middleSpace_;
@@ -188,7 +188,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
 
     auto width = std::max(minRowWidth_, contentWidth);
     auto actualWidth = GreatNotEqual(idealWidth_, 0.0f) ? idealWidth_ : width;
-    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         childConstraint.minSize.SetWidth(actualWidth);
         childConstraint.maxSize.SetWidth(actualWidth);
     } else {
@@ -229,8 +229,8 @@ void MenuItemLayoutAlgorithm::MeasureRow(LayoutWrapper* layoutWrapper, const Ref
     float rowWidth = 0.0f;
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    float rowHeight;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    float rowHeight = 0.0f;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         rowHeight = isOption_ ? 0.0f : minItemHeight_;
     } else {
         rowHeight = isOption_ ? 0.0f : (
@@ -299,7 +299,7 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     auto menuItemPattern = menuNode ? menuNode->GetPattern<MenuItemPattern>() : nullptr;
     auto isEmbedded = menuItemPattern ? menuItemPattern->IsEmbedded() : false;
     auto expandingMode = menuItemPattern ? menuItemPattern->GetExpandingMode() : SubMenuExpandingMode::SIDE;
-    float menuItemHeight = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+    float menuItemHeight = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
         userHeight_ : itemHeight;
     if (expandingMode == SubMenuExpandingMode::EMBEDDED && !isEmbedded && GreatNotEqual(menuItemHeight, 0.0f)) {
         auto props = layoutWrapper->GetLayoutProperty();
@@ -314,20 +314,20 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
         }
     }
 
-    auto bordersHeight = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+    auto bordersHeight = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
         GetBordersHeight(layoutWrapper) : 0.0f;
     itemHeight += GetDividerStroke(layoutWrapper);
     auto clickableArea = layoutWrapper->GetOrCreateChildByIndex(CLICKABLE_AREA_VIEW_INDEX);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        float height;
-        if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        float height = 0.0f;
+        if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             height = std::max(itemHeight, minItemHeight_);
         } else {
             height = std::max(itemHeight - bordersHeight, minItemHeight_);
         }
         layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(width, height + expandableHeight));
         if (clickableArea) {
-            if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 clickableArea->GetGeometryNode()->SetFrameSize(SizeF(width + padding_.Width(),
                     height + padding_.Height()));
             } else {
@@ -429,7 +429,7 @@ void MenuItemLayoutAlgorithm::UpdateIconMargin(LayoutWrapper* layoutWrapper)
 void MenuItemLayoutAlgorithm::InitPadding(const RefPtr<LayoutProperty>& props,
     std::optional<LayoutConstraintF>& layoutConstraint)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         padding_ = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
         return;
     }
@@ -468,7 +468,7 @@ void MenuItemLayoutAlgorithm::UpdateIdealSize(LayoutWrapper* layoutWrapper, cons
             ConvertToPx(calcConstraint->selfIdealSize.value().Width()->GetDimension(), scaleProperty,
                 layoutConstraint->percentReference.Width()));
     }
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
         calcConstraint && calcConstraint->selfIdealSize.has_value() &&
         calcConstraint->selfIdealSize.value().Height().has_value()) {
         idealHeight_ = calcConstraint->selfIdealSize.value().Height()->GetDimension().ConvertToPx();
@@ -479,7 +479,7 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
     const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint)
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        verInterval_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+        verInterval_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
             GetMenuItemVerticalPadding() : GetMenuItemVerticalPadding() - GetBordersHeight(layoutWrapper);
     }
     InitPadding(props, layoutConstraint);
@@ -492,14 +492,14 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
             padding_.Width();
     }
     CheckNeedMatchParent(layoutWrapper, layoutConstraint);
-    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         minRowWidth_ = layoutConstraint->minSize.Width() - padding_.Width();
     } else {
         minRowWidth_ = layoutConstraint->minSize.Width();
     }
 
     auto childConstraint = props->CreateChildConstraint();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         minItemHeight_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)
         ? selectTheme->GetMenuChildMinHeight().ConvertToPx()
         : selectTheme->GetOptionMinHeight().ConvertToPx();
@@ -522,11 +522,11 @@ void MenuItemLayoutAlgorithm::MeasureClickableArea(LayoutWrapper* layoutWrapper)
 {
     auto clickableArea = layoutWrapper->GetOrCreateChildByIndex(CLICKABLE_AREA_VIEW_INDEX);
     if (GreatNotEqual(idealWidth_, 0.0f)) {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) || !userSetPadding_) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) || !userSetPadding_) {
             layoutWrapper->GetGeometryNode()->SetFrameWidth(idealWidth_);
         }
         if (clickableArea) {
-            if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 clickableArea->GetGeometryNode()->SetFrameWidth(
                     layoutWrapper->GetGeometryNode()->GetFrameSize().Width());
             } else {
@@ -596,8 +596,8 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
 float MenuItemLayoutAlgorithm::CalcRowTopSpace(float rowsHeight, float itemHeight,
     LayoutWrapper* layoutWrapper, float leftOrRightRowHeight)
 {
-    float topSpace;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    float topSpace = 0.0f;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         topSpace = (rowsHeight - leftOrRightRowHeight) / 2.0f + padding_.top.value_or(0.0f);
     } else {
         topSpace = (itemHeight - leftOrRightRowHeight + GetBordersHeight(layoutWrapper)) / 2.0f;
@@ -612,9 +612,9 @@ void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const
     auto leftRowSize = leftRow ? leftRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     auto rightRowSize = rightRow ? rightRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
-    float rowsHeight;
-    float itemHeight;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    float rowsHeight = 0.0f;
+    float itemHeight = 0.0f;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         rowsHeight = GreatNotEqual(userHeight_, 0.0f)
             ? userHeight_ - padding_.Height()
             : std::max(leftRowSize.Height(), rightRowSize.Height());
@@ -654,7 +654,7 @@ void MenuItemLayoutAlgorithm::LayoutMenuItem(LayoutWrapper* layoutWrapper, const
     expandableArea->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     expandableArea->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(padding_.left.value_or(horInterval_),
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)
         ? rowsHeight + padding_.Height() : itemHeight));
     expandableArea->Layout();
 }

@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import PopupBootcampTest from './InformationDisplay/PopupBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  PopupBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

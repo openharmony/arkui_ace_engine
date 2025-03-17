@@ -1166,8 +1166,9 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions
     if (!option || !value || !size) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    if (option->ratios.size() > *size) {
-        *size = static_cast<int32_t>(option->ratios.size());
+    int32_t ratiosSize = static_cast<int32_t>(option->ratios.size());
+    if (*size < ratiosSize) {
+        *size = ratiosSize;
         return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
     }
     int32_t index = 0;

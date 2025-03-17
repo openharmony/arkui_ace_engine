@@ -63,6 +63,15 @@ RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, int32_t total
       onPurge_(onPurge), postUpdateTaskHasBeenScheduled_(false)
 {}
 
+void RepeatVirtualScroll2Node::UpdateTotalCount(uint32_t totalCount)
+{
+    // set active range when deleting all.
+    if (totalCount == 0 && totalCount != totalCount_) {
+        DoSetActiveChildRange(-1, -1, 0, 0, false);
+    }
+    totalCount_ = totalCount;
+}
+
 void RepeatVirtualScroll2Node::DoSetActiveChildRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
@@ -292,10 +301,9 @@ bool RepeatVirtualScroll2Node::ProcessActiveL2Nodes()
         if (frameNode && cacheItem->isActive_) {
             frameNode->SetActive(false);
             cacheItem->isActive_ = false;
-            cacheItem->node_->SetJSViewActive(false);
             needSync = true;
             TAG_LOGD(AceLogTag::ACE_REPEAT,
-                "spare node %{public}s: apply SetActive(false) & SetJSViewActive(false)",
+                "spare node %{public}s: apply SetActive(false)",
                 caches_.DumpCacheItem(cacheItem).c_str());
         }
         if (cacheItem->node_->OnRemoveFromParent(true)) {
@@ -395,10 +403,11 @@ void RepeatVirtualScroll2Node::RequestContainerReLayout(IndexType fromRepeatItem
 
     children_.clear();
 
-    auto frameNode = GetParentFrameNode();
-    if (frameNode) {
+    if (fromRepeatItemIndex != INT_MIN) {
         // container children starting from index 0 need to be updated
-        frameNode->ChildrenUpdatedFrom(fromRepeatItemIndex + startIndex_);
+        if (auto frameNode = GetParentFrameNode()) {
+            frameNode->ChildrenUpdatedFrom(fromRepeatItemIndex + startIndex_);
+        }
     }
 
     // do not call when visible items have not changed
@@ -406,6 +415,24 @@ void RepeatVirtualScroll2Node::RequestContainerReLayout(IndexType fromRepeatItem
 
     // do not call when visible items have not changed
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
+void RepeatVirtualScroll2Node::NotifyContainerLayoutChange(int32_t index, int32_t count,
+    NG::UINode::NotificationType notificationType)
+{
+    TAG_LOGD(AceLogTag::ACE_REPEAT,
+        "NotifyContainerLayoutChange triggered by Repeat rerender: nodeId: %{public}d "
+        "index: %{public}d, count: %{public}d notificationType: %{public}d",
+        static_cast<int32_t>(GetId()), index, count, static_cast<int32_t>(notificationType));
+
+    int64_t accessibilityId = GetAccessibilityId();
+
+    children_.clear();
+
+    auto frameNode = GetParentFrameNode();
+    if (frameNode) {
+        frameNode->NotifyChange(index + startIndex_, count, accessibilityId, notificationType);
+    }
 }
 
 // called from container layout
@@ -629,11 +656,27 @@ void RepeatVirtualScroll2Node::PostIdleTask()
 
         TAG_LOGD(AceLogTag::ACE_REPEAT, "idle task calls Purge");
         node->Purge();
+        node->FreezeSpareNode();
 
         TAG_LOGD(AceLogTag::ACE_REPEAT, " ============ after caches.purge ============= ");
         TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpUINodeCache().c_str());
         TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpL1Rid4Index().c_str());
         TAG_LOGD(AceLogTag::ACE_REPEAT, " ============ done caches.purge ============= ");
+    });
+}
+
+void RepeatVirtualScroll2Node::FreezeSpareNode()
+{
+    caches_.ForEachCacheItem([](RIDType rid, const CacheItem& cachedItem) {
+        if (cachedItem && !cachedItem->isL1_) {
+            auto& node = cachedItem->node_;
+            if (node) {
+                TAG_LOGD(AceLogTag::ACE_REPEAT,
+                    "spare node %{public}s(%{public}d): apply SetJSViewActive(false)",
+                    node->GetTag().c_str(), static_cast<int32_t>(node->GetId()));
+                node->SetJSViewActive(false);
+            }
+        }
     });
 }
 
@@ -678,6 +721,18 @@ void RepeatVirtualScroll2Node::SetOnMove(std::function<void(int32_t, int32_t)>&&
         InitAllChildrenDragManager(false);
     }
     onMoveEvent_ = onMove;
+}
+
+void RepeatVirtualScroll2Node::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+    std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+    std::function<void(int32_t)>&& onDrop)
+{
+    if (onMoveEvent_) {
+        onLongPressEvent_ = onLongPress;
+        onDragStartEvent_ = onDragStart;
+        onMoveThroughEvent_ = onMoveThrough;
+        onDropEvent_ = onDrop;
+    }
 }
 
 void RepeatVirtualScroll2Node::MoveData(int32_t from, int32_t to)
