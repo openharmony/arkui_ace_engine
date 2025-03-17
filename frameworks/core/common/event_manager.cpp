@@ -1945,6 +1945,48 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
     }
 }
 
+bool EventManager::TryResampleTouchEvent(std::vector<TouchEvent>& history,
+    const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& resample)
+{
+    // Try it best to get a resample or a nearest sample.
+    std::vector<TouchEvent> events(history);
+    events.insert(events.end(), current.begin(), current.end());
+    ResamplePoint slope;
+    resample = GetLatestPoint(events, nanoTimeStamp);
+    bool ret = ResampleAlgo::GetResamplePointerEvent(events, nanoTimeStamp, resample, slope);
+    if (ret) {
+        resample.history = current;
+        resample.isInterpolated = true;
+        resample.inputXDeltaSlope = slope.inputXDeltaSlope;
+        resample.inputYDeltaSlope = slope.inputYDeltaSlope;
+    }
+
+    // update history and store the last 2 samples.
+    history.clear();
+    auto penultimateIter = events.end() - 2; // cannot be used directly, maybe out of bounds.
+    if (ret && resample.time > penultimateIter->time) { // there are at least 2 samples if the resample exists.
+        if (resample.time > events.back().time) {
+            history.emplace_back(resample);
+            history.emplace_back(events.back());
+        } else {
+            history.emplace_back(events.back());
+            history.emplace_back(resample);
+        }
+    } else {
+        auto historyBegin = events.size() > 1 ? penultimateIter : events.begin();
+        history.assign(historyBegin, events.end());
+    }
+
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, SEC_PLD(,
+            "Touch Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}"
+            PRIu64), SEC_PARAM(resample.id, resample.x, resample.y,
+            resample.screenX, resample.screenY,
+            static_cast<uint64_t>(resample.time.time_since_epoch().count())));
+    }
+    return ret;
+}
+
 bool EventManager::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
     const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
 {

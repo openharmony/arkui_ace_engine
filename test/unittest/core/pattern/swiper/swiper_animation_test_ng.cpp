@@ -1296,6 +1296,114 @@ HWTEST_F(SwiperAnimationTestNg, FastAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetCurrentIndex001
+ * @tc.desc: Test GetCurrentIndex
+ * @tc.desc: Test GetCurrentIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, GetCurrentIndex001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+
+    pattern_->targetIndex_ = SWIPE_ONE;
+    pattern_->fastCurrentIndex_ = SWIPE_ONE;
+    pattern_->currentIndex_ = 0;
+    EXPECT_EQ(pattern_->GetCurrentIndex(true), SWIPE_ONE);
+
+    pattern_->targetIndex_ = 0;
+    pattern_->fastCurrentIndex_ = SWIPE_ONE;
+    pattern_->currentIndex_ = 0;
+    EXPECT_EQ(pattern_->GetCurrentIndex(true), pattern_->currentIndex_);
+}
+
+/**
+ * @tc.name: IsInFastAnimation001
+ * @tc.desc: Test IsInFastAnimation
+ * @tc.desc: Test IsInFastAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, IsInFastAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+
+    EXPECT_FALSE(pattern_->IsInFastAnimation());
+
+    pattern_->tabAnimationMode_ = TabAnimateMode::CONTENT_FIRST_WITH_JUMP;
+    pattern_->targetIndex_.reset();
+    pattern_->propertyAnimationIsRunning_ = true;
+    EXPECT_TRUE(pattern_->IsInFastAnimation());
+    pattern_->propertyAnimationIsRunning_ = false;
+    EXPECT_FALSE(pattern_->IsInFastAnimation());
+
+    pattern_->targetIndex_ = 1;
+    EXPECT_TRUE(pattern_->IsInFastAnimation());
+    pattern_->propertyAnimationIsRunning_ = true;
+    EXPECT_TRUE(pattern_->IsInFastAnimation());
+    pattern_->propertyAnimationIsRunning_ = false;
+    EXPECT_TRUE(pattern_->IsInFastAnimation());
+}
+
+/**
+ * @tc.name: ComputeTargetIndex001
+ * @tc.desc: Test ComputeTargetIndex
+ * @tc.desc: Test ComputeTargetIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ComputeTargetIndex001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+
+    int32_t targetIndex = 0;
+    pattern_->targetIndex_ = SWIPE_ONE;
+    pattern_->currentIndex_ = 0;
+    EXPECT_TRUE(pattern_->ComputeTargetIndex(0, targetIndex));
+    EXPECT_FALSE(pattern_->ComputeTargetIndex(SWIPE_ONE, targetIndex));
+}
+
+/**
+ * @tc.name: ChangeIndex001
+ * @tc.desc: Test ChangeIndex and SetSwiperToIndex
+ * @tc.desc: Test ChangeIndex and SetSwiperToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ChangeIndex001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(controller_, nullptr);
+
+    pattern_->targetIndex_ = SWIPE_ONE;
+    pattern_->currentIndex_ = 0;
+    controller_->ChangeIndex(SWIPE_ONE, SwiperAnimationMode::NO_ANIMATION);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+
+    pattern_->targetIndex_ = SWIPE_ONE;
+    pattern_->currentIndex_ = 0;
+    controller_->ChangeIndex(SWIPE_THREE, SwiperAnimationMode::NO_ANIMATION);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, SWIPE_THREE), 0.0f);
+
+    ASSERT_NE(frameNode_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(Referenced::RawPtr(frameNode_));
+    ASSERT_NE(frameNode, nullptr);
+    model.SetSwiperToIndex(frameNode, SWIPE_ONE, SwiperAnimationMode::NO_ANIMATION);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, SWIPE_ONE), 0.0f);
+}
+
+/**
  * @tc.name: CalcComingIndex
  * @tc.desc: Test CalcComingIndex
  * @tc.desc: Test CalcComingIndex

@@ -323,7 +323,13 @@ public:
 
     float GetChainOffset(int32_t index) const
     {
-        return chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
+        if (!chainOffsetFunc_) {
+            return 0.0f;
+        }
+        if (!isStackFromEnd_) {
+            return chainOffsetFunc_(index);
+        }
+        return -chainOffsetFunc_(totalItemCount_ - index - 1);
     }
 
     void SetChainInterval(float interval)

@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import SelectionMenuBootcampTest from './TextAndInput/SelectionMenuBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  SelectionMenuBootcampTest()
+  ListItemGroupBootcampTest();
+
 }

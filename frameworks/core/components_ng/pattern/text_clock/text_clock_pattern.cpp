@@ -175,7 +175,7 @@ void TextClockPattern::OnModifyDone()
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextTheme>(host->GetThemeScopeId());
+    auto textTheme = pipeline->GetTheme<TextClockTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(textTheme);
 
     textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);

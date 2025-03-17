@@ -316,6 +316,16 @@ public:
         return isSuccess;
     }
 
+    bool fetchCachedResult(const std::string& url, std::string& result) override
+    {
+        auto data = Request::Preload::GetInstance()->fetch(url);
+        if (data.has_value()) {
+            result = std::string(data->bytes().data(), data->bytes().data() + data->bytes().length());
+            return true;
+        }
+        return false;
+    }
+
     bool DownloadSyncWithPreload(
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId) override
     {

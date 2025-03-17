@@ -112,6 +112,18 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest003, TestSize.Level1)
     auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
     auto type = OH_ArkUI_KeyEvent_GetType(uiInputEvent);
     EXPECT_EQ(type, ArkUI_KeyEventType::ARKUI_KEY_EVENT_UNKNOWN);
+
+    /**
+     * @tc.steps: step2.create null KeyEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUI_UIInputEvent nullUiInputEvent;
+    nullUiInputEvent.inputEvent = nullptr;
+    nullUiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &nullUiInputEvent;
+    uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    type = OH_ArkUI_KeyEvent_GetType(uiInputEvent);
+    EXPECT_EQ(type, ArkUI_KeyEventType::ARKUI_KEY_EVENT_UNKNOWN);
 }
 
 /**
@@ -246,5 +258,277 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest006, TestSize.Level1)
      * @tc.expected: Return expected results.
      */
     EXPECT_EQ(flag, true);
+}
+
+/**
+ * @tc.name: NativeKeyEventTest007
+ * @tc.desc: Test OH_ArkUI_KeyEvent_GetKeyCode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest007, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1.create null UIInputEvent, function will return -1.
+    */
+    ArkUI_NodeEvent event = { 1, 0 };
+    event.origin = nullptr;
+    auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
+    auto type = OH_ArkUI_KeyEvent_GetKeyCode(uiInputEvent);
+    EXPECT_EQ(type, -1);
+
+    /**
+    * @tc.steps: step2.create null KeyEvent, function will return -1.
+    */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUI_UIInputEvent nullUiInputEvent;
+    nullUiInputEvent.inputEvent = nullptr;
+    nullUiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &nullUiInputEvent;
+    uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    type = OH_ArkUI_KeyEvent_GetKeyCode(uiInputEvent);
+    EXPECT_EQ(type, -1);
+}
+
+/**
+* @tc.name: NativeKeyEventTest008
+* @tc.desc: Test OH_ArkUI_KeyEvent_GetKeyText function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest008, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1.create null UIInputEvent, function will return null.
+    */
+    ArkUI_NodeEvent event = { 1, 0 };
+    event.origin = nullptr;
+    auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
+    auto type = OH_ArkUI_KeyEvent_GetKeyText(uiInputEvent);
+    EXPECT_EQ(type, nullptr);
+
+    /**
+    * @tc.steps: step2.create null KeyEvent, function will return null.
+    */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUI_UIInputEvent nullUiInputEvent;
+    nullUiInputEvent.inputEvent = nullptr;
+    nullUiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &nullUiInputEvent;
+    uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    type = OH_ArkUI_KeyEvent_GetKeyText(uiInputEvent);
+    EXPECT_EQ(type, nullptr);
+}
+
+/**
+* @tc.name: NativeKeyEventTest009
+* @tc.desc: Test OH_ArkUI_KeyEvent_GetKeySource function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest009, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1.create null UIInputEvent, function will return -1.
+    */
+    ArkUI_NodeEvent event = { 1, 0 };
+    event.origin = nullptr;
+    auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
+    auto type = OH_ArkUI_KeyEvent_GetKeySource(uiInputEvent);
+    EXPECT_EQ(type, -1);
+
+    /**
+    * @tc.steps: step2.create null KeyEvent, function will return -1.
+    */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUI_UIInputEvent nullUiInputEvent;
+    nullUiInputEvent.inputEvent = nullptr;
+    nullUiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &nullUiInputEvent;
+    uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    type = OH_ArkUI_KeyEvent_GetKeySource(uiInputEvent);
+    EXPECT_EQ(type, -1);
+}
+
+/**
+* @tc.name: NativeKeyEventTest0010
+* @tc.desc: Test OH_ArkUI_KeyEvent_StopPropagation function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0010, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1.create ArkUI_NodeEvent, related function is called and stopPropagation is true.
+    */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.keyEvent.stopPropagation = false;
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    OH_ArkUI_KeyEvent_StopPropagation(inputEvent, true);
+    EXPECT_EQ(event.keyEvent.stopPropagation, true);
+
+    /**
+    * @tc.steps: step2.create null UIInputEvent, related function is called and stopPropagation is true.
+    */
+    nodeEvent.origin = nullptr;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    OH_ArkUI_KeyEvent_StopPropagation(inputEvent, false);
+    EXPECT_EQ(event.keyEvent.stopPropagation, true);
+
+    /**
+    * @tc.steps: step2.create null KeyEvent, related function is called and stopPropagation is true.
+    */
+    uiInputEvent.inputEvent = nullptr;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    OH_ArkUI_KeyEvent_StopPropagation(inputEvent, false);
+    EXPECT_EQ(event.keyEvent.stopPropagation, true);
+}
+
+/**
+* @tc.name: NativeKeyEventTest0011
+* @tc.desc: Test OH_ArkUI_KeyEvent_GetKeyIntensionCode function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0011, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1.create null UIInputEvent, function will return -1.
+    */
+    ArkUI_NodeEvent event = { 1, 0 };
+    event.origin = nullptr;
+    auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
+    auto type = OH_ArkUI_KeyEvent_GetKeyIntensionCode(uiInputEvent);
+    EXPECT_EQ(type, -1);
+
+    /**
+    * @tc.steps: step2.create null KeyEvent, function will return -1.
+    */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUI_UIInputEvent nullUiInputEvent;
+    nullUiInputEvent.inputEvent = nullptr;
+    nullUiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &nullUiInputEvent;
+    uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    type = OH_ArkUI_KeyEvent_GetKeyIntensionCode(uiInputEvent);
+    EXPECT_EQ(type, -1);
+}
+
+/**
+* @tc.name: NativeKeyEventTest0012
+* @tc.desc: Test OH_ArkUI_KeyEvent_GetUnicode function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0012, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1.create null UIInputEvent, function will return 0.
+    */
+    ArkUI_NodeEvent event = { 1, 0 };
+    event.origin = nullptr;
+    auto uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&event);
+    auto type = OH_ArkUI_KeyEvent_GetUnicode(uiInputEvent);
+    EXPECT_EQ(type, 0);
+
+    /**
+    * @tc.steps: step2.create null KeyEvent, function will return 0.
+    */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUI_UIInputEvent nullUiInputEvent;
+    nullUiInputEvent.inputEvent = nullptr;
+    nullUiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &nullUiInputEvent;
+    uiInputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    type = OH_ArkUI_KeyEvent_GetUnicode(uiInputEvent);
+    EXPECT_EQ(type, 0);
+}
+
+/**
+* @tc.name: NativeKeyEventTest0013
+* @tc.desc: Test OH_ArkUI_KeyEvent_SetConsumed function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0013, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1.create ArkUI_NodeEvent, related function is called and stopPropagation is true.
+    */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.keyEvent.stopPropagation = false;
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    OH_ArkUI_KeyEvent_SetConsumed(inputEvent, true);
+    EXPECT_EQ(event.keyEvent.isConsumed, true);
+
+    /**
+    * @tc.steps: step2.create null UIInputEvent, related function is called and stopPropagation is true.
+    */
+    nodeEvent.origin = nullptr;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    OH_ArkUI_KeyEvent_SetConsumed(inputEvent, false);
+    EXPECT_EQ(event.keyEvent.isConsumed, true);
+
+    /**
+    * @tc.steps: step2.create null KeyEvent, related function is called and stopPropagation is true.
+    */
+    uiInputEvent.inputEvent = nullptr;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    OH_ArkUI_KeyEvent_SetConsumed(inputEvent, false);
+    EXPECT_EQ(event.keyEvent.isConsumed, true);
+}
+
+/**
+* @tc.name: NativeKeyEventTest0014
+* @tc.desc: Test OH_ArkUI_KeyEvent_Dispatch function.
+* @tc.type: FUNC
+*/
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest0014, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create node.
+    */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+
+    /**
+    * @tc.steps: step2.create null UIInputEvent, flag is false.
+    */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.keyEvent.stopPropagation = true;
+    uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
+    nodeEvent.origin = nullptr;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    
+    bool flag = false;
+    nodeAPI->registerNodeEvent(node, NODE_DISPATCH_KEY_EVENT, 0, &flag);
+    NodeModel::AddNodeEventReceiver(node, [](ArkUI_NodeEvent* event) {
+        auto userData = reinterpret_cast<bool*>(event->userData);
+        *userData = true;
+    });
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node->uiNodeHandle);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+    OH_ArkUI_KeyEvent_Dispatch(node, inputEvent);
+    EXPECT_EQ(flag, false);
+
+    /**
+    * @tc.steps: step2.create null KeyEvent, flag is false.
+    */
+    uiInputEvent.inputEvent = nullptr;
+    nodeEvent.origin = &uiInputEvent;
+    inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+    OH_ArkUI_KeyEvent_Dispatch(node, inputEvent);
+    nodeAPI->unregisterNodeEvent(node, NODE_DISPATCH_KEY_EVENT);
+    NodeModel::DisposeNode(node);
+    EXPECT_EQ(flag, false);
 }
 } // namespace OHOS::Ace

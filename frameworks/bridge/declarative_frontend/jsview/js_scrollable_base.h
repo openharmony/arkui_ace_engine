@@ -28,7 +28,7 @@ public:
     static void SetFadingEdge(const JSCallbackInfo& info);
     static void JSClipContent(const JSCallbackInfo& info);
     static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
-    static void JSBackToTop(bool backToTop);
+    static void JSBackToTop(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_BASE_H
