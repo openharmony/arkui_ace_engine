@@ -776,12 +776,6 @@ public:
     }
     virtual void MarkUiFirstNode(bool isUiFirstNode) {}
 
-    virtual OffsetF GetRectOffsetWithPositionEdges(
-        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference)
-    {
-        return OffsetF();
-    }
-
     virtual bool AddNodeToRsTree()
     {
         return false;
