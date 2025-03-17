@@ -1540,8 +1540,9 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 CHECK_NULL_VOID(navBarNode);
                 auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
                 CHECK_NULL_VOID(navBarLayoutProperty);
-                bool isSetInvisible =
-                    (navigationGroupNode->GetNeedSetInvisible() && navigationStack->Size() != 0) ? true : false;
+                auto lastStandardIndex = navigationGroupNode->GetLastStandardIndex();
+                bool isSetInvisible = navigationGroupNode->GetNeedSetInvisible() && navigationStack->Size() != 0 &&
+                    lastStandardIndex >= 0;
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
