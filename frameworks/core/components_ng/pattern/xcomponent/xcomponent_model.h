@@ -47,6 +47,7 @@ public:
     }
     virtual ~XComponentModel() = default;
 
+    virtual void Create(XComponentType type) {}
     virtual void Create(const std::optional<std::string>& id, XComponentType type,
         const std::optional<std::string>& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) = 0;

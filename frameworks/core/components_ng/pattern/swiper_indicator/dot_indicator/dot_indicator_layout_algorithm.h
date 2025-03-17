@@ -55,16 +55,36 @@ public:
         isSingle_ = isSingle;
     }
 
+    void SetMaxDisplayCount(int32_t maxDisplayCount)
+    {
+        maxDisplayCount_ = maxDisplayCount;
+    }
+
+    void SetIsBindIndicator(bool isBindIndicator)
+    {
+        isBindIndicator_ = isBindIndicator;
+    }
+
+    void SetIndicatorInteractive(bool indicatorInteractive)
+    {
+        indicatorInteractive_ = indicatorInteractive;
+    }
+
 private:
     static double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
+    SizeF CalcIndicatorFrameSize(LayoutWrapper* layoutWrapper, float indicatorWidth, float indicatorHeight);
+
     float indicatorWidth_ = 0.0f;
     float indicatorHeight_ = 0.0f;
     float ignorSizeIndicatorWidth_ = 0.0f;
     float ignorSizeIndicatorHeight_ = 0.0f;
     bool isHoverOrPress_ = false;
     bool isSingle_ = false;
+    bool isBindIndicator_ = false;
+    bool indicatorInteractive_ = true;
     PointF hoverPoint_;
     int32_t indicatorDisplayCount_ = 0;
+    int32_t maxDisplayCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_DOT_INDICATOR_LAYOUT_ALGORITHM_H

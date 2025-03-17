@@ -82,6 +82,10 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     }
     return this.gaugeNode.getFrameNode();
   }
+  privacySensitive(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, GaugePrivacySensitiveModifier.identity, GaugePrivacySensitiveModifier, value);
+    return this;
+  }
 }
 
 class GaugeIndicatorModifier extends ModifierWithKey<GaugeIndicatorOptions> {
@@ -197,6 +201,20 @@ class GaugeTrackShadowModifier extends ModifierWithKey<GaugeShadowOptions> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class GaugePrivacySensitiveModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gaugePrivacySensitive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().gauge.resetGaugePrivacySensitive(node);
+    } else {
+      getUINativeModule().gauge.setGaugePrivacySensitive(node, this.value);
+    }
   }
 }
 

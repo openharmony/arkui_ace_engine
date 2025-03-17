@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,7 +165,8 @@ int32_t WaterFlowSegmentedLayout::CheckDirtyItem() const
         if (NonNegative(userDefHeight)) {
             continue;
         }
-        auto child = MeasureItem(i, info_->itemInfos_[i].crossIdx, userDefHeight, false);
+        auto child =
+            MeasureItem(i, { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset }, userDefHeight, false);
         CHECK_NULL_BREAK(child);
         if (!NearEqual(GetMeasuredHeight(child, axis_), info_->itemInfos_[i].mainSize)) {
             return i;
@@ -321,6 +322,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
     const bool forward = LessOrEqual(info_->currentOffset_, prevOffset) || info_->endIndex_ == -1;
     if (forward) {
         Fill(info_->endIndex_ + 1);
+        MeasureLazyChild(info_->startIndex_, info_->endIndex_);
     }
 
     const int32_t oldStart = info_->startIndex_;
@@ -329,8 +331,9 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
     if (!forward) {
         // measure appearing items when scrolling upwards
         const int32_t bound = std::min(oldStart, info_->endIndex_);
+        bool heightChange = false;
         for (int32_t i = info_->startIndex_; i <= bound; ++i) {
-            auto item = MeasureItem(i, info_->itemInfos_[i].crossIdx,
+            auto item = MeasureItem(i, { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset },
                 WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i), false);
             CHECK_NULL_BREAK(item);
             if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[i].mainSize)) {
@@ -338,8 +341,12 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
                 info_->ClearCacheAfterIndex(i - 1);
                 Fill(i);
                 info_->Sync(mainSize_, canOverScrollStart_, canOverScrollEnd_);
+                heightChange = true;
                 break;
             }
+        }
+        if (!heightChange) {
+            MeasureLazyChild(bound + 1, info_->endIndex_);
         }
     }
 }
@@ -385,7 +392,8 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     }
     for (int32_t i = info_->startIndex_; i < jumpIdx; ++i) {
         auto seg = info_->GetSegment(i);
-        MeasureItem(i, info_->itemInfos_[i].crossIdx, WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i), false);
+        MeasureItem(i, { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset },
+            WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i), false);
     }
 }
 
@@ -436,7 +444,8 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i);
         if (force || Negative(itemHeight)) {
-            auto item = MeasureItem(i, position.crossIndex, itemHeight, cacheDeadline.has_value());
+            auto item =
+                MeasureItem(i, { position.crossIndex, position.startMainPos }, itemHeight, cacheDeadline.has_value());
             if (item) {
                 itemHeight = GetMeasuredHeight(item, axis_);
             }
@@ -457,7 +466,7 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
             break;
         }
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i);
-        auto item = MeasureItem(i, position.crossIndex, itemHeight, false);
+        auto item = MeasureItem(i, { position.crossIndex, position.startMainPos }, itemHeight, false);
         if (!item) {
             continue;
         }
@@ -479,7 +488,7 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
 }
 
 RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
-    int32_t idx, int32_t crossIdx, float userDefMainSize, bool isCache) const
+    int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, bool isCache) const
 {
     auto item = wrapper_->GetOrCreateChildByIndex(idx, !isCache, isCache);
     CHECK_NULL_RETURN(item, nullptr);
@@ -487,9 +496,22 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     if (NonNegative(userDefMainSize)) {
         WaterFlowLayoutUtils::UpdateItemIdealSize(item, axis_, userDefMainSize);
     }
-    item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-        { itemsCrossSize_[info_->GetSegment(idx)][crossIdx], mainSize_, axis_, NonNegative(userDefMainSize) }, props_,
-        item));
+    auto seg = info_->GetSegment(idx);
+    if (itemsCrossSize_[seg].size() > 1) {
+        item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+            { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, props_, item));
+    } else {
+        ViewPosReference ref {
+            .viewPosStart = 0,
+            .viewPosEnd = mainSize_ + info_->expandHeight_,
+            .referencePos = position.second + info_->currentOffset_,
+            .referenceEdge = ReferenceEdge::START,
+            .axis = axis_,
+        };
+        item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+            { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, ref, props_,
+            item));
+    }
     if (isCache) {
         item->Layout();
         item->SetActive(false);
@@ -546,8 +568,21 @@ void WaterFlowSegmentedLayout::SyncPreloadItem(LayoutWrapper* host, int32_t item
         MeasureToTarget(itemIdx, std::nullopt, true);
     } else {
         int32_t seg = info_->GetSegment(itemIdx);
-        MeasureItem(itemIdx, info_->itemInfos_[itemIdx].crossIdx,
+        MeasureItem(itemIdx, { info_->itemInfos_[itemIdx].crossIdx, info_->itemInfos_[itemIdx].mainOffset },
             WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, itemIdx), false);
+    }
+}
+
+void WaterFlowSegmentedLayout::MeasureLazyChild(int32_t startIdx, int32_t endIdx) const
+{
+    for (int32_t idx = startIdx; idx <= endIdx; idx++) {
+        auto item = wrapper_->GetChildByIndex(idx);
+        auto itemLayoutProperty = item->GetLayoutProperty();
+        if (itemLayoutProperty->GetNeedLazyLayout()) {
+            int32_t seg = info_->GetSegment(idx);
+            MeasureItem(idx, { info_->itemInfos_[idx].crossIdx, info_->itemInfos_[idx].mainOffset },
+                WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, idx), false);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

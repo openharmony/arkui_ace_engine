@@ -19,7 +19,6 @@
 
 namespace OHOS::Ace::NG {
 
-#ifdef USE_GRAPHIC_TEXT_GINE
 
 #define UPDATE_SPAN_FONT_STYLE_ITEM(item, name, value) (item)->fontStyle->Update##name(value)
 
@@ -148,6 +147,5 @@ ParagraphStyle SpanModelNG::CreateParagraphStyle(ArkUI_StyledString* styledStrin
         .textOverflow = typoStyle->ellipsis == ELLIPSIS ? TextOverflow::ELLIPSIS : TextOverflow::CLIP };
     return style;
 }
-#endif
 
 } // namespace OHOS::Ace::NG

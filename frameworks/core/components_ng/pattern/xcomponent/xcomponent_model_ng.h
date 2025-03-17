@@ -36,6 +36,7 @@ public:
 
 class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
 public:
+    void Create(XComponentType type) override;
     void Create(const std::optional<std::string>& id, XComponentType type,
         const std::optional<std::string>& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) override;
