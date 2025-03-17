@@ -1032,7 +1032,7 @@ int32_t SetBackgroundImageResizableWithSlice(ArkUI_NodeHandle node, const ArkUI_
         // value
         options[i * NUM_3 + NUM_1] = { (item->value[i].f32 < ZERO_F ? ZERO_F : item->value[i].f32), nullptr };
         // unit
-        options[i * NUM_3 + NUM_2] = { UNIT_VP, nullptr };
+        options[i * NUM_3 + NUM_2] = { GetDefaultUnit(node, UNIT_VP), nullptr };
     }
 
     auto* fullImpl = GetFullImpl();
