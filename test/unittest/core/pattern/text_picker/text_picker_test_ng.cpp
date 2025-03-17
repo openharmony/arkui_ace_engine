@@ -1959,14 +1959,14 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest006, TestSize.Level1)
      * @tc.steps: step2. execute SetColumns
      * @tc.expected: prop is set as expected
      */
-    TextPickerModelNG::isCascade_ = !TextPickerModelNG::isCascade_;
+    TextPickerModelNG::GetInstance()->SetIsCascade(true);
     TextPickerModelNG::isSingleRange_ = !TextPickerModelNG::isSingleRange_;
     NG::TextCascadePickerOptions options1;
     options1.rangeResult = { "11", "12", "13" };
     options.emplace_back(options1);
     TextPickerModelNG::SetColumns(node, options);
     TextPickerModelNG::getTextPickerRange(node);
-    EXPECT_EQ(TextPickerModelNG::isCascade_, true);
+    EXPECT_EQ(TextPickerModelNG::GetInstance()->IsCascade(), true);
     EXPECT_EQ(TextPickerModelNG::isSingleRange_, false);
 }
 

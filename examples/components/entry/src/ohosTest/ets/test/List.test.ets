@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import SymbolGlyphBootcampTest from './TextAndInput/SymbolGlyphBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  SymbolGlyphBootcampTest()
+  ListItemGroupBootcampTest();
+
 }

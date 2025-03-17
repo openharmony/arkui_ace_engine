@@ -52,10 +52,7 @@ public:
     void SetBackgroundColor(const Color& color) override;
     bool IsSingle() override;
     bool GetSingleRange(std::vector<NG::RangeContent>& rangeValue) override;
-    bool IsCascade() override
-    {
-        return isCascade_;
-    }
+    bool IsCascade() override;
 
     void SetMaxCount(uint32_t maxCount) override
     {
@@ -67,27 +64,22 @@ public:
         return maxCount_;
     }
 
-    void SetSingleRange(bool isSingleRange) override
-    {
-        std::lock_guard<std::mutex> lock(isSingleMutex_);
-        isSingleRange_ = isSingleRange;
-    }
-
+    void SetSingleRange(bool isSingleRange) override;
     bool GetSingleRange() override
     {
-        std::lock_guard<std::mutex> lock(isSingleMutex_);
+        std::lock_guard<std::shared_mutex> lock(isSingleMutex_);
         return isSingleRange_;
     }
 
     static void SetTextPickerSingeRange(bool isSingleRange)
     {
-        std::lock_guard<std::mutex> lock(isSingleMutex_);
+        std::lock_guard<std::shared_mutex> lock(isSingleMutex_);
         isSingleRange_ = isSingleRange;
     }
 
     static bool GetTextPickerSingeRange()
     {
-        std::lock_guard<std::mutex> lock(isSingleMutex_);
+        std::lock_guard<std::shared_mutex> lock(isSingleMutex_);
         return isSingleRange_;
     }
 
@@ -102,6 +94,7 @@ public:
     void SetDisableTextStyleAnimation(const bool value) override;
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override;
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
+    void UpdateUserSetSelectColor() override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
@@ -169,16 +162,10 @@ private:
 
     uint32_t maxCount_ = 0;
     std::vector<uint32_t> kinds_;
-    static inline bool isCascade_ = false;
     static inline bool isSingleRange_ = true;
     static inline uint32_t showCount_ = 0;
-    static inline std::vector<NG::RangeContent> rangeValue_;
-    static inline std::vector<NG::TextCascadePickerOptions> options_;
-    static inline std::mutex showCountMutex_;
-    static inline std::mutex rangeValueMutex_;
-    static inline std::mutex optionsMutex_;
-    static inline std::mutex isCascadeMutex_;
-    static inline std::mutex isSingleMutex_;
+    static inline std::shared_mutex showCountMutex_;
+    static inline std::shared_mutex isSingleMutex_;
     static inline uint32_t columnkind_ = TEXT;
 };
 

@@ -731,6 +731,8 @@ public:
         return isNewDragStyle_;
     }
 
+    bool isNeedInterceptedTouchEvent_ = false;
+
     bool IsDragging() const
     {
         return isDragging_;

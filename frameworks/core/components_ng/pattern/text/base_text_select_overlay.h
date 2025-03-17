@@ -296,6 +296,13 @@ public:
         isHostNodeEnableSubWindowMenu_ = enable;
     }
 
+    std::optional<SelectOverlayInfo> GetSelectOverlayInfos()
+    {
+        auto manager = GetManager<SelectContentOverlayManager>();
+        CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
+        return manager->GetSelectOverlayInfo();
+    }
+
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);

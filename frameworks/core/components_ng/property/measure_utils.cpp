@@ -44,7 +44,7 @@ std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& s
 {
     double result = -1.0;
     if (!value.NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
+        scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
         return std::nullopt;
     }
     return static_cast<float>(result);

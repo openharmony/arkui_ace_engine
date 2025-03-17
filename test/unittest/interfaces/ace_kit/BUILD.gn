@@ -84,6 +84,7 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_utils.cpp",
     "$ace_root/test/mock/core/package/mock_package_event_proxy.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_utils.cpp",
     "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",

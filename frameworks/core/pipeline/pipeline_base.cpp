@@ -274,8 +274,9 @@ bool PipelineBase::NeedTouchInterpolation()
     auto container = Container::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto uIContentType = container->GetUIContentType();
-    return uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
-        uIContentType == UIContentType::MODAL_UI_EXTENSION;
+    return SystemProperties::IsNeedResampleTouchPoints() &&
+        (uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
+        uIContentType == UIContentType::MODAL_UI_EXTENSION);
 }
 
 void PipelineBase::SetFontWeightScale(float fontWeightScale)

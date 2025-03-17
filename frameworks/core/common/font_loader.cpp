@@ -19,6 +19,8 @@ namespace OHOS::Ace {
 
 FontLoader::FontLoader(const std::string& familyName, const std::string& familySrc)
     : familyName_(familyName), familySrc_(familySrc) {}
+FontLoader::FontLoader(const std::string& familyName, const std::vector<std::string>& familySrcArray)
+    : familyName_(familyName), familySrcArray_(familySrcArray) {}
 
 const std::string& FontLoader::GetFamilyName() const
 {
