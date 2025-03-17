@@ -111,8 +111,8 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
     Worker* worker = nullptr;
     napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
-    if (worker == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker is nullptr");
+    if (worker == nullptr || entryPoint.empty()) {
+        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker is nullptr or entryPoint is empty");
         NG::DynamicModelNG::GetInstance()->InitializeDynamicComponent(
             AceType::Claim(frameNode), "", "", entryPoint, nullptr);
         return;

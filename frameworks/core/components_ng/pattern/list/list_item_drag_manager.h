@@ -17,10 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_DRAG_MANAGER_H
 
 #include "base/memory/ace_type.h"
+#include "base/geometry/ng/vector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
 
 namespace OHOS::Ace::NG {
+
+class RenderContext;
+
 enum class ListItemDragState {
     IDLE,
     LONG_PRESS,

@@ -211,27 +211,6 @@ public:
     {
         return customPreviewScaleTo_;
     }
-
-    void SetIsHoverImageScaleNearEqual(bool isEqual)
-    {
-        isHoverImageScaleNearEqual_ = isEqual;
-    }
-
-    bool IsHoverImageScaleNearEqual() const
-    {
-        return isHoverImageScaleNearEqual_;
-    }
-
-    void SetIsHoverImageAnimationPlaying(bool isPlay)
-    {
-        isHoverImageAnimationPlaying_ = isPlay;
-    }
-
-    bool IsHoverImageAnimationPlaying() const
-    {
-        return isHoverImageAnimationPlaying_;
-    }
-
     RefPtr<FrameNode> GetMenuWrapper() const;
 
     void SetIsHoverImageScalePlaying(bool isPlay)
@@ -242,6 +221,16 @@ public:
     bool IsHoverImageScalePlaying()
     {
         return isHoverImageScalePlaying_;
+    }
+
+    void SetIsHoverImagePreviewScalePlaying(bool isPlay)
+    {
+        isHoverImagePreviewScalePlaying_ = isPlay;
+    }
+
+    bool IsHoverImagePreviewScalePlaying()
+    {
+        return isHoverImagePreviewScalePlaying_;
     }
 
 private:
@@ -255,10 +244,9 @@ private:
     bool hasPreviewTransitionEffect_ = false;
 
     bool isShowHoverImage_ = false;
-    bool isHoverImageScaleNearEqual_ = false;
-    bool isHoverImageAnimationPlaying_ = false;
     bool isWidthDistLarge_ = false;
     bool isHoverImageScalePlaying_ = false;
+    bool isHoverImagePreviewScalePlaying_ = false;
     OffsetF hoverImageAfterScaleOffset_;
     float hoverImageAfterScaleWidth_ = 0.0f;
     float hoverImageAfterScaleHeight_ = 0.0f;

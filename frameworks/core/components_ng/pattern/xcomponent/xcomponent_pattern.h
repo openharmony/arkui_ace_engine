@@ -359,6 +359,8 @@ protected:
     static std::string XComponentTypeToString(XComponentType type);
     static std::string XComponentNodeTypeToString(XComponentNodeType type);
     void AdjustNativeWindowSize(float width, float height);
+    bool IsSupportImageAnalyzerFeature();
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
 
     std::optional<std::string> id_;
     XComponentType type_;
@@ -376,6 +378,7 @@ protected:
     RefPtr<RenderContext> renderContextForSurface_;
     std::optional<int32_t> transformHintChangedCallbackId_;
     std::string surfaceId_;
+    bool isOnTree_ = false;
 
 private:
     void OnAreaChangedInner() override;
@@ -429,11 +432,9 @@ private:
     bool StopTextureExport();
     void InitializeRenderContext();
     void SetSurfaceNodeToGraphic();
-    bool IsSupportImageAnalyzerFeature();
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
-    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
@@ -497,7 +498,6 @@ private:
     // record displaySync_->DelFromPipelineOnContainer() from OnDetachFromMainTree
     bool needRecoverDisplaySync_ = false;
     bool isNativeImageAnalyzing_ = false;
-    bool isOnTree_ = false;
 };
 } // namespace OHOS::Ace::NG
 

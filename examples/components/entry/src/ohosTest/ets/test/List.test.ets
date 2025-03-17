@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import GaugeBootcampTest from './InformationDisplay/GaugeBootcamp.test'
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  GaugeBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

@@ -363,7 +363,7 @@ float SecurityComponentHandler::GetBorderRadius(RefPtr<FrameNode>& node, const N
 }
 
 bool SecurityComponentHandler::CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode,
-    RefPtr<FrameNode>& node)
+    RefPtr<FrameNode>& node, bool& isBlured, double& blurRadius)
 {
     RectF parentRect = parentNode->GetTransformRectRelativeToWindow();
     if (NearEqual(parentRect.Width(), 0.0) || NearEqual(parentRect.Height(), 0.0)) {
@@ -375,6 +375,8 @@ bool SecurityComponentHandler::CheckLinearGradientBlur(const RefPtr<FrameNode>& 
     CHECK_NULL_RETURN(parentRender, false);
     auto linearGradientBlurPara = parentRender->GetLinearGradientBlur();
     CHECK_NULL_RETURN(linearGradientBlurPara, false);
+    isBlured = true;
+    blurRadius = linearGradientBlurPara->blurRadius_.ConvertToPx();
     float ratio = GetLinearGradientBlurRatio(linearGradientBlurPara->fractionStops_);
     if (NearEqual(ratio, 1.0)) {
         return false;
@@ -642,15 +644,11 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
         if (parentNode->CheckTopWindowBoundary()) {
             break;
         }
-        if (CheckRenderEffect(parentNode, message)) {
+        if (CheckRenderEffect(parentNode, message) || CheckParentBorder(parentNode, frameRect, message)) {
             message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
             return true;
         }
-        if (CheckParentBorder(parentNode, frameRect, message)) {
-            message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
-            return true;
-        }
-        if (CheckLinearGradientBlur(parentNode, node)) {
+        if (CheckLinearGradientBlur(parentNode, node, buttonInfo.hasNonCompatileChange_, buttonInfo.blurRadius_)) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s LinearGradientBlur is set, " \
                 "security component is invalid", parentNode->GetTag().c_str());
             message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType +

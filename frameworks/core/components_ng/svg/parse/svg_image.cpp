@@ -192,17 +192,28 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
     if (NearEqual(realSize.Width(), 0.0f) || NearEqual(realSize.Height(), 0.0f)) {
         return RSRect(0, 0, 0, 0);
     }
-    auto scaleValue = std::min(viewBox.Width() / realSize.Width(), viewBox.Height() / realSize.Height());
-    auto scaleValueY = scaleValue;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        scaleValue = viewBox.Width() / realSize.Width();
-        scaleValueY = viewBox.Height() / realSize.Height();
+    auto scaleX = 0.0f;
+    auto scaleY = 0.0f;
+    auto offsetX = 0.0f;
+    auto offsetY = 0.0f;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        scaleX = std::min(viewBox.Width() / realSize.Width(), viewBox.Height() / realSize.Height());
+        scaleY = scaleX;
+        auto spaceX = viewBox.Width() - realSize.Width() * scaleX;
+        auto spaceY = viewBox.Height() - realSize.Height() * scaleY;
+        offsetX = viewBox.Left() + spaceX * 0.5f; // 0.5f Align Center
+        offsetY = viewBox.Top() + spaceY * 0.5f; // 0.5f Align Center
+        return RSRect(offsetX, offsetY, realSize.Width() * scaleX + offsetX, realSize.Height() * scaleY + offsetY);
     }
-    auto spaceX = viewBox.Width() - realSize.Width() * scaleValue;
-    auto spaceY = viewBox.Height() - realSize.Height() * scaleValueY;
-    auto offsetX = viewBox.Left() + spaceX * 0.5f; // 0.5f Align Center
-    auto offsetY = viewBox.Top() + spaceY * 0.5f; // 0.5f Align Center
-    return RSRect(offsetX, offsetY, realSize.Width() * scaleValue + offsetX, realSize.Height() * scaleValueY + offsetY);
+    auto translateX = 0.0f;
+    auto translateY = 0.0f;
+    SvgPreserveAspectRatio preserveAspectRatio;
+    SvgAttributesParser::ComputeScale(viewBox.GetSize(), realSize, preserveAspectRatio, scaleX, scaleY);
+    SvgAttributesParser::ComputeTranslate(viewBox.GetSize(), realSize, scaleX, scaleY, preserveAspectRatio.svgAlign,
+        translateX, translateY);
+    offsetX = viewBox.Left() + translateX;
+    offsetY = viewBox.Top() + translateY;
+    return RSRect(offsetX, offsetY, realSize.Width() * scaleX + offsetX, realSize.Height() * scaleY + offsetY);
 }
 
 bool SvgImage::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)

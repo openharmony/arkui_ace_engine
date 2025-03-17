@@ -14,13 +14,14 @@
  */
 #include "core/interfaces/native/node/node_image_modifier.h"
 
+#include "effect/color_filter.h"
+
 #include "core/common/card_scope.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-
-#include "effect/color_filter.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -728,6 +729,25 @@ void ResetResizable(ArkUINodeHandle node)
     ImageModelNG::SetResizableSlice(frameNode, DEFAULT_IMAGE_SLICE);
 }
 
+void SetResizableLattice(ArkUINodeHandle node, void* lattice)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto drawingLattice = DrawingLattice::CreateDrawingLattice(lattice);
+    if (drawingLattice) {
+        ImageModelNG::SetResizableLattice(frameNode, drawingLattice);
+    } else {
+        ImageModelNG::ResetResizableLattice(frameNode);
+    }
+}
+
+void ResetResizableLattice(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetResizableLattice(frameNode);
+}
+
 void SetDynamicRangeMode(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1073,6 +1093,8 @@ const ArkUIImageModifier* GetImageModifier()
         .resetOnError = ResetOnError,
         .setImageOnFinish = SetImageOnFinish,
         .resetImageOnFinish = ResetImageOnFinish,
+        .setResizableLattice = SetResizableLattice,
+        .resetResizableLattice = ResetResizableLattice,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

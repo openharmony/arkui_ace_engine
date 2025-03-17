@@ -326,7 +326,7 @@ HWTEST_F(MenuItemTestNg, MenuItemLayoutAlgorithm001, TestSize.Level1)
 HWTEST_F(MenuItemTestNg, MenuItemLayoutAlgorithm002, TestSize.Level1)
 {
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(16);
+    MockContainer::Current()->SetApiTargetVersion(18);
 
     /**
      * @tc.steps: step1. Create menuItem.
