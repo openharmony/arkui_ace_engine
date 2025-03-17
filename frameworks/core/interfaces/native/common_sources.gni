@@ -18,7 +18,6 @@ common_sources = [
   "implementation/canvas_path_peer_impl.cpp",
   "implementation/canvas_renderer_peer_impl.cpp",
   "implementation/canvas_rendering_context2d_peer_impl.cpp",
-  "implementation/common_method_modifier_impl.cpp",
   "implementation/custom_dialog_controller_peer_impl.cpp",
   "implementation/dialog_common.cpp",
   "implementation/drawing_rendering_context_peer_impl.cpp",
