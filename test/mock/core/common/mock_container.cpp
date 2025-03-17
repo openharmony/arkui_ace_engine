@@ -191,4 +191,42 @@ bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
 {
     return false;
 }
+
+NG::SafeAreaInsets Container::GetKeyboardSafeArea()
+{
+    return {};
+}
+
+bool Container::LessThanAPIVersion(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 15
+               ? PipelineBase::GetCurrentContext() &&
+                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
+               : LessThanAPITargetVersion(version);
+}
+bool Container::GreatOrEqualAPIVersion(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 15
+               ? PipelineBase::GetCurrentContext() &&
+                     PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
+               : GreatOrEqualAPITargetVersion(version);
+}
+
+bool Container::LessThanAPIVersionWithCheck(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 14
+               ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                     PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
+                         static_cast<int32_t>(version)
+               : LessThanAPITargetVersion(version);
+}
+
+bool Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
+{
+    return static_cast<int32_t>(version) < 14
+               ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                     PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
+                         static_cast<int32_t>(version)
+               : GreatOrEqualAPITargetVersion(version);
+}
 } // namespace OHOS::Ace

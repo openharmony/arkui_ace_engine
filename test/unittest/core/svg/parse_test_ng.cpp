@@ -1882,8 +1882,6 @@ HWTEST_F(ParseTestNg, ParseNodeTest007, TestSize.Level1)
      * @tc.expected: Execute function return value is false
      */
     auto svgAnimation = SvgAnimation::Create();
-    auto op = svgAnimation->GetGradient("");
-    EXPECT_EQ(op.has_value(), false);
 
     /* *
      * @tc.steps: step2. call OnDrawTraversed

@@ -67,6 +67,8 @@ public:
     virtual bool DownloadSyncWithPreload(
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
     virtual bool IsContains(const std::string& url);
+    // Synchronously queries the cache in the preDownLoad module and assigns the result if found.
+    virtual bool fetchCachedResult(const std::string& url, std::string& result);
 
 private:
     static std::unique_ptr<DownloadManager> instance_;

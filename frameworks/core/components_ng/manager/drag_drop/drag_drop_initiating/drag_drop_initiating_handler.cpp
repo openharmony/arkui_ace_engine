@@ -106,6 +106,7 @@ void DragDropInitiatingHandler::NotifySequenceOnActionCancel(const GestureEvent&
 void DragDropInitiatingHandler::NotifyHitTesting(const TouchEvent& touchEvent)
 {
     CHECK_NULL_VOID(initiatingFlow_);
+    initiatingFlow_->InitializeState();
     initiatingFlow_->HandleHitTesting(touchEvent);
 }
 

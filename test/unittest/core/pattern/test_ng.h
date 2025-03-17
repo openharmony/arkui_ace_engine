@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern//linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern//linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -102,7 +103,7 @@ public:
         return AssertionFailure() << "Actual: " << actual.ToString() << " Expected: " << expected.ToString();
     }
 
-    AssertionResult IsEqual(const OverScrollOffset& actual, const OverScrollOffset& expected)
+    AssertionResult IsEqual(const NG::OverScrollOffset& actual, const NG::OverScrollOffset& expected)
     {
         if (NearEqual(actual.start, expected.start) && NearEqual(actual.end, expected.end)) {
             return AssertionSuccess();

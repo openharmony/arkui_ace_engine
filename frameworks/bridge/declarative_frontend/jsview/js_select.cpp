@@ -120,6 +120,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("space", &JSSelect::SetSpace, opt);
     JSClass<JSSelect>::StaticMethod("arrowPosition", &JSSelect::SetArrowPosition, opt);
     JSClass<JSSelect>::StaticMethod("menuAlign", &JSSelect::SetMenuAlign, opt);
+    JSClass<JSSelect>::StaticMethod("avoidance", &JSSelect::SetAvoidance, opt);
 
     // API7 onSelected deprecated
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
@@ -714,6 +715,30 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
     SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
 }
 
+void JSSelect::SetAvoidance(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    int32_t modeValue = info[0]->ToNumber<int32_t>();
+    Avoidance avoidance;
+    switch (modeValue) {
+        case static_cast<int32_t>(AvoidanceMode::COVER_TARGET):
+            avoidance.mode = AvoidanceMode::COVER_TARGET;
+            break;
+        case static_cast<int32_t>(AvoidanceMode::AVOID_AROUND_TARGET):
+            avoidance.mode = AvoidanceMode::AVOID_AROUND_TARGET;
+            break;
+        default:
+            avoidance.mode = AvoidanceMode::COVER_TARGET;
+    }
+
+    SelectModel::GetInstance()->SetAvoidance(avoidance);
+}
+
 bool JSSelect::IsPercentStr(std::string& percent)
 {
     if (percent.find("%") != std::string::npos) {
@@ -919,7 +944,7 @@ void JSSelect::SetDividerStyle(const JSCallbackInfo& info)
             divider.endMargin = value;
         }
         if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-            divider.color = Color::TRANSPARENT;
+            divider.color = defaultColor;
         }
         auto modeVal = obj->GetProperty("mode");
         if (modeVal->IsNumber() && modeVal->ToNumber<int32_t>() == 1) {

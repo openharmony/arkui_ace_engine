@@ -56,6 +56,8 @@ public:
 
     virtual void Init() {}
 
+    virtual void InitArkUI_X() {}
+
     virtual void Destroy()
     {
         platformWindow_->Destroy();

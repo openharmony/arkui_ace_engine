@@ -354,6 +354,7 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest007, TestSize.Level1)
     /**
      * @tc.steps: step2. build navigation
      */
+    navigationManager->hasCacheNavigationNodeEnable_ = true;
     auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
     auto navigationNode = InitAndCreateNavigation(mockNavPathStack);
     ASSERT_NE(navigationNode, nullptr);

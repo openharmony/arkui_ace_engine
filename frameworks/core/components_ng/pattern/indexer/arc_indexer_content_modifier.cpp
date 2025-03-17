@@ -50,8 +50,45 @@ ArcIndexerContentModifier::ArcIndexerContentModifier()
 void ArcIndexerContentModifier::onDraw(DrawingContext& context)
 {
     if (sweepAngle_ > 0) {
+        DrawArcShadow(context);
         DrawArc(context);
     }
+}
+
+void ArcIndexerContentModifier::DrawArcShadow(DrawingContext& context)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto strokeWidth = strokeWidth_->Get();
+
+    auto& canvas = context.canvas;
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetWidth(strokeWidth);
+    pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
+    pen.SetColor(Color::BLACK.GetValue());
+
+    RSFilter filter;
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+        RSBlurType::SOLID, RSDrawing::ConvertRadiusToSigma(strokeWidth), false));
+    pen.SetFilter(filter);
+
+    auto center = arcCenter_->Get();
+    auto radius = arcRadius_->Get();
+    auto startAngle = startAngle_->Get();
+    auto sweepAngle = sweepAngle_->Get();
+    auto stepAngle = stepAngle_->Get();
+    if (NearEqual(sweepAngle + stepAngle, FULL_CIRCLE_ANGLE)) {
+        sweepAngle = FULL_CIRCLE_ANGLE;
+    }
+
+    canvas.AttachPen(pen);
+    canvas.DrawArc(
+        { center.GetX() - radius, center.GetY() - radius, center.GetX() + radius, center.GetY() + radius },
+        startAngle, sweepAngle);
+    canvas.DetachPen();
 }
 
 void ArcIndexerContentModifier::DrawArc(DrawingContext& context)
@@ -68,11 +105,6 @@ void ArcIndexerContentModifier::DrawArc(DrawingContext& context)
     pen.SetWidth(strokeWidth);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
     pen.SetColor(ToRSColor(indexerTheme->GetIndexerBackgroundColor()));
-
-    RSFilter filter;
-    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
-        RSBlurType::SOLID, RSDrawing::ConvertRadiusToSigma(strokeWidth), false));
-    pen.SetFilter(filter);
 
     auto center = arcCenter_->Get();
     auto radius = arcRadius_->Get();

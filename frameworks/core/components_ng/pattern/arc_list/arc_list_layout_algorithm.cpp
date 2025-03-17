@@ -372,7 +372,7 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
     }
 }
 
-float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index, float prevPredictEndPos)
+float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(int32_t index, float prevPredictEndPos)
 {
     float predictSnapEndPos = prevPredictEndPos;
     float predictPos = prevPredictEndPos + contentMainSize_ / FLOAT_TWO - totalOffset_;
@@ -424,7 +424,7 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
         float itemDeltaHeight = (info.endPos - info.startPos) * (info.scale - 1);
         float itemDispStartPos = info.startPos + info.offsetY - itemDeltaHeight / FLOAT_TWO;
         startHeaderPos_ = itemDispStartPos - headerMainSize_;
-        if (LessNotEqual(headerOffset_, 0.0f)) {
+        if (CheckNeedUpdateHeaderOffset(layoutWrapper)) {
             headerOffset_ = GreatNotEqual(startHeaderPos_, HEADER_DIST) ? startHeaderPos_ - HEADER_DIST : 0.0f;
         }
         startHeaderPos_ -= headerOffset_;
@@ -434,7 +434,7 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
         }
     } else {
         startHeaderPos_ = -chainOffset - headerMainSize_;
-        if (LessNotEqual(headerOffset_, 0.0f)) {
+        if (CheckNeedUpdateHeaderOffset(layoutWrapper)) {
             headerOffset_ = 0.0f;
         }
     }
@@ -461,6 +461,40 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
             renderContext->UpdateOpacity(transparency);
         }
     }
+}
+
+bool ArcListLayoutAlgorithm::CheckNeedUpdateHeaderOffset(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<ArcListPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (!pattern->IsScrollableStopped()) {
+        return false;
+    }
+
+    if (headerStayNear_) {  // header offset set by init with no first item
+        return false;
+    }
+
+    bool offsetInvalid = LessNotEqual(headerOffset_, 0.0f);
+    if (itemPosition_.count(0) == 0) {
+        if (offsetInvalid) {
+            headerStayNear_ = true;
+            return true;
+        }
+        return false;
+    }
+
+    float firstItemSize = itemPosition_[0].endPos - itemPosition_[0].startPos;
+    bool itemChanged = !NearEqual(firstItemSize, oldFirstItemSize_);
+    bool headerChanged = !NearEqual(headerMainSize_, oldHeaderSize_);
+    if (offsetInvalid || itemChanged || headerChanged) {
+        oldFirstItemSize_ = firstItemSize;
+        oldHeaderSize_ = headerMainSize_;
+        return true;
+    }
+    return false;
 }
 
 void ArcListLayoutAlgorithm::UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper)

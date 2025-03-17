@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import BindMenuBootcampTest from './DialogBoxes/BindMenuBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  BindMenuBootcampTest();
+  ListItemGroupBootcampTest();
+
 }
