@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -30,8 +31,8 @@ class RenderNodeModifier : public ContentModifier {
     DECLARE_ACE_TYPE(RenderNodeModifier, ContentModifier);
 
 public:
-    explicit RenderNodeModifier(const std::function<void(DrawingContext& context)>& drawCallback)
-        : drawCallback_(drawCallback)
+    RenderNodeModifier(const std::function<void(DrawingContext& context)>& drawCallback, WeakPtr<FrameNode>&& host)
+        : drawCallback_(drawCallback), host_(std::move(host))
     {
         renderNodeFlag_ = AceType::MakeRefPtr<PropertyInt>(0);
         AttachProperty(renderNodeFlag_);
@@ -41,7 +42,11 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
-        if (!isDetached_ && drawCallback_) {
+        auto host = host_.Upgrade();
+        if (host && !host->IsOnMainTree()) {
+            return;
+        }
+        if (drawCallback_) {
             drawCallback_(context);
         }
     }
@@ -56,15 +61,10 @@ public:
         renderNodeFlag_->Set(renderNodeFlag_->Get() + 1);
     }
 
-    void UpdateIsDetached(bool isDetached)
-    {
-        isDetached_ = isDetached;
-    }
-
 private:
     std::function<void(DrawingContext& context)> drawCallback_;
     RefPtr<PropertyInt> renderNodeFlag_;
-    bool isDetached_ = false;
+    WeakPtr<FrameNode> host_;
 };
 } // namespace OHOS::Ace::NG
 

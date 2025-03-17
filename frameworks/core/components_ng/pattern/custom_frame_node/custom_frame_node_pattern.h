@@ -69,7 +69,7 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
 
         if (!renderNodeModifier_) {
-            renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
+            renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_, WeakPtr(GetHost()));
         }
         auto paintMethod = AceType::MakeRefPtr<RenderNodePaintMethod>(renderNodeModifier_);
         return paintMethod;
@@ -78,7 +78,7 @@ public:
     void SetDrawCallback(std::function<void(DrawingContext& context)>&& drawCallback)
     {
         drawCallback_ = drawCallback;
-        renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
+        renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_, WeakPtr(GetHost()));
     }
 
     void Invalidate()

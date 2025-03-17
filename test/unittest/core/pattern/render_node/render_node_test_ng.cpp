@@ -101,7 +101,7 @@ HWTEST_F(RenderNodeTestNg, RenderNodePaintMethod001, TestSize.Level1)
     ASSERT_NE(renderNodeLayoutProperty, nullptr);
 
     auto drawCallback = [](DrawingContext& context) {};
-    auto renderNodeModifier = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback);
+    auto renderNodeModifier = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback, WeakPtr(frameNode));
     RenderNodePaintMethod renderNodePaintMethod(renderNodeModifier);
 
     RefPtr<RenderContext> renderContext = RenderContext::Create();

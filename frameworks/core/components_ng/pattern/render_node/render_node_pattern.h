@@ -60,7 +60,7 @@ public:
     void SetDrawCallback(std::function<void(DrawingContext& context)>&& drawCallback)
     {
         drawCallback_ = drawCallback;
-        renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
+        renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_, WeakPtr(GetHost()));
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -78,7 +78,7 @@ public:
         paintProperty->SetHost(host);
 
         if (!renderNodeModifier_) {
-            renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
+            renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_, WeakPtr(GetHost()));
         }
         auto paintMethod = AceType::MakeRefPtr<RenderNodePaintMethod>(renderNodeModifier_);
         return paintMethod;
@@ -104,18 +104,6 @@ public:
     void SetLabel(const std::string& label)
     {
         label_ = label;
-    }
-
-    void OnAttachToMainTree() override
-    {
-        CHECK_NULL_VOID(renderNodeModifier_);
-        renderNodeModifier_->UpdateIsDetached(false);
-    }
-
-    void OnDetachFromMainTree() override
-    {
-        CHECK_NULL_VOID(renderNodeModifier_);
-        renderNodeModifier_->UpdateIsDetached(true);
     }
 
 private:
