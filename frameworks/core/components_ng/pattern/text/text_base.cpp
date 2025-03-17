@@ -69,15 +69,11 @@ void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float lon
     float lastLineBottom = firstRect.Top();
     auto end = *(lineGroup.rbegin());
     for (const auto& line : lineGroup) {
-        if (line == end) {
-            break;
-        }
-        auto rect = RectF(line.second.Left(), lastLineBottom, longestLine - line.second.Left(),
-                line.second.Bottom() - lastLineBottom);
+        auto width = (line == end) ? line.second.Width() : longestLine - line.second.Left();
+        auto rect = RectF(line.second.Left(), lastLineBottom, width, line.second.Bottom() - lastLineBottom);
         selectedRect.emplace_back(rect);
         lastLineBottom = line.second.Bottom();
     }
-    selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
 }
 
 float TextBase::GetSelectedBlankLineWidth()

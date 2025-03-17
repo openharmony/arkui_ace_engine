@@ -22,7 +22,7 @@ const mediaquery = requireNapi('mediaquery');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 const componentUtils = requireNapi('arkui.componentUtils');
-const Configuration = requireNapi('arkui.modifier').Configuration;
+const Configuration = requireNapi('configuration');
 
 const o = 10003;
 const t = 10002;
@@ -105,7 +105,7 @@ export const a1 = {
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         e2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        i2: 18,
+        i2: '18vp',
         e1: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
 };
@@ -126,7 +126,7 @@ export function Popup(options, parent = null) {
                     onClose: options.onClose,
                     buttons: options.buttons,
                     maxWidth: options.maxWidth
-                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 210, j2: 3 });
+                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 209, j2: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -797,7 +797,7 @@ export class d1 extends ViewPU {
         }
         if (this.maxWidth !== undefined) {
             if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
-                p1 = px2vp(this.maxWidth);
+                p1 = this.maxWidth;
             }
             else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
                 p1 = c1;
@@ -827,6 +827,13 @@ export class d1 extends ViewPU {
         this.messageMaxWidth = l1;
         this.messageMaxWeight = this.getMessageMaxWeight();
         return n1;
+    }
+    getTitleTextAlign() {
+        let k2 = TextAlign.Start;
+        if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
+            k2 = TextAlign.End;
+        }
+        return k2;
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -894,7 +901,7 @@ export class d1 extends ViewPU {
                         Text.fontSize(this.getTitleFontSize());
                         Text.fontColor(this.getTitleFontColor());
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
-                        Text.textAlign(Configuration.getLocale().dir === 'rtl' ? TextAlign.End : TextAlign.Start);
+                        Text.textAlign(this.getTitleTextAlign());
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1291,6 +1298,5 @@ export class d1 extends ViewPU {
         this.updateDirtyElements();
     }
 }
-
 
 export default { Popup };

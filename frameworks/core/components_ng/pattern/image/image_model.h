@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_H
 
+#include <memory>
 #include <mutex>
 
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+
 #include "base/geometry/dimension.h"
+#include "base/image/drawable_descriptor.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
@@ -30,7 +34,7 @@
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 struct ACE_FORCE_EXPORT ImageInfoConfig {
@@ -39,28 +43,18 @@ struct ACE_FORCE_EXPORT ImageInfoConfig {
     std::string moduleName;
     bool isUriPureNumber = false;
     bool isImageSpan = false;
-
-    ImageInfoConfig() {}
-
-    ImageInfoConfig(
-        const std::shared_ptr<std::string>& src_, const std::string& bundleName_, const std::string& moduleName_)
-        : src(src_), bundleName(bundleName_), moduleName(moduleName_)
-    {}
-
-    ImageInfoConfig(const std::shared_ptr<std::string>& src_, const std::string& bundleName_,
-        const std::string& moduleName_, bool isUriPureNumber_, bool isImageSpan_)
-        : src(src_), bundleName(bundleName_), moduleName(moduleName_), isUriPureNumber(isUriPureNumber_),
-          isImageSpan(isImageSpan_)
-    {}
 };
+
 class ACE_FORCE_EXPORT ImageModel {
 public:
-    static ImageModel *GetInstance();
+    static ImageModel* GetInstance();
     virtual ~ImageModel() = default;
+    virtual void Create(const RefPtr<DrawableDescriptor>& drawable) {}
+    virtual void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) = 0;
 
-    virtual void SetAlt(const ImageSourceInfo &src) = 0;
+    virtual void SetAlt(const ImageSourceInfo& src) = 0;
     virtual void SetBlur(double blur) = 0;
-    virtual void SetBorder(const Border &border) = 0;
+    virtual void SetBorder(const Border& border) = 0;
     virtual void SetBorderRadius(const Dimension& value) = 0;
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
@@ -68,18 +62,17 @@ public:
     virtual void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) = 0;
     virtual void SetBackBorder() = 0;
     virtual void SetImageFit(ImageFit value) = 0;
-    virtual void SetImageMatrix(const Matrix4 &value) = 0;
+    virtual void SetImageMatrix(const Matrix4& value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitOriginSize(bool value) = 0;
-    virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent &info)> &&callback) = 0;
-    virtual void SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback) = 0;
-    virtual void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) = 0;
-    virtual void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) = 0;
+    virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) = 0;
+    virtual void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) = 0;
+    virtual void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) = 0;
     virtual void ResetImage() = 0;
-    virtual void CreateAnimation(const std::vector<ImageProperties>& imageList,
-        int32_t duration, int32_t iteration) = 0;
-    virtual void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) = 0;
-    virtual void SetImageFill(const Color &color) = 0;
+    virtual void CreateAnimation(
+        const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) = 0;
+    virtual void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) = 0;
+    virtual void SetImageFill(const Color& color) = 0;
     virtual void ResetImageFill() = 0;
     virtual void SetImageInterpolation(ImageInterpolation interpolation) = 0;
     virtual void SetImageRepeat(ImageRepeat imageRepeat) = 0;
@@ -91,15 +84,15 @@ public:
     virtual void ResetResizableLattice() = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
     virtual void SetColorFilterMatrix(const std::vector<float>& matrix) = 0;
-    virtual void SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter) = 0;
+    virtual void SetDrawingColorFilter(RefPtr<DrawingColorFilter>& colorFilter) = 0;
     virtual void SetDraggable(bool draggable) = 0;
-    virtual void SetOnDragStart(NG::OnDragStartFunc &&onDragStart) = 0;
-    virtual void SetOnDragEnter(NG::OnDragDropFunc &&onDragEnter) = 0;
-    virtual void SetOnDragLeave(NG::OnDragDropFunc &&onDragLeave) = 0;
-    virtual void SetOnDragMove(NG::OnDragDropFunc &&onDragMove) = 0;
-    virtual void SetOnDrop(NG::OnDragDropFunc &&onDrop) = 0;
-    virtual void SetCopyOption(const CopyOptions &copyOption) = 0;
-    virtual bool UpdateDragItemInfo(DragItemInfo &itemInfo) = 0;
+    virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
+    virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
+    virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
+    virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
+    virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
+    virtual void SetCopyOption(const CopyOptions& copyOption) = 0;
+    virtual bool UpdateDragItemInfo(DragItemInfo& itemInfo) = 0;
     virtual void EnableAnalyzer(bool isEnableAnalyzer) = 0;
     virtual void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) = 0;
     virtual void SetImageAnalyzerConfig(void* config) = 0;
@@ -109,6 +102,7 @@ public:
     virtual void SetEnhancedImageQuality(AIImageQuality imageQuality) = 0;
     virtual void SetOrientation(ImageRotateOrientation orientation) = 0;
     virtual bool GetIsAnimation() = 0;
+
 private:
     static std::unique_ptr<ImageModel> instance_;
     static std::mutex mutex_;

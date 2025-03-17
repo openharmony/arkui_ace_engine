@@ -26,6 +26,7 @@ constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 constexpr int32_t FRAME_RATE = 120;
+constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
 
 } // namespace
 
