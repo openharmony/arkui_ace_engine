@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,6 +131,7 @@ export struct ExceptionPrompt {
           right: $r('sys.float.padding_level2'),
         })
         .accessibilityDescription(this.onActionTextClick ? '' : ' ')
+        .accessibilityRole(this.onActionTextClick ? AccessibilityRoleType.BUTTON : AccessibilityRoleType.ROLE_NONE)
         .onClick(() => {
           this.onActionTextClick && this.onActionTextClick();
         })

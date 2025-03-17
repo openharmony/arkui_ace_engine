@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,8 @@
 
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 
-#ifdef FLUTTER_2_5
-#include "ace_shell/shell/common/window_manager.h"
-#endif
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -56,23 +54,17 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     // case 2: image component is not set with size, use image source size to determine component size
     // if image data and altImage are both not ready, can not decide content size,
     // return std::nullopt and wait for next layout task triggered by [OnImageDataReady]
-    auto loadingCtx = loadingCtx_.Upgrade();
-    auto altLoadingCtx = altLoadingCtx_.Upgrade();
-    if ((!loadingCtx || !loadingCtx->GetImageSize().IsPositive()) &&
-        (!altLoadingCtx || !altLoadingCtx->GetImageSize().IsPositive())) {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto rawImageSize = pattern->GetImageSizeForMeasure();
+    if (rawImageSize == std::nullopt) {
         return std::nullopt;
     }
-    // if image data is valid, use image source, or use altImage data
-    auto rawImageSize = SizeF(-1.0, -1.0);
-    if (loadingCtx) {
-        rawImageSize = loadingCtx->GetImageSize();
-    }
-    if (rawImageSize.IsNegative() && altLoadingCtx) {
-        rawImageSize = altLoadingCtx->GetImageSize();
-    }
-    SizeF size(rawImageSize);
+    SizeF size(rawImageSize.value());
     do {
-        auto aspectRatio = static_cast<float>(Size::CalcRatio(rawImageSize));
+        auto aspectRatio = static_cast<float>(Size::CalcRatio(rawImageSize.value()));
         if (NearZero(aspectRatio)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "image aspectRatio is 0");
             return std::nullopt;
@@ -126,10 +118,11 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     BoxLayoutAlgorithm::Layout(layoutWrapper);
-    auto ctx = loadingCtx_.Upgrade();
-    CHECK_NULL_VOID(ctx);
-    ctx->FinishMearuse();
-    ctx->CallbackAfterMeasureIfNeed();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->FinishMeasureForOnComplete();
 }
 
 void ImageLayoutAlgorithm::PerformImageAnimationLayout(LayoutWrapper* layoutWrapper)

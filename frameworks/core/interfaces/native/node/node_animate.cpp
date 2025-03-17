@@ -18,6 +18,7 @@
 #include "base/error/error_code.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
+#include "core/animation/keyframe_animation.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"

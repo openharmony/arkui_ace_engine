@@ -39,7 +39,8 @@ public:
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {};
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
         const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-        const std::vector<std::string>& nameList) = 0;
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "") = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;

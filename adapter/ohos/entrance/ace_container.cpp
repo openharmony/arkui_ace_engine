@@ -172,6 +172,8 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         defaultBundleName, defaultModuleName, instanceId, resourceAdapter, true);
     if (!bundleName.empty() && !moduleName.empty()) {
         ResourceManager::GetInstance().RegisterMainResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter);
+        ResourceManager::GetInstance().RegisterMainResourceAdapter(
+            bundleName, moduleName, INSTANCE_ID_UNDEFINED, resourceAdapter);
     }
 }
 
@@ -973,25 +975,17 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
 void AceContainer::InitializeCallback()
 {
     ACE_FUNCTION_TRACE();
-
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_,
-                                    isTouchEventsPassThrough = isTouchEventsPassThrough_](const TouchEvent& event,
+    auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
+    bool isDebugAcc = (SystemProperties::GetTouchAccelarate() == static_cast<int32_t>(TouchPassMode::ACCELERATE));
+    pipelineContext_->SetTouchAccelarate((touchPassMode == TouchPassMode::ACCELERATE) || isDebugAcc);
+    pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
                                     const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
-        bool passThroughMode = false;
-        if (isTouchEventsPassThrough.has_value()) {
-            passThroughMode = isTouchEventsPassThrough.value();
-        } else {
-            auto container = Platform::AceContainer::GetContainer(id);
-            if (container) {
-                passThroughMode = AceApplicationInfo::GetInstance().IsTouchEventsPassThrough();
-                container->SetTouchEventsPassThroughMode(passThroughMode);
-            }
-        }
         context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
-        auto touchTask = [context, event, markProcess, node, mode = passThroughMode]() {
+        auto touchTask = [context, event, markProcess, node]() {
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
@@ -999,9 +993,9 @@ void AceContainer::InitializeCallback()
                 context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
-                    context->OnTouchEvent(event, node, false, mode);
+                    context->OnTouchEvent(event, node, false);
                 } else {
-                    context->OnTouchEvent(event, false, mode);
+                    context->OnTouchEvent(event, false);
                 }
             }
             CHECK_NULL_VOID(markProcess);
@@ -1289,6 +1283,7 @@ void AceContainer::SetView(const RefPtr<AceView>& view, double density, int32_t 
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    window->Init();
 #else
     auto platformWindow = PlatformWindow::Create(view);
     CHECK_NULL_VOID(platformWindow);
@@ -1314,6 +1309,7 @@ UIContentErrorCode AceContainer::SetViewNew(
         container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+        window->Init();
         container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
 
@@ -2264,7 +2260,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
         UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
-        pipeline->SaveTranslateManager(uiTranslateManager);
+        if (pipeline) {
+            pipeline->SaveTranslateManager(uiTranslateManager);
+        } else {
+            LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
+        }
     } else {
         LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
@@ -2277,7 +2277,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
-    pipeline->SaveTranslateManager(uiTranslateManager);
+    if (pipeline) {
+        pipeline->SaveTranslateManager(uiTranslateManager);
+    } else {
+        LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
+    }
 #endif
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
@@ -2773,17 +2777,22 @@ void AceContainer::CheckAndSetFontFamily()
         }
     }
     path = path.append("/fonts/");
-    familyName = GetFontFamilyName(path);
-    if (familyName.empty()) {
+    auto fontFamilyNames = GetFontFamilyName(path);
+    if (fontFamilyNames.empty()) {
+        TAG_LOGI(AceLogTag::ACE_FONT, "FontFamilyNames is empty");
         return;
     }
-    path = path.append(familyName);
+    familyName = fontFamilyNames[0];
+    std::vector<std::string> fullPath;
+    for (const auto& fontFamilyName : fontFamilyNames) {
+        fullPath.push_back(path + fontFamilyName);
+    }
     if (isFormRender_) {
         // Resolve garbled characters caused by FRS multi-thread async
         std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
-        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+        fontManager->SetFontFamily(familyName.c_str(), fullPath);
     } else {
-        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+        fontManager->SetFontFamily(familyName.c_str(), fullPath);
     }
 }
 
@@ -3398,13 +3407,20 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     MMI::PointerEvent::PointerItem pointerItem;
     auto iter = currentEvents_.find(dragPointerEvent.pointerId);
     if (iter == currentEvents_.end()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find PointerEvent, pointerId: %{public}d.", dragPointerEvent.pointerId);
         return false;
     }
 
     auto currentPointerEvent = iter->second;
     CHECK_NULL_RETURN(currentPointerEvent, false);
     dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
-    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem) || !pointerItem.IsPressed()) {
+    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem)) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find pointerItem, pointerId: %{public}d.", dragPointerEvent.pointerId);
+        return false;
+    }
+    if (!pointerItem.IsPressed()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Current pointer is not pressed, pointerId: %{public}d.",
+            dragPointerEvent.pointerId);
         return false;
     }
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
@@ -3458,6 +3474,8 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
     }
     dragPointerEvent.displayX = pointerItem.GetDisplayX();
     dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    dragPointerEvent.windowX = pointerItem.GetWindowX();
+    dragPointerEvent.windowY = pointerItem.GetWindowY();
     return true;
 }
 

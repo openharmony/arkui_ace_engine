@@ -172,7 +172,8 @@ private:
     bool ISAllowUpdate() const;
     void EnableDrag();
     void UpdateConfiguration();
-    void HandleFormComponent(const RequestFormInfo& info);
+    void HandleFormComponent(RequestFormInfo& info);
+    void SetParamForWantTask(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
     void AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline);
     void AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info);

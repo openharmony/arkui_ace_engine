@@ -14,10 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import DividerBootcampTest from './BlankAndDivider/DividerBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
 
 
 export default function testsuite() {
   abilityTest();
-  DividerBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

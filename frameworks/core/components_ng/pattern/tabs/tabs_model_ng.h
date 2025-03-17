@@ -110,6 +110,7 @@ private:
         const RefPtr<SwiperController>& swiperController);
     static void InitSelectedMaskNode(const RefPtr<FrameNode>& maskNode);
     static void InitUnselectedMaskNode(const RefPtr<FrameNode>& maskNode);
+    static void InitAccessibilityZIndex(RefPtr<FrameNode>& swiperNode, RefPtr<FrameNode>& tabBarNode);
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();
     static RefPtr<TabBarPaintProperty> GetTabBarPaintProperty();
     static RefPtr<SwiperLayoutProperty> GetSwiperLayoutProperty();

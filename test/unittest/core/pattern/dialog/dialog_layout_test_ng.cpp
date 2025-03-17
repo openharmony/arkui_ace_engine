@@ -952,4 +952,155 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithm032, TestSize.Level1)
     DialogLayoutAlgorithm dialogLayoutAlgorithm3;
     dialogLayoutAlgorithm3.Measure(layoutWrapper3.rawPtr_);
 }
+
+/**
+ * @tc.name: DialogLayoutAlgorithm033
+ * @tc.desc: Test CreateDialogNode with customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithm033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a custom node and childLayoutWrapper
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    dialogTheme->text_align_title_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        customNode, customNode->GetGeometryNode(), customNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. create dialog with a custom node and layoutWrapper.
+     * @tc.expected: the dialog node created successfully.
+     */
+    DialogProperties propsCustom;
+    propsCustom.type = DialogType::ACTION_SHEET;
+    propsCustom.title = "dialog title";
+    propsCustom.subtitle = "dialog subtitle";
+    propsCustom.content = "dialog content test";
+    propsCustom.sheetsInfo = sheetItems;
+    propsCustom.buttons = btnItems;
+    auto dialogWithCustom = DialogView::CreateDialogNode(propsCustom, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        dialogWithCustom, dialogWithCustom->GetGeometryNode(), dialogWithCustom->GetLayoutProperty());
+    layoutWrapper->AppendChild(childLayoutWrapper);
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
+    dialogLayoutAlgorithm.ResizeDialogSubwindow(true, true, true);
+}
+
+/**
+ * @tc.name: DialogViewTest001
+ * @tc.desc: Test DialogView::CreateDialogNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogViewTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a child node and childLayoutWrapper
+     * @tc.expected: the child node created successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    dialogTheme->alignDialog_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(childNode, nullptr);
+    auto childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childNode->GetGeometryNode(), childNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+
+    double opacity = 1.0;
+    auto appearOpacityTransition = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+    auto disappearScaleTransition = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    auto dialogTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+    auto maskTransitionEffect =
+        AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearOpacityTransition, disappearScaleTransition);
+
+    /**
+     * @tc.steps: step3. create dialog with a dialog node and layoutWrapper.
+     * @tc.expected: the dialog node created successfully.
+     */
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .width = 320,
+        .height = 320,
+        .backgroundColor = Color::TRANSPARENT,
+        .alignment = DialogAlignment::DEFAULT,
+        .hoverModeArea = HoverModeAreaType::TOP_SCREEN,
+        .isScenceBoardDialog = true,
+        .maskTransitionEffect = maskTransitionEffect,
+        .dialogTransitionEffect = dialogTransitionEffect
+    };
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(DIMENSION_RADIUS);
+    param.borderRadius = borderRadius;
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(DIMENSION_WIDTH);
+    param.borderWidth = borderWidth;
+    NG::BorderColorProperty borderColor;
+    borderColor.SetColor(Color::BLACK);
+    param.borderColor = borderColor;
+    auto dialog = DialogView::CreateDialogNode(param, childNode);
+    ASSERT_NE(dialog, nullptr);
+}
+
+/**
+ * @tc.name: CustomDialogControllerModelTest001
+ * @tc.desc: Test CustomDialogControllerModel::SetOpenDialogWithNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, CustomDialogControllerModelTest001, TestSize.Level1)
+{
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .dialogLevelMode = LevelMode::EMBEDDED
+    };
+    CustomDialogControllerModelNG controllerModel;
+    controllerModel.SetOpenDialogWithNode(props, nullptr);
+}
+
+/**
+ * @tc.name: CustomDialogControllerModelTest002
+ * @tc.desc: Test CustomDialogControllerModel::SetCloseDialogForNDK function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, CustomDialogControllerModelTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dialogTheme.
+     * @tc.expected: the dialogTheme created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+
+    /**
+     * @tc.steps: step2. create dialogNode.
+     * @tc.expected: the dialogNode created successfully.
+     */
+    RefPtr<FrameNode> dialogNode =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step3. call CustomDialogControllerModel::SetCloseDialogForNDK function.
+     * @tc.expected: the function called successfully.
+     */
+    CustomDialogControllerModelNG controllerModel;
+    controllerModel.SetCloseDialogForNDK(dialogNode.rawPtr_);
+}
 } // namespace OHOS::Ace::NG

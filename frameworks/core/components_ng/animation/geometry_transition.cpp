@@ -101,6 +101,24 @@ void GeometryTransition::RecordOutNodeFrame()
     auto outNodeAbsRect = GetNodeAbsFrameRect(outNode_.Upgrade(), outNodeParentPos_);
     outNodePos_ = outNodeAbsRect.GetOffset();
     outNodeSize_ = outNodeAbsRect.GetSize();
+    outWindowBoundaryNode_ = GetWindowBoundaryNode(outNode);
+}
+
+RefPtr<FrameNode> GeometryTransition::GetWindowBoundaryNode(const RefPtr<FrameNode>& node) const
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto parent = node;
+    auto topParent = parent;
+    while (parent) {
+        if (parent->IsWindowBoundary()) {
+            return parent;
+        }
+        parent = parent->GetAncestorNodeOfFrame(false);
+        if (parent) {
+            topParent = parent;
+        }
+    }
+    return topParent;
 }
 
 void GeometryTransition::MarkLayoutDirty(const RefPtr<FrameNode>& node, int32_t layoutPriority)
@@ -329,8 +347,10 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         renderContext->SetFrameWithoutAnimation(activeFrameRect);
         if (target->IsRemoving()) {
             if (doRegisterSharedTransition_) {
+                auto outWindowBoundaryNode = outWindowBoundaryNode_.Upgrade();
+                auto isInSameWindow = outWindowBoundaryNode && outWindowBoundaryNode == GetWindowBoundaryNode(self);
                 // notify backend for hierarchy processing
-                renderContext->RegisterSharedTransition(targetRenderContext);
+                renderContext->RegisterSharedTransition(targetRenderContext, isInSameWindow);
             }
         }
     } else {
@@ -339,7 +359,9 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         if (staticNodeAbsRect_ && targetRenderContext->HasSandBox()) {
             staticNodeAbsRect_.reset();
             if (doRegisterSharedTransition_) {
-                targetRenderContext->RegisterSharedTransition(renderContext);
+                auto outWindowBoundaryNode = GetWindowBoundaryNode(self);
+                auto isInSameWindow = outWindowBoundaryNode && outWindowBoundaryNode == GetWindowBoundaryNode(target);
+                targetRenderContext->RegisterSharedTransition(renderContext, isInSameWindow);
             }
         }
     }

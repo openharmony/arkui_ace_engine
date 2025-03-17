@@ -21,12 +21,14 @@
 namespace OHOS::Ace::NG {
 constexpr float TO_LEFT_ARC_SWIPER_PROPORTION = 5.0f / 2.0f;    //The critical point of arc_swiper is 2/5 screen
 constexpr float TO_RIGHT_ARC_SWIPER_PROPORTION = 5.0f / 3.0f;
+constexpr int32_t MIN_PAGE_VELOCITY = 520;
 class ArcSwiperPattern : public SwiperPattern {
     DECLARE_ACE_TYPE(ArcSwiperPattern, SwiperPattern);
 public:
     ArcSwiperPattern()
     {
         swiperProportion_ = TO_LEFT_ARC_SWIPER_PROPORTION;
+        newMinTurnPageVelocity_ = MIN_PAGE_VELOCITY;
     }
 
     ~ArcSwiperPattern() {}
@@ -182,7 +184,6 @@ private:
     double crownVelocity_ = 0.0;
     double crownTurnVelocity_ = 0.0;
     bool isHandleCrownActionEnd_ = false;
-    int32_t oldCurrentIndex_ = -1;
 #endif
     bool canChangeDirectionFlag_ = false;
     bool scrollToLeft_ = false;

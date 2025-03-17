@@ -113,8 +113,15 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     if (filter.IsFastFilter()) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto themeScopeId = host->GetThemeScopeId();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>(themeScopeId);
+    auto defaultColor = theme ? theme->GetTextStyle().GetTextColor() : Color::BLACK;
     json->PutExtAttr("fontColor",
-        GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
+        GetTextColor().value_or(defaultColor).ColorToString().c_str(), filter);
     json->PutExtAttr("fontStyle", GetFontStyleInJson(GetItalicFontStyle()).c_str(), filter);
     json->PutExtAttr("fontWeight", GetFontWeightInJson(GetFontWeight()).c_str(), filter);
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str(), filter);

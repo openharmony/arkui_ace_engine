@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 
 #define private public
+#define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_render_surface.h"
@@ -35,6 +36,8 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
