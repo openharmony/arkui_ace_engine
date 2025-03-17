@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,39 +13,42 @@
  * limitations under the License.
  */
 
-#include "ui_mgr_service.h"
+#include "ui_mgr_service_idl.h"
 
+#include "ipc_skeleton.h"
+#include "tokenid_kit.h"
+#include "ui_service_hilog.h"
 #include "ui_service_mgr_errors.h"
+#include "ui_service_mgr_xcollie.h"
 #include "xcollie/watchdog.h"
 
-#include "ui_service_hilog.h"
 namespace OHOS {
 namespace Ace {
 namespace {
 constexpr int32_t UI_MGR_SERVICE_SA_ID = 7001;
 constexpr uint32_t WATCHDOG_TIMEVAL = 5000;
-#ifndef UI_SERVICE_WITH_IDL
-const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(DelayedSingleton<UIMgrService>::GetInstance().get());
+constexpr uint32_t UI_MGR_SERVICE_TIMEOUT = 5;
+#ifdef UI_SERVICE_WITH_IDL
+const bool REGISTER_RESULT =
+    SystemAbility::MakeAndRegisterAbility(DelayedSingleton<UIMgrServiceIdl>::GetInstance().get());
 #endif
 } // namespace
 
-// UiservicePluginDialog UIMgrService::dialogPlugin_;
-
-UIMgrService::UIMgrService()
+UIMgrServiceIdl::UIMgrServiceIdl()
     : SystemAbility(UI_MGR_SERVICE_SA_ID, true), eventLoop_(nullptr), handler_(nullptr),
       state_(UIServiceRunningState::STATE_NOT_START)
 {
-    LOGI("Ace UIServcie is created");
+    LOGI("Ace UIServcieIdl is created");
 }
 
-UIMgrService::~UIMgrService()
+UIMgrServiceIdl::~UIMgrServiceIdl()
 {
-    LOGI("Ace UIServcie is destroyed");
+    LOGI("Ace UIServcieIdl is destroyed");
     std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     callbackMap_.clear();
 }
 
-int32_t UIMgrService::Dump(int32_t fd, const std::vector<std::u16string>& args)
+int32_t UIMgrServiceIdl::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     dprintf(fd, "total callbacks: %u\n", callbackMap_.size());
@@ -58,7 +61,7 @@ int32_t UIMgrService::Dump(int32_t fd, const std::vector<std::u16string>& args)
     return UI_SERVICE_NO_ERROR;
 }
 
-void UIMgrService::OnStart()
+void UIMgrServiceIdl::OnStart()
 {
     if (state_ == UIServiceRunningState::STATE_RUNNING) {
         return;
@@ -71,16 +74,16 @@ void UIMgrService::OnStart()
 
     /* Publish service maybe failed, so we need call this function at the last,
      * so it can't affect the TDD test program */
-    bool ret = Publish(DelayedSingleton<UIMgrService>::GetInstance().get());
+    bool ret = Publish(DelayedSingleton<UIMgrServiceIdl>::GetInstance().get());
     if (!ret) {
         return;
     }
     LOGI("Ace UImanager service OnStart");
 }
 
-bool UIMgrService::Init()
+bool UIMgrServiceIdl::Init()
 {
-    eventLoop_ = AppExecFwk::EventRunner::Create("UIMgrService");
+    eventLoop_ = AppExecFwk::EventRunner::Create("UIMgrServiceIdl");
     if (eventLoop_ == nullptr) {
         return false;
     }
@@ -90,7 +93,7 @@ bool UIMgrService::Init()
         return false;
     }
 
-    int32_t ret = HiviewDFX::Watchdog::GetInstance().AddThread("UIMgrService", handler_, WATCHDOG_TIMEVAL);
+    int32_t ret = HiviewDFX::Watchdog::GetInstance().AddThread("UIMgrServiceIdl", handler_, WATCHDOG_TIMEVAL);
     if (ret != 0) {
         LOGW("Add watchdog thread failed");
     }
@@ -99,7 +102,7 @@ bool UIMgrService::Init()
     return true;
 }
 
-void UIMgrService::OnStop()
+void UIMgrServiceIdl::OnStop()
 {
     eventLoop_->Stop();
     eventLoop_.reset();
@@ -108,12 +111,12 @@ void UIMgrService::OnStop()
     LOGI("Ace UImanager service stop");
 }
 
-UIServiceRunningState UIMgrService::QueryServiceState() const
+UIServiceRunningState UIMgrServiceIdl::QueryServiceState() const
 {
     return state_;
 }
 
-int32_t UIMgrService::RegisterCallBack(const AAFwk::Want& want, const sptr<IUIService>& uiService)
+int32_t UIMgrServiceIdl::RegisterCallBack(const AAFwk::Want& want, const sptr<IUIServiceNew>& uiService)
 {
     if (uiService == nullptr) {
         return UI_SERVICE_IS_NULL;
@@ -121,7 +124,8 @@ int32_t UIMgrService::RegisterCallBack(const AAFwk::Want& want, const sptr<IUISe
     if (handler_ == nullptr) {
         return UI_SERVICE_HANDLER_IS_NULL;
     }
-    std::function<void()> registerFunc = std::bind(&UIMgrService::HandleRegister, shared_from_this(), want, uiService);
+    std::function<void()> registerFunc =
+        std::bind(&UIMgrServiceIdl::HandleRegister, shared_from_this(), want, uiService);
     bool ret = handler_->PostTask(registerFunc);
     if (!ret) {
         return UI_SERVICE_POST_TASK_FAILED;
@@ -130,12 +134,12 @@ int32_t UIMgrService::RegisterCallBack(const AAFwk::Want& want, const sptr<IUISe
     return NO_ERROR;
 }
 
-int32_t UIMgrService::UnregisterCallBack(const AAFwk::Want& want)
+int32_t UIMgrServiceIdl::UnregisterCallBack(const AAFwk::Want& want)
 {
     if (handler_ == nullptr) {
         return UI_SERVICE_HANDLER_IS_NULL;
     }
-    std::function<void()> unregisterFunc = std::bind(&UIMgrService::HandleUnregister, shared_from_this(), want);
+    std::function<void()> unregisterFunc = std::bind(&UIMgrServiceIdl::HandleUnregister, shared_from_this(), want);
     bool ret = handler_->PostTask(unregisterFunc);
     if (!ret) {
         return UI_SERVICE_POST_TASK_FAILED;
@@ -144,16 +148,16 @@ int32_t UIMgrService::UnregisterCallBack(const AAFwk::Want& want)
     return NO_ERROR;
 }
 
-int32_t UIMgrService::Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
+int32_t UIMgrServiceIdl::Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
     const std::string& data, const std::string& extraData)
 {
-    std::map<std::string, sptr<IUIService>> callbackMap;
+    std::map<std::string, sptr<IUIServiceNew>> callbackMap;
     {
         std::lock_guard<std::recursive_mutex> lock(uiMutex_);
-        callbackMap = std::map<std::string, sptr<IUIService>>(callbackMap_);
+        callbackMap = std::map<std::string, sptr<IUIServiceNew>>(callbackMap_);
     }
     for (auto iter = callbackMap.begin(); iter != callbackMap.end(); ++iter) {
-        sptr<IUIService> uiService = iter->second;
+        sptr<IUIServiceNew> uiService = iter->second;
         if (uiService == nullptr) {
             return UI_SERVICE_IS_NULL;
         }
@@ -162,15 +166,15 @@ int32_t UIMgrService::Push(const AAFwk::Want& want, const std::string& name, con
     return NO_ERROR;
 }
 
-int32_t UIMgrService::Request(const AAFwk::Want& want, const std::string& name, const std::string& data)
+int32_t UIMgrServiceIdl::Request(const AAFwk::Want& want, const std::string& name, const std::string& data)
 {
-    std::map<std::string, sptr<IUIService>> callbackMap;
+    std::map<std::string, sptr<IUIServiceNew>> callbackMap;
     {
         std::lock_guard<std::recursive_mutex> lock(uiMutex_);
-        callbackMap = std::map<std::string, sptr<IUIService>>(callbackMap_);
+        callbackMap = std::map<std::string, sptr<IUIServiceNew>>(callbackMap_);
     }
     for (auto iter = callbackMap.begin(); iter != callbackMap.end(); ++iter) {
-        sptr<IUIService> uiService = iter->second;
+        sptr<IUIServiceNew> uiService = iter->second;
         if (uiService == nullptr) {
             return UI_SERVICE_IS_NULL;
         }
@@ -179,16 +183,16 @@ int32_t UIMgrService::Request(const AAFwk::Want& want, const std::string& name, 
     return NO_ERROR;
 }
 
-int32_t UIMgrService::ReturnRequest(
+int32_t UIMgrServiceIdl::ReturnRequest(
     const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
 {
-    std::map<std::string, sptr<IUIService>> callbackMap;
+    std::map<std::string, sptr<IUIServiceNew>> callbackMap;
     {
         std::lock_guard<std::recursive_mutex> lock(uiMutex_);
-        callbackMap = std::map<std::string, sptr<IUIService>>(callbackMap_);
+        callbackMap = std::map<std::string, sptr<IUIServiceNew>>(callbackMap_);
     }
     for (auto iter = callbackMap.begin(); iter != callbackMap.end(); ++iter) {
-        sptr<IUIService> uiService = iter->second;
+        sptr<IUIServiceNew> uiService = iter->second;
         if (uiService == nullptr) {
             return UI_SERVICE_IS_NULL;
         }
@@ -197,7 +201,7 @@ int32_t UIMgrService::ReturnRequest(
     return NO_ERROR;
 }
 
-int32_t UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIService>& uiService)
+int32_t UIMgrServiceIdl::HandleRegister(const AAFwk::Want& want, const sptr<IUIServiceNew>& uiService)
 {
     std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
@@ -209,7 +213,7 @@ int32_t UIMgrService::HandleRegister(const AAFwk::Want& want, const sptr<IUIServ
     return NO_ERROR;
 }
 
-int32_t UIMgrService::HandleUnregister(const AAFwk::Want& want)
+int32_t UIMgrServiceIdl::HandleUnregister(const AAFwk::Want& want)
 {
     std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     std::string keyStr = GetCallBackKeyStr(want);
@@ -221,7 +225,7 @@ int32_t UIMgrService::HandleUnregister(const AAFwk::Want& want)
     return NO_ERROR;
 }
 
-std::string UIMgrService::GetCallBackKeyStr(const AAFwk::Want& want)
+std::string UIMgrServiceIdl::GetCallBackKeyStr(const AAFwk::Want& want)
 {
     AppExecFwk::ElementName element = want.GetElement();
     std::string bundleName = element.GetBundleName();
@@ -229,7 +233,7 @@ std::string UIMgrService::GetCallBackKeyStr(const AAFwk::Want& want)
     return keyStr;
 }
 
-bool UIMgrService::CheckCallBackFromMap(const std::string& key)
+bool UIMgrServiceIdl::CheckCallBackFromMap(const std::string& key)
 {
     std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     auto it = callbackMap_.find(key);
@@ -238,5 +242,42 @@ bool UIMgrService::CheckCallBackFromMap(const std::string& key)
     }
     return true;
 }
+
+int32_t UIMgrServiceIdl::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    MessageOption& option)
+{
+    UIServiceMgrXCollie uiServiceMgrXCollie(IpcCodeToString(code), UI_MGR_SERVICE_TIMEOUT);
+    if (!IsSystemApp()) {
+        return ERR_PERMISSION_DENIED;
+    }
+    auto result = UIServiceMgrNewStub::OnRemoteRequest(code, data, reply, option);
+    LOGI("Ace UIServcieIdl OnRemoteRequest res = %{public}d", result);
+    return result;
+}
+
+const char* UIMgrServiceIdl::IpcCodeToString(uint32_t code)
+{
+    switch (static_cast<IUIServiceMgrNewIpcCode>(code)) {
+        case IUIServiceMgrNewIpcCode::COMMAND_REGISTER_CALL_BACK:
+            return "UISERVICE_REGISTER_CALLBACK";
+        case IUIServiceMgrNewIpcCode::COMMAND_UNREGISTER_CALL_BACK:
+            return "UISERVICE_UNREGISTER_CALLBACK";
+        case IUIServiceMgrNewIpcCode::COMMAND_PUSH:
+            return "UISERVICE_PUSH";
+        case IUIServiceMgrNewIpcCode::COMMAND_REQUEST:
+            return "UISERVICE_REQUEST";
+        case IUIServiceMgrNewIpcCode::COMMAND_RETURN_REQUEST:
+            return "UISERVICE_RETURN_REQUEST";
+        default:
+            return "UISERVICE_UNKNOWN";
+    }
+}
+
+bool UIMgrServiceIdl::IsSystemApp()
+{
+    uint64_t accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx);
+}
+
 } // namespace Ace
 } // namespace OHOS

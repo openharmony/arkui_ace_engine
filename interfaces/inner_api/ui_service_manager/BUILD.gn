@@ -13,16 +13,36 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import(
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/uiservicems.gni")
+
+if (ace_engine_enable_uiservice_idl) {
+  import("//build/config/components/idl_tool/idl.gni")
+  idl_gen_interface("uiservice_manager_interface") {
+    sources = [
+      "IUIServiceMgrNew.idl",
+      "IUIServiceNew.idl",
+    ]
+    log_domainid = "0xD003935"
+    log_tag = "AceUIService"
+    subsystem_name = "AceUIService"
+  }
+}
 
 config("uiservice_manager_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "$ace_root/frameworks",
     "include/",
+    "native/include",
+    "${target_gen_dir}",
   ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+  if (ace_engine_enable_uiservice_idl) {
+    defines = [ "UI_SERVICE_WITH_IDL" ]
   }
 }
 
@@ -43,6 +63,15 @@ ohos_shared_library("ui_service_mgr") {
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
   ]
 
+  if (ace_engine_enable_uiservice_idl) {
+    sources += [ "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_client_idl.cpp" ]
+    output_values = get_target_outputs(":uiservice_manager_interface")
+    sources += filter_include(output_values, [ "*_proxy.cpp" ])
+    sources += filter_include(output_values, [ "*_stub.cpp" ])
+
+    deps = [ ":uiservice_manager_interface" ]
+  }
+
   configs = [
     "$ace_root:ace_config",
     "$ace_root:ace_coverage_config",
@@ -62,6 +91,14 @@ ohos_shared_library("ui_service_mgr") {
     "window_manager:libwm",
   ]
 
+  if (ace_engine_enable_uiservice_idl) {
+    external_deps += [
+      "access_token:libtokenid_sdk",
+      "eventhandler:libeventhandler",
+      "safwk:system_ability_fwk",
+    ]
+  }
+
   defines = []
 
   if (uiservice_xcollie_enable) {
@@ -72,4 +109,32 @@ ohos_shared_library("ui_service_mgr") {
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
+}
+
+if (ace_engine_enable_uiservice_idl) {
+  ohos_source_set("uiservice_manager_interface_set") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    public_configs = [ ":uiservice_manager_public_config" ]
+    output_values = get_target_outputs(":uiservice_manager_interface")
+    sources = filter_include(output_values, [ "*_proxy.cpp" ])
+    sources += filter_include(output_values, [ "*_stub.cpp" ])
+    deps = [ ":uiservice_manager_interface" ]
+    external_deps = [
+      "ability_base:want",
+      "access_token:libtokenid_sdk",
+      "c_utils:utils",
+      "eventhandler:libeventhandler",
+      "hilog:libhilog",
+      "ipc:ipc_core",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+      "window_manager:libwm",
+    ]
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
 }
