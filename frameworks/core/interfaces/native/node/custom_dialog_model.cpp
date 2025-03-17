@@ -507,6 +507,16 @@ bool ContainerIsService()
     return containerId >= MIN_PA_SERVICE_ID || containerId < 0;
 }
 
+int32_t ConvertBlurStyle(int32_t originBlurStyle)
+{
+    if (originBlurStyle < static_cast<int32_t>(ARKUI_BLUR_STYLE_NONE)) {
+        return originBlurStyle + 1;
+    } else if (originBlurStyle == static_cast<int32_t>(ARKUI_BLUR_STYLE_NONE)) {
+        return 0;
+    }
+    return originBlurStyle;
+}
+
 void openCustomDialogWithNewPipeline(std::function<void(int32_t)>&& callback)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog IsCurrentUseNewPipeline.");
@@ -944,7 +954,7 @@ ArkUI_Int32 SetDialogCustomShadow(
 ArkUI_Int32 SetBackgroundBlurStyle(ArkUIDialogHandle controllerHandler, ArkUI_Int32 blurStyle)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->blurStyle = blurStyle;
+    controllerHandler->blurStyle = ConvertBlurStyle(blurStyle);
     return ERROR_CODE_NO_ERROR;
 }
 
