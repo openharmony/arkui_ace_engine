@@ -322,7 +322,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
     const bool forward = LessOrEqual(info_->currentOffset_, prevOffset) || info_->endIndex_ == -1;
     if (forward) {
         Fill(info_->endIndex_ + 1);
-        MeasureLazyChild(info_->startIndex_, info_->endIndex_);
+        MeasureRemainingLazyChild(info_->startIndex_, info_->endIndex_);
     }
 
     const int32_t oldStart = info_->startIndex_;
@@ -346,7 +346,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
             }
         }
         if (!heightChange) {
-            MeasureLazyChild(bound + 1, info_->endIndex_);
+            MeasureRemainingLazyChild(bound + 1, info_->endIndex_);
         }
     }
 }
@@ -567,10 +567,11 @@ void WaterFlowSegmentedLayout::SyncPreloadItem(LayoutWrapper* host, int32_t item
     }
 }
 
-void WaterFlowSegmentedLayout::MeasureLazyChild(int32_t startIdx, int32_t endIdx) const
+void WaterFlowSegmentedLayout::MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward) const
 {
     for (int32_t idx = startIdx; idx <= endIdx; idx++) {
         auto item = wrapper_->GetChildByIndex(idx);
+        CHECK_NULL_VOID(item);
         auto itemLayoutProperty = item->GetLayoutProperty();
         if (itemLayoutProperty->GetNeedLazyLayout()) {
             int32_t seg = info_->GetSegment(idx);
