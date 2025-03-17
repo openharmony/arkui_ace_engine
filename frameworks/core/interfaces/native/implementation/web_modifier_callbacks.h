@@ -71,7 +71,8 @@ void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCa
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-RefPtr<WebResponse> OnInterceptRequest(const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
+RefPtr<WebResponse> OnInterceptRequest(
+    const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
@@ -115,7 +116,8 @@ void OnLargestContentfulPaint(const CallbackHelper<OnLargestContentfulPaintCallb
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
 bool OnLoadIntercept(const CallbackHelper<Callback_OnLoadInterceptEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback, WeakPtr<FrameNode> weakNode, int32_t instanceId);
+void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId);
 void OnOverScroll(const CallbackHelper<Callback_OnOverScrollEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnSafeBrowsingCheckResult(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,

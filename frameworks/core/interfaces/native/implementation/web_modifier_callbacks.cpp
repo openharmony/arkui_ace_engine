@@ -440,7 +440,8 @@ bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Bool
     return result.value_or(false);
 }
 
-RefPtr<WebResponse> OnInterceptRequest(const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
+RefPtr<WebResponse> OnInterceptRequest(
+    const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -855,7 +856,8 @@ bool OnLoadIntercept(const CallbackHelper<Callback_OnLoadInterceptEvent_Boolean>
     return result.value_or(false);
 }
 
-void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback, WeakPtr<FrameNode> weakNode, int32_t instanceId)
+void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback,
+                          WeakPtr<FrameNode> weakNode, int32_t instanceId)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
