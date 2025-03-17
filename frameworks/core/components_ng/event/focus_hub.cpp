@@ -97,9 +97,6 @@ RefPtr<FocusManager> FocusHub::GetFocusManager() const
     return focusManager;
 }
 
-FocusState::FocusState(const WeakPtr<EventHub>& eventHub, FocusType type) : eventHub_(eventHub), focusType_(type) {}
-FocusState::FocusState(const WeakPtr<FrameNode>& frameNode, FocusType type) : frameNode_(frameNode), focusType_(type) {}
-
 RefPtr<FrameNode> FocusState::GetFrameNode() const
 {
     auto frameNode = frameNode_.Upgrade();

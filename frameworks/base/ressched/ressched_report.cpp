@@ -42,12 +42,14 @@ constexpr int32_t SLIDE_OFF_EVENT = 0;
 constexpr int32_t SLIDE_DETECTING = 2;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
 constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
+constexpr int32_t MOVE_DETECTING = 7;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
 constexpr int32_t PUSH_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t POP_PAGE_EVENT = 0;
 constexpr int32_t AXIS_OFF_EVENT = 1;
 constexpr int32_t AXIS_IS_PAD = 0;
 constexpr int32_t AXIS_IS_MOUSE = 1;
+constexpr int64_t TIME_INTERVAL = 300;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -97,6 +99,12 @@ ResSchedReport& ResSchedReport::GetInstance()
 {
     static ResSchedReport instance;
     return instance;
+}
+
+ResSchedReport::ResSchedReport()
+{
+    reportDataFunc_ = LoadReportDataFunc();
+    reportSyncEventFunc_ = LoadReportSyncEventFunc();
 }
 
 void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param)
@@ -177,22 +185,18 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
 void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     const std::unordered_map<std::string, std::string>& payload)
 {
-    if (reportDataFunc_ == nullptr) {
-        reportDataFunc_ = LoadReportDataFunc();
+    if (!reportDataFunc_) {
+        LOGD("reportDataFunc_ is null!");
+        return;
     }
-    if (reportDataFunc_ != nullptr) {
-        reportDataFunc_(resType, value, payload);
-    }
+    reportDataFunc_(resType, value, payload);
 }
 
 void ResSchedReport::ResScheSyncEventReport(const uint32_t resType, const int64_t value,
-    const std::unordered_map<std::string, std::string>& payload,
-    std::unordered_map<std::string, std::string>& reply)
+    const std::unordered_map<std::string, std::string>& payload, std::unordered_map<std::string, std::string>& reply)
 {
-    if (reportSyncEventFunc_ == nullptr) {
-        reportSyncEventFunc_ = LoadReportSyncEventFunc();
-    }
     if (!reportSyncEventFunc_) {
+        LOGD("reportSyncEventFunc_ is null!");
         return;
     }
     reportSyncEventFunc_(resType, value, payload, reply);
@@ -349,6 +353,16 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSlide_ = true;
+    }
+    static uint64_t lastTime = 0;
+    auto now = std::chrono::steady_clock::now();
+    uint64_t curMs = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
+    if (isInSlide_ && curMs - lastTime >= TIME_INTERVAL) {
+        lastTime = curMs;
+        std::unordered_map<std::string, std::string> payload;
+        LoadAceApplicationContext(payload);
+        ResSchedDataReport(RES_TYPE_SLIDE, MOVE_DETECTING, payload);
     }
 }
 

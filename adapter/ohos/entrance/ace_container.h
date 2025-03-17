@@ -776,6 +776,13 @@ public:
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
+
+    bool IsWaterfallWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->IsWaterfallModeEnabled();
+    }
+
     Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
     {
         CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
@@ -789,11 +796,6 @@ public:
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
-    }
-
-    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
-    {
-        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
     }
 
     void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
@@ -817,6 +819,21 @@ public:
     void SetFontScaleAndWeightScale(int32_t instanceId);
 
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
+
+    void SetFoldStatusFromListener(FoldStatus foldStatus)
+    {
+        foldStatusFromListener_ = foldStatus;
+    }
+
+    FoldStatus GetFoldStatusFromListener() override
+    {
+        return foldStatusFromListener_;
+    }
+
+    void InitFoldStatusFromListener() override
+    {
+        foldStatusFromListener_ = GetCurrentFoldStatus();
+    }
 
 private:
     virtual bool MaybeRelease() override;
@@ -883,6 +900,7 @@ private:
     float windowScale_ = 1.0f;
     sptr<IRemoteObject> token_;
     sptr<IRemoteObject> parentToken_;
+    FoldStatus foldStatusFromListener_ = FoldStatus::UNKNOWN;
 
     bool isSubContainer_ = false;
     bool isFormRender_ = false;
@@ -926,12 +944,12 @@ private:
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
+    friend class WindowFreeContainer;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
-    std::optional<bool> isTouchEventsPassThrough_;
 
     SingleHandTransform singleHandTransform_;
 };

@@ -248,7 +248,7 @@ void SearchModelNG::SetSearchButton(const std::string& text)
     } else {
         searchButtonEvent->SetEnabled(false);
         searchButtonRenderContext->UpdateOpacity(0.0);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton);
         }
     }
@@ -1250,6 +1250,17 @@ void SearchModelNG::SetSearchEnterKeyType(TextInputAction value)
         value = TextInputAction::SEARCH;
     }
     pattern->UpdateTextInputAction(value);
+}
+
+void SearchModelNG::SetSearchCapitalizationMode(AutoCapitalizationMode value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void SearchModelNG::SetMaxLength(uint32_t value)
@@ -2269,6 +2280,15 @@ void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
+}
+
+void SearchModelNG::SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    pattern->UpdateAutoCapitalizationMode(value);
 }
 
 void SearchModelNG::SetStopBackPress(bool isStopBackPress)

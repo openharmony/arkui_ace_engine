@@ -1205,7 +1205,7 @@ HWTEST_F(SelectOverlayTestTwoNg, CreateMenuNode, TestSize.Level1)
         }
         return AceType::MakeRefPtr<TextOverlayTheme>();
     });
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     /**
      * @tc.steps: step2. call CreateMenuNode.
      */
@@ -1301,5 +1301,220 @@ HWTEST_F(SelectOverlayTestTwoNg, UpdateToolBar, TestSize.Level1)
     selectOverlayNode->isDefaultBtnOverMaxWidth_ = false;
     selectOverlayNode->UpdateToolBar(true, true);
     EXPECT_EQ(selectOverlayNode->selectMenuStatus_, FrameNodeStatus::GONE);
+}
+
+/**
+ * @tc.name: MeasureChild
+ * @tc.desc: Test SelectOverlayLayoutAlgorithm::MeasureChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, MeasureChild, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    infoPtr->menuInfo.menuBuilder = []() {};
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    frameNode->GetAllChildrenWithBuild();
+    auto customMenuLayoutWrapper = frameNode->GetChildByIndex(0);
+    ASSERT_NE(customMenuLayoutWrapper, nullptr);
+    auto customNode = AceType::DynamicCast<FrameNode>(customMenuLayoutWrapper);
+    ASSERT_NE(customNode, nullptr);
+    customNode->isLayoutComplete_ = true;
+    /**
+     * @tc.steps: step2. call MeasureChild.
+     */
+    auto overlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(overlayLayoutAlgorithm, nullptr);
+    overlayLayoutAlgorithm->MeasureChild(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(customNode->isLayoutComplete_);
+}
+
+/**
+ * @tc.name: CalculateCustomMenuByMouseOffset
+ * @tc.desc: Test SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, CalculateCustomMenuByMouseOffset, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    infoPtr->menuInfo.menuBuilder = []() {};
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    frameNode->GetAllChildrenWithBuild();
+    auto customMenuLayoutWrapper = frameNode->GetChildByIndex(0);
+    ASSERT_NE(customMenuLayoutWrapper, nullptr);
+    auto customNode = AceType::DynamicCast<FrameNode>(customMenuLayoutWrapper);
+    ASSERT_NE(customNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF constraint = {
+        .selfIdealSize = OptionalSizeF(100.0f, 100.0f)
+    };
+    layoutProperty->layoutConstraint_ = constraint;
+    auto menu = frameNode->GetChildByIndex(0);
+    ASSERT_NE(menu, nullptr);
+    menu->GetGeometryNode()->SetFrameWidth(101.0f);
+    menu->GetGeometryNode()->SetFrameHeight(101.0f);
+    infoPtr->rightClickOffset = OffsetF(102.0f, 100);
+    /**
+     * @tc.steps: step2. Update selectOverlayPattern properties.
+     */
+    auto overlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(overlayLayoutAlgorithm, nullptr);
+    auto offset = overlayLayoutAlgorithm->CalculateCustomMenuByMouseOffset(AceType::RawPtr(frameNode));
+    EXPECT_EQ(offset.GetX(), 1.0f);
+    EXPECT_EQ(offset.GetY(), 49.5f);
+    infoPtr->rightClickOffset = OffsetF(50.0f, 50.f);
+    menu->GetGeometryNode()->SetFrameHeight(60.0f);
+    menu->GetGeometryNode()->SetFrameWidth(80.0f);
+    offset = overlayLayoutAlgorithm->CalculateCustomMenuByMouseOffset(AceType::RawPtr(frameNode));
+    EXPECT_EQ(offset.GetX(), 20.0f);
+    EXPECT_EQ(offset.GetY(), 39.0f);
+    infoPtr->rightClickOffset = OffsetF(80.0f, 50.f);
+    menu->GetGeometryNode()->SetFrameHeight(-60.0f);
+    menu->GetGeometryNode()->SetFrameWidth(140.0f);
+    EXPECT_EQ(offset.GetX(), 20.0f);
+    EXPECT_EQ(offset.GetY(), 39.0f);
+}
+
+/**
+ * @tc.name: AdjustMenuTooFarAway
+ * @tc.desc: Test SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, AdjustMenuTooFarAway, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    infoPtr->menuInfo.menuBuilder = []() {};
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    frameNode->GetAllChildrenWithBuild();
+    auto customMenuLayoutWrapper = frameNode->GetChildByIndex(0);
+    ASSERT_NE(customMenuLayoutWrapper, nullptr);
+    auto customNode = AceType::DynamicCast<FrameNode>(customMenuLayoutWrapper);
+    ASSERT_NE(customNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF constraint = { .selfIdealSize = OptionalSizeF(100.0f, 100.0f) };
+    layoutProperty->layoutConstraint_ = constraint;
+    auto menu = frameNode->GetChildByIndex(0);
+    ASSERT_NE(menu, nullptr);
+    menu->GetGeometryNode()->SetFrameWidth(101.0f);
+    menu->GetGeometryNode()->SetFrameHeight(101.0f);
+    infoPtr->rightClickOffset = OffsetF(102.0f, 100);
+    auto callerNode = FrameNode::GetOrCreateFrameNode(
+        "Text", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    callerNode->GetGeometryNode()->SetFrameWidth(5);
+    callerNode->GetGeometryNode()->SetFrameHeight(100);
+    infoPtr->callerFrameNode = AceType::WeakClaim(AceType::RawPtr(callerNode));
+    /**
+     * @tc.steps: step2. Update selectOverlayPattern properties.
+     */
+    auto overlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(overlayLayoutAlgorithm, nullptr);
+    OffsetF menuOffset;
+    RectF menuRect = RectF(OffsetF(10.0f, 10.0f), SizeF(20.0f, 20.0));
+    overlayLayoutAlgorithm->AdjustMenuTooFarAway(AceType::RawPtr(frameNode), menuOffset, menuRect);
+    EXPECT_EQ(menuOffset.GetX(), -5.0f);
+    callerNode->GetGeometryNode()->SetFrameWidth(30);
+    menuRect.SetLeft(-15);
+    overlayLayoutAlgorithm->AdjustMenuTooFarAway(AceType::RawPtr(frameNode), menuOffset, menuRect);
+    EXPECT_EQ(menuOffset.GetX(), -10.0f);
+}
+
+/**
+ * @tc.name: ComputeExtensionMenuPosition
+ * @tc.desc: Test SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, ComputeExtensionMenuPosition, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize layoutAlgorithm.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    infoPtr->menuInfo.menuBuilder = []() {};
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto childNode = FrameNode::GetOrCreateFrameNode(
+        "Text", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto childNode1 = FrameNode::GetOrCreateFrameNode(
+        "Text", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto childNode2 = FrameNode::GetOrCreateFrameNode(
+        "Text", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    childNode->MountToParent(frameNode);
+    childNode1->MountToParent(frameNode);
+    childNode2->MountToParent(frameNode);
+    frameNode->GetAllChildrenWithBuild();
+    auto customMenuLayoutWrapper = frameNode->GetChildByIndex(0);
+    ASSERT_NE(customMenuLayoutWrapper, nullptr);
+    auto customNode = AceType::DynamicCast<FrameNode>(customMenuLayoutWrapper);
+    ASSERT_NE(customNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF constraint = { .selfIdealSize = OptionalSizeF(100.0f, 100.0f) };
+    layoutProperty->layoutConstraint_ = constraint;
+    auto menu = frameNode->GetChildByIndex(0);
+    ASSERT_NE(menu, nullptr);
+    /**
+     * @tc.steps: step2. Update selectOverlayPattern properties.
+     */
+    auto overlayLayoutAlgorithm = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithm);
+    ASSERT_NE(overlayLayoutAlgorithm, nullptr);
+    OffsetF menuOffset;
+    auto offset = overlayLayoutAlgorithm->ComputeExtensionMenuPosition(AceType::RawPtr(frameNode), menuOffset);
+    EXPECT_EQ(offset.GetY(), -8.0f);
+    overlayLayoutAlgorithm->defaultMenuEndOffset_ = OffsetF(0.0f, 10.0f);
+    offset = overlayLayoutAlgorithm->ComputeExtensionMenuPosition(AceType::RawPtr(frameNode), menuOffset);
+    EXPECT_EQ(offset.GetY(), 2.0f);
 }
 } // namespace OHOS::Ace::NG

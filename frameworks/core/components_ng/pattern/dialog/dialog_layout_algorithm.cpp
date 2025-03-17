@@ -73,6 +73,13 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
     isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
+    if (dialogPattern->IsWaterfallWindowMode()) {
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "enableHoverMode for waterfallMode, isShowInSubWindow: %{public}d",
+            isShowInSubWindow_);
+        isHoverMode_ = true;
+        hoverModeArea_ = HoverModeAreaType::TOP_SCREEN;
+    }
+
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
@@ -964,9 +971,12 @@ void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNo
     CHECK_NULL_VOID(maskNodePtr);
     auto maskNode = AceType::DynamicCast<FrameNode>(maskNodePtr);
     CHECK_NULL_VOID(maskNode);
+    auto maskNodeLayoutProp = maskNode->GetLayoutProperty();
+    CHECK_NULL_VOID(maskNodeLayoutProp);
+    auto maskGeometryNode = maskNode->GetGeometryNode();
+    CHECK_NULL_VOID(maskGeometryNode);
     if (expandDisplay_) {
-        auto maskGeometryNode = maskNode->GetGeometryNode();
-        CHECK_NULL_VOID(maskGeometryNode);
+        maskNodeLayoutProp->ClearUserDefinedIdealSize(true, true);
         SizeF realSize;
         realSize.SetWidth(hostWindowRect_.Width());
         realSize.SetHeight(hostWindowRect_.Height());
@@ -981,10 +991,9 @@ void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNo
             maskNodeContext->UpdateBorderRadius(NG::BorderRadiusPropertyT<Dimension>(CONTAINER_OUTER_RADIUS));
         }
     } else {
-        auto maskNodeLayoutProp = maskNode->GetLayoutProperty();
-        CHECK_NULL_VOID(maskNodeLayoutProp);
         maskNodeLayoutProp->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
+        maskGeometryNode->SetFrameOffset(OffsetF(0, 0));
         maskNode->Measure(dialog->GetLayoutConstraint());
     }
     maskNode->Layout();

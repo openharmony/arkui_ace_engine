@@ -1177,12 +1177,12 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage047, TestSi
     auto frameNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode2, nullptr);
     auto guestureEventHub = frameNode2->GetOrCreateGestureEventHub();
-    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
+    PreparedInfoForDrag drag;
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, drag);
     dragDropManager->TransDragWindowToDragFwk(111);
     dragDropManager->SetIsDragWithContextMenu(false);
     event.SetDeviceId(0xFFFFEEEE);
-    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
-    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, true);
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, drag);
     EXPECT_NE(frameNode, nullptr);
 }
 

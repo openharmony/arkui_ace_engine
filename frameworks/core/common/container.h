@@ -74,6 +74,8 @@ using DragEventCallBack = std::function<void(const DragPointerEvent&, const Drag
 using StopDragCallback = std::function<void()>;
 using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
 
+class PipelineBase;
+
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
@@ -216,10 +218,14 @@ public:
 
     virtual FoldStatus GetCurrentFoldStatus();
 
-    virtual NG::SafeAreaInsets GetKeyboardSafeArea()
+    virtual FoldStatus GetFoldStatusFromListener()
     {
-        return {};
+        return GetCurrentFoldStatus();
     }
+
+    virtual void InitFoldStatusFromListener() {}
+
+    virtual NG::SafeAreaInsets GetKeyboardSafeArea();
 
     virtual std::string GetHapPath() const
     {
@@ -396,11 +402,7 @@ public:
         return container ? container->IsSubContainer() : false;
     }
 
-    Window* GetWindow() const
-    {
-        auto context = GetPipelineContext();
-        return context ? context->GetWindow() : nullptr;
-    }
+    Window* GetWindow() const;
 
     virtual uint64_t GetDisplayId() const
     {
@@ -559,65 +561,61 @@ public:
         return nullptr;
     }
 
-    /*
-     *this interface is just use before api12(not include api12),after api12 when you judge version,use
-     *LessThanAPITargetVersion(PlatformVersion version)
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use LessThanAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
-    static bool LessThanAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersion(PlatformVersion version);
 
-    /*
-     *this interface is just use before api12(not include api12),after api12 when you judge version,use
-     *GreatOrEqualAPITargetVersion(PlatformVersion version)
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use GreatOrEqualAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
-    static bool GreatOrEqualAPIVersion(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 15
-                   ? PipelineBase::GetCurrentContext() &&
-                         PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
-    /*
-     *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
+    /**
+     * @description: Compare whether the min compatible api version of the application is less than the incoming target
+     * version. This interface is just for when you use LessThanAPIVersion in instance does not exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
-    static bool LessThanAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() <
-                             static_cast<int32_t>(version)
-                   : LessThanAPITargetVersion(version);
-    }
+    static bool LessThanAPIVersionWithCheck(PlatformVersion version);
 
-    /*
-     *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
+    /**
+     * @description: Compare whether the min compatible api version of the application is greater than or equal to the
+     * incoming target version. This interface is just for when you use GreatOrEqualAPIVersion in instance does not
+     * exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
-    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version)
-    {
-        return static_cast<int32_t>(version) < 14
-                   ? PipelineBase::GetCurrentContextSafelyWithCheck() &&
-                         PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >=
-                             static_cast<int32_t>(version)
-                   : GreatOrEqualAPITargetVersion(version);
-    }
+    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
 
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming target
+     * version.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        if (!container) {
-            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
-            return apiTargetVersion < static_cast<int32_t>(version);
-        }
+        CHECK_NULL_RETURN(container, false);
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion < static_cast<int32_t>(version);
     }
 
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
@@ -658,11 +656,19 @@ public:
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetFontWeightScale(int32_t instanceId, float fontScale);
 
+    /**
+     * @description: Get the target api version of the application.
+     * @return: The target api version of the application.
+     */
     int32_t GetApiTargetVersion() const
     {
         return apiTargetVersion_;
     }
 
+    /**
+     * @description: Set the target api version of the application.
+     * @param: The target api version of the application.
+     */
     void SetApiTargetVersion(int32_t apiTargetVersion)
     {
         apiTargetVersion_ = apiTargetVersion % 1000;
@@ -683,6 +689,11 @@ public:
     virtual void CheckAndSetFontFamily() {};
 
     virtual bool IsFreeMultiWindow() const
+    {
+        return false;
+    }
+
+    virtual bool IsWaterfallWindow() const
     {
         return false;
     }
@@ -749,7 +760,7 @@ public:
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);
-    std::string GetFontFamilyName(std::string path);
+    std::vector<std::string> GetFontFamilyName(const std::string& path);
     bool endsWith(std::string str, std::string suffix);
 
 private:

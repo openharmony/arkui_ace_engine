@@ -205,6 +205,24 @@ private:
         return std::make_pair(cachedCount * crossCount_, cachedCount * crossCount_);
     }
 
+    std::string GetReloadReasonStr(GridReloadReason reason)
+    {
+        switch (reason) {
+            case GridReloadReason::INIT:
+                return "init";
+            case GridReloadReason::CROSS_COUNT_CHANGE:
+                return "cross count change";
+            case GridReloadReason::DATA_RELOAD:
+                return "data reload";
+            case GridReloadReason::SCROLL_TO_INDEX:
+                return "scroll to index";
+            case GridReloadReason::SKIP_LARGE_OFFSET:
+                return "skip large offset";
+            default:
+                return "";
+        }
+    }
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -252,6 +270,7 @@ private:
     OffsetF childFrameOffset_;
     std::list<GridPreloadItem> predictBuildList_;
     LayoutConstraintF cachedChildConstraint_;
+    GridReloadReason reason_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

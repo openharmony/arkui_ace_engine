@@ -1281,24 +1281,6 @@ HWTEST_F(RichEditorPatternTestSixNg, SetPreviewMenuParam001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnPlaceholderHover001
- * @tc.desc: test OnPlaceholderHover
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, OnPlaceholderHover001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->currentMouseStyle_ = MouseFormat::DEFAULT;
-    richEditorPattern->OnPlaceholderHover(true);
-    EXPECT_NE(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
-
-    richEditorPattern->OnPlaceholderHover(false);
-    EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
-}
-
-/**
  * @tc.name: DeleteRange001
  * @tc.desc: test DeleteRange
  * @tc.type: FUNC
