@@ -21,7 +21,7 @@ import {
   SegmentButtonOptions,
   SegmentButtonTextItem
 } from "@ohos.arkui.advanced.SegmentButton";
-import { LengthUnit } from "@kit.ArkUI";
+import { LengthUnit } from '@kit.ArkUI';
 
 @Component
 export struct SegmentButtonBootcamp {
