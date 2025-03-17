@@ -4244,12 +4244,11 @@ int32_t FrameNode::GetNodeExpectedRate()
     return iter->second;
 }
 
-void FrameNode::FrameRateDurationsStatisticsStart(const std::string &scene)
+void FrameNode::FrameRateDurationsStatisticsStart()
 {
     curFRCSceneFpsInfo_ = FRCSceneFpsInfo();
     calTime_ = 0;
     calFrameRate_ = 0;
-    curFRCSceneFpsInfo_.scene = scene;
 }
 
 void FrameNode::FrameRateDurationsStatisticsRunning(int32_t expectedRate, const std::string &scene)
@@ -4273,11 +4272,7 @@ void FrameNode::FrameRateDurationsStatisticsEnd(const std::string &scene)
     int32_t duration = endTime - calTime_;
     calTime_ = endTime;
     AddFrameRateDuration(calFrameRate_, duration);
-    EventReport::SendDiffFrameRatesDuring(scene,
-        curFRCSceneFpsInfo_.duration_60,
-        curFRCSceneFpsInfo_.duration_72,
-        curFRCSceneFpsInfo_.duration_90,
-        curFRCSceneFpsInfo_.duration_120);
+    EventReport::SendDiffFrameRatesDuring(scene, curFRCSceneFpsInfo_);
 }
 
 void FrameNode::AddFrameRateDuration(int32_t frameRate, int32_t duration)
@@ -4308,7 +4303,7 @@ void FrameNode::TryPrintDebugLog(const std::string& scene, float speed, SceneSta
 {
     if (SystemProperties::GetDebugEnabled()) {
         const std::string sceneStatusStrs[] = { "START", "RUNNING", "END" };
-        LOGI("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
+        LOGD("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
             scene.c_str(), std::abs(speed), sceneStatusStrs[static_cast<int32_t>(status)].c_str());
     }
 }
@@ -4337,7 +4332,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
                 sceneRateMap_.emplace(scene, expectedRate);
                 frameRateManager->UpdateNodeRate(nodeId, GetNodeExpectedRate());
             }
-            FrameRateDurationsStatisticsStart(scene);
+            FrameRateDurationsStatisticsStart();
             return;
         }
         case SceneStatus::RUNNING: {
