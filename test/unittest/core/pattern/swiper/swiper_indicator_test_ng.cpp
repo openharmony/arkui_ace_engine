@@ -986,4 +986,34 @@ HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternConvertAngleWithArcD
     EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION, 1.0f),
         -89.0f);
 }
+
+/**
+ * @tc.name: DynamicChangeIndicatorType001
+ * @tc.desc: Dynamic change indicator type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, DynamicChangeIndicatorType001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperDone();
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DOT);
+
+    auto indicatorId = pattern_->GetIndicatorId();
+    layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
+    pattern_->InitIndicator();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DIGIT);
+    auto newIndicatorId = pattern_->GetIndicatorId();
+    EXPECT_NE(indicatorId, newIndicatorId);
+
+    layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DOT);
+    pattern_->InitIndicator();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DOT);
+    auto lastIndicatorId = pattern_->GetIndicatorId();
+    EXPECT_NE(lastIndicatorId, newIndicatorId);
+}
 } // namespace OHOS::Ace::NG
