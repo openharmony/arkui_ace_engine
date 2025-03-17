@@ -30,6 +30,8 @@ template<typename AceInfo,
 >
 class SomeEventPeer : public BaseEventPeer {
 public:
+    using AceEventInfo = AceInfo;
+
     ~SomeEventPeer() override = default;
 
     BaseEventInfo* GetBaseInfo() override
@@ -39,16 +41,20 @@ public:
 
     AceInfo* GetEventInfo()
     {
-        return eventInfo;
+        return eventInfo->ptr;
     }
 
     void SetEventInfo(AceInfo* info)
     {
-        eventInfo = info;
+        eventInfo->ptr = info;
     }
 
-private:
-    AceInfo* eventInfo;
+    struct EventInfo {
+        AceInfo* ptr = nullptr;
+        std::optional<AceInfo> object;
+    };
+
+    const std::shared_ptr<EventInfo> eventInfo = std::make_shared<EventInfo>();
 };
 
 using BaseEventPeerImpl = SomeEventPeer<BaseEventInfo>;
