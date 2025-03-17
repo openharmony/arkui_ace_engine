@@ -85,8 +85,7 @@ public:
     }
 };
 
-void UIExtensionComponentTestTwoNg::SetUp() {
-}
+void UIExtensionComponentTestTwoNg::SetUp() {}
 
 void UIExtensionComponentTestTwoNg::TearDown() {
 }
