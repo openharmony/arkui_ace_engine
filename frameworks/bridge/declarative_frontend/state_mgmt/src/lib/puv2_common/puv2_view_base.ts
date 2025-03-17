@@ -310,7 +310,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // When the child node supports the Component freezing, the root node will definitely recurse to the child node. 
     // From API16, to prevent child node mistakenly activated by the parent node, reference counting is used to control node status.
     // active + 1 means count +1， inactive -1 means count -1, Expect no more than 1 
-    if (Utils.isApiVersionEQAbove(16)) {
+    if (Utils.isApiVersionEQAbove(18)) {
       this.activeCount_ += active ? 1 : -1;
     }
     else {

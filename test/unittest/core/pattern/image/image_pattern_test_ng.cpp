@@ -397,7 +397,7 @@ HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
     imagePattern->animator_->AttachScheduler(pipeline);
     SystemProperties::debugEnabled_ = true;
     imagePattern->animator_->status_ = OHOS::Ace::Animator::Status::PAUSED;
-    imagePattern->imageType_ = ImageType::ANIMATION;
+    imagePattern->imageType_ = ImageType::ANIMATED_DRAWABLE;
     imagePattern->OnVisibleAreaChange(true, 1.0f);
     EXPECT_EQ(imagePattern->animator_->status_, OHOS::Ace::Animator::Status::RUNNING);
 }
@@ -764,6 +764,13 @@ HWTEST_F(ImagePatternTestNg, ImagePatternOnKeyEvent001, TestSize.Level1)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), false);
+
+    /**
+     * @tc.steps: step1. init onKey event.
+     */
+    imagePattern->keyEventCallback_ = [](const KeyEvent& event) -> bool {return false;};
+    imagePattern->InitOnKeyEvent();
+    ASSERT_NE(imagePattern->keyEventCallback_, nullptr);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -1547,5 +1554,133 @@ HWTEST_F(ImagePatternTestNg, SetImageAnalyzerConfig, TestSize.Level1)
     auto isEnableAnalyzer = imagePattern->isEnableAnalyzer_;
     imagePattern->SetImageAnalyzerConfig(voidPtr);
     EXPECT_TRUE(isEnableAnalyzer);
+}
+
+/**
+ * @tc.name: RecycleImageData001
+ * @tc.desc: RecycleImageData001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, RecycleImageData001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. set isShow true and call RecycleImageData.
+    * @tc.expected: Returned value is false.
+    */
+    imagePattern->isShow_ = true;
+    EXPECT_FALSE(imagePattern->RecycleImageData());
+}
+
+/**
+* @tc.name: RecycleImageData002
+* @tc.desc: RecycleImageData002
+* @tc.type: FUNC
+*/
+HWTEST_F(ImagePatternTestNg, RecycleImageData002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. set isShow false and call RecycleImageData.
+    * @tc.expected: Returned value is false.
+    */
+    imagePattern->isShow_ = false;
+    imagePattern->OnRecycle();
+    EXPECT_FALSE(imagePattern->RecycleImageData());
+}
+
+/**
+* @tc.name: RecycleImageData003
+* @tc.desc: RecycleImageData003
+* @tc.type: FUNC
+*/
+HWTEST_F(ImagePatternTestNg, RecycleImageData003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. set isShow false and call RecycleImageData.
+    * @tc.expected: Returned value is false.
+    */
+    imagePattern->isShow_ = false;
+    EXPECT_FALSE(imagePattern->RecycleImageData());
+}
+
+/**
+* @tc.name: RecycleImageData004
+* @tc.desc: RecycleImageData004
+* @tc.type: FUNC
+*/
+HWTEST_F(ImagePatternTestNg, RecycleImageData004, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. set isShow false and call RecycleImageData.
+    * @tc.expected: Returned value is true.
+    */
+    imagePattern->isShow_ = false;
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    EXPECT_TRUE(imagePattern->RecycleImageData());
 }
 } // namespace OHOS::Ace::NG

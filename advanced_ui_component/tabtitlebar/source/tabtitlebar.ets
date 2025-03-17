@@ -802,7 +802,7 @@ struct ImageMenuItem {
     .borderRadius(ImageMenuItem.buttonBorderRadius)
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
-    .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
+    .enabled(this.item.isEnabled ? this.item.isEnabled : false)
     .stateStyles({
       focused: {
         .border({

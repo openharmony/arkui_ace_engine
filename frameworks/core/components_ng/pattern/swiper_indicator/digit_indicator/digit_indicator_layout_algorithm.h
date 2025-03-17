@@ -52,12 +52,13 @@ public:
     }
 
 private:
-    float CalcFrameHeight(const RefPtr<FrameNode>& frameNode, float indicatorHeight);
-    void SetBackTextOffset(const ChildrenListWithGuard& textWrapperList, const SizeF& frameSize, bool isHorizontal,
+    float CalcFrameHeight(const RefPtr<FrameNode>& frameNode, float indicatorHeight, float indicatorDigitPadding);
+    void SetBackTextOffset(const ChildrenListWithGuard& textWrapperList, const SizeF& frameSize,
         const std::optional<bool>& ignoreSize);
     bool isHoverOrPress_ = false;
     bool isSingle_ = false;
     PointF hoverPoint_;
+    float indicatorDigitPadding_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_DIGIT_INDICATOR_LAYOUT_ALGORITHM_H

@@ -14,10 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import BlankBootcampTest from './BlankAndDivider/BlankBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
 
 
 export default function testsuite() {
   abilityTest();
-  BlankBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

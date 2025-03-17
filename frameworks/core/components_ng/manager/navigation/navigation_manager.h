@@ -203,7 +203,7 @@ private:
     bool preNodeAnimationCached_ = false;
     bool isInAnimation_ = false;
     bool isNodeAddAnimation_ = false;
-    bool hasCacheNavigationNodeEnable_ = false;
+    bool hasCacheNavigationNodeEnable_ = true;
     int32_t interactiveAnimationId_ = -1;
 
     WeakPtr<PipelineContext> pipeline_;

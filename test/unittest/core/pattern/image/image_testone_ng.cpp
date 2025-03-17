@@ -1690,7 +1690,7 @@ void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
 
     image.EnableAnalyzer(false);
     ImageModelNG::EnableAnalyzer(frameNode, true);
-    imagePattern->SetImageType(ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
     ImageModelNG::ResetImageSrc(frameNode);
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
     ASSERT_EQ(imageSourceInfo->GetSrc(), "");

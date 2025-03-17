@@ -18,7 +18,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
-
+#include "core/components_ng/pattern/texttimer/text_timer_event_hub.h"
 namespace OHOS::Ace::NG {
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
@@ -176,6 +176,25 @@ void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Flo
         TextTimerModelNG::SetInputCount(frameNode, count);
     }
 }
+
+void SetTextTimerOnTimer(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onTimer = reinterpret_cast<ChangeEvent*>(callback);
+        TextTimerModelNG::SetOnTimer(frameNode, std::move(*onTimer));
+    } else {
+        TextTimerModelNG::SetOnTimer(frameNode, nullptr);
+    }
+}
+
+void ResetTextTimerOnTimer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextTimerModelNG::SetOnTimer(frameNode, nullptr);
+}
 } // namespace TextTimerModifier
 
 namespace NodeModifier {
@@ -198,6 +217,8 @@ const ArkUITextTimerModifier* GetTextTimerModifier()
         .setTextShadow = TextTimerModifier::SetTextShadow,
         .resetTextShadow = TextTimerModifier::ResetTextShadow,
         .setTextTimerOptions = TextTimerModifier::setTextTimerOptions,
+        .setTextTimerOnTimer = TextTimerModifier::SetTextTimerOnTimer,
+        .resetTextTimerOnTimer = TextTimerModifier::ResetTextTimerOnTimer,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

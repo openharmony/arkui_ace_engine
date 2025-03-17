@@ -212,6 +212,81 @@ class ImageAnimatorAutoMonitorInvisibleAreaModeModifier extends ModifierWithKey<
   }
 }
 
+declare type OnStart = () => void;
+class ImageAnimatorOnStartModifier extends ModifierWithKey<OnStart> {
+  constructor(value: OnStart) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageAnimatorOnStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnStart(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnStart(node, this.value);
+    }
+  }
+}
+
+declare type OnPause = () => void;
+class ImageAnimatorOnPauseModifier extends ModifierWithKey<OnPause> {
+  constructor(value: OnPause) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageAnimatorOnPause');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnPause(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnPause(node, this.value);
+    }
+  }
+}
+
+declare type OnRepeat = () => void;
+class ImageAnimatorOnRepeatModifier extends ModifierWithKey<OnRepeat> {
+  constructor(value: OnRepeat) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageAnimatorOnRepeat');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnRepeat(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnRepeat(node, this.value);
+    }
+  }
+}
+
+declare type OnCancel = () => void;
+class ImageAnimatorOnCancelModifier extends ModifierWithKey<OnCancel> {
+  constructor(value: OnCancel) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageAnimatorOnCancel');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnCancel(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnCancel(node, this.value);
+    }
+  }
+}
+
+declare type OnFinish = () => void;
+class ImageAnimatorOnFinishModifier extends ModifierWithKey<OnFinish> {
+  constructor(value: OnFinish) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageAnimatorOnFinish');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageAnimator.resetImageAnimatorOnFinish(node);
+    } else {
+      getUINativeModule().imageAnimator.setImageAnimatorOnFinish(node, this.value);
+    }
+  }
+}
+
 class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<ImageAnimatorAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -260,19 +335,24 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
     return this;
   }
   onStart(event: () => void): ImageAnimatorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnStartModifier.identity, ImageAnimatorOnIncModifier, event);
+    return this;
   }
   onPause(event: () => void): ImageAnimatorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnPauseModifier.identity, ImageAnimatorOnPauseModifier, event);
+    return this;
   }
   onRepeat(event: () => void): ImageAnimatorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnRepeatModifier.identity, ImageAnimatorOnRepeatModifier, event);
+    return this;
   }
   onCancel(event: () => void): ImageAnimatorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnCancelModifier.identity, ImageAnimatorOnCancelModifier, event);
+    return this;
   }
   onFinish(event: () => void): ImageAnimatorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorOnFinishModifier.identity, ImageAnimatorOnFinishModifier, event);
+    return this;
   }
 }
 // @ts-ignore

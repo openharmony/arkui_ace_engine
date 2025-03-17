@@ -959,7 +959,7 @@ public:
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
-    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType);
+    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth,
@@ -1057,6 +1057,7 @@ public:
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
+    void RestoreRenderFit();
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1164,6 +1165,8 @@ public:
         }
     }
 
+    bool SetFocusByPosition(float x, float y);
+
     void StartVibraFeedback(const std::string& vibratorType);
 
     RefPtr<TaskExecutor> GetTaskExecutor() const
@@ -1174,6 +1177,8 @@ public:
     bool GetAccessibilityVisible(int64_t accessibilityId);
 
     void SetTransformHint(uint32_t rotation);
+
+    void MaximizeResize();
 
     void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
 

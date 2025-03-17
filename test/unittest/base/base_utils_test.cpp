@@ -1185,6 +1185,83 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest070, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BaseUtilsTest071
+ * @tc.desc: invalid byte
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest071, TestSize.Level1)
+{
+    uint8_t invalidByte[1] = { 0x80 };
+    size_t size = MUtf8ToUtf16Size(invalidByte, 1);
+    EXPECT_EQ(size, 1);
+}
+
+/**
+ * @tc.name: BaseUtilsTest072
+ * @tc.desc: HandlesSupplementaryPairs
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest072, TestSize.Level1)
+{
+    uint8_t mutf8[] = { 0xED, 0xA0, 0xBC, 0xED, 0xB7, 0x84 };
+    size_t mutf8Len = sizeof(mutf8) / sizeof(mutf8[0]);
+    size_t utf16Size = MUtf8ToUtf16Size(mutf8, mutf8Len);
+    EXPECT_EQ(utf16Size, 2);
+}
+
+/**
+ * @tc.name: BaseUtilsTest073
+ * @tc.desc: SingleByte String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest073, TestSize.Level1)
+{
+    uint8_t data[1] = { 0x80 };
+    auto result = ConvertMUtf8ToUtf16Pair(data, 1);
+    EXPECT_EQ(result.first, 0x80);
+    EXPECT_EQ(result.second, 1);
+}
+
+/**
+ * @tc.name: BaseUtilsTest074
+ * @tc.desc: 2Byte String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest074, TestSize.Level1)
+{
+    uint8_t data[2] = { 0xE0, 0x80 };
+    auto result = ConvertMUtf8ToUtf16Pair(data, 2);
+    EXPECT_EQ(result.first, 0xE0);
+    EXPECT_EQ(result.second, 1);
+}
+
+/**
+ * @tc.name: BaseUtilsTest075
+ * @tc.desc: 3Byte String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest075, TestSize.Level1)
+{
+    uint8_t data[3] = { 0xF0, 0x80, 0x80 };
+    auto result = ConvertMUtf8ToUtf16Pair(data, 3);
+    EXPECT_EQ(result.first, 0xF0);
+    EXPECT_EQ(result.second, 1);
+}
+
+/**
+ * @tc.name: BaseUtilsTest076
+ * @tc.desc: 4Byte String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest076, TestSize.Level1)
+{
+    uint8_t mutf8[] = { 0xF0, 0x9D, 0x84, 0x9E };
+    auto [codePoint, nbytes] = ConvertMUtf8ToUtf16Pair(mutf8, 4);
+    EXPECT_TRUE(codePoint > 0xFFFF);
+    EXPECT_EQ(nbytes, 4);
+}
+
+/**
  * @tc.name: StringExpressionTest001
  * @tc.desc: InitMapping()
  * @tc.type: FUNC
@@ -1398,5 +1475,146 @@ HWTEST_F(BaseUtilsTest, TimeUtilsTest001, TestSize.Level1)
     int64_t timestamp = 1626211200;
     std::string ret = ConvertTimestampToStr(timestamp);
     EXPECT_EQ(ret, "1970-01-20 03:43:31.200");
+}
+
+/**
+ * @tc.name: UtfConversionTest001
+ * @tc.desc: Convert a simple ASCII string to UTF-16.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, UtfConversionTest001, TestSize.Level1)
+{
+    const std::string asciiStr = "Hello World";
+    const size_t utf8Len = asciiStr.size();
+    const size_t utf16Len = utf8Len + 1;
+    std::vector<uint8_t> utf8In(asciiStr.begin(), asciiStr.end());
+    std::vector<uint16_t> utf16Out(utf16Len);
+
+    size_t written = ConvertRegionUtf8ToUtf16(
+        utf8In.data(), utf16Out.data(), utf8Len, utf16Len, 0);
+
+    std::u16string expectedStr = u"Hello World";
+    std::u16string actualStr(utf16Out.begin(), utf16Out.begin() + written);
+    ASSERT_EQ(actualStr, expectedStr);
+    ASSERT_EQ(written, expectedStr.size());
+}
+
+/**
+ * @tc.name: UtfConversionTest002
+ * @tc.desc: Convert a string with non-ASCII characters to UTF-16.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, UtfConversionTest002, TestSize.Level1)
+{
+    const std::string nonAsciiStr = "こんにちは世界";
+    const size_t utf8Len = nonAsciiStr.size();
+    const size_t utf16Len = utf8Len + 1;
+    std::vector<uint8_t> utf8In(nonAsciiStr.begin(), nonAsciiStr.end());
+    std::vector<uint16_t> utf16Out(utf16Len);
+
+    size_t written = ConvertRegionUtf8ToUtf16(
+        utf8In.data(), utf16Out.data(), utf8Len, utf16Len, 0);
+
+    std::u16string expectedStr = u"こんにちは世界";
+    std::u16string actualStr(utf16Out.begin(), utf16Out.begin() + written);
+
+    ASSERT_EQ(actualStr, expectedStr);
+    ASSERT_EQ(written, expectedStr.size());
+}
+
+/**
+ * @tc.name: UtfConversionTest003
+ * @tc.desc: Convert a string with a mix of ASCII and non-ASCII characters to UTF-16.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, UtfConversionTest003, TestSize.Level1)
+{
+    const std::string mixedStr = "Hello, 世界!";
+    const size_t utf8Len = mixedStr.size();
+    const size_t utf16Len = utf8Len + 1;
+    std::vector<uint8_t> utf8In(mixedStr.begin(), mixedStr.end());
+    std::vector<uint16_t> utf16Out(utf16Len);
+
+    size_t written = ConvertRegionUtf8ToUtf16(
+        utf8In.data(), utf16Out.data(), utf8Len, utf16Len, 0);
+
+    std::u16string expectedStr = u"Hello, 世界!";
+    std::u16string actualStr(utf16Out.begin(), utf16Out.begin() + written);
+
+    ASSERT_EQ(actualStr, expectedStr);
+    ASSERT_EQ(written, expectedStr.size());
+}
+
+/**
+ * @tc.name: UtfConversionTest004
+ * @tc.desc: Convert a string with a 4-byte UTF-8 character to UTF-16.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, UtfConversionTest004, TestSize.Level1)
+{
+    const std::string fourByteStr = "𝄞𝄢𝄡𝄠𝄟𝄠𝄡𝄢𝄞𝄙𝄘𝄕𝄖𝄕𝄘𝄙𝄞";
+    const size_t utf8Len = fourByteStr.size();
+    const size_t utf16Len = utf8Len * 2;
+    std::vector<uint8_t> utf8In(fourByteStr.begin(), fourByteStr.end());
+    std::vector<uint16_t> utf16Out(utf16Len);
+
+    size_t written = ConvertRegionUtf8ToUtf16(
+        utf8In.data(), utf16Out.data(), utf8Len, utf16Len, 0);
+
+    std::u16string expectedStr = u"𝄞𝄢𝄡𝄠𝄟𝄠𝄡𝄢𝄞𝄙𝄘𝄕𝄖𝄕𝄘𝄙𝄞";
+    std::u16string actualStr(utf16Out.begin(), utf16Out.begin() + written);
+
+    ASSERT_EQ(actualStr, expectedStr);
+    ASSERT_EQ(written, expectedStr.size());
+}
+
+/**
+ * @tc.name: UtfConversionTest005
+ * @tc.desc: Test conversion with a string that requires truncation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, UtfConversionTest005, TestSize.Level1)
+{
+    const std::string fullStr = "This string will be truncated";
+    const size_t startOffset = 10;
+    const size_t utf8Len = fullStr.size() - startOffset;
+    const size_t utf16Len = utf8Len + 1;
+   
+    std::vector<uint8_t> utf8In(fullStr.begin(), fullStr.end());
+    std::vector<uint16_t> utf16Out(utf16Len);
+   
+    size_t written = ConvertRegionUtf8ToUtf16(
+        utf8In.data() + startOffset, utf16Out.data(), utf8Len, utf16Len, 0);
+   
+    std::u16string expectedStr = u"g will be truncated";
+    std::u16string actualStr(utf16Out.begin(), utf16Out.begin() + written);
+   
+    ASSERT_EQ(actualStr, expectedStr);
+    ASSERT_EQ(written, expectedStr.size());
+}
+
+/**
+ * @tc.name: UtfConversionTest007
+ * @tc.desc: Test conversion with a start offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, UtfConversionTest007, TestSize.Level1)
+{
+    const std::string offsetStr = "Start offset test string";
+    const size_t utf8Len = offsetStr.size();
+    const size_t utf16Len = utf8Len * 2;
+
+    std::vector<uint8_t> utf8In(offsetStr.begin(), offsetStr.end());
+    std::vector<uint16_t> utf16Out(utf16Len);
+    const size_t startOffset = 10;
+
+    size_t written = ConvertRegionUtf8ToUtf16(
+        utf8In.data(), utf16Out.data(), utf8Len, utf16Len, startOffset);
+
+    std::u16string expectedStr = u"et test string";
+    std::u16string actualStr(utf16Out.begin(), utf16Out.begin() + written);
+
+    ASSERT_EQ(actualStr, expectedStr);
+    ASSERT_EQ(written, expectedStr.size());
 }
 } // namespace OHOS::Ace

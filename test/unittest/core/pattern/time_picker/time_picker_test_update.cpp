@@ -2133,4 +2133,44 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerColumnPattern002, TestSize.Level
     EXPECT_EQ(amPmColumnPattern->offsetCurSet_, 0.f);
     EXPECT_EQ(amPmColumnPattern->GetCurrentIndex(), 1);
 }
+
+/**
+ * @tc.name: TimePickerUpdateButtonFocus001
+ * @tc.desc: Test UpdateButtonDefaultFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerUpdateButtonFocus001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create TimePicker's button node.
+     * @tc.expected: buttonNode is not null.
+     */
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo buttonInfo;
+    buttonInfo.text = "OK";
+    buttonInfo.isPrimary = true;
+    buttonInfo.isAcceptButton = true;
+    buttonInfos.push_back(buttonInfo);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+
+    /**
+     * @tc.step: step2. call UpdateButtonDefaultFocus, set buttonNode as default focus.
+     * @tc.expected: focusHub is not default focus.
+     */
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(buttonNode, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), false);
+
+    /**
+     * @tc.step: step3. call UpdateButtonDefaultFocus, set buttonNode as default focus.
+     * @tc.expected: focusHub is default focus.
+     */
+    TimePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(buttonNode, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
+}
 } // namespace OHOS::Ace::NG
