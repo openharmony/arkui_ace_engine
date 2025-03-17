@@ -195,28 +195,6 @@ void SliderPattern::InitAccessibilityHoverEvent()
         ClearSliderVirtualNode();
         return;
     }
-    eventHub->SetAccessibilityHoverEvent([weak = WeakClaim(this)](bool isHover, AccessibilityHoverInfo& info) {
-        auto slider = weak.Upgrade();
-        CHECK_NULL_VOID(slider);
-        slider->HandleAccessibilityHoverEvent(isHover, info);
-    });
-
-    accessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
-        auto slider = weak.Upgrade();
-        CHECK_NULL_VOID(slider);
-        slider->HandleSliderOnAccessibilityFocusCallback(focus);
-    });
-}
-
-void SliderPattern::HandleSliderOnAccessibilityFocusCallback(bool focus)
-{
-    auto accessibilityLevel = focus ? AccessibilityProperty::Level::NO_STR : AccessibilityProperty::Level::YES_STR;
-    for (const auto& pointNode : pointAccessibilityNodeVec_) {
-        auto accessibilityProperty = pointNode->GetAccessibilityProperty<AccessibilityProperty>();
-        if (accessibilityProperty) {
-            accessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
-        }
-    }
 }
 
 class SliderAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
@@ -269,22 +247,6 @@ void SliderPattern::InitAccessibilityVirtualNodeTask()
                 CHECK_NULL_VOID(sliderPattern);
                 sliderPattern->isInitAccessibilityVirtualNode_ = sliderPattern->InitAccessibilityVirtualNode();
             });
-    }
-}
-
-void SliderPattern::HandleAccessibilityHoverEvent(bool isHover, const AccessibilityHoverInfo& info)
-{
-    auto accessibilityHoverAction = info.GetActionType();
-    if (isHover && (accessibilityHoverAction == AccessibilityHoverAction::HOVER_ENTER ||
-                       accessibilityHoverAction == AccessibilityHoverAction::HOVER_MOVE)) {
-        for (const auto& pointNode : pointAccessibilityNodeVec_) {
-            pointNode->GetAccessibilityProperty<AccessibilityProperty>()->SetAccessibilityLevel(
-                AccessibilityProperty::Level::YES_STR);
-        }
-    } else if (!isHover) {
-        auto host = GetHost();
-        auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
     }
 }
 
@@ -449,23 +411,6 @@ void SliderPattern::SetStepPointAccessibilityVirtualNode(
     auto pointAccessibilityProperty = pointNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(pointAccessibilityProperty);
     pointAccessibilityProperty->SetAccessibilityText(txt);
-
-    pointAccessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this)](bool focus) {
-        auto slider = weak.Upgrade();
-        CHECK_NULL_VOID(slider);
-        slider->HandleTextOnAccessibilityFocusCallback(focus);
-    });
-}
-
-void SliderPattern::HandleTextOnAccessibilityFocusCallback(bool focus)
-{
-    auto accessibilityLevel = focus ? AccessibilityProperty::Level::NO_STR : AccessibilityProperty::Level::YES_STR;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
@@ -560,7 +505,7 @@ uint32_t SliderPattern::GetCurrentStepIndex()
     if (NearZero(step)) {
         return 0;
     }
-    return static_cast<uint32_t>(std::round((currentValue - min) / step));
+    return static_cast<uint32_t>(std::ceil((currentValue - min) / step));
 }
 
 SizeF SliderPattern::GetStepPointAccessibilityVirtualNodeSize()

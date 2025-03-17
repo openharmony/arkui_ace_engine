@@ -653,7 +653,8 @@ void FormPattern::OnModifyDone()
     }
     // Convert DimensionUnit to DimensionUnit::PX
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnModifyDone, info.id: %{public}" PRId64, info.id);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "FormPattern::OnModifyDone, info.id: %{public}" PRId64 ", info.index: %{public}" PRId64, info.id, info.index);
     info.width = Dimension(width.ConvertToPx());
     info.height = Dimension(height.ConvertToPx());
     auto &&borderWidthProperty = layoutProperty->GetBorderWidthProperty();
@@ -664,8 +665,6 @@ void FormPattern::OnModifyDone()
     info.borderWidth = borderWidth;
     layoutProperty->UpdateRequestFormInfo(info);
     UpdateBackgroundColorWhenUnTrustForm();
-    info.obscuredMode = isFormObscured_;
-    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleProtected(info.bundleName, info.id));
     auto wantWrap = info.wantWrap;
     if (wantWrap) {
         bool isEnable = wantWrap->GetWant().GetBoolParam(OHOS::AppExecFwk::Constants::FORM_ENABLE_SKELETON_KEY, false);
@@ -707,18 +706,19 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     layoutProperty->UpdateRequestFormInfo(info);
 
     UpdateBackgroundColorWhenUnTrustForm();
-    info.obscuredMode = isFormObscured_;
-    info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) || IsFormBundleProtected(info.bundleName, info.id));
     HandleFormComponent(info);
     return true;
 }
 
-void FormPattern::HandleFormComponent(const RequestFormInfo& info)
+void FormPattern::HandleFormComponent(RequestFormInfo& info)
 {
     ACE_FUNCTION_TRACE();
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
+        info.obscuredMode = isFormObscured_;
+        info.obscuredMode |= (CheckFormBundleForbidden(info.bundleName) ||
+            IsFormBundleProtected(info.bundleName, info.id));
         AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
@@ -825,12 +825,21 @@ void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFo
         }, "ArkUIAddFormComponentUI");
 }
 
+void FormPattern::SetParamForWantTask(const RequestFormInfo& info)
+{
+    PostBgTask([weak = WeakClaim(this), info] {
+        ACE_SCOPED_TRACE("ArkUISetParamForWant");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formManagerBridge_->SetParamForWant(info);
+        }, "ArkUISetParamForWant");
+}
+
 void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 {
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
-        std::lock_guard<std::mutex> lock(formManagerBridge_->GetRecycleMutex());
-        formManagerBridge_->SetParamForWant(info);
+        SetParamForWantTask(info);
 #endif
     }
     auto host = GetHost();
@@ -1764,8 +1773,8 @@ void FormPattern::OnActionEvent(const std::string& action)
         }
     }
 
-    isManuallyClick_ = false;
     if ("router" == type) {
+        isManuallyClick_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
@@ -2054,6 +2063,7 @@ void FormPattern::DelayResetManuallyClickFlag()
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     std::string nodeIdStr = std::to_string(host->GetId());
+    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
     executor->PostDelayedTask(
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();

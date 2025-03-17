@@ -936,7 +936,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     RefPtr<NG::UINode> previewCustomNode;
-    if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM) {
+    if (previewBuildFunc && menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::CUSTOM) {
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
@@ -1060,6 +1060,20 @@ void SubwindowOhos::ClearPopupNG()
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->CleanPopupInSubWindow();
+    HideWindow();
+    context->FlushPipelineImmediately();
+}
+
+void SubwindowOhos::ClearPopupNG(bool isForceClear)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear popup ng enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->CleanPopupInSubWindow(isForceClear);
     HideWindow();
     context->FlushPipelineImmediately();
 }

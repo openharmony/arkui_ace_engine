@@ -406,7 +406,7 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool in
     }
 }
 
-void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
+void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId, bool isForceClear)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear popup in subwindow enter");
     RefPtr<Subwindow> subwindow;
@@ -417,7 +417,7 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
         subwindow = GetCurrentWindow();
     }
     if (subwindow) {
-        subwindow->ClearPopupNG();
+        subwindow->ClearPopupNG(isForceClear);
     }
 }
 
@@ -1042,6 +1042,7 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId
         }
         subwindow->SetToastWindowType(windowType);
         subwindow->SetMainWindowId(mainWindowId);
+        subwindow->InitContainer();
         AddToastSubwindow(containerId, subwindow);
     }
     return subwindow;
@@ -1466,7 +1467,7 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId, Subwin
         displayId = container->GetCurrentDisplayId();
         searchKey.foldStatus =
             isSuperFoldDisplayDevice_ && (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID)
-                ? container->GetCurrentFoldStatus()
+                ? container->GetFoldStatusFromListener()
                 : FoldStatus::UNKNOWN;
     }
 

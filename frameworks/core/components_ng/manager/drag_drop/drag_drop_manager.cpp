@@ -59,6 +59,7 @@ constexpr float DEFAULT_SPRING_RESPONSE = 0.347f;
 constexpr float MIN_SPRING_RESPONSE = 0.05f;
 constexpr float DEL_SPRING_RESPONSE = 0.005f;
 constexpr float MIN_UI_EXTENSION_BOUNDARY_DISTANCE = 5.0f;
+constexpr float MIN_FOLDER_SUBWINDOW_BOUNDARY_DISTANCE = 5.0f;
 constexpr int32_t RESERVED_DEVICEID_1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID_2 = 0xAAAAAAFE;
 constexpr uint32_t TASK_DELAY_TIME = 5 * 1000;
@@ -990,6 +991,7 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
             "pointerEventId is %{public}d.",
             container->GetWindowId(), pointerEvent.pointerEventId);
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_REFUSE_DATA);
+        ACE_SCOPED_TRACE("drag: stop drag, not allowed to drop");
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
@@ -1047,8 +1049,10 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
         TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager is dragCancel, finish drag. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
             container->GetWindowId(), pointerEvent.pointerEventId);
+        ACE_SCOPED_TRACE("drag: drag cancelled");
         DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
         ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
+        FireOnDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE, extraInfo);
         ClearVelocityInfo();
         return;
     }
@@ -1061,6 +1065,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
             "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
             container->GetWindowId(), pointerEvent.pointerEventId);
+        ACE_SCOPED_TRACE("drag: drag stop, not find drop target");
         ResetDragDrop(container->GetWindowId(), point);
         return;
     }
@@ -1172,6 +1177,7 @@ RefPtr<UnifiedData> DragDropManager::RequestUDMFDataWithUDKey(const std::string&
         TAG_LOGI(AceLogTag::ACE_DRAG, "udKey is empty");
         return nullptr;
     }
+    ACE_SCOPED_TRACE("drag: get drag data from udmf");
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->CreateUnifiedData();
     auto ret = UdmfClient::GetInstance()->GetData(udData, udKey);
     if (ret != 0) {
@@ -1974,7 +1980,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
 
 bool DragDropManager::IsNeedDoDragMoveAnimate(const DragPointerEvent& pointerEvent)
 {
-    if (!(IsNeedDisplayInSubwindow() || isDragWithContextMenu_) || isDragFwkShow_) {
+    if (isDragFwkShow_) {
         return false;
     }
     auto x = pointerEvent.GetPoint().GetX();
@@ -2117,7 +2123,9 @@ void DragDropManager::DoDragMoveAnimate(const DragPointerEvent& pointerEvent)
     isPullMoveReceivedForCurrentDrag_ = true;
     CHECK_NULL_VOID(info_.imageNode);
     auto containerId = Container::CurrentId();
-    if (CheckIsUIExtensionBoundary(pointerEvent.GetDisplayX(), pointerEvent.GetDisplayY(), containerId)) {
+    auto x = pointerEvent.GetDisplayX();
+    auto y = pointerEvent.GetDisplayY();
+    if (CheckIsUIExtensionBoundary(x, y, containerId) || CheckIsFolderSubwindowBoundary(x, y, containerId)) {
         SetStartAnimation(false);
         TransDragWindowToDragFwk(containerId);
         return;
@@ -2249,6 +2257,8 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     }
     CHECK_NULL_VOID(info_.imageNode);
     isDragFwkShow_ = false;
+    dragAnimationPointerEvent_ = DragPointerEvent(event.GetGlobalLocation().GetX(), event.GetGlobalLocation().GetY(),
+        event.GetScreenLocation().GetX(), event.GetScreenLocation().GetY());
     ResetPullMoveReceivedForCurrentDrag();
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(info_.imageNode);
     Point point = { static_cast<int32_t>(event.GetGlobalLocation().GetX()),
@@ -2268,30 +2278,28 @@ void DragDropManager::DragStartAnimation(const Offset& newOffset, const RefPtr<O
     CHECK_NULL_VOID(data.imageNode);
     auto containerId = Container::CurrentId();
     AnimationOption option;
-    const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
-    constexpr int32_t animateDuration = 300;
-    option.SetCurve(curve);
-    option.SetDuration(animateDuration);
+    SetDragStartAnimationOption(option, containerId);
     AddNewDragStartAnimation();
-    option.SetOnFinishEvent([weakManager = WeakClaim(this), containerId]() {
-        auto dragDropManager = weakManager.Upgrade();
-        if (dragDropManager->IsAllStartAnimationFinished()) {
-            dragDropManager->SetStartAnimation(true);
-        }
-        if (dragDropManager && !dragDropManager->IsPullMoveReceivedForCurrentDrag()) {
-            dragDropManager->TransDragWindowToDragFwk(containerId);
-        }
-    });
     auto renderContext = info_.imageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto offset = OffsetF(point.GetX(), point.GetY());
     auto menuWrapperNode = GetMenuWrapperNodeFromDrag();
     auto menuPosition = overlayManager->CalculateMenuPosition(menuWrapperNode, offset);
     auto menuRenderContext = GetMenuRenderContextFromMenuWrapper(menuWrapperNode);
+    auto callback = [weakManager = WeakClaim(this)](float rate) {
+        auto dragDropManager = weakManager.Upgrade();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->SetDragStartAnimationRate(rate);
+    };
+    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
+    CHECK_NULL_VOID(animateProperty);
+    renderContext->AttachNodeAnimatableProperty(animateProperty);
+    animateProperty->Set(0.0f);
+    dragStartAnimationRate_ = 0.0f;
     AnimationUtils::Animate(
         option,
         [data, renderContext, info = info_, newOffset, overlayManager, gatherNodeCenter, menuRenderContext,
-            menuPosition]() {
+            menuPosition, animateProperty]() {
             CHECK_NULL_VOID(renderContext);
             if (menuRenderContext && !menuPosition.NonOffset()) {
                 menuRenderContext->UpdatePosition(
@@ -2307,9 +2315,48 @@ void DragDropManager::DragStartAnimation(const Offset& newOffset, const RefPtr<O
             GatherAnimationInfo gatherAnimationInfo = { info.scale, info.width, info.height, gatherNodeCenter,
                 renderContext->GetBorderRadius() };
             UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
+            if (animateProperty) {
+                animateProperty->Set(1.0f);
+            }
         },
         option.GetOnFinishEvent());
     DragStartTransitionAnimation(data, newOffset, info_, option);
+}
+
+void DragDropManager::SetDragStartAnimationOption(AnimationOption& option, int32_t containerId)
+{
+    const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
+    constexpr int32_t animateDuration = 300;
+    option.SetCurve(curve);
+    option.SetDuration(animateDuration);
+    option.SetOnFinishEvent([weakManager = WeakClaim(this), containerId]() {
+        auto dragDropManager = weakManager.Upgrade();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->HandleStartDragAnimationFinish(containerId);
+    });
+}
+
+void DragDropManager::HandleStartDragAnimationFinish(int32_t containerId)
+{
+    if (IsAllStartAnimationFinished()) {
+        SetStartAnimation(true);
+    }
+    if (IsPullMoveReceivedForCurrentDrag()) {
+        TransDragWindowToDragFwk(containerId);
+    }
+    auto overlayManager = GetDragAnimationOverlayManager(containerId);
+    CHECK_NULL_VOID(overlayManager);
+    auto gatherNode = overlayManager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    auto info = overlayManager->GetGatherNodeChildrenInfo();
+    int cnt = 0;
+    for (auto iter = info.rbegin(); iter != info.rend(); iter++) {
+        auto imageNode = (*iter).imageNode.Upgrade();
+        if (cnt > 1) {
+            gatherNode->RemoveChild(imageNode);
+        }
+        cnt++;
+    }
 }
 
 void DragDropManager::DragStartTransitionAnimation(
@@ -2497,9 +2544,11 @@ void DragDropManager::UpdateGatherNodePosition(const RefPtr<OverlayManager>& ove
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenterToScreen(imageNode);
     gatherNodeCenter -= DragDropFuncWrapper::GetCurrentWindowOffset(gatherNode->GetContextRefPtr());
     OffsetF offset;
-    auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
-    for (const auto& child : gatherNodeChildrenInfo) {
+    auto info = overlayManager->GetGatherNodeChildrenInfo();
+    for (auto iter = info.rbegin(); iter != info.rend(); iter++) {
+        auto& child = (*iter);
         auto imageNode = child.imageNode.Upgrade();
+        CHECK_NULL_VOID(imageNode);
         offset.SetX(gatherNodeCenter.GetX() - child.halfWidth);
         offset.SetY(gatherNodeCenter.GetY() - child.halfHeight);
         DragDropFuncWrapper::UpdateNodePositionToWindow(imageNode, offset);
@@ -2892,6 +2941,34 @@ bool DragDropManager::IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, in
 int32_t DragDropManager::CancelUDMFDataLoading(const std::string& key)
 {
     return UdmfClient::GetInstance()->Cancel(key);
+}
+
+bool DragDropManager::CheckIsFolderSubwindowBoundary(float x, float y, int32_t instanceId)
+{
+    if (!SystemProperties::IsSuperFoldDisplayDevice() || NearZero(info_.scale)) {
+        return false;
+    }
+    auto mainContainerId = instanceId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(instanceId) : instanceId;
+    auto container = Container::GetContainer(mainContainerId);
+    CHECK_NULL_RETURN(container, false);
+    if (container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
+        return false;
+    }
+    auto isCrossWindow = container->IsCrossAxisWindow();
+    auto isScenceBoard = container->IsScenceBoardWindow();
+    if (isCrossWindow || isScenceBoard) {
+        return false;
+    }
+    auto subwindow = SubwindowManager::GetInstance()->GetCurrentWindow();
+    CHECK_NULL_RETURN(subwindow, false);
+    auto rect = subwindow->GetWindowRect();
+    auto scale = dragStartAnimationRate_ * (info_.scale - info_.originScale.y) + info_.originScale.y;
+    OffsetF pixelMapOffset = pixelMapOffset_ / info_.scale * scale;
+    float top = y + pixelMapOffset.GetY();
+    float bottom = y + pixelMapOffset.GetY() + info_.height * scale;
+    float distance = std::min(top - rect.Top(), rect.Bottom() - bottom);
+    return distance < MIN_FOLDER_SUBWINDOW_BOUNDARY_DISTANCE;
 }
 
 bool DragDropManager::CheckIsUIExtensionBoundary(float x, float y, int32_t instanceId)

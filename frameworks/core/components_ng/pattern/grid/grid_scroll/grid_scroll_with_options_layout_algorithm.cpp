@@ -298,11 +298,11 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::CalculateCache
 int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCount(
     const GridLayoutOptions& options, int32_t cachedCount)
 {
-    if (info_.startMainLineIndex_ - cachedCount <= 0) {
-        return info_.startIndex_;
-    }
-
     int32_t start = cachedCount * info_.crossCount_;
+
+    if (info_.startMainLineIndex_ - cachedCount <= 0) {
+        return std::min(info_.startIndex_, start);
+    }
 
     auto startLine = info_.gridMatrix_.find(info_.startMainLineIndex_ - cachedCount);
     if (startLine != info_.gridMatrix_.end()) {

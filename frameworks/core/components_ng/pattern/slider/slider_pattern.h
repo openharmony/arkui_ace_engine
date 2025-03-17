@@ -324,12 +324,9 @@ private:
     void AccessibilityVirtualNodeRenderTask();
     bool CheckCreateAccessibilityVirtualNode();
     void InitAccessibilityHoverEvent();
-    void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
     bool InitAccessibilityVirtualNode();
     void ModifyAccessibilityVirtualNode();
     void AddStepPointsAccessibilityVirtualNode();
-    void HandleTextOnAccessibilityFocusCallback(bool focus);
-    void HandleSliderOnAccessibilityFocusCallback(bool focus);
     void UpdateStepAccessibilityVirtualNode();
     void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);

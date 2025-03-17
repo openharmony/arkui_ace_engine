@@ -84,7 +84,6 @@ ArkUIDialogHandle CreateDialog()
         .levelUniqueId = ARKUI_DEFAULT_LEVEL_UNIQUEID,
         .immersiveMode = ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE,
         .levelOrder = 0.0f,
-        .focusable = true,
         .onWillAppearData = nullptr,
         .onDidAppearData = nullptr,
         .onWillDisappearData = nullptr,
@@ -116,6 +115,7 @@ ArkUIDialogHandle CreateDialog()
         .keyboardAvoidMode = OHOS::Ace::KeyboardAvoidMode::DEFAULT,
         .enableHoverMode = false,
         .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
+        .focusable = true,
     });
 }
 
@@ -491,7 +491,7 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties &dialogPr
 void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name,
     const RefPtr<NG::OverlayManager>& overlay)
 {
-    auto currentId = Container::CurrentId();
+    auto currentId = Container::CurrentIdSafelyWithCheck();
     ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -509,7 +509,7 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
 
 bool ContainerIsService()
 {
-    auto containerId = Container::CurrentIdSafely();
+    auto containerId = Container::CurrentIdSafelyWithCheck();
     if (containerId < 0) {
         auto container = Container::GetActive();
         if (container) {
@@ -730,13 +730,6 @@ ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle controllerHandler, ArkUI_Float64 lev
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->levelOrder = levelOrder;
-    return ERROR_CODE_NO_ERROR;
-}
-
-ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
-{
-    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->focusable = focusable;
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -978,6 +971,13 @@ ArkUI_Int32 SetHoverModeArea(ArkUIDialogHandle controllerHandler, ArkUI_Int32 ho
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->hoverModeAreaType = static_cast<OHOS::Ace::HoverModeAreaType>(hoverModeAreaType);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->focusable = focusable;
     return ERROR_CODE_NO_ERROR;
 }
 

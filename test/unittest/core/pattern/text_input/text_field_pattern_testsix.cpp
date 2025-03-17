@@ -185,7 +185,7 @@ HWTEST_F(TextFieldPatternTestSix, GetAutoFillTypeAndMetaData001, TestSize.Level0
  */
 HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus001, TestSize.Level0)
 {
-    int32_t setApiVersion = 16;
+    int32_t setApiVersion = 18;
     int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     CreateTextField();
@@ -206,7 +206,7 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus001, TestSize.Level0)
  */
 HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus002, TestSize.Level0)
 {
-    int32_t setApiVersion = 16;
+    int32_t setApiVersion = 18;
     int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     CreateTextField();
@@ -224,7 +224,7 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus002, TestSize.Level0)
  */
 HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus003, TestSize.Level0)
 {
-    int32_t setApiVersion = 16;
+    int32_t setApiVersion = 18;
     int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     CreateTextField();
@@ -253,7 +253,7 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus003, TestSize.Level0)
  */
 HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus004, TestSize.Level0)
 {
-    int32_t setApiVersion = 16;
+    int32_t setApiVersion = 18;
     int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     CreateTextField();
@@ -296,7 +296,7 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus004, TestSize.Level0)
  */
 HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus005, TestSize.Level0)
 {
-    int32_t setApiVersion = 16;
+    int32_t setApiVersion = 18;
     int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(setApiVersion);
     CreateTextField();

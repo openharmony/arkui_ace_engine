@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,11 @@ RefPtr<Paragraph> Paragraph::CreateRichEditorParagraph(
     CHECK_NULL_RETURN(txtFontCollection, nullptr);
     auto sharedFontCollection = txtFontCollection->GetRawFontCollection();
     return AceType::MakeRefPtr<RichEditorParagraph>(paraStyle, sharedFontCollection);
+}
+
+Rosen::TextRectHeightStyle RichEditorParagraph::GetHeightStyle(bool needLineHighest)
+{
+    return needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT;
 }
 
 void RichEditorParagraph::Layout(float width)

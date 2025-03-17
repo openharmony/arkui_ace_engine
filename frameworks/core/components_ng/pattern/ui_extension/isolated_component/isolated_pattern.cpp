@@ -90,7 +90,7 @@ void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWr
     }
 
     curIsolatedInfo_.abcPath = abcPath;
-    curIsolatedInfo_.reourcePath = resourcePath;
+    curIsolatedInfo_.resourcePath = resourcePath;
     curIsolatedInfo_.entryPoint = entryPoint;
     curIsolatedInfo_.registerComponents = registerComponents;
     InitializeRender(runtime);
@@ -309,7 +309,7 @@ void IsolatedPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("isolatedId: ").append(std::to_string(platformId_)));
     DumpLog::GetInstance().AddDesc(std::string("abcPath: ").append(curIsolatedInfo_.abcPath));
-    DumpLog::GetInstance().AddDesc(std::string("reourcePath: ").append(curIsolatedInfo_.reourcePath));
+    DumpLog::GetInstance().AddDesc(std::string("resourcePath: ").append(curIsolatedInfo_.resourcePath));
     DumpLog::GetInstance().AddDesc(std::string("entryPoint: ").append(curIsolatedInfo_.entryPoint));
     DumpLog::GetInstance().AddDesc(std::string("createLimitedWorkerTime: ")
         .append(std::to_string(isolatedDumpInfo_.createLimitedWorkerTime)));
@@ -328,9 +328,9 @@ void IsolatedPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("isolatedId", platformId_);
     json->Put("abcPath", curIsolatedInfo_.abcPath.c_str());
-    json->Put("reourcePath", curIsolatedInfo_.reourcePath.c_str());
-    json->Put("entryPoint", curIsolatedInfo_.reourcePath.c_str());
-    json->Put("reourcePath", curIsolatedInfo_.entryPoint.c_str());
+    json->Put("resourcePath", curIsolatedInfo_.resourcePath.c_str());
+    json->Put("entryPoint", curIsolatedInfo_.resourcePath.c_str());
+    json->Put("resourcePath", curIsolatedInfo_.entryPoint.c_str());
     json->Put("createLimitedWorkerTime", std::to_string(isolatedDumpInfo_.createLimitedWorkerTime).c_str());
 
     CHECK_NULL_VOID(dynamicComponentRenderer_);

@@ -45,7 +45,7 @@ bool CustomNode::Render(int64_t deadline)
         RenderFunction renderFunction = nullptr;
         std::swap(renderFunction, renderFunction_);
         if (!CheckFireOnAppear()) {
-            ACE_LAYOUT_SCOPED_TRACE("CustomNode:OnAppear");
+            ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
             if (deadline > 0 && GetSysTimestamp() > deadline) {
                 std::swap(renderFunction, renderFunction_);
@@ -58,7 +58,7 @@ bool CustomNode::Render(int64_t deadline)
                 id = Container::CurrentId();
             }
             COMPONENT_CREATION_DURATION(id);
-            ACE_LAYOUT_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d][frameRound:%d]",
+            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d][frameRound:%d]",
                 GetJSViewName().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0, prebuildFrameRounds_);
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor(prebuildViewStackProcessor_);
@@ -78,7 +78,7 @@ bool CustomNode::Render(int64_t deadline)
             }
         }
         {
-            ACE_LAYOUT_SCOPED_TRACE("CustomNode::DidBuild");
+            ACE_SCOPED_TRACE("CustomNode::DidBuild");
             FireDidBuild();
         }
     }

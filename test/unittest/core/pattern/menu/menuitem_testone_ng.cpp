@@ -35,8 +35,10 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
@@ -51,6 +53,8 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
@@ -91,19 +95,6 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
-
-RefPtr<Theme> GetTheme(ThemeType type)
-{
-    if (type == TextTheme::TypeId()) {
-        return AceType::MakeRefPtr<TextTheme>();
-    } else if (type == IconTheme::TypeId()) {
-        return AceType::MakeRefPtr<IconTheme>();
-    } else if (type == SelectTheme::TypeId()) {
-        return AceType::MakeRefPtr<SelectTheme>();
-    } else {
-        return AceType::MakeRefPtr<MenuTheme>();
-    }
-}
 } // namespace
 class MenuItemTestOneNg : public testing::Test {
 public:
@@ -112,13 +103,9 @@ public:
     void SetUp() override;
     void TearDown() override;
     void MockPipelineContextGetTheme();
-    void InitTargetFrameNode();
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
     RefPtr<MenuItemLayoutAlgorithm> menuItemLayoutAlgorithm_;
-    RefPtr<FrameNode> targetFrameNode_;
-    int32_t targetId_ = 0;
-    std::string targetTag_ = "";
 };
 
 void MenuItemTestOneNg::SetUpTestCase() {}
@@ -133,8 +120,6 @@ void MenuItemTestOneNg::SetUp()
     MockContainer::SetUp();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    InitTargetFrameNode();
 }
 
 void MenuItemTestOneNg::TearDown()
@@ -187,19 +172,16 @@ void MenuItemTestOneNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        return GetTheme(type);
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
     });
-    EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
-}
-
-void MenuItemTestOneNg::InitTargetFrameNode()
-{
-    targetFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    ASSERT_NE(targetFrameNode_, nullptr);
-    targetId_ = targetFrameNode_->GetId();
-    targetTag_ = targetFrameNode_->GetTag();
 }
 
 /**
@@ -216,7 +198,7 @@ HWTEST_F(MenuItemTestOneNg, UpdateSelfSize001, TestSize.Level1)
     optionParams.emplace_back("MenuItem1", "", action);
     optionParams.emplace_back("MenuItem2", "", action);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, MenuType::MENU, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -251,7 +233,7 @@ HWTEST_F(MenuItemTestOneNg, CheckNeedExpandContent001, TestSize.Level1)
     optionParams.emplace_back("MenuItem1", "", action);
     optionParams.emplace_back("MenuItem2", "", action);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, MenuType::MENU, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -286,7 +268,7 @@ HWTEST_F(MenuItemTestOneNg, Measure001, TestSize.Level1)
     optionParams.emplace_back("MenuItem1", "", action);
     optionParams.emplace_back("MenuItem2", "", action);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, MenuType::MENU, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -332,7 +314,7 @@ HWTEST_F(MenuItemTestOneNg, Measure002, TestSize.Level1)
     optionParams.emplace_back("MenuItem1", "", action);
     optionParams.emplace_back("MenuItem2", "", action);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, MenuType::MENU, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -378,7 +360,7 @@ HWTEST_F(MenuItemTestOneNg, Measure003, TestSize.Level1)
     optionParams.emplace_back("MenuItem1", "", action);
     optionParams.emplace_back("MenuItem2", "", action);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, MenuType::MENU, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -663,5 +645,125 @@ HWTEST_F(MenuItemTestOneNg, CalcContentExpandWidth001, TestSize.Level1)
     menuItemLayoutAlgorithm_->CalcContentExpandWidth(layoutConstraint, 49.0f, 32.0f, 32.0f);
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: GetDividerStroke001
+ * @tc.desc: Test GetDividerStroke func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, GetDividerStroke001, TestSize.Level1)
+{
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto topDivider = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    topDivider->MountToParent(menuNode);
+    menuItemPattern->topDivider_ = topDivider;
+    ASSERT_EQ(menuItemLayoutAlgorithm_->GetDividerStroke(&layoutWrapper), 0.0f);
+}
+
+/**
+ * @tc.name: GetDividerStroke002
+ * @tc.desc: Test GetDividerStroke func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, GetDividerStroke002, TestSize.Level1)
+{
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto topDivider = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    menuItemPattern->topDivider_ = topDivider;
+    menuItemLayoutAlgorithm_->GetDividerStroke(&layoutWrapper);
+    menuItemPattern->topDivider_ = nullptr;
+    menuItemLayoutAlgorithm_->GetDividerStroke(&layoutWrapper);
+}
+
+/**
+ * @tc.name: InitPadding001
+ * @tc.desc: Test InitPadding func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, InitPadding001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto props = layoutWrapper.GetLayoutProperty();
+    PaddingProperty padding;
+    props->UpdatePadding(padding);
+    auto layoutConstraint = props->GetLayoutConstraint();
+    menuItemLayoutAlgorithm_->horInterval_ = 12.0f;
+    menuItemLayoutAlgorithm_->verInterval_ = 8.0f;
+    menuItemLayoutAlgorithm_->InitPadding(props, layoutConstraint);
+
+    padding.left = CalcLength(5.0f, DimensionUnit::PX);
+    padding.right = CalcLength(5.0f, DimensionUnit::PX);
+    padding.top = CalcLength(3.0f, DimensionUnit::PX);
+    padding.bottom = CalcLength(3.0f, DimensionUnit::PX);
+    menuItemLayoutAlgorithm_->InitPadding(props, layoutConstraint);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: MeasureClickableArea001
+ * @tc.desc: Test MeasureClickableArea func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureClickableArea001, TestSize.Level1)
+{
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto clickableArea = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(clickableArea, nullptr);
+    clickableArea->MountToParent(itemNode, CLICKABLE_AREA_VIEW_INDEX);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->userSetPadding_ = true;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(itemNode, geometryNode, itemNode->GetLayoutProperty());
+    menuItemLayoutAlgorithm_->MeasureClickableArea(&layoutWrapper);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    menuItemLayoutAlgorithm_->MeasureClickableArea(&layoutWrapper);
 }
 } // namespace OHOS::Ace::NG

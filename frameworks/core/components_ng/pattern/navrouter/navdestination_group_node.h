@@ -128,6 +128,16 @@ public:
         return canReused_;
     }
 
+    void SetInCurrentStack(bool inStack)
+    {
+        inCurrentStack_ = inStack;
+    }
+
+    bool GetInCurrentStack() const
+    {
+        return inCurrentStack_;
+    }
+
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
         navDestinationPathInfo_ = pagePath;
@@ -208,7 +218,7 @@ public:
     void ReleaseTextNodeList();
     void CollectTextNodeAsRenderGroup(bool isPopPage);
 
-    void CleanContent();
+    void CleanContent(bool cleanDirectly = false, bool allowTransition = false);
     bool IsNeedContentTransition();
     bool TransitionContentInValid();
     bool IsNeedTitleTransition();
@@ -265,6 +275,7 @@ private:
     bool isCacheNode_ = false;
     bool isAnimated_ = true;
     bool canReused_ = true;
+    bool inCurrentStack_ = true;
     bool recoverable_ = true;
     bool fromNavrouterAndNoRouteInfo_ = false;
     bool needAppearFromRecovery_ = false;

@@ -271,17 +271,6 @@ public:
         }
     }
 
-    void SetHostPageIdByParent(int32_t id)
-    {
-        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG || tag_ == V2::STAGE_ETS_TAG) {
-            return;
-        }
-        hostPageId_ = id;
-        for (auto& child : children_) {
-            child->SetHostPageIdByParent(id);
-        }
-    }
-
     void SetRemoveSilently(bool removeSilently)
     {
         removeSilently_ = removeSilently;
@@ -895,8 +884,20 @@ public:
     }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
 
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     bool GreatOrEqualAPITargetVersion(PlatformVersion version) const;
 
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     bool LessThanAPITargetVersion(PlatformVersion version) const;
 
     bool IsArkTsRenderNode() const
@@ -1010,7 +1011,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = Infinity<int32_t>();
+    int32_t depth_ = 1;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;

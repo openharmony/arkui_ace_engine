@@ -79,6 +79,8 @@ bool MockNavigationStack::CreateNodeByIndex(int32_t index, const OHOS::Ace::Weak
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
     pattern->SetName(name);
+    auto navDestinationId = std::to_string(pattern->GetNavDestinationId());
+    mockPathArray_[index]->SetNavDestinationId(navDestinationId);
     return true;
 }
 

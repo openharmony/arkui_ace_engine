@@ -48,6 +48,9 @@ public:
         return MakeRefPtr<PluginEventHub>();
     }
 
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+
     void ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern);
 
     std::unique_ptr<DrawDelegate> GetDrawDelegate();

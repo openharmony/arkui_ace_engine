@@ -4752,11 +4752,10 @@ HWTEST_F(SelectOverlayTestNg, GetCreateMenuOptionsParams001, TestSize.Level1)
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
+        .WillOnce(Return(textOverlayTheme))
         .WillRepeatedly(Return(selectTheme));
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    EXPECT_NE(pipeline, nullptr);
     auto menuWrapper =  selectOverlayNode->CreateMenuNode(info_);
-    EXPECT_EQ(menuWrapper, nullptr);
+    EXPECT_NE(menuWrapper, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
 }
 
@@ -5093,11 +5092,10 @@ HWTEST_F(SelectOverlayTestNg, CreateMenuNode001, TestSize.Level1)
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
+        .WillOnce(Return(textOverlayTheme))
         .WillRepeatedly(Return(selectTheme));
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    EXPECT_NE(pipeline, nullptr);
     auto menuWrapperNoShortCut = selectOverlayNode->CreateMenuNode(info_);
-    EXPECT_EQ(menuWrapperNoShortCut, nullptr);
+    EXPECT_NE(menuWrapperNoShortCut, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
 }
 
@@ -5148,11 +5146,10 @@ HWTEST_F(SelectOverlayTestNg, CreateMenuNode002, TestSize.Level1)
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
+        .WillOnce(Return(textOverlayTheme))
         .WillRepeatedly(Return(selectTheme));
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    EXPECT_NE(pipeline, nullptr);
     auto menuWrapperNoShortCut = selectOverlayNode->CreateMenuNode(info_);
-    EXPECT_EQ(menuWrapperNoShortCut, nullptr);
+    EXPECT_NE(menuWrapperNoShortCut, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
 }
 

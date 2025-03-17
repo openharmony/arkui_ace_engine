@@ -70,6 +70,7 @@ constexpr XComponentType XCOMPONENT_TEXTURE_TYPE_VALUE = XComponentType::TEXTURE
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
+const RectF MAX_SURFACE_RECT(0, 0, MAX_WIDTH, MAX_HEIGHT);
 TestProperty g_testProperty;
 } // namespace
 
@@ -707,5 +708,60 @@ HWTEST_F(XComponentTestTwoNg, NativeStartImageAnalyzerTest, TestSize.Level1)
 
     pattern->NativeStartImageAnalyzer(nativeOnAnalyzed);
     EXPECT_EQ(nativeAnalyzerState, ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_ONGOING);
+}
+
+/**
+ * @tc.name: NativeXComponentCallbackTest
+ * @tc.desc: Test Register NativeXComponentCallback Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, NativeXComponentCallbackTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.xcId = XCOMPONENT_ID;
+    g_testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    g_testProperty.soPath = XCOMPONENT_SO_PATH;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto pair = pattern->GetNativeXComponent();
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
+    auto nativeXComponentImpl = pair.first;
+    ASSERT_TRUE(nativeXComponent);
+    ASSERT_TRUE(nativeXComponentImpl);
+    pattern->hasXComponentInit_ = true;
+
+    OH_NativeXComponent_Callback nativeCallback = {nullptr, nullptr, nullptr, nullptr};
+    nativeXComponent->RegisterCallback(&nativeCallback);
+    static bool hasSurfaceCreated = false;
+    static bool hasSurfaceChanged = false;
+    static bool hasSurfaceDestroyed = false;
+    static bool hasDispatchTouchEvent = false;
+    nativeCallback.OnSurfaceCreated = [](OH_NativeXComponent* component, void* window) {
+        hasSurfaceCreated = true;
+    };
+    nativeCallback.OnSurfaceChanged = [](OH_NativeXComponent* component, void* window) {
+        hasSurfaceChanged = true;
+    };
+    nativeCallback.OnSurfaceDestroyed = [](OH_NativeXComponent* component, void* window) {
+        hasSurfaceDestroyed = true;
+    };
+    nativeCallback.DispatchTouchEvent = [](OH_NativeXComponent* component, void* window) {
+        hasDispatchTouchEvent = true;
+    };
+    
+    pattern->OnSurfaceCreated();
+    ASSERT_TRUE(hasSurfaceCreated);
+
+    pattern->OnSurfaceChanged(MAX_SURFACE_RECT, true);
+    ASSERT_TRUE(hasSurfaceChanged);
+
+    pattern->NativeXComponentDispatchTouchEvent({}, {});
+    ASSERT_TRUE(hasDispatchTouchEvent);
+
+    pattern->OnSurfaceDestroyed();
+    ASSERT_TRUE(hasSurfaceDestroyed);
 }
 } // namespace OHOS::Ace::NG
