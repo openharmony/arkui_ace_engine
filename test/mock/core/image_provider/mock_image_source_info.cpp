@@ -272,6 +272,21 @@ std::string ImageSourceInfo::GetKey() const
     return std::string("");
 }
 
+std::string ImageSourceInfo::GetTaskKey() const
+{
+    return std::string("");
+}
+
+void ImageSourceInfo::SetContainerId(int32_t containerId)
+{
+    containerId_ = containerId;
+}
+
+int32_t ImageSourceInfo::GetContainerId() const
+{
+    return containerId_;
+}
+
 bool ImageSourceInfo::SupportObjCache() const
 {
     return false;

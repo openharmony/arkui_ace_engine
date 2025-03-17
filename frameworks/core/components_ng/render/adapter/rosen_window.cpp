@@ -75,7 +75,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    if (window->GetSurfaceNode()) {
+    if (window && window->GetSurfaceNode()) {
         rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
     }
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
@@ -98,6 +98,17 @@ void RosenWindow::Init()
         CHECK_NULL_VOID(self);
         self->RequestFrame();
     });
+}
+
+void RosenWindow::InitArkUI_X()
+{
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    CHECK_NULL_VOID(rsWindow_);
+    auto surfaceNode = rsWindow_->GetSurfaceNode();
+    if (rsUIDirector_ && surfaceNode) {
+        rsUIDirector_->SetRSSurfaceNode(surfaceNode);
+    }
+#endif
 }
 
 void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
@@ -261,7 +272,11 @@ int64_t RosenWindow::GetVSyncPeriod() const
 
 std::string RosenWindow::GetWindowName() const
 {
-    return rsWindow_->GetWindowName();
+    std::string windowName;
+    if (rsWindow_) {
+        windowName = rsWindow_->GetWindowName();
+    }
+    return windowName;
 }
 
 void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)

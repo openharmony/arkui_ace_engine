@@ -209,4 +209,252 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRemoveExtraCustomProperty001, TestSize.Level1
     bool result = frameNode->GetExtraCustomProperty("key");
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: FrameTestNg100
+ * @tc.desc: Test CollectSelfAxisResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg100, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    PointF globalPoint;
+    PointF localPoint;
+    PointF parentRevertPoint;
+    AxisTestResult onAxisResult;
+    HitTestResult testResult;
+    TouchRestrict touchRestrict;
+    bool isConsumed = true;
+    bool isPreventBubbling = false;
+    SystemProperties::debugEnabled_ = true;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMNONE);
+    eventHub->SetGestureEventHub(gestureEventHub);
+    frameNode->eventHub_ = eventHub;
+    frameNode->CollectSelfAxisResult(globalPoint, localPoint, isConsumed, parentRevertPoint,
+            onAxisResult, isPreventBubbling, testResult, touchRestrict);
+    EXPECT_EQ(testResult, HitTestResult::BUBBLING);
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    isConsumed = false;
+    frameNode->CollectSelfAxisResult(globalPoint, localPoint, isConsumed, parentRevertPoint,
+            onAxisResult, isPreventBubbling, testResult, touchRestrict);
+    EXPECT_EQ(testResult, HitTestResult::STOP_BUBBLING);
+}
+
+/**
+ * @tc.name: FrameTestNg101
+ * @tc.desc: Test GetOrCreateFocusHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg101, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->focusHub_ = nullptr;
+    frameNode->pattern_ = nullptr;
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    auto focusHub2 = frameNode->GetOrCreateFocusHub();
+    EXPECT_NE(focusHub2, nullptr);
+    frameNode->focusHub_ = nullptr;
+    frameNode->pattern_ = AceType::MakeRefPtr<Pattern>();
+    auto focusHub3 = frameNode->GetOrCreateFocusHub();
+    EXPECT_NE(focusHub3, nullptr);
+    FocusPattern focusPattern = { FocusType::NODE, false };
+    auto focusHub4 = frameNode->GetOrCreateFocusHub(focusPattern);
+    EXPECT_NE(focusHub4, nullptr);
+    frameNode->focusHub_ = nullptr;
+    frameNode->pattern_ = nullptr;
+    auto focusHub5 = frameNode->GetOrCreateFocusHub(focusPattern);
+    frameNode->pattern_ = AceType::MakeRefPtr<Pattern>();
+    EXPECT_NE(focusHub5, nullptr);
+}
+
+/**
+ * @tc.name: FrameTestNg102
+ * @tc.desc: Test Window state and position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg102, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->OnWindowActivated();
+    frameNode->OnWindowDeactivated();
+    frameNode->GetPositionToScreen();
+    frameNode->GetPositionToScreenWithTransform();
+    EXPECT_NE(frameNode->renderContext_, nullptr);
+    auto parent = FrameNode::CreateFrameNode("Parent", 10, AceType::MakeRefPtr<Pattern>(), true);
+    auto one = FrameNode::CreateFrameNode("One", 20, AceType::MakeRefPtr<Pattern>());
+    parent->AddChild(one);
+    parent->topWindowBoundary_ = false;
+    one->GetPaintRectOffsetNG(true, false);
+    EXPECT_NE(one->renderContext_, nullptr);
+}
+
+/**
+ * @tc.name: FrameTestNg103
+ * @tc.desc: Test GetPaintRectToWindowWithTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg103, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", 20, AceType::MakeRefPtr<Pattern>());
+    frameNode->AddChild(child);
+    child->GetPaintRectToWindowWithTransform();
+    EXPECT_NE(child->geometryNode_, nullptr);
+}
+
+/**
+ * @tc.name: FrameTestNg104
+ * @tc.desc: Test UpdateAccessibilityNodeRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg104, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::CLICK, "");
+    frameNode->UpdateAccessibilityNodeRect();
+    EXPECT_NE(frameNode->renderContext_, nullptr);
+}
+
+/**
+ * @tc.name: FrameTestNg105
+ * @tc.desc: Test OnAutoEventParamUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg105, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsonValue = std::make_unique<JsonValue>();
+    jsonValue->Put(Recorder::ORIGIN_PARAM, "ORIGIN_PARAM");
+    frameNode->exposureProcessor_ = nullptr;
+    auto exposureCfg = std::make_unique<JsonValue>();
+    exposureCfg->Put(Recorder::EXPOSURE_CONFIG_RATIO, 2.2f);
+    exposureCfg->Put(Recorder::EXPOSURE_CONFIG_DURATION, 5);
+    jsonValue->Put(Recorder::EXPOSURE_CONFIG_PARAM, exposureCfg);
+    frameNode->OnAutoEventParamUpdate(jsonValue->ToString());
+    EXPECT_EQ(frameNode->exposureProcessor_, nullptr);
+    auto ep = AceType::MakeRefPtr<Recorder::ExposureProcessor>("test", "0");
+    frameNode->SetExposureProcessor(ep);
+    EXPECT_NE(frameNode->exposureProcessor_, nullptr);
+    RectF visibleRect;
+    RectF frameRect;
+    frameNode->GetVisibleRect(visibleRect, frameRect);
+    EXPECT_NE(frameNode->renderContext_, nullptr);
+}
+
+/**
+ * @tc.name: FrameTestNg106
+ * @tc.desc: Test GetVisibleRectWithClip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg106, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    RectF visibleRect, visibleInnerRect, frameRect;
+    frameNode->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    auto parent = FrameNode::CreateFrameNode("parent", 20, AceType::MakeRefPtr<Pattern>());
+    parent->AddChild(frameNode);
+    frameNode->isWindowBoundary_ = false;
+    frameNode->onMainTree_ = true;
+    frameNode->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    EXPECT_FALSE(frameNode->isWindowBoundary_);
+}
+
+/**
+ * @tc.name: GetCacheVisibleRectTest
+ * @tc.desc: Test GetCacheVisibleRectTest.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(FrameNodeTestNg, GetCacheVisibleRectTest001, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto parentNode = FrameNode::CreateFrameNode("testParent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->AddChild(frameNode);
+    /**
+     * @tc.steps: step2. set key is value1, remove key.
+     * @tc.expected: expect result false.
+     */
+    auto result = frameNode->GetCacheVisibleRect(0, false);
+    EXPECT_EQ(result.cumulativeScale.x, 1.0);
+    parentNode->GetRenderContext()->UpdateClipEdge(true);
+    result = frameNode->GetCacheVisibleRect(1, true);
+    EXPECT_EQ(result.cumulativeScale.x, 1.0);
+    frameNode->isWindowBoundary_ = true;
+    result = frameNode->GetCacheVisibleRect(1, true);
+    EXPECT_EQ(result.cumulativeScale.x, 1.0);
+}
+
+/**
+ * @tc.name: DumpSafeAreaInfoTest
+ * @tc.desc: Test DumpSafeAreaInfo.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(FrameNodeTestNg, DumpSafeAreaInfoTest001, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), true);
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    /**
+     * @tc.steps: step2. set key is value1, remove key.
+     * @tc.expected: expect result false.
+     */
+    frameNode->DumpExtensionHandlerInfo(json);
+    
+    RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
+    ASSERT_NE(drawModifier, nullptr);
+    frameNode->SetDrawModifier(drawModifier);
+
+    frameNode->DumpExtensionHandlerInfo(json);
+    EXPECT_FALSE(json->GetValue("HasCustomerMeasure")->GetBool());
+}
+
+/**
+ * @tc.name: GetCurrentPageRootNodeTest001
+ * @tc.desc: Test GetCurrentPageRootNode.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(FrameNodeTestNg, GetCurrentPageRootNodeTest001, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode(V2::JS_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddChild(child);
+    EXPECT_FALSE(frameNode->GetCurrentPageRootNode() != nullptr);
+}
+
+/**
+ * @tc.name: GetCurrentPageRootNodeTest002
+ * @tc.desc: Test GetCurrentPageRootNode.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(FrameNodeTestNg, GetCurrentPageRootNodeTest002, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("text", 3, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddChild(child);
+    EXPECT_TRUE(frameNode->GetCurrentPageRootNode() != nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -64,6 +64,20 @@ public:
         return moduleName_;
     }
 
+    std::string ToString() const
+    {
+        std::string result;
+        result.append("id:");
+        result.append(std::to_string(id_));
+        result.append("type:");
+        result.append(std::to_string(type_));
+        result.append("bundleName:");
+        result.append(bundleName_);
+        result.append("moduleName:");
+        result.append(moduleName_);
+        return result;
+    }
+
 private:
     int32_t id_;
     int32_t type_;

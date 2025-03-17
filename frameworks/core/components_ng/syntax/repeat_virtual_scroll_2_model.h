@@ -54,6 +54,10 @@ public:
     virtual void UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t totalCount,
         uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index) = 0;
     virtual void OnMove(int32_t repeatElmtId, std::function<void(int32_t, int32_t)>&& onMove) = 0;
+    virtual void SetItemDragHandler(int32_t repeatElmtId, std::function<void(int32_t)>&& onLongPress,
+        std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+        std::function<void(int32_t)>&& onDrop) = 0;
+    virtual void SetCreateByTemplate(bool isCreatedByTemplate) = 0;
 
 private:
     static std::unique_ptr<RepeatVirtualScroll2Model> instance_;

@@ -22,6 +22,13 @@ interface RepeatItem<T> {
     readonly index?: number
 }
 
+interface ItemDragEventHandler {
+    onLongPress?: (index: number) => void;
+    onDragStart?: (index: number) => void;
+    onMoveThrough?: (from: number, to: number) => void;
+    onDrop?: (index: number) => void;
+}
+
 type RepeatItemGenFunc<T> = (i: RepeatItem<T>) => void;
 type RepeatTTypeGenFunc<T> = (item: T, index: number) => string;
 type RepeatKeyGenFunc<T> = (item: T, index?: number) => string;
@@ -72,5 +79,5 @@ interface RepeatAPI<T> {
     render(isInitialRender: boolean): void;       
 
     // not used by Repeat
-    onMove: (handler: OnMoveHandler) => RepeatAPI<T>;
+    onMove: (handler: OnMoveHandler, eventHandler: ItemDragEventHandler) => RepeatAPI<T>;
 }

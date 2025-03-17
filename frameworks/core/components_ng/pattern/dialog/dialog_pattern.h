@@ -312,6 +312,7 @@ public:
     }
 
     bool IsShowInFreeMultiWindow();
+    bool IsWaterfallWindowMode();
     bool IsShowInFloatingWindow();
     void AddExtraMaskNode(const DialogProperties& props);
 

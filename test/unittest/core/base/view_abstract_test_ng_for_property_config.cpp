@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/base/mock_task_executor.h"
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 using namespace testing;
@@ -1347,5 +1348,191 @@ HWTEST_F(ViewAbstractTestNg, SetAutoFocusTransferTest001, TestSize.Level1)
 
     ViewAbstract::SetAutoFocusTransfer(instanceId, false);
     ASSERT_FALSE(focusManager->isAutoFocusTransfer_);
+}
+
+/**
+ * @tc.name: ViewAbstractBindTipsTest001
+ * @tc.desc: Test the BindTips of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and params.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> targetNode2 = FrameNode::CreateFrameNode("three", 3, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto param2 = AceType::MakeRefPtr<PopupParam>();
+
+    /**
+     * @tc.steps: step2. get tipsInfo  and change some params.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto nodeId = targetNode->GetId();
+    PopupInfo info = overlayManager->GetPopupInfo(nodeId);
+    info.isCurrentOnShow = true;
+    info.popupId = 1;
+    auto popupNode1 = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, info.popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    info.popupNode = popupNode1;
+    info.target = targetNode2;
+    overlayManager->ShowTips(targetNode->GetId(), info, 300, 300);
+    overlayManager->tipsInfoList_.emplace_back(targetNode->GetId(), info);
+    overlayManager->ShowTips(targetNode->GetId(), info, 300, 300);
+
+    /**
+     * @tc.steps: step3. Call BindTips many times.
+     * @tc.expected: popupNode in overlayManager of targetNode not null
+     */
+    ViewAbstract::BindTips(param, targetNode);
+    overlayManager->HideTips(targetNode->GetId(), info, 300);
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    auto popupNode = popupInfo.popupNode;
+    ASSERT_NE(popupNode, nullptr);
+    popupNode->GetPattern<BubblePattern>()->transitionStatus_ = TransitionStatus::ENTERING;
+    auto context1 = targetNode->GetContext();
+    ASSERT_NE(context1, nullptr);
+    auto subwindow = Subwindow::CreateSubwindow(context1->GetInstanceId());
+    SubwindowManager::GetInstance()->AddSubwindow(context1->GetInstanceId(), subwindow);
+    ViewAbstract::BindTips(param, targetNode);
+    EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
+
+    /**
+     * @tc.steps: step4. Call BindTips with param use custom.
+     * @tc.expected: popupNode in overlayManager of targetNode not null
+     */
+    param2->SetUseCustomComponent(true);
+    ViewAbstract::BindTips(param2, targetNode2);
+    EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
+}
+
+/**
+ * @tc.name: ViewAbstractAddHoverEventForTipsTest001
+ * @tc.desc: Test the AddHoverEventForTips of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and params.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    ViewAbstract::AddHoverEventForTips(param, targetNode, popupInfo, true);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    auto hoverEventActuator = inputHub->hoverEventActuator_;
+    ASSERT_NE(hoverEventActuator, nullptr);
+    auto Events = hoverEventActuator->inputEvents_;
+    bool ishover = true;
+    for (const auto& callback : Events) {
+        (*callback)(ishover);
+    }
+    ishover = false;
+    for (const auto& callback : Events) {
+        (*callback)(ishover);
+    }
+    EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
+    EXPECT_EQ(Events.size(), 1);
+}
+
+/**
+ * @tc.name: ViewAbstractAddHoverEventForTipsTest002
+ * @tc.desc: Test the AddHoverEventForTips of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and params.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    ViewAbstract::AddHoverEventForTips(param, targetNode, popupInfo, false);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    auto hoverEventActuator = inputHub->hoverEventActuator_;
+    ASSERT_NE(hoverEventActuator, nullptr);
+    auto Events = hoverEventActuator->inputEvents_;
+    bool ishover = true;
+    for (const auto& callback : Events) {
+        (*callback)(ishover);
+    }
+    ishover = false;
+    for (const auto& callback : Events) {
+        (*callback)(ishover);
+    }
+    EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
+    EXPECT_EQ(Events.size(), 1);
+}
+
+/**
+ * @tc.name: ViewAbstractHandleHoverTipsInfoTest001
+ * @tc.desc: Test the handleHoverTipsInfo of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractHandleHoverTipsInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and params.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    ViewAbstract::HandleHoverTipsInfo(param, targetNode, popupInfo, false, 1);
+    for (const auto& destroyCallback : targetNode->destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
+    }
+    ViewAbstract::HandleHoverTipsInfo(param, targetNode, popupInfo, true, 1);
+    for (const auto& destroyCallback : targetNode->destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
+    }
+    EXPECT_EQ(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
 }
 } // namespace OHOS::Ace::NG
