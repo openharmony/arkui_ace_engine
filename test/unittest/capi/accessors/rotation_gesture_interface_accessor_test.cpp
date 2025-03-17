@@ -79,7 +79,7 @@ HWTEST_F(RotationGestureInterfaceAccessorTest, onActionStartTest, TestSize.Level
         rotationEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
-        delete event;
+        fullAPI_->getAccessors()->getGestureEventAccessor()->destroyPeer(event);
     };
     auto arkCallback = Converter::ArkValue<Callback_GestureEvent_Void>(nullptr, onActionStartFunc, RES_ID);
     ASSERT_NE(peer_, nullptr);
@@ -103,7 +103,7 @@ HWTEST_F(RotationGestureInterfaceAccessorTest, onActionUpdateTest, TestSize.Leve
         rotationEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
-        delete event;
+        fullAPI_->getAccessors()->getGestureEventAccessor()->destroyPeer(event);
     };
     auto arkCallback = Converter::ArkValue<Callback_GestureEvent_Void>(nullptr, onActionUpdateFunc, RES_ID);
     ASSERT_NE(peer_, nullptr);
@@ -128,7 +128,7 @@ HWTEST_F(RotationGestureInterfaceAccessorTest, onActionEndTest, TestSize.Level1)
         rotationEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
-        delete event;
+        fullAPI_->getAccessors()->getGestureEventAccessor()->destroyPeer(event);
     };
     auto arkCallback = Converter::ArkValue<Callback_GestureEvent_Void>(nullptr, onActionEndFunc, RES_ID);
     ASSERT_NE(peer_, nullptr);
