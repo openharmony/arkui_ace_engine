@@ -1764,7 +1764,8 @@ HWTEST_F(ButtonModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
     Ark_Union_Number_Resource initValueMinFontScale;
     // Initial setup
     initValueMinFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(2.1));
-        auto checkValue = [this, &initValueMinFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
+        auto checkValue = [this, &initValueMinFontScale](const std::string& input,
+                                                         const Ark_Union_Number_Resource& value) {
         Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
         inputValueMinFontScale = value;
@@ -1833,7 +1834,8 @@ HWTEST_F(ButtonModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
     Ark_Union_Number_Resource initValueMaxFontScale;
     // Initial setup
     initValueMaxFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.1));
-        auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
+        auto checkValue = [this, &initValueMaxFontScale](const std::string& input,
+                                                         const Ark_Union_Number_Resource& value) {
         Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
         inputValueMaxFontScale = value;
