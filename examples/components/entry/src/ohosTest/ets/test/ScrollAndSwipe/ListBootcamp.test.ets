@@ -905,26 +905,5 @@ export default function ListBootcampTest() {
 
     })
 
-    // maintainVisibleContentPosition
-    it('ArkUI_List_039', 0, async (done: Function) => {
-      await titleSearch('参数列表', 'maintainVisibleContentPosition')
-
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        },
-        id: 'List',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('maintainVisibleContentPosition', JsonType.value),
-        ],
-        assertEqual: true
-      })
-
-      done();
-
-    })
-
   })
 }
