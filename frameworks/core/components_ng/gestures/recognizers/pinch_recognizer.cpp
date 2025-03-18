@@ -451,14 +451,6 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
     }
 }
 
-void PinchRecognizer::CheckCallbackState()
-{
-    if ((callbackState_ == CallbackState::START || callbackState_ == CallbackState::UPDATE) &&
-        currentFingers_ == 0) {
-        SendCallbackMsg(onActionEnd_);
-    }
-}
-
 GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
 {
     auto targetComponent = GetTargetComponent();

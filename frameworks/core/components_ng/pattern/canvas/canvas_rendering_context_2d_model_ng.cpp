@@ -60,7 +60,7 @@ void CanvasRenderingContext2DModelNG::OnDetachFromCanvas()
     if (onContext2DDetach_) {
         onContext2DDetach_();
     }
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
         weakPattern_ = nullptr;
     }
 }

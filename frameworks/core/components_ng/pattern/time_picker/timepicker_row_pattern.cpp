@@ -173,12 +173,10 @@ bool TimePickerRowPattern::IsCircle()
 }
 
 void TimePickerRowPattern::SetDefaultColoumnFocus(std::unordered_map<std::string, WeakPtr<FrameNode>>::iterator& it,
-    const std::string &id, bool focus, const std::function<void(const std::string&)>& call)
+    const std::string &id, bool& focus, const std::function<void(const std::string&)>& call)
 {
     auto column = it->second.Upgrade();
-    if (!column) {
-        return;
-    }
+    CHECK_NULL_VOID(column);
     auto tmpPattern = column->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(tmpPattern);
     tmpPattern->SetSelectedMarkId(id);
@@ -186,15 +184,17 @@ void TimePickerRowPattern::SetDefaultColoumnFocus(std::unordered_map<std::string
     if (focus) {
         tmpPattern->SetSelectedMark(true, false);
         selectedColumnId_ = id;
+        focus = false;
     }
 }
 
 void TimePickerRowPattern::ClearFocus()
 {
-    if (!IsCircle()) {
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    if (!isClearFocus_ && (HasSecondNode() == hasSecond_)) {
         return ;
     }
-
+    isClearFocus_ = true;
     if (!selectedColumnId_.empty()) {
         auto it = allChildNode_.find(selectedColumnId_);
         if (it != allChildNode_.end()) {
@@ -211,10 +211,9 @@ void TimePickerRowPattern::ClearFocus()
 
 void TimePickerRowPattern::SetDefaultFocus()
 {
-    if (!IsCircle()) {
-        return ;
-    }
-
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    CHECK_EQUAL_VOID(isClearFocus_, false);
+    isClearFocus_ = false;
     std::function<void(const std::string &focusId)> call =  [weak = WeakClaim(this)](const std::string &focusId) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -239,7 +238,6 @@ void TimePickerRowPattern::SetDefaultFocus()
         auto it = allChildNode_.find(columnName[i]);
         if (it != allChildNode_.end()) {
             SetDefaultColoumnFocus(it, columnName[i], setFocus, call);
-            setFocus = false;
         }
     }
 }
@@ -358,6 +356,9 @@ void TimePickerRowPattern::OnModifyDone()
     InitFocusEvent();
     UpdateTitleNodeContent();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (isUserSetSelectColor_) {
+        UpdateUserSetSelectColor();
+    }
     SetDefaultFocus();
 }
 
@@ -2234,4 +2235,20 @@ bool TimePickerRowPattern::NeedAdaptForAging()
     }
     return false;
 }
+
+void TimePickerRowPattern::UpdateUserSetSelectColor()
+{
+    CHECK_EQUAL_VOID(IsCircle(), false);
+    isUserSetSelectColor_ = true;
+    for (auto iter = allChildNode_.begin(); iter != allChildNode_.end(); iter++) {
+        auto columnNode = iter->second.Upgrade();
+        if (columnNode) {
+            auto pattern = columnNode->GetPattern<TimePickerColumnPattern>();
+            if (pattern) {
+                pattern->UpdateUserSetSelectColor();
+            }
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

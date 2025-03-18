@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import TextPickerDialogBootcampTest from './TextPickerDialogBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  TextPickerDialogBootcampTest();
+  ListItemGroupBootcampTest();
+
 }
