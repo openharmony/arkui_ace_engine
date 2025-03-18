@@ -224,7 +224,7 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(pipelineContext, false);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, false);
-    padding_ = popupTheme->GetPadding();
+    padding_ = isTips_ ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
     if (isTips_) {
         return enableArrow_ && showArrow_ && popupTheme->GetTipsDoubleBorderEnable();
     }

@@ -253,6 +253,7 @@ private:
     std::string targetTag_;
     bool bCaretMode_ = false;
     bool useCustom_ = false;
+    bool isTips_ = false;
 
     BubbleDumpInfo dumpInfo_;
     SizeF targetSize_;

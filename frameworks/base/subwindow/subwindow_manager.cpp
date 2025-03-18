@@ -498,15 +498,18 @@ void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
+    if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
+        return;
+    }
 
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
-    auto subwindow = manager->GetSubwindow(containerId);
+    auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
     if (!IsSubwindowExist(subwindow)) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
-        manager->AddSubwindow(containerId, subwindow);
+        manager->AddSubwindow(containerId, SubwindowType::TYPE_POPUP, subwindow);
     }
     subwindow->ShowTipsNG(targetNode->GetId(), popupInfo, appearingTime, appearingTimeWithContinuousOperation);
 }
@@ -516,10 +519,11 @@ void SubwindowManager::HideTipsNG(int32_t targetId, int32_t disappearingTime, in
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
         // get the subwindow which overlay node in, not current
-        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+        subwindow = GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
     } else {
         subwindow = GetCurrentWindow();
     }
+
     if (subwindow) {
         subwindow->HideTipsNG(targetId, disappearingTime);
     }

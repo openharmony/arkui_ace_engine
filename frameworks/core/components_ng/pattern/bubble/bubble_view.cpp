@@ -233,7 +233,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         auto textNode = CreateMessage(message, useCustom);
         bubblePattern->SetMessageNode(textNode);
         auto popupTheme = GetPopupTheme();
-        auto padding = popupTheme->GetPadding();
+        auto padding = param->IsTips() ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
         auto layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();
         if (param->IsTips()) {
             layoutProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -247,8 +247,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         layoutProps->UpdatePadding(textPadding);
         layoutProps->UpdateAlignment(Alignment::CENTER);
         UpdateTextProperties(param, layoutProps);
-        auto buttonMiniMumHeight = popupTheme->GetBubbleMiniMumHeight().ConvertToPx();
-        layoutProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(buttonMiniMumHeight)));
+        if (!param->IsTips()) {
+            auto buttonMiniMumHeight = popupTheme->GetBubbleMiniMumHeight().ConvertToPx();
+            layoutProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(buttonMiniMumHeight)));
+        }
         textNode->MarkModifyDone();
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
             textNode->MountToParent(columnNode);
@@ -533,6 +535,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     }
     // Update layout props
     popupProp->UpdateUseCustom(param->IsUseCustom());
+    popupProp->UpdateIsTips(param->IsTips());
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
     auto displayWindowOffset = GetDisplayWindowRectOffset(popupId);
@@ -540,6 +543,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     // Update paint props
     popupPaintProp->UpdatePlacement(param->GetPlacement());
     popupPaintProp->UpdateUseCustom(param->IsUseCustom());
+    popupPaintProp->UpdateIsTips(param->IsTips());
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
 }
 
