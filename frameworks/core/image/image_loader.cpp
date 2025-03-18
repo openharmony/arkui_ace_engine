@@ -30,6 +30,7 @@
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -213,16 +214,9 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 bool NetworkImageLoader::DownloadImage(
     DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId)
 {
-    // If the API version is greater or equal than 14, use the preload module to download the URL.
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
-                          std::move(downloadCallback), src, Container::CurrentId(), nodeId)
-                    : DownloadManager::GetInstance()->DownloadAsyncWithPreload(
-                          std::move(downloadCallback), src, Container::CurrentId(), nodeId);
-    }
-    return sync ? DownloadManager::GetInstance()->DownloadSync(
+    return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
                       std::move(downloadCallback), src, Container::CurrentId(), nodeId)
-                : DownloadManager::GetInstance()->DownloadAsync(
+                : DownloadManager::GetInstance()->DownloadAsyncWithPreload(
                       std::move(downloadCallback), src, Container::CurrentId(), nodeId);
 }
 

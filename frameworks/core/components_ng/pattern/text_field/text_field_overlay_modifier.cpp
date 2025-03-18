@@ -125,7 +125,7 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
     PaintPreviewTextDecoration(context);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         RSBrush brush;
         brush.SetAntiAlias(true);
         brush.SetColor(hoverColor_->Get());

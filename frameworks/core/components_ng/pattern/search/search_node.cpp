@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/search/search_node.h"
 
+#include "core/pipeline/base/element_register.h"
+
 namespace OHOS::Ace::NG {
 
 void SearchNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)

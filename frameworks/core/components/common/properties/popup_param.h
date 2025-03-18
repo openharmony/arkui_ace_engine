@@ -25,11 +25,15 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/text_style.h"
+#include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
+
+using ComposeId = std::string;
 
 struct ButtonProperties {
     bool showButton = false;
@@ -99,6 +103,46 @@ public:
     Placement GetPlacement() const
     {
         return placement_;
+    }
+
+    void SetAppearingTime(int32_t appearingTime)
+    {
+        appearingTime_ = appearingTime;
+    }
+
+    int32_t GetAppearingTime() const
+    {
+        return appearingTime_;
+    }
+
+    void SetDisappearingTime(int32_t disappearingTime)
+    {
+        disappearingTime_ = disappearingTime;
+    }
+
+    int32_t GetDisappearingTime() const
+    {
+        return disappearingTime_;
+    }
+
+    void SetAppearingTimeWithContinuousOperation(int32_t appearingTimeWithContinuousOperation)
+    {
+        appearingTimeWithContinuousOperation_ = appearingTimeWithContinuousOperation;
+    }
+
+    int32_t GetAppearingTimeWithContinuousOperation() const
+    {
+        return appearingTimeWithContinuousOperation_;
+    }
+
+    void SetDisappearingTimeWithContinuousOperation(int32_t disappearingTimeWithContinuousOperation)
+    {
+        disappearingTimeWithContinuousOperation_ = disappearingTimeWithContinuousOperation;
+    }
+
+    int32_t GetDisappearingTimeWithContinuousOperation() const
+    {
+        return disappearingTimeWithContinuousOperation_;
     }
 
     const Color& GetMaskColor() const
@@ -535,6 +579,16 @@ public:
         isPartialUpdate_ = isPartialUpdate;
     }
 
+    void SetTipsFlag(bool isTips)
+    {
+        isTips_ = isTips;
+    }
+
+    bool IsTips() const
+    {
+        return isTips_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -552,6 +606,11 @@ private:
     bool isCaretMode_ = true;
     bool enableHoverMode_ = false;
     bool followTransformOfTarget_ = false;
+    bool isTips_ = false;
+    int32_t appearingTime_ = 700;
+    int32_t disappearingTime_ = 300;
+    int32_t appearingTimeWithContinuousOperation_ = 300;
+    int32_t disappearingTimeWithContinuousOperation_ = 0;
     std::optional<bool> isPartialUpdate_;
     Color maskColor_;
     Color backgroundColor_;

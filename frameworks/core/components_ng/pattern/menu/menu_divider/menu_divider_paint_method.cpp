@@ -46,7 +46,8 @@ void MenuDividerPaintMethod::UpdateModfierParams(PaintWrapper* paintWrapper)
     GetDividerMargin(startMargin, endMargin, paintProperty, size);
     dividerModifier_->SetLeftMargin(isRtl ? endMargin : startMargin);
     dividerModifier_->SetRightMargin(isRtl ? startMargin : endMargin);
-    if (paintProperty->HasStrokeWidth()) {
+    auto strokeWidth = paintProperty->GetStrokeWidthValue(Dimension(0, DimensionUnit::INVALID));
+    if (strokeWidth.Unit() != DimensionUnit::INVALID) {
         dividerModifier_->SetStrokeWidth(paintProperty->GetStrokeWidthValue().ConvertToPx());
     } else {
         dividerModifier_->SetStrokeWidth(themeStrokeWidth_);

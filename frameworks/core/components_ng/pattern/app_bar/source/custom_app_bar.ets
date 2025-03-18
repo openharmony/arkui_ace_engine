@@ -20,6 +20,8 @@ const ARKUI_APP_BAR_CONTENT_SAFE_AREA: string = 'arkui_app_bar_content_safe_area
 const ARKUI_APP_BAR_BAR_INFO: string = 'arkui_app_bar_info';
 const ARKUI_APP_BAR_SCREEN: string = 'arkui_app_bar_screen';
 const ARKUI_APP_BG_COLOR: string = 'arkui_app_bg_color';
+const ARKUI_APP_BAR_SERVICE_PANEL: string = 'arkui_app_bar_service_panel'
+const ARKUI_APP_BAR_CLOSE: string = 'arkui_app_bar_close'
 
 const EVENT_NAME_CUSTOM_APP_BAR_MENU_CLICK = 'arkui_custom_app_bar_menu_click';
 const EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK = 'arkui_custom_app_bar_close_click';
@@ -71,6 +73,8 @@ struct Index {
   @State contentMarginRight: string = '0vp'
   @State contentMarginBottom: string = '0vp'
   @State menuMarginTop: string = '10vp'
+  @State serviceMenuRead: string = this.getStringByResourceToken(ARKUI_APP_BAR_SERVICE_PANEL)
+  @State closeRead: string = this.getStringByResourceToken(ARKUI_APP_BAR_CLOSE)
   isDark: boolean = true;
 
   parseBoolean(value: string): boolean {
@@ -173,6 +177,10 @@ struct Index {
             .gesture(TapGesture().onAction(() => {
               this.onMenuButtonClick()
             }))
+            .accessibilityText(this.serviceMenuRead)
+            .onAccessibilityHover(() => {
+              this.serviceMenuRead = this.getStringByResourceToken(ARKUI_APP_BAR_SERVICE_PANEL);
+            })
 
             Divider()
               .id('AtomicServiceDividerId')
@@ -200,6 +208,10 @@ struct Index {
             .gesture(TapGesture().onAction(() => {
               this.onCloseButtonClick()
             }))
+            .accessibilityText(this.closeRead)
+            .onAccessibilityHover(() => {
+              this.closeRead = this.getStringByResourceToken(ARKUI_APP_BAR_CLOSE);
+            })
           }
           .borderRadius(MENU_RADIUS)
           .borderWidth(BORDER_WIDTH)
@@ -229,5 +241,16 @@ struct Index {
     .justifyContent(FlexAlign.End)
     .backgroundColor(this.contentBgColor)
     .hitTestBehavior(HitTestMode.Transparent)
+  }
+
+  getStringByResourceToken(value?: string, ...args: Array<string | number>): string {
+    if (value) {
+      try {
+        return getContext(this).resourceManager.getStringByNameSync(value, ...args);
+      } catch (error) {
+        console.error(`Ace SegmentButton getAccessibilityDescription, error: ${error.toString()}`);
+      }
+    }
+    return '';
   }
 }

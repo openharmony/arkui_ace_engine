@@ -62,4 +62,7 @@
 
 #endif // ACE_DEBUG
 
+#define ACE_LIKELY(x) __builtin_expect(!!(x), 1)
+#define ACE_UNLIKELY(x) __builtin_expect(!!(x), 0)
+
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MACROS_H

@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import DatePickerBootcampTest from './ButtonsAndSelections/DatePickerBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  DatePickerBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

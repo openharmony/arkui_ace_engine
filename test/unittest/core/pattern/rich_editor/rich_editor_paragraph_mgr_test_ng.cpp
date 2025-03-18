@@ -469,7 +469,7 @@ HWTEST_F(RichEditorParagraphMgrTestNg, IsSelectLineHeadAndUseLeadingMargin002, T
     */
     int start = richEditorPattern->paragraphs_.paragraphs_.begin()->start;
     bool bRet = richEditorPattern->paragraphs_.IsSelectLineHeadAndUseLeadingMargin(start);
-    EXPECT_EQ(bRet, true);
+    EXPECT_EQ(bRet, false);
 }
 
 /**
@@ -506,7 +506,7 @@ HWTEST_F(RichEditorParagraphMgrTestNg, IsSelectLineHeadAndUseLeadingMargin003, T
      * @tc.steps: step2. test IsSelectLineHeadAndUseLeadingMargin fun
     */
     bool bRet = richEditorPattern->paragraphs_.IsSelectLineHeadAndUseLeadingMargin(paragraphRect.end);
-    EXPECT_EQ(bRet, true);
+    EXPECT_EQ(bRet, false);
 }
 
 /**
