@@ -765,9 +765,22 @@ public:
     void SetBindIndicator(bool bind)
     {
         isBindIndicator_ = bind;
+        // Need to reset the last independent indicator first,
+        // whether it will rebind to a new independent navigation point.
+        ResetIndicatorNode();
     }
 
-    void SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode);
+    void SetJSIndicatorController(std::function<void()> resetFunc)
+    {
+        if (resetFunc_) {
+            resetFunc_();
+        }
+        resetFunc_ = resetFunc;
+    }
+
+    void SetIndicatorNode(const RefPtr<FrameNode>& indicatorNode);
+
+    void ResetIndicatorNode();
 
     RefPtr<FrameNode> GetIndicatorNode() const
     {
@@ -1187,8 +1200,6 @@ private:
         return !IsLoop() && (prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_) && TotalCount() > GetDisplayCount();
     }
 
-    std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
-
     bool IsItemOverlay() const;
     void UpdateIndicatorOnChildChange();
     void UpdateDigitalIndicator();
@@ -1398,8 +1409,9 @@ private:
     TabAnimateMode tabAnimationMode_ = TabAnimateMode::NO_ANIMATION;
     bool isFirstAxisAction_ = true;
     bool stopWhenTouched_ = true;
-    WeakPtr<NG::UINode> indicatorNode_;
+    WeakPtr<FrameNode> indicatorNode_;
     bool isBindIndicator_ = false;
+    std::function<void()> resetFunc_;
 
     SwiperHoverFlag hoverFlag_ = HOVER_NONE;
     GestureStatus gestureStatus_ = GestureStatus::INIT;

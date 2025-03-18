@@ -806,7 +806,7 @@ private:
     void ClearFocus();
     void SetDefaultFocus();
     bool IsCircle();
-
+    bool CurrentIsLunar();
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
     bool OnCrownEvent(const CrownEvent& event);
@@ -903,6 +903,8 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
     std::string selectedColumnId_;
+    bool lastTimeIsLuanar_ = true;
+    bool isFirstTimeSetFocus_ = true;
 };
 } // namespace OHOS::Ace::NG
 

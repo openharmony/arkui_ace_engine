@@ -22,7 +22,6 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
-#include "transaction/rs_transaction_proxy.h"
 #endif
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -686,13 +685,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isFirstFlushMessages_ = false;
         LOGI("ArkUi flush first frame messages.");
     }
-#ifdef ENABLE_ROSEN_BACKEND
-    auto isCmdEmpty = false;
-    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
-    if (transactionProxy != nullptr) {
-        isCmdEmpty = transactionProxy->IsEmpty();
-    }
-#endif
     FlushMessages();
     FlushWindowPatternInfo();
     InspectDrew();
@@ -705,15 +697,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
             FlushFocusScroll();
         }
     }
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!isCmdEmpty) {
-        HandleOnAreaChangeEvent(nanoTimestamp);
-        HandleVisibleAreaChangeEvent(nanoTimestamp);
-    }
-#else
     HandleOnAreaChangeEvent(nanoTimestamp);
     HandleVisibleAreaChangeEvent(nanoTimestamp);
-#endif
     FlushMouseEventInVsync();
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
@@ -2196,7 +2181,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "origin positionY: %{public}f, height %{public}f", positionY, height);
 
-        float positionYWithOffset = positionY;
         float keyboardOffset = manager ? manager->GetClickPositionOffset() :
             context->safeAreaManager_->GetKeyboardOffset();
         float currentPos = manager->GetClickPosition().GetY() - context->GetRootRect().GetOffset().GetY() -
@@ -2214,10 +2198,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "use origin arg from the window");
         } else if (manager->GetIfFocusTextFieldIsInline()) {
             manager->GetInlineTextFieldAvoidPositionYAndHeight(positionY, height);
-            positionYWithOffset = positionY;
+            positionY -= keyboardOffset;
         } else if (!NearEqual(positionY, currentPos) && !context->IsEnableKeyBoardAvoidMode()) {
             positionY = currentPos;
-            positionYWithOffset = currentPos;
             height = manager->GetHeight();
         }
 
@@ -2226,7 +2209,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         }
         auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         float newKeyboardOffset = context->CalcNewKeyboardOffset(keyboardHeight,
-            positionYWithOffset, height, rootSize, onFocusField && manager->GetIfFocusTextFieldIsInline());
+            positionY, height, rootSize, onFocusField && manager->GetIfFocusTextFieldIsInline());
         if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
             manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId()) {
             context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
@@ -2822,7 +2805,6 @@ void PipelineContext::OnTouchEvent(
             eventManager_->FlushTouchEventsEnd({ scalePoint });
             eventManager_->DispatchTouchEvent(scalePoint);
             hasIdleTasks_ = true;
-            RequestFrame();
             return;
         }
         if (!eventManager_->GetInnerFlag() && formEventMgr) {
@@ -5925,7 +5907,7 @@ void PipelineContext::FlushMouseEventForHover()
         windowSizeChangeReason_ == WindowSizeChangeReason::MOVE) {
         return;
     }
-    CHECK_RUN_ON(TaskExecutor::TaskType::UI);
+    CHECK_RUN_ON(UI);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     MouseEvent event;

@@ -172,6 +172,7 @@ public:
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
     bool IsClickable() const;
+    bool IsComponentClickable() const;
     bool IsUserClickable() const;
     bool IsAccessibilityClickable();
     bool IsAccessibilityLongClickable();
@@ -380,8 +381,7 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
-    void PrepareDragStartInfo(
-        const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data);
+    void PrepareDragStartInfo(RefPtr<PipelineContext>& pipeline, PreparedInfoForDrag& data);
     void StartVibratorByDrag(const RefPtr<FrameNode>& frameNode);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale,
         const PreparedInfoForDrag& dragInfoData);

@@ -43,6 +43,7 @@
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
+#include "core/common/page_viewport_config.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/settings.h"
@@ -54,7 +55,6 @@
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -209,6 +209,33 @@ public:
     {
         return Orientation::UNSPECIFIED;
     }
+
+    void SetCurrentDisplayOrientation(DisplayOrientation orientation)
+    {
+        displayOrientation_ = orientation;
+    }
+    DisplayOrientation GetCurrentDisplayOrientation() const
+    {
+        return displayOrientation_;
+    }
+    virtual RefPtr<PageViewportConfig> GetCurrentViewportConfig() const
+    {
+        return nullptr;
+    }
+    virtual RefPtr<PageViewportConfig> GetTargetViewportConfig(Orientation orientation,
+        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
+    {
+        return nullptr;
+    }
+    virtual void SetRequestedOrientation(
+        Orientation orientation, bool needAnimation = true) {}
+    virtual Orientation GetRequestedOrientation()
+    {
+        return Orientation::UNSPECIFIED;
+    }
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool IsFullScreenWindow() const { return true; }
+    virtual bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) { return true; }
 
     virtual RefPtr<DisplayInfo> GetDisplayInfo();
 
@@ -693,6 +720,11 @@ public:
         return false;
     }
 
+    virtual bool IsWaterfallWindow() const
+    {
+        return false;
+    }
+
     virtual Rect GetUIExtensionHostWindowRect(int32_t instanceId)
     {
         return Rect();
@@ -781,6 +813,7 @@ private:
     std::string filesDataPath_;
     std::string tempDir_;
     bool usePartialUpdate_ = false;
+    DisplayOrientation displayOrientation_ = DisplayOrientation::PORTRAIT;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
     RefPtr<NG::NavigationRoute> navigationRoute_;

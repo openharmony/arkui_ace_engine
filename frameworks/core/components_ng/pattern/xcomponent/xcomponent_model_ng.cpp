@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
+#include "base/display_manager/display_manager.h"
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
@@ -303,6 +304,12 @@ void XComponentModelNG::EnableTransparentLayer(bool isTransparentLayer)
     xcPattern->EnableTransparentLayer(isTransparentLayer);
 }
 
+void XComponentModelNG::SetScreenId(uint64_t screenId)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetScreenId(frameNode, screenId);
+}
+
 bool XComponentModelNG::IsTexture(FrameNode *frameNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
@@ -335,6 +342,7 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     auto type = params->type;
     auto libraryName = params->libraryName;
     auto controller = params->controller;
+    auto screenId = params->screenId;
 
     RefPtr<FrameNode> frameNode;
     if (id.empty() && controller == nullptr && (type == XComponentType::SURFACE || type == XComponentType::TEXTURE)) {
@@ -353,7 +361,24 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
         xcPattern->SetImageAIOptions(params->aiOptions);
     }
+    if (type == XComponentType::SURFACE && screenId.has_value()) {
+        SetScreenId(Referenced::RawPtr(frameNode), screenId.value());
+    }
     return frameNode;
+}
+
+void XComponentModelNG::SetScreenId(FrameNode* frameNode, uint64_t screenId)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    uint64_t rsScreenId = 0u;
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s][screenId: %" PRIu64 "]", xcPattern->GetId().c_str(),
+        screenId);
+    if (!DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "ConvertScreenIdToRsScreenId fail");
+    }
+    xcPattern->SetScreenId(rsScreenId);
 }
 
 void XComponentModelNG::SetXComponentId(FrameNode* frameNode, const std::string& id)

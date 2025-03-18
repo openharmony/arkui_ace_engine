@@ -110,7 +110,7 @@ void DragDropInitiatingStateLifting::HandleSequenceOnActionCancel(const GestureE
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (!gestureHub->GetBindMenuStatus().IsNotNeedShowPreview()) {
-        machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
     }
 }
 
@@ -142,7 +142,7 @@ void DragDropInitiatingStateLifting::HandlePanOnActionEnd(const GestureEvent& in
     dragDropManager->SetIsDisableDefaultDropAnimation(true);
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 
 void DragDropInitiatingStateLifting::HandleReStartDrag(const GestureEvent& info)
@@ -435,8 +435,7 @@ void DragDropInitiatingStateLifting::BindClickEvent(const RefPtr<FrameNode>& col
         CHECK_NULL_VOID(stateLift);
         auto machine = stateLift->GetStateMachine();
         CHECK_NULL_VOID(machine);
-        machine->RequestStatusTransition(
-            AceType::Claim(RawPtr(stateLift)), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
     };
     auto columnGestureHub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(columnGestureHub);

@@ -275,7 +275,6 @@ void* createRootNode(ArkUI_Int32 nodeId)
     auto stageManager = context->GetStageManager();
     CHECK_NULL_RETURN(stageManager, nullptr);
     auto stageNode = stageManager->GetStageNode();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
     return AceType::RawPtr(stageNode);
 }
 
@@ -285,7 +284,6 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     frameNode->IncRefCount();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
 }
 

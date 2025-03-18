@@ -43,7 +43,7 @@ struct DragDropInitiatingParams {
     CancelableCallback<void()> preDragStatusCallback;
     OptionsAfterApplied optionsAfterApplied;
     WeakPtr<FrameNode> frameNode;
-    SourceType triggeredSourceType;
+    SourceType triggeredSourceType = SourceType::TOUCH;
     Offset touchOffset { 0.0, 0.0 };
 
     RefPtr<FrameNode> GetFrameNode()

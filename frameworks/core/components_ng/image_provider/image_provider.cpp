@@ -129,7 +129,9 @@ void ImageProvider::FailCallback(
     auto notifyLoadFailTask = [ctxs, errorMsg] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->FailCallback(errorMsg);
         }
     };
@@ -150,7 +152,9 @@ void ImageProvider::SuccessCallback(
     auto notifyLoadSuccess = [ctxs, canvasImage] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->SuccessCallback(canvasImage->Clone());
         }
     };
@@ -199,7 +203,9 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     auto notifyDataReadyTask = [ctxs, imageObj, src] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->DataReadyCallback(imageObj);
         }
     };
@@ -288,7 +294,9 @@ void ImageProvider::DownLoadSuccessCallback(
     auto notifyDownLoadSuccess = [ctxs, imageObj] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->DataReadyCallback(imageObj);
         }
     };
@@ -307,7 +315,9 @@ void ImageProvider::DownLoadOnProgressCallback(
     auto notifyDownLoadOnProgressCallback = [ctxs, dlNow, dlTotal] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->DownloadOnProgress(dlNow, dlTotal);
         }
     };
@@ -502,14 +512,19 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
 void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& size, const std::string& key,
     const ImageDecoderOptions& imageDecoderOptions)
 {
-    ImageDecoder decoder(obj, size, imageDecoderOptions.forceResize);
-    RefPtr<CanvasImage> image;
+    RefPtr<CanvasImage> image = nullptr;
+    ImageDecoderConfig imageDecoderConfig = {
+        .desiredSize_ = size,
+        .forceResize_ = imageDecoderOptions.forceResize,
+        .imageQuality_ = imageDecoderOptions.imageQuality,
+        .isHdrDecoderNeed_ = imageDecoderOptions.isHdrDecoderNeed,
+        .photoDecodeFormat_ = imageDecoderOptions.photoDecodeFormat,
+    };
     // preview and ohos platform
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality, imageDecoderOptions.isHdrDecoderNeed,
-            imageDecoderOptions.photoDecodeFormat);
+        image = ImageDecoder::MakePixmapImage(obj, imageDecoderConfig);
     } else {
-        image = decoder.MakeDrawingImage();
+        image = ImageDecoder::MakeDrawingImage(obj, imageDecoderConfig);
     }
 
     if (image) {

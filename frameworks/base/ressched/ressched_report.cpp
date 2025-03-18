@@ -15,8 +15,6 @@
 
 #include "base/ressched/ressched_report.h"
 
-#define LIKELY(x) __builtin_expect(!!(x), 1)
-
 namespace OHOS::Ace {
 namespace Ressched {
 constexpr uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
@@ -186,7 +184,7 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     const std::unordered_map<std::string, std::string>& payload)
 {
     if (!reportDataFunc_) {
-        LOGD("reportDataFunc_ is null!");
+        LOGW("reportDataFunc_ is null!");
         return;
     }
     reportDataFunc_(resType, value, payload);
@@ -196,7 +194,7 @@ void ResSchedReport::ResScheSyncEventReport(const uint32_t resType, const int64_
     const std::unordered_map<std::string, std::string>& payload, std::unordered_map<std::string, std::string>& reply)
 {
     if (!reportSyncEventFunc_) {
-        LOGD("reportSyncEventFunc_ is null!");
+        LOGW("reportSyncEventFunc_ is null!");
         return;
     }
     reportSyncEventFunc_(resType, value, payload, reply);
@@ -413,7 +411,7 @@ double ResSchedReport::GetUpVelocity(const ResEventInfo& lastMoveInfo,
 
 void ResSchedReport::LoadPageEvent(int32_t value)
 {
-    if (LIKELY((value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)
+    if (ACE_LIKELY((value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)
         || (value == ResDefine::LOAD_PAGE_NO_REQUEST_FRAME_EVENT && loadPageRequestFrameOn_ == false))) {
         return;
     } else if (value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == true) {

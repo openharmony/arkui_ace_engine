@@ -301,6 +301,7 @@ public:
     virtual void SetSecurityLayer(bool isSecure) {}
     virtual void SetHDRBrightness(float hdrBrightness) {}
     virtual void SetTransparentLayer(bool isTransparentLayer) {}
+    virtual void SetScreenId(uint64_t screenId) {}
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(
         const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())
@@ -768,6 +769,17 @@ public:
     }
 
     virtual void SetRenderFit(RenderFit renderFit) {}
+
+    virtual OffsetF GetBaseTransalteInXY() const
+    {
+        return OffsetF{0.0f, 0.0f};
+    }
+    virtual void SetBaseTranslateInXY(const OffsetF& offset) {}
+    virtual float GetBaseRotateInZ() const
+    {
+        return 0.0f;
+    }
+    virtual void SetBaseRotateInZ(float degree) {}
 
     virtual void UpdateWindowBlur() {}
     virtual size_t GetAnimationsCount() const

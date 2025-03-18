@@ -495,56 +495,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetSelectSpanSplit003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnDragInsertStyledString001
- * @tc.desc: test HandleOnDragInsertStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertStyledString001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
-    richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
-    EXPECT_FALSE(richEditorPattern->isDragSponsor_);
-}
-
-/**
- * @tc.name: HandleOnDragInsertStyledString002
- * @tc.desc: test HandleOnDragInsertStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertStyledString002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
-    richEditorPattern->isDragSponsor_ = true;
-    richEditorPattern->caretPosition_ = 1;
-    richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
-    EXPECT_FALSE(richEditorPattern->caretPosition_ < richEditorPattern->dragRange_.first);
-}
-
-/**
- * @tc.name: HandleOnDragInsertStyledString003
- * @tc.desc: test HandleOnDragInsertStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertStyledString003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
-    richEditorPattern->isDragSponsor_ = true;
-    richEditorPattern->caretPosition_ = 1;
-    richEditorPattern->dragRange_ = { 2, 8 };
-    richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
-    EXPECT_TRUE(richEditorPattern->caretPosition_ < richEditorPattern->dragRange_.first);
-}
-
-/**
  * @tc.name: InsertValueToBeforeSpan001
  * @tc.desc: test InsertValueToBeforeSpan
  * @tc.type: FUNC
@@ -897,40 +847,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, DumpInfo002, TestSize.Level1)
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     richEditorPattern->DumpInfo(json);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->HasRenderTransform());
-}
-
-/**
- * @tc.name: HandleOnDragInsertValue001
- * @tc.desc: test HandleOnDragInsertValue
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertValue001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::u16string insertValue;
-    richEditorPattern->textSelector_.baseOffset = -2;
-    richEditorPattern->textSelector_.destinationOffset = -2;
-    richEditorPattern->HandleOnDragInsertValue(insertValue);
-    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
- * @tc.name: HandleOnDragInsertValue002
- * @tc.desc: test HandleOnDragInsertValue
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertValue002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::u16string insertValue;
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->HandleOnDragInsertValue(insertValue);
-    EXPECT_EQ(richEditorPattern->operationRecords_.size(), 2);
 }
 
 /**

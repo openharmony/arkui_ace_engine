@@ -74,6 +74,20 @@ void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType ev
     }
 }
 
+void AccessibilityProperty::UpdateAccessibilityNextFocusIdMap(const std::string& nextFocusInspectorKey)
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+
+    auto jsAccessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(containerId, nextFocusInspectorKey,
+                                                              frameNode->GetAccessibilityId());
+}
+
 std::string AccessibilityProperty::GetText() const
 {
     return propText_.value_or("");
@@ -1000,6 +1014,7 @@ void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::str
         return;
     }
     accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    UpdateAccessibilityNextFocusIdMap(accessibilityNextFocusInspectorKey);
     NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
 

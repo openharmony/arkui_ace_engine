@@ -21,10 +21,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/gestures/drag_event.h"
-#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace::NG {
 

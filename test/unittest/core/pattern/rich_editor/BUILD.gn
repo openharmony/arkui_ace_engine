@@ -23,7 +23,6 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_base_testone_ng.cpp",
     "rich_editor_change_callback_test_ng.cpp",
     "rich_editor_click_test_ng.cpp",
-    "rich_editor_click_testone_ng.cpp",
     "rich_editor_common_test_ng.cpp",
     "rich_editor_content_modifier_test_ng.cpp",
     "rich_editor_controller_test.cpp",
@@ -48,6 +47,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_selection_test_ng.cpp",
     "rich_editor_span_test.cpp",
     "rich_editor_styled_string_test_ng.cpp",
+    "rich_editor_undo_redo_test.cpp",
     "rich_editor_url_style_test.cpp",
   ]
 }

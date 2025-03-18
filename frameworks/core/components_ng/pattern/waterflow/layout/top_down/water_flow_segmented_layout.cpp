@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -496,16 +497,22 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     if (NonNegative(userDefMainSize)) {
         WaterFlowLayoutUtils::UpdateItemIdealSize(item, axis_, userDefMainSize);
     }
-    ViewPosReference ref {
-        .viewPosStart = 0,
-        .viewPosEnd = mainSize_ + info_->expandHeight_,
-        .referencePos = position.second + info_->currentOffset_,
-        .referenceEdge = ReferenceEdge::START,
-        .axis = Axis::VERTICAL,
-    };
-    item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-        { itemsCrossSize_[info_->GetSegment(idx)][position.first], mainSize_, axis_, NonNegative(userDefMainSize) },
-        ref, props_, item));
+    auto seg = info_->GetSegment(idx);
+    if (itemsCrossSize_[seg].size() > 1) {
+        item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+            { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, props_, item));
+    } else {
+        ViewPosReference ref {
+            .viewPosStart = 0,
+            .viewPosEnd = mainSize_ + info_->expandHeight_,
+            .referencePos = position.second + info_->currentOffset_,
+            .referenceEdge = ReferenceEdge::START,
+            .axis = axis_,
+        };
+        item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+            { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, ref, props_,
+            item));
+    }
     if (isCache) {
         item->Layout();
         item->SetActive(false);

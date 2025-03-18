@@ -17,6 +17,7 @@
 
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

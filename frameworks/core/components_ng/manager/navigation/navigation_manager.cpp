@@ -499,4 +499,63 @@ bool NavigationManager::IsCustomDialogValid(const RefPtr<UINode>& node)
     // if dialog is custom dialog, don't need to trigger active lifecycle, it triggers when dialog closed
     return dialogProperty.isUserCreatedDialog;
 }
+
+void NavigationManager::AddBeforeOrientationChangeTask(const std::function<void()>&& task)
+{
+    beforeOrientationChangeTasks_.emplace_back(std::move(task));
+}
+
+void NavigationManager::ClearBeforeOrientationChangeTask()
+{
+    beforeOrientationChangeTasks_.clear();
+}
+
+void NavigationManager::OnOrientationChanged()
+{
+    auto tasks = std::move(beforeOrientationChangeTasks_);
+    for (auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void NavigationManager::SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& config)
+{
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    bool enable = false;
+    bool animated = false;
+    if (config.has_value()) {
+        // developer set statusBar config to NavDestination
+        enable = config.value().first;
+        animated = config.value().second;
+    } else {
+        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
+        enable = statusBarConfigByWindowApi_.first;
+        animated = statusBarConfigByWindowApi_.second;
+    }
+
+    container->SetSystemBarEnabled(SystemBarType::STATUS, enable, animated);
+}
+
+void NavigationManager::SetNavigationIndicatorConfig(std::optional<bool> config)
+{
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    bool enable = false;
+    if (config.has_value()) {
+        // developer set navigationIndicator config to NavDestination
+        enable = config.value();
+    } else {
+        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
+        enable = navigationIndicatorConfigByWindowApi_;
+    }
+
+    container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enable, false);
+}
 } // namespace OHOS::Ace::NG

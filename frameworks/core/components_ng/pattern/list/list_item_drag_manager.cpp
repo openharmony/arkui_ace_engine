@@ -121,6 +121,7 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(pattern);
     axis_ = pattern->GetAxis();
     lanes_ = pattern->GetLanes();
+    isStackFromEnd_ = pattern->IsStackFromEnd();
 
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_VOID(forEach);
@@ -137,8 +138,9 @@ void ListItemDragManager::HandleOnItemLongPress(const GestureEvent& info)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_VOID(forEach);
-    forEach->FireOnLongPress(GetIndex());
+    if (forEach && info.GetSourceTool() != SourceTool::MOUSE) {
+        forEach->FireOnLongPress(GetIndex());
+    }
     if (renderContext->HasTransformScale()) {
         prevScale_ = renderContext->GetTransformScaleValue({ 1.0f, 1.0f });
     } else {
@@ -284,10 +286,11 @@ int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, con
 
     int32_t crossNearIndex = index;
     float crossDelta = delta.GetCrossOffset(axis_);
+    int32_t step = isStackFromEnd_ ? -1 : 1;
     if (Positive(crossDelta)) {
-        crossNearIndex = index + 1;
+        crossNearIndex = index + step;
     } else if (Negative(crossDelta)) {
-        crossNearIndex = index - 1;
+        crossNearIndex = index - step;
     }
     ScaleResult crossRes = { false, 1.0f };
     if (crossNearIndex != index) {
@@ -373,6 +376,9 @@ void ListItemDragManager::HandleScrollCallback()
         return;
     }
     HandleSwapAnimation(from, to);
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
+    forEach->FireOnMoveThrough(fromIndex_, to);
 }
 
 void ListItemDragManager::SetPosition(const OffsetF& offset)
@@ -409,12 +415,12 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     HandleAutoScroll(from, point, frameRect);
 
     int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
-    auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_VOID(forEach);
     if (to == from) {
         return;
     }
     HandleSwapAnimation(from, to);
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
     forEach->FireOnMoveThrough(fromIndex_, to);
 }
 

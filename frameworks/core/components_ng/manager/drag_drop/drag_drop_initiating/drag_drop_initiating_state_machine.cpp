@@ -22,9 +22,6 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_ready.h"
 #include "core/gestures/drag_event.h"
 namespace OHOS::Ace::NG {
-namespace {
-constexpr int32_t DEFAULT_DRAG_DROP_INITIATING_STATE_SIZE = 5;
-}
 DragDropInitiatingStateMachine::DragDropInitiatingStateMachine(const RefPtr<FrameNode>& frameNode)
 {
     currentState_ = 0;
@@ -33,11 +30,18 @@ DragDropInitiatingStateMachine::DragDropInitiatingStateMachine(const RefPtr<Fram
 
 void DragDropInitiatingStateMachine::InitializeState()
 {
-    if (!dragDropInitiatingState_.empty()) {
-        return;
+    if (dragDropInitiatingState_.empty()) {
+        dragDropInitiatingState_ =
+            std::vector<RefPtr<DragDropInitiatingStateBase>>(DEFAULT_DRAG_DROP_INITIATING_STATE_SIZE);
     }
-    dragDropInitiatingState_ =
-        std::vector<RefPtr<DragDropInitiatingStateBase>>(DEFAULT_DRAG_DROP_INITIATING_STATE_SIZE);
+    bool needInitializeState = false;
+    for (size_t i = 0; i < dragDropInitiatingState_.size(); i++) {
+        if (!dragDropInitiatingState_[i]) {
+            needInitializeState = true;
+            break;
+        }
+    }
+    CHECK_NULL_VOID(needInitializeState);
     dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::IDLE)] =
         MakeRefPtr<DragDropInitiatingStateIdle>(AceType::WeakClaim(this));
     dragDropInitiatingState_[static_cast<int32_t>(DragDropInitiatingStatus::READY)] =
@@ -52,115 +56,129 @@ void DragDropInitiatingStateMachine::InitializeState()
 
 void DragDropInitiatingStateMachine::HandleLongPressOnAction(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandleLongPressOnAction(info);
 }
 
 void DragDropInitiatingStateMachine::HandleLongPressOnActionEnd(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandleLongPressOnActionEnd(info);
 }
 
 void DragDropInitiatingStateMachine::HandleLongPressOnActionCancel(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandleLongPressOnActionCancel(info);
 }
 
 void DragDropInitiatingStateMachine::HandlePreviewLongPressOnAction(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
+    CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandlePreviewLongPressOnAction(info);
 }
 
 void DragDropInitiatingStateMachine::HandlePreviewLongPressOnActionEnd(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandlePreviewLongPressOnActionEnd(info);
 }
 
 void DragDropInitiatingStateMachine::HandlePreviewLongPressOnActionCancel(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandlePreviewLongPressOnActionCancel(info);
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnActionStart(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandlePanOnActionStart(info);
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnActionUpdate(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandlePanOnActionUpdate(info);
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnActionEnd(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandlePanOnActionEnd(info);
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnActionCancel(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandlePanOnActionCancel(info);
 }
 
 void DragDropInitiatingStateMachine::HandlePanOnReject()
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandlePanOnReject();
 }
 
 void DragDropInitiatingStateMachine::HandleSequenceOnActionCancel(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandleSequenceOnActionCancel(info);
 }
 
 void DragDropInitiatingStateMachine::HandleHitTesting(const TouchEvent& touchEvent)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandleHitTesting(touchEvent);
 }
 
 void DragDropInitiatingStateMachine::HandleTouchEvent(const TouchEvent& touchEvent)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandleTouchEvent(touchEvent);
 }
 
 void DragDropInitiatingStateMachine::HandlePullEvent(const DragPointerEvent& dragPointerEvent)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandlePullEvent(dragPointerEvent);
 }
 
 void DragDropInitiatingStateMachine::HandleReStartDrag(const GestureEvent& info)
 {
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     CHECK_NULL_VOID(dragDropInitiatingState_[currentState_]);
     dragDropInitiatingState_[currentState_]->HandleReStartDrag(info);
 }
 
 void DragDropInitiatingStateMachine::HandleDragStart()
 {
-    RequestStatusTransition(AceType::Claim(RawPtr(dragDropInitiatingState_[currentState_])),
-        static_cast<int32_t>(DragDropInitiatingStatus::MOVING));
+    RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::MOVING));
 }
 
 void DragDropInitiatingStateMachine::HandleDragEnd()
 {
-    RequestStatusTransition(AceType::Claim(RawPtr(dragDropInitiatingState_[currentState_])),
-        static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 
 void DragDropInitiatingStateMachine::TransDragWindowToFwk()
 {
-    RequestStatusTransition(AceType::Claim(RawPtr(dragDropInitiatingState_[currentState_])),
-        static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 
 void DragDropInitiatingStateMachine::TransMenuShow(bool isMenuShow)
@@ -169,12 +187,10 @@ void DragDropInitiatingStateMachine::TransMenuShow(bool isMenuShow)
         return;
     }
     if (!isMenuShow) {
-        RequestStatusTransition(AceType::Claim(RawPtr(dragDropInitiatingState_[currentState_])),
-            static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
         return;
     }
-    RequestStatusTransition(AceType::Claim(RawPtr(dragDropInitiatingState_[currentState_])),
-        static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
 }
 
 void DragDropInitiatingStateMachine::SetThumbnailCallback(std::function<void(Offset)>&& callback)
@@ -182,11 +198,10 @@ void DragDropInitiatingStateMachine::SetThumbnailCallback(std::function<void(Off
     dragDropInitiatingParams_.getTextThumbnailPixelMapCallback = std::move(callback);
 }
 
-void DragDropInitiatingStateMachine::RequestStatusTransition(
-    RefPtr<DragDropInitiatingStateBase> currentState, int32_t nextStatus)
+void DragDropInitiatingStateMachine::RequestStatusTransition(int32_t nextStatus)
 {
     TAG_LOGD(AceLogTag::ACE_DRAG, "RequestStatusTransition from %{public}d to %{public}d.", currentState_, nextStatus);
-    CHECK_NULL_VOID(dragDropInitiatingState_[nextStatus]);
+    CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     if (currentState_ != nextStatus) {
         CHECK_NULL_VOID(dragDropInitiatingState_[nextStatus]);
         dragDropInitiatingState_[nextStatus]->Init(currentState_);

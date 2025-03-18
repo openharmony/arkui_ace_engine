@@ -17,6 +17,8 @@
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
+#include "core/components_ng/property/measure_utils.h"
+
 namespace OHOS::Ace::NG {
 RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutMode mode)
 {

@@ -631,7 +631,7 @@ void InitSwiperArrowParameters(
 int32_t VectorStringToInt(std::vector<std::string>& vectorStr, int32_t index)
 {
     int32_t value = 0;
-    if (index < vectorStr.size()) {
+    if (index < static_cast<int32_t>(vectorStr.size())) {
         value = StringUtils::StringToInt(vectorStr[index]);
     }
     return value;

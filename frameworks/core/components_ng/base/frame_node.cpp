@@ -46,6 +46,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
@@ -558,6 +559,16 @@ RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId
         if (parent) {
             parent->RemoveChild(frameNode);
         }
+        return nullptr;
+    }
+    return frameNode;
+}
+
+RefPtr<FrameNode> FrameNode::GetFrameNodeOnly(const std::string& tag, int32_t nodeId)
+{
+    auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (frameNode->GetTag() != tag) {
         return nullptr;
     }
     return frameNode;
@@ -1310,7 +1321,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
         PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
     }
-    bool forceMeasure = GetPattern()->ReusedNodeSkipMeasure();
+    bool forceMeasure = !GetPattern()->ReusedNodeSkipMeasure();
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess() && forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -6551,6 +6562,21 @@ void FrameNode::FireFrameNodeDestructorCallback()
     if (frameNodeDestructorCallback_) {
         frameNodeDestructorCallback_(GetId());
     }
+}
+
+const char* FrameNode::GetPatternTypeName() const
+{
+    return TypeInfoHelper::TypeName(RawPtr(pattern_));
+}
+
+const char* FrameNode::GetLayoutPropertyTypeName() const
+{
+    return TypeInfoHelper::TypeName(RawPtr(layoutProperty_));
+}
+
+const char* FrameNode::GetPaintPropertyTypeName() const
+{
+    return TypeInfoHelper::TypeName(RawPtr(paintProperty_));
 }
 
 const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const

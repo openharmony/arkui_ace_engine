@@ -15,6 +15,8 @@
 
 #include "cj_pixel_unit_convert_ffi.h"
 
+#include "core/pipeline/pipeline_base.h"
+
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 

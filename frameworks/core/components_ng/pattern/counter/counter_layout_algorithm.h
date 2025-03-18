@@ -18,6 +18,9 @@
 
 #include "core/components_ng/layout/layout_wrapper.h"
 
+namespace OHOS::Ace {
+class Color;
+}
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CounterLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(CounterLayoutAlgorithm, LayoutAlgorithm);

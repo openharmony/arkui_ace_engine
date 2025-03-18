@@ -2796,7 +2796,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSystemTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm),
         NavDestinationBridge::ResetNavDestinationSystemTransition));
-
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPreferredOrientation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetPreferredOrientation));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPreferredOrientation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetPreferredOrientation));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableStatusBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetEnableStatusBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableStatusBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetEnableStatusBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableNavigationIndicator"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetEnableNavigationIndicator));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableNavigationIndicator"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetEnableNavigationIndicator));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);

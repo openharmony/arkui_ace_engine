@@ -498,7 +498,7 @@ std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::Get
     int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
     SelectData selectData;
-    selectData.secondResult = CalcCaretMetricsByPosition(end, selectData.secondMetrics, TextAffinity::UPSTREAM);
+    selectData.secondResult = CalcCaretMetricsByPosition(end, selectData.secondMetrics, TextAffinity::DOWNSTREAM);
     std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
     selectData.y = 0.0f;
     for (auto&& info : paragraphs_) {
@@ -520,6 +520,7 @@ std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::Get
                 rect.SetTop(rect.Top() + selectData.y);
             }
             paragraphsRects.emplace_back(std::make_pair(rects, info.paragraphStyle));
+            selectData.paragraphSpacing = info.paragraphStyle.paragraphSpacing.ConvertToPx();
         }
         selectData.y += info.paragraph->GetHeight();
     }
@@ -555,6 +556,9 @@ void ParagraphManager::MakeBlankRectsInRichEditor(std::vector<RectF>& result, co
         RectF rect(caretMetrics.offset.GetX(), caretMetrics.offset.GetY(), 0.0f, caretMetrics.height);
         height  = rect.Top();
         rects.emplace_back(rect);
+        if (auto spacing = selectData.paragraphSpacing; index == 0 && !NearZero(spacing)) {
+            rects.emplace_back(caretMetrics.offset.GetX(), caretMetrics.offset.GetY() - spacing, 0, spacing);
+        }
     }
     std::reverse(rects.begin(), rects.end());
     result.insert(result.end(), rects.begin(), rects.end());

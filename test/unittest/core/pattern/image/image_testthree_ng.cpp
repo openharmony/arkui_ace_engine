@@ -154,7 +154,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0026, TestSize.Level1)
      * @tc.steps: step1. Test status
      * @tc.expected: IDLE
      */
-    EXPECT_EQ(imagePattern->status_, Animator::Status::IDLE);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::IDLE);
 
     //切换Image数据源
     std::vector<ImageProperties> images;
@@ -178,7 +178,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0026, TestSize.Level1)
      * @tc.steps: step2. Test status
      * @tc.expected: STATE_START
      */
-    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
 }
 
 /**
@@ -884,7 +884,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0040, TestSize.Level1)
      * @tc.steps: step1. Test status
      * @tc.expected: IDLE
      */
-    EXPECT_EQ(imagePattern->status_, Animator::Status::IDLE);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::IDLE);
 
     //切换Image数据源
     std::vector<ImageProperties> images;
@@ -908,7 +908,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0040, TestSize.Level1)
      * @tc.steps: step2. Test status
      * @tc.expected: STATE_START
      */
-    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
 }
 
 /**
@@ -1936,13 +1936,13 @@ HWTEST_F(ImageTestThreeNg, ImagePatternControlAnimation0053, TestSize.Level1)
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    imagePattern->status_ = Animator::Status::IDLE;
+    imagePattern->status_ = AnimatorStatus::IDLE;
     imagePattern->ControlAnimation(2);
     EXPECT_TRUE(imagePattern->isFormAnimationStart_);
-    imagePattern->status_ = Animator::Status::PAUSED;
+    imagePattern->status_ = AnimatorStatus::PAUSED;
     imagePattern->ControlAnimation(2);
     EXPECT_TRUE(imagePattern->isFormAnimationStart_);
-    imagePattern->status_ = Animator::Status::RUNNING;
+    imagePattern->status_ = AnimatorStatus::RUNNING;
     imagePattern->isFormAnimationEnd_ = true;
     imagePattern->ControlAnimation(2);
     EXPECT_FALSE(imagePattern->isFormAnimationEnd_);
