@@ -50,7 +50,7 @@ class MockRotationGesture : public RotationGesture {
     };
 
 struct RotationEvent {
-   int32_t resourceId;
+    int32_t resourceId;
 };
 
 static const int RES_ID = 123;
