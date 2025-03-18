@@ -884,7 +884,7 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     }
 
     RefPtr<FrameNode> symbolIconNode = GetSecCompChildNode(node, V2::SYMBOL_ETS_TAG);
-    if (!InitSCSymbolIconInfo(buttonInfo, iconNode)) {
+    if (!InitSCSymbolIconInfo(buttonInfo, symbolIconNode)) {
         return false;
     }
 
