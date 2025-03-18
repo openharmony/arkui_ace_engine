@@ -137,6 +137,7 @@ constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
 static std::list<PipelineContext::PredictTask> predictTasks_;
 static Rect windowRect_;
+static bool g_isDragging = false;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
@@ -294,7 +295,7 @@ void PipelineContext::SendEventToAccessibilityWithNode(
 {}
 
 void PipelineContext::OnTouchEvent(
-    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe, bool isEventsPassThrough)
+    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe)
 {}
 
 void PipelineContext::ReDispatch(KeyEvent& keyEvent) {}
@@ -305,7 +306,7 @@ void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, cons
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe, bool isEventsPassThrough) {}
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
@@ -902,10 +903,13 @@ void PipelineContext::OpenFrontendAnimation(
 
 bool PipelineContext::IsDragging() const
 {
-    return false;
+    return g_isDragging;
 }
 
-void PipelineContext::SetIsDragging(bool isDragging) {}
+void PipelineContext::SetIsDragging(bool isDragging)
+{
+    g_isDragging = isDragging;
+}
 
 void PipelineContext::ResetDragging() {}
 

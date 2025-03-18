@@ -238,7 +238,7 @@ public:
     {
         return dataDetectorAdapter_;
     }
-    const std::map<int32_t, AISpan>& GetAISpanMap()
+    virtual const std::map<int32_t, AISpan>& GetAISpanMap()
     {
         return dataDetectorAdapter_->aiSpanMap_;
     }
@@ -1052,6 +1052,7 @@ private:
 
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
+    bool moveOverClickThreshold_ = false;
     bool isMarqueeRunning_ = false;
 
     RefPtr<ParagraphManager> pManager_;

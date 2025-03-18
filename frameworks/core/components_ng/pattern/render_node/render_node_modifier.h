@@ -41,7 +41,7 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
-        if (!isDetached_ && drawCallback_) {
+        if (drawCallback_) {
             drawCallback_(context);
         }
     }
@@ -56,15 +56,9 @@ public:
         renderNodeFlag_->Set(renderNodeFlag_->Get() + 1);
     }
 
-    void UpdateIsDetached(bool isDetached)
-    {
-        isDetached_ = isDetached;
-    }
-
 private:
     std::function<void(DrawingContext& context)> drawCallback_;
     RefPtr<PropertyInt> renderNodeFlag_;
-    bool isDetached_ = false;
 };
 } // namespace OHOS::Ace::NG
 

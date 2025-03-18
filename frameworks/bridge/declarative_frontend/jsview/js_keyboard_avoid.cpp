@@ -66,7 +66,7 @@ void JSKeyboardAvoid::GetKeyboardAvoidMode(const JSCallbackInfo& info)
             break;
     }
     auto returnValue = JSVal(ToJSValue(obj));
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         returnValue = JSVal(ToJSValue(static_cast<int32_t>(mode)));
     }
     auto returnPtr = JSRef<JSVal>::Make(returnValue);

@@ -580,6 +580,15 @@ void GestureEventHub::BindMenu(GestureEventFunc&& showMenu)
     AddClickEvent(showMenu_);
 }
 
+void GestureEventHub::RegisterMenuOnTouch(TouchEventFunc&& callback)
+{
+    if (bindMenuTouch_) {
+        RemoveTouchEvent(bindMenuTouch_);
+    }
+    bindMenuTouch_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
+    AddTouchEvent(bindMenuTouch_);
+}
+
 OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
 {
     auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
@@ -1036,6 +1045,11 @@ void GestureEventHub::RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
 bool GestureEventHub::IsClickable() const
 {
     return clickEventActuator_ != nullptr;
+}
+
+bool GestureEventHub::IsComponentClickable() const
+{
+    return clickEventActuator_ && clickEventActuator_->IsComponentClickable();
 }
 
 bool GestureEventHub::IsUserClickable() const

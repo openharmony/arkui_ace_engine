@@ -54,6 +54,8 @@ protected:
         return !props_->GetShowCachedItemsValue(false) && (itemIdx < info->startIndex_ || itemIdx > info->endIndex_);
     }
 
+    virtual void MeasureLazyChild(int32_t startIdx, int32_t endIdx) const = 0;
+
     LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutProperty> props_;
     Axis axis_ = Axis::VERTICAL;
@@ -139,7 +141,8 @@ private:
      * @param userDefMainSize user-defined main-axis size of the FlowItem.
      * @return LayoutWrapper of the FlowItem.
      */
-    RefPtr<LayoutWrapper> MeasureItem(int32_t idx, int32_t crossIdx, float userDefMainSize, bool isCache) const;
+    RefPtr<LayoutWrapper> MeasureItem(
+        int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, bool isCache) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
@@ -169,6 +172,8 @@ private:
     float SolveJumpOffset(const WaterFlowLayoutInfo::ItemInfo& item) const;
 
     void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
+
+    void MeasureLazyChild(int32_t startIdx, int32_t endIdx) const override;
 
     RefPtr<WaterFlowSections> sections_;
 

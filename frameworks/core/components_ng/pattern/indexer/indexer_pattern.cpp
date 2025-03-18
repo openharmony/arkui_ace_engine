@@ -125,9 +125,10 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
             if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
-                    lastCollapsingMode_ == IndexerCollapsingMode::FIVE) &&
-                (propSelect > sharpItemCount_)) {
+                    lastCollapsingMode_ == IndexerCollapsingMode::FIVE) && (propSelect > sharpItemCount_)) {
                 propSelect = GetAutoCollapseIndex(propSelect);
+            } else {
+                collapsedIndex_ = 0;
             }
         } else {
             sharpItemCount_ = 0;
@@ -139,7 +140,9 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
         sharpItemCount_ = 0;
         itemCountChanged = (itemCount_ != 0);
         itemCount_ = 0;
+        collapsedIndex_ = 0;
         arrayValue_.clear();
+        collapsedItemNums_.clear();
     }
     if (propSelect != selected_ || collapsedIndex_ != lastCollapsedIndex_) {
         selected_ = propSelect;
@@ -402,7 +405,7 @@ int32_t IndexerPattern::GetActualIndex(int32_t index)
                         static_cast<int32_t>(std::find(fullArrayValue_.begin(), fullArrayValue_.end(),
                         arrayValue_.at(index).first) - fullArrayValue_.begin()) : index;
     int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
-    return std::clamp(actualIndex + collapsedIndex_, 0, fullArraySize);
+    return std::clamp(actualIndex + collapsedIndex_, 0, fullArraySize > 0 ? fullArraySize - 1 : 0);
 }
 
 void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -595,6 +598,7 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset, bool isTouch)
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, -1);
     int32_t index = 0;
+    int32_t arraySize = static_cast<int32_t>(collapsedItemNums_.size());
     for (auto child : host->GetChildren()) {
         auto childNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_RETURN(childNode, -1);
@@ -608,9 +612,10 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset, bool isTouch)
             LessNotEqual(offset.GetY(), childOffset.GetY() + itemHeight_)) {
                 if (isTouch) {
                     collapsedIndex_ = 0;
-                } else {
+                } else if (arraySize > 0) {
                     float yOffset = offset.GetY() - childOffset.GetY();
-                    int32_t itemNum = collapsedItemNums_[index] < 1 ? 1 : collapsedItemNums_[index];
+                    int32_t itemIndex = std::clamp(index, 0, arraySize - 1);
+                    int32_t itemNum = collapsedItemNums_[itemIndex] < 1 ? 1 : collapsedItemNums_[itemIndex];
                     float itemHeight = itemHeight_ / itemNum;
                     collapsedIndex_ = NearZero(itemHeight) ? 0 : floor(yOffset / itemHeight);
                 }

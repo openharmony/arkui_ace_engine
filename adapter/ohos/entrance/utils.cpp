@@ -133,6 +133,16 @@ NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea)
         { avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ });
 }
 
+Rosen::AvoidArea ConvertAvoidArea(const NG::SafeAreaInsets& insets, int32_t rootWidth, int32_t rootHeight)
+{
+    Rosen::AvoidArea area;
+    area.topRect_ = Rosen::Rect{ 0, insets.top_.start, rootWidth, insets.top_.end - insets.top_.start };
+    area.leftRect_ = Rosen::Rect{ insets.left_.start, 0, insets.left_.end - insets.left_.start, rootHeight };
+    area.rightRect_ = Rosen::Rect{ insets.right_.start, 0, insets.right_.end - insets.right_.start, rootHeight };
+    area.bottomRect_ = Rosen::Rect{ 0, insets.bottom_.start, rootWidth, insets.bottom_.end - insets.bottom_.start };
+    return area;
+}
+
 Rect ConvertDMRect2Rect(const OHOS::Rosen::DMRect& displayAvailableRect)
 {
     return Rect(displayAvailableRect.posX_, displayAvailableRect.posY_, displayAvailableRect.width_,

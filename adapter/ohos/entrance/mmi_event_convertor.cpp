@@ -15,7 +15,7 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
-
+#include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/tsa_advanced_feature.h"
@@ -54,6 +54,19 @@ SourceTool GetSourceTool(int32_t orgToolType)
             LOGW("unknown tool type");
             return SourceTool::UNKNOWN;
     }
+}
+
+uint64_t GetPointerSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (AceApplicationInfo::GetInstance().GetTouchEventPassMode() != TouchPassMode::ACCELERATE) {
+        return pointerEvent->GetActionTime();
+    }
+    auto inputTime = pointerEvent->GetSensorInputTime();
+    if (inputTime == 0) {
+        // inject event has no sensor time.
+        inputTime = pointerEvent->GetActionTime();
+    }
+    return inputTime;
 }
 
 TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
@@ -213,7 +226,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     }
     auto touchPoint = ConvertTouchPoint(item);
     TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
-    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    std::chrono::microseconds microseconds(GetPointerSensorTime(pointerEvent));
     TimeStamp time(microseconds);
     event.SetTime(time)
         .SetDeviceId(pointerEvent->GetDeviceId())
@@ -685,6 +698,14 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)
 {
+    if (pointerEvent->GetSourceType() != OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW ||
+        pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW)) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "SourceType:%{public}d error, PointerAction:%{public}d "
+            "instanceId:%{public}d",
+            pointerEvent->GetSourceType(), pointerEvent->GetPointerAction(), instanceId);
+    }
+
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
         auto container = Platform::AceContainer::GetContainer(instanceId);
         if (container) {

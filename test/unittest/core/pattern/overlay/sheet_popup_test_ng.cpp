@@ -71,9 +71,9 @@ void SheetPopupTestNg::SetUpTestCase()
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
-    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
-    MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_SIXTEEN);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_EIGHTEEN);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
@@ -184,7 +184,7 @@ void SheetPopupTestNg::InitSheetAndWrapperLayoutInfo(
 
 /**
  * @tc.name: GetPopupStyleSheetOffset001
- * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) &&
  *                      (CheckDirectionBottomNew == True);
  *           Condition: placement == Bottom, placemenntOnTarget == true
  * @tc.type: FUNC
@@ -274,7 +274,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
 
 /**
  * @tc.name: GetPopupStyleSheetOffset002
- * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) &&
  *                      (CheckDirectionBottomNew == False);
  *           Condition: placement == Bottom, placemenntOnTarget == true
  * @tc.type: FUNC
@@ -365,7 +365,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset002, TestSize.Level1)
 
 /**
  * @tc.name: GetPopupStyleSheetOffset003
- * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) &&
  *                      (CheckDirectionBottomNew == False);
  *           Condition: placement == Bottom, placemenntOnTarget == false
  * @tc.type: FUNC
@@ -458,7 +458,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset003, TestSize.Level1)
 
 /**
  * @tc.name: GetPopupStyleSheetOffset004
- * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ * @tc.desc: Branch: if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) &&
  *                      (CheckDirectionBottomNew == False);
  *           Condition: placement == Bottom, placemenntOnTarget == false
  * @tc.type: FUNC
@@ -550,7 +550,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset004, TestSize.Level1)
 
 /**
  * @tc.name: GetOffsetInAvoidanceRule001
- * @tc.desc: Branch: if (LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ * @tc.desc: Branch: if (LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) &&
  *                  getOffsetFunc == GetOffsetWithBottom()
  *           Condition: sheetType == Popup
  * @tc.type: FUNC
@@ -648,7 +648,7 @@ HWTEST_F(SheetPopupTestNg, GetOffsetInAvoidanceRule001, TestSize.Level1)
 
 /**
  * @tc.name: GetOffsetWithBottomLeft001
- * @tc.desc: Branch: if (LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ * @tc.desc: Branch: if (LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) &&
  *                  getOffsetFunc == GetOffsetWithBottomLeft()
  *           Condition: sheetType == Popup
  * @tc.type: FUNC
@@ -745,7 +745,7 @@ HWTEST_F(SheetPopupTestNg, GetOffsetWithBottomLeft001, TestSize.Level1)
 
 /**
  * @tc.name: GetOffsetWithBottomRight001
- * @tc.desc: Branch: if (LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ * @tc.desc: Branch: if (LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) &&
  *                  getOffsetFunc == GetOffsetWithBottomRight001()
  *           Condition: sheetType == Popup
  * @tc.type: FUNC
@@ -845,7 +845,7 @@ HWTEST_F(SheetPopupTestNg, GetOffsetWithBottomRight001, TestSize.Level1)
 
 /**
  * @tc.name: AvoidanceRuleBottom001
- * @tc.desc: Branch: if (LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
+ * @tc.desc: Branch: if (LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) &&
  *                  getOffsetFunc == GetOffsetWithBottomRight001()
  *           Condition: sheetType == Popup
  * @tc.type: FUNC

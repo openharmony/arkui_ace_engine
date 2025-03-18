@@ -143,6 +143,19 @@ void UIObserverHandler::NotifyDidClick(
     didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
 
+void UIObserverHandler::NotifyPanGestureStateChange(const GestureEvent& gestureEventInfo,
+    const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode, const PanGestureInfo& panGestureInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(panGestureHandleFunc_);
+    auto getCurrent = Container::Current();
+    CHECK_NULL_VOID(getCurrent);
+    AbilityContextInfo info = { AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(), getCurrent->GetModuleName() };
+
+    panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
+}
+
 void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
 {
     CHECK_NULL_VOID(tabContentStateHandleFunc_);
@@ -356,6 +369,11 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetPanGestureHandleFunc(PanGestureHandleFunc func)
+{
+    panGestureHandleFunc_ = func;
 }
 
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)

@@ -1029,6 +1029,10 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
 
     marqueeSet_ = true;
     ResumeTextRace(false);
+
+    if (!IsMarqueeVisible()) {
+        PauseAnimation();
+    }
 }
 
 void TextContentModifier::StopTextRace()
@@ -1046,7 +1050,7 @@ void TextContentModifier::StopTextRace()
 void TextContentModifier::ResumeAnimation()
 {
     CHECK_NULL_VOID(raceAnimation_);
-    if (!CheckMarqueeState(MarqueeState::PAUSED)) {
+    if (!CheckMarqueeState(MarqueeState::PAUSED) || !IsMarqueeVisible()) {
         return;
     }
     AnimationUtils::ResumeAnimation(raceAnimation_);
@@ -1457,5 +1461,18 @@ void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const Fade
     canvas.DrawRect(clipInnerRect);
     canvas.DetachBrush();
     canvas.Restore();
+}
+
+bool TextContentModifier::IsMarqueeVisible() const
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, true);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_RETURN(host, true);
+    RectF visibleRect;
+    RectF visibleInnerRect;
+    RectF frameRect;
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    return Positive(visibleInnerRect.Width()) && Positive(visibleInnerRect.Height());
 }
 } // namespace OHOS::Ace::NG

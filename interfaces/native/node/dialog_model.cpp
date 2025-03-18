@@ -329,24 +329,12 @@ int32_t RegisterOnDidDisappear(ArkUI_NativeDialogHandle handle, void* userData, 
     return result;
 }
 
-int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable)
-{
-    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
-    }
-    if (!handle) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    return impl->getDialogAPI()->setFocusable(handle->controller, focusable);
-}
-
 int32_t SetBorderWidth(
     ArkUI_NativeDialogHandle handle, float top, float right, float bottom, float left, ArkUI_LengthMetricUnit unit)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -361,7 +349,7 @@ int32_t SetBorderColor(ArkUI_NativeDialogHandle handle, uint32_t top, uint32_t r
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -373,7 +361,7 @@ int32_t SetBorderStyle(ArkUI_NativeDialogHandle handle, int32_t top, int32_t rig
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -385,7 +373,7 @@ int32_t SetWidth(ArkUI_NativeDialogHandle handle, float width, ArkUI_LengthMetri
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -401,7 +389,7 @@ int32_t SetHeight(ArkUI_NativeDialogHandle handle, float height, ArkUI_LengthMet
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -417,7 +405,7 @@ int32_t SetShadow(ArkUI_NativeDialogHandle handle, ArkUI_ShadowStyle shadow)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -433,7 +421,7 @@ int32_t SetCustomShadow(ArkUI_NativeDialogHandle handle, const ArkUI_AttributeIt
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -481,7 +469,7 @@ int32_t SetBackgroundBlurStyle(ArkUI_NativeDialogHandle handle, ArkUI_BlurStyle 
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -494,7 +482,7 @@ int32_t SetKeyboardAvoidMode(ArkUI_NativeDialogHandle handle, ArkUI_KeyboardAvoi
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -507,7 +495,7 @@ int32_t EnableHoverMode(ArkUI_NativeDialogHandle handle, bool enableHoverMode)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -520,13 +508,25 @@ int32_t SetHoverModeArea(ArkUI_NativeDialogHandle handle, ArkUI_HoverModeAreaTyp
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
-        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (!handle) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     int result = impl->getDialogAPI()->setHoverModeArea(handle->controller, hoverModeAreaType);
     return result;
+}
+
+int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+    }
+    if (!handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setFocusable(handle->controller, focusable);
 }
 } // namespace OHOS::Ace::NG::DialogModel
 

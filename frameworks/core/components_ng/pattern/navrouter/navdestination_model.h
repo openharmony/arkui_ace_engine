@@ -17,8 +17,10 @@
 #define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVDESTINATION_NAVDESTINATION_MODEL_H
 
 #include <mutex>
+#include <optional>
 
 #include "base/system_bar/system_bar_style.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
@@ -39,7 +41,8 @@ public:
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {};
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
         const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-        const std::vector<std::string>& nameList) = 0;
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "") = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;

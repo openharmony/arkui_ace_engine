@@ -325,6 +325,11 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void CloseLongPressDialog();
+    void CheckIfOrientationChanged();
+    void StopAnimation();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void CheckIfStatusBarConfigChanged();
+    void CheckIfNavigationIndicatorConfigChagned();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -345,6 +350,9 @@ private:
     RefPtr<NavDestinationScrollableProcessor> scrollableProcessor_;
     HideBarOnSwipeContext titleBarSwipeContext_;
     HideBarOnSwipeContext toolBarSwipeContext_;
+    bool isFirstTimeCheckOrientation_ = true;
+    bool isFirstTimeCheckStatusBarConfig_ = true;
+    bool isFirstTimeCheckNavigationIndicatorConfig_ = true;
 };
 } // namespace OHOS::Ace::NG
 

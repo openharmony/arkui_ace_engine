@@ -21,7 +21,6 @@
 
 #include "base/resource.h"
 
-
 namespace OHOS {
 namespace Ace {
 namespace Drawable {
