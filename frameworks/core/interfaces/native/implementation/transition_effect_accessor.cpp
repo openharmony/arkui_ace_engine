@@ -28,6 +28,7 @@ const auto SCALE_TOKEN = "scale";
 const auto OPACITY_TOKEN = "opacity";
 const auto MOVE_TOKEN = "move";
 const auto ASYMMETRIC_TOKEN = "asymmetric";
+const auto IDENTITY_TOKEN = "identity";
 
 void DestroyPeerImpl(Ark_TransitionEffect peer)
 {
@@ -83,6 +84,8 @@ Ark_TransitionEffect CtorImpl(const Ark_String* type,
         auto disapp = effect->asymmetric.disappear;
         CHECK_NULL_RETURN(disapp, nullptr);
         peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(app->handler, disapp->handler);
+    } else if (valueText == IDENTITY_TOKEN) {
+        peer->handler = AceType::MakeRefPtr<ChainedIdentityEffect>();
     }
     return peer;
 }
@@ -174,15 +177,42 @@ Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
 }
 Ark_TransitionEffect GetIDENTITYImpl()
 {
-    return {};
+    Ark_String type = Converter::ArkValue<Ark_String>(IDENTITY_TOKEN);
+    Ark_TransitionEffects effects {};
+    return CtorImpl(&type, &effects);
 }
 Ark_TransitionEffect GetOPACITYImpl()
 {
-    return {};
+    auto alpha = Converter::ArkValue<Ark_Number>(static_cast<float>(0.0f));
+    Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN);
+    Ark_TransitionEffects effects {
+        .opacity = alpha
+    };
+    return CtorImpl(&type, &effects);
 }
 Ark_TransitionEffect GetSLIDEImpl()
 {
-    return {};
+    Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
+    Ark_TransitionEdge startEdge = Converter::ArkValue<Ark_TransitionEdge>(TransitionEdge::START);
+    Ark_TransitionEffects startEffects {
+        .move = startEdge
+    };
+    Ark_TransitionEffect appear = CtorImpl(&type, &startEffects);
+    Ark_TransitionEdge endEdge = Converter::ArkValue<Ark_TransitionEdge>(TransitionEdge::END);
+    Ark_String type1 = Converter::ArkValue<Ark_String>(MOVE_TOKEN);
+    Ark_TransitionEffects endEffects {
+        .move = endEdge
+    };
+    Ark_TransitionEffect disappear = CtorImpl(&type1, &endEffects);
+
+    Ark_String asyType = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN);
+    Ark_Literal_TransitionEffect_appear_disappear asymm;
+    asymm.appear = appear;
+    asymm.disappear = disappear;
+    Ark_TransitionEffects effects {
+        .asymmetric = asymm
+    };
+    return CtorImpl(&asyType, &effects);
 }
 Ark_TransitionEffect GetSLIDE_SWITCHImpl()
 {
