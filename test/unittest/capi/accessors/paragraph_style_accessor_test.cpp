@@ -22,6 +22,8 @@
 #include "frameworks/core/interfaces/native/utility/callback_helper.h"
 #include "frameworks/core/interfaces/native/utility/converter.h"
 #include "frameworks/core/interfaces/native/utility/reverse_converter.h"
+#include "test/unittest/capi/modifiers/generated/type_helpers.h"
+#include "test/mock/base/mock_pixel_map.h"
 #include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {
@@ -44,32 +46,37 @@ class ParagraphStyleAccessorTest
 public:
     ~ParagraphStyleAccessorTest() override
     {
-        if (param_.value.textIndent.value) {
-            delete param_.value.textIndent.value;
-            param_.value.textIndent.value = nullptr;
-        }
-
-        if (margin_) {
-            delete margin_;
-            margin_ = nullptr;
+        auto& interface = TypeHelper::WriteTo(param_);
+        auto& lengthMetrics = TypeHelper::WriteTo(interface.textIndent);
+        if (lengthMetrics) {
+            delete lengthMetrics;
+            lengthMetrics = nullptr;
         }
     }
     void* CreatePeerInstance() override
     {
-        param_.value.textAlign = Converter::ArkValue<Opt_TextAlign>(TEST_TEXT_ALIGN);
-        param_.value.textIndent.value = LengthMetricsPeer::Create(Dimension(TEST_MARGIN));
-        param_.value.maxLines = Converter::ArkValue<Opt_Number>(TEST_LINES_NUM);
-        param_.value.overflow = Converter::ArkValue<Opt_TextOverflow>(TEST_TEXT_OVERFLOW);
-        param_.value.wordBreak = Converter::ArkValue<Opt_WordBreak>(TEST_WORD_BREAK);
-        margin_ = LengthMetricsPeer::Create(Dimension(TEST_MARGIN_2));
-        param_.value.leadingMargin.value =
-            Converter::ArkUnion<Ark_Union_LengthMetrics_LeadingMarginPlaceholder, Ark_LengthMetrics>(margin_);
+        auto& interface = TypeHelper::WriteTo(param_);
+        interface.textAlign = Converter::ArkValue<Opt_TextAlign>(TEST_TEXT_ALIGN);
+        interface.textIndent.value = LengthMetricsPeer::Create(Dimension(TEST_MARGIN));
+        interface.maxLines = Converter::ArkValue<Opt_Number>(TEST_LINES_NUM);
+        interface.overflow = Converter::ArkValue<Opt_TextOverflow>(TEST_TEXT_OVERFLOW);
+        interface.wordBreak = Converter::ArkValue<Opt_WordBreak>(TEST_WORD_BREAK);
+
+        // Margin holder
+        NG::LeadingMargin margin {.size = LeadingMarginSize(Dimension(TEST_MARGIN), Dimension(TEST_MARGIN_2))};
+        margin.pixmap = AceType::MakeRefPtr<MockPixelMap>();
+
+        auto arkPlaceHolder = Converter::ArkValue<Ark_LeadingMarginPlaceholder>(margin);
+        auto leadingMargin = Converter::ArkUnion<Ark_Union_LengthMetrics_LeadingMarginPlaceholder,
+            Ark_LeadingMarginPlaceholder>(arkPlaceHolder);
+        auto& holder = TypeHelper::WriteTo(interface.leadingMargin);
+        holder = leadingMargin;
+
         return accessor_->ctor(&param_);
     }
 
 private:
     Opt_ParagraphStyleInterface param_ = {};
-    Ark_LengthMetrics margin_ = nullptr;
 };
 
 /**
@@ -135,5 +142,28 @@ HWTEST_F(ParagraphStyleAccessorTest, getWordBreakTest, TestSize.Level1)
     auto testVal = accessor_->getWordBreak(peer_);
     auto converted = Converter::ArkValue<Ark_WordBreak>(TEST_WORD_BREAK);
     EXPECT_EQ(testVal, converted);
+}
+
+/**
+ * @tc.name: getLeadingMarginTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphStyleAccessorTest, getLeadingMarginTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getLeadingMargin, nullptr);
+    auto testVal = accessor_->getLeadingMargin(peer_);
+    Converter::VisitUnion(testVal,
+        [](const Ark_Number& metrics) {
+            EXPECT_EQ(Converter::Convert<int>(metrics), TEST_MARGIN);
+        },
+        [](const Ark_LeadingMarginPlaceholder& inMargin) {
+            auto convVal0 = Converter::OptConvert<Dimension>(inMargin.size.value0).value_or(Dimension());
+            auto convVal1 = Converter::OptConvert<Dimension>(inMargin.size.value1).value_or(Dimension());
+            EXPECT_EQ(static_cast<int>(convVal0.ConvertToPx()), TEST_MARGIN);
+            EXPECT_EQ(static_cast<int>(convVal1.ConvertToPx()), TEST_MARGIN_2);
+            delete inMargin.pixelMap;
+        },
+        []() {});
 }
 } // namespace OHOS::Ace::NG

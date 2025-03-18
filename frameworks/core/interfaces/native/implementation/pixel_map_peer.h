@@ -20,5 +20,16 @@
 
 struct PixelMapPeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap;
+
+    static PixelMapPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& src)
+    {
+        return new PixelMapPeer{src};
+    }
+
+    static void Destroy(PixelMapPeer *peer)
+    {
+        CHECK_NULL_VOID(peer);
+        delete peer;
+    }
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PIXEL_MAP_ACCESSOR_PEER_IMPL_H
