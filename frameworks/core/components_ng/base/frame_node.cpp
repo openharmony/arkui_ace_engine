@@ -778,8 +778,7 @@ void FrameNode::DumpCommonInfo()
     }
     if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         DumpLog::GetInstance().AddDesc(std::string("Visible: ")
-                                           .append(std::to_string(static_cast<int32_t>(
-                                               layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)))));
+                                           .append(PrintVisibilityDumpInfo().c_str()));
     }
     if (layoutProperty_->GetPaddingProperty()) {
         DumpLog::GetInstance().AddDesc(
@@ -6563,5 +6562,28 @@ bool FrameNode::IsDrawFocusOnTop() const
     auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     return static_cast<FocusDrawLevel>(accessibilityProperty->GetFocusDrawLevel()) == FocusDrawLevel::TOP;
+}
+
+void FrameNode::AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo)
+{
+    if (visibilityDumpInfos_.size() == SIZE_CHANGE_DUMP_SIZE) {
+        visibilityDumpInfos_.pop_front();
+    }
+    visibilityDumpInfos_.push_back(dumpInfo);
+}
+
+std::string FrameNode::PrintVisibilityDumpInfo() const
+{
+    if (visibilityDumpInfos_.empty()) {
+        return "" ;
+    }
+    std::string res = "[ ";
+    for (auto it = visibilityDumpInfos_.rbegin(); it != visibilityDumpInfos_.rend(); ++it) {
+        res += ("{" + std::to_string(it->first) + ", " +
+            std::to_string(static_cast<int32_t>(it->second.first)) + ", " +
+            std::to_string(static_cast<int32_t>(it->second.second)) + "}, ");
+    }
+    res += "]";
+    return res;
 }
 } // namespace OHOS::Ace::NG
