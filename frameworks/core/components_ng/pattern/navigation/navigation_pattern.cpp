@@ -3835,7 +3835,27 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
 
 bool NavigationPattern::IsPageLevelConfigEnabled(bool considerSize)
 {
-    return false;
+    if (!IsEquivalentToStackMode()) {
+        return false;
+    }
+    if (considerSize && !isFullPageNavigation_) {
+        return false;
+    }
+    if (pageNode_.Upgrade() == nullptr) {
+        return false;
+    }
+
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(navigationNode, false);
+    auto context = navigationNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    if (container->IsPcOrPadFreeMultiWindowMode() || container->IsUIExtensionWindow()) {
+        return false;
+    }
+
+    return container->IsMainWindow() && container->IsFullScreenWindow();
 }
 
 void NavigationPattern::OnStartOneTransitionAnimation()
@@ -3938,6 +3958,36 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
 
 void NavigationPattern::UpdateSystemBarConfigForSizeChanged()
 {
+    if (!IsPageLevelConfigEnabled(false)) {
+        return;
+    }
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationNode);
+    auto context = navigationNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(mgr);
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+
+    auto lastNode = GetLastStandardNodeOrNavBar();
+    if (!lastNode) {
+        return;
+    }
+
+    auto windowApiStatusBarConfig = mgr->GetStatusBarConfigByWindowApi();
+    auto windowApiNavIndicatorConfig = mgr->GetNavigationIndicatorConfigByWindowApi();
+    auto statusBarConfig = lastNode->GetStatusBarConfig();
+    if (statusBarConfig.has_value()) {
+        bool show = isFullPageNavigation_ ? statusBarConfig.value().first : windowApiStatusBarConfig.first;
+        bool animated = isFullPageNavigation_ ? statusBarConfig.value().second : windowApiStatusBarConfig.second;
+        container->SetSystemBarEnabled(SystemBarType::STATUS, show, animated);
+    }
+    auto navIndicatorConfig = lastNode->GetNavigationIndicatorConfig();
+    if (navIndicatorConfig.has_value()) {
+        bool show = isFullPageNavigation_ ? navIndicatorConfig.value() : windowApiNavIndicatorConfig;
+        container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, show, false);
+    }
 }
 
 RefPtr<NavDestinationNodeBase> NavigationPattern::GetLastStandardNodeOrNavBar()
@@ -3958,10 +4008,80 @@ RefPtr<NavDestinationNodeBase> NavigationPattern::GetLastStandardNodeOrNavBar()
 
 void NavigationPattern::ShowOrHideSystemBarIfNeeded(bool isShow)
 {
+    if (!IsPageLevelConfigEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, don't enable/disable SystemBar");
+        return;
+    }
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationNode);
+    auto context = navigationNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(mgr);
+    auto windowApiStatusBarConfig = mgr->GetStatusBarConfigByWindowApi();
+    auto windowApiNavIndicatorConfig = mgr->GetNavigationIndicatorConfigByWindowApi();
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (preVisibleNodes_.empty()) {
+        return;
+    }
+    auto preNode = preVisibleNodes_[0].Upgrade();
+    if (!preNode) {
+        return;
+    }
+    auto preStatusBarConfig = preNode->GetStatusBarConfig();
+    auto preNavIndicatorConfig = preNode->GetNavigationIndicatorConfig();
+    auto lastNode = GetLastStandardNodeOrNavBar();
+    if (!lastNode) {
+        return;
+    }
+    auto statusBarConfig = lastNode->GetStatusBarConfig();
+    auto navigationIndicatorConfig = lastNode->GetNavigationIndicatorConfig();
+
+    if (preStatusBarConfig.has_value() || statusBarConfig.has_value()) {
+        /**
+         * If the developer use the NavDestination's interface, we will set it according to their configuration,
+         * otherwise we will follow the window configuration
+         */
+        bool needShow = statusBarConfig.has_value() ? statusBarConfig.value().first : windowApiStatusBarConfig.first;
+        bool animated = statusBarConfig.has_value() ? statusBarConfig.value().second : windowApiStatusBarConfig.second;
+        if (needShow == isShow) {
+            container->SetSystemBarEnabled(SystemBarType::STATUS, isShow, animated);
+        }
+    }
+
+    if (preNavIndicatorConfig.has_value() || navigationIndicatorConfig.has_value()) {
+        /**
+         * If the developer use the NavDestination's interface, we will set it according to their configuration,
+         * otherwise we will follow the window configuration
+         */
+        bool needShow = navigationIndicatorConfig.has_value() ?
+            navigationIndicatorConfig.value() : windowApiNavIndicatorConfig;
+        if (needShow == isShow) {
+            container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, isShow, false);
+        }
+    }
 }
 
 bool NavigationPattern::IsEquivalentToStackMode()
 {
-    return false;
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(navigationNode, false);
+    auto property = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_RETURN(property, false);
+    auto userNavMode = property->GetUsrNavigationModeValue(NavigationMode::AUTO);
+    auto hideNavBar = property->GetHideNavBarValue(false);
+    if (userNavMode == NavigationMode::STACK || hideNavBar) {
+        return true;
+    }
+    auto navBarNode = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarNode());
+    CHECK_NULL_RETURN(navBarNode, false);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(navBarProperty, false);
+    auto navBarGeometryNode = navBarNode->GetGeometryNode();
+    CHECK_NULL_RETURN(navBarGeometryNode, false);
+    auto visibility = navBarProperty->GetVisibilityValue(VisibleType::VISIBLE);
+    auto size = navBarGeometryNode->GetFrameSize();
+    return visibility != VisibleType::VISIBLE || NearEqual(size.Width(), 0.0f) || NearEqual(size.Height(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

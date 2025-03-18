@@ -17693,6 +17693,15 @@ class ArkSafeAreaExpandOpts {
     return (this.type === another.type) && (this.edges === another.edges);
   }
 }
+class ArkEnableStatusBar {
+  constructor() {
+    this.enable = undefined;
+    this.animated = undefined;
+  }
+  isEqual(another) {
+    return (this.enable === another.enable) && (this.animated === another.animated);
+  }
+}
 class ArkButtonStyle {
   constructor() {
     this.left = 16;
@@ -22990,6 +22999,21 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
     return this;
   }
+  preferredOrientation(orientation) {
+    modifierWithKey(this._modifiersWithKeys, PreferredOrientationModifier.identity, PreferredOrientationModifier, orientation);
+    return this;
+  }
+  enableStatusBar(enable, animated) {
+    let statusBar = new ArkEnableStatusBar();
+    statusBar.enable = enable;
+    statusBar.animated = animated;
+    modifierWithKey(this._modifiersWithKeys, EnableStatusBarModifier.identity, EnableStatusBarModifier, statusBar);
+    return this;
+  }
+  enableNavigationIndicator(enable) {
+    modifierWithKey(this._modifiersWithKeys, EnableNavigationIndicatorModifier.identity, EnableNavigationIndicatorModifier, enable);
+    return this;
+  }
 }
 
 class HideTitleBarModifier extends ModifierWithKey {
@@ -23120,6 +23144,55 @@ class NavDestinationMenusModifier extends ModifierWithKey {
   }
 }
 NavDestinationMenusModifier.identity = Symbol('menus');
+
+class PreferredOrientationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetPreferredOrientation(node);
+    } else {
+      getUINativeModule().navDestination.setPreferredOrientation(node, this.value);
+    }
+  }
+}
+PreferredOrientationModifier.identity = Symbol('preferredOrientation');
+
+class EnableStatusBarModifier extends ModifierWithKey {
+  constructor(statusBar) {
+    super(statusBar);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetEnableStatusBar(node);
+    } else {
+      getUINativeModule().navDestination.setEnableStatusBar(node, this.value?.enable, this.value?.animated);
+    }
+  }
+
+  checkObjectDiff() {
+    return this.value.enable !== this.stageValue.enable || this.value.animated !== this.stageValue.animated;
+  }
+}
+EnableStatusBarModifier.identity = Symbol('enableStatusBar');
+
+class EnableNavigationIndicatorModifier extends ModifierWithKey {
+  constructor(navigationIndicator) {
+    super(navigationIndicator);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetEnableNavigationIndicator(node);
+    } else {
+      getUINativeModule().navDestination.setEnableNavigationIndicator(node, this.value);
+    }
+  }
+}
+EnableNavigationIndicatorModifier.identity = Symbol('enableNavigationIndicator');
 
 //@ts-ignore
 if (globalThis.NavDestination !== undefined) {

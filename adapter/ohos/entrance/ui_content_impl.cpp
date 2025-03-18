@@ -3042,6 +3042,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
         rsTransaction == nullptr, avoidAreas.size(), stringifiedMap.c_str());
+    if (reason == OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "save PAGE_ROTATION as ROTATION");
+        reason = OHOS::Rosen::WindowSizeChangeReason::ROTATION;
+    }
     if (lastReason_ == OHOS::Rosen::WindowSizeChangeReason::UNDEFINED) {
         lastReason_ = reason;
     }

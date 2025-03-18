@@ -61,6 +61,8 @@ public:
     void RestoreSafeArea() override;
 
 private:
+    int32_t backupRootWidth_ = -1;
+    int32_t backupRootHeight_ = -1;
     std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> backupSafeAreas_;
     ViewportConfig config_;
     AvoidAreaInfo avoidAreas_;
