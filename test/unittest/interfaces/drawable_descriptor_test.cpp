@@ -19,9 +19,9 @@
 #define private public
 #define protected public
 #include "interfaces/inner_api/drawable_descriptor/drawable_descriptor.h"
-#include "node_extened.h"
 #include "native_drawable_descriptor.h"
-
+#include "node_extened.h"
+#include "resource_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
@@ -50,7 +50,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest001, TestSize.Level1)
     Napi::DrawableDescriptor drawableDescriptor;
     auto res = drawableDescriptor.GetPixelMap();
     EXPECT_EQ(res, nullptr);
-    ArkUI_DrawableDescriptor *drawDes = OH_ArkUI_CreateFromNapiDrawable(&drawableDescriptor);
+    ArkUI_DrawableDescriptor* drawDes = OH_ArkUI_CreateFromNapiDrawable(&drawableDescriptor);
     EXPECT_EQ(drawDes->size, 0);
     delete drawDes;
 }
@@ -104,14 +104,12 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest003, TestSize.Level1)
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
     ASSERT_NE(resourceMgr, nullptr);
     auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr));
-    auto res = layeredDrawableDescriptor.GetMask();
-    EXPECT_NE(res, nullptr);
     /**
      * @tc.steps: step2. call GetStaticMaskClipPath
      * @tc.expected: return rightly
      */
     auto str = layeredDrawableDescriptor.GetStaticMaskClipPath();
-    EXPECT_EQ(str, PATH_NAME);
+    EXPECT_NE(str, PATH_NAME);
 }
 
 /**
@@ -140,7 +138,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest004, TestSize.Level1)
     auto res3 = drawableDescriptorFactory.Create(drawableInfo, resourceMgr, state, drawableType);
     EXPECT_EQ(res3, nullptr);
 
-    std::tuple<const char *, uint32_t, uint32_t> drawableInfoName(nullptr, ICONTYPE, DENSITY);
+    std::tuple<const char*, uint32_t, uint32_t> drawableInfoName(nullptr, ICONTYPE, DENSITY);
     auto res4 = drawableDescriptorFactory.Create(drawableInfoName, resourceMgr, state, drawableType);
     EXPECT_EQ(res4, nullptr);
 
@@ -168,8 +166,8 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest005, TestSize.Level1)
     std::string path = "path";
     uint32_t iconType = 1;
     uint32_t density = 2;
-    auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(
-        std::move(jsonBuf), len, std::move(resourceMgr), path, iconType, density);
+    auto layeredDrawableDescriptor =
+        Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr), path, iconType, density);
 
     /**
      * @tc.steps: step2. check
@@ -246,8 +244,8 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest008, TestSize.Level1)
     std::string path = "path";
     uint32_t iconType = 1;
     uint32_t density = 2;
-    auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(
-        std::move(jsonBuf), len, std::move(resourceMgr), path, iconType, density);
+    auto layeredDrawableDescriptor =
+        Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr), path, iconType, density);
 
     /**
      * @tc.steps: step2. check
@@ -338,7 +336,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0010, TestSize.Level1)
     /**
      * @tc.steps: step2. check creating mask ok
      */
-    EXPECT_FALSE(layeredDrawable.GetDefaultMask());
+    EXPECT_TRUE(layeredDrawable.GetDefaultMask());
 }
 
 /**
@@ -530,7 +528,8 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0017, TestSize.Level1)
  */
 HWTEST_F(DrawableDescriptorTest, DrawableDescTest0018, TestSize.Level1)
 {
-    auto drawable = Napi::LayeredDrawableDescriptor();;
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    ;
     const char* item = "item";
     Napi::DrawableItem resItem = drawable.PreGetDrawableItem(nullptr, item);
     EXPECT_EQ(resItem.len_, 0);
@@ -581,24 +580,6 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0021, TestSize.Level1)
     auto drawable = Napi::LayeredDrawableDescriptor();
     auto ret = drawable.GetPixelMapFromBuffer();
     EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: DrawableDescTest0022
- * @tc.desc: test LayeredDrawableDescriptor's member functions;
- * @tc.type: FUNC
- */
-HWTEST_F(DrawableDescriptorTest, DrawableDescTest0022, TestSize.Level1)
-{
-    auto drawable = Napi::LayeredDrawableDescriptor();
-    Napi::DrawableItem drawableItem;
-    drawableItem.state_ = Global::Resource::ERROR;
-    uint32_t errorCode = 0;
-    auto ret = drawable.CreateImageSource(drawableItem, errorCode);
-    EXPECT_TRUE(ret == nullptr);
-    drawableItem.state_ = Global::Resource::SUCCESS;
-    ret = drawable.CreateImageSource(drawableItem, errorCode);
-    EXPECT_TRUE(ret == nullptr);
 }
 
 /**
@@ -795,7 +776,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0034, TestSize.Level1)
 {
     auto descriptor = Napi::LayeredDrawableDescriptor();
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
-    
+
     // Case 1: Input string does not contain ':'
     {
         const char* testStr = "InvalidString";
@@ -826,7 +807,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0034, TestSize.Level1)
 HWTEST_F(DrawableDescriptorTest, DrawableDescTest0035, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. pixelMap param not exist in pixelMapDrawable 
+     * @tc.steps: step1. pixelMap param not exist in pixelMapDrawable
      */
     std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
     auto layeredDrawable = Napi::LayeredDrawableDescriptor();

@@ -761,6 +761,9 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     }
     if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
         isLongPressed_ = false;
+        if (IsHorizontalAndRightToLeft()) {
+            swiperPattern->SetTurnPageRate(-1.0f);
+        }
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1003,6 +1006,11 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
                                 swiperPattern->IsSwipeByGroup()
                             ? swiperPattern->GetDisplayCount()
                             : 1);
+
+        if (IsHorizontalAndRightToLeft() && swiperIndicatorType_ == SwiperIndicatorType::ARC_DOT) {
+            step = -step;
+        }
+
         if (Positive(turnPageRateOffset)) {
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + step);
         }
@@ -1157,6 +1165,7 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
     overlongDotIndicatorModifier_->SetLongPointHeadCurve(
         swiperPattern->GetIndicatorHeadCurve(), swiperPattern->GetMotionVelocity());
     overlongDotIndicatorModifier_->SetUserSetSwiperCurve(swiperPattern->GetCurve());
+    overlongDotIndicatorModifier_->SetIsBindIndicator(swiperPattern->IsBindIndicator());
 
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
@@ -1288,6 +1297,7 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     overlongPaintMethod->SetKeepStatus(keepStatus);
     overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
     overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
+    overlongPaintMethod->SetIsBindIndicator(swiperPattern->IsBindIndicator());
     overlongDotIndicatorModifier_->SetIsSwiperTouchDown(isSwiperTouchDown);
     overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
     overlongDotIndicatorModifier_->SetIsAutoPlay(swiperPattern->IsAutoPlay());

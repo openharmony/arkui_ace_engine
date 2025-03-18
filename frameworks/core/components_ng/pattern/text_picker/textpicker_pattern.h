@@ -520,6 +520,12 @@ public:
     }
 
     void ColumnPatternInitHapticController();
+    void UpdateUserSetSelectColor();
+    std::string GetTextPickerRange() const;
+    inline void SetSingleRange(bool isSingleRange)
+    {
+        isSingleRange_ = isSingleRange;
+    }
 
 private:
     void OnModifyDone() override;
@@ -648,6 +654,7 @@ private:
     bool isEnableHaptic_ = true;
     bool isHapticChanged_ = false;
     int32_t selectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
+    bool isSingleRange_ = true;
 };
 } // namespace OHOS::Ace::NG
 

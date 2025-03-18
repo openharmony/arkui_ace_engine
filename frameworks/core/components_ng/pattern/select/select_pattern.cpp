@@ -302,10 +302,20 @@ void SelectPattern::RegisterOnHover()
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
+        auto selectRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(selectRenderContext);
         // update hover status, repaint background color
         if (isHover) {
+            float scaleHover = theme->GetSelectHoverOrFocusedScale();
+            VectorF scale(scaleHover, scaleHover);
+            auto&& transform = selectRenderContext->GetOrCreateTransform();
+            CHECK_NULL_VOID(transform);
+            if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
+                selectRenderContext->SetScale(scaleHover, scaleHover);
+            }
             pattern->SetBgBlendColor(theme->GetHoverColor());
         } else {
+            selectRenderContext->SetScale(1.0f, 1.0f);
             pattern->SetBgBlendColor(Color::TRANSPARENT);
         }
         pattern->PlayBgColorAnimation();
@@ -470,7 +480,7 @@ void SelectPattern::SetFocusStyle()
         GetShadowFromTheme(shadowStyle, shadow);
         selectRenderContext->UpdateBackShadow(shadow);
     }
-    float scaleFocus = selectTheme->GetSelectFocusedScale();
+    float scaleFocus = selectTheme->GetSelectHoverOrFocusedScale();
     VectorF scale(scaleFocus, scaleFocus);
     if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
         scaleModify_ = true;

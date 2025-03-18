@@ -72,6 +72,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     delta = -FireOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkScrollBarProxyDirty();
     return true;
 };
 
@@ -267,6 +268,10 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     bool indexChanged = itemRange_.first != layoutInfo_->FirstIdx() || itemRange_.second != layoutInfo_->endIndex_;
     auto onScrollIndex = eventHub->GetOnScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    if (indexChanged) {
+        host->OnAccessibilityEvent(
+            AccessibilityEventType::SCROLLING_EVENT, layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
+    }
     auto onReachStart = eventHub->GetOnReachStart();
     FireOnReachStart(onReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();

@@ -68,7 +68,6 @@ int32_t RegisterOnWillAppear(ArkUI_NativeDialogHandle handle, void* userData, vo
 int32_t RegisterOnDidAppear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
 int32_t RegisterOnWillDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
 int32_t RegisterOnDidDisappear(ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(void* userData));
-int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable);
 int32_t SetBorderWidth(
     ArkUI_NativeDialogHandle handle, float top, float right, float bottom, float left, ArkUI_LengthMetricUnit unit);
 int32_t SetBorderColor(ArkUI_NativeDialogHandle handle, uint32_t top, uint32_t right, uint32_t bottom, uint32_t left);
@@ -81,6 +80,7 @@ int32_t SetBackgroundBlurStyle(ArkUI_NativeDialogHandle handle, ArkUI_BlurStyle 
 int32_t SetKeyboardAvoidMode(ArkUI_NativeDialogHandle handle, ArkUI_KeyboardAvoidMode keyboardAvoidMode);
 int32_t EnableHoverMode(ArkUI_NativeDialogHandle handle, bool enableHoverMode);
 int32_t SetHoverModeArea(ArkUI_NativeDialogHandle handle, ArkUI_HoverModeAreaType hoverModeAreaType);
+int32_t SetFocusable(ArkUI_NativeDialogHandle handle, bool focusable);
 } // namespace OHOS::Ace::NG::DialogModel
 
 #endif // ARKUI_NATIVE_NODE_DIALOG_MODEL_H

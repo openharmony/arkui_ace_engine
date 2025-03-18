@@ -62,9 +62,10 @@ void FontManager::RegisterFont(const std::string& familyName, const std::string&
     });
 }
 
-void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
+void FontManager::SetFontFamily(const char* familyName, const std::vector<std::string>& familySrc)
 {
-    RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
+    RefPtr<FontLoader> fontLoader = FontLoader::CreateFontLoader(familyName, familySrc);
+    CHECK_NULL_VOID(fontLoader);
     fontLoader->SetDefaultFontFamily(familyName, familySrc);
     FontNodeChangeStyleNG();
 }
