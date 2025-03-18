@@ -7,7 +7,7 @@
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -22,29 +22,29 @@ const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 
 export var IconType;
-(function (d12) {
-    d12[d12['BADGE'] = 1] = 'BADGE';
-    d12[d12['NORMAL_ICON'] = 2] = 'NORMAL_ICON';
-    d12[d12['SYSTEM_ICON'] = 3] = 'SYSTEM_ICON';
-    d12[d12['HEAD_SCULPTURE'] = 4] = 'HEAD_SCULPTURE';
-    d12[d12['APP_ICON'] = 5] = 'APP_ICON';
-    d12[d12['PREVIEW'] = 6] = 'PREVIEW';
-    d12[d12['LONGITUDINAL'] = 7] = 'LONGITUDINAL';
-    d12[d12['VERTICAL'] = 8] = 'VERTICAL';
+(function (IconType) {
+    IconType[IconType['BADGE'] = 1] = 'BADGE';
+    IconType[IconType['NORMAL_ICON'] = 2] = 'NORMAL_ICON';
+    IconType[IconType['SYSTEM_ICON'] = 3] = 'SYSTEM_ICON';
+    IconType[IconType['HEAD_SCULPTURE'] = 4] = 'HEAD_SCULPTURE';
+    IconType[IconType['APP_ICON'] = 5] = 'APP_ICON';
+    IconType[IconType['PREVIEW'] = 6] = 'PREVIEW';
+    IconType[IconType['LONGITUDINAL'] = 7] = 'LONGITUDINAL';
+    IconType[IconType['VERTICAL'] = 8] = 'VERTICAL';
 })(IconType || (IconType = {}));
 var FontSizeScaleLevel;
-(function (c12) {
-    c12[c12['LEVEL1'] = 1.75] = 'LEVEL1';
-    c12[c12['LEVEL2'] = 2] = 'LEVEL2';
-    c12[c12['LEVEL3'] = 3.2] = 'LEVEL3';
+(function (FontSizeScaleLevel) {
+    FontSizeScaleLevel[FontSizeScaleLevel['LEVEL1'] = 1.75] = 'LEVEL1';
+    FontSizeScaleLevel[FontSizeScaleLevel['LEVEL2'] = 2] = 'LEVEL2';
+    FontSizeScaleLevel[FontSizeScaleLevel['LEVEL3'] = 3.2] = 'LEVEL3';
 })(FontSizeScaleLevel || (FontSizeScaleLevel = {}));
 var ItemHeight;
-(function (b12) {
-    b12[b12['FIRST_HEIGHT'] = 48] = 'FIRST_HEIGHT';
-    b12[b12['SECOND_HEIGHT'] = 56] = 'SECOND_HEIGHT';
-    b12[b12['THIRD_HEIGHT'] = 64] = 'THIRD_HEIGHT';
-    b12[b12['FOURTH_HEIGHT'] = 72] = 'FOURTH_HEIGHT';
-    b12[b12['FIFTH_HEIGHT'] = 96] = 'FIFTH_HEIGHT';
+(function (ItemHeight) {
+    ItemHeight[ItemHeight['FIRST_HEIGHT'] = 48] = 'FIRST_HEIGHT';
+    ItemHeight[ItemHeight['SECOND_HEIGHT'] = 56] = 'SECOND_HEIGHT';
+    ItemHeight[ItemHeight['THIRD_HEIGHT'] = 64] = 'THIRD_HEIGHT';
+    ItemHeight[ItemHeight['FOURTH_HEIGHT'] = 72] = 'FOURTH_HEIGHT';
+    ItemHeight[ItemHeight['FIFTH_HEIGHT'] = 96] = 'FIFTH_HEIGHT';
 })(ItemHeight || (ItemHeight = {}));
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
@@ -98,6 +98,7 @@ const ICON_SIZE_MAP = new Map([
     [IconType.LONGITUDINAL, LONGITUDINAL_SIZE],
     [IconType.VERTICAL, VERTICAL_SIZE]
 ]);
+// Does it support events such as focus, hover, press, etc. for the sub components of list
 const IS_SUPPORT_SUBCOMPONENT_EVENT = LengthMetrics.resource({
     'id': -1,
     'type': 10002,
@@ -186,19 +187,19 @@ const APPICON_ITEMLENGTH = LengthMetrics.resource({
 }).value;
 
 class Util {
-    static isSymbolResource(z11) {
-        if (!Util.isResourceType(z11)) {
+    static isSymbolResource(resourceStr) {
+        if (!Util.isResourceType(resourceStr)) {
             return false;
         }
-        let a12 = z11;
-        return a12.type === RESOURCE_TYPE_SYMBOL;
+        let resource = resourceStr;
+        return resource.type === RESOURCE_TYPE_SYMBOL;
     }
 
-    static isResourceType(y11) {
-        if (!y11) {
+    static isResourceType(resource) {
+        if (!resource) {
             return false;
         }
-        if (typeof y11 === 'string' || typeof y11 === 'undefined') {
+        if (typeof resource === 'string' || typeof resource === 'undefined') {
             return false;
         }
         return true;
@@ -206,19 +207,19 @@ class Util {
 }
 
 class ContentItemStruct extends ViewPU {
-    constructor(s11, t11, u11, v11 = -1, w11 = undefined, x11) {
-        super(s11, u11, v11, x11);
-        if (typeof w11 === 'function') {
-            this.paramsGenerator_ = w11;
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === 'function') {
+            this.paramsGenerator_ = paramsLambda;
         }
-        this.__iconStyle = new SynchedPropertySimpleOneWayPU(t11.iconStyle, this, 'iconStyle');
-        this.__icon = new SynchedPropertyObjectOneWayPU(t11.icon, this, 'icon');
-        this.__symbolStyle = new SynchedPropertyObjectOneWayPU(t11.symbolStyle, this, 'symbolStyle');
-        this.__primaryText = new SynchedPropertyObjectOneWayPU(t11.primaryText, this, 'primaryText');
-        this.__secondaryText = new SynchedPropertyObjectOneWayPU(t11.secondaryText, this, 'secondaryText');
-        this.__description = new SynchedPropertyObjectOneWayPU(t11.description, this, 'description');
+        this.__iconStyle = new SynchedPropertySimpleOneWayPU(params.iconStyle, this, 'iconStyle');
+        this.__icon = new SynchedPropertyObjectOneWayPU(params.icon, this, 'icon');
+        this.__symbolStyle = new SynchedPropertyObjectOneWayPU(params.symbolStyle, this, 'symbolStyle');
+        this.__primaryText = new SynchedPropertyObjectOneWayPU(params.primaryText, this, 'primaryText');
+        this.__secondaryText = new SynchedPropertyObjectOneWayPU(params.secondaryText, this, 'secondaryText');
+        this.__description = new SynchedPropertyObjectOneWayPU(params.description, this, 'description');
         this.__itemRowSpace = new ObservedPropertySimplePU(NORMAL_ITEM_ROW_SPACE, this, 'itemRowSpace');
-        this.__leftWidth = new SynchedPropertySimpleOneWayPU(t11.leftWidth, this, 'leftWidth');
+        this.__leftWidth = new SynchedPropertySimpleOneWayPU(params.leftWidth, this, 'leftWidth');
         this.__primaryTextColor = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
@@ -240,10 +241,10 @@ class ContentItemStruct extends ViewPU {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }, this, 'descriptionColor');
-        this.__fontSizeScale = new SynchedPropertySimpleOneWayPU(t11.fontSizeScale, this, 'fontSizeScale');
-        this.__parentDirection = new SynchedPropertySimpleOneWayPU(t11.parentDirection, this, 'parentDirection');
-        this.__itemDirection = new SynchedPropertySimpleOneWayPU(t11.itemDirection, this, 'itemDirection');
-        this.__isFocus = new SynchedPropertySimpleOneWayPU(t11.isFocus, this, 'isFocus');
+        this.__fontSizeScale = new SynchedPropertySimpleOneWayPU(params.fontSizeScale, this, 'fontSizeScale');
+        this.__parentDirection = new SynchedPropertySimpleOneWayPU(params.parentDirection, this, 'parentDirection');
+        this.__itemDirection = new SynchedPropertySimpleOneWayPU(params.itemDirection, this, 'itemDirection');
+        this.__isFocus = new SynchedPropertySimpleOneWayPU(params.isFocus, this, 'isFocus');
         this.__primaryTextSize = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10002,
@@ -258,7 +259,7 @@ class ContentItemStruct extends ViewPU {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }, this, 'primaryTextColors');
-        this.__itemHeight = new SynchedPropertyObjectOneWayPU(t11.itemHeight, this, 'itemHeight');
+        this.__itemHeight = new SynchedPropertyObjectOneWayPU(params.itemHeight, this, 'itemHeight');
         this.__iconColor = new ObservedPropertyObjectPU(null, this, 'iconColor');
         this.__secondaryTextColors = new ObservedPropertyObjectPU({
             'id': -1,
@@ -281,11 +282,11 @@ class ContentItemStruct extends ViewPU {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }, this, 'descriptionColors');
-        this.__isWrapText = new SynchedPropertyObjectTwoWayPU(t11.isWrapText, this, 'isWrapText');
+        this.__isWrapText = new SynchedPropertyObjectTwoWayPU(params.isWrapText, this, 'isWrapText');
         this.__isWrapFirstText = new ObservedPropertyObjectPU(false, this, 'isWrapFirstText');
         this.__isWrapSecondText = new ObservedPropertyObjectPU(false, this, 'isWrapSecondText');
         this.__isWrapThirdText = new ObservedPropertyObjectPU(false, this, 'isWrapThirdText');
-        this.setInitiallyProvidedValue(t11);
+        this.setInitiallyProvidedValue(params);
         this.declareWatch('iconStyle', this.onPropChange);
         this.declareWatch('icon', this.onPropChange);
         this.declareWatch('symbolStyle', this.onPropChange);
@@ -302,117 +303,117 @@ class ContentItemStruct extends ViewPU {
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(r11) {
-        if (r11.iconStyle === undefined) {
+    setInitiallyProvidedValue(params) {
+        if (params.iconStyle === undefined) {
             this.__iconStyle.set(null);
         }
-        if (r11.icon === undefined) {
+        if (params.icon === undefined) {
             this.__icon.set(null);
         }
-        if (r11.symbolStyle === undefined) {
+        if (params.symbolStyle === undefined) {
             this.__symbolStyle.set(null);
         }
-        if (r11.primaryText === undefined) {
+        if (params.primaryText === undefined) {
             this.__primaryText.set(null);
         }
-        if (r11.secondaryText === undefined) {
+        if (params.secondaryText === undefined) {
             this.__secondaryText.set(null);
         }
-        if (r11.description === undefined) {
+        if (params.description === undefined) {
             this.__description.set(null);
         }
-        if (r11.itemRowSpace !== undefined) {
-            this.itemRowSpace = r11.itemRowSpace;
+        if (params.itemRowSpace !== undefined) {
+            this.itemRowSpace = params.itemRowSpace;
         }
-        if (r11.leftWidth === undefined) {
+        if (params.leftWidth === undefined) {
             this.__leftWidth.set(LEFT_PART_WIDTH);
         }
-        if (r11.primaryTextColor !== undefined) {
-            this.primaryTextColor = r11.primaryTextColor;
+        if (params.primaryTextColor !== undefined) {
+            this.primaryTextColor = params.primaryTextColor;
         }
-        if (r11.secondaryTextColor !== undefined) {
-            this.secondaryTextColor = r11.secondaryTextColor;
+        if (params.secondaryTextColor !== undefined) {
+            this.secondaryTextColor = params.secondaryTextColor;
         }
-        if (r11.descriptionColor !== undefined) {
-            this.descriptionColor = r11.descriptionColor;
+        if (params.descriptionColor !== undefined) {
+            this.descriptionColor = params.descriptionColor;
         }
-        if (r11.isFocus === undefined) {
+        if (params.isFocus === undefined) {
             this.__isFocus.set(false);
         }
-        if (r11.primaryTextSize !== undefined) {
-            this.primaryTextSize = r11.primaryTextSize;
+        if (params.primaryTextSize !== undefined) {
+            this.primaryTextSize = params.primaryTextSize;
         }
-        if (r11.primaryTextColors !== undefined) {
-            this.primaryTextColors = r11.primaryTextColors;
+        if (params.primaryTextColors !== undefined) {
+            this.primaryTextColors = params.primaryTextColors;
         }
-        if (r11.itemHeight === undefined) {
+        if (params.itemHeight === undefined) {
             this.__itemHeight.set(null);
         }
-        if (r11.iconColor !== undefined) {
-            this.iconColor = r11.iconColor;
+        if (params.iconColor !== undefined) {
+            this.iconColor = params.iconColor;
         }
-        if (r11.secondaryTextColors !== undefined) {
-            this.secondaryTextColors = r11.secondaryTextColors;
+        if (params.secondaryTextColors !== undefined) {
+            this.secondaryTextColors = params.secondaryTextColors;
         }
-        if (r11.secondaryThirdTextSize !== undefined) {
-            this.secondaryThirdTextSize = r11.secondaryThirdTextSize;
+        if (params.secondaryThirdTextSize !== undefined) {
+            this.secondaryThirdTextSize = params.secondaryThirdTextSize;
         }
-        if (r11.descriptionColors !== undefined) {
-            this.descriptionColors = r11.descriptionColors;
+        if (params.descriptionColors !== undefined) {
+            this.descriptionColors = params.descriptionColors;
         }
-        if (r11.isWrapFirstText !== undefined) {
-            this.isWrapFirstText = r11.isWrapFirstText;
+        if (params.isWrapFirstText !== undefined) {
+            this.isWrapFirstText = params.isWrapFirstText;
         }
-        if (r11.isWrapSecondText !== undefined) {
-            this.isWrapSecondText = r11.isWrapSecondText;
+        if (params.isWrapSecondText !== undefined) {
+            this.isWrapSecondText = params.isWrapSecondText;
         }
-        if (r11.isWrapThirdText !== undefined) {
-            this.isWrapThirdText = r11.isWrapThirdText;
+        if (params.isWrapThirdText !== undefined) {
+            this.isWrapThirdText = params.isWrapThirdText;
         }
     }
 
-    updateStateVars(q11) {
-        this.__iconStyle.reset(q11.iconStyle);
-        this.__icon.reset(q11.icon);
-        this.__symbolStyle.reset(q11.symbolStyle);
-        this.__primaryText.reset(q11.primaryText);
-        this.__secondaryText.reset(q11.secondaryText);
-        this.__description.reset(q11.description);
-        this.__leftWidth.reset(q11.leftWidth);
-        this.__fontSizeScale.reset(q11.fontSizeScale);
-        this.__parentDirection.reset(q11.parentDirection);
-        this.__itemDirection.reset(q11.itemDirection);
-        this.__isFocus.reset(q11.isFocus);
-        this.__itemHeight.reset(q11.itemHeight);
+    updateStateVars(params) {
+        this.__iconStyle.reset(params.iconStyle);
+        this.__icon.reset(params.icon);
+        this.__symbolStyle.reset(params.symbolStyle);
+        this.__primaryText.reset(params.primaryText);
+        this.__secondaryText.reset(params.secondaryText);
+        this.__description.reset(params.description);
+        this.__leftWidth.reset(params.leftWidth);
+        this.__fontSizeScale.reset(params.fontSizeScale);
+        this.__parentDirection.reset(params.parentDirection);
+        this.__itemDirection.reset(params.itemDirection);
+        this.__isFocus.reset(params.isFocus);
+        this.__itemHeight.reset(params.itemHeight);
     }
 
-    purgeVariableDependenciesOnElmtId(p11) {
-        this.__iconStyle.purgeDependencyOnElmtId(p11);
-        this.__icon.purgeDependencyOnElmtId(p11);
-        this.__symbolStyle.purgeDependencyOnElmtId(p11);
-        this.__primaryText.purgeDependencyOnElmtId(p11);
-        this.__secondaryText.purgeDependencyOnElmtId(p11);
-        this.__description.purgeDependencyOnElmtId(p11);
-        this.__itemRowSpace.purgeDependencyOnElmtId(p11);
-        this.__leftWidth.purgeDependencyOnElmtId(p11);
-        this.__primaryTextColor.purgeDependencyOnElmtId(p11);
-        this.__secondaryTextColor.purgeDependencyOnElmtId(p11);
-        this.__descriptionColor.purgeDependencyOnElmtId(p11);
-        this.__fontSizeScale.purgeDependencyOnElmtId(p11);
-        this.__parentDirection.purgeDependencyOnElmtId(p11);
-        this.__itemDirection.purgeDependencyOnElmtId(p11);
-        this.__isFocus.purgeDependencyOnElmtId(p11);
-        this.__primaryTextSize.purgeDependencyOnElmtId(p11);
-        this.__primaryTextColors.purgeDependencyOnElmtId(p11);
-        this.__itemHeight.purgeDependencyOnElmtId(p11);
-        this.__iconColor.purgeDependencyOnElmtId(p11);
-        this.__secondaryTextColors.purgeDependencyOnElmtId(p11);
-        this.__secondaryThirdTextSize.purgeDependencyOnElmtId(p11);
-        this.__descriptionColors.purgeDependencyOnElmtId(p11);
-        this.__isWrapText.purgeDependencyOnElmtId(p11);
-        this.__isWrapFirstText.purgeDependencyOnElmtId(p11);
-        this.__isWrapSecondText.purgeDependencyOnElmtId(p11);
-        this.__isWrapThirdText.purgeDependencyOnElmtId(p11);
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__iconStyle.purgeDependencyOnElmtId(rmElmtId);
+        this.__icon.purgeDependencyOnElmtId(rmElmtId);
+        this.__symbolStyle.purgeDependencyOnElmtId(rmElmtId);
+        this.__primaryText.purgeDependencyOnElmtId(rmElmtId);
+        this.__secondaryText.purgeDependencyOnElmtId(rmElmtId);
+        this.__description.purgeDependencyOnElmtId(rmElmtId);
+        this.__itemRowSpace.purgeDependencyOnElmtId(rmElmtId);
+        this.__leftWidth.purgeDependencyOnElmtId(rmElmtId);
+        this.__primaryTextColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__secondaryTextColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__descriptionColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__fontSizeScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__parentDirection.purgeDependencyOnElmtId(rmElmtId);
+        this.__itemDirection.purgeDependencyOnElmtId(rmElmtId);
+        this.__isFocus.purgeDependencyOnElmtId(rmElmtId);
+        this.__primaryTextSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__primaryTextColors.purgeDependencyOnElmtId(rmElmtId);
+        this.__itemHeight.purgeDependencyOnElmtId(rmElmtId);
+        this.__iconColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__secondaryTextColors.purgeDependencyOnElmtId(rmElmtId);
+        this.__secondaryThirdTextSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__descriptionColors.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapText.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapFirstText.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapSecondText.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapThirdText.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
@@ -450,214 +451,214 @@ class ContentItemStruct extends ViewPU {
         return this.__iconStyle.get();
     }
 
-    set iconStyle(o11) {
-        this.__iconStyle.set(o11);
+    set iconStyle(newValue) {
+        this.__iconStyle.set(newValue);
     }
 
     get icon() {
         return this.__icon.get();
     }
 
-    set icon(n11) {
-        this.__icon.set(n11);
+    set icon(newValue) {
+        this.__icon.set(newValue);
     }
 
     get symbolStyle() {
         return this.__symbolStyle.get();
     }
 
-    set symbolStyle(m11) {
-        this.__symbolStyle.set(m11);
+    set symbolStyle(newValue) {
+        this.__symbolStyle.set(newValue);
     }
 
     get primaryText() {
         return this.__primaryText.get();
     }
 
-    set primaryText(l11) {
-        this.__primaryText.set(l11);
+    set primaryText(newValue) {
+        this.__primaryText.set(newValue);
     }
 
     get secondaryText() {
         return this.__secondaryText.get();
     }
 
-    set secondaryText(k11) {
-        this.__secondaryText.set(k11);
+    set secondaryText(newValue) {
+        this.__secondaryText.set(newValue);
     }
 
     get description() {
         return this.__description.get();
     }
 
-    set description(j11) {
-        this.__description.set(j11);
+    set description(newValue) {
+        this.__description.set(newValue);
     }
 
     get itemRowSpace() {
         return this.__itemRowSpace.get();
     }
 
-    set itemRowSpace(i11) {
-        this.__itemRowSpace.set(i11);
+    set itemRowSpace(newValue) {
+        this.__itemRowSpace.set(newValue);
     }
 
     get leftWidth() {
         return this.__leftWidth.get();
     }
 
-    set leftWidth(h11) {
-        this.__leftWidth.set(h11);
+    set leftWidth(newValue) {
+        this.__leftWidth.set(newValue);
     }
 
     get primaryTextColor() {
         return this.__primaryTextColor.get();
     }
 
-    set primaryTextColor(g11) {
-        this.__primaryTextColor.set(g11);
+    set primaryTextColor(newValue) {
+        this.__primaryTextColor.set(newValue);
     }
 
     get secondaryTextColor() {
         return this.__secondaryTextColor.get();
     }
 
-    set secondaryTextColor(f11) {
-        this.__secondaryTextColor.set(f11);
+    set secondaryTextColor(newValue) {
+        this.__secondaryTextColor.set(newValue);
     }
 
     get descriptionColor() {
         return this.__descriptionColor.get();
     }
 
-    set descriptionColor(e11) {
-        this.__descriptionColor.set(e11);
+    set descriptionColor(newValue) {
+        this.__descriptionColor.set(newValue);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(d11) {
-        this.__fontSizeScale.set(d11);
+    set fontSizeScale(newValue) {
+        this.__fontSizeScale.set(newValue);
     }
 
     get parentDirection() {
         return this.__parentDirection.get();
     }
 
-    set parentDirection(c11) {
-        this.__parentDirection.set(c11);
+    set parentDirection(newValue) {
+        this.__parentDirection.set(newValue);
     }
 
     get itemDirection() {
         return this.__itemDirection.get();
     }
 
-    set itemDirection(b11) {
-        this.__itemDirection.set(b11);
+    set itemDirection(newValue) {
+        this.__itemDirection.set(newValue);
     }
 
     get isFocus() {
         return this.__isFocus.get();
     }
 
-    set isFocus(a11) {
-        this.__isFocus.set(a11);
+    set isFocus(newValue) {
+        this.__isFocus.set(newValue);
     }
 
     get primaryTextSize() {
         return this.__primaryTextSize.get();
     }
 
-    set primaryTextSize(z10) {
-        this.__primaryTextSize.set(z10);
+    set primaryTextSize(newValue) {
+        this.__primaryTextSize.set(newValue);
     }
 
     get primaryTextColors() {
         return this.__primaryTextColors.get();
     }
 
-    set primaryTextColors(y10) {
-        this.__primaryTextColors.set(y10);
+    set primaryTextColors(newValue) {
+        this.__primaryTextColors.set(newValue);
     }
 
     get itemHeight() {
         return this.__itemHeight.get();
     }
 
-    set itemHeight(x10) {
-        this.__itemHeight.set(x10);
+    set itemHeight(newValue) {
+        this.__itemHeight.set(newValue);
     }
 
     get iconColor() {
         return this.__iconColor.get();
     }
 
-    set iconColor(w10) {
-        this.__iconColor.set(w10);
+    set iconColor(newValue) {
+        this.__iconColor.set(newValue);
     }
 
     get secondaryTextColors() {
         return this.__secondaryTextColors.get();
     }
 
-    set secondaryTextColors(v10) {
-        this.__secondaryTextColors.set(v10);
+    set secondaryTextColors(newValue) {
+        this.__secondaryTextColors.set(newValue);
     }
 
     get secondaryThirdTextSize() {
         return this.__secondaryThirdTextSize.get();
     }
 
-    set secondaryThirdTextSize(u10) {
-        this.__secondaryThirdTextSize.set(u10);
+    set secondaryThirdTextSize(newValue) {
+        this.__secondaryThirdTextSize.set(newValue);
     }
 
     get descriptionColors() {
         return this.__descriptionColors.get();
     }
 
-    set descriptionColors(t10) {
-        this.__descriptionColors.set(t10);
+    set descriptionColors(newValue) {
+        this.__descriptionColors.set(newValue);
     }
 
     get isWrapText() {
         return this.__isWrapText.get();
     }
 
-    set isWrapText(s10) {
-        this.__isWrapText.set(s10);
+    set isWrapText(newValue) {
+        this.__isWrapText.set(newValue);
     }
 
     get isWrapFirstText() {
         return this.__isWrapFirstText.get();
     }
 
-    set isWrapFirstText(r10) {
-        this.__isWrapFirstText.set(r10);
+    set isWrapFirstText(newValue) {
+        this.__isWrapFirstText.set(newValue);
     }
 
     get isWrapSecondText() {
         return this.__isWrapSecondText.get();
     }
 
-    set isWrapSecondText(q10) {
-        this.__isWrapSecondText.set(q10);
+    set isWrapSecondText(newValue) {
+        this.__isWrapSecondText.set(newValue);
     }
 
     get isWrapThirdText() {
         return this.__isWrapThirdText.get();
     }
 
-    set isWrapThirdText(p10) {
-        this.__isWrapThirdText.set(p10);
+    set isWrapThirdText(newValue) {
+        this.__isWrapThirdText.set(newValue);
     }
 
-    onWillApplyTheme(o10) {
-        this.primaryTextColor = o10.colors.fontPrimary;
-        this.secondaryTextColor = o10.colors.fontSecondary;
-        this.descriptionColor = o10.colors.fontTertiary;
+    onWillApplyTheme(theme) {
+        this.primaryTextColor = theme.colors.fontPrimary;
+        this.secondaryTextColor = theme.colors.fontSecondary;
+        this.descriptionColor = theme.colors.fontTertiary;
     }
 
     onPropChange() {
@@ -728,19 +729,19 @@ class ContentItemStruct extends ViewPU {
         }
     }
 
-    judgeIsWrap(k10, l10, m10) {
-        let n10 = this.getSingleRowTextHeight(k10, l10);
-        return m10 > n10;
+    judgeIsWrap(text, sizeResource, newHeight) {
+        let singleRowHeight = this.getSingleRowTextHeight(text, sizeResource);
+        return newHeight > singleRowHeight;
     }
 
-    getSingleRowTextHeight(h10, i10) {
-        if (h10 && i10) {
-            let j10 = px2vp(measure.measureTextSize({
-                textContent: h10,
-                fontSize: i10,
+    getSingleRowTextHeight(text, sizeResource) {
+        if (text && sizeResource) {
+            let singleRowHeight = px2vp(measure.measureTextSize({
+                textContent: text,
+                fontSize: sizeResource,
                 maxLines: TEXT_MAX_LINE
             }).height);
-            return j10;
+            return singleRowHeight;
         }
         return 0;
     }
@@ -749,16 +750,16 @@ class ContentItemStruct extends ViewPU {
         this.onPropChange();
     }
 
-    createIcon(q9 = null) {
-        this.observeComponentCreation2((r9, s9) => {
+    createIcon(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((t9, u9) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (this.symbolStyle != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((f10, g10) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([this.getContentItemIconFillColor()]);
                                     SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
@@ -779,11 +780,11 @@ class ContentItemStruct extends ViewPU {
                             });
                         } else if (this.icon != null) {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((v9, w9) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();
                                     if (Util.isSymbolResource(ObservedObject.GetRawObject(this.icon))) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((d10, e10) => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.icon);
                                                 SymbolGlyph.fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`);
                                                 SymbolGlyph.fontColor([this.getContentItemIconFillColor()]);
@@ -801,11 +802,11 @@ class ContentItemStruct extends ViewPU {
                                         });
                                     } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((x9, y9) => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 If.create();
                                                 if (this.iconStyle <= IconType.PREVIEW) {
                                                     this.ifElseBranchUpdateFunction(0, () => {
-                                                        this.observeComponentCreation2((b10, c10) => {
+                                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                             Image.create(this.icon);
                                                             Image.objectFit(ImageFit.Contain);
                                                             Image.width(ICON_SIZE_MAP.get(this.iconStyle));
@@ -825,7 +826,7 @@ class ContentItemStruct extends ViewPU {
                                                     });
                                                 } else {
                                                     this.ifElseBranchUpdateFunction(1, () => {
-                                                        this.observeComponentCreation2((z9, a10) => {
+                                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                             Image.create(this.icon);
                                                             Image.objectFit(ImageFit.Contain);
                                                             Image.constraintSize({
@@ -870,8 +871,8 @@ class ContentItemStruct extends ViewPU {
         If.pop();
     }
 
-    createText(x8 = null) {
-        this.observeComponentCreation2((o9, p9) => {
+    createText(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create({ space: TEXT_COLUMN_SPACE });
             Column.flexShrink(1);
             Column.margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined : {
@@ -880,7 +881,7 @@ class ContentItemStruct extends ViewPU {
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
-        this.observeComponentCreation2((k9, l9) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.primaryText);
             Text.fontSize(ObservedObject.GetRawObject(this.primaryTextSize));
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTextColors));
@@ -891,19 +892,19 @@ class ContentItemStruct extends ViewPU {
             Text.fontWeight(FontWeight.Medium);
             Text.focusable(true);
             Text.draggable(false);
-            Text.onSizeChange((m9, n9) => {
+            Text.onSizeChange((oldValue, newValue) => {
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.isWrapFirstText = this.judgeIsWrap(ObservedObject.GetRawObject(this.primaryText),
-                        ObservedObject.GetRawObject(this.primaryTextSize), n9.height);
+                        ObservedObject.GetRawObject(this.primaryTextSize), newValue.height);
                 }
             });
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((e9, f9) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.secondaryText != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((g9, h9) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.secondaryText);
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
@@ -912,11 +913,11 @@ class ContentItemStruct extends ViewPU {
                             TextOverflow.Ellipsis
                         });
                         Text.draggable(false);
-                        Text.onSizeChange((i9, j9) => {
+                        Text.onSizeChange((oldValue, newValue) => {
                             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
                                 this.isWrapSecondText =
                                     this.judgeIsWrap(ObservedObject.GetRawObject(this.secondaryText),
-                                        ObservedObject.GetRawObject(this.secondaryThirdTextSize), j9.height);
+                                        ObservedObject.GetRawObject(this.secondaryThirdTextSize), newValue.height);
                             }
                         });
                     }, Text);
@@ -928,11 +929,11 @@ class ContentItemStruct extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((y8, z8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.description != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((a9, b9) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.description);
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColors));
@@ -941,10 +942,10 @@ class ContentItemStruct extends ViewPU {
                             TextOverflow.Ellipsis
                         });
                         Text.draggable(false);
-                        Text.onSizeChange((c9, d9) => {
+                        Text.onSizeChange((oldValue, newValue) => {
                             if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
                                 this.isWrapThirdText = this.judgeIsWrap(ObservedObject.GetRawObject(this.description),
-                                    ObservedObject.GetRawObject(this.secondaryThirdTextSize), d9.height);
+                                    ObservedObject.GetRawObject(this.secondaryThirdTextSize), newValue.height);
                             }
                         });
                     }, Text);
@@ -981,7 +982,7 @@ class ContentItemStruct extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation2((v8, w8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Flex.create({
                 space: { main: this.getItemSpace() },
                 direction: this.itemDirection,
@@ -1011,25 +1012,25 @@ class CreateIconParam {
 }
 
 class OperateItemStruct extends ViewPU {
-    constructor(p8, q8, r8, s8 = -1, t8 = undefined, u8) {
-        super(p8, r8, s8, u8);
-        if (typeof t8 === 'function') {
-            this.paramsGenerator_ = t8;
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === 'function') {
+            this.paramsGenerator_ = paramsLambda;
         }
-        this.__arrow = new SynchedPropertyObjectOneWayPU(q8.arrow, this, 'arrow');
-        this.__icon = new SynchedPropertyObjectOneWayPU(q8.icon, this, 'icon');
-        this.__subIcon = new SynchedPropertyObjectOneWayPU(q8.subIcon, this, 'subIcon');
-        this.__button = new SynchedPropertyObjectOneWayPU(q8.button, this, 'button');
-        this.__switch = new SynchedPropertyObjectOneWayPU(q8.switch, this, 'switch');
-        this.__checkBox = new SynchedPropertyObjectOneWayPU(q8.checkBox, this, 'checkBox');
-        this.__radio = new SynchedPropertyObjectOneWayPU(q8.radio, this, 'radio');
-        this.__image = new SynchedPropertyObjectOneWayPU(q8.image, this, 'image');
-        this.__symbolStyle = new SynchedPropertyObjectOneWayPU(q8.symbolStyle, this, 'symbolStyle');
-        this.__text = new SynchedPropertyObjectOneWayPU(q8.text, this, 'text');
+        this.__arrow = new SynchedPropertyObjectOneWayPU(params.arrow, this, 'arrow');
+        this.__icon = new SynchedPropertyObjectOneWayPU(params.icon, this, 'icon');
+        this.__subIcon = new SynchedPropertyObjectOneWayPU(params.subIcon, this, 'subIcon');
+        this.__button = new SynchedPropertyObjectOneWayPU(params.button, this, 'button');
+        this.__switch = new SynchedPropertyObjectOneWayPU(params.switch, this, 'switch');
+        this.__checkBox = new SynchedPropertyObjectOneWayPU(params.checkBox, this, 'checkBox');
+        this.__radio = new SynchedPropertyObjectOneWayPU(params.radio, this, 'radio');
+        this.__image = new SynchedPropertyObjectOneWayPU(params.image, this, 'image');
+        this.__symbolStyle = new SynchedPropertyObjectOneWayPU(params.symbolStyle, this, 'symbolStyle');
+        this.__text = new SynchedPropertyObjectOneWayPU(params.text, this, 'text');
         this.__switchState = new ObservedPropertySimplePU(false, this, 'switchState');
         this.__radioState = new ObservedPropertySimplePU(false, this, 'radioState');
         this.__checkBoxState = new ObservedPropertySimplePU(false, this, 'checkBoxState');
-        this.__rightWidth = new SynchedPropertySimpleOneWayPU(q8.rightWidth, this, 'rightWidth');
+        this.__rightWidth = new SynchedPropertySimpleOneWayPU(params.rightWidth, this, 'rightWidth');
         this.__secondaryTextColor = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
@@ -1039,15 +1040,15 @@ class OperateItemStruct extends ViewPU {
         }, this, 'secondaryTextColor');
         this.__hoveringColor = new ObservedPropertyObjectPU('#0d000000', this, 'hoveringColor');
         this.__activedColor = new ObservedPropertyObjectPU('#1a0a59f7', this, 'activedColor');
-        this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(q8.parentCanFocus, this, 'parentCanFocus');
-        this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(q8.parentCanTouch, this, 'parentCanTouch');
-        this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(q8.parentIsHover, this, 'parentIsHover');
-        this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(q8.parentCanHover, this, 'parentCanHover');
-        this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(q8.parentIsActive, this, 'parentIsActive');
-        this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(q8.parentFrontColor, this, 'parentFrontColor');
-        this.__parentDirection = new SynchedPropertySimpleTwoWayPU(q8.parentDirection, this, 'parentDirection');
+        this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(params.parentCanFocus, this, 'parentCanFocus');
+        this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(params.parentCanTouch, this, 'parentCanTouch');
+        this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(params.parentIsHover, this, 'parentIsHover');
+        this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(params.parentCanHover, this, 'parentCanHover');
+        this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(params.parentIsActive, this, 'parentIsActive');
+        this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(params.parentFrontColor, this, 'parentFrontColor');
+        this.__parentDirection = new SynchedPropertySimpleTwoWayPU(params.parentDirection, this, 'parentDirection');
         this.__rowSpace = new ObservedPropertySimplePU(DEFAULT_ROW_SPACE, this, 'rowSpace');
-        this.__isFocus = new SynchedPropertySimpleTwoWayPU(q8.isFocus, this, 'isFocus');
+        this.__isFocus = new SynchedPropertySimpleTwoWayPU(params.isFocus, this, 'isFocus');
         this.__secondaryTextSize = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10002,
@@ -1069,8 +1070,8 @@ class OperateItemStruct extends ViewPU {
             'bundleName': '__harDefaultBundleName__',
             'moduleName': '__harDefaultModuleName__'
         }, this, 'iconColor');
-        this.__isChecked = new SynchedPropertySimpleTwoWayPU(q8.isChecked, this, 'isChecked');
-        this.setInitiallyProvidedValue(q8);
+        this.__isChecked = new SynchedPropertySimpleTwoWayPU(params.isChecked, this, 'isChecked');
+        this.setInitiallyProvidedValue(params);
         this.declareWatch('arrow', this.onPropChange);
         this.declareWatch('icon', this.onPropChange);
         this.declareWatch('subIcon', this.onPropChange);
@@ -1087,117 +1088,117 @@ class OperateItemStruct extends ViewPU {
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(o8) {
-        if (o8.arrow === undefined) {
+    setInitiallyProvidedValue(params) {
+        if (params.arrow === undefined) {
             this.__arrow.set(null);
         }
-        if (o8.icon === undefined) {
+        if (params.icon === undefined) {
             this.__icon.set(null);
         }
-        if (o8.subIcon === undefined) {
+        if (params.subIcon === undefined) {
             this.__subIcon.set(null);
         }
-        if (o8.button === undefined) {
+        if (params.button === undefined) {
             this.__button.set(null);
         }
-        if (o8.switch === undefined) {
+        if (params.switch === undefined) {
             this.__switch.set(null);
         }
-        if (o8.checkBox === undefined) {
+        if (params.checkBox === undefined) {
             this.__checkBox.set(null);
         }
-        if (o8.radio === undefined) {
+        if (params.radio === undefined) {
             this.__radio.set(null);
         }
-        if (o8.image === undefined) {
+        if (params.image === undefined) {
             this.__image.set(null);
         }
-        if (o8.symbolStyle === undefined) {
+        if (params.symbolStyle === undefined) {
             this.__symbolStyle.set(null);
         }
-        if (o8.text === undefined) {
+        if (params.text === undefined) {
             this.__text.set(null);
         }
-        if (o8.switchState !== undefined) {
-            this.switchState = o8.switchState;
+        if (params.switchState !== undefined) {
+            this.switchState = params.switchState;
         }
-        if (o8.radioState !== undefined) {
-            this.radioState = o8.radioState;
+        if (params.radioState !== undefined) {
+            this.radioState = params.radioState;
         }
-        if (o8.checkBoxState !== undefined) {
-            this.checkBoxState = o8.checkBoxState;
+        if (params.checkBoxState !== undefined) {
+            this.checkBoxState = params.checkBoxState;
         }
-        if (o8.rightWidth === undefined) {
+        if (params.rightWidth === undefined) {
             this.__rightWidth.set(RIGHT_PART_WIDTH);
         }
-        if (o8.secondaryTextColor !== undefined) {
-            this.secondaryTextColor = o8.secondaryTextColor;
+        if (params.secondaryTextColor !== undefined) {
+            this.secondaryTextColor = params.secondaryTextColor;
         }
-        if (o8.hoveringColor !== undefined) {
-            this.hoveringColor = o8.hoveringColor;
+        if (params.hoveringColor !== undefined) {
+            this.hoveringColor = params.hoveringColor;
         }
-        if (o8.activedColor !== undefined) {
-            this.activedColor = o8.activedColor;
+        if (params.activedColor !== undefined) {
+            this.activedColor = params.activedColor;
         }
-        if (o8.rowSpace !== undefined) {
-            this.rowSpace = o8.rowSpace;
+        if (params.rowSpace !== undefined) {
+            this.rowSpace = params.rowSpace;
         }
-        if (o8.secondaryTextSize !== undefined) {
-            this.secondaryTextSize = o8.secondaryTextSize;
+        if (params.secondaryTextSize !== undefined) {
+            this.secondaryTextSize = params.secondaryTextSize;
         }
-        if (o8.secondaryTextColors !== undefined) {
-            this.secondaryTextColors = o8.secondaryTextColors;
+        if (params.secondaryTextColors !== undefined) {
+            this.secondaryTextColors = params.secondaryTextColors;
         }
-        if (o8.iconColor !== undefined) {
-            this.iconColor = o8.iconColor;
+        if (params.iconColor !== undefined) {
+            this.iconColor = params.iconColor;
         }
     }
 
-    updateStateVars(n8) {
-        this.__arrow.reset(n8.arrow);
-        this.__icon.reset(n8.icon);
-        this.__subIcon.reset(n8.subIcon);
-        this.__button.reset(n8.button);
-        this.__switch.reset(n8.switch);
-        this.__checkBox.reset(n8.checkBox);
-        this.__radio.reset(n8.radio);
-        this.__image.reset(n8.image);
-        this.__symbolStyle.reset(n8.symbolStyle);
-        this.__text.reset(n8.text);
-        this.__rightWidth.reset(n8.rightWidth);
+    updateStateVars(params) {
+        this.__arrow.reset(params.arrow);
+        this.__icon.reset(params.icon);
+        this.__subIcon.reset(params.subIcon);
+        this.__button.reset(params.button);
+        this.__switch.reset(params.switch);
+        this.__checkBox.reset(params.checkBox);
+        this.__radio.reset(params.radio);
+        this.__image.reset(params.image);
+        this.__symbolStyle.reset(params.symbolStyle);
+        this.__text.reset(params.text);
+        this.__rightWidth.reset(params.rightWidth);
     }
 
-    purgeVariableDependenciesOnElmtId(m8) {
-        this.__arrow.purgeDependencyOnElmtId(m8);
-        this.__icon.purgeDependencyOnElmtId(m8);
-        this.__subIcon.purgeDependencyOnElmtId(m8);
-        this.__button.purgeDependencyOnElmtId(m8);
-        this.__switch.purgeDependencyOnElmtId(m8);
-        this.__checkBox.purgeDependencyOnElmtId(m8);
-        this.__radio.purgeDependencyOnElmtId(m8);
-        this.__image.purgeDependencyOnElmtId(m8);
-        this.__symbolStyle.purgeDependencyOnElmtId(m8);
-        this.__text.purgeDependencyOnElmtId(m8);
-        this.__switchState.purgeDependencyOnElmtId(m8);
-        this.__radioState.purgeDependencyOnElmtId(m8);
-        this.__checkBoxState.purgeDependencyOnElmtId(m8);
-        this.__rightWidth.purgeDependencyOnElmtId(m8);
-        this.__secondaryTextColor.purgeDependencyOnElmtId(m8);
-        this.__hoveringColor.purgeDependencyOnElmtId(m8);
-        this.__activedColor.purgeDependencyOnElmtId(m8);
-        this.__parentCanFocus.purgeDependencyOnElmtId(m8);
-        this.__parentCanTouch.purgeDependencyOnElmtId(m8);
-        this.__parentIsHover.purgeDependencyOnElmtId(m8);
-        this.__parentCanHover.purgeDependencyOnElmtId(m8);
-        this.__parentIsActive.purgeDependencyOnElmtId(m8);
-        this.__parentFrontColor.purgeDependencyOnElmtId(m8);
-        this.__parentDirection.purgeDependencyOnElmtId(m8);
-        this.__rowSpace.purgeDependencyOnElmtId(m8);
-        this.__isFocus.purgeDependencyOnElmtId(m8);
-        this.__secondaryTextSize.purgeDependencyOnElmtId(m8);
-        this.__secondaryTextColors.purgeDependencyOnElmtId(m8);
-        this.__iconColor.purgeDependencyOnElmtId(m8);
-        this.__isChecked.purgeDependencyOnElmtId(m8);
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__arrow.purgeDependencyOnElmtId(rmElmtId);
+        this.__icon.purgeDependencyOnElmtId(rmElmtId);
+        this.__subIcon.purgeDependencyOnElmtId(rmElmtId);
+        this.__button.purgeDependencyOnElmtId(rmElmtId);
+        this.__switch.purgeDependencyOnElmtId(rmElmtId);
+        this.__checkBox.purgeDependencyOnElmtId(rmElmtId);
+        this.__radio.purgeDependencyOnElmtId(rmElmtId);
+        this.__image.purgeDependencyOnElmtId(rmElmtId);
+        this.__symbolStyle.purgeDependencyOnElmtId(rmElmtId);
+        this.__text.purgeDependencyOnElmtId(rmElmtId);
+        this.__switchState.purgeDependencyOnElmtId(rmElmtId);
+        this.__radioState.purgeDependencyOnElmtId(rmElmtId);
+        this.__checkBoxState.purgeDependencyOnElmtId(rmElmtId);
+        this.__rightWidth.purgeDependencyOnElmtId(rmElmtId);
+        this.__secondaryTextColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__hoveringColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__activedColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__parentCanFocus.purgeDependencyOnElmtId(rmElmtId);
+        this.__parentCanTouch.purgeDependencyOnElmtId(rmElmtId);
+        this.__parentIsHover.purgeDependencyOnElmtId(rmElmtId);
+        this.__parentCanHover.purgeDependencyOnElmtId(rmElmtId);
+        this.__parentIsActive.purgeDependencyOnElmtId(rmElmtId);
+        this.__parentFrontColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__parentDirection.purgeDependencyOnElmtId(rmElmtId);
+        this.__rowSpace.purgeDependencyOnElmtId(rmElmtId);
+        this.__isFocus.purgeDependencyOnElmtId(rmElmtId);
+        this.__secondaryTextSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__secondaryTextColors.purgeDependencyOnElmtId(rmElmtId);
+        this.__iconColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__isChecked.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
@@ -1239,246 +1240,246 @@ class OperateItemStruct extends ViewPU {
         return this.__arrow.get();
     }
 
-    set arrow(l8) {
-        this.__arrow.set(l8);
+    set arrow(newValue) {
+        this.__arrow.set(newValue);
     }
 
     get icon() {
         return this.__icon.get();
     }
 
-    set icon(k8) {
-        this.__icon.set(k8);
+    set icon(newValue) {
+        this.__icon.set(newValue);
     }
 
     get subIcon() {
         return this.__subIcon.get();
     }
 
-    set subIcon(j8) {
-        this.__subIcon.set(j8);
+    set subIcon(newValue) {
+        this.__subIcon.set(newValue);
     }
 
     get button() {
         return this.__button.get();
     }
 
-    set button(i8) {
-        this.__button.set(i8);
+    set button(newValue) {
+        this.__button.set(newValue);
     }
 
     get switch() {
         return this.__switch.get();
     }
 
-    set switch(h8) {
-        this.__switch.set(h8);
+    set switch(newValue) {
+        this.__switch.set(newValue);
     }
 
     get checkBox() {
         return this.__checkBox.get();
     }
 
-    set checkBox(g8) {
-        this.__checkBox.set(g8);
+    set checkBox(newValue) {
+        this.__checkBox.set(newValue);
     }
 
     get radio() {
         return this.__radio.get();
     }
 
-    set radio(f8) {
-        this.__radio.set(f8);
+    set radio(newValue) {
+        this.__radio.set(newValue);
     }
 
     get image() {
         return this.__image.get();
     }
 
-    set image(e8) {
-        this.__image.set(e8);
+    set image(newValue) {
+        this.__image.set(newValue);
     }
 
     get symbolStyle() {
         return this.__symbolStyle.get();
     }
 
-    set symbolStyle(d8) {
-        this.__symbolStyle.set(d8);
+    set symbolStyle(newValue) {
+        this.__symbolStyle.set(newValue);
     }
 
     get text() {
         return this.__text.get();
     }
 
-    set text(c8) {
-        this.__text.set(c8);
+    set text(newValue) {
+        this.__text.set(newValue);
     }
 
     get switchState() {
         return this.__switchState.get();
     }
 
-    set switchState(b8) {
-        this.__switchState.set(b8);
+    set switchState(newValue) {
+        this.__switchState.set(newValue);
     }
 
     get radioState() {
         return this.__radioState.get();
     }
 
-    set radioState(a8) {
-        this.__radioState.set(a8);
+    set radioState(newValue) {
+        this.__radioState.set(newValue);
     }
 
     get checkBoxState() {
         return this.__checkBoxState.get();
     }
 
-    set checkBoxState(z7) {
-        this.__checkBoxState.set(z7);
+    set checkBoxState(newValue) {
+        this.__checkBoxState.set(newValue);
     }
 
     get rightWidth() {
         return this.__rightWidth.get();
     }
 
-    set rightWidth(y7) {
-        this.__rightWidth.set(y7);
+    set rightWidth(newValue) {
+        this.__rightWidth.set(newValue);
     }
 
     get secondaryTextColor() {
         return this.__secondaryTextColor.get();
     }
 
-    set secondaryTextColor(x7) {
-        this.__secondaryTextColor.set(x7);
+    set secondaryTextColor(newValue) {
+        this.__secondaryTextColor.set(newValue);
     }
 
     get hoveringColor() {
         return this.__hoveringColor.get();
     }
 
-    set hoveringColor(w7) {
-        this.__hoveringColor.set(w7);
+    set hoveringColor(newValue) {
+        this.__hoveringColor.set(newValue);
     }
 
     get activedColor() {
         return this.__activedColor.get();
     }
 
-    set activedColor(v7) {
-        this.__activedColor.set(v7);
+    set activedColor(newValue) {
+        this.__activedColor.set(newValue);
     }
 
     get parentCanFocus() {
         return this.__parentCanFocus.get();
     }
 
-    set parentCanFocus(u7) {
-        this.__parentCanFocus.set(u7);
+    set parentCanFocus(newValue) {
+        this.__parentCanFocus.set(newValue);
     }
 
     get parentCanTouch() {
         return this.__parentCanTouch.get();
     }
 
-    set parentCanTouch(t7) {
-        this.__parentCanTouch.set(t7);
+    set parentCanTouch(newValue) {
+        this.__parentCanTouch.set(newValue);
     }
 
     get parentIsHover() {
         return this.__parentIsHover.get();
     }
 
-    set parentIsHover(s7) {
-        this.__parentIsHover.set(s7);
+    set parentIsHover(newValue) {
+        this.__parentIsHover.set(newValue);
     }
 
     get parentCanHover() {
         return this.__parentCanHover.get();
     }
 
-    set parentCanHover(r7) {
-        this.__parentCanHover.set(r7);
+    set parentCanHover(newValue) {
+        this.__parentCanHover.set(newValue);
     }
 
     get parentIsActive() {
         return this.__parentIsActive.get();
     }
 
-    set parentIsActive(q7) {
-        this.__parentIsActive.set(q7);
+    set parentIsActive(newValue) {
+        this.__parentIsActive.set(newValue);
     }
 
     get parentFrontColor() {
         return this.__parentFrontColor.get();
     }
 
-    set parentFrontColor(p7) {
-        this.__parentFrontColor.set(p7);
+    set parentFrontColor(newValue) {
+        this.__parentFrontColor.set(newValue);
     }
 
     get parentDirection() {
         return this.__parentDirection.get();
     }
 
-    set parentDirection(o7) {
-        this.__parentDirection.set(o7);
+    set parentDirection(newValue) {
+        this.__parentDirection.set(newValue);
     }
 
     get rowSpace() {
         return this.__rowSpace.get();
     }
 
-    set rowSpace(n7) {
-        this.__rowSpace.set(n7);
+    set rowSpace(newValue) {
+        this.__rowSpace.set(newValue);
     }
 
     get isFocus() {
         return this.__isFocus.get();
     }
 
-    set isFocus(m7) {
-        this.__isFocus.set(m7);
+    set isFocus(newValue) {
+        this.__isFocus.set(newValue);
     }
 
     get secondaryTextSize() {
         return this.__secondaryTextSize.get();
     }
 
-    set secondaryTextSize(l7) {
-        this.__secondaryTextSize.set(l7);
+    set secondaryTextSize(newValue) {
+        this.__secondaryTextSize.set(newValue);
     }
 
     get secondaryTextColors() {
         return this.__secondaryTextColors.get();
     }
 
-    set secondaryTextColors(k7) {
-        this.__secondaryTextColors.set(k7);
+    set secondaryTextColors(newValue) {
+        this.__secondaryTextColors.set(newValue);
     }
 
     get iconColor() {
         return this.__iconColor.get();
     }
 
-    set iconColor(j7) {
-        this.__iconColor.set(j7);
+    set iconColor(newValue) {
+        this.__iconColor.set(newValue);
     }
 
     get isChecked() {
         return this.__isChecked.get();
     }
 
-    set isChecked(i7) {
-        this.__isChecked.set(i7);
+    set isChecked(newValue) {
+        this.__isChecked.set(newValue);
     }
 
-    onWillApplyTheme(h7) {
-        this.secondaryTextColor = h7.colors.fontSecondary;
-        this.hoveringColor = h7.colors.interactiveHover;
-        this.activedColor = h7.colors.interactiveActive;
+    onWillApplyTheme(theme) {
+        this.secondaryTextColor = theme.colors.fontSecondary;
+        this.hoveringColor = theme.colors.interactiveHover;
+        this.activedColor = theme.colors.interactiveActive;
     }
 
     onFocusChange() {
@@ -1547,8 +1548,8 @@ class OperateItemStruct extends ViewPU {
         this.onFocusChange();
     }
 
-    createButton(z6 = null) {
-        this.observeComponentCreation2((e7, f7) => {
+    createButton(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild();
             Button.padding({ top: 0, bottom: 0 });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
@@ -1583,12 +1584,12 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onHover((g7) => {
+            Button.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (g7 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!g7) {
+                if (!isHover) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1600,14 +1601,14 @@ class OperateItemStruct extends ViewPU {
             Button.accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''));
             Button.accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''));
         }, Button);
-        this.observeComponentCreation2((c7, d7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.padding({
                 left: TEXT_SAFE_MARGIN,
                 right: TEXT_SAFE_MARGIN
             });
         }, Row);
-        this.observeComponentCreation2((a7, b7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.button?.text);
             Text.focusable(true);
         }, Text);
@@ -1616,8 +1617,8 @@ class OperateItemStruct extends ViewPU {
         Button.pop();
     }
 
-    createIcon(k6, l6 = null) {
-        this.observeComponentCreation2((w6, x6) => {
+    createIcon(param, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.shadow(CLEAR_SHADOW);
             Button.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
@@ -1634,12 +1635,12 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onHover((y6) => {
+            Button.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (y6 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!y6) {
+                if (!isHover) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1647,20 +1648,21 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
-            Button.onClick(k6.icon?.action);
-            Button.accessibilityLevel(getAccessibilityLevelOnAction(k6.icon?.accessibilityLevel, k6.icon?.action));
-            Button.accessibilityText(getAccessibilityText(k6.icon?.accessibilityText ?? ''));
-            Button.accessibilityDescription(getAccessibilityText(k6.icon?.accessibilityDescription ?? ''));
+            Button.onClick(param.icon?.action);
+            Button.accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel,
+                param.icon?.action));
+            Button.accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''));
+            Button.accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''));
             Button.flexShrink(0);
         }, Button);
-        this.observeComponentCreation2((m6, n6) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (k6.icon?.symbolStyle) {
+            if (param.icon?.symbolStyle) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((u6, v6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create();
                         SymbolGlyph.fontColor([this.iconColor]);
-                        SymbolGlyph.attributeModifier.bind(this)(k6.icon?.symbolStyle);
+                        SymbolGlyph.attributeModifier.bind(this)(param.icon?.symbolStyle);
                         SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                         SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.symbolEffect(new SymbolEffect(), false);
@@ -1670,12 +1672,12 @@ class OperateItemStruct extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((o6, p6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (Util.isSymbolResource(k6.icon?.value)) {
+                        if (Util.isSymbolResource(param.icon?.value)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((s6, t6) => {
-                                    SymbolGlyph.create(k6.icon?.value);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    SymbolGlyph.create(param.icon?.value);
                                     SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                                     SymbolGlyph.fontColor([this.iconColor]);
                                     SymbolGlyph.focusable(true);
@@ -1684,8 +1686,8 @@ class OperateItemStruct extends ViewPU {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((q6, r6) => {
-                                    Image.create(k6.icon?.value);
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    Image.create(param.icon?.value);
                                     Image.height(OPERATEITEM_ICONLIKE_SIZE);
                                     Image.width(OPERATEITEM_ICONLIKE_SIZE);
                                     Image.focusable(true);
@@ -1703,12 +1705,12 @@ class OperateItemStruct extends ViewPU {
         Button.pop();
     }
 
-    createImage(d6 = null) {
-        this.observeComponentCreation2((e6, f6) => {
+    createImage(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (Util.isSymbolResource(ObservedObject.GetRawObject(this.image))) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i6, j6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create(this.image);
                         SymbolGlyph.fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`);
                         SymbolGlyph.draggable(false);
@@ -1717,7 +1719,7 @@ class OperateItemStruct extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((g6, h6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create(this.image);
                         Image.height(OPERATEITEM_IMAGE_SIZE);
                         Image.width(OPERATEITEM_IMAGE_SIZE);
@@ -1730,8 +1732,8 @@ class OperateItemStruct extends ViewPU {
         If.pop();
     }
 
-    createSymbol(a6 = null) {
-        this.observeComponentCreation2((b6, c6) => {
+    createSymbol(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
             SymbolGlyph.attributeModifier.bind(this)(ObservedObject.GetRawObject(this.symbolStyle));
             SymbolGlyph.fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`);
@@ -1742,8 +1744,8 @@ class OperateItemStruct extends ViewPU {
         }, SymbolGlyph);
     }
 
-    createText(x5 = null) {
-        this.observeComponentCreation2((y5, z5) => {
+    createText(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.text);
             Text.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Text.fontSize(ObservedObject.GetRawObject(this.secondaryTextSize));
@@ -1770,8 +1772,8 @@ class OperateItemStruct extends ViewPU {
         Text.pop();
     }
 
-    createArrow(j5 = null) {
-        this.observeComponentCreation2((u5, v5) => {
+    createArrow(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.shadow(CLEAR_SHADOW);
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
@@ -1785,11 +1787,11 @@ class OperateItemStruct extends ViewPU {
             });
             Button.stateEffect(this.arrow?.action !== undefined);
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((w5) => {
+            Button.onHover((isHover) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                if (w5 && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.parentCanHover = false;
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 } else {
@@ -1806,11 +1808,11 @@ class OperateItemStruct extends ViewPU {
             Button.accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''));
             Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
-        this.observeComponentCreation2((k5, l5) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.arrow?.symbolStyle) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((s5, t5) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         SymbolGlyph.create();
                         SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
                             'id': -1,
@@ -1829,11 +1831,11 @@ class OperateItemStruct extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((m5, n5) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (Util.isSymbolResource(this.arrow?.value)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((q5, r5) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create(this.arrow?.value);
                                     SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                                     SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
@@ -1849,7 +1851,7 @@ class OperateItemStruct extends ViewPU {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((o5, p5) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Image.create(this.arrow?.value);
                                     Image.height(OPERATEITEM_ICONLIKE_SIZE);
                                     Image.width(OPERATEITEM_ARROW_WIDTH);
@@ -1875,8 +1877,8 @@ class OperateItemStruct extends ViewPU {
         Button.pop();
     }
 
-    createRadio(e5 = null) {
-        this.observeComponentCreation2((f5, g5) => {
+    createRadio(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Radio.create({ value: '', group: '' });
             Radio.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Radio.checked(this.radioState);
@@ -1886,13 +1888,13 @@ class OperateItemStruct extends ViewPU {
             Radio.backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
             Color.Transparent);
             Radio.borderRadius(OPERATE_ITEM_RADIUS);
-            Radio.onChange((i5) => {
+            Radio.onChange((isCheck) => {
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-                    this.radioState = i5;
-                    this.isChecked = i5;
+                    this.radioState = isCheck;
+                    this.isChecked = isCheck;
                 }
                 if (this.radio?.onChange) {
-                    this.radio?.onChange(i5);
+                    this.radio?.onChange(isCheck);
                 }
             });
             Radio.height(OPERATEITEM_ICONLIKE_SIZE);
@@ -1903,12 +1905,12 @@ class OperateItemStruct extends ViewPU {
             });
             Radio.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
             Radio.flexShrink(0);
-            Radio.onHover((h5) => {
+            Radio.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (h5 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!h5) {
+                if (!isHover) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1923,8 +1925,8 @@ class OperateItemStruct extends ViewPU {
         }, Radio);
     }
 
-    createCheckBox(z4 = null) {
-        this.observeComponentCreation2((a5, b5) => {
+    createCheckBox(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Checkbox.create();
             Checkbox.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS);
             Checkbox.unselectedColor(this.getUnselectedColor());
@@ -1932,13 +1934,13 @@ class OperateItemStruct extends ViewPU {
             Color.Transparent);
             Checkbox.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Checkbox.select(this.checkBoxState);
-            Checkbox.onChange((d5) => {
+            Checkbox.onChange((isCheck) => {
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-                    this.checkBoxState = d5;
-                    this.isChecked = d5;
+                    this.checkBoxState = isCheck;
+                    this.isChecked = isCheck;
                 }
                 if (this.checkBox?.onChange) {
-                    this.checkBox?.onChange(d5);
+                    this.checkBox?.onChange(isCheck);
                 }
             });
             Checkbox.height(OPERATEITEM_ICONLIKE_SIZE);
@@ -1949,12 +1951,12 @@ class OperateItemStruct extends ViewPU {
             });
             Checkbox.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None);
             Checkbox.flexShrink(0);
-            Checkbox.onHover((c5) => {
+            Checkbox.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (c5 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!c5) {
+                if (!isHover) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1970,8 +1972,8 @@ class OperateItemStruct extends ViewPU {
         Checkbox.pop();
     }
 
-    createSwitch(s4 = null) {
-        this.observeComponentCreation2((w4, x4) => {
+    createSwitch(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.margin({ end: LengthMetrics.vp(SWITCH_PADDING) });
             Row.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
@@ -1980,12 +1982,12 @@ class OperateItemStruct extends ViewPU {
             Row.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Row.onHover((y4) => {
+            Row.onHover((isHover) => {
                 this.parentCanHover = false;
-                if (y4 && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!y4) {
+                if (!isHover) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1994,7 +1996,7 @@ class OperateItemStruct extends ViewPU {
                 }
             });
         }, Row);
-        this.observeComponentCreation2((t4, u4) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
             Toggle.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS);
             Toggle.backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
@@ -2002,13 +2004,13 @@ class OperateItemStruct extends ViewPU {
             Toggle.switchPointColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus && !this.switchState ?
                 OPERATE_ITEM_COLOR :
                 UNUSUAL);
-            Toggle.onChange((v4) => {
-                this.switchState = v4;
+            Toggle.onChange((isCheck) => {
+                this.switchState = isCheck;
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-                    this.isChecked = v4;
+                    this.isChecked = isCheck;
                 }
                 if (this.switch?.onChange) {
-                    this.switch?.onChange(v4);
+                    this.switch?.onChange(isCheck);
                 }
             });
             Toggle.onClick(() => {
@@ -2024,8 +2026,8 @@ class OperateItemStruct extends ViewPU {
         Row.pop();
     }
 
-    createTextArrow(k3 = null) {
-        this.observeComponentCreation2((p4, q4) => {
+    createTextArrow(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.shadow(CLEAR_SHADOW);
             Button.hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ?
@@ -2053,11 +2055,11 @@ class OperateItemStruct extends ViewPU {
             });
             Button.stateEffect(this.arrow?.action !== undefined);
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((r4) => {
+            Button.onHover((isHover) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
-                if (r4 && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                if (isHover && IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.parentCanHover = false;
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 } else {
@@ -2074,18 +2076,18 @@ class OperateItemStruct extends ViewPU {
             Button.accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`);
             Button.accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''));
         }, Button);
-        this.observeComponentCreation2((l3, m3) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.parentDirection === FlexDirection.Column) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((n4, o4) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
                         Flex.padding({
                             start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
                             end: LengthMetrics.vp(LISTITEM_PADDING)
                         });
                     }, Flex);
-                    this.observeComponentCreation2((l4, m4) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.text);
                         Text.fontSize({
                             'id': -1,
@@ -2102,11 +2104,11 @@ class OperateItemStruct extends ViewPU {
                         });
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((b4, c4) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (this.arrow?.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((j4, k4) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{
                                         'id': -1,
@@ -2125,11 +2127,11 @@ class OperateItemStruct extends ViewPU {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((d4, e4) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.arrow?.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((h4, i4) => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.arrow?.value);
                                                 SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                                                 SymbolGlyph.fontColor([{
@@ -2145,7 +2147,7 @@ class OperateItemStruct extends ViewPU {
                                         });
                                     } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((f4, g4) => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 Image.create(this.arrow?.value);
                                                 Image.height(OPERATEITEM_ICONLIKE_SIZE);
                                                 Image.width(OPERATEITEM_ARROW_WIDTH);
@@ -2172,14 +2174,14 @@ class OperateItemStruct extends ViewPU {
                 });
             } else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((z3, a4) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create({ space: SPECICAL_ROW_SPACE });
                         Row.padding({
                             start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
                             end: LengthMetrics.vp(LISTITEM_PADDING)
                         });
                     }, Row);
-                    this.observeComponentCreation2((x3, y3) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.text);
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
@@ -2207,11 +2209,11 @@ class OperateItemStruct extends ViewPU {
                         Text.margin({ right: OPERATEITEM_ARROW_MARGIN_WIDTH });
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((n3, o3) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (this.arrow?.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((v3, w3) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
                                         'id': -1,
@@ -2230,11 +2232,11 @@ class OperateItemStruct extends ViewPU {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((p3, q3) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.arrow?.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((t3, u3) => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.arrow?.value);
                                                 SymbolGlyph.fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`);
                                                 SymbolGlyph.fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? {
@@ -2250,7 +2252,7 @@ class OperateItemStruct extends ViewPU {
                                         });
                                     } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((r3, s3) => {
+                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 Image.create(this.arrow?.value);
                                                 Image.height(OPERATEITEM_ICONLIKE_SIZE);
                                                 Image.width(OPERATEITEM_ARROW_WIDTH);
@@ -2282,22 +2284,22 @@ class OperateItemStruct extends ViewPU {
     }
 
     getFlexOptions() {
-        let j3 = { alignItems: ItemAlign.Center };
+        let flexOptions = { alignItems: ItemAlign.Center };
         if (this.parentDirection === FlexDirection.Column) {
-            j3.justifyContent = FlexAlign.SpaceBetween;
+            flexOptions.justifyContent = FlexAlign.SpaceBetween;
         } else {
-            j3.space = { main: LengthMetrics.vp(this.rowSpace) };
-            j3.justifyContent = FlexAlign.End;
+            flexOptions.space = { main: LengthMetrics.vp(this.rowSpace) };
+            flexOptions.justifyContent = FlexAlign.End;
         }
-        return j3;
+        return flexOptions;
     }
 
     initialRender() {
-        this.observeComponentCreation2((h3, i3) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Flex.create(this.getFlexOptions());
             Flex.width(this.parentDirection === FlexDirection.Column ? undefined : this.rightWidth);
         }, Flex);
-        this.observeComponentCreation2((d3, e3) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.button != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
@@ -2345,7 +2347,7 @@ class OperateItemStruct extends ViewPU {
                 this.ifElseBranchUpdateFunction(10, () => {
                     this.createIcon.bind(this)(makeBuilderParameterProxy('createIcon',
                         { icon: () => (this['__icon'] ? this['__icon'] : this['icon']) }));
-                    this.observeComponentCreation2((f3, g3) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
                         if (this.subIcon != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
@@ -2373,51 +2375,72 @@ class OperateItemStruct extends ViewPU {
     }
 }
 
-function getAccessibilityText(y2) {
+/**
+ * Obtain accessible text
+ *
+ * @param resource initial resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityText(resource) {
     try {
-        let c3 = '';
-        if (typeof y2 === 'string') {
-            c3 = y2;
+        let resourceString = '';
+        if (typeof resource === 'string') {
+            resourceString = resource;
         } else {
-            c3 = getContext().resourceManager.getStringSync(y2);
+            resourceString = getContext().resourceManager.getStringSync(resource);
         }
-        return c3;
-    } catch (z2) {
-        let a3 = z2.code;
-        let b3 = z2.message;
-        hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${a3}, message: ${b3}`);
+        return resourceString;
+    } catch (error) {
+        let code = error.code;
+        let message = error.message;
+        hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
         return '';
     }
 }
 
-function getAccessibilityLevelOnChange(w2, x2) {
-    if (w2) {
-        return w2;
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnChange(accessibilityLevel, onChange) {
+    if (accessibilityLevel) {
+        return accessibilityLevel;
     }
-    if (x2) {
+    if (onChange) {
         return ACCESSIBILITY_LEVEL_YES;
     }
     return ACCESSIBILITY_LEVEL_NO;
 }
 
-function getAccessibilityLevelOnAction(u2, v2) {
-    if (u2) {
-        return u2;
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnAction(accessibilityLevel, onAction) {
+    if (accessibilityLevel) {
+        return accessibilityLevel;
     }
-    if (v2) {
+    if (onAction) {
         return ACCESSIBILITY_LEVEL_YES;
     }
     return ACCESSIBILITY_LEVEL_NO;
 }
 
 export class ComposeListItem extends ViewPU {
-    constructor(j2, k2, l2, m2 = -1, n2 = undefined, o2) {
-        super(j2, l2, m2, o2);
-        if (typeof n2 === 'function') {
-            this.paramsGenerator_ = n2;
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === 'function') {
+            this.paramsGenerator_ = paramsLambda;
         }
-        this.__contentItem = new SynchedPropertyObjectOneWayPU(k2.contentItem, this, 'contentItem');
-        this.__operateItem = new SynchedPropertyObjectOneWayPU(k2.operateItem, this, 'operateItem');
+        this.__contentItem = new SynchedPropertyObjectOneWayPU(params.contentItem, this, 'contentItem');
+        this.__operateItem = new SynchedPropertyObjectOneWayPU(params.operateItem, this, 'operateItem');
         this.__frontColor = new ObservedPropertyObjectPU(NORMAL_BG_COLOR, this, 'frontColor');
         this.__borderSize = new ObservedPropertySimplePU(0, this, 'borderSize');
         this.__canFocus = new ObservedPropertySimplePU(false, this, 'canFocus');
@@ -2450,23 +2473,23 @@ export class ComposeListItem extends ViewPU {
         this.__isWrapText = new ObservedPropertySimplePU(false, this, 'isWrapText');
         this.__listScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, 'listScale');
         this.envCallback = {
-            onConfigurationUpdated: (q2) => {
-                if (q2 === undefined || !this.isFollowingSystemFontScale) {
+            onConfigurationUpdated: (config) => {
+                if (config === undefined || !this.isFollowingSystemFontScale) {
                     this.fontSizeScale = 1;
                     return;
                 }
                 try {
-                    this.fontSizeScale = Math.min(this.maxFontScale, q2.fontSizeScale ?? 1);
-                } catch (r2) {
-                    let s2 = r2.code;
-                    let t2 = r2.message;
-                    hilog.error(0x3900, 'Ace', `ComposeListItem environmentCallback error: ${s2}, ${t2}`);
+                    this.fontSizeScale = Math.min(this.maxFontScale, config.fontSizeScale ?? 1);
+                } catch (paramError) {
+                    let code = paramError.code;
+                    let message = paramError.message;
+                    hilog.error(0x3900, 'Ace', `ComposeListItem environmentCallback error: ${code}, ${message}`);
                 }
             },
-            onMemoryLevel: (p2) => {
+            onMemoryLevel: (level) => {
             }
         };
-        this.setInitiallyProvidedValue(k2);
+        this.setInitiallyProvidedValue(params);
         this.declareWatch('contentItem', this.onPropChange);
         this.declareWatch('operateItem', this.onPropChange);
         this.declareWatch('fontSizeScale', this.onFontSizeScaleChange);
@@ -2474,123 +2497,123 @@ export class ComposeListItem extends ViewPU {
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(i2) {
-        if (i2.contentItem === undefined) {
+    setInitiallyProvidedValue(params) {
+        if (params.contentItem === undefined) {
             this.__contentItem.set(null);
         }
-        if (i2.operateItem === undefined) {
+        if (params.operateItem === undefined) {
             this.__operateItem.set(null);
         }
-        if (i2.frontColor !== undefined) {
-            this.frontColor = i2.frontColor;
+        if (params.frontColor !== undefined) {
+            this.frontColor = params.frontColor;
         }
-        if (i2.borderSize !== undefined) {
-            this.borderSize = i2.borderSize;
+        if (params.borderSize !== undefined) {
+            this.borderSize = params.borderSize;
         }
-        if (i2.canFocus !== undefined) {
-            this.canFocus = i2.canFocus;
+        if (params.canFocus !== undefined) {
+            this.canFocus = params.canFocus;
         }
-        if (i2.canTouch !== undefined) {
-            this.canTouch = i2.canTouch;
+        if (params.canTouch !== undefined) {
+            this.canTouch = params.canTouch;
         }
-        if (i2.canHover !== undefined) {
-            this.canHover = i2.canHover;
+        if (params.canHover !== undefined) {
+            this.canHover = params.canHover;
         }
-        if (i2.isHover !== undefined) {
-            this.isHover = i2.isHover;
+        if (params.isHover !== undefined) {
+            this.isHover = params.isHover;
         }
-        if (i2.itemHeight !== undefined) {
-            this.itemHeight = i2.itemHeight;
+        if (params.itemHeight !== undefined) {
+            this.itemHeight = params.itemHeight;
         }
-        if (i2.isActive !== undefined) {
-            this.isActive = i2.isActive;
+        if (params.isActive !== undefined) {
+            this.isActive = params.isActive;
         }
-        if (i2.hoveringColor !== undefined) {
-            this.hoveringColor = i2.hoveringColor;
+        if (params.hoveringColor !== undefined) {
+            this.hoveringColor = params.hoveringColor;
         }
-        if (i2.touchDownColor !== undefined) {
-            this.touchDownColor = i2.touchDownColor;
+        if (params.touchDownColor !== undefined) {
+            this.touchDownColor = params.touchDownColor;
         }
-        if (i2.activedColor !== undefined) {
-            this.activedColor = i2.activedColor;
+        if (params.activedColor !== undefined) {
+            this.activedColor = params.activedColor;
         }
-        if (i2.focusOutlineColor !== undefined) {
-            this.focusOutlineColor = i2.focusOutlineColor;
+        if (params.focusOutlineColor !== undefined) {
+            this.focusOutlineColor = params.focusOutlineColor;
         }
-        if (i2.fontSizeScale !== undefined) {
-            this.fontSizeScale = i2.fontSizeScale;
+        if (params.fontSizeScale !== undefined) {
+            this.fontSizeScale = params.fontSizeScale;
         }
-        if (i2.containerDirection !== undefined) {
-            this.containerDirection = i2.containerDirection;
+        if (params.containerDirection !== undefined) {
+            this.containerDirection = params.containerDirection;
         }
-        if (i2.contentItemDirection !== undefined) {
-            this.contentItemDirection = i2.contentItemDirection;
+        if (params.contentItemDirection !== undefined) {
+            this.contentItemDirection = params.contentItemDirection;
         }
-        if (i2.containerPadding !== undefined) {
-            this.containerPadding = i2.containerPadding;
+        if (params.containerPadding !== undefined) {
+            this.containerPadding = params.containerPadding;
         }
-        if (i2.textArrowLeftSafeOffset !== undefined) {
-            this.textArrowLeftSafeOffset = i2.textArrowLeftSafeOffset;
+        if (params.textArrowLeftSafeOffset !== undefined) {
+            this.textArrowLeftSafeOffset = params.textArrowLeftSafeOffset;
         }
-        if (i2.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = i2.isFollowingSystemFontScale;
+        if (params.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = params.isFollowingSystemFontScale;
         }
-        if (i2.maxFontScale !== undefined) {
-            this.maxFontScale = i2.maxFontScale;
+        if (params.maxFontScale !== undefined) {
+            this.maxFontScale = params.maxFontScale;
         }
-        if (i2.callbackId !== undefined) {
-            this.callbackId = i2.callbackId;
+        if (params.callbackId !== undefined) {
+            this.callbackId = params.callbackId;
         }
-        if (i2.accessibilityTextBuilder !== undefined) {
-            this.accessibilityTextBuilder = i2.accessibilityTextBuilder;
+        if (params.accessibilityTextBuilder !== undefined) {
+            this.accessibilityTextBuilder = params.accessibilityTextBuilder;
         }
-        if (i2.isFocus !== undefined) {
-            this.isFocus = i2.isFocus;
+        if (params.isFocus !== undefined) {
+            this.isFocus = params.isFocus;
         }
-        if (i2.isChecked !== undefined) {
-            this.isChecked = i2.isChecked;
+        if (params.isChecked !== undefined) {
+            this.isChecked = params.isChecked;
         }
-        if (i2.isWrapText !== undefined) {
-            this.isWrapText = i2.isWrapText;
+        if (params.isWrapText !== undefined) {
+            this.isWrapText = params.isWrapText;
         }
-        if (i2.listScale !== undefined) {
-            this.listScale = i2.listScale;
+        if (params.listScale !== undefined) {
+            this.listScale = params.listScale;
         }
-        if (i2.envCallback !== undefined) {
-            this.envCallback = i2.envCallback;
+        if (params.envCallback !== undefined) {
+            this.envCallback = params.envCallback;
         }
     }
 
-    updateStateVars(h2) {
-        this.__contentItem.reset(h2.contentItem);
-        this.__operateItem.reset(h2.operateItem);
+    updateStateVars(params) {
+        this.__contentItem.reset(params.contentItem);
+        this.__operateItem.reset(params.operateItem);
     }
 
-    purgeVariableDependenciesOnElmtId(g2) {
-        this.__contentItem.purgeDependencyOnElmtId(g2);
-        this.__operateItem.purgeDependencyOnElmtId(g2);
-        this.__frontColor.purgeDependencyOnElmtId(g2);
-        this.__borderSize.purgeDependencyOnElmtId(g2);
-        this.__canFocus.purgeDependencyOnElmtId(g2);
-        this.__canTouch.purgeDependencyOnElmtId(g2);
-        this.__canHover.purgeDependencyOnElmtId(g2);
-        this.__isHover.purgeDependencyOnElmtId(g2);
-        this.__itemHeight.purgeDependencyOnElmtId(g2);
-        this.__isActive.purgeDependencyOnElmtId(g2);
-        this.__hoveringColor.purgeDependencyOnElmtId(g2);
-        this.__touchDownColor.purgeDependencyOnElmtId(g2);
-        this.__activedColor.purgeDependencyOnElmtId(g2);
-        this.__focusOutlineColor.purgeDependencyOnElmtId(g2);
-        this.__fontSizeScale.purgeDependencyOnElmtId(g2);
-        this.__containerDirection.purgeDependencyOnElmtId(g2);
-        this.__contentItemDirection.purgeDependencyOnElmtId(g2);
-        this.__containerPadding.purgeDependencyOnElmtId(g2);
-        this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(g2);
-        this.__accessibilityTextBuilder.purgeDependencyOnElmtId(g2);
-        this.__isFocus.purgeDependencyOnElmtId(g2);
-        this.__isChecked.purgeDependencyOnElmtId(g2);
-        this.__isWrapText.purgeDependencyOnElmtId(g2);
-        this.__listScale.purgeDependencyOnElmtId(g2);
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__contentItem.purgeDependencyOnElmtId(rmElmtId);
+        this.__operateItem.purgeDependencyOnElmtId(rmElmtId);
+        this.__frontColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__borderSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__canFocus.purgeDependencyOnElmtId(rmElmtId);
+        this.__canTouch.purgeDependencyOnElmtId(rmElmtId);
+        this.__canHover.purgeDependencyOnElmtId(rmElmtId);
+        this.__isHover.purgeDependencyOnElmtId(rmElmtId);
+        this.__itemHeight.purgeDependencyOnElmtId(rmElmtId);
+        this.__isActive.purgeDependencyOnElmtId(rmElmtId);
+        this.__hoveringColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__touchDownColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__activedColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__focusOutlineColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__fontSizeScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__containerDirection.purgeDependencyOnElmtId(rmElmtId);
+        this.__contentItemDirection.purgeDependencyOnElmtId(rmElmtId);
+        this.__containerPadding.purgeDependencyOnElmtId(rmElmtId);
+        this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(rmElmtId);
+        this.__accessibilityTextBuilder.purgeDependencyOnElmtId(rmElmtId);
+        this.__isFocus.purgeDependencyOnElmtId(rmElmtId);
+        this.__isChecked.purgeDependencyOnElmtId(rmElmtId);
+        this.__isWrapText.purgeDependencyOnElmtId(rmElmtId);
+        this.__listScale.purgeDependencyOnElmtId(rmElmtId);
     }
 
     aboutToBeDeleted() {
@@ -2626,199 +2649,199 @@ export class ComposeListItem extends ViewPU {
         return this.__contentItem.get();
     }
 
-    set contentItem(f2) {
-        this.__contentItem.set(f2);
+    set contentItem(newValue) {
+        this.__contentItem.set(newValue);
     }
 
     get operateItem() {
         return this.__operateItem.get();
     }
 
-    set operateItem(e2) {
-        this.__operateItem.set(e2);
+    set operateItem(newValue) {
+        this.__operateItem.set(newValue);
     }
 
     get frontColor() {
         return this.__frontColor.get();
     }
 
-    set frontColor(d2) {
-        this.__frontColor.set(d2);
+    set frontColor(newValue) {
+        this.__frontColor.set(newValue);
     }
 
     get borderSize() {
         return this.__borderSize.get();
     }
 
-    set borderSize(c2) {
-        this.__borderSize.set(c2);
+    set borderSize(newValue) {
+        this.__borderSize.set(newValue);
     }
 
     get canFocus() {
         return this.__canFocus.get();
     }
 
-    set canFocus(b2) {
-        this.__canFocus.set(b2);
+    set canFocus(newValue) {
+        this.__canFocus.set(newValue);
     }
 
     get canTouch() {
         return this.__canTouch.get();
     }
 
-    set canTouch(a2) {
-        this.__canTouch.set(a2);
+    set canTouch(newValue) {
+        this.__canTouch.set(newValue);
     }
 
     get canHover() {
         return this.__canHover.get();
     }
 
-    set canHover(z1) {
-        this.__canHover.set(z1);
+    set canHover(newValue) {
+        this.__canHover.set(newValue);
     }
 
     get isHover() {
         return this.__isHover.get();
     }
 
-    set isHover(y1) {
-        this.__isHover.set(y1);
+    set isHover(newValue) {
+        this.__isHover.set(newValue);
     }
 
     get itemHeight() {
         return this.__itemHeight.get();
     }
 
-    set itemHeight(x1) {
-        this.__itemHeight.set(x1);
+    set itemHeight(newValue) {
+        this.__itemHeight.set(newValue);
     }
 
     get isActive() {
         return this.__isActive.get();
     }
 
-    set isActive(w1) {
-        this.__isActive.set(w1);
+    set isActive(newValue) {
+        this.__isActive.set(newValue);
     }
 
     get hoveringColor() {
         return this.__hoveringColor.get();
     }
 
-    set hoveringColor(v1) {
-        this.__hoveringColor.set(v1);
+    set hoveringColor(newValue) {
+        this.__hoveringColor.set(newValue);
     }
 
     get touchDownColor() {
         return this.__touchDownColor.get();
     }
 
-    set touchDownColor(u1) {
-        this.__touchDownColor.set(u1);
+    set touchDownColor(newValue) {
+        this.__touchDownColor.set(newValue);
     }
 
     get activedColor() {
         return this.__activedColor.get();
     }
 
-    set activedColor(t1) {
-        this.__activedColor.set(t1);
+    set activedColor(newValue) {
+        this.__activedColor.set(newValue);
     }
 
     get focusOutlineColor() {
         return this.__focusOutlineColor.get();
     }
 
-    set focusOutlineColor(s1) {
-        this.__focusOutlineColor.set(s1);
+    set focusOutlineColor(newValue) {
+        this.__focusOutlineColor.set(newValue);
     }
 
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
 
-    set fontSizeScale(r1) {
-        this.__fontSizeScale.set(r1);
+    set fontSizeScale(newValue) {
+        this.__fontSizeScale.set(newValue);
     }
 
     get containerDirection() {
         return this.__containerDirection.get();
     }
 
-    set containerDirection(q1) {
-        this.__containerDirection.set(q1);
+    set containerDirection(newValue) {
+        this.__containerDirection.set(newValue);
     }
 
     get contentItemDirection() {
         return this.__contentItemDirection.get();
     }
 
-    set contentItemDirection(p1) {
-        this.__contentItemDirection.set(p1);
+    set contentItemDirection(newValue) {
+        this.__contentItemDirection.set(newValue);
     }
 
     get containerPadding() {
         return this.__containerPadding.get();
     }
 
-    set containerPadding(o1) {
-        this.__containerPadding.set(o1);
+    set containerPadding(newValue) {
+        this.__containerPadding.set(newValue);
     }
 
     get textArrowLeftSafeOffset() {
         return this.__textArrowLeftSafeOffset.get();
     }
 
-    set textArrowLeftSafeOffset(n1) {
-        this.__textArrowLeftSafeOffset.set(n1);
+    set textArrowLeftSafeOffset(newValue) {
+        this.__textArrowLeftSafeOffset.set(newValue);
     }
 
     get accessibilityTextBuilder() {
         return this.__accessibilityTextBuilder.get();
     }
 
-    set accessibilityTextBuilder(m1) {
-        this.__accessibilityTextBuilder.set(m1);
+    set accessibilityTextBuilder(newValue) {
+        this.__accessibilityTextBuilder.set(newValue);
     }
 
     get isFocus() {
         return this.__isFocus.get();
     }
 
-    set isFocus(l1) {
-        this.__isFocus.set(l1);
+    set isFocus(newValue) {
+        this.__isFocus.set(newValue);
     }
 
     get isChecked() {
         return this.__isChecked.get();
     }
 
-    set isChecked(k1) {
-        this.__isChecked.set(k1);
+    set isChecked(newValue) {
+        this.__isChecked.set(newValue);
     }
 
     get isWrapText() {
         return this.__isWrapText.get();
     }
 
-    set isWrapText(j1) {
-        this.__isWrapText.set(j1);
+    set isWrapText(newValue) {
+        this.__isWrapText.set(newValue);
     }
 
     get listScale() {
         return this.__listScale.get();
     }
 
-    set listScale(i1) {
-        this.__listScale.set(i1);
+    set listScale(newValue) {
+        this.__listScale.set(newValue);
     }
 
-    onWillApplyTheme(h1) {
-        this.hoveringColor = h1.colors.interactiveHover;
-        this.touchDownColor = h1.colors.interactivePressed;
-        this.activedColor = h1.colors.interactiveActive;
-        this.focusOutlineColor = h1.colors.interactiveFocus;
+    onWillApplyTheme(theme) {
+        this.hoveringColor = theme.colors.interactiveHover;
+        this.touchDownColor = theme.colors.interactivePressed;
+        this.activedColor = theme.colors.interactiveActive;
+        this.focusOutlineColor = theme.colors.interactiveFocus;
     }
 
     onWrapChange() {
@@ -2852,12 +2875,12 @@ export class ComposeListItem extends ViewPU {
                     }).value);
             }
         } else if (this.contentItem.description === undefined) {
-            let g1 = this.contentItem.iconStyle;
+            let iconStyle = this.contentItem.iconStyle;
             if (this.contentItem.icon === undefined ||
-                (this.contentItem.icon !== undefined && g1 <= IconType.SYSTEM_ICON)) {
+                (this.contentItem.icon !== undefined && iconStyle <= IconType.SYSTEM_ICON)) {
                 this.itemHeight = ItemHeight.THIRD_HEIGHT;
             } else {
-                this.itemHeight = g1 === IconType.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
+                this.itemHeight = iconStyle === IconType.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
             }
         } else {
             this.itemHeight = ItemHeight.FIFTH_HEIGHT;
@@ -2886,10 +2909,10 @@ export class ComposeListItem extends ViewPU {
         this.onPropChange();
         try {
             this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
-        } catch (d1) {
-            let e1 = d1.code;
-            let f1 = d1.message;
-            hilog.error(0x3900, 'Ace', `ComposeListItem Faild to get environment param error: ${e1}, ${f1}`);
+        } catch (paramError) {
+            let code = paramError.code;
+            let message = paramError.message;
+            hilog.error(0x3900, 'Ace', `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
         }
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
             this.onFontSizeScaleChange();
@@ -3031,9 +3054,9 @@ export class ComposeListItem extends ViewPU {
         if (this.containerDirection === FlexDirection.Row) {
             return LengthMetrics.vp(0);
         }
-        let c1 = ICON_SIZE_MAP.get(this.contentItem?.iconStyle);
-        if (this.contentItem?.icon && c1 && c1 <= HEADSCULPTURE_SIZE) {
-            return LengthMetrics.vp(c1 + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+        let iconSize = ICON_SIZE_MAP.get(this.contentItem?.iconStyle);
+        if (this.contentItem?.icon && iconSize && iconSize <= HEADSCULPTURE_SIZE) {
+            return LengthMetrics.vp(iconSize + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
         }
         return LengthMetrics.vp(LISTITEM_PADDING - this.textArrowLeftSafeOffset);
     }
@@ -3082,14 +3105,14 @@ export class ComposeListItem extends ViewPU {
 
     getPadding() {
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-            let z = LengthMetrics.resource(ITEM_PADDING).value;
-            let a1 = z > LISTITEM_PADDING;
-            let b1 = a1 ? z - LISTITEM_PADDING : 0;
+            let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
+            let compareSize = paddingNum > LISTITEM_PADDING;
+            let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
             return {
-                top: this.isWrapText ? z : 0,
-                bottom: this.isWrapText ? z : 0,
-                left: b1,
-                right: b1
+                top: this.isWrapText ? paddingNum : 0,
+                bottom: this.isWrapText ? paddingNum : 0,
+                left: horizontalPadding,
+                right: horizontalPadding
             };
         } else {
             return undefined;
@@ -3097,7 +3120,7 @@ export class ComposeListItem extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation2((x, y) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.width('100%');
             Stack.accessibilityGroup(true);
@@ -3142,7 +3165,7 @@ export class ComposeListItem extends ViewPU {
                 right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
             });
         }, Stack);
-        this.observeComponentCreation2((u, v) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Flex.create(this.getFlexOptions());
             Flex.height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined);
             Flex.constraintSize({
@@ -3163,19 +3186,19 @@ export class ComposeListItem extends ViewPU {
             Flex.onBlur(() => {
                 this.canFocus = false;
             });
-            Flex.onHover((w) => {
+            Flex.onHover((isHover) => {
                 if (this.isFocus && !IS_SUPPORT_SUBCOMPONENT_EVENT) {
                     this.isHover = false;
                     return;
                 }
-                this.isHover = w;
+                this.isHover = isHover;
                 if (this.canHover) {
-                    this.frontColor = w ? this.hoveringColor :
+                    this.frontColor = isHover ? this.hoveringColor :
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-                    this.frontColor = w ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
-                    w ? this.zoomIn() : this.zoomOut();
+                    this.frontColor = isHover ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
+                    isHover ? this.zoomIn() : this.zoomOut();
                 }
             });
             ViewStackProcessor.visualState('focused');
@@ -3220,30 +3243,30 @@ export class ComposeListItem extends ViewPU {
             ViewStackProcessor.visualState();
             Flex.padding(ObservedObject.GetRawObject(this.containerPadding));
         }, Flex);
-        this.observeComponentCreation2((o, p) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.contentItem === null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((q, r) => {
-                            if (r) {
-                                let s = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new ContentItemStruct(this, {
                                     isWrapText: this.__isWrapText
-                                }, undefined, q, () => {
+                                }, undefined, elmtId, () => {
                                 }, {
                                     page: 'library/src/main/ets/components/composelistitem.ets',
                                     line: 1405,
                                     col: 11
                                 });
-                                ViewPU.create(s);
-                                let t = () => {
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
                                     return {
                                         isWrapText: this.isWrapText
                                     };
                                 };
-                                s.paramsGenerator_ = t;
+                                componentCall.paramsGenerator_ = paramsLambda;
                             } else {
-                                this.updateStateVarsOfChildByElmtId(q, {});
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
                             }
                         }, { name: 'ContentItemStruct' });
                     }
@@ -3254,14 +3277,14 @@ export class ComposeListItem extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((i, j) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((k, l) => {
-                            if (l) {
-                                let m = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new ContentItemStruct(this, {
                                     icon: this.contentItem?.icon,
                                     symbolStyle: this.contentItem?.symbolStyle,
                                     iconStyle: this.contentItem?.iconStyle,
@@ -3274,14 +3297,14 @@ export class ComposeListItem extends ViewPU {
                                     isFocus: this.isFocus,
                                     itemHeight: this.itemHeight,
                                     isWrapText: this.__isWrapText
-                                }, undefined, k, () => {
+                                }, undefined, elmtId, () => {
                                 }, {
                                     page: 'library/src/main/ets/components/composelistitem.ets',
                                     line: 1410,
                                     col: 11
                                 });
-                                ViewPU.create(m);
-                                let n = () => {
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         symbolStyle: this.contentItem?.symbolStyle,
@@ -3297,9 +3320,9 @@ export class ComposeListItem extends ViewPU {
                                         isWrapText: this.isWrapText
                                     };
                                 };
-                                m.paramsGenerator_ = n;
+                                componentCall.paramsGenerator_ = paramsLambda;
                             } else {
-                                this.updateStateVarsOfChildByElmtId(k, {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
                                     icon: this.contentItem?.icon,
                                     symbolStyle: this.contentItem?.symbolStyle,
                                     iconStyle: this.contentItem?.iconStyle,
@@ -3322,11 +3345,11 @@ export class ComposeListItem extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((a, b) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.operateItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((g, h) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         __Common__.create();
                         __Common__.flexShrink(0);
                         __Common__.onFocus(() => {
@@ -3338,9 +3361,9 @@ export class ComposeListItem extends ViewPU {
                         __Common__.padding({ start: this.getOperateOffset() });
                     }, __Common__);
                     {
-                        this.observeComponentCreation2((c, d) => {
-                            if (d) {
-                                let e = new OperateItemStruct(this, {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new OperateItemStruct(this, {
                                     icon: this.operateItem?.icon,
                                     subIcon: this.operateItem?.subIcon,
                                     button: this.operateItem?.button,
@@ -3361,14 +3384,14 @@ export class ComposeListItem extends ViewPU {
                                     parentDirection: this.__containerDirection,
                                     isFocus: this.__isFocus,
                                     isChecked: this.__isChecked,
-                                }, undefined, c, () => {
+                                }, undefined, elmtId, () => {
                                 }, {
                                     page: 'library/src/main/ets/components/composelistitem.ets',
                                     line: 1426,
                                     col: 11
                                 });
-                                ViewPU.create(e);
-                                let f = () => {
+                                ViewPU.create(componentCall);
+                                let paramsLambda = () => {
                                     return {
                                         icon: this.operateItem?.icon,
                                         subIcon: this.operateItem?.subIcon,
@@ -3392,9 +3415,9 @@ export class ComposeListItem extends ViewPU {
                                         isChecked: this.isChecked
                                     };
                                 };
-                                e.paramsGenerator_ = f;
+                                componentCall.paramsGenerator_ = paramsLambda;
                             } else {
-                                this.updateStateVarsOfChildByElmtId(c, {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
                                     icon: this.operateItem?.icon,
                                     subIcon: this.operateItem?.subIcon,
                                     button: this.operateItem?.button,
