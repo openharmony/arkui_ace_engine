@@ -117,4 +117,5 @@ const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor()
     };
     return &LengthMetricsAccessorImpl;
 }
+
 }
