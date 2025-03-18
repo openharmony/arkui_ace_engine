@@ -121,6 +121,7 @@ void ListItemDragManager::HandleOnItemDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(pattern);
     axis_ = pattern->GetAxis();
     lanes_ = pattern->GetLanes();
+    isStackFromEnd_ = pattern->IsStackFromEnd();
 
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_VOID(forEach);
@@ -284,10 +285,11 @@ int32_t ListItemDragManager::ScaleNearItem(int32_t index, const RectF& rect, con
 
     int32_t crossNearIndex = index;
     float crossDelta = delta.GetCrossOffset(axis_);
+    int32_t step = isStackFromEnd_ ? -1 : 1;
     if (Positive(crossDelta)) {
-        crossNearIndex = index + 1;
+        crossNearIndex = index + step;
     } else if (Negative(crossDelta)) {
-        crossNearIndex = index - 1;
+        crossNearIndex = index - step;
     }
     ScaleResult crossRes = { false, 1.0f };
     if (crossNearIndex != index) {

@@ -447,4 +447,82 @@ HWTEST_F(TextTestNineNg, SetupMagnifier024, TestSize.Level1)
     EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
 }
 
+/**
+ * @tc.name: CheckAndAdjustHandle001
+ * @tc.desc: test text_pattern.cpp CheckAndAdjustHandle function, case clipEdge == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckAndAdjustHandle001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF paintRect = { 0, 0, 10, 10 };
+    auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckAndAdjustHandle002
+ * @tc.desc: test text_pattern.cpp CheckAndAdjustHandle function, case clipEdge == true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckAndAdjustHandle002, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(true);
+    RectF paintRect = { 0, 0, 10, 10 };
+    auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckAndAdjustHandle003
+ * @tc.desc: test text_pattern.cpp CheckAndAdjustHandle function, case handleLevelMode_ == HandleLevelMode::EMBED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckAndAdjustHandle003, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF paintRect = { 0, 0, 10, 10 };
+    pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test text_pattern.cpp OnHandleMove function, case handleLevelMode_ == HandleLevelMode::OVERLAY.
+    textPattern->HasContext == false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, OnHandleMove001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF handleRect = { 0, 0, 10, 10 };
+    bool isFirst = true;
+    pattern->textForDisplay_ = u"";
+    pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+}
+
+/**
+* @tc.name: OnHandleMove002
+* @tc.desc: test text_pattern.cpp OnHandleMove function, case textPattern->HasContext == true,
+   magnifierController_ != nullptr.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNineNg, OnHandleMove002, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF handleRect = { 0, 0, 10, 10 };
+    bool isFirst = true;
+    pattern->textForDisplay_ = u"1";
+    pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+}
 } // namespace OHOS::Ace::NG

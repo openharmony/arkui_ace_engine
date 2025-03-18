@@ -86,6 +86,7 @@ private:
     Axis axis_ = Axis::VERTICAL;
     int32_t totalCount_ = -1;
     int32_t lanes_ = 1;
+    bool isStackFromEnd_ = false;
     bool scrolling_ = false;
     OffsetF realOffset_;
 

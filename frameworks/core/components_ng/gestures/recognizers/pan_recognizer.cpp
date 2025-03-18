@@ -394,6 +394,9 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
 
+    if (refereeState_ == RefereeState::FAIL) {
+        return;
+    }
     UpdateTouchEventInfo(event);
     UpdateTouchPointInVelocityTracker(event);
     if (refereeState_ == RefereeState::DETECTING) {
@@ -690,6 +693,7 @@ void PanRecognizer::OnResetStatus()
     touchPoints_.clear();
     averageDistance_.Reset();
     touchPointsDistance_.clear();
+    panVelocity_.ResetAll();
     isStartTriggered_ = false;
 }
 

@@ -5086,8 +5086,10 @@ HWTEST_F(WebSelectOverlayTest, UpdateSelectMenuOptions, TestSize.Level1)
     WeakPtr<TextBase> textBase = nullptr;
     WebSelectOverlay overlay(textBase);
     overlay.webSelectInfo_.menuInfo.showTranslate = true;
+    overlay.webSelectInfo_.menuInfo.showSearch = true;
     overlay.UpdateSelectMenuOptions();
     EXPECT_FALSE(overlay.webSelectInfo_.menuInfo.showTranslate);
+    EXPECT_FALSE(overlay.webSelectInfo_.menuInfo.showSearch);
 }
 
 /**
@@ -5113,5 +5115,9 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTest006, TestSize.Level1)
     overlay.quickMenuCallback_ = callback;
     overlay.OnMenuItemAction(OptionMenuActionId::TRANSLATE, OptionMenuType::TOUCH_MENU);
     EXPECT_FALSE(overlay.startSelectionHandle_);
+    overlay.endSelectionHandle_ = std::make_shared<OHOS::NWeb::NWebTouchHandleStateMock>();
+    overlay.quickMenuCallback_ = callback;
+    overlay.OnMenuItemAction(OptionMenuActionId::SEARCH, OptionMenuType::TOUCH_MENU);
+    EXPECT_FALSE(overlay.endSelectionHandle_);
 }
 } // namespace OHOS::Ace::NG

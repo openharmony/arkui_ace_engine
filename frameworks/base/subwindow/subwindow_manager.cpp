@@ -1623,7 +1623,8 @@ bool SubwindowManager::IsWindowEnableSubWindowMenu(
 
 const RefPtr<Subwindow> SubwindowManager::GetSubwindowByType(int32_t instanceId, SubwindowType windowType)
 {
-    if (instanceId >= MIN_SUBCONTAINER_ID) {
+    if (instanceId >= MIN_SUBCONTAINER_ID && windowType != SubwindowType::TYPE_SYSTEM_TOP_MOST_TOAST &&
+        windowType != SubwindowType::TYPE_TOP_MOST_TOAST) {
         return GetSubwindowById(instanceId);
     }
 

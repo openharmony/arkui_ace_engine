@@ -17,8 +17,10 @@
 #define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVDESTINATION_NAVDESTINATION_MODEL_H
 
 #include <mutex>
+#include <optional>
 
 #include "base/system_bar/system_bar_style.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"

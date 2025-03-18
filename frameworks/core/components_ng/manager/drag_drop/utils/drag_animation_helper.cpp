@@ -1088,6 +1088,8 @@ void DragAnimationHelper::MountPixelMapSizeContentTransition(
 void DragAnimationHelper::CreateAndMountMenuPreviewNode(
     const PreparedInfoForDrag& data, const RefPtr<FrameNode>& stackFrameNode)
 {
+    CHECK_NULL_VOID(data.imageNode);
+    CHECK_NULL_VOID(data.menuPreviewNode);
     if (data.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION) {
         auto menuPreviewImageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });

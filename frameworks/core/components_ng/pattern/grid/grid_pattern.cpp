@@ -1444,7 +1444,6 @@ void GridPattern::StopAnimate()
 
 bool GridPattern::IsPredictOutOfRange(int32_t index) const
 {
-    CHECK_NULL_RETURN(info_.reachEnd_, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
