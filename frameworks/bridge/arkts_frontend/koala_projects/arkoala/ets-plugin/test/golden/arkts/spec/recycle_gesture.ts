@@ -1,9 +1,9 @@
-import { ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkText, ArkTextComponent, FlexAlign, FlexDirection, FlexOptions, GestureEvent, ItemAlign, stateOf } from "@koalaui/arkts-arkui";
+import { ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkReusableStruct, ArkText, ArkTextComponent, FlexAlign, FlexDirection, FlexOptions, GestureEvent, ItemAlign, stateOf } from "@koalaui/arkts-arkui";
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
 /** @memo:stable */
-class ArkGestureTestComponent extends ArkStructBase<ArkGestureTestComponent, GestureTestOptions> {
+class ArkGestureTestComponent extends ArkReusableStruct<ArkGestureTestComponent, GestureTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
     /** @memo */
@@ -24,6 +24,12 @@ class ArkGestureTestComponent extends ArkStructBase<ArkGestureTestComponent, Ges
     }
     private set width_value(value: string) {
         this.__backing_width_value!.value = observableProxy(value);
+    }
+    __rebindStates(initializers?: GestureTestOptions): void {
+        if (initializers?.count)
+            this.count = initializers!.count!;
+        if (initializers?.width_value)
+            this.width_value = initializers!.width_value!;
     }
     /** @memo */
     __build(/**/
@@ -64,7 +70,7 @@ content?: () => void, initializers?: GestureTestOptions): void {
         __backing_count: initializers?.__backing_count,
         __backing_width_value: initializers?.__backing_width_value
     };
-    ArkGestureTestComponent._instantiate(style, () => new ArkGestureTestComponent, content, updatedInitializers);
+    ArkGestureTestComponent._instantiate(style, () => new ArkGestureTestComponent, content, updatedInitializers, "ArkGestureTestComponent");
 }
 export interface GestureTestOptions {
     __backing_count?: MutableState<number>;

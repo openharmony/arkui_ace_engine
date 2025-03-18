@@ -19,7 +19,7 @@ import { IncrementalNode } from "../tree/IncrementalNode"
 import { StateContext } from "../states/State"
 @memo_intrinsic export declare function NodeAttach<Node extends IncrementalNode>(create: () => Node, @memo update: (node: Node) => void): void
 @memo_intrinsic export declare function contextNode<T extends IncrementalNode>(kind: uint32 = 1, name?: string): T
-export declare function NodeAttach<Node extends IncrementalNode>(__memo_context: StateContext, __memo_id: KoalaCallsiteKey, create: () => Node, update: (__memo_context: StateContext, __memo_id: KoalaCallsiteKey, node: Node) => void): void
+export declare function NodeAttach<Node extends IncrementalNode>(__memo_context: StateContext, __memo_id: KoalaCallsiteKey, create: () => Node, update: (__memo_context: StateContext, __memo_id: KoalaCallsiteKey, node: Node) => void, reuseKey?: string): void
 export declare function contextNode<T extends IncrementalNode>(__memo_context: StateContext, __memo_id: KoalaCallsiteKey, kind: uint32 = 1, name?: string): T
 export declare class DataNode<Data> extends IncrementalNode {
     constructor(kind: uint32 = 1)

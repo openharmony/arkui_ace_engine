@@ -20,6 +20,7 @@ export * from "./generated"
 export * from "./handwritten"
 
 export * from "./ArkStructBase"
+export * from "./ArkReusableStruct"
 export * from "./UserView"
 export * from "./stateOf"
 export * from "./ForEach"

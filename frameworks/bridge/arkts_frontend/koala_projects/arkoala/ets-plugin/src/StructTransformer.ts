@@ -56,6 +56,7 @@ import {
     prependMemoComment,
     prependMemoStable,
     provideVariableName,
+    ReusableDecorator,
     RewriteNames,
     styledInstance,
     voidLambdaType,
@@ -71,6 +72,7 @@ import {
     findDecoratorLiterals,
     findObjectPropertyValue,
     getDeclarationsByNode,
+    getDecorator,
     hasDecorator,
     id,
     isKnownIdentifier,
@@ -460,6 +462,9 @@ export class StructTransformer extends AbstractVisitor {
             translator.translateMember()
         )
         const updateStruct = this.createBuildProlog(structNode, structNode.members, propertyTranslators)
+        const rebindStates = this.allowReusable(structNode)
+            ? this.createRebindStatesMethod(structNode, propertyTranslators)
+            : undefined
 
         // The rest of the struct members are translated here directly.
         const restMembers = structNode.members.map(member => {
@@ -480,6 +485,7 @@ export class StructTransformer extends AbstractVisitor {
         return collect(
             ...propertyMembers,
             updateStruct,
+            rebindStates,
             ...restMembers
         )
     }
@@ -573,6 +579,16 @@ export class StructTransformer extends AbstractVisitor {
             )
         )
 
+        const argList = [
+            impl ? undefinedValue() : id("style"),
+            factory,
+            impl ? undefinedValue() : id("content"),
+            updatedInitializersId
+        ]
+        if (this.allowReusable(node)) {
+            // pass ClassName as ReuseKey
+            argList.push(ts.factory.createStringLiteral(className.text))
+        }
         const callInstantiate = ts.factory.createExpressionStatement(
             ts.factory.createCallExpression(
                 ts.factory.createPropertyAccessExpression(
@@ -580,12 +596,7 @@ export class StructTransformer extends AbstractVisitor {
                     id("_instantiate")
                 ),
                 undefined,
-                [
-                    impl ? undefinedValue() : id("style"),
-                    factory,
-                    impl ? undefinedValue() : id("content"),
-                    updatedInitializersId
-                ]
+                argList
             )
         )
 
@@ -746,6 +757,27 @@ export class StructTransformer extends AbstractVisitor {
         )
     }
 
+    createRebindStatesMethod(
+        node: ts.StructDeclaration, 
+        propertyTranslators: PropertyTranslator[]
+    ): ts.MethodDeclaration {
+        const parameters = [optionalParameter(initializers(), this.structOptions.createTypeReference(node))]
+
+        const updates = propertyTranslators
+            .map(it => it.translateToReuse())
+            .filter(isDefined)
+        return ts.factory.createMethodDeclaration(
+            undefined,
+            undefined,
+            RewriteNames.RebindStates,
+            undefined,
+            undefined,
+            parameters,
+            Void(),
+            ts.factory.createBlock(updates, true)
+        )
+    }
+
     createTopLevelInitialization(node: ts.StructDeclaration): ts.ExpressionStatement {
         const routerPage = this.entryTracker.sourceFileToRoute(this.sourceFile)
         return ts.factory.createExpressionStatement(
@@ -799,7 +831,9 @@ export class StructTransformer extends AbstractVisitor {
 
     translateStructToClass(node: ts.StructDeclaration): ts.ClassDeclaration {
         const className = this.translateComponentName(adaptorClassName(node.name)) // TODO make me string for proper reuse
-        const baseClassName = this.importer.withAdaptorImport("ArkStructBase")
+        const baseClassName = this.allowReusable(node)
+            ? this.importer.withAdaptorImport("ArkReusableStruct")
+            : this.importer.withAdaptorImport("ArkStructBase")
         this.createOptionsDeclaration(node)
 
         let entryLocalStorage: ts.Expression | undefined = undefined
@@ -1158,6 +1192,10 @@ export class StructTransformer extends AbstractVisitor {
         ) return false
 
         return true
+    }
+
+    allowReusable(node: ts.StructDeclaration) : boolean {
+        return this.importer.isArkts() && hasDecorator(node, ReusableDecorator)
     }
 
     visitor(beforeChildren: ts.Node): ts.Node {

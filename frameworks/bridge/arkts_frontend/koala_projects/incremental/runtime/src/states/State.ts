@@ -129,7 +129,15 @@ export interface StateContext {
     stateBy<Value>(name: string, global?: boolean): MutableState<Value> | undefined
     valueBy<Value>(name: string, global?: boolean): Value
     /** @internal */
-    scope<Value>(id: KoalaCallsiteKey, paramCount?: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean): InternalScope<Value>
+    scope<Value>(
+        id: KoalaCallsiteKey,
+        paramCount?: int32,
+        create?: () => IncrementalNode,
+        compute?: () => Value,
+        cleanup?: (value: Value | undefined) => void,
+        once?: boolean,
+        reuseKey?: string
+    ): InternalScope<Value>
     controlledScope(id: KoalaCallsiteKey, invalidate: () => void): ControlledScope
 }
 
@@ -195,12 +203,28 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
     readonly once: boolean
     readonly modified: boolean
     readonly parent: ManagedScope | undefined
+    readonly reuseKey: string | undefined
     next: ManagedScope | undefined
     recomputeNeeded: boolean
     addCreatedState(state: Disposable): void
     getNamedState<Value>(name: string): MutableState<Value> | undefined
     setNamedState(name: string, state: Disposable): void
-    getChildScope<Value>(id: KoalaCallsiteKey, paramCount: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean): ScopeImpl<Value>
+    /**
+     * @param reuseKey to categorize different templates of reusable nodes
+     */
+    getChildScope<Value>(
+        id: KoalaCallsiteKey,
+        paramCount: int32,
+        create?: () => IncrementalNode,
+        compute?: () => Value,
+        cleanup?: (value: Value | undefined) => void,
+        once?: boolean,
+        reuseKey?: string
+    ): ScopeImpl<Value>
+
+    /* TEMP: traverse all scopes in the subtree to update id */
+    /* will be replaced by memo-plugin that keeps id constant within Reusable scope */
+    traverseOnReuse(idDiff: number): void
     increment(count: uint32, skip: boolean): void
 }
 
@@ -649,13 +673,13 @@ class StateManagerImpl implements StateManager {
         return this.external
     }
 
-    scope<Value>(id: KoalaCallsiteKey, paramCount?: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean): InternalScope<Value> {
+    scope<Value>(id: KoalaCallsiteKey, paramCount?: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean, reuseKey?: string): InternalScope<Value> {
         const counters = KoalaProfiler.counters
         if (counters) {
             create ? counters.build() : counters.compute()
         }
         const scope = this.current
-        if (scope) return scope.getChildScope<Value>(id, paramCount ?? 0, create, compute, cleanup, once)
+        if (scope) return scope.getChildScope<Value>(id, paramCount ?? 0, create, compute, cleanup, once, reuseKey)
         throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") for the top level")
     }
 
@@ -783,17 +807,19 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     parentScope: ManagedScope | undefined = undefined
     next: ManagedScope | undefined = undefined
 
-    private readonly _id: KoalaCallsiteKey
+    private _id: KoalaCallsiteKey
     private _once: boolean = false
     private _node: IncrementalNode | undefined = undefined
     private _nodeRef: IncrementalNode | undefined = undefined
+    private readonly _reuseKey?: string  /** need to store on Scope because not obtainable in every @method recache */
     nodeCount: uint32 = 0
 
-    constructor(id: KoalaCallsiteKey, paramCount: int32, compute?: () => Value, cleanup?: (value: Value | undefined) => void) {
+    constructor(id: KoalaCallsiteKey, paramCount: int32, compute?: () => Value, cleanup?: (value: Value | undefined) => void, reuseKey?: string) {
         this._id = id // special type to distinguish scopes
         this.params = paramCount > 0 ? new Array<Disposable | undefined>(paramCount) : undefined
         this.myCompute = compute
         this.myCleanup = cleanup
+        this._reuseKey = reuseKey
     }
 
     hasDependencies(): boolean {
@@ -828,6 +854,10 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return this.parentScope
     }
 
+    get reuseKey(): string | undefined {
+        return this._reuseKey
+    }
+
     addCreatedState(state: Disposable): void {
         let statesCreated = this.statesCreated
         if (statesCreated === undefined) {
@@ -851,7 +881,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return state ? state as MutableState<T> : undefined
     }
 
-    getChildScope<Value>(id: KoalaCallsiteKey, paramCount: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean): ScopeImpl<Value> {
+    getChildScope<Value>(id: KoalaCallsiteKey, paramCount: int32, create?: () => IncrementalNode, compute?: () => Value, cleanup?: (value: Value | undefined) => void, once?: boolean, reuseKey?: string): ScopeImpl<Value> {
         const manager = this.manager
         if (manager === undefined) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the disposed scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
         manager.checkForStateCreating()
@@ -865,9 +895,15 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             }
         }
         if (once != true && this.once) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the remember scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
-        const scope = new ScopeImpl<Value>(id, paramCount, compute, cleanup)
+
+        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey) as ScopeImpl<Value> : undefined
+        const scope = reused ?? new ScopeImpl<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
-        if (create) {
+        if (reused) {
+            scope.recomputeNeeded = true
+            const idDiff = id - scope.id
+            scope.traverseOnReuse(idDiff) // remove later when memo-plugin is ready
+        } else if (create) {
             // create node within a scope
             scope._once = true
             manager.current = scope
@@ -888,6 +924,13 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return scope
     }
 
+    traverseOnReuse(idDiff: number): void {
+        this._id += idDiff
+        for (let child = this.child; child; child = child!.next) {
+            child!.traverseOnReuse(idDiff)
+        }
+    }
+
     private detachChildScopes(last?: ManagedScope): void {
         const inc = this.incremental
         let child = inc ? inc.next : this.child
@@ -903,7 +946,14 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         manager.current = undefined // allow to dispose children during recomputation
         while (child != last) {
             if (child === undefined) throw new Error("unexpected")
-            child.dispose()
+            // TEMP: explicit compares to avoid compiler bug
+            const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child) == true
+            if (recycled) {
+                if (!child.node) throw Error("reusable scope doesn't have a node")
+                child.node!.detach()
+            } else {
+                child.dispose()
+            }
             child = child.next
         }
         manager.current = scope

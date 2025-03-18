@@ -64,6 +64,25 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
     }
 
     /**
+     * Reuse a scope from the pool.
+     * @param reuseKey - The type of the scope to reuse.
+     * @returns A recycled scope, or undefined if none is available.
+     */
+    reuse(reuseKey: string): Disposable | undefined {
+        return undefined
+    }
+
+    /**
+     * Recycle a scope by adding it to the recycler pool for reuse.
+     * @param scope - The scope to recycle.
+     * @param reuseKey - The type of the scope (used as the key in the pool).
+     * @return true if child is successfully recycled
+     */
+    recycle(reuseKey: string, child: Disposable): boolean {
+        return false
+    }
+
+    /**
      * @returns `true` if this node should no longer be used
      */
     get disposed(): boolean {
@@ -71,15 +90,22 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
     }
 
     /**
-     * This method is called to remove this node from the hierarchy.
+     * This method is called to remove this node from the hierarchy and cleanup related resources.
      */
     dispose(): void {
         if (this._disposed) return
+        this._disposed = true
+        this.detach()
+    }
+
+    /**
+     * This method is called to remove this node from the hierarchy.
+     * @internal
+     */
+    detach(): void {
         const prev = this._prev
         const next = this._next
         const parent = this._parent
-        this._disposed = true
-        this._child = undefined
         if (prev) {
             this._prev = undefined
             prev._next = next

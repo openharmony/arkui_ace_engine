@@ -113,6 +113,7 @@ export {
 } from "./memo/repeat"
 export {
     TestNode,
+    ReusableTestNode,
     testRoot,
     testTick,
     testUpdate,

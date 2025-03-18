@@ -28,9 +28,11 @@ import { IncrementalNode } from "../tree/IncrementalNode"
 export function NodeAttach<Node extends IncrementalNode>(
     create: () => Node,
     /** @memo */
-    update: (node: Node) => void
+    update: (node: Node) => void,
+    reuseKey?: string
 ): void {
-    const scope = __context().scope<void>(__id(), 0, create)
+    const scope =
+        __context().scope<void>(__id(), 0, create, undefined, undefined, undefined, reuseKey)
     if (scope.unchanged) {
         scope.cached
     } else try {

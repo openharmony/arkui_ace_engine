@@ -21,9 +21,12 @@ export declare class IncrementalNode implements Disposable, ReadonlyTreeNode {
     protected onChildRemoved: ((node: IncrementalNode) => void) | undefined
     readonly kind: uint32
     constructor(kind: uint32 = 1)
-    isKind(kind: uint32): boolean 
+    isKind(kind: uint32): boolean
+    reuse(reuseKey: string): Disposable | undefined
+    recycle(reuseKey: string, child: Disposable): boolean
     get disposed(): boolean
     dispose(): void
+    detach(): void
     get parent(): IncrementalNode | undefined
     toString(): string
     toHierarchy(): string

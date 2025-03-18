@@ -1,4 +1,4 @@
-import { ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkListItem, ArkListItemComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkStructBase, ArkTabContent, ArkTabContentComponent, ArkTabs, ArkTabsComponent, ArkText, ArkTextComponent, BarPosition, Color, SyncedProperty, TabsController, TabsOptions, propState, stateOf } from "@koalaui/arkts-arkui";
+import { ArkButton, ArkButtonComponent, ArkColumn, ArkColumnComponent, ArkCommonMethodComponent, ArkFlex, ArkFlexComponent, ArkListItem, ArkListItemComponent, ArkPageTransitionEnterComponent, ArkPageTransitionExitComponent, ArkReusableStruct, ArkStructBase, ArkTabContent, ArkTabContentComponent, ArkTabs, ArkTabsComponent, ArkText, ArkTextComponent, BarPosition, Color, SyncedProperty, TabsController, TabsOptions, propState, stateOf } from "@koalaui/arkts-arkui";
 import { MutableState } from "@koalaui/runtime";
 import { LocalStorage } from "@koalaui/arkui-common";
 import { observableProxy } from "@koalaui/common";
@@ -50,7 +50,7 @@ class ArkHomeComponentComponent extends ArkStructBase<ArkHomeComponentComponent,
     }
 }
 /** @memo:stable */
-class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
+class ArkchildComponent extends ArkReusableStruct<ArkchildComponent, childOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
     /** @memo */
@@ -115,6 +115,16 @@ class ArkchildComponent extends ArkStructBase<ArkchildComponent, childOptions> {
     /** @memo */
     __updateStruct(initializers: childOptions | undefined): void {
         this.__backing_propvalue?.update(initializers?.propvalue);
+    }
+    __rebindStates(initializers?: childOptions): void {
+        this.__backing_propvalue?.update(initializers?.propvalue);
+        this.__backing_linkvalue = initializers!.__backing_linkvalue!;
+        if (initializers?.state_value)
+            this.state_value = initializers!.state_value!;
+        if (initializers?.width_value)
+            this.width_value = initializers!.width_value!;
+        if (initializers?.heightValue)
+            this.heightValue = initializers!.heightValue!;
     }
     /** @memo */
     __build(/**/
@@ -227,7 +237,7 @@ class ArkNormalComponentComponent extends ArkStructBase<ArkNormalComponentCompon
     }
 }
 /** @memo:stable */
-class ArkAnimationTestComponent extends ArkStructBase<ArkAnimationTestComponent, AnimationTestOptions> {
+class ArkAnimationTestComponent extends ArkReusableStruct<ArkAnimationTestComponent, AnimationTestOptions> {
     private _entry_local_storage_ = new LocalStorage();
     __initializeStruct(/**/
     /** @memo */
@@ -240,6 +250,10 @@ class ArkAnimationTestComponent extends ArkStructBase<ArkAnimationTestComponent,
     }
     private set width_value(value: string) {
         this.__backing_width_value!.value = observableProxy(value);
+    }
+    __rebindStates(initializers?: AnimationTestOptions): void {
+        if (initializers?.width_value)
+            this.width_value = initializers!.width_value!;
     }
     /** @memo */
     __build(/**/
@@ -284,7 +298,7 @@ content?: () => void, initializers?: childOptions): void {
         controller: initializers?.controller,
         __backing_heightValue: initializers?.__backing_heightValue
     };
-    ArkchildComponent._instantiate(style, () => new ArkchildComponent, content, updatedInitializers);
+    ArkchildComponent._instantiate(style, () => new ArkchildComponent, content, updatedInitializers, "ArkchildComponent");
 }
 /** @memo */
 export function NormalComponent(/**/
@@ -306,7 +320,7 @@ content?: () => void, initializers?: AnimationTestOptions): void {
     const updatedInitializers: AnimationTestOptions = {
         __backing_width_value: initializers?.__backing_width_value
     };
-    ArkAnimationTestComponent._instantiate(style, () => new ArkAnimationTestComponent, content, updatedInitializers);
+    ArkAnimationTestComponent._instantiate(style, () => new ArkAnimationTestComponent, content, updatedInitializers, "ArkAnimationTestComponent");
 }
 export interface HomeComponentOptions {
     __backing_state_value?: MutableState<string>;
