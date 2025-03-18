@@ -2737,6 +2737,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             };
             taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
         }
+        SetUiDvsyncSwitch(false);
     } else {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
