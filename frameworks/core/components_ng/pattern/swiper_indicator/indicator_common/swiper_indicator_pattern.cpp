@@ -299,7 +299,7 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
         auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
         CHECK_NULL_VOID(swiperLayoutProperty);
         if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
-            swiperPattern->ArrowHover(isHover_);
+            swiperPattern->ArrowHover(isHover_, HOVER_INDICATOR);
         }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

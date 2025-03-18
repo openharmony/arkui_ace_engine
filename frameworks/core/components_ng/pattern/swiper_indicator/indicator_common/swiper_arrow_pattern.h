@@ -76,6 +76,7 @@ public:
     void SetButtonVisible(bool visible);
     void DumpAdvanceInfo() override;
 private:
+    std::tuple<bool, bool, bool> CheckHoverStatus();
     void OnModifyDone() override;
     void InitNavigationArrow();
     void InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub);
