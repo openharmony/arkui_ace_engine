@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/cppview/canvas_image_data.h"
 
+#include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::Framework {
 constexpr double DIFF = 1e-10;
 constexpr int32_t PIXEL_SIZE = 4;
@@ -62,4 +63,9 @@ std::vector<uint8_t> NativeImageData::GetData() const
     return data;
 }
 
+double NativeImageData::GetDensity()
+{
+    double density = PipelineBase::GetCurrentDensity();
+    return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
+}
 } // namespace OHOS::Ace::Framework

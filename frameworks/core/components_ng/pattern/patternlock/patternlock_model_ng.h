@@ -52,6 +52,8 @@ public:
     static void SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect);
     static void SetEnableForeground(FrameNode* frameNode, bool enableForeground);
     static void SetSkipUnselectedPoint(FrameNode* frameNode, bool isSkipUnselectedPoint);
+    static void SetPatternComplete(FrameNode* frameNode, NG::PatternLockCompleteEvent&& onComplete);
+    static void SetDotConnect(FrameNode* frameNode, std::function<void(int32_t)>&& onDotConnect);
 };
 
 } // namespace OHOS::Ace::NG

@@ -80,18 +80,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
         return;
     }
 
-    // set draggable for framenode
-    if (!imageInfoConfig.isImageSpan) {
-        auto pipeline = frameNode->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto draggable = pipeline->GetDraggable<ImageTheme>();
-        if (draggable && !frameNode->IsDraggable()) {
-            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-            CHECK_NULL_VOID(gestureHub);
-            gestureHub->InitDragDropEvent();
-        }
-        frameNode->SetDraggable(true);
-    }
+    SetDraggableForFrameNode(frameNode, imageInfoConfig.isImageSpan);
     auto srcInfo =
         CreateSourceInfo(imageInfoConfig.src, pixMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
     srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
@@ -114,6 +103,36 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
 }
 
+void ImageModelNG::Create(const RefPtr<DrawableDescriptor>& drawable)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    stack->Push(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    pattern->SetNeedLoadAlt(true);
+    pattern->SetImageType(ImageType::PIXELMAP_DRAWABLE);
+    pattern->SetDrawable(drawable);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    SetDraggableForFrameNode(frameNode);
+}
+
+void ImageModelNG::SetDraggableForFrameNode(RefPtr<FrameNode> frameNode, bool isImageSpan)
+{
+    if (frameNode->IsFirstBuilding() && !isImageSpan) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<ImageTheme>();
+        if (draggable && !frameNode->IsDraggable()) {
+            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureHub);
+            gestureHub->InitDragDropEvent();
+        }
+        frameNode->SetDraggable(draggable);
+    }
+}
+
 void ImageModelNG::ResetImage()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -130,7 +149,7 @@ void ImageModelNG::ResetImage()
     CHECK_NULL_VOID(pattern);
     pattern->SetNeedLoadAlt(false);
     pattern->ResetImageAndAlt();
-    if (pattern->GetImageType() == ImageType::ANIMATION) {
+    if (pattern->GetImageType() == ImageType::ANIMATED_DRAWABLE) {
         if (pattern->GetHasSizeChanged()) {
             pattern->ResetPictureSize();
         }
@@ -216,7 +235,7 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
     frameNode->SetDraggable(draggable);
     pattern->SetSrcUndefined(false);
     pattern->StopAnimation();
-    pattern->SetImageType(ImageType::ANIMATION);
+    pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
     std::vector<ImageProperties> images = imageList;
     pattern->SetImages(std::move(images));
     pattern->SetDuration(duration);
@@ -623,7 +642,7 @@ void ImageModelNG::SetPixelMapArray(FrameNode* frameNode, void* animatedDrawable
     CHECK_NULL_VOID(pattern);
 
     pattern->StopAnimation();
-    pattern->SetImageType(ImageType::ANIMATION);
+    pattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
     pattern->SetImages(std::move(images));
     pattern->SetDuration(duration);
     pattern->SetIteration(iterations);
@@ -1036,7 +1055,7 @@ void ImageModelNG::ResetImageSrc(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetImage();
-    if (pattern->GetImageType() == ImageType::ANIMATION) {
+    if (pattern->GetImageType() == ImageType::ANIMATED_DRAWABLE) {
         if (pattern->GetHasSizeChanged()) {
             pattern->ResetPictureSize();
         }

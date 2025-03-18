@@ -82,8 +82,9 @@ public:
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnColorConfigurationUpdate() override;
     void DumpInfo() override;
-    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void OnVisibleChange(bool isVisible) override;
     void OnWindowHide() override;
     void OnWindowShow() override;

@@ -34,40 +34,7 @@ struct SwitchPaintParagraph {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBorderRadius, Dimension);
 
     void ToJsonValue(
-        std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode> host) const
-    {
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        int32_t themeScopeId = 0;
-        if (host) {
-            themeScopeId = host->GetThemeScopeId();
-        }
-        auto pipeline = host->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto switchTheme = pipeline->GetTheme<SwitchTheme>(themeScopeId);
-        CHECK_NULL_VOID(switchTheme);
-        auto selectedColor = switchTheme->GetActiveColor();
-        auto switchPointColor = switchTheme->GetPointColor();
-        json->PutExtAttr("selectedColor", propSelectedColor.value_or(selectedColor).ColorToString().c_str(), filter);
-        json->PutExtAttr("switchPointColor",
-            propSwitchPointColor.value_or(switchPointColor).ColorToString().c_str(), filter);
-        auto defaultHeight = (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2);
-        auto defaultPointRadius = defaultHeight / 2 - 2.0_vp; // Get the default radius of the point.
-        if (propPointRadius.has_value()) {
-            json->PutExtAttr("pointRadius", propPointRadius.value().ToString().c_str(), filter);
-        } else {
-            json->PutExtAttr("pointRadius", defaultPointRadius.ToString().c_str(), filter);
-        }
-        json->PutExtAttr("unselectedColor", propUnselectedColor.value_or(Color()).ColorToString().c_str(), filter);
-        auto defaultTrackBorderRadius = defaultHeight / 2; // Get the default border radius of the track.
-        if (propTrackBorderRadius.has_value()) {
-            json->PutExtAttr("trackBorderRadius", propTrackBorderRadius.value().ToString().c_str(), filter);
-        } else {
-            json->PutExtAttr("trackBorderRadius", defaultTrackBorderRadius.ToString().c_str(), filter);
-        }
-    }
+        std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode> host) const;
 };
 
 struct SwitchAnimationStyle {
@@ -81,39 +48,11 @@ class SwitchPaintProperty : public PaintProperty {
 public:
     SwitchPaintProperty() = default;
     ~SwitchPaintProperty() override = default;
-    RefPtr<PaintProperty> Clone() const override
-    {
-        auto value = MakeRefPtr<SwitchPaintProperty>();
-        value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
-        value->propSwitchPaintParagraph_ = CloneSwitchPaintParagraph();
-        value->propIsOn_ = CloneIsOn();
-        value->propSwitchAnimationStyle_ = CloneSwitchAnimationStyle();
-        return value;
-    }
+    RefPtr<PaintProperty> Clone() const override;
 
-    void Reset() override
-    {
-        PaintProperty::Reset();
-        ResetSwitchPaintParagraph();
-        ResetIsOn();
-        ResetSwitchAnimationStyle();
-    }
+    void Reset() override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        if (propSwitchPaintParagraph_) {
-            propSwitchPaintParagraph_->ToJsonValue(json, filter, GetHost());
-        } else {
-            SwitchPaintParagraph switchPaintParagraph;
-            switchPaintParagraph.ToJsonValue(json, filter, GetHost());
-        }
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        json->PutExtAttr("type", "ToggleType.Switch", filter);
-        json->PutExtAttr("isOn", propIsOn_.value_or(false) ? "true" : "false", filter);
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     ACE_DEFINE_PROPERTY_GROUP(SwitchAnimationStyle, SwitchAnimationStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchAnimationStyle, Duration, int32_t, PROPERTY_UPDATE_RENDER);

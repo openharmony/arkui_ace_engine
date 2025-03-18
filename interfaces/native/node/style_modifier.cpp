@@ -26,6 +26,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -1031,7 +1032,7 @@ int32_t SetBackgroundImageResizableWithSlice(ArkUI_NodeHandle node, const ArkUI_
         // value
         options[i * NUM_3 + NUM_1] = { (item->value[i].f32 < ZERO_F ? ZERO_F : item->value[i].f32), nullptr };
         // unit
-        options[i * NUM_3 + NUM_2] = { UNIT_VP, nullptr };
+        options[i * NUM_3 + NUM_2] = { GetDefaultUnit(node, UNIT_VP), nullptr };
     }
 
     auto* fullImpl = GetFullImpl();
@@ -1411,7 +1412,7 @@ int32_t SetBlur(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     ArkUI_Float64 blur = item->value[NUM_0].f32;
     BlurOption blurOption;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBlur(
-        node->uiNodeHandle, blur, blurOption.grayscale.data(), blurOption.grayscale.size());
+        node->uiNodeHandle, blur, blurOption.grayscale.data(), blurOption.grayscale.size(), true);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -8289,6 +8290,19 @@ const ArkUI_AttributeItem* GetSwiperNextMargin(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+void SetBottomAndIgnoreSize(const ArkUI_SwiperDigitIndicator* indicator,
+    ArkUISwiperDigitIndicator& indicatorProp)
+{
+    auto bottom = ArkUIOptionalFloat { indicator->dimBottom.isSet, indicator->dimBottom.value };
+    indicatorProp.dimBottom = bottom;
+    if (bottom.isSet && bottom.value <= 0.0f) {
+        indicatorProp.ignoreSizeValue = ArkUIOptionalInt { indicator->ignoreSizeValue.isSet,
+        indicator->ignoreSizeValue.value };
+    } else {
+        indicatorProp.ignoreSizeValue = ArkUIOptionalInt { indicator->ignoreSizeValue.isSet, 0 };
+    }
+}
+
 int32_t SetSwiperDigitIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->value[0].i32 == ARKUI_SWIPER_INDICATOR_TYPE_DIGIT) {
@@ -8301,7 +8315,7 @@ int32_t SetSwiperDigitIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem
         indicatorProp.dimLeft = ArkUIOptionalFloat { indicator->dimLeft.isSet, indicator->dimLeft.value };
         indicatorProp.dimTop = ArkUIOptionalFloat { indicator->dimTop.isSet, indicator->dimTop.value };
         indicatorProp.dimRight = ArkUIOptionalFloat { indicator->dimRight.isSet, indicator->dimRight.value };
-        indicatorProp.dimBottom = ArkUIOptionalFloat { indicator->dimBottom.isSet, indicator->dimBottom.value };
+
         if (indicator->type == ARKUI_SWIPER_INDICATOR_TYPE_DIGIT) {
             indicatorProp.fontColor = ArkUIOptionalUint { indicator->fontColor.isSet, indicator->fontColor.value };
             indicatorProp.selectedFontColor =
@@ -8312,8 +8326,7 @@ int32_t SetSwiperDigitIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem
             indicatorProp.fontWeight = ArkUIOptionalUint { indicator->fontWeight.isSet, indicator->fontWeight.value };
             indicatorProp.selectedFontWeight =
                 ArkUIOptionalUint { indicator->selectedFontWeight.isSet, indicator->selectedFontWeight.value };
-            indicatorProp.ignoreSizeValue = ArkUIOptionalInt { indicator->ignoreSizeValue.isSet,
-                indicator->ignoreSizeValue.value };
+            SetBottomAndIgnoreSize(indicator, indicatorProp);
         } else {
             return ERROR_CODE_PARAM_INVALID;
         }
@@ -9556,17 +9569,36 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE),
-        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_MULTI), item->value[NUM_0].i32)) {
+        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT), item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     bool isSingleRange = false;
     auto fullImpl = GetFullImpl();
-    if (!item->string) {
+    if (!item->string && !item->object) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    isSingleRange = item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE);
-    fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(
-        node->uiNodeHandle, item->string, isSingleRange, item->value[NUM_0].i32);
+    if (item->object) {
+        if (item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_RANGE_CONTENT)) {
+            auto* TextPickerRangeContentArray = reinterpret_cast<ArkUITextPickerRangeContentArray>(item->object);
+            if (TextPickerRangeContentArray == nullptr) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerIconRangeStr(
+                node->uiNodeHandle, TextPickerRangeContentArray, isSingleRange, item->value[NUM_0].i32);
+        } else if (item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT)) {
+            auto TextCascadePickerRangeContentArray =
+                reinterpret_cast<ArkUITextCascadePickerRangeContentArray>(item->object);
+            if (TextCascadePickerRangeContentArray == nullptr) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextCascadePickRangeContent(
+                node->uiNodeHandle, TextCascadePickerRangeContentArray, item->value[NUM_0].i32);
+        }
+    } else if (item->string) {
+        isSingleRange = item->value[NUM_0].i32 == static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE);
+        fullImpl->getNodeModifiers()->getTextPickerModifier()->setTextPickerRangeStr(
+            node->uiNodeHandle, item->string, isSingleRange, item->value[NUM_0].i32);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -10069,7 +10101,7 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     bool isValidColor = false;
     Color inactiveColor = Color::TRANSPARENT;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
-        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue());
+        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue(), true);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -10109,9 +10141,9 @@ int32_t SetForegroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
     BlurOption blurOption = {{grayScaleStart, grayScaleEnd}};
-    
+
     fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundBlurStyle(
-        node->uiNodeHandle, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
+        node->uiNodeHandle, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size(), true);
     return ERROR_CODE_NO_ERROR;
 }
 

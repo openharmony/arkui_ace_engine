@@ -395,7 +395,7 @@ ArkUI_Int32 IsInitialized(ArkUINodeHandle node, ArkUI_Bool* isInitialized)
     }
     bool value;
     auto res = xcPattern->IsInitialized(value);
-    *isInitialized = static_cast<ArkUI_Bool>(value);
+    *isInitialized = value;
     return res;
 }
 

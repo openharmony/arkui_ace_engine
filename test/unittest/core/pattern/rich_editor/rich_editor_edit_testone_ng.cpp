@@ -1137,7 +1137,8 @@ HWTEST_F(RichEditorEditTestOneNg, GetChangeSpanStyle001, TestSize.Level1)
     richEditorPattern->spans_.emplace_back(spanItem1);
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem2);
-    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
+    std::optional<std::u16string> urlAddress;
+    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
     /**
      * @tc.steps: step2. change parameter and call function.
@@ -1145,13 +1146,13 @@ HWTEST_F(RichEditorEditTestOneNg, GetChangeSpanStyle001, TestSize.Level1)
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem3 = AceType::MakeRefPtr<ImageSpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem3);
     lastInfo.SetSpanIndex(richEditorPattern->spans_.size() - 1);
-    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
+    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
     /**
      * @tc.steps: step4. change parameter and call function.
     */
     lastInfo.SetEraseLength(lastLength - 1);
-    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
+    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
 }
 

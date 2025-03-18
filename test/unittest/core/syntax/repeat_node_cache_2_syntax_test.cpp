@@ -611,4 +611,108 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test013, TestSize.Level1)
     std::optional<RIDType> rid = repeatNode->caches_.GetRID4Index(0);
     EXPECT_EQ(rid.value(), 1);
 }
+
+/**
+ * @tc.name: RepeatNodeCache2Test014
+ * @tc.desc: Test caches.ConvertFromToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test014, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(1014, 6);
+    repeatNode->MoveData(0, 1);
+    repeatNode->MoveData(1, 2);
+    repeatNode->MoveData(2, 3);
+    
+    /**
+     * @tc.steps: step1.
+     * @tc.expected: index is 0, mappedIndex should be 1.
+     */
+    IndexType mappedIndex = repeatNode->caches_.ConvertFromToIndex(0);
+    EXPECT_EQ(mappedIndex, 1);
+
+    /**
+     * @tc.steps: step2.
+     * @tc.expected: index is 1, mappedIndex should be 2.
+     */
+    mappedIndex = repeatNode->caches_.ConvertFromToIndex(1);
+    EXPECT_EQ(mappedIndex, 2);
+
+    /**
+     * @tc.steps: step3.
+     * @tc.expected: index is 2, mappedIndex should be 3.
+     */
+    mappedIndex = repeatNode->caches_.ConvertFromToIndex(2);
+    EXPECT_EQ(mappedIndex, 3);
+
+    /**
+     * @tc.steps: step4.
+     * @tc.expected: index is 3, mappedIndex should be 0.
+     */
+    mappedIndex = repeatNode->caches_.ConvertFromToIndex(3);
+    EXPECT_EQ(mappedIndex, 0);
+
+    /**
+     * @tc.steps: step5.
+     * @tc.expected: index is 4, 5, 6, mappedIndex should be same with index.
+     */
+    mappedIndex = repeatNode->caches_.ConvertFromToIndex(4);
+    EXPECT_EQ(mappedIndex, 4);
+    mappedIndex = repeatNode->caches_.ConvertFromToIndex(5);
+    EXPECT_EQ(mappedIndex, 5);
+    mappedIndex = repeatNode->caches_.ConvertFromToIndex(6);
+    EXPECT_EQ(mappedIndex, 6);
+}
+
+/**
+ * @tc.name: RepeatNodeCache2Test015
+ * @tc.desc: Test caches.ConvertFromToIndexRevert
+ * @tc.type: FUNC
+ */
+HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test015, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(1015, 6);
+    repeatNode->MoveData(0, 1);
+    repeatNode->MoveData(1, 2);
+    repeatNode->MoveData(2, 3);
+    
+    /**
+     * @tc.steps: step1.
+     * @tc.expected: index is 0, mappedIndex should be 3.
+     */
+    IndexType mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(0);
+    EXPECT_EQ(mappedIndex, 3);
+
+    /**
+     * @tc.steps: step2.
+     * @tc.expected: index is 1, mappedIndex should be 0.
+     */
+    mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(1);
+    EXPECT_EQ(mappedIndex, 0);
+
+    /**
+     * @tc.steps: step3.
+     * @tc.expected: index is 2, mappedIndex should be 1.
+     */
+    mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(2);
+    EXPECT_EQ(mappedIndex, 1);
+
+    /**
+     * @tc.steps: step4.
+     * @tc.expected: index is 3, mappedIndex should be 2.
+     */
+    mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(3);
+    EXPECT_EQ(mappedIndex, 2);
+
+    /**
+     * @tc.steps: step5.
+     * @tc.expected: index is 4, 5, 6, mappedIndex should be same with index.
+     */
+    mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(4);
+    EXPECT_EQ(mappedIndex, 4);
+    mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(5);
+    EXPECT_EQ(mappedIndex, 5);
+    mappedIndex = repeatNode->caches_.ConvertFromToIndexRevert(6);
+    EXPECT_EQ(mappedIndex, 6);
+}
 } // namespace OHOS::Ace::NG
