@@ -896,42 +896,34 @@ std::shared_ptr<RSShaderEffect> RosenRenderTextField::MakeGradientShader(double 
     // Width hidden on the right side. Attention: textOffsetForShowCaret_.GetX() is less than 0.
     double rightOverflow = textWidth + textOffsetForShowCaret_.GetX() - innerRect_.Width();
     bool needShadeRight = rightOverflow > 1.0;
-
-    if (!needShadeLeft && !needShadeRight) {
+    if ((!needShadeLeft && !needShadeRight) || !innerRect_.IsValid()) {
         return nullptr;
     }
-    if (!innerRect_.IsValid()) {
-        return nullptr;
-    }
-
     auto posLeft = static_cast<float>(shadeWidth / innerRect_.Width());
     float posRight = 1.0f - (posLeft * 2.0f);
-    if (posRight < posLeft) {
-        posRight = posLeft;
-    }
-
+    posRight = (posRight < posLeft) ? posLeft : posRight;
     uint32_t originColor = style_.GetTextColor().GetValue();
     uint32_t transparentColor = originColor & 0x00FFFFFF;
-
 #ifndef USE_ROSEN_DRAWING
     SkPoint pts[] = { SkPoint::Make(SkDoubleToScalar(innerRect_.Left()), SkDoubleToScalar(0.0)),
         SkPoint::Make(SkDoubleToScalar(innerRect_.Right()), SkDoubleToScalar(0.0)) };
     // Text or placeholder color from alpha 0 - 255
     SkColor colors[] = { transparentColor, originColor, originColor, transparentColor };
     float pos[] = { 0.0f, posLeft, posRight, 1.0f };
-
-    int32_t start = 0;
     int32_t renderCount = static_cast<int32_t>(sizeof(pos) / sizeof(pos[0]));
+    constexpr int32_t colorArrayLength = static_cast<int32_t>(sizeof(colors) / sizeof(SkColor));
+    constexpr int32_t posArrayLength = static_cast<int32_t>(sizeof(pos) / sizeof(float));
 #else
     RSPoint startPoint = RSPoint(static_cast<RSScalar>(innerRect_.Left()), static_cast<RSScalar>(0.0));
     RSPoint endPoint = RSPoint(static_cast<RSScalar>(innerRect_.Right()), static_cast<RSScalar>(0.0));
     // Text or placeholder color from alpha 0 - 255
     RSColorQuad colorsTemplate[] = { transparentColor, originColor, originColor, transparentColor };
     RSScalar posTemplate[] = { 0.0f, posLeft, posRight, 1.0f };
-
-    int32_t start = 0;
+    constexpr int32_t colorArrayLength = static_cast<int32_t>(sizeof(colorsTemplate) / sizeof(RSColorQuad));
+    constexpr int32_t posArrayLength = static_cast<int32_t>(sizeof(posTemplate) / sizeof(RSScalar));
     int32_t renderCount = static_cast<int32_t>(sizeof(posTemplate) / sizeof(posTemplate[0]));
 #endif
+    int32_t start = 0;
     int32_t totalCount = renderCount;
     if (!needShadeLeft) {
         start = 2;
@@ -949,11 +941,12 @@ std::shared_ptr<RSShaderEffect> RosenRenderTextField::MakeGradientShader(double 
         }
     }
 #ifndef USE_ROSEN_DRAWING
-    return SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkTileMode::kClamp);
+    return (start >= colorArrayLength || start >= posArrayLength)? nullptr:
+        SkGradientShader::MakeLinear(pts, &colors[start], &pos[start], renderCount, SkTileMode::kClamp);
 #else
     std::vector<RSColorQuad> colors;
     std::vector<RSScalar> pos;
-    for (int i = 0; i < renderCount; i++) {
+    for (int i = 0; i < renderCount && start + i < colorArrayLength && start + i < posArrayLength; i++) {
         colors.push_back(colorsTemplate[start + i]);
         pos.push_back(posTemplate[start + i]);
     }

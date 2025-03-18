@@ -286,4 +286,16 @@ void OverlengthDotIndicatorPaintMethod::AnalysisIndexRange(int32_t& nposStation)
         nposStation = NUM_3;
     }
 }
+
+void OverlengthDotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& itemHalfSizes,
+    const SizeF& frameSize, const int32_t displayCount, const Dimension& indicatorDotItemSpace, bool ignoreSize)
+{
+    if (maxDisplayCount_ > 0 && isBindIndicator_) {
+        normalMargin_.Reset();
+        return;
+    }
+
+    DotIndicatorPaintMethod::CalculateNormalMargin(
+        itemHalfSizes, frameSize, displayCount, indicatorDotItemSpace, ignoreSize);
+}
 } // namespace OHOS::Ace::NG

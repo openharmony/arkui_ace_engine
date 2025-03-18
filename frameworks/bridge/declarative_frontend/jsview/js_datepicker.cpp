@@ -511,6 +511,9 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
+        DatePickerModel::GetInstance()->UpdateUserSetSelectColor();
+    }
 }
 
 void JSDatePicker::JsOpacity(const JSCallbackInfo& info)
@@ -1607,6 +1610,9 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
         JSDatePicker::ParseTextStyle(info[0], textStyle, "selectedTextStyleTime");
     }
     TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
+        TimePickerModel::GetInstance()->UpdateUserSetSelectColor();
+    }
 }
 
 void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)

@@ -417,6 +417,7 @@ void FfiOHOSAceFrameworkInteractableViewOnDragStart(CJDragItemInfo (*callback)(C
 #endif
         itemInfo.extraInfo = ret.extraInfo;
         itemInfo.node = node;
+        ReleaseCJDragItemInfo(ret);
         return itemInfo;
     };
 

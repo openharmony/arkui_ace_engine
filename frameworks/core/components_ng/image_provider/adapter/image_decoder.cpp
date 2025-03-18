@@ -37,7 +37,8 @@ ImageDecoder::ImageDecoder(const RefPtr<ImageObject>& obj, const SizeF& size, bo
     CHECK_NULL_VOID(obj_);
     CHECK_NULL_VOID(ImageProvider::PrepareImageData(obj_));
 
-    auto data = AceType::DynamicCast<DrawingImageData>(obj_->GetData());
+    auto imageData = obj_->GetData();
+    auto data = AceType::DynamicCast<DrawingImageData>(imageData);
     CHECK_NULL_VOID(data);
     data_ = data->GetRSData();
 }

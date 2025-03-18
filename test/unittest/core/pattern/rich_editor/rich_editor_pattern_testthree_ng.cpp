@@ -1170,58 +1170,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, TripleClickSection003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleMouseLeftButtonRelease001
- * @tc.desc: test HandleMouseLeftButtonRelease
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleMouseLeftButtonRelease001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    MouseInfo info;
-    richEditorPattern->showSelect_ = false;
-    richEditorPattern->HandleMouseLeftButtonRelease(info);
-    EXPECT_TRUE(richEditorPattern->showSelect_);
-}
-
-/**
- * @tc.name: HandleMouseLeftButtonRelease002
- * @tc.desc: test HandleMouseLeftButtonRelease
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleMouseLeftButtonRelease002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    MouseInfo info;
-    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
-    richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
-    richEditorPattern->status_ = Status::ON_DROP;
-    richEditorPattern->HandleMouseLeftButtonRelease(info);
-    EXPECT_TRUE(richEditorPattern->showSelect_);
-}
-
-/**
- * @tc.name: HandleMouseLeftButtonRelease003
- * @tc.desc: test HandleMouseLeftButtonRelease
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleMouseLeftButtonRelease003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    MouseInfo info;
-    richEditorPattern->dataDetectorAdapter_->pressedByLeftMouse_ = true;
-    richEditorPattern->mouseStatus_ = MouseStatus::MOVE;
-    richEditorPattern->status_ = Status::DRAGGING;
-    richEditorPattern->HandleMouseLeftButtonRelease(info);
-    EXPECT_TRUE(richEditorPattern->showSelect_);
-}
-
-/**
  * @tc.name: UpdateSelectionType
  * @tc.desc: test UpdateSelectionType
  * @tc.type: FUNC

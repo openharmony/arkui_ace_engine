@@ -45,6 +45,7 @@ struct ACE_FORCE_EXPORT TreeParams {
     std::string webContentJs;
     bool isWindowIdOnly = false;
     bool enableFullAttrs = false;
+    bool enableAllNodes = false;
     InspectorPageType inspectorType { InspectorPageType::FOCUS };
     InspectorInfoType infoType { InspectorInfoType::CONTENT };
     int32_t webId = 0;

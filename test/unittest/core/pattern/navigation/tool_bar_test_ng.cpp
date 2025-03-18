@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,10 @@
 #define private public
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
@@ -32,6 +34,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -60,6 +63,7 @@ struct TestParameters {
 } // namespace
 class ToolBarTestNg : public testing::Test {
 public:
+    static RefPtr<ButtonTheme> buttonTheme_;
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     static void MockPipelineContextGetTheme();
@@ -78,14 +82,29 @@ public:
     RefPtr<TitleBarNode> titleBarNode_;
 };
 
+RefPtr<ButtonTheme> ToolBarTestNg::buttonTheme_ = nullptr;
+
 void ToolBarTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+
+    buttonTheme_ = AceType::MakeRefPtr<ButtonTheme>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == ButtonTheme::TypeId()) {
+            return buttonTheme_;
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void ToolBarTestNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 void ToolBarTestNg::SetUp()
@@ -513,131 +532,6 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternTest009, TestSize.Level1)
     NavigationToolbarOptions opt;
     opt.brOptions.textHideOptions = true;
     navToolbarPattern->SetToolbarOptions(std::move(opt));
-}
-
-/**
- * @tc.name: NavToolbarPatternOnModifyDone001
- * @tc.desc: Increase the coverage of NavToolbarPattern::OnModifyDone function.
- * @tc.type: FUNC
- */
-HWTEST_F(ToolBarTestNg, NavToolbarPatternOnModifyDone001, TestSize.Level1)
-{
-    auto containerNode = FrameNode::GetOrCreateFrameNode(
-        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    ASSERT_NE(containerNode, nullptr);
-    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
-        "Toolbar", 201, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
-    ASSERT_NE(toolbarNode, nullptr);
-    toolbarNode->SetToolbarContainerNode(containerNode);
-    auto navToolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
-    ASSERT_NE(navToolbarPattern, nullptr);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->fontScale_ = AgingAdapationDialogUtil::GetDialogBigFontSizeScale() - 1.0f;
-    EXPECT_TRUE(LessNotEqual(context->fontScale_, AgingAdapationDialogUtil::GetDialogBigFontSizeScale()));
-    navToolbarPattern->OnModifyDone();
-
-    context->fontScale_ = AgingAdapationDialogUtil::GetDialogBigFontSizeScale() + 1.0f;
-    EXPECT_FALSE(LessNotEqual(context->fontScale_, AgingAdapationDialogUtil::GetDialogBigFontSizeScale()));
-    navToolbarPattern->OnModifyDone();
-}
-
-/**
- * @tc.name: NavToolbarPatternInitDragEvent001
- * @tc.desc: Increase the coverage of NavToolbarPattern::InitDragEvent function.
- * @tc.type: FUNC
- */
-HWTEST_F(ToolBarTestNg, NavToolbarPatternInitDragEvent001, TestSize.Level1)
-{
-    auto containerNode = FrameNode::GetOrCreateFrameNode(
-        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    auto gestureHub = containerNode->GetOrCreateGestureEventHub();
-    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
-        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
-    toolbarNode->SetToolbarContainerNode(containerNode);
-    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
-    ASSERT_NE(toolbarPattern, nullptr);
-    toolbarPattern->InitDragEvent(gestureHub);
-    ASSERT_NE(gestureHub->GetDragEventActuator(), nullptr);
-    ASSERT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
-    auto actionUpdate = gestureHub->GetDragEventActuator()->userCallback_->GetActionUpdateEventFunc();
-    ASSERT_NE(actionUpdate, nullptr);
-    GestureEvent info;
-    auto barItem1 = BarItemNode::GetOrCreateBarItemNode(
-        "BarItem", 201, []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto geometryNode = barItem1->GetGeometryNode();
-    geometryNode->SetFrameWidth(100);
-    geometryNode->SetFrameHeight(50);
-    containerNode->children_.emplace_front(barItem1);
-    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
-    actionUpdate(info);
-    
-    auto dialogNode = FrameNode::GetOrCreateFrameNode(
-        "Dailog", 401, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    toolbarPattern->dialogNode_ = dialogNode;
-    toolbarPattern->moveIndex_ = -1;
-    EXPECT_NE(toolbarPattern->dialogNode_, nullptr);
-    EXPECT_TRUE(toolbarPattern->moveIndex_.has_value());
-    actionUpdate(info);
-
-    toolbarPattern->dialogNode_ = dialogNode;
-    toolbarPattern->moveIndex_ = std::nullopt;
-    EXPECT_NE(toolbarPattern->dialogNode_, nullptr);
-    EXPECT_FALSE(toolbarPattern->moveIndex_.has_value());
-    actionUpdate(info);
-}
-
-/**
- * @tc.name: NavToolbarPatternShowDialogWithNode001
- * @tc.desc: Increase the coverage of NavToolbarPattern::ShowDialogWithNode function.
- * @tc.type: FUNC
- */
-HWTEST_F(ToolBarTestNg, NavToolbarPatternShowDialogWithNode001, TestSize.Level1)
-{
-    ToolBarTestNg::MockPipelineContextGetTheme();
-    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
-        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
-    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
-    ASSERT_NE(toolbarPattern, nullptr);
-    auto barItem1 = BarItemNode::GetOrCreateBarItemNode(
-        "BarItem", 201, []() { return AceType::MakeRefPtr<Pattern>(); });
-    EXPECT_FALSE(barItem1->IsMoreItemNode());
-    EXPECT_EQ(AceType::DynamicCast<FrameNode>(barItem1->GetTextNode()), nullptr);
-    EXPECT_EQ(AceType::DynamicCast<FrameNode>(barItem1->GetIconNode()), nullptr);
-    toolbarPattern->ShowDialogWithNode(barItem1);
-
-    auto textNode = FrameNode::CreateFrameNode("Text", 0, AceType::MakeRefPtr<TextPattern>());
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->propContent_ = u"";
-    barItem1->SetTextNode(textNode);
-    auto imageNode = FrameNode::GetOrCreateFrameNode(
-        "Image", 1, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    barItem1->SetIconNode(imageNode);
-    EXPECT_NE(AceType::DynamicCast<FrameNode>(barItem1->GetTextNode()), nullptr);
-    ASSERT_TRUE(textLayoutProperty->GetContent().has_value());
-    EXPECT_TRUE(textLayoutProperty->GetContent().value().empty());
-    EXPECT_NE(AceType::DynamicCast<FrameNode>(barItem1->GetIconNode()), nullptr);
-    EXPECT_NE(imageNode->GetTag(), V2::SYMBOL_ETS_TAG);
-    toolbarPattern->ShowDialogWithNode(barItem1);
-
-    textLayoutProperty->propContent_ = u"test";
-    imageNode->tag_ = V2::SYMBOL_ETS_TAG;
-    ASSERT_TRUE(textLayoutProperty->GetContent().has_value());
-    EXPECT_FALSE(textLayoutProperty->GetContent().value().empty());
-    EXPECT_EQ(imageNode->GetTag(), V2::SYMBOL_ETS_TAG);
-    toolbarPattern->ShowDialogWithNode(barItem1);
-
-    barItem1->isMoreItemNode_ = true;
-    AceApplicationInfo& applicationInfo = AceApplicationInfo::GetInstance();
-    applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
-    EXPECT_TRUE(barItem1->IsMoreItemNode());
-    EXPECT_FALSE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
-    toolbarPattern->ShowDialogWithNode(barItem1);
-
-    applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    EXPECT_TRUE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
-    toolbarPattern->ShowDialogWithNode(barItem1);
 }
 
 /**
@@ -1079,5 +973,198 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest006, TestSize.Leve
      */
     toolbarPattern->HandleLongPressActionEnd();
     EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Branch: if (LessNotEqual(scale, GetDialogBigFontSizeScale())) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, OnModifyDone001, TestSize.Level1)
+{
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    auto pipelineContext = containerNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = AgingAdapationDialogUtil::GetDialogBigFontSizeScale() + 1.0f;
+    auto accessibilityProperty = containerNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+
+    toolbarPattern->OnModifyDone();
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), AccessibilityProperty::Level::NO_STR);
+}
+
+/**
+ * @tc.name: OnModifyDone002
+ * @tc.desc: Branch: if (LessNotEqual(scale, GetDialogBigFontSizeScale())) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, OnModifyDone002, TestSize.Level1)
+{
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    auto pipelineContext = containerNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->fontScale_ = AgingAdapationDialogUtil::GetDialogBigFontSizeScale() - 1.0f;
+    auto accessibilityProperty = containerNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+
+    toolbarPattern->OnModifyDone();
+    EXPECT_NE(accessibilityProperty->GetAccessibilityLevel(), AccessibilityProperty::Level::NO_STR);
+}
+
+/**
+ * @tc.name: InitDragEvent001
+ * @tc.desc: Branch: if (toolBarPattern->dialogNode_ && index >= 0 && index < totalCount) = true
+ *           Condition: toolBarPattern->dialogNode_ = true, index >= 0 = true, index < totalCount = true
+ *           Branch: if (!toolBarPattern->moveIndex_.has_value()) = false
+ *           Branch: if (toolBarPattern->moveIndex_ != index) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, InitDragEvent001, TestSize.Level1)
+{
+    ToolBarTestNg::SetUpTestSuite();
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    // Make toolBarItemNode not NULL
+    auto toolBarItem1Node = FrameNode::GetOrCreateFrameNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    toolBarItem1Node->isActive_ = true;
+    auto geometryNode = toolBarItem1Node->GetGeometryNode();
+    geometryNode->SetFrameWidth(100);
+    geometryNode->SetFrameHeight(50);
+    containerNode->children_.emplace_front(toolBarItem1Node);
+    // Make toolBarPattern->dialogNode_ true
+    auto dialogNode = FrameNode::GetOrCreateFrameNode(V2::DIALOG_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    toolbarPattern->dialogNode_ = dialogNode;
+    toolbarPattern->moveIndex_ = -1;
+    auto renderContext = toolBarItem1Node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+    buttonTheme_->clickedColor_ = Color::GREEN;
+
+    auto gestureHub = containerNode->GetOrCreateGestureEventHub();
+    toolbarPattern->InitDragEvent(gestureHub);
+    ASSERT_NE(gestureHub->GetDragEventActuator(), nullptr);
+    ASSERT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
+    auto actionUpdate = gestureHub->GetDragEventActuator()->userCallback_->GetActionUpdateEventFunc();
+    ASSERT_NE(actionUpdate, nullptr);
+    GestureEvent info;
+    actionUpdate(info);
+    EXPECT_EQ(toolbarPattern->moveIndex_, 0);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::GREEN);
+    ToolBarTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: InitDragEvent002
+ * @tc.desc: Branch: if (toolBarPattern->dialogNode_ && index >= 0 && index < totalCount) = true
+ *           Condition: toolBarPattern->dialogNode_ = true, index >= 0 = true, index < totalCount = true
+ *           Branch: if (!toolBarPattern->moveIndex_.has_value()) = true
+ *           Branch: if (toolBarPattern->moveIndex_ != index) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, InitDragEvent002, TestSize.Level1)
+{
+    ToolBarTestNg::SetUpTestSuite();
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    // Make toolBarItemNode not NULL
+    auto toolBarItem1Node = FrameNode::GetOrCreateFrameNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    toolBarItem1Node->isActive_ = true;
+    auto geometryNode = toolBarItem1Node->GetGeometryNode();
+    geometryNode->SetFrameWidth(100);
+    geometryNode->SetFrameHeight(50);
+    containerNode->children_.emplace_front(toolBarItem1Node);
+    // Make toolBarPattern->dialogNode_ true
+    auto dialogNode = FrameNode::GetOrCreateFrameNode(V2::DIALOG_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    toolbarPattern->dialogNode_ = dialogNode;
+    toolbarPattern->moveIndex_ = 0;
+    auto renderContext = toolBarItem1Node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackgroundColor(Color::BLUE);
+    buttonTheme_->clickedColor_ = Color::GREEN;
+
+    auto gestureHub = containerNode->GetOrCreateGestureEventHub();
+    toolbarPattern->InitDragEvent(gestureHub);
+    ASSERT_NE(gestureHub->GetDragEventActuator(), nullptr);
+    ASSERT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
+    auto actionUpdate = gestureHub->GetDragEventActuator()->userCallback_->GetActionUpdateEventFunc();
+    ASSERT_NE(actionUpdate, nullptr);
+    GestureEvent info;
+    actionUpdate(info);
+    EXPECT_EQ(toolbarPattern->moveIndex_, 0);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::BLUE);
+    ToolBarTestNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: InitDragEvent003
+ * @tc.desc: Branch: if (toolBarPattern->dialogNode_ && index >= 0 && index < totalCount) = true
+ *           Condition: toolBarPattern->dialogNode_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, InitDragEvent003, TestSize.Level1)
+{
+    ToolBarTestNg::SetUpTestSuite();
+    auto containerNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TOOL_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    // Make toolBarItemNode not NULL
+    auto toolBarItem1Node = FrameNode::GetOrCreateFrameNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    toolBarItem1Node->isActive_ = true;
+    auto geometryNode = toolBarItem1Node->GetGeometryNode();
+    geometryNode->SetFrameWidth(100);
+    geometryNode->SetFrameHeight(50);
+    containerNode->children_.emplace_front(toolBarItem1Node);
+    toolbarPattern->moveIndex_ = -1;
+
+    auto gestureHub = containerNode->GetOrCreateGestureEventHub();
+    toolbarPattern->InitDragEvent(gestureHub);
+    ASSERT_NE(gestureHub->GetDragEventActuator(), nullptr);
+    ASSERT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
+    auto actionUpdate = gestureHub->GetDragEventActuator()->userCallback_->GetActionUpdateEventFunc();
+    ASSERT_NE(actionUpdate, nullptr);
+    GestureEvent info;
+    actionUpdate(info);
+    EXPECT_EQ(toolbarPattern->moveIndex_, -1);
+    ToolBarTestNg::TearDownTestSuite();
 }
 } // namespace OHOS::Ace::NG

@@ -47,7 +47,7 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetFirstHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.firstHandle;
     handleInfo.isShow = dragHandleIndex_ == DragHandleIndex::FIRST || CheckHandleVisible(handleInfo.paintRect);
-
+    handleInfo.isTouchable = handleInfo.isShow;
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
@@ -63,7 +63,7 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetSecondHandleInfo()
     handleInfo.paintRect = pattern->textSelector_.secondHandle;
     handleInfo.isShow = (dragHandleIndex_ == DragHandleIndex::SECOND && !IsSingleHandle()) ||
         CheckHandleVisible(handleInfo.paintRect);
-
+    handleInfo.isTouchable = handleInfo.isShow;
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
@@ -246,7 +246,8 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     pattern->CalculateHandleOffsetAndShowOverlay();
     overlayManager->MarkInfoChange((isFirstHandle ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
                             DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM);
-    ProcessOverlay({ .animation = true });
+    ProcessOverlay({ .animation = true, .requestCode = recreateAfterMoveDone_ ? REQUEST_RECREATE : 0 });
+    recreateAfterMoveDone_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -606,16 +607,20 @@ void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
     auto menuParams = pattern->GetMenuParams(pattern->GetEditorType(),
         pattern->textResponseType_.value_or(TextResponseType::NONE));
     bool needRecreate = (lastMenuParams_ == nullptr) ^ (menuParams == nullptr);
-    if (needRecreate) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menu type changed, recreate menu");
-        ProcessOverlay({ .menuIsShow = IsCurrentMenuVisibile(), .requestCode = REQUEST_RECREATE });
-    } else {
+    if (!needRecreate) {
         UpdateHandleOffset();
         if (IsShowMouseMenu()) {
             CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
             return;
         }
         IF_TRUE(IsMenuShow(), UpdateMenuOffset());
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menu type changed, recreate menu isHandleMoving:%{public}d", isHandleMoving_);
+    if (isHandleMoving_) {
+        recreateAfterMoveDone_ = true;
+    } else {
+        ProcessOverlay({ .menuIsShow = IsCurrentMenuVisibile(), .requestCode = REQUEST_RECREATE });
     }
 }
 

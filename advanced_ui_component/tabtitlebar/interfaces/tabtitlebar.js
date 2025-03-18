@@ -245,22 +245,22 @@ export class TabTitleBar extends ViewPU {
         }, List);
         this.observeComponentCreation2((k45, l45) => {
             ForEach.create();
-            const i = (n45, o45) => {
+            const a18 = (n45, o45) => {
                 const p45 = n45;
                 {
-                    const j = (f46, g46) => {
+                    const b18 = (f46, g46) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(f46);
-                        k(f46, g46);
+                        c18(f46, g46);
                         if (!g46) {
                             ListItem.pop();
                         }
                         ViewStackProcessor.StopGetAccessRecording();
                     };
-                    const k = (d46, e46) => {
-                        ListItem.create(l, true);
+                    const c18 = (d46, e46) => {
+                        ListItem.create(d18, true);
                     };
-                    const l = (t45, u45) => {
-                        j(t45, u45);
+                    const d18 = (t45, u45) => {
+                        b18(t45, u45);
                         {
                             this.observeComponentCreation2((v45, w45) => {
                                 if (w45) {
@@ -276,7 +276,7 @@ export class TabTitleBar extends ViewPU {
                                         }
                                     }, undefined, v45, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 174, col: 21 });
                                     ViewPU.create(x45);
-                                    let m = () => {
+                                    let e18 = () => {
                                         return {
                                             item: p45,
                                             index: o45,
@@ -289,7 +289,7 @@ export class TabTitleBar extends ViewPU {
                                             }
                                         };
                                     };
-                                    x45.paramsGenerator_ = m;
+                                    x45.paramsGenerator_ = e18;
                                 }
                                 else {
                                     this.updateStateVarsOfChildByElmtId(v45, {
@@ -300,11 +300,11 @@ export class TabTitleBar extends ViewPU {
                         }
                         ListItem.pop();
                     };
-                    this.observeComponentCreation2(k, ListItem);
+                    this.observeComponentCreation2(c18, ListItem);
                     ListItem.pop();
                 }
             };
-            this.forEachUpdateFunction(k45, this.tabItems, i, undefined, true, false);
+            this.forEachUpdateFunction(k45, this.tabItems, a18, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         List.pop();
@@ -329,13 +329,13 @@ export class TabTitleBar extends ViewPU {
                             if (d45) {
                                 let e45 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined, c45, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 204, col: 11 });
                                 ViewPU.create(e45);
-                                let h = () => {
+                                let z17 = () => {
                                     return {
                                         menuItems: this.menuItems,
                                         index: 1 + TabTitleBar.instanceCount++
                                     };
                                 };
-                                e45.paramsGenerator_ = h;
+                                e45.paramsGenerator_ = z17;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(c45, {});
@@ -429,7 +429,7 @@ class CollapsibleMenuSection extends ViewPU {
                 }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 273, col: 14 });
                 s44.setController(this.dialogController);
                 ViewPU.create(s44);
-                let g = () => {
+                let y17 = () => {
                     return {
                         cancel: () => {
                         },
@@ -440,7 +440,7 @@ class CollapsibleMenuSection extends ViewPU {
                         fontSize: this.fontSize
                     };
                 };
-                s44.paramsGenerator_ = g;
+                s44.paramsGenerator_ = y17;
             },
             maskColor: Color.Transparent,
             isModal: true,
@@ -615,20 +615,20 @@ class CollapsibleMenuSection extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((i43, j43) => {
                         ForEach.create();
-                        const e = (l43, m43) => {
+                        const w17 = (l43, m43) => {
                             const n43 = l43;
                             {
                                 this.observeComponentCreation2((o43, p43) => {
                                     if (p43) {
                                         let q43 = new ImageMenuItem(this, { item: n43, index: this.index * 1000 + m43 + 1 }, undefined, o43, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 342, col: 13 });
                                         ViewPU.create(q43);
-                                        let f = () => {
+                                        let x17 = () => {
                                             return {
                                                 item: n43,
                                                 index: this.index * 1000 + m43 + 1
                                             };
                                         };
-                                        q43.paramsGenerator_ = f;
+                                        q43.paramsGenerator_ = x17;
                                     }
                                     else {
                                         this.updateStateVarsOfChildByElmtId(o43, {});
@@ -636,7 +636,7 @@ class CollapsibleMenuSection extends ViewPU {
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(i43, this.menuItems, e, undefined, true, false);
+                        this.forEachUpdateFunction(i43, this.menuItems, w17, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
                 });
@@ -645,20 +645,20 @@ class CollapsibleMenuSection extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((y42, z42) => {
                         ForEach.create();
-                        const c = (b43, c43) => {
+                        const u17 = (b43, c43) => {
                             const d43 = b43;
                             {
                                 this.observeComponentCreation2((e43, f43) => {
                                     if (f43) {
                                         let g43 = new ImageMenuItem(this, { item: d43, index: this.index * 1000 + c43 + 1 }, undefined, e43, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 347, col: 15 });
                                         ViewPU.create(g43);
-                                        let d = () => {
+                                        let v17 = () => {
                                             return {
                                                 item: d43,
                                                 index: this.index * 1000 + c43 + 1
                                             };
                                         };
-                                        g43.paramsGenerator_ = d;
+                                        g43.paramsGenerator_ = v17;
                                     }
                                     else {
                                         this.updateStateVarsOfChildByElmtId(e43, {});
@@ -666,7 +666,7 @@ class CollapsibleMenuSection extends ViewPU {
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(y42, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), c, undefined, true, false);
+                        this.forEachUpdateFunction(y42, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), u17, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
                     this.observeComponentCreation2((s42, t42) => {
@@ -762,7 +762,7 @@ class CollapsibleMenuSection extends ViewPU {
         }, Column);
         this.observeComponentCreation2((y41, z41) => {
             ForEach.create();
-            const a = (b42, c42) => {
+            const s17 = (b42, c42) => {
                 const d42 = b42;
                 {
                     this.observeComponentCreation2((e42, f42) => {
@@ -770,14 +770,14 @@ class CollapsibleMenuSection extends ViewPU {
                             let g42 = new ImageMenuItem(this, { item: d42, index: this.index * 1000 +
                             CollapsibleMenuSection.maxCountOfVisibleItems + c42 }, undefined, e42, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 437, col: 11 });
                             ViewPU.create(g42);
-                            let b = () => {
+                            let t17 = () => {
                                 return {
                                     item: d42,
                                     index: this.index * 1000 +
                                     CollapsibleMenuSection.maxCountOfVisibleItems + c42
                                 };
                             };
-                            g42.paramsGenerator_ = b;
+                            g42.paramsGenerator_ = t17;
                         }
                         else {
                             this.updateStateVarsOfChildByElmtId(e42, {});
@@ -785,7 +785,7 @@ class CollapsibleMenuSection extends ViewPU {
                     }, { name: 'ImageMenuItem' });
                 }
             };
-            this.forEachUpdateFunction(y41, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), a, undefined, true, false);
+            this.forEachUpdateFunction(y41, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), s17, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Column.pop();
@@ -1336,7 +1336,6 @@ class ImageMenuItem extends ViewPU {
             Button.borderRadius(ImageMenuItem.buttonBorderRadius);
             Button.foregroundColor(this.getFgColor());
             Button.backgroundColor(this.getBgColor());
-            Button.opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
             Button.enabled(this.item.isEnabled ? this.item.isEnabled : false);
             ViewStackProcessor.visualState('focused');
             Button.border({

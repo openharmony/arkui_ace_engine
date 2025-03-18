@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import TimePickerDialogBootcampTest from './TimePickerDialogBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  TimePickerDialogBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

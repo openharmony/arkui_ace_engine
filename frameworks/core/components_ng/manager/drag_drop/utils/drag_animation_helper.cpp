@@ -624,24 +624,24 @@ void DragAnimationHelper::InitGatherNodeAttr(const RefPtr<FrameNode>& gatherNode
     }
 }
 
-void DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frameNode)
+bool DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frameNode)
 {
     TAG_LOGI(AceLogTag::ACE_DRAG, "Show gather node animation");
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pipeline = frameNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, false);
     auto manager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
+    CHECK_NULL_RETURN(manager, false);
 
     if (manager->GetHasGatherNode()) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Not need create gather node, already have");
-        return;
+        return false;
     }
 
     //create gather node
     std::vector<GatherNodeChildInfo> gatherNodeInfo;
     auto gatherNode = CreateGatherNode(frameNode, gatherNodeInfo);
-    CHECK_NULL_VOID(gatherNode);
+    CHECK_NULL_RETURN(gatherNode, false);
     MountGatherNode(manager, frameNode, gatherNode, gatherNodeInfo);
     InitGatherNodeAttr(gatherNode, gatherNodeInfo);
     AddDragNodeCopy(manager, frameNode, gatherNode);
@@ -654,6 +654,7 @@ void DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frame
     PlayGatherNodeOpacityAnimation(manager);
     PlayGatherNodeTranslateAnimation(frameNode, manager);
     ShowDragNodeCopyAnimation(manager, frameNode);
+    return true;
 }
 
 void DragAnimationHelper::AddDragNodeCopy(const RefPtr<OverlayManager>& overlayManager,
@@ -679,9 +680,9 @@ void DragAnimationHelper::AddDragNodeCopy(const RefPtr<OverlayManager>& overlayM
     int32_t height = pixelMap->GetHeight();
     auto offset = DragDropFuncWrapper::GetPaintRectCenter(frameNode) -
         OffsetF(width / HALF_DIVIDE, height / HALF_DIVIDE);
+    DragDropFuncWrapper::UpdateNodePositionToWindow(dragNodeCopy, offset);
     auto copyNodeRenderContext = dragNodeCopy->GetRenderContext();
     CHECK_NULL_VOID(copyNodeRenderContext);
-    copyNodeRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
     copyNodeRenderContext->UpdateTransformScale({ 1.0f, 1.0f });
 }
 
@@ -1087,6 +1088,8 @@ void DragAnimationHelper::MountPixelMapSizeContentTransition(
 void DragAnimationHelper::CreateAndMountMenuPreviewNode(
     const PreparedInfoForDrag& data, const RefPtr<FrameNode>& stackFrameNode)
 {
+    CHECK_NULL_VOID(data.imageNode);
+    CHECK_NULL_VOID(data.menuPreviewNode);
     if (data.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION) {
         auto menuPreviewImageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });

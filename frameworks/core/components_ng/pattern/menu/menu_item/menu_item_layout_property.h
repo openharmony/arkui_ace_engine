@@ -161,9 +161,7 @@ public:
             json->PutExtAttr("selectIcon", "false", filter);
         }
         auto context = PipelineBase::GetCurrentContext();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto theme = context ? context->GetTheme<SelectTheme>(host->GetThemeScopeId()) : nullptr;
+        auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
         auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
         auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;
         auto contentFontJsonObject = JsonUtil::Create(true);
@@ -184,7 +182,7 @@ public:
             V2::ConvertWrapFontStyleToStirng(GetLabelItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
         labelFontJsonObject->Put("family", V2::ConvertFontFamily(GetLabelFontFamilyValue({})).c_str());
         json->PutExtAttr("labelFont", labelFontJsonObject, filter);
-        auto defaultLabelFontColor = theme ? theme->GetLabelColor() : Color::GRAY;
+        auto defaultLabelFontColor = theme ? theme->GetSecondaryFontColor() : Color::GRAY;
         json->PutExtAttr("labelFontColor",
             GetLabelFontColor().value_or(defaultLabelFontColor).ColorToString().c_str(), filter);
         json->PutFixedAttr("label", GetContent().value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
