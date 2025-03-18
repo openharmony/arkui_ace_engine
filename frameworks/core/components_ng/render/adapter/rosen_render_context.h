@@ -199,14 +199,20 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
-    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
-    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
+    void UpdateBackBlurStyle(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateBackgroundEffect(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions()) override;
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
-    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateBackBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) override;
     void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
-    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateFrontBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
-    void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
+    void UpdateFrontBlurStyle(
+        const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions = SysOptions()) override;
     void OnForegroundEffectUpdate(float radius) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
@@ -386,7 +392,7 @@ public:
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
-    void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
+    void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
     void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;
@@ -412,6 +418,11 @@ public:
     void SetOpacity(float opacity) override;
     void SetTranslate(float translateX, float translateY, float translateZ) override;
     void SetHostNode(const WeakPtr<FrameNode>& host) override;
+
+    OffsetF GetBaseTransalteInXY() const override;
+    void SetBaseTranslateInXY(const OffsetF& offset) override;
+    float GetBaseRotateInZ() const override;
+    void SetBaseRotateInZ(float degree) override;
 
     void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) override;
@@ -444,7 +455,24 @@ public:
     RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
     void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
     void AddRsNodeForCapture();
-    void SetDrawNodeChangeCallback() override;
+    static bool initDrawNodeChangeCallback_;
+
+    void FreezeCanvasNode(bool freezeFlag = false);
+    void RemoveCanvasNode();
+    void CheckAnimationParametersValid(int32_t& animationParam);
+    bool SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
+    void LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode);
+    std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode();
+
+    void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
+    {
+        callbackAnimateEnd_ =  callback;
+    }
+
+    void AddKeyFrameCachedAnimateActionCallback(const std::function<void()>& callback)
+    {
+        callbackCachedAnimateAction_ = callback;
+    }
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -714,6 +742,10 @@ protected:
     // translate and scale modifier for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;
+    std::shared_ptr<Rosen::RSRotationXModifier> rotationXUserModifier_;
+    std::shared_ptr<Rosen::RSRotationYModifier> rotationYUserModifier_;
+    std::shared_ptr<Rosen::RSRotationModifier> rotationZUserModifier_;
+    std::shared_ptr<Rosen::RSCameraDistanceModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
@@ -723,6 +755,10 @@ protected:
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
 
     std::optional<OffsetF> frameOffset_;
+
+    // for page orientation feature.
+    std::shared_ptr<Rosen::RSTranslateModifier> baseTranslateInXY_;
+    std::shared_ptr<Rosen::RSRotationModifier> baseRotateInZ_;
 
     // graphics modifiers
     struct GraphicModifiers {
@@ -753,6 +789,10 @@ protected:
     std::unique_ptr<RectF> contentClip_;
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
+
+    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_;
+    std::function<void()> callbackAnimateEnd_ = nullptr;
+    std::function<void()> callbackCachedAnimateAction_ = nullptr;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

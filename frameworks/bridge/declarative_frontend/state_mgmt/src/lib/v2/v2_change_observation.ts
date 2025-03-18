@@ -766,7 +766,7 @@ class ObserveV2 {
     // Prevents V2 proxy creation if the developer uses makeV1Observed and also tries to wrap a V2 proxy with built-in types
     // Handle the case where both V1 and V2 proxies exist (if V1 proxy doesn't trigger enableV2Compatibility).
     // Currently not implemented to avoid compatibility issues with existing apps that may use both V1 and V2 proxies.
-    if (!val[ObserveV2.SYMBOL_PROXY_GET_TARGET] && !ObservedObject.isEnableV2CompatibleInternal(val) && !ObservedObject.isMakeV1Observed(val)) {
+    if (!val[ObserveV2.SYMBOL_PROXY_GET_TARGET] && !(ObservedObject.isEnableV2CompatibleInternal(val) || ObservedObject.isMakeV1Observed(val))) {
 
       if (Array.isArray(val)) {
         target[key] = new Proxy(val, ObserveV2.arrayProxy);

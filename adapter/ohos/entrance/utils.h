@@ -167,6 +167,8 @@ private:
 };
 
 NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea);
+Rosen::AvoidArea ConvertAvoidArea(const NG::SafeAreaInsets& insets, int32_t rootWidth, int32_t rootHeight);
+
 Rect ConvertDMRect2Rect(const OHOS::Rosen::DMRect& displayAvailableRect);
 } // namespace OHOS::Ace
 

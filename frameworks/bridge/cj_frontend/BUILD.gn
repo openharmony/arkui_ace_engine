@@ -169,6 +169,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_scrollbar_ffi.cpp",
       "interfaces/cj_ffi/cj_search_ffi.cpp",
       "interfaces/cj_ffi/cj_shape_ffi.cpp",
+      "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
       "interfaces/cj_ffi/cj_slider_ffi.cpp",
       "interfaces/cj_ffi/cj_span_ffi.cpp",
       "interfaces/cj_ffi/cj_stack_ffi.cpp",
@@ -218,7 +219,6 @@ template("cj_frontend") {
         "interfaces/cj_ffi/cj_column_split_ffi.cpp",
         "interfaces/cj_ffi/cj_row_split_ffi.cpp",
         "interfaces/cj_ffi/cj_select_ffi.cpp",
-        "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
         "interfaces/cj_ffi/cj_stepper_ffi.cpp",
         "interfaces/cj_ffi/cj_stepper_item_ffi.cpp",
       ]

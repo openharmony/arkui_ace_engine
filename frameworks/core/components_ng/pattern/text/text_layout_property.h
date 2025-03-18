@@ -154,6 +154,7 @@ public:
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
         TextLineStyle, LineBreakStrategy, LineBreakStrategy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, HalfLeading, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, ParagraphSpacing, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
 
     ACE_DEFINE_PROPERTY_GROUP(TextMarqueeOptions, TextMarqueeOptions);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeStart, bool, PROPERTY_UPDATE_RENDER);

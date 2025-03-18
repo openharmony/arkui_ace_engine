@@ -95,6 +95,7 @@ const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 constexpr int32_t DIRECTION_COUNT = 4;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 constexpr int NUM1 = 1;
+constexpr int NUM2 = 2;
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
@@ -2395,6 +2396,14 @@ void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOp
     }
 }
 
+void JSViewAbstract::ParseSysOptions(const JSRef<JSObject>& jsSysOptions, SysOptions& sysOptions)
+{
+    auto disableAdaptation = jsSysOptions->GetProperty("disableSystemAdaptation");
+    if (disableAdaptation->IsBoolean()) {
+        sysOptions.disableSystemAdaptation = disableAdaptation->ToBoolean();
+    }
+}
+
 void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption)
 {
     auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
@@ -2462,7 +2471,13 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
         ParseBlurStyleOption(jsOption, styleOption);
     }
-    ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = false;
+    if (info.Length() > NUM2 && info[NUM2]->IsObject()) {
+        JSRef<JSObject> jsSysOptions = JSRef<JSObject>::Cast(info[NUM2]);
+        ParseSysOptions(jsSysOptions, sysOptions);
+    }
+    ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption, sysOptions);
 }
 
 void JSViewAbstract::ParseBrightnessOption(const JSRef<JSObject>& jsOption, BrightnessOption& brightnessOption)
@@ -2590,7 +2605,13 @@ void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
         }
     }
     radius = std::max(radius, 0.0f);
-    ViewAbstractModel::GetInstance()->SetForegroundEffect(radius);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = false;
+    if (info.Length() > NUM1 && info[NUM1]->IsObject()) {
+        JSRef<JSObject> jsSysOptions = JSRef<JSObject>::Cast(info[NUM1]);
+        ParseSysOptions(jsSysOptions, sysOptions);
+    }
+    ViewAbstractModel::GetInstance()->SetForegroundEffect(radius, sysOptions);
 }
 
 void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
@@ -2603,7 +2624,13 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
         ParseEffectOption(jsOption, option);
     }
-    ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = false;
+    if (info.Length() > NUM1 && info[NUM1]->IsObject()) {
+        JSRef<JSObject> jsSysOptions = JSRef<JSObject>::Cast(info[NUM1]);
+        ParseSysOptions(jsSysOptions, sysOptions);
+    }
+    ViewAbstractModel::GetInstance()->SetBackgroundEffect(option, sysOptions);
 }
 
 void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
@@ -2645,7 +2672,13 @@ void JSViewAbstract::JsForegroundBlurStyle(const JSCallbackInfo& info)
             styleOption.blurOption = blurOption;
         }
     }
-    ViewAbstractModel::GetInstance()->SetForegroundBlurStyle(styleOption);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = false;
+    if (info.Length() > NUM2 && info[NUM2]->IsObject()) {
+        JSRef<JSObject> jsSysOptions = JSRef<JSObject>::Cast(info[NUM2]);
+        ParseSysOptions(jsSysOptions, sysOptions);
+    }
+    ViewAbstractModel::GetInstance()->SetForegroundBlurStyle(styleOption, sysOptions);
 }
 
 void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
@@ -3930,8 +3963,14 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(info[1]);
         ParseBlurOption(jsBlurOption, blurOption);
     }
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = false;
+    if (info.Length() > NUM2 && info[NUM2]->IsObject()) {
+        JSRef<JSObject> jsSysOptions = JSRef<JSObject>::Cast(info[NUM2]);
+        ParseSysOptions(jsSysOptions, sysOptions);
+    }
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
-    ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius, blurOption);
+    ViewAbstractModel::GetInstance()->SetFrontBlur(dimensionRadius, blurOption, sysOptions);
     info.SetReturnValue(info.This());
 }
 
@@ -4025,7 +4064,13 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(info[1]);
         ParseBlurOption(jsBlurOption, blurOption);
     }
-    ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = false;
+    if (info.Length() > NUM2 && info[NUM2]->IsObject()) {
+        JSRef<JSObject> jsSysOptions = JSRef<JSObject>::Cast(info[NUM2]);
+        ParseSysOptions(jsSysOptions, sysOptions);
+    }
+    ViewAbstractModel::GetInstance()->SetBackdropBlur(dimensionRadius, blurOption, sysOptions);
     info.SetReturnValue(info.This());
 }
 
@@ -7110,37 +7155,31 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
         }
 
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(weak->weakRef.Upgrade());
-        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-        const auto& extensionHandler = frameNode->GetExtensionHandler();
-        if (extensionHandler) {
-            extensionHandler->InvalidateRender();
-            auto renderContext = frameNode->GetRenderContext();
-            CHECK_NULL_RETURN(renderContext, panda::JSValueRef::Undefined(vm));
-            renderContext->RequestNextFrame();
-        } else {
-            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+        if (frameNode) {
+            const auto& extensionHandler = frameNode->GetExtensionHandler();
+            if (extensionHandler) {
+                extensionHandler->InvalidateRender();
+            } else {
+                frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+            }
         }
 
         return panda::JSValueRef::Undefined(vm);
     };
-
     auto jsInvalidate = JSRef<JSFunc>::New<FunctionCallback>(invalidate);
+    if (frameNode) {
+        const auto& extensionHandler = frameNode->GetExtensionHandler();
+        if (extensionHandler) {
+            extensionHandler->InvalidateRender();
+        } else {
+            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+        }
+    }
     auto vm = jsInvalidate->GetEcmaVM();
     auto* weak = new NG::NativeWeakRef(static_cast<AceType*>(frameNode));
     jsInvalidate->GetHandle()->SetNativePointerFieldCount(vm, 1);
     jsInvalidate->GetHandle()->SetNativePointerField(vm, 0, weak, &NG::DestructorInterceptor<NG::NativeWeakRef>);
     jsDrawModifier->SetPropertyObject("invalidate", jsInvalidate);
-
-    CHECK_NULL_VOID(frameNode);
-    const auto& extensionHandler = frameNode->GetExtensionHandler();
-    if (extensionHandler) {
-        extensionHandler->InvalidateRender();
-        auto renderContext = frameNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->RequestNextFrame();
-    } else {
-        frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
-    }
 }
 
 void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)

@@ -881,16 +881,17 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     }
     auto oldParent = moveNode->GetParent();
     moveNode->setIsMoving(true);
+    auto moveNodeRef = AceType::Claim(moveNode);
     if (oldParent) {
-        oldParent->RemoveChild(AceType::Claim(moveNode));
+        oldParent->RemoveChild(moveNodeRef);
         oldParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     int32_t childCount = toNode->TotalChildCount();
     if (index >= childCount || index < 0) {
-        toNode->AddChild(AceType::Claim(moveNode));
+        toNode->AddChild(moveNodeRef);
     } else {
         auto indexChild = toNode->GetChildAtIndex(index);
-        toNode->AddChildBefore(AceType::Claim(moveNode), indexChild);
+        toNode->AddChildBefore(moveNodeRef, indexChild);
     }
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);

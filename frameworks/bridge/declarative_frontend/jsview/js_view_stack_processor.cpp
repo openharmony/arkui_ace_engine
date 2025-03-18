@@ -180,7 +180,7 @@ void JSViewStackProcessor::JsSendStateInfo(const std::string& stateInfo)
     info->Put("processID", getpid());
     info->Put("windowID", (int32_t)pipeline->GetWindowId());
     TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", info->ToString().c_str());
-    LayoutInspector::SendStateProfilerMessage(info->ToString());
+    LayoutInspector::SendMessage(info->ToString());
 #endif
 }
 

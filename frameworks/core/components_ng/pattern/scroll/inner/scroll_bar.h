@@ -673,9 +673,9 @@ private:
     // dump info
     std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
     bool needAddLayoutInfo = false;
+    bool isMousePressed_ = false;
 
 #ifdef ARKUI_CIRCLE_FEATURE
-    bool isMousePressed_ = false;
     Dimension normalBackgroundWidth_;
     Dimension activeBackgroundWidth_;
     double normalStartAngle_ = 0.0;

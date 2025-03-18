@@ -259,7 +259,7 @@ void FormRenderer::RemoveFormDeathRecipient()
 void FormRenderer::Destroy()
 {
     HILOG_INFO("Destroy FormRenderer start.");
-    if (formRendererDelegate_ != nullptr) {
+    if (formRendererDelegate_ != nullptr && uiContent_ != nullptr) {
         auto rsSurfaceNode = uiContent_->GetFormRootNode();
         if (rsSurfaceNode != nullptr) {
             HILOG_INFO("Form OnSurfaceRelease!");

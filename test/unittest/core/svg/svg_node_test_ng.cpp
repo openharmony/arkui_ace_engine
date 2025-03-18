@@ -64,6 +64,7 @@
 #include "core/components_ng/svg/parse/svg_pattern.h"
 #include "core/components_ng/svg/parse/svg_polygon.h"
 #include "core/components_ng/svg/parse/svg_rect.h"
+#include "core/components_ng/svg/parse/svg_stop.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/parse/svg_use.h"
 #include "core/components_ng/svg/svg_dom.h"
@@ -1099,5 +1100,170 @@ HWTEST_F(SvgNodeTestNg, SvgGraphicTest005, TestSize.Level1)
     svgCircle->fillState_.SetColor(Color::RED);
     auto updateFill = svgCircle->UpdateFillStyle(fillColorOpt);
     EXPECT_EQ(updateFill, true);
+}
+
+/**
+ * @tc.name: SvgSvgOnDrawTest001
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgSvgOnDrawTest001, TestSize.Level1)
+{
+    auto svgSvg = AceType::DynamicCast<SvgSvg>(SvgSvg::Create());
+    EXPECT_NE(svgSvg, nullptr);
+    SvgLengthScaleRule lengthRule;
+    Testing::MockCanvas rSCanvas;
+    ImageColorFilter filter;
+    filter.colorFilterMatrix_ = std::make_shared<std::vector<float>>(std::vector<float> {});
+    svgSvg->SetColorFilter(filter);
+    svgSvg->SetIsRootNode(true);
+    svgSvg->OnDraw(rSCanvas, lengthRule);
+    EXPECT_EQ(svgSvg->isRootNode_, true);
+}
+
+/**
+ * @tc.name: SvgStopParseTest001
+ * @tc.desc: test parse stop-color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgStopParseTest001, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    auto backupApiVersion = container->GetCurrentApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+
+    /* *
+     * @tc.steps: step1. create svgStop node
+     */
+    auto svgNode = SvgStop::Create();
+    auto svgStop = AceType::DynamicCast<SvgStop>(svgNode);
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor(), Color::BLACK);
+
+    /* *
+     * @tc.steps: step2. parse stop-color
+     * @tc.expected: The property is parse successfully
+     */
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "rgba(0,49,83,255)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xFF003153);
+
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "rgb(0,49,83)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xFF003153);
+
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "#3456");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0x66334455);
+
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "#33445566");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0x66334455);
+
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "#3344546");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
+
+    //invalid color-->default color black
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "#MF");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
+
+    /* *
+     * @tc.steps: step4. parse stopOpacity
+     * @tc.expected: The property is parse successfully
+     */
+    svgStop->ParseAndSetSpecializedAttr("stopOpacity", "0.0");
+    EXPECT_EQ(svgStop->GetGradientColor().GetOpacity(), 0.0);
+
+    /* *
+     * @tc.steps: step5. parse properties that do not belong to SvgStop
+     * @tc.expected: The property is parse unsuccessfully
+     */
+    bool parseResult = svgStop->ParseAndSetSpecializedAttr("strokeLinecap", "butt");
+    EXPECT_FALSE(parseResult);
+    container->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgStopParseTest002
+ * @tc.desc: test parse stopcolor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgStopParseTest002, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    auto backupApiVersion = container->GetCurrentApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+
+    /* *
+     * @tc.steps: step1. create svgStop node
+     */
+    auto svgNode = SvgStop::Create();
+    auto svgStop = AceType::DynamicCast<SvgStop>(svgNode);
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor(), Color::BLACK);
+
+    /* *
+     * @tc.steps: step3. parse stopcolor
+     * @tc.expected: The property is parse successfully
+     */
+    svgStop->ParseAndSetSpecializedAttr("stopColor", "rgba(0,49,83,0.5)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0x80003153);
+
+    svgStop->ParseAndSetSpecializedAttr("stopColor", "rgb(0,49,83)");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xFF003153);
+
+    svgStop->ParseAndSetSpecializedAttr("stopColor", "#3456");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0x66334455);
+
+    svgStop->ParseAndSetSpecializedAttr("stopColor", "#33445566");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0x66334455);
+
+    svgStop->ParseAndSetSpecializedAttr("stopColor", "#3344546");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
+
+    //invalid color-->default color black
+    svgStop->ParseAndSetSpecializedAttr("stopColor", "#MF");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
+
+    container->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: SvgStopParseTest003
+ * @tc.desc: test parse stop-color
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgStopParseTest003, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    auto backupApiVersion = container->GetCurrentApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+
+    /* *
+     * @tc.steps: step1. create svgStop node
+     */
+    auto svgNode = SvgStop::Create();
+    auto svgStop = AceType::DynamicCast<SvgStop>(svgNode);
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor(), Color::BLACK);
+
+    /* *
+     * @tc.steps: step2. parse stop-color
+     * @tc.expected: The property is parse successfully
+     */
+
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "#3456");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0x33445566);
+
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "#33445566");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0x33445566);
+
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "#3344546");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff344546);
+
+    //invalid color-->default color black
+    svgStop->ParseAndSetSpecializedAttr("stop-color", "#MF");
+    EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
+
+    container->SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 } // namespace OHOS::Ace::NG

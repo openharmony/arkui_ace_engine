@@ -57,6 +57,8 @@ const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
 const int32_t PARAM_ZERO = 0;
 const int32_t PARAM_ONE = 1;
 const int32_t PARAM_TWO = 2;
+constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
+constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
 
 void EraseSpace(std::string& data)
 {
@@ -3349,6 +3351,30 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     }
 }
 
+NG::MenuParam GetSelectionMenuParam(
+    const JSCallbackInfo& info, ResponseType responseType, std::function<void()> previewBuilder)
+{
+    NG::MenuParam menuParam;
+    if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
+        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
+    }
+
+    if (responseType != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    NG::PaddingProperty paddings;
+    paddings.start = NG::CalcLength(PREVIEW_MENU_MARGIN_LEFT);
+    paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
+    menuParam.layoutRegionMargin = paddings;
+    menuParam.disappearScaleToTarget = true;
+    menuParam.isPreviewContainScale = true;
+    menuParam.isShow = true;
+    return menuParam;
+}
+
 void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
 {
     if (info.Length() < SELECTION_MENU_OPTION_PARAM_INDEX || !info[0]->IsNumber() || !info[1]->IsObject() ||
@@ -3384,18 +3410,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     };
 
     std::function<void()> previewBuilder = nullptr;
-    NG::MenuParam menuParam;
-    if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
-        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
-    }
-
-    if (responseType != ResponseType::LONG_PRESS) {
-        menuParam.previewMode = MenuPreviewMode::NONE;
-        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
-    }
-    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
-    menuParam.type = NG::MenuType::CONTEXT_MENU;
-    menuParam.isShow = true;
+    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder);
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
         elementType, responseType, menuBuilder, previewBuilder, menuParam);

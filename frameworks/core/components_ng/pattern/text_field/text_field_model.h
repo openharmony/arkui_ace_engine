@@ -192,6 +192,7 @@ public:
     virtual void DeleteText(int32_t start, int32_t end) {}
     virtual SelectionInfo GetSelection() { return {}; }
     virtual void ClearPreviewText() {}
+    virtual std::u16string GetText() { return u""; }
 
     void SetGetCaretIndex(std::function<int32_t()>&& setGetCaretIndex)
     {
@@ -277,6 +278,7 @@ public:
     virtual void ResetPlaceholderColor() = 0;
     virtual void SetPlaceholderFont(const Font& value) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
+    virtual void SetCapitalizationMode(AutoCapitalizationMode value) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
     virtual void SetCaretColor(const Color& value) = 0;
