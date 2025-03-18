@@ -208,7 +208,22 @@ void OnErrorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("UIExtensionComponentInterfaceModifier::OnErrorImpl - is not supported");
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto instanceId = ContainerScope::CurrentId();
+    auto weakNode = AceType::WeakClaim<NG::FrameNode>(frameNode);
+    auto onError = [arkCallback = CallbackHelper(*value), instanceId, weakNode](
+        int32_t code, const std::string& name, const std::string& message) {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(weakNode);
+        arkCallback.Invoke(Ark_BusinessError{
+            .name  = Converter::ArkValue<Ark_String>(name, Converter::FC),
+            .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
+            .code = Converter::ArkValue<Ark_Number>(code)});
+    };
+    UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
+#endif //WINDOW_SCENE_SUPPORTED
 }
 void OnTerminatedImpl(Ark_NativePointer node,
                       const Callback_TerminationInfo_Void* value)
