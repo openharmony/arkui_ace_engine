@@ -129,6 +129,8 @@ Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 }
 Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {
+    LOGE("ARKOALA CanvasRenderingContext2DAccessor::GetCanvasImpl type Ark_UIContext"
+        " is not fully implemented on the current platform.");
     return {};
 }
 } // CanvasRenderingContext2DAccessor

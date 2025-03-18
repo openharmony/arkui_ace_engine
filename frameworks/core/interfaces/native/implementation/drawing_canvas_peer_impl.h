@@ -55,8 +55,19 @@ public:
         pattern_ = pattern;
     }
 
+    void SetCanvas(const std::shared_ptr<OHOS::Ace::RSCanvas>& rsCanvas)
+    {
+        rsCanvas_ = rsCanvas;
+    }
+
+    std::shared_ptr<OHOS::Ace::RSCanvas> GetCanvas()
+    {
+        return rsCanvas_;
+    }
+
 private:
     OHOS::Ace::RefPtr<OHOS::Ace::NG::OffscreenCanvasPattern> pattern_;
+    std::shared_ptr<OHOS::Ace::RSCanvas> rsCanvas_;
     const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelmap_;
     static constexpr int defaultSize = 1; // The canvas size should be at least 1x1
 };

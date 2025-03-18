@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/pattern/mock_canvas_pattern.h"
-#include "accessor_test_base.h"
-#include "drawing_rendering_context_accessor_test.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-
-#include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "gmock/gmock.h"
+
+#include "accessor_test_base.h"
+#include "core/components_ng/pattern/canvas/canvas_paint_method.h"
+#include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
+#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
+#include "test/mock/core/pattern/mock_canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,6 +31,17 @@ namespace {
 
 const auto ARK_STRING = Converter::ArkValue<Ark_String>("PX");
 const auto DEFAULT_SETTING_UNITS = Converter::ArkValue<Opt_LengthMetricsUnit>(Ark_LengthMetricsUnit{ARK_STRING});
+const double DEFAULT_VALUE = -1;
+const double DEFAULT_DENSITY = 1.0;
+const double DENSITY_1_25 = 1.25;
+const double FLT_PRECISION = 0.001;
+const std::vector<std::pair<double, double>> floatNumberTestPlan = {
+    { 100, 100 },
+    { 0, 0 },
+    { -100, -100 },
+    { 12.34, 12.34 },
+    { -56.73, -56.73 },
+};
 
 class MockCanvasPattern : public CanvasPattern {
 public:
@@ -41,31 +52,40 @@ public:
 } // namespace
 
 class DrawingRenderingContextAccessorTest
-    : public AccessorTestBaseParent<GENERATED_ArkUIDrawingRenderingContextAccessor,
+    : public AccessorTestCtorBase<GENERATED_ArkUIDrawingRenderingContextAccessor,
     &GENERATED_ArkUIAccessors::getDrawingRenderingContextAccessor, DrawingRenderingContextPeer> {
 public:
     void SetUp(void) override
     {
-        ASSERT_NE(accessor_->ctor, nullptr);
-        peer_ = reinterpret_cast<DrawingRenderingContextPeer*>(accessor_->ctor(&DEFAULT_SETTING_UNITS));
-        ASSERT_NE(peer_, nullptr);
-
+        AccessorTestCtorBase::SetUp();
         mockPattern_ = new MockCanvasPattern();
         mockPatternKeeper_ = AceType::Claim(mockPattern_);
         ASSERT_NE(mockPatternKeeper_, nullptr);
         auto peerImpl = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer_);
         ASSERT_NE(peerImpl, nullptr);
+        TestHolder::GetInstance()->SetUp();
         peerImpl->SetCanvasPattern(mockPatternKeeper_);
         ASSERT_NE(mockPattern_, nullptr);
-
-        LOGE("ARKOALA DrawingRenderingContextAccessorTest::SetUp Opt_CustomObject not implemented.");
     }
 
     void TearDown() override
     {
-        AccessorTestBaseParent::TearDown();
+        AccessorTestCtorBase::TearDown();
+        ChangeDensity(DEFAULT_DENSITY);
         mockPatternKeeper_ = nullptr;
         mockPattern_ = nullptr;
+    }
+
+    void* CreatePeerInstance() override
+    {
+        return accessor_->ctor(&DEFAULT_SETTING_UNITS);
+    }
+
+    void ChangeDensity(const double density)
+    {
+        auto pipelineContext =
+            AceType::DynamicCast<NG::MockPipelineContext>(NG::MockPipelineContext::GetCurrentContext());
+        pipelineContext->SetDensity(density);
     }
 
     MockCanvasPattern* mockPattern_ = nullptr;
@@ -77,7 +97,7 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_invalidateTest, TestSize.Level1)
+HWTEST_F(DrawingRenderingContextAccessorTest, invalidateTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     holder->SetUp();
@@ -92,5 +112,74 @@ HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_invalidateTest, TestSize.
 
     holder->TearDown();
 }
+/**
+ * @tc.name: getSizeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawingRenderingContextAccessorTest, getSizeTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    ASSERT_NE(accessor_->getSize, nullptr);
+    auto peerImpl = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer_);
+    ASSERT_NE(peerImpl, nullptr);
+    peerImpl->SetCanvasPattern(mockPatternKeeper_);
+    for (const auto& [actualW, expectedW] : floatNumberTestPlan) {
+        for (const auto& [actualH, expectedH] : floatNumberTestPlan) {
+            holder->width = DEFAULT_VALUE;
+            holder->height = DEFAULT_VALUE;
+            ASSERT_NE(holder->rsCallback, nullptr);
+            holder->rsCallback(nullptr, actualW, actualH);
 
+            Ark_Size result = accessor_->getSize(peer_);
+
+            auto width = Converter::Convert<float>(result.width);
+            auto height = Converter::Convert<float>(result.height);
+            EXPECT_NEAR(width, expectedW, FLT_PRECISION);
+            EXPECT_NEAR(height, expectedH, FLT_PRECISION);
+        }
+    }
+    // widh density
+    ChangeDensity(DENSITY_1_25);
+    for (const auto& [actualW, expectedW] : floatNumberTestPlan) {
+        for (const auto& [actualH, expectedH] : floatNumberTestPlan) {
+            holder->width = DEFAULT_VALUE;
+            holder->height = DEFAULT_VALUE;
+            ASSERT_NE(holder->rsCallback, nullptr);
+            holder->rsCallback(nullptr, actualW, actualH);
+
+            Ark_Size result = accessor_->getSize(peer_);
+
+            auto width = Converter::Convert<float>(result.width);
+            auto height = Converter::Convert<float>(result.height);
+            EXPECT_NEAR(width, expectedW / DENSITY_1_25, FLT_PRECISION);
+            EXPECT_NEAR(height, expectedH / DENSITY_1_25, FLT_PRECISION);
+        }
+    }
+    holder->TearDown();
+}
+/**
+ * @tc.name: getCanvasTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawingRenderingContextAccessorTest, getCanvasTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    ASSERT_NE(accessor_->getCanvas, nullptr);
+    auto peerImpl = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer_);
+    ASSERT_NE(peerImpl, nullptr);
+    peerImpl->SetCanvasPattern(mockPatternKeeper_);
+    ASSERT_NE(holder->rsCallback, nullptr);
+    std::shared_ptr<RSCanvas> rsCanvas = std::make_shared<RSCanvas>();
+    holder->rsCallback(rsCanvas.get(), DEFAULT_VALUE, DEFAULT_VALUE);
+  
+    Ark_DrawingCanvas result = accessor_->getCanvas(peer_);
+
+    ASSERT_NE(result, nullptr);
+    auto canvas = result->GetCanvas();
+    EXPECT_EQ(canvas, rsCanvas);
+}
 } // namespace OHOS::Ace::NG
