@@ -60,7 +60,6 @@
         "@koalaui/common": "file:../incremental/common"
     },
     "devDependencies": {
-        "@ohos/hypium": "1.0.6",
         "@types/node": "^18.0.0",
         "@typescript-eslint/eslint-plugin": "^5.20.0",
         "@typescript-eslint/parser": "^5.20.0",

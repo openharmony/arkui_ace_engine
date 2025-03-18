@@ -12,6 +12,5 @@
     "exclude": ["./src/ohos"],
     "references": [
         {"path": "../compat"},
-        {"path": "./bridges/ohos"}
     ]
 }

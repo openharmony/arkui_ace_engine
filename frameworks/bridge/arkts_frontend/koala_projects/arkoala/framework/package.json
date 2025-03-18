@@ -17,9 +17,10 @@
     },
     "keywords": [],
     "dependencies": {
+        "@types/node": "^18.0.0",
+        "json5": "^2.2.3",
         "node-api-headers": "0.0.5",
-        "typescript": "4.9.5",
-        "@types/node": "^18.0.0"
+        "typescript": "4.9.5"
     },
     "scripts": {
         "prepare:compiler": "test $(node -e \"console.log(process.platform)\") != \"linux\" && npm run --prefix ../ohos-sdk download || npm run install:toolchain --prefix ../tools/compiler",
@@ -36,7 +37,6 @@
         "compile:native-panda-host": "npm run configure:native-panda-host && cd native && meson compile -C build-panda-host && meson install -C build-panda-host",
         "configure:native-panda-ani-host": "cd native && meson setup -D vm_kind=panda-ani build-panda-ani-host",
         "compile:native-panda-ani-host": "npm run configure:native-panda-ani-host && cd native && meson compile -C build-panda-ani-host && meson install -C build-panda-ani-host",
-
         "configure:native-panda-linux-x64": "cd native && node ../scripts/configure.mjs panda-linux-x64",
         "compile:native-panda-linux-x64": "npm run configure:native-panda-linux-x64 && cd native && meson compile -C build-panda-linux-x64 && meson install -C build-panda-linux-x64",
         "configure:native-panda-linux-arm64": "cd native && node ../scripts/configure.mjs panda-linux-arm64",
@@ -47,7 +47,6 @@
         "compile:native-panda-macos-x64": "npm run configure:native-panda-macos-x64 && cd native && meson compile -C build-panda-macos-x64 && meson install -C build-panda-macos-x64",
         "configure:native-panda-macos-arm64": "cd native && node ../scripts/configure.mjs panda-macos-arm64",
         "compile:native-panda-macos-arm64": "npm run configure:native-panda-macos-arm64 && cd native && meson compile -C build-panda-macos-arm64 && meson install -C build-panda-macos-arm64",
-
         "configure:native-jvm-host": "cd native && meson setup -D vm_kind=jvm build-jvm-host -D vmloader=true -D jdk_dir=$JAVA_HOME",
         "compile:native-jvm-host": "npm run configure:native-jvm-host && cd native && meson compile -C build-jvm-host && meson install -C build-jvm-host",
         "configure:native-hzvm-ohos-arm64": "npm run prepare:arm64 && cd native && node ../scripts/configure.mjs hzvm-ohos-arm64",
