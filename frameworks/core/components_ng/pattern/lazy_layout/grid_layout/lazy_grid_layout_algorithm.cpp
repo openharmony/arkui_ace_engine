@@ -462,7 +462,7 @@ void LazyGridLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper, int3
     while (curIndex >= 0 && GreatNotEqual(currentStartPos, startPos_)) {
         currentEndPos = currentStartPos;
         float lineSize = 0.0f;
-        int32_t laneIdx = endIndex % lanes_;
+        int32_t laneIdx = curIndex % lanes_;
         for (int32_t i = 0; i <= laneIdx && curIndex - i >= 0; i++) {
             auto wrapper = layoutWrapper->GetOrCreateChildByIndex(curIndex - i);
             if (!wrapper) {
