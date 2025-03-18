@@ -34,6 +34,12 @@ void SyncInstanceIdImpl(Ark_Int32 instanceId)
 void RestoreInstanceIdImpl()
 {
 }
+Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
+                            const Ark_String* moduleName,
+                            const Array_String* params)
+{
+    return {};
+}
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
@@ -42,6 +48,7 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::EndFrameImpl,
         SystemOpsAccessor::SyncInstanceIdImpl,
         SystemOpsAccessor::RestoreInstanceIdImpl,
+        SystemOpsAccessor::GetResourceIdImpl,
     };
     return &SystemOpsAccessorImpl;
 }
