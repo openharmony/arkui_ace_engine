@@ -2389,7 +2389,7 @@ void ViewAbstract::DismissDialog()
     auto dialogId = DialogManager::GetInstance().GetDismissDialogId();
     auto dialogTag = DialogManager::GetInstance().GetDialogTag();
     if (dialogId && !dialogTag.empty()) {
-        dialogNode = FrameNode::GetFrameNode(dialogTag, dialogId);
+        dialogNode = FrameNode::GetFrameNodeOnly(dialogTag, dialogId);
     }
     if (!dialogNode) {
         if (overlayManager->GetDismissDialogId()) {

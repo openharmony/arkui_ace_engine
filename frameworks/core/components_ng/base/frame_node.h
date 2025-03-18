@@ -116,6 +116,8 @@ public:
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
+    static RefPtr<FrameNode> GetFrameNodeOnly(const std::string& tag, int32_t nodeId);
+
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
 
