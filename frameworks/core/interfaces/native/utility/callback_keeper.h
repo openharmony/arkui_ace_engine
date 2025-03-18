@@ -47,7 +47,8 @@ public:
         // create continuation
         ContinuationType continuation {
             .resource = GetNextCallbackResource(),
-            .call = &ReceiveResult<ArkResultType>
+            .call = &ReceiveResult<ArkResultType>,
+            .callSync = &ReceiveResultSync<ArkResultType>
         };
 
         // register handler
@@ -64,7 +65,8 @@ public:
         // create continuation
         CallbackType callback {
             .resource = GetNextCallbackResource(),
-            .call = &InvokeReverseInternal
+            .call = &InvokeReverseInternal,
+            .callSync = &InvokeReverseInternalSync
         };
 
         auto resultHandler = [handler](const void *) {
@@ -121,6 +123,12 @@ private:
         ReceiveResultInternal(resourceId, &value);
     }
 
+    template <typename ArkResultType>
+    inline static void ReceiveResultSync(Ark_VMContext context, const Ark_Int32 resourceId, const ArkResultType value)
+    {
+        ReceiveResultInternal(resourceId, &value);
+    }
+
     struct CallbackData {
         int32_t counter = 0;
         ResultHandler handler;
@@ -138,9 +146,12 @@ private:
 
     static void InvokeReverseInternal(const Ark_Int32 resourceId)
     {
-        if (auto it = storage_.find(resourceId); it != storage_.end()) {
-            it->second.handler(nullptr);
-        }
+        ReceiveResultInternal(resourceId, nullptr);
+    }
+
+    static void InvokeReverseInternalSync(Ark_VMContext context, const Ark_Int32 resourceId)
+    {
+        ReceiveResultInternal(resourceId, nullptr);
     }
 };
 
