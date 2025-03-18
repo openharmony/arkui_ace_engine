@@ -62,7 +62,15 @@ public:
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
-        return MakeRefPtr<IndexerAccessibilityProperty>();
+        auto property = MakeRefPtr<IndexerAccessibilityProperty>();
+        CHECK_NULL_RETURN(property, nullptr);
+        property->SetAccessibilityHoverConsume([weak = WeakClaim(this)](const NG::PointF& point) -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            Offset offset = Offset(point.GetX(), point.GetY());
+            return pattern->AtArcHotArea(offset);
+        });
+        return property;
     }
 
     void SetIsTouch(bool isTouch)
@@ -101,6 +109,7 @@ private:
     void BuildFullArrayValue();
     void CollapseArrayValue();
     void ApplyFourPlusOneMode();
+    void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);

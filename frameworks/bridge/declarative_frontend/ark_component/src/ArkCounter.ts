@@ -19,10 +19,12 @@ class ArkCounterComponent extends ArkComponent implements CounterAttribute {
     super(nativePtr, classType);
   }
   onInc(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, CounterOnIncModifier.identity, CounterOnIncModifier, event);
+    return this;
   }
   onDec(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, CounterOnDecModifier.identity, CounterOnDecModifier, event);
+    return this;
   }
   enableDec(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, EnableDecModifier.identity, EnableDecModifier, value);
@@ -49,6 +51,36 @@ class ArkCounterComponent extends ArkComponent implements CounterAttribute {
   size(value: SizeOptions): this {
     modifierWithKey(this._modifiersWithKeys, CounterSizeModifier.identity, CounterSizeModifier, value);
     return this;
+  }
+}
+
+declare type OnIncCallback = () => void;
+class CounterOnIncModifier extends ModifierWithKey<OnIncCallback> {
+  constructor(value: OnIncCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('counterOnInc');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().counter.resetCounterOnInc(node);
+    } else {
+      getUINativeModule().counter.setCounterOnInc(node, this.value);
+    }
+  }
+}
+
+declare type OnDecCallback = () => void;
+class CounterOnDecModifier extends ModifierWithKey<OnDecCallback> {
+  constructor(value: OnDecCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('counterOnDec');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().counter.resetCounterOnDec(node);
+    } else {
+      getUINativeModule().counter.setCounterOnDec(node, this.value);
+    }
   }
 }
 class CounterHeightModifier extends ModifierWithKey<Length> {

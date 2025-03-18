@@ -153,7 +153,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     if (isSpanStringMode_ && spanStringHasMaxLines_) {
         textStyle.SetMaxLines(UINT32_MAX);
     }
-    if (isSpanStringMode_ && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (isSpanStringMode_ && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         textStyle_ = textStyle;
         BuildParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
@@ -659,7 +659,7 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     if (!textStyle.GetAdaptTextSize() ||
-        (!spans_.empty() && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN))) {
+        (!spans_.empty() && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))) {
         if (!CreateParagraphAndLayout(textStyle, layoutProperty->GetContent().value_or(u""), contentConstraint,
             layoutWrapper)) {
             TAG_LOGW(AceLogTag::ACE_TEXT, "BuildParagraph fail, contentConstraint:%{public}s",

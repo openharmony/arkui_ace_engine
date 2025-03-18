@@ -43,4 +43,22 @@ RefPtr<FontLoader> FontLoader::Create(const std::string& familyName, const std::
     }
 }
 
+RefPtr<FontLoader> FontLoader::CreateFontLoader(const char* familyName, const std::vector<std::string>& familySrcArray)
+{
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return AceType::MakeRefPtr<RosenFontLoader>(familyName, familySrcArray);
+#else
+        return nullptr;
+#endif
+    } else {
+#ifdef NG_BUILD
+        return nullptr;
+#else
+
+        return nullptr;
+#endif
+    }
+}
+
 } // namespace OHOS::Ace

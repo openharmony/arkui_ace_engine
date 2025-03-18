@@ -68,6 +68,343 @@ auto imageOption4 = HtmlConvertTestNg::GetImageOption(
 );
 
 /**
+ * @tc.name: HtmlConvertComplex01
+ * @tc.desc: This test case checks the conversion of a span string with various complex styles like font,
+ *           letter spacing, background color, line height, text shadow, image spans, and paragraph styles.
+ *           It ensures that all styles are properly applied and the correct number of span items is produced.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertComplex01, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize mutable SpanString and add a variety of styles like font, letter spacing,
+     *             background color, line height, and text shadow.
+     * @tc.expected: Span string should apply all styles correctly and be ready for conversion.
+     */
+    auto imageOption = GetImageOption("src/icon-2.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto spanString3 = AceType::MakeRefPtr<SpanString>(u"Hello World! This is a test to cover complex cases.");
+
+    // Adding Font Spans
+    spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 5));
+    spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 6, 11));
+
+    // Adding Letter Spacing
+    spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(3), 12, 18));
+
+    // Adding Background Color Span
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    TextBackgroundStyle textBackgroundStyle;
+    textBackgroundStyle.backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+    spanString3->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 19, 25));
+
+    // Adding Line Height Span
+    spanString3->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(1.5), 26, 32));
+
+    // Adding Text Shadow Span
+    Shadow shadow1;
+    shadow1.SetBlurRadius(2.0);
+    shadow1.SetColor(Color::RED);
+    shadow1.SetOffsetX(4.0);
+    shadow1.SetOffsetY(4.0);
+    
+    spanString3->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(std::vector<Shadow>{shadow1}, 15, 25));
+
+    // Adding Image Span
+    auto imageSpan = AceType::MakeRefPtr<ImageSpan>(imageOption);
+    spanString3->AddSpan(imageSpan);
+
+    // Adding a complex Paragraph Style
+    auto paragraphStyle = GetDefaultParagraphStyle();
+    auto paraSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle, 8, 15);
+    spanString3->AddSpan(paraSpan);
+
+    mutableStr->InsertSpanString(0, spanString3);
+
+    /**
+     * @tc.steps2: Create a new SpanString with Chinese content and more complex styles,
+     *             and insert into mutable string.
+     * @tc.expected: Correct application of font, letter spacing, and span insertion.
+     */
+    auto spanString2 = AceType::MakeRefPtr<SpanString>(u"中文文本，包含更多复杂的样式。123456");
+    spanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 2));
+    spanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 3, 6));
+    spanString2->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(8), 7, 10));
+
+    mutableStr->InsertSpanString(16, spanString2);
+
+    /**
+     * @tc.steps3: Call the conversion function to convert the mutable span string to HTML.
+     * @tc.expected: Ensure that the conversion correctly maintains all span properties and styles.
+     */
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*mutableStr);
+
+    /**
+     * @tc.steps4: Convert HTML back to SpanString and validate the number of span items.
+     * @tc.expected: The number of span items should match the total number of spans added.
+     */
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_EQ(items.size(), 22);
+}
+
+/**
+ * @tc.name: HtmlConvertComplex02
+ * @tc.desc: This test case checks the conversion of a span string with nested and complex styles like
+ *           font spans, letter spacing, background color, and image spans. It ensures that the nested
+ *           styles are applied correctly and that the correct number of span items is produced.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertComplex02, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize mutable SpanString and add various font, letter spacing, background color,
+     *             and image spans in a nested manner.
+     * @tc.expected: Nested and complex spans should be applied correctly.
+     */
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption1);
+    auto spanString4 = AceType::MakeRefPtr<SpanString>(u"Complex Nested Styles Test: Begin");
+
+    // Add some font spans with different styles
+    spanString4->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 7));
+    spanString4->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 8, 15));
+    spanString4->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 16, 21));
+
+    // Add multiple letter spacing spans
+    spanString4->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 10));
+    spanString4->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(2), 12, 18));
+
+    // Add Background Color Span for a range
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(4, OHOS::Ace::DimensionUnit::FP);
+    borderRadius.radiusTopRight = Dimension(3, OHOS::Ace::DimensionUnit::FP);
+    borderRadius.radiusBottomLeft = Dimension(5, OHOS::Ace::DimensionUnit::FP);
+    borderRadius.radiusBottomRight = Dimension(7, OHOS::Ace::DimensionUnit::FP);
+    TextBackgroundStyle textBackgroundStyle;
+    textBackgroundStyle.backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+    spanString4->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 5, 15));
+
+    // Add Image Span at the end
+    auto imageSpan = AceType::MakeRefPtr<ImageSpan>(imageOption2);
+    spanString4->AddSpan(imageSpan);
+
+    mutableStr->InsertSpanString(0, spanString4);
+
+    /**
+     * @tc.steps2: Create another SpanString with more complex Chinese content,
+     *             add font spans, letter spacing, and text shadow, and insert it into mutable string.
+     * @tc.expected: The second span string with additional styles should be properly inserted and applied.
+     */
+    auto spanString5 = AceType::MakeRefPtr<SpanString>(u"进一步增加复杂性，测试多个样式的组合应用。");
+    spanString5->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 0, 4));
+    spanString5->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 5, 9));
+    spanString5->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(7), 9, 14));
+
+    Shadow shadow1;
+    shadow1.SetBlurRadius(10.0);
+    shadow1.SetColor(Color::RED);
+    shadow1.SetOffsetX(-10.0);
+    shadow1.SetOffsetY(0.0);
+    spanString5->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(std::vector<Shadow>{shadow1}, 10, 20));
+
+    mutableStr->InsertSpanString(10, spanString5);
+
+    /**
+     * @tc.steps3: Call the conversion function to convert the mutable span string to HTML.
+     * @tc.expected: Ensure that the conversion correctly maintains all nested and complex span properties.
+     */
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*mutableStr);
+    
+    /**
+     * @tc.steps4: Convert HTML back to SpanString and validate the number of span items.
+     * @tc.expected: The number of span items should match the total number of spans added.
+     */
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_EQ(items.size(), 20);
+}
+
+/**
+ * @tc.name: HtmlConvertComplex03
+ * @tc.desc: This test case verifies the conversion of a very large text block with multiple font spans,
+ *           letter spacing, background color, and text shadow applied in various iterations. It ensures
+ *           that the correct number of span items is produced and that the styles are applied consistently.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertComplex03, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize mutable SpanString with a large text block and apply various font,
+     *             letter spacing, and other styles.
+     * @tc.expected: Large text block with correct number of spans, properly applied styles, and correct span count.
+     */
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption3);
+    
+    // Test with a very large text block, mimicking an article
+    std::u16string largeText = u"这是一段包含多个字体和样式的大段文本。我们将使用不同的样式组合来测试转换的效果。";
+    auto spanString6 = AceType::MakeRefPtr<SpanString>(largeText);
+    
+    // Apply multiple font spans with varied fonts
+    spanString6->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 5));
+    spanString6->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 6, 10));
+    spanString6->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 11, 15));
+    
+    // Add a large number of letter spacing spans
+    for (int i = 0; i < 20; ++i) {
+        spanString6->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(i), i * 2, i * 3));
+    }
+
+    // Add a combination of other spans
+    Shadow shadow;
+    shadow.SetBlurRadius(2.0);
+    shadow.SetColor(Color::TRANSPARENT);
+    shadow.SetOffsetX(2.0);
+    shadow.SetOffsetY(2.0);
+    spanString6->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(std::vector<Shadow>{shadow}, 6, 12));
+
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(1, OHOS::Ace::DimensionUnit::AUTO);
+    borderRadius.radiusTopRight = Dimension(2, OHOS::Ace::DimensionUnit::AUTO);
+    borderRadius.radiusBottomLeft = Dimension(3, OHOS::Ace::DimensionUnit::AUTO);
+    borderRadius.radiusBottomRight = Dimension(4, OHOS::Ace::DimensionUnit::AUTO);
+
+    TextBackgroundStyle textBackgroundStyle;
+    textBackgroundStyle.backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+    spanString6->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 10));
+
+    mutableStr->InsertSpanString(0, spanString6);
+
+    /**
+     * @tc.steps2: Convert the large mutable string to HTML format and validate the number of span items.
+     * @tc.expected: The conversion should result in a high number of span items due to the large amount of styling.
+     */
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*mutableStr);
+    
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_EQ(items.size(), 26);
+}
+
+/**
+ * @tc.name: HtmlConvertComplex04
+ * @tc.desc: This test case checks the conversion of multiple text blocks with embedded images and various
+ *           styles such as font and letter spacing applied. It verifies the correct insertion of images and
+ *           the accurate number of span items after conversion.
+ * @tc.level: 3
+ */
+HWTEST_F(HtmlConvertTestNg, HtmlConvertComplex04, TestSize.Level3)
+{
+    /**
+     * @tc.steps1: Initialize mutable SpanString with imageOption1.
+     * @tc.expected: The mutable string should be ready for inserting span strings with various styles and images.
+     */
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption1);
+
+    // First text block with an image
+    /**
+     * @tc.steps2: Create the first text span string and apply font and letter spacing styles to it.
+     *             Insert an image (imageOption1) into the text span.
+     * @tc.expected: The first span string should be styled correctly and the image should be inserted
+     *                at the correct position.
+     */
+    std::u16string text1 = u"This is the first paragraph with an image display:";
+    auto spanString1 = AceType::MakeRefPtr<SpanString>(text1);
+    spanString1->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10)); // "This is the first"
+    spanString1->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(4), 10, 20)); // "paragraph"
+    
+    // Insert image (using imageOption1)
+    auto imageSpan1 = AceType::MakeRefPtr<ImageSpan>(imageOption1);
+    spanString1->AddSpan(imageSpan1);
+
+    mutableStr->InsertSpanString(0, spanString1);
+
+    // Second text block with different image configurations
+    /**
+     * @tc.steps3: Create the second text span string and apply font and letter spacing styles.
+     *             Insert a different image (imageOption2) into this span string.
+     * @tc.expected: The second span string should have proper font styles, letter spacing, and image insertion.
+     */
+    std::u16string text2 = u"The second paragraph with different image configurations:";
+    auto spanString2 = AceType::MakeRefPtr<SpanString>(text2);
+    spanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 0, 10)); // "The second"
+    spanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 11, 18)); // "paragraph"
+    spanString2->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(6), 18, 25)); // "with different"
+    
+    // Insert image (using imageOption2)
+    auto imageSpan2 = AceType::MakeRefPtr<ImageSpan>(imageOption2);
+    spanString2->AddSpan(imageSpan2);
+
+    mutableStr->InsertSpanString(30, spanString2);
+
+    // Third text block with more images
+    /**
+     * @tc.steps4: Create the third text span string and apply font and letter spacing styles.
+     *             Insert an image (imageOption3) into this span string.
+     * @tc.expected: The third span string should have the correct styles and image insertion.
+     */
+    std::u16string text3 = u"The third paragraph showcasing another image configuration:";
+    auto spanString3 = AceType::MakeRefPtr<SpanString>(text3);
+    spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10)); // "The third"
+    spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 11, 15)); // "paragraph"
+    spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(3), 15, 20)); // "showcasing"
+    
+    // Insert image (using imageOption3)
+    auto imageSpan3 = AceType::MakeRefPtr<ImageSpan>(imageOption3);
+    spanString3->AddSpan(imageSpan3);
+
+    mutableStr->InsertSpanString(50, spanString3);
+
+    // Fourth text block with the final image
+    /**
+     * @tc.steps5: Create the fourth text span string and apply font and letter spacing styles.
+     *             Insert the final image (imageOption4) into this span string.
+     * @tc.expected: The fourth span string should be styled correctly and the image should
+     *               be inserted at the right position.
+     */
+    std::u16string text4 = u"The final paragraph showcasing the last image configuration:";
+    auto spanString4 = AceType::MakeRefPtr<SpanString>(text4);
+    spanString4->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 0, 10)); // "The final"
+    spanString4->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(4), 10, 18)); // "paragraph"
+    
+    // Insert image (using imageOption4)
+    auto imageSpan4 = AceType::MakeRefPtr<ImageSpan>(imageOption4);
+    spanString4->AddSpan(imageSpan4);
+
+    mutableStr->InsertSpanString(70, spanString4);
+
+    /**
+     * @tc.steps6: Convert the entire mutable string to HTML format and verify the result.
+     * @tc.expected: The conversion should result in the correct number of span items,
+     *               including those with images and different styles.
+     */
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*mutableStr);
+    
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    
+    EXPECT_EQ(items.size(), 24);
+}
+
+/**
  * @tc.name: HtmlConvert000
  * @tc.desc: This test case verifies the conversion of a simple SpanString (without complex styles)
  *           to TLV format, HTML format, and back to SpanString. It ensures the conversion

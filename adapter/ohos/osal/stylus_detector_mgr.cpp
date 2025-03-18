@@ -211,4 +211,28 @@ bool StylusDetectorMgr::IsHitCleanNodeResponseArea(
     globalFrameRect.SetOffset(cleanNodeFrameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
     return globalFrameRect.IsInRegion(point);
 }
+
+bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(float x, float y)
+{
+    if (!IsEnable()) {
+        TAG_LOGI(AceLogTag::ACE_STYLUS, "IsNeedInterceptedTouchEventForWeb Stylus service is not enable");
+        return false;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto bundleName = container->GetBundleName();
+    NotifyInfo info;
+    info.componentId = -1;
+    info.x = x;
+    info.y = y;
+    info.bundleName = bundleName;
+    auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
+    nodeId_ = 0;
+    sInd_ = -1;
+    eInd_ = -1;
+    showMenu_ = false;
+    isRegistered_ = RegisterStylusInteractionListener(bundleName, stylusDetectorCallback);
+    return Notify(info);
+}
 } // namespace OHOS::Ace

@@ -59,11 +59,7 @@ public:
         return unit_;
     }
 
-    double GetDensity()
-    {
-        double density = PipelineBase::GetCurrentDensity();
-        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
-    }
+    double GetDensity();
 
 protected:
     RefPtr<CanvasPath2D> path2d_;

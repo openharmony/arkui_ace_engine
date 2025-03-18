@@ -19,7 +19,6 @@
 #include "movingphoto_event_hub.h"
 #include "movingphoto_controller.h"
 #include "movingphoto_utils.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 

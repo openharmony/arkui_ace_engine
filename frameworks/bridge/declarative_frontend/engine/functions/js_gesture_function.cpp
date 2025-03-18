@@ -52,6 +52,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetProperty<double>("pressure", info.GetForce());
     gestureInfoObj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     gestureInfoObj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    gestureInfoObj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     gestureInfoObj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
 
     gestureInfoObj->SetProperty<double>(

@@ -617,6 +617,43 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     HideFilter(false);
 }
 
+void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+    int32_t appearingTimeWithContinuousOperation)
+{
+    popupTargetId_ = targetId;
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    ResizeWindow();
+    ShowWindow(popupInfo.focusable);
+    CHECK_NULL_VOID(window_);
+    window_->SetTouchable(true);
+    ContainerScope scope(childContainerId_);
+    overlayManager->ShowTips(targetId, popupInfo, appearingTime, appearingTimeWithContinuousOperation);
+    window_->SetFocusable(true);
+}
+
+void SubwindowOhos::HideTipsNG(int32_t targetId, int32_t disappearingTime)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto popupInfo = overlayManager->GetPopupInfo(targetId == -1 ? popupTargetId_ : targetId);
+    popupInfo.markNeedUpdate = true;
+    ContainerScope scope(childContainerId_);
+    overlayManager->HideTips(targetId == -1 ? popupTargetId_ : targetId, popupInfo, disappearingTime);
+    context->FlushPipelineImmediately();
+    HideEventColumn();
+    HidePixelMap();
+    HideFilter(false);
+}
+
 void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get popup info ng enter");
@@ -899,7 +936,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     RefPtr<NG::UINode> previewCustomNode;
-    if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM) {
+    if (previewBuildFunc && menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::CUSTOM) {
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
@@ -1023,6 +1060,20 @@ void SubwindowOhos::ClearPopupNG()
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->CleanPopupInSubWindow();
+    HideWindow();
+    context->FlushPipelineImmediately();
+}
+
+void SubwindowOhos::ClearPopupNG(bool isForceClear)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear popup ng enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->CleanPopupInSubWindow(isForceClear);
     HideWindow();
     context->FlushPipelineImmediately();
 }
@@ -1172,7 +1223,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         parentOverlay->SetSubWindowId(childContainerId_);
     }
     ResizeWindow();
-    ShowWindow();
+    ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
