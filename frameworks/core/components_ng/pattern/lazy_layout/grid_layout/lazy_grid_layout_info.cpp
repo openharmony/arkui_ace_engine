@@ -24,7 +24,7 @@ void LazyGridLayoutInfo::EstimateItemSize()
 {
     if (!posMap_.empty()) {
         float totalSize = posMap_.rbegin()->second.endPos + spaceWidth_ - posMap_.begin()->second.startPos;
-        int32_t totalCount = (posMap_.rbegin()->first + 1 - posMap_.begin()->first) / lanes_;
+        int32_t totalCount = (posMap_.size() + lanes_ - 1) / lanes_;
         estimateItemSize_ = totalSize / totalCount - spaceWidth_;
     }
 }
@@ -128,16 +128,21 @@ void LazyGridLayoutInfo::UpdatePosMap()
     if (!Positive(estimateItemSize_)) {
         EstimateItemSize();
     }
-    if (updatedStart_ < INT_MAX || cachedUpdatedStart_ < INT_MAX) {
-        int32_t updatedEnd = updatedEnd_ < 0 ? cachedUpdatedEnd_ : updatedEnd_;
+    if (updatedStart_ == INT_MAX && cachedUpdatedStart_ < INT_MAX) {
+        updatedStart_ = cachedUpdatedStart_;
+        updatedEnd_ = cachedUpdatedEnd_;
+    }
+    if (updatedStart_ < INT_MAX) {
         if (cachedUpdatedStart_ < updatedStart_) {
-            adjustOffset_.start =
-                UpdatePosMapStart(LanesFloor(cachedUpdatedStart_), std::min(updatedEnd, updatedStart_ - 1));
+            UpdatePosMapStart(LanesFloor(cachedUpdatedStart_), updatedStart_ - 1);
         }
-        if (updatedStart_ < INT_MAX) {
-            adjustOffset_.start = UpdatePosMapStart(updatedStart_, updatedEnd);
+        adjustOffset_.start = UpdatePosMapStart(updatedStart_, updatedEnd_);
+        if (cachedUpdatedEnd_ > updatedEnd_) {
+            UpdatePosMapStart(updatedEnd_ + 1, LanesCeil(cachedUpdatedEnd_));
+            UpdatePosMapEnd(LanesCeil(cachedUpdatedEnd_));
+        } else {
+            UpdatePosMapEnd(updatedEnd_);
         }
-        UpdatePosMapEnd(updatedEnd);
         adjustOffset_.end = totalMainSize_ - prevTotalMainSize_ - adjustOffset_.start;
         updatedStart_ = INT_MAX;
         updatedEnd_ = -1;

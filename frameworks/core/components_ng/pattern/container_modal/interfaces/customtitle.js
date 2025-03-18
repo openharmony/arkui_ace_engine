@@ -1087,6 +1087,11 @@ class c3 extends ViewPU {
             PanGesture.create();
             PanGesture.pop();
             Gesture.pop();
+            Row.onTouch((u) => {
+                if (u) {
+                    u.stopPropagation();
+                }
+            })
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild();

@@ -1423,14 +1423,10 @@ void CalendarPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     }
     json->PutExtAttr("disabledDateRange", disabledDateRangeStr.c_str(), filter);
 
-    if (calendarData_.startDate.ToDays() == PickerDate().ToDays()) {
-        json->PutExtAttr("start", "undefined", filter);
-    } else {
+    if (calendarData_.startDate.ToDays() != PickerDate().ToDays()) {
         json->PutExtAttr("start", calendarData_.startDate.ToString(false).c_str(), filter);
     }
-    if (calendarData_.endDate.ToDays() == PickerDate().ToDays()) {
-        json->PutExtAttr("end", "undefined", filter);
-    } else {
+    if (calendarData_.endDate.ToDays() != PickerDate().ToDays()) {
         json->PutExtAttr("end", calendarData_.endDate.ToString(false).c_str(), filter);
     }
 }

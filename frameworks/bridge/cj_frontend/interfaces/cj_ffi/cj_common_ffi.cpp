@@ -18,6 +18,7 @@
 #include <malloc.h>
 
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
+#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;

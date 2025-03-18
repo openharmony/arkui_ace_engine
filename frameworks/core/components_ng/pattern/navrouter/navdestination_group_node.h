@@ -266,6 +266,7 @@ private:
     std::optional<AnimationOption> GetTransitionAnimationOption(NavigationOperation operation, bool isEnter) const;
     std::function<void()> BuildTransitionFinishCallback(
         bool isSystemTransition = true, std::function<void()>&& extraOption = nullptr);
+    std::function<void()> BuildEmptyFinishCallback();
 
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;

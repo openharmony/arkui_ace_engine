@@ -76,10 +76,6 @@ DragEventActuator::DragEventActuator(
     const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance)
     : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers), distance_(distance)
 {
-    auto gestureHub = gestureEventHub_.Upgrade();
-    if (gestureHub && gestureHub->IsDragNewFwk()) {
-        return;
-    }
     if (fingers_ < PAN_FINGER) {
         fingers_ = PAN_FINGER;
     }

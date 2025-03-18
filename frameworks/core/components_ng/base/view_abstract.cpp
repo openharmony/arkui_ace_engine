@@ -2099,7 +2099,7 @@ void ViewAbstract::BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameN
     CHECK_NULL_VOID(overlayManager);
     auto tipsInfo = overlayManager->GetPopupInfo(targetId);
     auto showInSubWindow = param->IsShowInSubWindow();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
     if (subwindow) {
         subwindow->GetPopupInfoNG(targetId, tipsInfo);
     }
@@ -2136,7 +2136,8 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
         targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
     } else {
         auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            auto subwindow =
+                SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
             CHECK_NULL_VOID(subwindow);
             auto overlayManager = subwindow->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);

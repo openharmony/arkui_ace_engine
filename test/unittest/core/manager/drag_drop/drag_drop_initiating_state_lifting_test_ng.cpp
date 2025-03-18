@@ -267,8 +267,7 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
      * @tc.steps: step2. test lifting state init for none text drag.
      */
     machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::IDLE);
-    machine->RequestStatusTransition(machine->dragDropInitiatingState_[machine->currentState_],
-        static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
     EXPECT_TRUE(DragDropInitiatingStateTestNG::CheckDragDropInitiatingStatus(
         0, static_cast<DragDropInitiatingStatus>(machine->currentState_), DragDropInitiatingStatus::LIFTING));
 
@@ -278,8 +277,7 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
     machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::IDLE);
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
     dragPreviewOption.isLiftingDisabled = false;
-    machine->RequestStatusTransition(machine->dragDropInitiatingState_[machine->currentState_],
-        static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
     EXPECT_TRUE(DragDropInitiatingStateTestNG::CheckDragDropInitiatingStatus(
         0, static_cast<DragDropInitiatingStatus>(machine->currentState_), DragDropInitiatingStatus::LIFTING));
 
@@ -289,8 +287,7 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
     machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::IDLE);
     gestureEventHub->SetTextDraggable(true);
     gestureEventHub->SetIsTextDraggable(true);
-    machine->RequestStatusTransition(machine->dragDropInitiatingState_[machine->currentState_],
-        static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
     EXPECT_TRUE(DragDropInitiatingStateTestNG::CheckDragDropInitiatingStatus(
         0, static_cast<DragDropInitiatingStatus>(machine->currentState_), DragDropInitiatingStatus::LIFTING));
 
@@ -299,8 +296,7 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
      */
     machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::IDLE);
     gestureEventHub->SetIsTextDraggable(false);
-    machine->RequestStatusTransition(machine->dragDropInitiatingState_[machine->currentState_],
-        static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
     EXPECT_TRUE(DragDropInitiatingStateTestNG::CheckDragDropInitiatingStatus(
         0, static_cast<DragDropInitiatingStatus>(machine->currentState_), DragDropInitiatingStatus::LIFTING));
 }

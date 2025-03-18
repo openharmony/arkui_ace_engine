@@ -334,6 +334,42 @@ void ListTestNg::CreateItemsInLazyForEach(
     lazyForEachModelNG.OnMove(std::move(onMove));
 }
 
+LazyForEachModelNG ListTestNg::CreateItemsInForLazyEachForItemDragEvent(int32_t itemNumber, float itemMainSize)
+{
+    RefPtr<LazyForEachActuator> mockForEach = AceType::MakeRefPtr<ListItemMockLazy>(itemNumber, itemMainSize);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(mockForEach);
+    return lazyForEachModelNG;
+}
+
+ForEachModelNG ListTestNg::CreateForEachListForItemDragEvent(int32_t itemNumber, int32_t lanes)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(lanes);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    ForEachModelNG forEachModelNG;
+    forEachModelNG.Create();
+    auto forEachNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    forEachNode->SetParent(weakList); // for InitAllChildrenDragManager
+    std::list<std::string> newIds;
+    for (int32_t index = 0; index < itemNumber; index++) {
+        newIds.emplace_back(std::to_string(index));
+    }
+    std::list<int32_t> removedElmtId;
+    forEachModelNG.SetNewIds(std::move(newIds));
+    forEachModelNG.SetRemovedElmtIds(removedElmtId);
+    for (int32_t index = 0; index < itemNumber; index++) {
+        // key is 0,1,2,3...
+        forEachModelNG.CreateNewChildStart(std::to_string(index));
+        CreateListItems(1);
+        forEachModelNG.CreateNewChildFinish(std::to_string(index));
+    }
+    return forEachModelNG;
+}
+
 class ListItemGroupMockLazy : public Framework::MockLazyForEachBuilder {
 public:
     explicit ListItemGroupMockLazy(int32_t itemGroupCnt) : itemGroupCnt_(itemGroupCnt) {}
