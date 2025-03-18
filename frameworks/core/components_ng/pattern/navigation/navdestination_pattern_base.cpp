@@ -422,4 +422,11 @@ void NavDestinationPatternBase::MarkSafeAreaPaddingChangedWithCheckTitleBar(floa
         safeAreaPaddingChanged_ = true;
     }
 }
+
+bool NavDestinationPatternBase::CustomizeExpandSafeArea()
+{
+    auto host = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    return host->CustomizeExpandSafeArea();
+}
 } // namespace OHOS::Ace::NG

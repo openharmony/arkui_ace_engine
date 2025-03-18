@@ -25,6 +25,7 @@
 #include "display_manager.h"
 #include "dm_common.h"
 #include "interfaces/inner_api/ace/arkui_rect.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 
@@ -305,6 +306,12 @@ public:
         auto dmOrientation = static_cast<Rosen::Orientation>(static_cast<uint32_t>(orientation));
         uiWindow_->SetRequestedOrientation(dmOrientation);
     }
+
+    RefPtr<PageViewportConfig> GetCurrentViewportConfig() const override;
+    RefPtr<PageViewportConfig> GetTargetViewportConfig(Orientation orientation,
+        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator) override;
+    void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
+    Orientation GetRequestedOrientation() override;
 
     uint64_t GetDisplayId() const override
     {
@@ -871,6 +878,16 @@ private:
 
     void RegisterAvoidInfoCallback();
     void RegisterAvoidInfoDataProcessCallback();
+
+    void RegisterOrientationUpdateListener();
+    void RegisterOrientationChangeListener();
+    bool IsPcOrPadFreeMultiWindowMode() const override;
+    bool IsFullScreenWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN;
+    }
+    bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) override;
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;

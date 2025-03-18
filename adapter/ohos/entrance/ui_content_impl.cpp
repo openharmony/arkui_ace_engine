@@ -3062,6 +3062,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    container->SetCurrentDisplayOrientation(static_cast<DisplayOrientation>(config.Orientation()));
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     if (container->IsSubContainer()) {
