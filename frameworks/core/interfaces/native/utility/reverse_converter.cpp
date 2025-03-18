@@ -18,6 +18,7 @@
 #include "base/utils/string_utils.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "validators.h"
 
@@ -173,6 +174,15 @@ void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
 {
     dst.alwaysEnabled = src;
+}
+
+void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src)
+{
+    std::pair<const Dimension, const Dimension> pair = {src.size.Width(), src.size.Height()};
+    dst.size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair);
+    if (src.pixmap) {
+        dst.pixelMap = PixelMapPeer::Create(src.pixmap);
+    }
 }
 
 void AssignArkValue(Ark_Length& dst, const double& src)
