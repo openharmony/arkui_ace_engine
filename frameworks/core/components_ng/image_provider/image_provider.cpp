@@ -129,7 +129,9 @@ void ImageProvider::FailCallback(
     auto notifyLoadFailTask = [ctxs, errorMsg] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->FailCallback(errorMsg);
         }
     };
@@ -150,7 +152,9 @@ void ImageProvider::SuccessCallback(
     auto notifyLoadSuccess = [ctxs, canvasImage] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->SuccessCallback(canvasImage->Clone());
         }
     };
@@ -199,7 +203,9 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     auto notifyDataReadyTask = [ctxs, imageObj, src] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->DataReadyCallback(imageObj);
         }
     };
@@ -288,7 +294,9 @@ void ImageProvider::DownLoadSuccessCallback(
     auto notifyDownLoadSuccess = [ctxs, imageObj] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->DataReadyCallback(imageObj);
         }
     };
@@ -307,7 +315,9 @@ void ImageProvider::DownLoadOnProgressCallback(
     auto notifyDownLoadOnProgressCallback = [ctxs, dlNow, dlTotal] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
-            CHECK_NULL_VOID(ctx);
+            if (!ctx) {
+                continue;
+            }
             ctx->DownloadOnProgress(dlNow, dlTotal);
         }
     };
