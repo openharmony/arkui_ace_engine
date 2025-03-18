@@ -24,6 +24,11 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
+LeadingMarginSize Convert(const Ark_Tuple_Dimension_Dimension& src)
+{
+    return LeadingMarginSize(Convert<Dimension>(src.value0), Convert<Dimension>(src.value1));
+}
+template<>
 OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
 {
     OHOS::Ace::SpanParagraphStyle ret;
@@ -40,11 +45,10 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
             ret.leadingMargin = margin;
         },
         [&ret](const Ark_LeadingMarginPlaceholder& inMargin) {
-            LeadingMargin margin;
-            auto dimension1 = Converter::Convert<Dimension>(inMargin.size.value0);
-            auto dimension2 = Converter::Convert<Dimension>(inMargin.size.value1);
-            margin.size = LeadingMarginSize(dimension1, dimension2);
-            ret.leadingMargin = margin;
+            ret.leadingMargin = {
+                .size = Convert<LeadingMarginSize>(inMargin.size),
+                .pixmap = Convert<RefPtr<PixelMap>>(inMargin.pixelMap),
+            };
         },
         []() {});
     return ret;
