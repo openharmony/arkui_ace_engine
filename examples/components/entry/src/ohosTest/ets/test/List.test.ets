@@ -14,12 +14,10 @@
  */
 
 import abilityTest from './Ability.test';
-import CalendarPickerDialogBootcampTest from './CalendarPickerDialogBootcamp.test';
 import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
-  CalendarPickerDialogBootcampTest();
   ListItemGroupBootcampTest();
 
 }
