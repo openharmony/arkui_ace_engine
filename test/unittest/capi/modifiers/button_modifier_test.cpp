@@ -1761,10 +1761,15 @@ HWTEST_F(ButtonModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
 {
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumInvalidValues = {
+        { "-1.01", Converter::ArkValue<Ark_Number>(-1.01), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
+        { "2.89", Converter::ArkValue<Ark_Number>(2.89), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
+        { "-1", Converter::ArkValue<Ark_Number>(-1), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
+    };
     Ark_Union_Number_Resource initValueMinFontScale;
     // Initial setup
     initValueMinFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(2.1));
-        auto checkValue = [this, &initValueMinFontScale](const std::string& input,
+        auto checkValue = [this, &initValueMinFontScale](const std::string& input,  const std::string& expectedStr,
                                                          const Ark_Union_Number_Resource& value) {
         Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
         modifier_->setMinFontScale(node_, &inputValueMinFontScale);
@@ -1775,8 +1780,9 @@ HWTEST_F(ButtonModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
         EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) <<
             "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
     };
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
+    for (auto& [input, value, expected] : testFixtureMinFontScaleNumInvalidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+    }
 }
 
 /*
@@ -1831,10 +1837,15 @@ HWTEST_F(ButtonModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ButtonModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
 {
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumInvalidValues = {
+        { "0.1", Converter::ArkValue<Ark_Number>(0.1), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
+        { "-1.5", Converter::ArkValue<Ark_Number>(-1.5), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
+        { "-0.99", Converter::ArkValue<Ark_Number>(-0.99), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
+    };
     Ark_Union_Number_Resource initValueMaxFontScale;
     // Initial setup
     initValueMaxFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.1));
-        auto checkValue = [this, &initValueMaxFontScale](const std::string& input,
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input,  const std::string& expectedStr,
                                                          const Ark_Union_Number_Resource& value) {
         Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
         modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
@@ -1845,6 +1856,8 @@ HWTEST_F(ButtonModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
         EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
             "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
     };
-    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
+    for (auto& [input, value, expected] : testFixtureMaxFontScaleNumInvalidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+    }
 }
 } // namespace OHOS::Ace::NG
