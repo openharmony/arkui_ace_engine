@@ -43,6 +43,8 @@ namespace {
     const auto ATTRIBUTE_LABEL_STYLE_MAX_LINES_NAME = "maxLines";
     const auto ATTRIBUTE_LABEL_STYLE_MIN_FONT_SIZE_NAME = "minFontSize";
     const auto ATTRIBUTE_LABEL_STYLE_MAX_FONT_SIZE_NAME = "maxFontSize";
+    const auto ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_NAME = "minFontScale";
+    const auto ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_NAME = "maxFontScale";
     const auto ATTRIBUTE_LABEL_STYLE_HEIGHT_ADAPTIVE_POLICY_NAME = "heightAdaptivePolicy";
     const auto ATTRIBUTE_LABEL_STYLE_FONT_NAME = "font";
     const auto ATTRIBUTE_LABEL_STYLE_FONT_SIZE_NAME("size");
@@ -60,6 +62,8 @@ namespace {
     const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE("16.00fp");
     const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE("FontWeight.Normal");
     const auto ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE("FontStyle.Normal");
+    const auto ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE("0.000000");
+    const auto ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE("2147483648.000000");
 
     // typedefs
     using ButtonTypeTest = std::pair<Ark_ButtonType, std::string>;
@@ -1703,5 +1707,142 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontFamily, TestSize.Level1)
     font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
     family = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME);
     EXPECT_EQ(family, inputStringValue);
+}
+
+/*
+ * @tc.name: setMinFontScaleDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, setMinFontScaleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'minFontScale'";
+}
+
+/*
+ * @tc.name: setMinFontScaleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
+{
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumValidValues = {
+        { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.100000" },
+        { "0.89", Converter::ArkValue<Ark_Number>(0.89), "0.890000" },
+        { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+    };
+    Ark_Union_Number_Resource initValueMinFontScale;
+    // Initial setup
+    initValueMinFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
+        std::get<1>(testFixtureMinFontScaleNumValidValues[0]));
+
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
+                            const Ark_Union_Number_Resource& value) {
+        Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
+    };
+    for (auto& [input, value, expected] : testFixtureMinFontScaleNumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setMinFontScaleTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
+{
+    Ark_Union_Number_Resource initValueMinFontScale;
+    // Initial setup
+    initValueMinFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(2.1));
+        auto checkValue = [this, &initValueMinFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
+        Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MIN_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
+    };
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setMaxFontScaleDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'maxFontScale'";
+}
+
+/*
+ * @tc.name: setMaxFontScaleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
+{
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues = {
+        { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+        { "1.5", Converter::ArkValue<Ark_Number>(1.5), "1.500000" },
+        { "1.99", Converter::ArkValue<Ark_Number>(1.99), "1.990000" },
+    };
+    Ark_Union_Number_Resource initValueMaxFontScale;
+    // Initial setup
+    initValueMaxFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(
+        std::get<1>(testFixtureMaxFontScaleNumValidValues[0]));
+
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
+                            const Ark_Union_Number_Resource& value) {
+        Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
+    };
+    for (auto& [input, value, expected] : testFixtureMaxFontScaleNumValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setMaxFontScaleTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
+{
+    Ark_Union_Number_Resource initValueMaxFontScale;
+    // Initial setup
+    initValueMaxFontScale = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.1));
+        auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
+        Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_STYLE_MAX_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
+    };
+    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
 }
 } // namespace OHOS::Ace::NG

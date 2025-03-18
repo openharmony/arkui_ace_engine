@@ -78,6 +78,7 @@ ButtonParameters Convert(const Ark_LabelStyle& src)
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+constexpr float SCALE_LIMIT = 1.f;
 namespace ButtonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -240,17 +241,22 @@ void MinFontScaleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ButtonModelNG::SetMinFontScale(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
+    ButtonModelNG::SetMinFontScale(frameNode, convValue);
 }
+
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Ark_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ButtonModelNG::SetMaxFontScale(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
+    ButtonModelNG::SetMaxFontScale(frameNode, convValue);
 }
 } // ButtonAttributeModifier
 const GENERATED_ArkUIButtonModifier* GetButtonModifier()
