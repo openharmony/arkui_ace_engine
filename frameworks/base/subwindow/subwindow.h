@@ -72,6 +72,7 @@ public:
     virtual void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
     virtual bool ShowPreviewNG(bool isStartDraggingFromSubWindow) = 0;
+    virtual void SetWindowTouchable(bool touchable) = 0;
     virtual void HidePreviewNG() = 0;
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
@@ -85,12 +86,16 @@ public:
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) = 0;
     virtual void HidePopupNG(int32_t targetId) = 0;
+    virtual void ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+        int32_t appearingTimeWithContinuousOperation) {};
+    virtual void HideTipsNG(int32_t targetId, int32_t disappearingTime) {};
     virtual void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) = 0;
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
     virtual void ClearMenuNG(int32_t targetId = -1, bool inWindow = true, bool showAnimation = false) = 0;
     virtual void ClearPopupNG() = 0;
+    virtual void ClearPopupNG(bool isForceClear) {}
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNGWithNode(

@@ -29,7 +29,7 @@ void DragDropInitiatingStatePress::HandlePreviewLongPressOnAction(const GestureE
 {
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
 }
 
 void DragDropInitiatingStatePress::HandleSequenceOnActionCancel(const GestureEvent& info)
@@ -44,7 +44,7 @@ void DragDropInitiatingStatePress::HandleSequenceOnActionCancel(const GestureEve
     CHECK_NULL_VOID(gestureHub);
     bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
     if (!isMenuShow) {
-        machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
     }
 }
 
@@ -86,7 +86,10 @@ void DragDropInitiatingStatePress::HandlePanOnReject()
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsGatherWithMenu()) {
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (manager->IsGatherWithMenu() || !params.hasGatherNode) {
         return;
     }
     auto preDragStatus = DragDropGlobalController::GetInstance().GetPreDragStatus();
@@ -124,7 +127,7 @@ void DragDropInitiatingStatePress::HandlePanOnActionEnd(const GestureEvent& info
     dragDropManager->SetIsDisableDefaultDropAnimation(true);
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 
 void DragDropInitiatingStatePress::Init(int32_t currentState)

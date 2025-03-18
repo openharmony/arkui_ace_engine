@@ -31,6 +31,7 @@ constexpr int32_t TIME_4000 = 4000; // 4000 ms
 constexpr int32_t LOADING_ANIMATION_DURATION = 2000;
 constexpr float DEFAULT_MAX_VALUE = 100.0f;
 constexpr float DEFAULT_SCALE_WIDTH = 10.0f;
+constexpr float DEFAULT_MIN_PROGRESS_WIDTH = 0.0f;
 constexpr int32_t DEFAULT_SCALE_COUNT = 100;
 constexpr double DEFAULT_CAPSULE_BORDER_WIDTH = 0.0;
 constexpr float FLOAT_ZERO_FIVE = 0.5f;
@@ -721,7 +722,7 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
             } else {
                 PaintVerticalCapsuleForApiNine(canvas, offset_->Get(), contentSize);
             }
-        } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             if (contentSize.Width() >= contentSize.Height()) {
                 PaintCapsule(canvas, offset_->Get(), contentSize, contentSize.Height() / INT32_TWO);
             } else {
@@ -1581,6 +1582,7 @@ void ProgressModifier::PaintCapsuleProgressLessRadiusScene(
     float offsetY = offset.GetY();
     float progressWidth =
         std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
+    progressWidth = std::max(progressWidth, DEFAULT_MIN_PROGRESS_WIDTH);
     bool isDefault = GreatOrEqual(borderRadius, contentSize.Height() / INT32_TWO);
     if (isDefault) {
         if (!isRightToLeft_->Get()) {

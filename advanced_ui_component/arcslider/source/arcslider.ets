@@ -1190,6 +1190,12 @@ export struct ArcSlider {
             this.onTouchEvent(event);
           }
         })
+        .onTouchIntercept((event: TouchEvent) => {
+          if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+            return HitTestMode.Block;
+          }
+          return HitTestMode.Transparent;
+        })
         .focusable(true)
         .focusOnTouch(true)
         .onDigitalCrown((event: CrownEvent) => {

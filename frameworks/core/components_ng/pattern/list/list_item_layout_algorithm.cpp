@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 
+#include "core/components_ng/layout/layout_property.h"
 namespace OHOS::Ace::NG {
 
 bool ListItemLayoutAlgorithm::IsRTLAndVertical(LayoutWrapper* layoutWrapper) const
@@ -36,10 +37,33 @@ float ListItemLayoutAlgorithm::SetReverseValue(LayoutWrapper* layoutWrapper, flo
     }
 }
 
-void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+SizeF ListItemLayoutAlgorithm::GetContentSize(LayoutWrapper* layoutWrapper) const
 {
-    layoutWrapper->RemoveAllChildInRenderTree();
+    CHECK_NULL_RETURN(layoutWrapper, {});
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    return geometryNode->GetPaddingSize();
+}
 
+void ListItemLayoutAlgorithm::CheckAndUpdateCurOffset(LayoutWrapper* layoutWrapper)
+{
+    if (!canUpdateCurOffset_) {
+        return;
+    }
+    float itemWidth = GetContentSize(layoutWrapper).CrossSize(axis_);
+    if (NearEqual(itemWidth, childNodeSize_)) {
+        return;
+    }
+    isCurOffsetUpdated_ = true;
+    if (Positive(curOffset_) && startNodeIndex_ >= 0) {
+        curOffset_ = itemWidth;
+    } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
+        curOffset_ = -itemWidth;
+    }
+}
+
+void ListItemLayoutAlgorithm::MeasureItemChild(LayoutWrapper* layoutWrapper)
+{
     std::list<RefPtr<LayoutWrapper>> childList;
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
@@ -48,11 +72,22 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childList.push_back(child);
     }
     PerformMeasureSelfWithChildList(layoutWrapper, childList);
+    CheckAndUpdateCurOffset(layoutWrapper);
+}
+
+void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    layoutWrapper->RemoveAllChildInRenderTree();
+
+    // step 1: measure item child node.
+    MeasureItemChild(layoutWrapper);
     auto mainSize = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
     if (NonPositive(mainSize)) {
         curOffset_ = 0.0f;
         return;
     }
+
+    // step 2: measure swipeAction node.
     if (Positive(curOffset_) && startNodeIndex_ >= 0) {
         auto startLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         if (!NearZero(startNodeSize_) && curOffset_ > startNodeSize_) {
@@ -64,7 +99,7 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto startNode = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
         CHECK_NULL_VOID(startNode);
         startNode->Measure(startLayoutConstraint);
-        if (NearZero(startNodeSize_) || curOffset_ < endNodeSize_) {
+        if (NearZero(startNodeSize_) || curOffset_ < startNodeSize_) {
             startNodeSize_ = startNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
         }
         curOffset_ = NearZero(startNodeSize_) && !hasStartDeleteArea_ ? 0.0f : curOffset_;

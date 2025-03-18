@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_window.h"
 
@@ -2655,6 +2656,112 @@ HWTEST_F(SheetPresentationTestNg, CalculateSheetRadius004, TestSize.Level1)
     sheetPattern->CalculateAloneSheetRadius(sheetRadius, sheetStyleRadius);
     radius = Dimension(50.0);
     EXPECT_EQ(sheetRadius, radius);
+
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateTitleTextColor001
+ * @tc.desc: Test bindSheet mainText color.
+ *           Condition: sheetStyle.sheetTitle.has_value() == true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, UpdateTitleTextColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetType = SheetType::SHEET_CENTER;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+
+    /**
+     * @tc.steps: step4. execute UpdateTitleTextColor.
+     */
+    sheetPattern->UpdateTitleTextColor();
+
+    /**
+     * @tc.steps: step4. get main text property.
+     */
+    auto firstChild = sheetNode->GetChildAtIndex(0);
+    ASSERT_NE(firstChild, nullptr);
+    auto sheetTitleColumn = firstChild->GetChildAtIndex(1);
+    ASSERT_NE(sheetTitleColumn, nullptr);
+    auto mainRow = sheetTitleColumn->GetChildAtIndex(0);
+    ASSERT_NE(mainRow, nullptr);
+    auto mainTitleText = AceType::DynamicCast<FrameNode>(mainRow->GetChildAtIndex(0));
+    ASSERT_NE(mainTitleText, nullptr);
+    auto mainProp = mainTitleText->GetLayoutProperty<TextLayoutProperty>();
+
+    /**
+     * @tc.expected: mainProp->GetTextColor() == sheetTheme->GetTitleTextFontColor()
+     */
+    EXPECT_EQ(mainProp->GetTextColor(), sheetTheme->GetTitleTextFontColor());
+
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateTitleTextColor002
+ * @tc.desc: Branch: if (sheetStyle.sheetSubtitle.has_value()).
+ *           Condition: 1.sheetEffectEdge_ = SheetEffectEdge::START,
+ *                      2.scrollSizeMode_ = ScrollSizeMode::CONTINUOUS, IsScrollable().
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, UpdateTitleTextColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetType = SheetType::SHEET_CENTER;
+    style.sheetTitle = MESSAGE;
+    style.sheetSubtitle = MESSAGE;
+    style.showCloseIcon = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+
+    /**
+     * @tc.steps: step4. execute UpdateTitleTextColor.
+     */
+    sheetPattern->UpdateTitleTextColor();
+
+    /**
+     * @tc.steps: step4. get main text property.
+     */
+    auto firstChild = sheetNode->GetChildAtIndex(0);
+    ASSERT_NE(firstChild, nullptr);
+    auto sheetTitleColumn = firstChild->GetChildAtIndex(1);
+    ASSERT_NE(sheetTitleColumn, nullptr);
+    auto subRow = sheetTitleColumn->GetChildAtIndex(1);
+    ASSERT_NE(subRow, nullptr);
+    auto subTitleText = AceType::DynamicCast<FrameNode>(subRow->GetChildAtIndex(0));
+    ASSERT_NE(subTitleText, nullptr);
+    auto subProp = subTitleText->GetLayoutProperty<TextLayoutProperty>();
+
+    /**
+     * @tc.expected: subProp->GetTextColor() == sheetTheme->GetSubtitleTextFontColor()
+     */
+    EXPECT_EQ(subProp->GetTextColor(), sheetTheme->GetSubtitleTextFontColor());
 
     SheetPresentationTestNg::TearDownTestCase();
 }

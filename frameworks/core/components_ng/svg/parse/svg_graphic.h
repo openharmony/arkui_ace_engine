@@ -204,7 +204,7 @@ private:
     PaintType GetFillType();
     bool InitBrush(RSCanvas& canvas, RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
         PaintType paintType);
-    void SetBrushColor(RSBrush& brush);
+    void SetBrushColor(RSBrush& brush, bool useFillColor);
     bool SetBrushLinearGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     bool SetBrushRadialGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     bool SetBrushPattern(RSCanvas& canvas, RSBrush& brush,

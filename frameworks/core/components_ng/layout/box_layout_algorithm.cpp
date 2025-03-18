@@ -16,6 +16,7 @@
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

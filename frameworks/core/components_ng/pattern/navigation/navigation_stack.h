@@ -58,6 +58,7 @@ public:
     void SavePreNavList()
     {
         // same navdestination nodes before poped
+        isPreForceSetList_ = isCurForceSetList_;
         navPathListBeforePoped_.clear();
         for (auto iter: preNavPathList_) {
             navPathListBeforePoped_.emplace_back(std::make_pair(iter.first, WeakPtr<UINode>(iter.second)));
@@ -69,6 +70,16 @@ public:
         preNavPathList_ = navPathList;
         //copy nav path
         navPathList_ = navPathList;
+    }
+
+    void SetIsCurForceSetList(bool isForce)
+    {
+        isCurForceSetList_ = isForce;
+    }
+
+    bool GetIsPreForceSetList() const
+    {
+        return isPreForceSetList_;
     }
 
     std::vector<std::pair<std::string, WeakPtr<UINode>>>& GetAllNavDestinationNodesPrev()
@@ -191,6 +202,10 @@ public:
     virtual int32_t GetRecoveredDestinationMode(int32_t index) { return false; }
     virtual int32_t GetSize() const { return -1; }
 
+    virtual uint64_t GetNavDestinationIdInt(int32_t index) { return -1; }
+    virtual bool GetIsForceSet(int32_t index) { return false; }
+    virtual void ResetIsForceSetFlag(int32_t index) {}
+
     // could be optimized...
     virtual bool HasSingletonMoved()
     {
@@ -269,6 +284,8 @@ protected:
     bool animated_ = true;
     WeakPtr<UINode> navigationNode_;
     std::vector<std::pair<std::string, WeakPtr<UINode>>> navPathListBeforePoped_;
+    bool isCurForceSetList_ = false;
+    bool isPreForceSetList_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_STACK_H
