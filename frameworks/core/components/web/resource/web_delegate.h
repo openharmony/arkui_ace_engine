@@ -1103,6 +1103,11 @@ public:
 
     void MaximizeResize();
 
+    bool GetIsSmoothDragResizeEnabled();
+    void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
+    void SetDragResizeStartFlag(bool isDragResizeStart);
+    void SetDragResizePreSize(const double& pre_height, const double& pre_width);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1321,6 +1326,9 @@ private:
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
     bool isEnableHardwareComposition_ = false;
+    bool isDragResizeStart_ = false;
+    double dragResize_preHight_ = 0.0;
+    double dragResize_preWidth_ = 0.0;
 #endif
 };
 } // namespace OHOS::Ace

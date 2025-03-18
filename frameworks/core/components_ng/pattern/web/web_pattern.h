@@ -1214,6 +1214,9 @@ private:
         .scrollLeft = NestedScrollMode::SELF_FIRST,
         .scrollRight = NestedScrollMode::SELF_FIRST,
     };
+    int64_t lastHeight_ = 0L;
+    int64_t lastWidth_ = 0L;
+    bool dragWindowFlag_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

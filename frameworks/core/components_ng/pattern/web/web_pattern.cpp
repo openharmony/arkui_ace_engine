@@ -163,6 +163,9 @@ constexpr Dimension SELECT_HANDLE_DEFAULT_HEIGHT = 16.0_vp;
 constexpr int32_t HALF = 2;
 constexpr int32_t AI_TIMEOUT_LIMIT = 200;
 
+constexpr int32_t CHECK_PRE_SIZE = 5;
+constexpr int32_t ADJUST_RATIO = 10;
+
 bool ParseDateTimeJson(const std::string& timeJson, NWeb::DateTime& result)
 {
     auto sourceJson = JsonUtil::ParseJsonString(timeJson);
@@ -5550,9 +5553,31 @@ void WebPattern::OnWindowHide()
 
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WindowSizeChangeReason type: %{public}d ", type);
     if (type == WindowSizeChangeReason::MAXIMIZE) {
         WindowMaximize();
         return;
+    }
+    CHECK_NULL_VOID(delegate_);
+    bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
+    if (!isSmoothDragResizeEnabled) {
+                return;
+    }
+    if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG) {
+        dragWindowFlag_ = true;
+        delegate_->SetDragResizeStartFlag(true);
+        WindowDrag(width, height);
+    }
+    if (type == WindowSizeChangeReason::DRAG_END) {
+        delegate_->SetDragResizeStartFlag(false);
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+        delegate_->SetBoundsOrResize(drawSize_, offset, false);
+        delegate_->ResizeVisibleViewport(visibleViewportSize_, false);
+        dragWindowFlag_ = false;
+        lastHeight_ = 0;
+        lastWidth_ = 0;
     }
 }
 
@@ -5579,6 +5604,32 @@ void WebPattern::WindowMaximize()
     }
     if (delegate_) {
         delegate_->MaximizeResize();
+    }
+}
+
+void WebPattern::WindowDrag(int32_t width, int32_t height)
+{
+    if (delegate_) {
+        if (lastHeight_ == 0 && lastWidth_ == 0) {
+            lastHeight_ = height;
+            lastWidth_ = width;
+        }
+        if (!GetPendingSizeStatus() && dragWindowFlag_) {
+            int64_t pre_height = height - lastHeight_;
+            int64_t pre_width = width - lastWidth_;
+            if (pre_height <= CHECK_PRE_SIZE && pre_height > 0) {
+                pre_height = 0;
+            }
+            if (pre_width <= CHECK_PRE_SIZE && pre_width > 0) {
+                pre_width = 0;
+            }
+            lastHeight_ = height;
+            lastWidth_ = width;
+            if (pre_width == 0 && pre_height == 0) {
+                return;
+            }
+            delegate_->SetDragResizePreSize(pre_height * ADJUST_RATIO, pre_width * ADJUST_RATIO);
+        }
     }
 }
 
