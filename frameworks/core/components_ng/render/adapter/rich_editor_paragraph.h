@@ -30,10 +30,6 @@ public:
 
     void Layout(float width) override;
     float GetHeight() override;
-    bool IsEndAddParagraphSpacing() override
-    {
-        return true;
-    }
 
 private:
     float height_ = 0.0f;
