@@ -378,7 +378,7 @@ void SearchLayoutAlgorithm::DividerMeasure(LayoutWrapper* layoutWrapper)
 
     auto iconHeight = searchTheme->GetIconHeight().ConvertToPx();
     auto dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(iconHeight));
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto defaultDividerHeight = DEFAULT_DIVIDER_HEIGHT.ConvertToPx();
         dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(defaultDividerHeight));
     }
@@ -715,10 +715,6 @@ void SearchLayoutAlgorithm::LayoutSearchIcon(const LayoutSearchParams& params)
     auto iconUserHeight =
         searchIconConstraint->selfIdealSize.Height().value_or(params.searchTheme->GetIconHeight().ConvertToPx());
     float imageVerticalOffset = topPadding;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        // height is rounded in framenode's measure function, iconFrameHeight has no fractional part
-        iconUserHeight = std::floor(iconUserHeight + 0.5f);
-    }
     if (NearEqual(iconUserHeight, iconFrameHeight)) {
         float iconInterval = (params.searchFrameHeight - iconUserHeight) / 2;
         if (topPadding <= iconInterval && bottomPadding <= iconInterval) {

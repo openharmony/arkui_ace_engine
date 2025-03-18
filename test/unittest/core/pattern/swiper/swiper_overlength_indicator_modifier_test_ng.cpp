@@ -798,4 +798,87 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, ChangeIndex001, TestSize.Level
     EXPECT_EQ(modifier->currentSelectedIndex_, 3);
     EXPECT_EQ(modifier->currentOverlongType_, OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT);
 }
+
+/**
+ * @tc.name: CalcRealPadding001
+ * @tc.desc: Test CalcRealPadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcRealPadding001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(true);
+    SwiperParameters swiperParameters;
+    swiperParameters.maxDisplayCountVal = std::make_optional<int32_t>(6);
+    model.SetDotIndicatorStyle(swiperParameters);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto modifier = indicatorPattern->overlongDotIndicatorModifier_;
+    FlushUITasks();
+    EXPECT_EQ(modifier->currentSelectedIndex_, 0);
+    EXPECT_EQ(modifier->currentOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+
+    modifier->isBindIndicator_ = false;
+    auto unselectedIndicatorRadius = 10.0f;
+    auto selectedIndicatorRadius = 20.0f;
+    auto overlongType = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    auto realPadding = modifier->CalcRealPadding(unselectedIndicatorRadius, selectedIndicatorRadius, overlongType);
+    auto realPaddingVp = Dimension(realPadding, DimensionUnit::PX).ConvertToVp();
+    EXPECT_EQ(realPaddingVp, 12);
+
+    modifier->isBindIndicator_ = true;
+    realPadding = modifier->CalcRealPadding(unselectedIndicatorRadius, selectedIndicatorRadius, overlongType);
+    overlongType = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    auto newRealPadding = modifier->CalcRealPadding(unselectedIndicatorRadius, selectedIndicatorRadius, overlongType);
+    EXPECT_EQ(realPadding, newRealPadding);
+
+    overlongType = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+    newRealPadding = modifier->CalcRealPadding(unselectedIndicatorRadius, selectedIndicatorRadius, overlongType);
+    EXPECT_GT(newRealPadding, realPadding);
+}
+
+/**
+ * @tc.name: CalculateNormalMarginr001
+ * @tc.desc: Test CalculateNormalMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalculateNormalMarginr001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    SwiperParameters swiperParameters;
+    swiperParameters.maxDisplayCountVal = std::make_optional<int32_t>(6);
+    model.SetDotIndicatorStyle(swiperParameters);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
+    auto indicatorGeometryNode = indicatorNode_->GetGeometryNode();
+    CHECK_NULL_VOID(indicatorGeometryNode);
+    auto frameSize = indicatorGeometryNode->GetFrameSize();
+    auto displayCount = 1;
+    auto indicatorDotItemSpace = Dimension(8.0f, DimensionUnit::PX);
+    auto ignoreSize = false;
+    paintMethod->maxDisplayCount_ = 6;
+    paintMethod->isBindIndicator_ = true;
+    paintMethod->CalculateNormalMargin(itemHalfSizes, frameSize, displayCount, indicatorDotItemSpace, ignoreSize);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 0);
+
+    paintMethod->isBindIndicator_ = false;
+    paintMethod->maxDisplayCount_ = 0;
+    paintMethod->CalculateNormalMargin(itemHalfSizes, frameSize, displayCount, indicatorDotItemSpace, ignoreSize);
+    EXPECT_NE(paintMethod->normalMargin_.GetX(), 0);
+    EXPECT_NE(paintMethod->normalMargin_.GetY(), 0);
+
+    paintMethod->isBindIndicator_ = true;
+    paintMethod->maxDisplayCount_ = 0;
+    paintMethod->CalculateNormalMargin(itemHalfSizes, frameSize, displayCount, indicatorDotItemSpace, ignoreSize);
+    EXPECT_NE(paintMethod->normalMargin_.GetX(), 0);
+    EXPECT_NE(paintMethod->normalMargin_.GetY(), 0);
+}
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,11 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 namespace OHOS::Ace::NG {
+enum class SwiperDirection {
+    UNKNOWN = 0,
+    LEFT,
+    RIGHT
+};
 class ArcSwiperIndicatorPattern : public SwiperIndicatorPattern {
 DECLARE_ACE_TYPE(ArcSwiperIndicatorPattern, SwiperIndicatorPattern);
 public:
@@ -41,11 +46,12 @@ public:
 
 private:
     bool CalculateArcIndicatorHotRegion(const RectF& frameRect, const OffsetF& contentOffset);
+    void CalculateCycle(float angle, float startAngle, const PointF& conter, const PointF& point);
     float ConvertAngleWithArcDirection(SwiperArcDirection arcDirection, const float& angle);
-    bool CheckPointLocation(const PointF& conter, const PointF& point, bool isLeft);
+    bool CheckPointLocation(const PointF& conter, const PointF& point);
     bool isAccessibilityFocusd_ = false;
     int32_t dragCycle_ = 0;
-    bool isLeft_ = false;
+    SwiperDirection direction_ = SwiperDirection::UNKNOWN;
     bool isUpageStartAngle_ = false;
     bool isUpdateCycle_ = false;
     float oldEndAngle_ = 0;

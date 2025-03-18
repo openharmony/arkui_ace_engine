@@ -127,10 +127,11 @@ private:
     void ApplySevenPlusOneMode(int32_t fullArraySize);
     void ApplyFivePlusOneMode(int32_t fullArraySize);
     int32_t GetAutoCollapseIndex(int32_t propSelect);
+    int32_t GetActualIndex(int32_t index);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);
-    void MoveIndexByOffset(const Offset& offset);
+    void MoveIndexByOffset(const Offset& offset, bool isTouch = true);
     bool KeyIndexByStep(int32_t step);
     bool MoveIndexBySearch(const std::string& searchStr);
     void ApplyIndexChanged(
@@ -180,7 +181,7 @@ private:
     bool NeedShowPopupView();
     bool NeedShowBubble();
     bool IfSelectIndexValid();
-    int32_t GetSelectChildIndex(const Offset& offset);
+    int32_t GetSelectChildIndex(const Offset& offset, bool isTouch = true);
     void StartBubbleAppearAnimation();
     void StartDelayTask(uint32_t duration = INDEXER_BUBBLE_WAIT_DURATION);
     void StartBubbleDisappearAnimation();
@@ -203,6 +204,9 @@ private:
     void UpdateBubbleListItemContext(
         const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme, uint32_t pos);
     void UpdateBubbleListItemMarkModify(RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& listItemNode);
+    std::vector<int32_t> collapsedItemNums_;
+    int32_t collapsedIndex_ = 0;
+    int32_t lastCollapsedIndex_ = 0;
    
 protected:
     RefPtr<FrameNode> popupNode_;

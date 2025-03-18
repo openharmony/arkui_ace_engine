@@ -183,7 +183,7 @@ bool IsFocusCanBeActive()
 
 bool IsCacheNavigationNodeEnable()
 {
-    return system::GetParameter("persist.ace.navigation.groupnode.cached", "false") == "true";
+    return system::GetParameter("persist.ace.navigation.groupnode.cached", "true") == "true";
 }
 
 bool IsHookModeEnabled()
@@ -431,9 +431,73 @@ int32_t ReadDragDropFrameworkStatus()
     return system::GetIntParameter("debug.ace.drag.drop.framework.status", 0);
 }
 
+int32_t ReadTouchAccelarateMode()
+{
+    return system::GetIntParameter("debug.ace.touch.accelarate", 0);
+}
+
 bool IsAsyncInitializeEnabled()
 {
     return system::GetBoolParameter("persist.ace.async.initialize", true);
+}
+
+std::string InitSysBrand()
+{
+    const char* res = ::GetBrand();
+    if (res) {
+        return std::string(res);
+    }
+    return SystemProperties::INVALID_PARAM;
+}
+
+std::string InitSysManufacture()
+{
+    const char* res = ::GetManufacture();
+    if (res) {
+        return std::string(res);
+    }
+    return SystemProperties::INVALID_PARAM;
+}
+
+std::string InitSysProductModel()
+{
+    const char* res = ::GetProductModel();
+    if (res) {
+        return std::string(res);
+    }
+    return SystemProperties::INVALID_PARAM;
+}
+
+std::string InitSysMarketName()
+{
+    const char* res = ::GetMarketName();
+    if (res) {
+        return std::string(res);
+    }
+    return SystemProperties::INVALID_PARAM;
+}
+
+std::string InitSysSdkApiVersion()
+{
+    return std::to_string(::GetSdkApiVersion());
+}
+
+std::string InitSysOsReleaseType()
+{
+    const char* res = ::GetOsReleaseType();
+    if (res) {
+        return std::string(res);
+    }
+    return SystemProperties::INVALID_PARAM;
+}
+
+std::string InitSysDeviceType()
+{
+    const char* res = ::GetDeviceType();
+    if (res) {
+        return std::string(res);
+    }
+    return SystemProperties::INVALID_PARAM;
 }
 
 std::atomic<bool> SystemProperties::asyncInitializeEnabled_(IsAsyncInitializeEnabled()); 
@@ -465,16 +529,15 @@ ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
 ACE_WEAK_SYM FoldScreenType SystemProperties::foldScreenType_ { FoldScreenType::UNKNOWN };
 ACE_WEAK_SYM bool SystemProperties::needAvoidWindow_ { false };
 ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
-std::string SystemProperties::brand_ = INVALID_PARAM;
-std::string SystemProperties::manufacturer_ = INVALID_PARAM;
-std::string SystemProperties::model_ = INVALID_PARAM;
-std::string SystemProperties::product_ = INVALID_PARAM;
-std::string SystemProperties::apiVersion_ = INVALID_PARAM;
-std::string SystemProperties::releaseType_ = INVALID_PARAM;
-std::string SystemProperties::paramDeviceType_ = INVALID_PARAM;
+std::string SystemProperties::brand_ = InitSysBrand();
+std::string SystemProperties::manufacturer_ = InitSysManufacture();
+std::string SystemProperties::model_ = InitSysProductModel();
+std::string SystemProperties::product_ = InitSysMarketName();
+std::string SystemProperties::apiVersion_ = InitSysSdkApiVersion();
+std::string SystemProperties::releaseType_ = InitSysOsReleaseType();
+std::string SystemProperties::paramDeviceType_ = InitSysDeviceType();
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
 int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
-ACE_WEAK_SYM ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
@@ -519,6 +582,7 @@ float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
+int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -633,13 +697,6 @@ void SystemProperties::InitDeviceInfo(
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
     deviceHeight_ = deviceHeight;
-    brand_ = ::GetBrand();
-    manufacturer_ = ::GetManufacture();
-    model_ = ::GetProductModel();
-    product_ = ::GetMarketName();
-    apiVersion_ = std::to_string(::GetSdkApiVersion());
-    releaseType_ = ::GetOsReleaseType();
-    paramDeviceType_ = ::GetDeviceType();
     needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
     debugEnabled_ = IsDebugEnabled();
     debugFlags_ = GetDebugFlags();
@@ -932,6 +989,7 @@ void SystemProperties::OnFocusActiveChanged(const char* key, const char* value, 
         if (!focusCanBeActive) {
             auto container = reinterpret_cast<Platform::AceContainer*>(context);
             CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
             container->SetIsFocusActive(focusCanBeActive);
         }
         LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
@@ -1053,6 +1111,11 @@ double SystemProperties::GetScrollableDistance()
     return scrollableDistance_;
 }
 
+bool SystemProperties::GetWebDebugMaximizeResizeOptimize()
+{
+    return system::GetBoolParameter("web.debug.maximize_resize_optimize", true);
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
@@ -1066,6 +1129,11 @@ bool SystemProperties::IsNeedSymbol()
 int32_t SystemProperties::GetDragDropFrameworkStatus()
 {
     return dragDropFrameworkStatus_;
+}
+
+int32_t SystemProperties::GetTouchAccelarate()
+{
+    return touchAccelarate_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()

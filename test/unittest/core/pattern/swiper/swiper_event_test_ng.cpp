@@ -1330,7 +1330,7 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
 
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 

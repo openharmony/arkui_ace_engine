@@ -1249,4 +1249,31 @@ HWTEST_F(WaterFlowSegmentCommonTest, SafeAreaExpand001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 4);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 11);
 }
+
+/**
+ * @tc.name: ResetSection001
+ * @tc.desc: update section then make sections null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ResetSection001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(30, [](int32_t i) { return 100.0f; });
+    model.SetCachedCount(3);
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_12);
+    FlushUITasks();
+
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 3, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 1, .margin = MARGIN_1 } };
+    secObj->ChangeData(0, 1, newSection);
+
+    // set this.sections null, trigger ResetSections.
+    pattern_->ResetSections();
+    EXPECT_EQ(pattern_->sections_, nullptr);
+    FlushUITasks();
+}
 } // namespace OHOS::Ace::NG
