@@ -175,21 +175,21 @@ HWTEST_F(RectShapeAccessorTest, offsetTest, TestSize.Level1)
     ASSERT_NE(peer_->shape, nullptr);
 
     Ark_Position offset {
-        .x = Converter::ArkValue<Opt_Length>(5),
-        .y = Converter::ArkValue<Opt_Length>(8)
+        .x = Converter::ArkValue<Opt_Length>(5.),
+        .y = Converter::ArkValue<Opt_Length>(8.)
     };
     EXPECT_EQ(accessor_->offset(peer_, &offset), peer_);
 
-    auto expected = DimensionOffset(Dimension(5.f, DimensionUnit::PX), Dimension(8.f, DimensionUnit::PX));
+    auto expected = DimensionOffset(Dimension(5.f, DimensionUnit::VP), Dimension(8.f, DimensionUnit::VP));
     EXPECT_EQ(peer_->shape->GetOffset(), expected);
 
     Ark_Position offset2 {
-        .x = Converter::ArkValue<Opt_Length>(20),
-        .y = Converter::ArkValue<Opt_Length>(10)
+        .x = Converter::ArkValue<Opt_Length>(20.),
+        .y = Converter::ArkValue<Opt_Length>(10.)
     };
     EXPECT_EQ(accessor_->offset(peer_, &offset2), peer_);
 
-    auto expected2 = DimensionOffset(Dimension(20.f, DimensionUnit::PX), Dimension(10.f, DimensionUnit::PX));
+    auto expected2 = DimensionOffset(Dimension(20.f, DimensionUnit::VP), Dimension(10.f, DimensionUnit::VP));
     EXPECT_EQ(peer_->shape->GetOffset(), expected2);
 
     EXPECT_EQ(accessor_->offset(nullptr, &offset), nullptr);
@@ -230,21 +230,21 @@ HWTEST_F(RectShapeAccessorTest, positionTest, TestSize.Level1)
     ASSERT_NE(peer_->shape, nullptr);
 
     Ark_Position position {
-        .x = Converter::ArkValue<Opt_Length>(5),
-        .y = Converter::ArkValue<Opt_Length>(8)
+        .x = Converter::ArkValue<Opt_Length>(5.),
+        .y = Converter::ArkValue<Opt_Length>(8.)
     };
     EXPECT_EQ(accessor_->position(peer_, &position), peer_);
 
-    auto expected = DimensionOffset(Dimension(5.f, DimensionUnit::PX), Dimension(8.f, DimensionUnit::PX));
+    auto expected = DimensionOffset(Dimension(5.f, DimensionUnit::VP), Dimension(8.f, DimensionUnit::VP));
     EXPECT_EQ(peer_->shape->GetPosition(), expected);
 
     Ark_Position position2 {
-        .x = Converter::ArkValue<Opt_Length>(20),
-        .y = Converter::ArkValue<Opt_Length>(10)
+        .x = Converter::ArkValue<Opt_Length>(20.),
+        .y = Converter::ArkValue<Opt_Length>(10.)
     };
     EXPECT_EQ(accessor_->position(peer_, &position2), peer_);
 
-    auto expected2 = DimensionOffset(Dimension(20.f, DimensionUnit::PX), Dimension(10.f, DimensionUnit::PX));
+    auto expected2 = DimensionOffset(Dimension(20.f, DimensionUnit::VP), Dimension(10.f, DimensionUnit::VP));
     EXPECT_EQ(peer_->shape->GetPosition(), expected2);
 
     EXPECT_EQ(accessor_->position(nullptr, &position), nullptr);
@@ -263,16 +263,16 @@ HWTEST_F(RectShapeAccessorTest, widthTest, TestSize.Level1)
     ASSERT_NE(accessor_->width, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
 
-    Ark_Length width = Converter::ArkValue<Ark_Length>(96);
-    auto expected = Dimension(96.f, DimensionUnit::PX);
+    Ark_Length width = Converter::ArkValue<Ark_Length>(96.);
+    auto expected = Dimension(96.f, DimensionUnit::VP);
     EXPECT_EQ(accessor_->width(peer_, &width), peer_);
     EXPECT_EQ(peer_->shape->GetWidth(), expected);
 
-    width = Converter::ArkValue<Ark_Length>(-64);
+    width = Converter::ArkValue<Ark_Length>(-64.);
     EXPECT_EQ(accessor_->width(peer_, &width), peer_);
     EXPECT_EQ(peer_->shape->GetWidth(), expected);
 
-    width = Converter::ArkValue<Ark_Length>(3);
+    width = Converter::ArkValue<Ark_Length>(3.);
     EXPECT_EQ(accessor_->width(nullptr, &width), nullptr);
     EXPECT_EQ(accessor_->width(nullptr, nullptr), nullptr);
     EXPECT_EQ(accessor_->width(peer_, nullptr), peer_);
@@ -289,16 +289,16 @@ HWTEST_F(RectShapeAccessorTest, heightTest, TestSize.Level1)
     ASSERT_NE(accessor_->height, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
 
-    Ark_Length height = Converter::ArkValue<Ark_Length>(96);
-    auto expected = Dimension(96.f, DimensionUnit::PX);
+    Ark_Length height = Converter::ArkValue<Ark_Length>(96.);
+    auto expected = Dimension(96.f, DimensionUnit::VP);
     EXPECT_EQ(accessor_->height(peer_, &height), peer_);
     EXPECT_EQ(peer_->shape->GetHeight(), expected);
 
-    height = Converter::ArkValue<Ark_Length>(-64);
+    height = Converter::ArkValue<Ark_Length>(-64.);
     EXPECT_EQ(accessor_->height(peer_, &height), peer_);
     EXPECT_EQ(peer_->shape->GetHeight(), expected);
 
-    height = Converter::ArkValue<Ark_Length>(3);
+    height = Converter::ArkValue<Ark_Length>(3.);
     EXPECT_EQ(accessor_->height(nullptr, &height), nullptr);
     EXPECT_EQ(accessor_->height(nullptr, nullptr), nullptr);
     EXPECT_EQ(accessor_->height(peer_, nullptr), peer_);
@@ -316,24 +316,24 @@ HWTEST_F(RectShapeAccessorTest, sizeTest, TestSize.Level1)
     ASSERT_NE(peer_->shape, nullptr);
 
     Ark_SizeOptions size {
-        .width = Converter::ArkValue<Opt_Length>(5),
-        .height = Converter::ArkValue<Opt_Length>(8)
+        .width = Converter::ArkValue<Opt_Length>(5.),
+        .height = Converter::ArkValue<Opt_Length>(8.)
     };
     EXPECT_EQ(accessor_->size(peer_, &size), peer_);
 
-    auto expectedWidth = Dimension(5.f, DimensionUnit::PX);
-    auto expectedHeight = Dimension(8.f, DimensionUnit::PX);
+    auto expectedWidth = Dimension(5.f, DimensionUnit::VP);
+    auto expectedHeight = Dimension(8.f, DimensionUnit::VP);
     EXPECT_EQ(peer_->shape->GetWidth(), expectedWidth);
     EXPECT_EQ(peer_->shape->GetHeight(), expectedHeight);
 
     Ark_SizeOptions size2 {
-        .width = Converter::ArkValue<Opt_Length>(20),
-        .height = Converter::ArkValue<Opt_Length>(10)
+        .width = Converter::ArkValue<Opt_Length>(20.),
+        .height = Converter::ArkValue<Opt_Length>(10.)
     };
     EXPECT_EQ(accessor_->size(peer_, &size2), peer_);
 
-    auto expectedWidth2 = Dimension(20.f, DimensionUnit::PX);
-    auto expectedHeight2 = Dimension(10.f, DimensionUnit::PX);
+    auto expectedWidth2 = Dimension(20.f, DimensionUnit::VP);
+    auto expectedHeight2 = Dimension(10.f, DimensionUnit::VP);
     EXPECT_EQ(peer_->shape->GetWidth(), expectedWidth2);
     EXPECT_EQ(peer_->shape->GetHeight(), expectedHeight2);
 
