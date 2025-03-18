@@ -20,12 +20,11 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
-#include "core/common/container.h"
 #include "core/components/calendar/calendar_data_adapter.h"
+#include "core/components/picker/picker_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_layout_algorithm.h"
-#include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
@@ -54,18 +53,7 @@ public:
         return MakeRefPtr<CalendarLayoutAlgorithm>();
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-            InitCurrentVirtualNode();
-        }
-        CalendarPaintParams params;
-        params.startDate = startDate_;
-        params.endDate = endDate_;
-        params.markToday = markToday_;
-        params.disabledDateRange = disabledDateRange_;
-        return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, params, isCalendarDialog_);
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     const ObtainedMonth& GetMonthData() const
     {
@@ -83,18 +71,7 @@ public:
         return calendarDay_;
     }
 
-    void SetCalendarDay(const CalendarDay& calendarDay)
-    {
-        calendarDay_ = calendarDay;
-        if (monthState_ == MonthState::CUR_MONTH && !obtainedMonth_.days.empty()) {
-            for (auto& day : obtainedMonth_.days) {
-                if (day.month.year == calendarDay.month.year && day.month.month == calendarDay.month.month &&
-                    day.day == calendarDay.day) {
-                    day.focused = true;
-                }
-            }
-        }
-    }
+    void SetCalendarDay(const CalendarDay& calendarDay);
 
     void SetStartDate(const PickerDate& startDate)
     {
@@ -158,35 +135,9 @@ public:
 
     bool IsLargeSize(const RefPtr<CalendarTheme>& theme);
 
-    void InitFoldState()
-    {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        container->InitIsFoldable();
-        if (container->IsFoldable()) {
-            currentFoldStatus_ = container->GetCurrentFoldStatus();
-        }
-    }
+    void InitFoldState();
 
-    void FireIsFoldStatusChanged()
-    {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        if (!container->IsFoldable()) {
-            return;
-        }
-        auto foldStatus = container->GetCurrentFoldStatus();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto paintProperty = host->GetPaintProperty<CalendarPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx();
-        if (foldStatus != currentFoldStatus_ && colSpace_ != colSpace && monthState_ == MonthState::CUR_MONTH) {
-            currentFoldStatus_ = foldStatus;
-            InitCalendarVirtualNode();
-            SetFocusNode(focusedCalendarDay_.index, true);
-        }
-    }
+    void FireIsFoldStatusChanged();
 
 private:
     void OnAttachToFrameNode() override;

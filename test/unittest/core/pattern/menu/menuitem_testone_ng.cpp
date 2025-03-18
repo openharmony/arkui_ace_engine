@@ -35,8 +35,10 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
@@ -51,6 +53,8 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
@@ -490,7 +494,7 @@ HWTEST_F(MenuItemTestOneNg, CheckUserHeight001, TestSize.Level1)
 HWTEST_F(MenuItemTestOneNg, CalcItemHeight001, TestSize.Level1)
 {
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(18);
+    MockContainer::Current()->SetApiTargetVersion(20);
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
 
     auto menuItemNode =
@@ -522,7 +526,7 @@ HWTEST_F(MenuItemTestOneNg, CalcItemHeight001, TestSize.Level1)
 HWTEST_F(MenuItemTestOneNg, CalcItemHeight002, TestSize.Level1)
 {
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(18);
+    MockContainer::Current()->SetApiTargetVersion(20);
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
 
     auto menuItemNode =
@@ -554,7 +558,7 @@ HWTEST_F(MenuItemTestOneNg, CalcItemHeight002, TestSize.Level1)
 HWTEST_F(MenuItemTestOneNg, CalcItemHeight003, TestSize.Level1)
 {
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(18);
+    MockContainer::Current()->SetApiTargetVersion(20);
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
 
     auto menuItemNode =
@@ -641,5 +645,125 @@ HWTEST_F(MenuItemTestOneNg, CalcContentExpandWidth001, TestSize.Level1)
     menuItemLayoutAlgorithm_->CalcContentExpandWidth(layoutConstraint, 49.0f, 32.0f, 32.0f);
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: GetDividerStroke001
+ * @tc.desc: Test GetDividerStroke func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, GetDividerStroke001, TestSize.Level1)
+{
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto topDivider = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    topDivider->MountToParent(menuNode);
+    menuItemPattern->topDivider_ = topDivider;
+    ASSERT_EQ(menuItemLayoutAlgorithm_->GetDividerStroke(&layoutWrapper), 0.0f);
+}
+
+/**
+ * @tc.name: GetDividerStroke002
+ * @tc.desc: Test GetDividerStroke func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, GetDividerStroke002, TestSize.Level1)
+{
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto topDivider = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    menuItemPattern->topDivider_ = topDivider;
+    menuItemLayoutAlgorithm_->GetDividerStroke(&layoutWrapper);
+    menuItemPattern->topDivider_ = nullptr;
+    menuItemLayoutAlgorithm_->GetDividerStroke(&layoutWrapper);
+}
+
+/**
+ * @tc.name: InitPadding001
+ * @tc.desc: Test InitPadding func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, InitPadding001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>()
+        );
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, menuItemNode->GetLayoutProperty());
+    auto props = layoutWrapper.GetLayoutProperty();
+    PaddingProperty padding;
+    props->UpdatePadding(padding);
+    auto layoutConstraint = props->GetLayoutConstraint();
+    menuItemLayoutAlgorithm_->horInterval_ = 12.0f;
+    menuItemLayoutAlgorithm_->verInterval_ = 8.0f;
+    menuItemLayoutAlgorithm_->InitPadding(props, layoutConstraint);
+
+    padding.left = CalcLength(5.0f, DimensionUnit::PX);
+    padding.right = CalcLength(5.0f, DimensionUnit::PX);
+    padding.top = CalcLength(3.0f, DimensionUnit::PX);
+    padding.bottom = CalcLength(3.0f, DimensionUnit::PX);
+    menuItemLayoutAlgorithm_->InitPadding(props, layoutConstraint);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: MeasureClickableArea001
+ * @tc.desc: Test MeasureClickableArea func .
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureClickableArea001, TestSize.Level1)
+{
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto clickableArea = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(clickableArea, nullptr);
+    clickableArea->MountToParent(itemNode, CLICKABLE_AREA_VIEW_INDEX);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->userSetPadding_ = true;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(itemNode, geometryNode, itemNode->GetLayoutProperty());
+    menuItemLayoutAlgorithm_->MeasureClickableArea(&layoutWrapper);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    menuItemLayoutAlgorithm_->MeasureClickableArea(&layoutWrapper);
 }
 } // namespace OHOS::Ace::NG

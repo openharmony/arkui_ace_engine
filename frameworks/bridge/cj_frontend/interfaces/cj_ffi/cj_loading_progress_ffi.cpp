@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_loading_progress_ffi.h"
 
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
 
 using namespace OHOS::Ace;
@@ -33,5 +34,19 @@ void FfiOHOSAceFrameworkLoadingProgressSetColor(uint32_t progressColor)
 void FfiOHOSAceFrameworkLoadingProgressSetEnableLoading(bool enable)
 {
     LoadingProgressModel::GetInstance()->SetEnableLoading(enable);
+}
+
+void FfiOHOSAceFrameworkLoadingProgressForegroundColor(uint32_t color)
+{
+    LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(false);
+    LoadingProgressModel::GetInstance()->SetColor(Color(color));
+}
+
+void FfiOHOSAceFrameworkLoadingProgressForegroundColorStrategy(char* strategy)
+{
+    if (strcmp(strategy, "invert") == 0) {
+        ForegroundColorStrategy cStrategy = ForegroundColorStrategy::INVERT;
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(cStrategy);
+    }
 }
 }

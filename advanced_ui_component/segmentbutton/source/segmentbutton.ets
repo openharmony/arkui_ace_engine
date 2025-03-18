@@ -23,6 +23,8 @@ const MAX_ITEM_COUNT = 5
 const DEFAULT_MAX_FONT_SCALE: number = 1
 const MAX_MAX_FONT_SCALE: number = 2
 const MIN_MAX_FONT_SCALE: number = 1
+const RESOURCE_TYPE_FLOAT = 10002;
+const RESOURCE_TYPE_INTEGER = 10007;
 
 interface SegmentButtonThemeInterface {
   SEGMENT_TEXT_VERTICAL_PADDING: Resource;
@@ -40,15 +42,14 @@ interface SegmentButtonThemeInterface {
   FOCUS_BORDER_COLOR: ResourceColor,
   HOVER_COLOR: ResourceColor,
   PRESS_COLOR: ResourceColor,
-  BACKGROUND_BLUR_STYLE: BlurStyle,
-  SEGMENT_BUTTON_PADDING: number,
+  BACKGROUND_BLUR_STYLE: Resource,
   CONSTRAINT_SIZE_MIN_HEIGHT: DimensionNoPercentage,
   SEGMENT_BUTTON_MIN_FONT_SIZE: DimensionNoPercentage,
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: Length | BorderRadiuses | LocalizedBorderRadiuses,
-  SEGMENT_ITEM_TEXT_OVERFLOW: boolean,
+  SEGMENT_ITEM_TEXT_OVERFLOW: Resource,
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: ResourceColor,
-  SEGMENT_BUTTON_SHADOW: ShadowStyle,
-  SEGMENT_FOCUS_STYLE_CUSTOMIZED: boolean
+  SEGMENT_BUTTON_SHADOW: Resource,
+  SEGMENT_FOCUS_STYLE_CUSTOMIZED: Resource
 }
 
 const segmentButtonTheme: SegmentButtonThemeInterface = {
@@ -63,20 +64,18 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   FOCUS_BORDER_COLOR: $r('sys.color.ohos_id_color_focused_outline'),
   HOVER_COLOR: $r('sys.color.segment_button_hover_color'),
   PRESS_COLOR: $r('sys.color.segment_button_press_color'),
-  BACKGROUND_BLUR_STYLE: LengthMetrics.resource($r('sys.float.segment_button_background_blur_style'))
-    .value as BlurStyle,
-  SEGMENT_BUTTON_PADDING: LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value,
+  BACKGROUND_BLUR_STYLE: $r('sys.float.segment_button_background_blur_style'),
   CONSTRAINT_SIZE_MIN_HEIGHT: $r('sys.float.segment_button_height'),
   SEGMENT_BUTTON_MIN_FONT_SIZE: $r('sys.float.segment_button_min_font_size'),
   SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: $r('sys.float.segment_button_normal_border_radius'),
-  SEGMENT_ITEM_TEXT_OVERFLOW: LengthMetrics.resource($r('sys.float.segment_marquee')).value === 0.0,
+  SEGMENT_ITEM_TEXT_OVERFLOW: $r('sys.float.segment_marquee'),
   SEGMENT_BUTTON_FOCUS_TEXT_COLOR: $r('sys.color.segment_button_focus_text_primary'),
-  SEGMENT_BUTTON_SHADOW: LengthMetrics.resource($r('sys.float.segment_button_shadow')).value as ShadowStyle,
+  SEGMENT_BUTTON_SHADOW: $r('sys.float.segment_button_shadow'),
   SEGMENT_TEXT_HORIZONTAL_PADDING: $r('sys.float.segment_button_text_l_r_padding'),
   SEGMENT_TEXT_VERTICAL_PADDING: $r('sys.float.segment_button_text_u_d_padding'),
   SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING: $r('sys.float.segment_button_text_capsule_u_d_padding'),
   SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR: $r('sys.color.segment_button_focus_backboard_primary'),
-  SEGMENT_FOCUS_STYLE_CUSTOMIZED: LengthMetrics.resource($r('sys.float.segment_focus_control')).value === 0.0
+  SEGMENT_FOCUS_STYLE_CUSTOMIZED: $r('sys.float.segment_focus_control')
 }
 
 interface Point {
@@ -330,7 +329,9 @@ export class SegmentButtonOptions {
     this.buttonPadding = options.buttonPadding
     this.textPadding = options.textPadding
     this.type = options.type
-    this.backgroundBlurStyle = options.backgroundBlurStyle ?? segmentButtonTheme.BACKGROUND_BLUR_STYLE
+    this.backgroundBlurStyle =
+      options.backgroundBlurStyle ??
+        LengthMetrics.resource(segmentButtonTheme.BACKGROUND_BLUR_STYLE).value as BlurStyle;
     this.localizedTextPadding = options.localizedTextPadding
     this.localizedButtonPadding = options.localizedButtonPadding
     this.direction = options.direction ?? Direction.Auto
@@ -344,7 +345,8 @@ export class SegmentButtonOptions {
     } else {
       this.showText = true
     }
-    this.componentPadding = this.multiply ? 0 : segmentButtonTheme.SEGMENT_BUTTON_PADDING;
+    let themePadding = LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value;
+    this.componentPadding = this.multiply ? 0 : themePadding;
   }
 
   public onButtonsUpdated() {
@@ -451,7 +453,8 @@ struct SelectItem {
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
-        .shadow(segmentButtonTheme.SEGMENT_BUTTON_SHADOW)
+        .shadow(resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW,
+          0) as ShadowStyle)
     }
   }
 }
@@ -517,7 +520,8 @@ struct SegmentButtonItem {
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
   @Prop index: number
-  @State isTextSupportMarquee: boolean = segmentButtonTheme.SEGMENT_ITEM_TEXT_OVERFLOW;
+  @State isTextSupportMarquee: boolean =
+    resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_ITEM_TEXT_OVERFLOW, 1.0) === 0.0;
   @Prop isMarqueeAndFadeout: boolean;
   @Prop isSegmentFocusStyleCustomized: boolean;
   @State isTextInMarqueeCondition: boolean = false;
@@ -618,7 +622,7 @@ struct SegmentButtonItem {
           .fontColor(this.getFontColor())
           .fontWeight(this.property.fontWeight)
           .fontSize(this.property.fontSize)
-          .minFontSize(9)
+          .minFontSize(this.isSegmentFocusStyleCustomized ? this.property.fontSize : 9)
           .maxFontSize(this.property.fontSize)
           .maxFontScale(this.maxFontScale)
           .textOverflow({
@@ -1135,7 +1139,9 @@ export struct SegmentButton {
   private panGestureStartPoint: Point = { x: 0, y: 0 }
   private isPanGestureMoved: boolean = false
   @State shouldMirror: boolean = false
-  private isSegmentFocusStyleCustomized: boolean = segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED;
+  private isSegmentFocusStyleCustomized: boolean =
+    resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED, 1.0) ===
+      0.0;
   private isGestureInProgress: boolean = false;
 
   onItemsPositionChange() {
@@ -1577,5 +1583,32 @@ export struct SegmentButton {
         this.options.fontWeight ?? FontWeight.Regular
       this.buttonItemProperty[index].isSelected = selected
     })
+  }
+}
+
+function resourceToNumber(context: Context | undefined, resource: Resource, defaultValue: number): number {
+  if (!resource || !resource.type || !context) {
+    console.error('[SegmentButton] failed: resource get fail.');
+    return defaultValue;
+  }
+  let resourceManager = context?.resourceManager;
+  if (!resourceManager) {
+    console.error('[SegmentButton] failed to get resourceManager.');
+    return defaultValue;
+  }
+  switch (resource.type) {
+    case RESOURCE_TYPE_FLOAT:
+    case RESOURCE_TYPE_INTEGER:
+      try {
+        if (resource.id !== -1) {
+          return resourceManager.getNumber(resource);
+        }
+        return resourceManager.getNumberByName((resource.params as string[])[0].split('.')[2]);
+      } catch (error) {
+        console.error(`[SegmentButton] get resource error, return defaultValue`);
+        return defaultValue;
+      }
+    default:
+      return defaultValue;
   }
 }

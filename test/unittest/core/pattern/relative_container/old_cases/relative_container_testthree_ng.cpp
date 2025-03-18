@@ -270,7 +270,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm006, TestSi
 }
 
 /**
- * @tc.name: RelativeContainerLayoutAlgorithm004
+ * @tc.name: RelativeContainerLayoutAlgorithm007
  * @tc.desc: test RelativeContainerLayout Algorithm.
  * @tc.type: ETS
  */
@@ -332,7 +332,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm008, TestSi
     relativeContainerLayoutAlgorithm->barriers_["DEFAULT"] = std::make_pair(BarrierDirection::END, referencedIds);
     relativeContainerLayoutAlgorithm->MeasureBarrier("DEFAULT");
     auto barrierRect = relativeContainerLayoutAlgorithm->GetBarrierRectByReferencedIds(referencedIds);
-    EXPECT_EQ(barrierRect.minLeft, 1);
+    EXPECT_EQ(barrierRect.minLeft, 11);
     EXPECT_EQ(barrierRect.maxRight, 11);
     EXPECT_EQ(barrierRect.minTop, Infinity<float>());
     EXPECT_EQ(barrierRect.maxBottom, 0);

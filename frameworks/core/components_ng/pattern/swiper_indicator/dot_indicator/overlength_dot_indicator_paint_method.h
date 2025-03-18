@@ -42,6 +42,8 @@ public:
     std::pair<float, float> CalculatePointCenterX(
         const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index) override;
 
+    void CalculateNormalMargin(const LinearVector<float>& itemHalfSizes, const SizeF& frameSize,
+        const int32_t displayCount, const Dimension& indicatorDotItemSpace, bool ignoreSize) override;
     void SetMaxDisplayCount(int32_t maxDisplayCount)
     {
         if (maxDisplayCount >= DISPLAY_COUNT_MIN && maxDisplayCount <= DISPLAY_COUNT_MAX) {
@@ -64,6 +66,11 @@ public:
     void SetKeepStatus(bool keepStatus)
     {
         keepStatus_ = keepStatus;
+    }
+
+    void SetIsBindIndicator(bool isBindIndicator)
+    {
+        isBindIndicator_ = isBindIndicator;
     }
 
 private:
@@ -91,6 +98,7 @@ private:
     int32_t animationStartIndex_ = 0;
     int32_t animationEndIndex_ = 0;
     bool keepStatus_ = false;
+    bool isBindIndicator_ = false;
     std::pair<float, float> overlongSelectedCenterX_ = { 0.0f, 0.0f};
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorPaintMethod);
 };

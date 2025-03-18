@@ -47,6 +47,8 @@ public:
 
     void Init() override;
 
+    void InitArkUI_X() override;
+
     void Destroy() override;
 
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}

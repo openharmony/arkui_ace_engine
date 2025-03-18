@@ -104,6 +104,10 @@ public:
     const std::optional<Color>& GetFillColor() const;
     const RefPtr<PixelMap>& GetPixmap() const;
     std::string GetKey() const;
+    // Generates a task key that includes the current running container ID.
+    std::string GetTaskKey() const;
+    void SetContainerId(int32_t containerId);
+    int32_t GetContainerId() const;
     bool GetIsUriPureNumber() const
     {
         return isUriPureNumber_;
@@ -143,6 +147,7 @@ private:
     std::string src_;
     std::shared_ptr<std::string> srcRef_ = nullptr;
     std::string cacheKey_;
+    int32_t containerId_ = 0;
     // Interim programme
     std::string bundleName_;
     std::string moduleName_;

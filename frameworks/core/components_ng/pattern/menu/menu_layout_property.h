@@ -66,6 +66,7 @@ public:
         value->propTitle_ = CloneTitle();
         value->propMenuPlacement_ = CloneMenuPlacement();
         value->propSelectMenuAlignOption_ = CloneSelectMenuAlignOption();
+        value->propSelectAvoidanceMode_ = CloneSelectAvoidanceMode();
         value->propBorderRadius_ = CloneBorderRadius();
         value->propMenuWidth_ = CloneMenuWidth();
         value->propShowInSubWindow_ = CloneShowInSubWindow();
@@ -86,6 +87,7 @@ public:
         ResetTitle();
         ResetMenuPlacement();
         ResetSelectMenuAlignOption();
+        ResetSelectAvoidanceMode();
         ResetBorderRadius();
         ResetMenuWidth();
         ResetShowInSubWindow();
@@ -129,6 +131,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectMenuAlignOption, AlignType, MenuAlignType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectMenuAlignOption, Offset, DimensionOffset, PROPERTY_UPDATE_MEASURE);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectAvoidanceMode, AvoidanceMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE)
 

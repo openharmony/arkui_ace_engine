@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include <climits>
 #include "base/utils/utils.h"
 #ifdef WINDOWS_PLATFORM
 #include <shlwapi.h>
 #endif
 namespace OHOS::Ace {
+constexpr int64_t MAX_FILE_SIZE = 20 * 1024 * 1024;
     bool RealPath(const std::string& fileName, char* realPath)
 {
 #if defined(WINDOWS_PLATFORM)
@@ -35,5 +37,45 @@ double RoundToMaxPrecision(double value)
         return value;
     }
     return std::round(value * factor) / factor;
+}
+
+std::string ReadFileToString(const std::string& packagePathStr, const std::string& fileName)
+{
+    auto configPath = packagePathStr + fileName;
+    char realPath[PATH_MAX] = { 0x00 };
+    if (!RealPath(configPath.c_str(), realPath)) {
+        LOGE("realpath fail!");
+        return "";
+    }
+    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
+    if (!file) {
+        LOGE("open file failed");
+        return "";
+    }
+    if (std::fseek(file.get(), 0, SEEK_END) != 0) {
+        LOGE("seek file tail error");
+        return "";
+    }
+
+    int64_t size = std::ftell(file.get());
+    if (size == -1L || size <= 0L || size > MAX_FILE_SIZE) {
+        return "";
+    }
+
+    char* fileData = new (std::nothrow) char[size + 1];
+    if (fileData == nullptr) {
+        return "";
+    }
+
+    rewind(file.get());
+    std::unique_ptr<char[]> jsonStream(fileData);
+    size_t result = std::fread(jsonStream.get(), 1, size, file.get());
+    jsonStream[size] = '\0';
+    if (result != static_cast<size_t>(size)) {
+        LOGE("read file failed");
+        return "";
+    }
+
+    return fileData;
 }
 }

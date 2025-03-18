@@ -361,6 +361,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkBindTipsOptions {
+  message: ResourceStr | StyledString | undefined;
+  options: TipsOptions | undefined;
+  constructor() {
+    this.message = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkBindTipsOptions): boolean {
+    return (this.options === another.options) && (this.options === another.options);
+  }
+}
+
 class ArkChainMode {
   direction: Axis | undefined;
   style: ChainStyle | undefined;
@@ -1369,6 +1381,39 @@ class ArkBindMenu{
   }
 }
 
+class ArkSearchAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkSearchAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
+class ArkTextAreaAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkTextAreaAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
+class ArkTextInputAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkTextAreaAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
 class ArkTextBackGroundStyle {
   color: ResourceColor;
   radius: Dimension | BorderRadiuses;
@@ -1464,6 +1509,7 @@ class TextDataDetectorConfig {
 
 class ArkDragPreviewOptions {
   mode: DragPreviewMode | Array<DragPreviewMode> | undefined;
+  sizeChangeEffect: DraggingSizeChangeEffect | undefined;
   numberBadge: boolean | number | undefined;
   isMultiSelectionEnabled: boolean | undefined;
   defaultAnimationBeforeLifting: boolean | undefined;
@@ -1474,6 +1520,7 @@ class ArkDragPreviewOptions {
   constructor() {
     this.mode = undefined;
     this.numberBadge = undefined;
+    this.sizeChangeEffect = undefined;
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
@@ -1485,6 +1532,7 @@ class ArkDragPreviewOptions {
     return (
       this.mode === another.mode &&
       this.numberBadge === another.numberBadge &&
+      this.sizeChangeEffect === another.sizeChangeEffect &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting && 
       this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&

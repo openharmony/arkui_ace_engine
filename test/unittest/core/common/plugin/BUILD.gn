@@ -16,7 +16,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("plugin_manager_test") {
-  module_out_path = "$basic_test_output_path/common"
+  module_out_path = "$basic_test_output_path"
 
   sources = [
     "$ace_root/frameworks/core/common/container_scope.cpp",
