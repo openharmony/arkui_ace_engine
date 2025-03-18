@@ -25,6 +25,8 @@ const std::vector<std::tuple<std::string, Ark_Boolean, bool>> testFixtureBoolean
     { "false", ArkValue<Ark_Boolean>(false), false },
 };
 
+const std::vector<float> testFixtureFloatValues = { 1.24f, 0.f, 100.f, -20.65f };
+
 const std::vector<std::tuple<std::string, Ark_Int32, int32_t>> testFixtureInt32WithNegativeValues = {
     { "0", ArkValue<Ark_Int32>(0), 0 },
     { "INT32_MIN", ArkValue<Ark_Int32>(INT32_MIN), INT32_MIN },
@@ -89,6 +91,14 @@ const std::vector<std::tuple<std::string, double, Ark_Int32>> testFixtureDoubleA
     { "-20.65", -20.65, ArkValue<Ark_Int32>(-10) },
 };
 
+const std::vector<std::tuple<std::string, float, float>> testFixtureFloatFloat_half_Values = {
+    { "100.", 100., 50. },
+    { "0.", 0., 0. },
+    { "-100.", -100., -50. },
+    { "12.34", 12.34, 6.17 },
+    { "-56.73", -56.73, -28.365 },
+};
+
 const std::vector<std::tuple<std::string, double, double, Ark_Int32>> testFixtureVelocity_half_Values = {
     { "[30., 40.]", 30., 40., ArkValue<Ark_Int32>(25) },
     { "[-30., 0.]", 30., 0., ArkValue<Ark_Int32>(15) },
@@ -96,10 +106,17 @@ const std::vector<std::tuple<std::string, double, double, Ark_Int32>> testFixtur
     { "[0., 0.]", 0., 0., ArkValue<Ark_Int32>(0) },
 };
 
+const std::vector<std::tuple<std::string, float, float, float>> testFixtureVelocityFloat_half_Values = {
+    { "[30., 40.]", 30., 40., 25. },
+    { "[-30., 0.]", 30., 0., 15. },
+    { "[0., 40.]", 0., 40., 20. },
+    { "[0., 0.]", 0., 0., 0. },
+};
+
 const std::vector<std::tuple<std::string, double, Ark_Number>> testFixtureNumberFloatAnythingValidValues = {
-    { "100", 100, ArkValue<Ark_Number>(100) },
-    { "0", 0, ArkValue<Ark_Number>(0) },
-    { "-100", -100, ArkValue<Ark_Number>(-100) },
+    { "100.", 100., ArkValue<Ark_Number>(100.) },
+    { "0.", 0., ArkValue<Ark_Number>(0.) },
+    { "-100.", -100., ArkValue<Ark_Number>(-100.) },
     { "12.34", 12.34, ArkValue<Ark_Number>(12.34) },
     { "-56.73", -56.73, ArkValue<Ark_Number>(-56.73) },
 };
@@ -219,5 +236,12 @@ const std::vector<std::tuple<ResAccessorID, std::string, ResRawValue>> resourceI
     { DIMENSIONS_RES_NON_PCT_11_ID, DIMENSIONS_RES_NON_PCT_11_STR, -123._px },
     { DIMENSIONS_RES_NON_PCT_12_ID, DIMENSIONS_RES_NON_PCT_12_STR, 0.2_pct },
     { DIMENSIONS_RES_NON_PCT_13_ID, DIMENSIONS_RES_NON_PCT_13_STR, -0.2_pct },
+};
+
+const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues = {
+    { "1.24", ArkValue<Ark_Number>(1.24f), "1.24px" },
+    { "0", ArkValue<Ark_Number>(0), "0.00px" },
+    { "100", ArkValue<Ark_Number>(100), "100.00px" },
+    { "-20.65", ArkValue<Ark_Number>(-20.65), "-20.65px" },
 };
 } // namespace OHOS::Ace::NG::AccessorTestFixtures
