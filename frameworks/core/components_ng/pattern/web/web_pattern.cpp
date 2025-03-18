@@ -1421,6 +1421,16 @@ void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
 {
+    if (info.GetAction() != MouseAction::MOVE) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebPattern::HandleMouseEvent, web id %{public}d, Action %{public}d, Button %{public}d",
+            GetWebId(), static_cast<int32_t>(info.GetAction()), static_cast<int32_t>(info.GetButton()));
+    }
+
+    ACE_SCOPED_TRACE(
+        "WebPattern::HandleMouseEvent, web id %d, Action %d, Button %d",
+        GetWebId(), static_cast<int32_t>(info.GetAction()), static_cast<int32_t>(info.GetButton()));
+
     isMouseEvent_ = true;
     WebOnMouseEvent(info);
 
