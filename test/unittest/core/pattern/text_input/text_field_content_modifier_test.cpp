@@ -122,17 +122,18 @@ HWTEST_F(TextFieldContentModifierTest, CreateNodePaintMethod002, TestSize.Level1
     pattern_->scrollBar_->SetScrollable(true);
     pattern_->scrollBar_->SetDisplayMode(DisplayMode::ON);
     auto paint = pattern_->CreateNodePaintMethod();
-    EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
 
     /**
      * @tc.steps: step3. get default value
      * tc.expected: step3. Check if the value is created.
      */
-    auto contentOffsetY = pattern_->textFieldContentModifier_->GetContentOffsetY();
+    auto contentOffsetY = textFieldContentModifier->GetContentOffsetY();
     EXPECT_EQ(contentOffsetY, MIN_RECT_Y);
-    auto textRectX = pattern_->textFieldContentModifier_->GetTextRectX();
+    auto textRectX = textFieldContentModifier->GetTextRectX();
     EXPECT_EQ(textRectX, MIN_RECT_X);
-    auto textRectY = pattern_->textFieldContentModifier_->GetTextRectY();
+    auto textRectY = textFieldContentModifier->GetTextRectY();
     EXPECT_EQ(textRectY, MIN_RECT_Y);
     
     /**
@@ -145,12 +146,12 @@ HWTEST_F(TextFieldContentModifierTest, CreateNodePaintMethod002, TestSize.Level1
      * @tc.steps: step4. do SetDefaultPropertyValue()
      * tc.expected: step4. Check if the value is changed.
      */
-    pattern_->textFieldContentModifier_->SetDefaultPropertyValue();
-    contentOffsetY = pattern_->textFieldContentModifier_->GetContentOffsetY();
+    textFieldContentModifier->SetDefaultPropertyValue();
+    contentOffsetY = textFieldContentModifier->GetContentOffsetY();
     EXPECT_NE(contentOffsetY, MIN_RECT_Y);
-    textRectX = pattern_->textFieldContentModifier_->GetTextRectX();
+    textRectX = textFieldContentModifier->GetTextRectX();
     EXPECT_NE(textRectX, MIN_RECT_X);
-    textRectY = pattern_->textFieldContentModifier_->GetTextRectY();
+    textRectY = textFieldContentModifier->GetTextRectY();
     EXPECT_NE(textRectY, MIN_RECT_Y);
 }
 
@@ -175,14 +176,15 @@ HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate001, TestSize.Level1)
     pattern_->scrollBar_->SetScrollable(true);
     pattern_->scrollBar_->SetDisplayMode(DisplayMode::ON);
     auto paint = pattern_->CreateNodePaintMethod();
-    EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
 
     /**
      * @tc.steps: step3. set propertyChangeFlag = PROPERTY_UPDATE_MEASURE
      * tc.expected: step3. Check real flag.
      */
     PropertyChangeFlag flag = UPDATE_MEASURE;
-    EXPECT_FALSE(pattern_->textFieldContentModifier_->NeedMeasureUpdate(flag));
+    EXPECT_FALSE(textFieldContentModifier->NeedMeasureUpdate(flag));
     EXPECT_NE(flag, UPDATE_MEASURE);
 
     /**
@@ -190,7 +192,7 @@ HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate001, TestSize.Level1)
      * tc.expected: step4. Check real flag.
      */
     flag = UPDATE_MEASURE_SELF;
-    EXPECT_FALSE(pattern_->textFieldContentModifier_->NeedMeasureUpdate(flag));
+    EXPECT_FALSE(textFieldContentModifier->NeedMeasureUpdate(flag));
     EXPECT_NE(flag, UPDATE_MEASURE_SELF);
 
     /**
@@ -198,7 +200,7 @@ HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate001, TestSize.Level1)
      * tc.expected: step5. Check real flag.
      */
     flag = UPDATE_MEASURE_SELF_AND_PARENT;
-    EXPECT_FALSE(pattern_->textFieldContentModifier_->NeedMeasureUpdate(flag));
+    EXPECT_FALSE(textFieldContentModifier->NeedMeasureUpdate(flag));
     EXPECT_NE(flag, UPDATE_MEASURE_SELF_AND_PARENT);
 
     /**
@@ -206,7 +208,7 @@ HWTEST_F(TextFieldContentModifierTest, NeedMeasureUpdate001, TestSize.Level1)
      * tc.expected: step6. Check real flag.
      */
     flag = UPDATE_DIFF;
-    EXPECT_FALSE(pattern_->textFieldContentModifier_->NeedMeasureUpdate(flag));
+    EXPECT_FALSE(textFieldContentModifier->NeedMeasureUpdate(flag));
     EXPECT_EQ(flag, UPDATE_NORMAL);
 }
 
@@ -236,7 +238,7 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierTest001, TestSize
      * tc.expected: step3. Check if the value is created.
      */
     auto paint = pattern_->CreateNodePaintMethod();
-    auto textFieldContentModifier = pattern_->textFieldContentModifier_;
+    auto textFieldContentModifier = pattern_->GetContentModifier();
     EXPECT_NE(textFieldContentModifier, nullptr);
 
     /**
@@ -268,5 +270,244 @@ HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierTest001, TestSize
     auto contentRectHeight = pattern_->GetContentRect().Height();
     EXPECT_NE(contentRectWidth, MIN_RECT_WIDTH);
     EXPECT_NE(contentRectHeight, MIN_RECT_HEIGHT);
+}
+
+/**
+* @tc.name: TextFieldContentModifierUTSuit001
+* @tc.desc: Test SetFontStyle to update fontStyle_.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step3. call SetFontStyle
+     * tc.expected: step3. Check if the ITALIC value is setted.
+     */
+    textFieldContentModifier->SetFontStyle(Ace::FontStyle::ITALIC);
+    EXPECT_EQ(textFieldContentModifier->fontStyle_->Get(), 1);
+
+    /**
+     * @tc.steps: step4. call SetFontStyle
+     * tc.expected: step4. Check if the NONE value is setted.
+     */
+    textFieldContentModifier->SetFontStyle(Ace::FontStyle::NONE);
+    EXPECT_EQ(textFieldContentModifier->fontStyle_->Get(), 2);
+
+    /**
+     * @tc.steps: step5. call SetFontStyle
+     * tc.expected: step5. Check if the NORMAL value is setted.
+     */
+    textFieldContentModifier->SetFontStyle(Ace::FontStyle::NORMAL);
+    EXPECT_EQ(textFieldContentModifier->fontStyle_->Get(), 0);
+}
+
+/**
+* @tc.name: TextFieldContentModifierUTSuit002
+* @tc.desc: Test SetShowUnderlineState to update showUnderline_.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step3. call SetShowUnderlineState
+     * tc.expected: step3. Check if the showUnderline_ is correct
+     */
+    auto propertyBool = AceType::MakeRefPtr<PropertyBool>(false);
+    textFieldContentModifier->SetShowUnderlineState(propertyBool);
+    EXPECT_EQ(textFieldContentModifier->showUnderline_, nullptr);
+
+    /**
+     * @tc.steps: step4. call SetShowUnderlineState
+     * tc.expected: step4. Check if the showUnderline_ is correct
+     */
+    propertyBool = AceType::MakeRefPtr<PropertyBool>(true);
+    textFieldContentModifier->SetShowUnderlineState(propertyBool);
+    EXPECT_EQ(textFieldContentModifier->showUnderline_, nullptr);
+
+    /**
+     * @tc.steps: step5. call SetShowUnderlineState
+     * tc.expected: step5. Check if the showUnderline_ is correct
+     */
+    textFieldContentModifier->showUnderline_ = AceType::MakeRefPtr<PropertyBool>(false);
+    EXPECT_NE(textFieldContentModifier->showUnderline_, nullptr);
+
+    /**
+     * @tc.steps: step6. call SetShowUnderlineState
+     * tc.expected: step6. Check if the showUnderline_ is correct
+     */
+    textFieldContentModifier->SetShowUnderlineState(propertyBool);
+    EXPECT_EQ(textFieldContentModifier->showUnderline_->Get(), true);
+
+    /**
+     * @tc.steps: step7. call SetShowUnderlineState
+     * tc.expected: step7. Check if the showUnderline_ is correct
+     */
+    propertyBool = AceType::MakeRefPtr<PropertyBool>(true);
+    textFieldContentModifier->SetShowUnderlineState(propertyBool);
+    EXPECT_EQ(textFieldContentModifier->showUnderline_->Get(), true);
+}
+
+/**
+* @tc.name: TextFieldContentModifierUTSuit003
+* @tc.desc: Test SetTextDecoration to update textDecorationStyle_, textDecorationColor_, textDecoration_.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step3. check default value
+     * tc.expected: step3. Check if the default value right
+     */
+    EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::NONE);
+    EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::BLACK);
+    EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::SOLID),
+              TextDecorationStyle::SOLID);
+
+    /**
+     * @tc.steps: step4. call SetTextDecoration
+     * tc.expected: step4. Check if the textDecoration_ is correct
+     */
+    TextDecoration textDecoration = TextDecoration::INHERIT;
+    Color color = Color::BLUE;
+    TextDecorationStyle textDecorationStyle = TextDecorationStyle::SOLID;
+    textFieldContentModifier->SetTextDecoration(textDecoration, color, textDecorationStyle);
+    EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::INHERIT);
+    EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::BLUE);
+    EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::DOTTED),
+              TextDecorationStyle::SOLID);
+    EXPECT_EQ(textFieldContentModifier->textDecorationColorAlpha_->Get(), 255.0f);
+
+    /**
+     * @tc.steps: step5. call SetTextDecoration
+     * tc.expected: step5. Check if the textDecorationStyle_ is correct
+     */
+    textDecorationStyle = TextDecorationStyle::DASHED;
+    textFieldContentModifier->SetTextDecoration(textDecoration, color, textDecorationStyle);
+    EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::INHERIT);
+    EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::BLUE);
+    EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::DOTTED),
+            TextDecorationStyle::DASHED);
+    EXPECT_EQ(textFieldContentModifier->textDecorationColorAlpha_->Get(), 255.0f);
+
+    /**
+     * @tc.steps: step6. call SetTextDecoration
+     * tc.expected: step6. Check if the textDecoration_ is correct
+     */
+    textDecoration = TextDecoration::NONE;
+    textFieldContentModifier->SetTextDecoration(textDecoration, color, textDecorationStyle);
+    EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::NONE);
+    EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::BLUE);
+    EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::DOTTED),
+            TextDecorationStyle::DASHED);
+    EXPECT_EQ(textFieldContentModifier->textDecorationColorAlpha_->Get(), 0.0f);
+
+    /**
+     * @tc.steps: step7. call SetTextDecoration
+     * tc.expected: step7. Check if the textDecorationAnimatable_ is correct
+     */
+    textDecoration = TextDecoration::UNDERLINE;
+    EXPECT_EQ(textFieldContentModifier->textDecorationAnimatable_, false);
+    textFieldContentModifier->SetTextDecoration(textDecoration, color, textDecorationStyle);
+    EXPECT_EQ(textFieldContentModifier->textDecorationAnimatable_, true);
+}
+
+
+/**
+* @tc.name: TextFieldContentModifierUTSuit004
+* @tc.desc: Test ModifyDecorationInTextStyle to update textStyle.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextFieldContentModifierTest, TextFieldContentModifierUTSuit004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto textFieldContentModifier = pattern_->GetContentModifier();
+    EXPECT_NE(textFieldContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step3. prepare the textDecoration_, textDecorationColor_,
+     *                   textDecorationStyle_ of textFieldContentModifier
+     * tc.expected: step3. Check if the textDecoration_ and so on are correct
+     */
+    TextDecoration textDecoration = TextDecoration::UNDERLINE;
+    Color color = Color::GRAY;
+    TextDecorationStyle textDecorationStyle = TextDecorationStyle::WAVY;
+    textFieldContentModifier->SetTextDecoration(textDecoration, color, textDecorationStyle);
+    EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::UNDERLINE);
+    EXPECT_EQ(textFieldContentModifier->textDecorationColor_.value_or(Color::BLACK), Color::GRAY);
+    EXPECT_EQ(textFieldContentModifier->textDecorationStyle_.value_or(TextDecorationStyle::DOTTED),
+            TextDecorationStyle::WAVY);
+    EXPECT_EQ(textFieldContentModifier->textDecorationColorAlpha_->Get(), 255.0f);
+
+    /**
+     * @tc.steps: step4. call SetTextDecoration, satisfy the condition of UNDERLINE to NONE
+     * tc.expected: step4. Check if the textDecoration_ is correctly setted
+     */
+    textDecoration = TextDecoration::NONE;
+    textFieldContentModifier->SetTextDecoration(textDecoration, color, textDecorationStyle);
+    EXPECT_EQ(textFieldContentModifier->textDecoration_.value_or(TextDecoration::NONE), TextDecoration::NONE);
+    EXPECT_EQ(textFieldContentModifier->textDecorationAnimatable_, true);
+
+    /**
+     * @tc.steps: step5. call ModifyDecorationInTextStyle
+     * tc.expected: step5. Check if the textStyle is correct
+     */
+    TextStyle textStyle;
+    textStyle.SetTextDecoration(TextDecoration::LINE_THROUGH);
+    textStyle.SetTextDecorationColor(Color::GREEN);
+    textFieldContentModifier->ModifyDecorationInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetTextDecoration(), TextDecoration::NONE);
+    EXPECT_EQ(textStyle.GetTextDecorationColor(), Color::GRAY);
 }
 } // namespace OHOS::Ace::NG
