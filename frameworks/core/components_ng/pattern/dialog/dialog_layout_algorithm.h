@@ -55,6 +55,8 @@ public:
     }
 
 private:
+    void ClipCustomMaskNode(const RefPtr<FrameNode>& dialog, const RectF& rect);
+    void UpdateCustomMaskNodeLayout(const RefPtr<FrameNode>& dialog);
     LayoutConstraintF CreateDialogChildConstraint(LayoutWrapper* layoutWrapper, float height, float width);
     void Distribute(float& scrollHeight, float& listHeight, float restHeight);
     void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
@@ -109,6 +111,7 @@ private:
     bool customSize_ = false;
     SafeAreaInsets safeAreaInsets_;
     bool isModal_ = true;
+    bool hasAddMaskNode_ = false;
     bool isShowInSubWindow_ = false;
     bool isSuitableForElderly_ = false;
     bool isSuitOldMeasure_ = false;
