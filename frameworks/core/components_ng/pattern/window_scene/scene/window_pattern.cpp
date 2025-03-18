@@ -662,6 +662,12 @@ sptr<Rosen::Session> WindowPattern::GetSession()
     return session_;
 }
 
+bool WindowPattern::BorderUnoccupied() const
+{
+    CHECK_NULL_RETURN(session_, false);
+    return session_->GetBorderUnoccupied();
+}
+
 void WindowPattern::TransferFocusState(bool focusState)
 {
     CHECK_NULL_VOID(session_);
