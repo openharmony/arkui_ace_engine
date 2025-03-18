@@ -1612,14 +1612,10 @@ void SwiperPattern::HandleSwiperCustomAnimation(float offset)
     indexsInAnimation_.clear();
     CalculateAndUpdateItemInfo(offset);
 
-    auto visibleIndex = CalcVisibleIndex();
-    auto visibleIndexWithOffset = CalcVisibleIndex(offset);
     std::set<int32_t> unmountIndexs;
     for (auto& item : itemPositionInAnimation_) {
         if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end() &&
-            needUnmountIndexs_.find(item.first) == needUnmountIndexs_.end() &&
-            visibleIndex.find(item.first) != visibleIndex.end() &&
-            visibleIndexWithOffset.find(item.first) == visibleIndexWithOffset.end()) {
+            needUnmountIndexs_.find(item.first) == needUnmountIndexs_.end()) {
             indexsInAnimation_.insert(item.first);
             needUnmountIndexs_.insert(item.first);
             item.second.startPos += offset;
@@ -1637,58 +1633,6 @@ void SwiperPattern::HandleSwiperCustomAnimation(float offset)
     }
 
     FireSwiperCustomAnimationEvent();
-}
-
-std::set<int32_t> SwiperPattern::CalcVisibleIndex(float offset) const
-{
-    auto visibleSize = CalculateVisibleSize();
-    auto itemSpace = GetItemSpace();
-    auto isLoop = IsLoop();
-    auto displayCount = GetDisplayCount();
-    auto swipeByGroup = IsSwipeByGroup();
-    std::set<int32_t> visibleIndex;
-
-    for (auto& item : itemPosition_) {
-        auto index = item.first;
-        auto startPos = item.second.startPos + offset;
-        auto endPos = item.second.endPos + offset;
-        auto itemPosDiff = endPos - startPos + itemSpace;
-        auto pageStartIndex = swipeByGroup ? SwiperUtils::ComputePageIndex(index, displayCount) : index;
-        auto pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index, displayCount) : index;
-        auto pageStartPos = swipeByGroup ? startPos - itemPosDiff * (index - pageStartIndex) : startPos;
-        auto pageEndPos = swipeByGroup ? endPos + itemPosDiff * (pageEndIndex - index) : endPos;
-
-        if (LessOrEqual(pageEndPos, -GetPrevMarginWithItemSpace())) {
-            continue;
-        }
-        if (GreatOrEqual(pageStartPos, visibleSize + GetNextMarginWithItemSpace())) {
-            continue;
-        }
-
-        if (GreatNotEqual(startPos - itemSpace, -GetPrevMarginWithItemSpace()) &&
-            itemPosition_.find(index - 1) == itemPosition_.end() && (isLoop || index > 0)) {
-            pageStartIndex = swipeByGroup ? SwiperUtils::ComputePageIndex(index - 1, displayCount) : index - 1;
-        }
-        if (LessNotEqual(endPos + itemSpace, visibleSize + GetNextMarginWithItemSpace()) &&
-            itemPosition_.find(index + 1) == itemPosition_.end() && (isLoop || index < RealTotalCount() - 1)) {
-            pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index + 1, displayCount) : index + 1;
-        }
-        auto currentIndex = index - 1;
-        while (currentIndex >= targetIndex_.value_or(currentIndex) && currentIndex >= pageStartIndex &&
-               itemPosition_.find(currentIndex) == itemPosition_.end()) {
-            visibleIndex.insert(GetLoopIndex(currentIndex));
-            currentIndex--;
-        }
-        currentIndex = index + 1;
-        while (currentIndex <= targetIndex_.value_or(currentIndex) && currentIndex <= pageEndIndex &&
-               itemPosition_.find(currentIndex) == itemPosition_.end()) {
-            visibleIndex.insert(GetLoopIndex(currentIndex));
-            currentIndex++;
-        }
-        visibleIndex.insert(GetLoopIndex(index));
-    }
-
-    return visibleIndex;
 }
 
 void SwiperPattern::CalculateAndUpdateItemInfo(float offset)
@@ -1711,32 +1655,32 @@ void SwiperPattern::CalculateAndUpdateItemInfo(float offset)
         auto pageStartPos = swipeByGroup ? startPos - itemPosDiff * (index - pageStartIndex) : startPos;
         auto pageEndPos = swipeByGroup ? endPos + itemPosDiff * (pageEndIndex - index) : endPos;
 
-        if (LessOrEqual(pageEndPos, NearZero(prevMargin) ? 0.0f : -prevMargin - itemSpace)) {
-            continue;
-        }
-        if (GreatOrEqual(pageStartPos, NearZero(nextMargin) ? visibleSize : visibleSize + nextMargin + itemSpace)) {
+        if (LessOrEqual(pageEndPos, NearZero(prevMargin) ? 0.0f : -prevMargin - itemSpace) ||
+            GreatOrEqual(pageStartPos, NearZero(nextMargin) ? visibleSize : visibleSize + nextMargin + itemSpace)) {
             continue;
         }
 
         if (GreatNotEqual(startPos - itemSpace, NearZero(prevMargin) ? 0.0f : -prevMargin - itemSpace) &&
             itemPosition_.find(index - 1) == itemPosition_.end() && (isLoop || index > 0)) {
-            pageStartIndex = swipeByGroup ? SwiperUtils::ComputePageIndex(index - 1, displayCount) : index - 1;
+            if (!targetIndex_.has_value() || index < targetIndex_.value() || index - 1 >= targetIndex_.value()) {
+                pageStartIndex = swipeByGroup ? SwiperUtils::ComputePageIndex(index - 1, displayCount) : index - 1;
+            }
         }
         if (LessNotEqual(
                 endPos + itemSpace, NearZero(nextMargin) ? visibleSize : visibleSize + nextMargin + itemSpace) &&
             itemPosition_.find(index + 1) == itemPosition_.end() && (isLoop || index < RealTotalCount() - 1)) {
-            pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index + 1, displayCount) : index + 1;
+            if (!targetIndex_.has_value() || index > targetIndex_.value() || index + 1 <= targetIndex_.value()) {
+                pageEndIndex = swipeByGroup ? SwiperUtils::ComputePageEndIndex(index + 1, displayCount) : index + 1;
+            }
         }
         auto currentIndex = index - 1;
-        while (currentIndex >= targetIndex_.value_or(currentIndex) && currentIndex >= pageStartIndex &&
-               itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex >= pageStartIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
             UpdateItemInfoInCustomAnimation(currentIndex, startPos - itemPosDiff * (index - currentIndex),
                 endPos - itemPosDiff * (index - currentIndex));
             currentIndex--;
         }
         currentIndex = index + 1;
-        while (currentIndex <= targetIndex_.value_or(currentIndex) && currentIndex <= pageEndIndex &&
-               itemPosition_.find(currentIndex) == itemPosition_.end()) {
+        while (currentIndex <= pageEndIndex && itemPosition_.find(currentIndex) == itemPosition_.end()) {
             UpdateItemInfoInCustomAnimation(currentIndex, startPos + itemPosDiff * (currentIndex - index),
                 endPos + itemPosDiff * (currentIndex - index));
             currentIndex++;
