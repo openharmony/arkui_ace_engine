@@ -246,7 +246,6 @@ void MinFontScaleImpl(Ark_NativePointer node,
     Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
     ButtonModelNG::SetMinFontScale(frameNode, convValue);
 }
-
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Ark_Union_Number_Resource* value)
 {
