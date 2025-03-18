@@ -1378,7 +1378,21 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 
 bool TextFieldPattern::HandleOnEscape()
 {
-    CloseSelectOverlay(true);
+    if (SelectOverlayIsOn()) {
+        CloseSelectOverlay(true);
+        if (!IsSelected() && HasFocus()) {
+            StartTwinkling();
+        }
+        return false;
+    }
+    if (GetIsPreviewText()) {
+        ResetPreviewTextState();
+        return false;
+    }
+    if (HasFocus()) {
+        StopTwinkling();
+        FocusHub::LostFocusToViewRoot();
+    }
     return false;
 }
 
