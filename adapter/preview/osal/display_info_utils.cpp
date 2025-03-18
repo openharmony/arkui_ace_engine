@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,6 @@ namespace OHOS::Previewer {
     class PreviewerDisplay;
 }
 namespace OHOS::Ace {
-DisplayInfoUtils& DisplayInfoUtils::GetInstance()
-{
-    static DisplayInfoUtils instance;
-    return instance;
-}
-
 RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo()
 {
     return AceType::MakeRefPtr<DisplayInfo>();
@@ -35,9 +29,9 @@ RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo()
 
 void DisplayInfoUtils::InitIsFoldable() {}
 
-bool DisplayInfoUtils::IsFoldable()
+bool DisplayInfoUtils::GetIsFoldable()
 {
-    hasInitIsFoldable = true;
+    hasInitIsFoldable_ = true;
     return OHOS::Previewer::PreviewerDisplay::GetInstance().IsFoldable();
 }
 
@@ -47,5 +41,11 @@ FoldStatus DisplayInfoUtils::GetCurrentFoldStatus()
     CHECK_NULL_RETURN(displayInfo_, FoldStatus::UNKNOWN);
     displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
     return displayInfo_->GetFoldStatus();
+}
+
+std::vector<Rect> DisplayInfoUtils::GetCurrentFoldCreaseRegion()
+{
+    hasInitFoldCreaseRegion_ = true;
+    return {};
 }
 } // namespace OHOS::Ace::DisplayInfoUtils

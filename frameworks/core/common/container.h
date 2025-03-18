@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -204,6 +204,8 @@ public:
     virtual bool IsFoldable();
 
     virtual FoldStatus GetCurrentFoldStatus();
+
+    virtual std::vector<Rect> GetCurrentFoldCreaseRegion();
 
     virtual NG::SafeAreaInsets GetKeyboardSafeArea()
     {
@@ -621,6 +623,7 @@ protected:
     Frontend::State state_ = Frontend::State::UNDEFINE;
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
+    RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:
     std::string bundleName_;
