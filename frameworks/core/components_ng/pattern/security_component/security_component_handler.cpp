@@ -928,37 +928,46 @@ void SecurityComponentHandler::WriteButtonInfo(
     }
 }
 
+bool SecurityComponentHandler::InitButtonInfoValue(RefPtr<FrameNode>& node,
+    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, const SecCompType& scType, std::string& message)
+{
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    WriteButtonInfo(layoutProperty, node, buttonInfo, message);
+    buttonInfo.type_ = scType;
+    if (layoutProperty->GetIsIconExceeded().has_value() && layoutProperty->GetIsIconExceeded().value()) {
+        buttonInfo.isIconExceeded_ = true;
+        buttonInfo.hasNonCompatileChange_ = true;
+    }
+    if (!InitChildInfo(buttonInfo, node)) {
+        return false;
+    }
+    return true;
+}
+
 bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node, SecCompType& scType,
     std::string& message)
 {
     CHECK_NULL_RETURN(node, false);
-    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, false);
     std::string type = node->GetTag();
     if (type == V2::LOCATION_BUTTON_ETS_TAG) {
         LocationButton buttonInfo;
-        WriteButtonInfo(layoutProperty, node, buttonInfo, message);
-        buttonInfo.type_ = SecCompType::LOCATION_COMPONENT;
         scType = SecCompType::LOCATION_COMPONENT;
-        if (!InitChildInfo(buttonInfo, node)) {
+        if (!InitButtonInfoValue(node, buttonInfo, scType, message)) {
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
         PasteButton buttonInfo;
-        WriteButtonInfo(layoutProperty, node, buttonInfo, message);
-        buttonInfo.type_ = SecCompType::PASTE_COMPONENT;
         scType = SecCompType::PASTE_COMPONENT;
-        if (!InitChildInfo(buttonInfo, node)) {
+        if (!InitButtonInfoValue(node, buttonInfo, scType, message)) {
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
         SaveButton buttonInfo;
-        WriteButtonInfo(layoutProperty, node, buttonInfo, message);
-        buttonInfo.type_ = SecCompType::SAVE_COMPONENT;
         scType = SecCompType::SAVE_COMPONENT;
-        if (!InitChildInfo(buttonInfo, node)) {
+        if (!InitButtonInfoValue(node, buttonInfo, scType, message)) {
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();
