@@ -26,6 +26,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/pattern/gesture/gesture_model.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -36,6 +37,7 @@
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 
