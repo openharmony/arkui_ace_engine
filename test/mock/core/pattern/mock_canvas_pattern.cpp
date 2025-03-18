@@ -1406,6 +1406,12 @@ double CanvasPattern::GetHeight()
 
 void CanvasPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->rsCallback = std::move(callback);
+        return;
+    }
     paintMethod_->SetRSCanvasCallback(callback);
 }
 

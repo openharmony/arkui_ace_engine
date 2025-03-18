@@ -18,7 +18,7 @@
 
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "core/components/common/properties/paint_state.h"
-
+#include "core/components_ng/render/drawing_forward.h"
 namespace OHOS::Ace::NG {
 class TestHolder {
 public:
@@ -148,6 +148,7 @@ public:
     std::optional<Ace::TextBaseline> baseline = std::nullopt;
     std::optional<std::string> type = std::nullopt;
     std::optional<double> quality = std::nullopt;
+    std::function<void(RSCanvas*, double, double)> rsCallback;
 };
 
 } // namespace OHOS::Ace::NG

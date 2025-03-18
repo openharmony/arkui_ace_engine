@@ -394,4 +394,9 @@ void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>&
     }
     dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
 }
+void AssignArkValue(Ark_Size& dst, const SizeF& src)
+{
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
 } // namespace OHOS::Ace::NG::Converter

@@ -16,56 +16,53 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_DRAWING_RENDERING_CONTEXT_PEER_IMPL_H
 
 #include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/common/container_consts.h"
-
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/render/drawing.h"
+#include "base/geometry/ng/size_t.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class DrawingRenderingContextPeerImpl : public Referenced {
 public:
-    DrawingRenderingContextPeerImpl() = default;
+    DrawingRenderingContextPeerImpl();
     ~DrawingRenderingContextPeerImpl() override = default;
 
-    void TriggerInvalidate();
+    void SetOptions(const std::optional<CanvasUnit>& unit);
+    void SetInvalidate();
+    SizeF GetSize();
+    std::shared_ptr<RSCanvas> GetCanvas() const;
+    void SetRSCanvasCallback(RefPtr<AceType>& canvasPattern);
 
+    void SetCanvasPattern(const RefPtr<AceType>& canvas)
+    {
+        canvasPattern_ = canvas;
+        SetRSCanvasCallback(canvasPattern_);
+    }
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;
     }
-
     CanvasUnit GetUnit()
     {
         return unit_;
     }
-
-    void SetCanvasPattern(const RefPtr<AceType>& pattern)
+    double GetDensity()
     {
-        CHECK_NULL_VOID(pattern);
-        auto canvasPattern = AceType::DynamicCast<CanvasPattern>(pattern);
-        CHECK_NULL_VOID(canvasPattern);
-        if (pattern_ == canvasPattern) {
-            return;
-        }
-        pattern_ = canvasPattern;
-    }
-
-    void SetInstanceId(int32_t instanceId)
-    {
-        instanceId_ = instanceId;
-    }
-
-    int32_t GetInstanceId()
-    {
-        return instanceId_;
+        double density = PipelineBase::GetCurrentDensity();
+        return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
 
 protected:
-    RefPtr<AceType> pattern_;
+    RefPtr<AceType> canvasPattern_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
+    std::shared_ptr<RSCanvas> rsCanvas_;
+    NG::OptionalSizeF size_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
