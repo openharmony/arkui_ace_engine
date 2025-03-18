@@ -50,17 +50,17 @@ ImageLoadingContext::~ImageLoadingContext()
         auto state = stateManager_->GetCurrentState();
         if (state == ImageLoadingState::DATA_LOADING) {
             // cancel CreateImgObj task
-            if (Downloadable()) {
-                ImageProvider::CancelTask(src_.GetTaskKey() + (GetOnProgressCallback() ? "1" : "0"), WeakClaim(this));
-                DownloadManager::GetInstance()->RemoveDownloadTaskWithPreload(src_.GetSrc(), imageDfxConfig_.nodeId_);
-            } else {
+            if (!Downloadable()) {
                 ImageProvider::CancelTask(src_.GetTaskKey(), WeakClaim(this));
+                return;
             }
-        } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE) {
+            std::string taskKey = src_.GetTaskKey() + (GetOnProgressCallback() ? "1" : "0");
+            if (ImageProvider::CancelTask(taskKey, WeakClaim(this))) {
+                DownloadManager::GetInstance()->RemoveDownloadTaskWithPreload(src_.GetSrc());
+            }
+        } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE && InstanceOf<StaticImageObject>(imageObj_)) {
             // cancel MakeCanvasImage task
-            if (InstanceOf<StaticImageObject>(imageObj_)) {
-                ImageProvider::CancelTask(canvasKey_, WeakClaim(this));
-            }
+            ImageProvider::CancelTask(canvasKey_, WeakClaim(this));
         }
     }
 }
