@@ -150,8 +150,8 @@ public:
     void RemoveInvalidPage(size_t index);
     std::vector<std::string> GetAllPathName();
     std::vector<ParamType> GetParamByName(const std::string& name);
-    std::vector<size_t> GetIndexByName(const std::string& name);
-    size_t Size() const;
+    std::vector<uint32_t> GetIndexByName(const std::string& name);
+    size_t GetSize() const;
     void DisableAnimation(bool disableAnimation);
     void SetInterception(InterceptionType interception);
 protected:
@@ -233,7 +233,17 @@ public:
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
     int32_t GetRecoveredDestinationMode(int32_t index) override;
+    void AddCustomNode(int32_t index, const RefPtr<NG::UINode>& node)
+    {
+        nodes_.insert(std::pair<int32_t, RefPtr<NG::UINode>>(index, node));
+    }
+
+    void ClearNodeList()
+    {
+        nodes_.clear();
+    }
 protected:
+    std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
     NavDestBuildCallback navDestBuilderFunc_;
     std::function<void()> onStateChangedCallback_;
@@ -243,9 +253,6 @@ private:
     {
         PathStack::SetIsReplace(static_cast<PathStack::IsReplace>(value));
     }
-#ifdef UPSTREAM
-    int32_t GetSize() const override;
-#endif
     std::string GetNameByIndex(int32_t index) const;
     ParamType GetParamByIndex(int32_t index) const;
     OnPopCallback GetOnPopByIndex(int32_t index) const;

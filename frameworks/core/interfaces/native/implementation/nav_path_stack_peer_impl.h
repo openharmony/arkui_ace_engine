@@ -41,11 +41,6 @@ public:
         navStack_ = navStack;
     }
 
-    void SetUpdateCallback(std::function<void()>&& func)
-    {
-        _updater = std::move(func);
-    }
-
     void SetInstanceId(int32_t instanceId)
     {
         instanceId_ = instanceId;
@@ -61,15 +56,8 @@ public:
         return navStack_;
     }
 
-    void InvokeUpdateCallback()
-    {
-    }
-
 protected:
     RefPtr<Nav::NavigationStack> navStack_;
     int32_t instanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
-
-private:
-    std::function<void()> _updater;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAV_PATH_STACK_PEER_IMPL_H

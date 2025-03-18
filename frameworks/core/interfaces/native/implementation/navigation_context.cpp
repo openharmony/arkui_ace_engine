@@ -419,10 +419,10 @@ std::vector<ParamType> PathStack::GetParamByName(const std::string& name)
     return array;
 }
 
-std::vector<size_t> PathStack::GetIndexByName(const std::string& name)
+std::vector<uint32_t> PathStack::GetIndexByName(const std::string& name)
 {
-    std::vector<size_t> array;
-    for (size_t index = 0; index < pathArray_.size(); index++) {
+    std::vector<uint32_t> array;
+    for (uint32_t index = 0; index < static_cast<uint32_t>(pathArray_.size()); index++) {
         if (pathArray_[index].name_ == name) {
             array.push_back(index);
         }
@@ -430,7 +430,7 @@ std::vector<size_t> PathStack::GetIndexByName(const std::string& name)
     return array;
 }
 
-size_t PathStack::Size() const
+size_t PathStack::GetSize() const
 {
     return pathArray_.size();
 }
@@ -566,11 +566,15 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     auto isEntry = pathInfo->isEntry_;
     RefPtr<NG::UINode> targetNode;
     RefPtr<NG::NavDestinationGroupNode> desNode;
-    int32_t errorCode = LoadDestination(name, param, customNode, targetNode, desNode);
-    // isRemove true, set destination info, false, current destination create failed
-    bool isRemove = true; // Remove of destination may be here
-    if (!isRemove) {
-        return false;
+    int32_t errorCode = ERROR_CODE_DESTINATION_NOT_FOUND;
+    for (auto iter = nodes_.begin(); iter != nodes_.end(); iter++) {
+        if (iter->first == index) {
+            targetNode = iter->second;
+            break;
+        }
+    }
+    if (GetNavDestinationNodeInUINode(targetNode, desNode)) {
+        errorCode = ERROR_CODE_NO_ERROR;
     }
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
@@ -658,20 +662,13 @@ void NavigationStack::UpdateReplaceValue(int32_t replaceValue) const
 
 std::string NavigationStack::GetRouteParam() const
 {
-    auto size = PathStack::Size();
+    auto size = PathStack::GetSize();
     if (size > 0) {
         auto param = GetParamByIndex(size - 1);
         return ConvertParamToString(param, true);
     }
     return "";
 }
-
-#ifdef UPSTREAM
-int32_t NavigationStack::GetSize() const
-{
-    return PathStack::Size();
-}
-#endif
 
 std::string NavigationStack::ConvertParamToString(const ParamType& param, bool needLimit) const
 {

@@ -155,6 +155,30 @@ RefPtr<NG::FrameNode> NavDestinationModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    CHECK_NULL_RETURN(navDestinationNode, nullptr);
+    if (!navDestinationNode->GetTitleBarNode()) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+        if (titleBarNode) {
+            auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+            CHECK_NULL_RETURN(titleBarLayoutProperty, navDestinationNode);
+            titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+        }
+    }
+    // content node
+    if (!navDestinationNode->GetContentNode()) {
+        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
+        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        navDestinationNode->AddChild(contentNode);
+        navDestinationNode->SetContentNode(contentNode);
+    }
+    CreateToolBarNode(navDestinationNode);
     return navDestinationNode;
 }
 

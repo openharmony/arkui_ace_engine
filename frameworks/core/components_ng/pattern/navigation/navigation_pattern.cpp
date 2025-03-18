@@ -3134,4 +3134,24 @@ void NavigationPattern::CheckContentNeedMeasure(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(contentNode);
     contentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
+
+bool NavigationPattern::CheckNeedCreate(int32_t index)
+{
+    CHECK_NULL_RETURN(navigationStack_, false);
+    auto pathListSize = navigationStack_->Size();
+    RefPtr<UINode> uiNode = nullptr;
+    if (navigationStack_->IsFromRecovery(index)) {
+        return true;
+    }
+    if (navigationStack_->NeedBuildNewInstance(index)) {
+        return true;
+    }
+    if (index == pathListSize - 1 && addByNavRouter_) {
+        addByNavRouter_ = false;
+        uiNode = navigationStack_->Get();
+    } else {
+        uiNode = navigationStack_->Get(index);
+    }
+    return uiNode == nullptr;
+}
 } // namespace OHOS::Ace::NG

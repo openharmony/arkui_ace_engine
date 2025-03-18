@@ -452,7 +452,7 @@ public:
     {
         return enableDragBar_;
     }
-    
+    bool CheckNeedCreate(int32_t index);
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
