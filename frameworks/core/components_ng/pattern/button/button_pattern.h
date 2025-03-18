@@ -204,7 +204,7 @@ public:
         json->PutExtAttr("minFontScale",
                          std::to_string(layoutProperty->GetMinFontScale().value_or(0.0f)).c_str(), filter);
         json->PutExtAttr("maxFontScale", std::to_string(layoutProperty->GetMaxFontScale().value_or(
-                static_cast<float>(INT32_MAX))).c_str(), filter);
+            static_cast<float>(INT32_MAX))).c_str(), filter);
 
         labelJsValue->Put("heightAdaptivePolicy",
             V2::ConvertWrapTextHeightAdaptivePolicyToString(
