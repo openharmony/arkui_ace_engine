@@ -1558,7 +1558,7 @@ HWTEST_F(BaseUtilsTest, StringUtilsTest009, TestSize.Level1)
  * @tc.desc: Test Three Byte String with One Invalid Character
  * @tc.type: FUNC
  */
-HWTEST_F(BaseUtilsTest, StringUtilsTest10, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, StringUtilsTest010, TestSize.Level1)
 {
     std::string invalidStr = "\xE2\x40\xAC";
     EXPECT_FALSE(IsUTF8(invalidStr));
@@ -1569,7 +1569,7 @@ HWTEST_F(BaseUtilsTest, StringUtilsTest10, TestSize.Level1)
  * @tc.desc: Test Four Byte Stringg Smile Face
  * @tc.type: FUNC
  */
-HWTEST_F(BaseUtilsTest, StringUtilsTest11, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, StringUtilsTest011, TestSize.Level1)
 {
     std::string fourByteStr = "\xF0\x9F\x98\x8A";
     EXPECT_TRUE(IsUTF8(fourByteStr));
@@ -1580,7 +1580,7 @@ HWTEST_F(BaseUtilsTest, StringUtilsTest11, TestSize.Level1)
  * @tc.desc: Test Four Byte String without Continuation
  * @tc.type: FUNC
  */
-HWTEST_F(BaseUtilsTest, StringUtilsTest12, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, StringUtilsTest012, TestSize.Level1)
 {
     std::string missingFourth = "\xF0\x9F\x98";
     EXPECT_FALSE(IsUTF8(missingFourth));
@@ -1591,7 +1591,7 @@ HWTEST_F(BaseUtilsTest, StringUtilsTest12, TestSize.Level1)
  * @tc.desc: Test Four Byte String with Invalid Character
  * @tc.type: FUNC
  */
-HWTEST_F(BaseUtilsTest, StringUtilsTest13, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, StringUtilsTest013, TestSize.Level1)
 {
     std::string invalidSecond = "\xF0\xC0\x80\x80";
     EXPECT_FALSE(IsUTF8(invalidSecond));
@@ -1602,7 +1602,7 @@ HWTEST_F(BaseUtilsTest, StringUtilsTest13, TestSize.Level1)
  * @tc.desc: Test Four Byte String with Invalid Start Character
  * @tc.type: FUNC
  */
-HWTEST_F(BaseUtilsTest, StringUtilsTest14, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, StringUtilsTest014, TestSize.Level1)
 {
     std::string invalidStart = "\xF8\x80\x80\x80";
     EXPECT_FALSE(IsUTF8(invalidStart));
@@ -1613,7 +1613,7 @@ HWTEST_F(BaseUtilsTest, StringUtilsTest14, TestSize.Level1)
  * @tc.desc: Test String Mixed with Invalid Character
  * @tc.type: FUNC
  */
-HWTEST_F(BaseUtilsTest, StringUtilsTest15, TestSize.Level1)
+HWTEST_F(BaseUtilsTest, StringUtilsTest015, TestSize.Level1)
 {
     std::string mixedStr = "a\xC3\xA9\xE2\x82";
     EXPECT_FALSE(IsUTF8(mixedStr));
