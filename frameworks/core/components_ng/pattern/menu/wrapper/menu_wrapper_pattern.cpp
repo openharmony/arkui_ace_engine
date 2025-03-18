@@ -695,6 +695,7 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void MenuWrapperPattern::StartShowAnimation()
 {
+    TAG_LOGI(AceLogTag::ACE_MENU, "start show menu animation");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -777,7 +778,7 @@ bool MenuWrapperPattern::IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& 
 
 void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "register menu enter");
+    TAG_LOGD(AceLogTag::ACE_MENU, "register menu enter");
     CHECK_NULL_VOID(menuWrapperNode);
     auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
@@ -790,7 +791,7 @@ void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapp
 
 void MenuWrapperPattern::SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "set menu transition effect");
+    TAG_LOGD(AceLogTag::ACE_MENU, "set menu transition effect");
     CHECK_NULL_VOID(menuWrapperNode);
     auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
