@@ -90,4 +90,15 @@ void ForEachModelNG::OnMove(std::function<void(int32_t, int32_t)>&& onMove)
     CHECK_NULL_VOID(node);
     node->SetOnMove(std::move(onMove));
 }
+
+void ForEachModelNG::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+    std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+    std::function<void(int32_t)>&& onDrop)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<ForEachNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    node->SetItemDragHandler(
+        std::move(onLongPress), std::move(onDragStart), std::move(onMoveThrough), std::move(onDrop));
+}
 } // namespace OHOS::Ace::NG

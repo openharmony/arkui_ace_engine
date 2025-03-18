@@ -439,6 +439,25 @@ std::string ImageSourceInfo::GetKey() const
     return cacheKey_;
 }
 
+void ImageSourceInfo::SetContainerId(int32_t containerId)
+{
+    containerId_ = containerId;
+}
+
+int32_t ImageSourceInfo::GetContainerId() const
+{
+    return containerId_;
+}
+
+std::string ImageSourceInfo::GetTaskKey() const
+{
+    // only svg sets fillColor
+    if (isSvg_ && fillColor_.has_value()) {
+        return cacheKey_ + fillColor_.value().ColorToString() + std::to_string(containerId_);
+    }
+    return cacheKey_ + std::to_string(containerId_);
+}
+
 ImageSourceInfo ImageSourceInfo::CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host)
 {
     ImageSourceInfo imageSourceInfo;

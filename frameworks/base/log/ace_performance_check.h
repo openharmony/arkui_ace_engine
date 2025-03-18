@@ -85,6 +85,7 @@ private:
     static bool CheckPage(const CodeInfo& codeInfo, const std::string& rule);
     static void RecordFunctionTimeout();
     static RefPtr<Framework::RevSourceMap> GetCurrentSourceMap();
+    static bool CheckIsRuleWebsocket(const std::string& ruleType);
     int64_t markTime_ = 0;
     std::string name_;
     static std::string currentPath_;

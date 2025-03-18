@@ -493,6 +493,8 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AutoCapitalizationMode, AutoCapitalizationMode)
+
     const RefPtr<Paragraph>& GetParagraph() const
     {
         return paragraph_;
@@ -914,6 +916,7 @@ public:
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
+    std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
@@ -1508,6 +1511,11 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool GetEnableHapticFeedback() const
+    {
+        return isEnableHapticFeedback_;
+    }
+
     void SetIsFocusedBeforeClick(bool isFocusedBeforeClick)
     {
         isFocusedBeforeClick_ = isFocusedBeforeClick;
@@ -1556,6 +1564,10 @@ public:
     void SetIsFilterChanged(bool isFilterChanged)
     {
         isFilterChanged_ = isFilterChanged;
+    }
+    bool GetCancelButtonTouchInfo()
+    {
+        return cancelButtonTouched_;
     }
 protected:
     virtual void InitDragEvent();
@@ -1709,6 +1721,7 @@ private:
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
+    void OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value);
     void Delete(int32_t start, int32_t end);
     void CheckAndUpdateRecordBeforeOperation();
     void BeforeCreateLayoutWrapper() override;
@@ -2076,6 +2089,7 @@ private:
     PreviewText callbackOldPreviewText_;
     bool isFilterChanged_ = false;
     std::optional<bool> showPasswordState_;
+    bool cancelButtonTouched_ = false;
 };
 } // namespace OHOS::Ace::NG
 

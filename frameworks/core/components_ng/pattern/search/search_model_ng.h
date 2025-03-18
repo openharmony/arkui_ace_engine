@@ -84,6 +84,7 @@ public:
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
     void SetSearchEnterKeyType(TextInputAction value) override;
+    void SetSearchCapitalizationMode(AutoCapitalizationMode value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>& onError) override;
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetTextIndent(const Dimension& value) override;
@@ -150,6 +151,7 @@ public:
     static void SetCancelImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
+    static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
     static void SetId(FrameNode* frameNode, const std::string& key);
     static void SetTextDecoration(FrameNode* frameNode, Ace::TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);

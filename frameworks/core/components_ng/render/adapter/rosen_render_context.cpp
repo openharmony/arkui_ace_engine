@@ -23,6 +23,7 @@
 #include "render_service_base/include/render/rs_mask.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
+#include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 #include "render_service_client/core/ui/rs_canvas_drawing_node.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
@@ -40,6 +41,7 @@
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/render/adapter/background_modifier.h"
@@ -134,6 +136,12 @@ static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositi
     }
 }
 
+bool SetDrawNodeChangeCallback()
+{
+    Rosen::RSNode::SetDrawNodeChangeCallback(DrawNodeChangeCallback);
+    return true;
+}
+
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
     static const LinearEnumMapNode<RenderFit, Rosen::Gravity> gravityMap[] = {
@@ -170,7 +178,7 @@ ColorMode GetResourceColorMode(PipelineContext* pipeline)
 }
 
 std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
-    const BlurStyleOption& blurStyleOption, PipelineContext* pipeline)
+    const BlurStyleOption& blurStyleOption, PipelineContext* pipeline, const SysOptions& sysOptions)
 {
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
@@ -190,7 +198,7 @@ std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
     auto saturation = (blurParam->saturation - 1) * ratio + 1.0;
     auto brightness = (blurParam->brightness - 1) * ratio + 1.0;
     return Rosen::RSFilter::CreateMaterialFilter(radiusBlur, saturation, brightness, maskColor.GetValue(),
-        static_cast<Rosen::BLUR_COLOR_MODE>(blurStyleOption.adaptiveColor));
+        static_cast<Rosen::BLUR_COLOR_MODE>(blurStyleOption.adaptiveColor), sysOptions.disableSystemAdaptation);
 }
 
 RSPen GetRsPen(uint32_t strokeColor, float strokeWidth)
@@ -223,6 +231,8 @@ T GetAnimatablePropertyStagingValue(std::shared_ptr<ModifierName>& modifier)
     return property->GetStagingValue();
 }
 } // namespace
+
+bool RosenRenderContext::initDrawNodeChangeCallback_ = SetDrawNodeChangeCallback();
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
@@ -263,11 +273,6 @@ void RosenRenderContext::DetachModifiers()
     if (pipeline) {
         pipeline->RequestFrame();
     }
-}
-
-void RosenRenderContext::SetDrawNodeChangeCallback()
-{
-    Rosen::RSNode::SetDrawNodeChangeCallback(DrawNodeChangeCallback);
 }
 
 void RosenRenderContext::StartRecording()
@@ -904,16 +909,18 @@ void RosenRenderContext::SetBackBlurFilter()
     const auto& background = GetBackground();
     CHECK_NULL_VOID(background);
     const auto& blurStyleOption = background->propBlurStyleOption;
+    auto sysOptions = background->propSysOptions.value_or(SysOptions());
     std::shared_ptr<Rosen::RSFilter> backFilter;
     if (!blurStyleOption.has_value()) {
         const auto& radius = background->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
             float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
-            backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+            backFilter =
+                Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius, sysOptions.disableSystemAdaptation);
         }
     } else {
-        backFilter = CreateRSMaterialFilter(blurStyleOption.value(), context);
+        backFilter = CreateRSMaterialFilter(blurStyleOption.value(), context, sysOptions);
     }
     rsNode_->SetBackgroundFilter(backFilter);
 }
@@ -951,16 +958,18 @@ void RosenRenderContext::SetFrontBlurFilter()
     const auto& foreground = GetForeground();
     CHECK_NULL_VOID(foreground);
     const auto& blurStyleOption = foreground->propBlurStyleOption;
+    auto sysOptions = foreground->propSysOptionsForBlur.value_or(SysOptions());
     std::shared_ptr<Rosen::RSFilter> frontFilter;
     if (!blurStyleOption.has_value()) {
         const auto& radius = foreground->propBlurRadius;
         if (radius.has_value() && radius->IsValid()) {
             float radiusPx = context->NormalizeToPx(radius.value());
             float backblurRadius = DrawingDecorationPainter::ConvertRadiusToSigma(radiusPx);
-            frontFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+            frontFilter =
+                Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius, sysOptions.disableSystemAdaptation);
         }
     } else {
-        frontFilter = CreateRSMaterialFilter(blurStyleOption.value(), context);
+        frontFilter = CreateRSMaterialFilter(blurStyleOption.value(), context, sysOptions);
     }
 
     rsNode_->SetFilter(frontFilter);
@@ -999,11 +1008,12 @@ bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOpt
     return blurEnable;
 }
 
-void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
+void RosenRenderContext::UpdateBackBlurStyle(
+    const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckBlurStyleOption(bgBlurStyle)) {
+    if (groupProperty->CheckBlurStyleOption(bgBlurStyle) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
         // Same with previous value.
         // If colorMode is following system and has valid blurStyle, still needs updating
         if (bgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
@@ -1015,6 +1025,7 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
         }
     } else {
         groupProperty->propBlurStyleOption = bgBlurStyle;
+        groupProperty->propSysOptions = sysOptions;
     }
 
     if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
@@ -1024,14 +1035,16 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
     SetBackBlurFilter();
 }
 
-void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+void RosenRenderContext::UpdateBackgroundEffect(
+    const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckEffectOption(effectOption)) {
+    if (groupProperty->CheckEffectOption(effectOption) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
         return;
     }
     groupProperty->propEffectOption = effectOption;
+    groupProperty->propSysOptions = sysOptions;
     if (!effectOption.has_value()) {
         return;
     }
@@ -1047,9 +1060,10 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
     if (effectOption->adaptiveColor == AdaptiveColor::AVERAGE) {
         fastAverage = Rosen::BLUR_COLOR_MODE::FASTAVERAGE;
     }
-    std::shared_ptr<Rosen::RSFilter> backFilter = Rosen::RSFilter::CreateMaterialFilter(backblurRadius,
-        static_cast<float>(effectOption->saturation), static_cast<float>(effectOption->brightness),
-        effectOption->color.GetValue(), static_cast<Rosen::BLUR_COLOR_MODE>(fastAverage));
+    std::shared_ptr<Rosen::RSFilter> backFilter =
+        Rosen::RSFilter::CreateMaterialFilter(backblurRadius, static_cast<float>(effectOption->saturation),
+            static_cast<float>(effectOption->brightness), effectOption->color.GetValue(),
+            static_cast<Rosen::BLUR_COLOR_MODE>(fastAverage), sysOptions.disableSystemAdaptation);
     rsNode_->SetBackgroundFilter(backFilter);
     if (effectOption->blurOption.grayscale.size() > 1) {
         Rosen::Vector2f grayScale(effectOption->blurOption.grayscale[0], effectOption->blurOption.grayscale[1]);
@@ -1057,11 +1071,12 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
     }
 }
 
-void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle)
+void RosenRenderContext::UpdateFrontBlurStyle(
+    const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckBlurStyleOption(fgBlurStyle)) {
+    if (groupProperty->CheckBlurStyleOption(fgBlurStyle) && groupProperty->CheckSysOptionsForBlurSame(sysOptions)) {
         // Same with previous value.
         // If colorMode is following system and has valid blurStyle, still needs updating
         if (fgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
@@ -1073,8 +1088,20 @@ void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOptio
         }
     } else {
         groupProperty->propBlurStyleOption = fgBlurStyle;
+        groupProperty->propSysOptionsForBlur = sysOptions;
     }
     SetFrontBlurFilter();
+}
+
+void RosenRenderContext::UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions)
+{
+    CHECK_NULL_VOID(rsNode_);
+    const auto& groupProperty = GetOrCreateForeground();
+    if (groupProperty->CheckSysOptionsForEffectSame(sysOptions)) {
+        return;
+    }
+    groupProperty->propSysOptionsForForeEffect = sysOptions;
+    rsNode_->SetForegroundEffectDisableSystemAdaptation(sysOptions.disableSystemAdaptation);
 }
 
 void RosenRenderContext::ResetBackBlurStyle()
@@ -2673,6 +2700,18 @@ void RosenRenderContext::UpdateAccessibilityRoundRect()
 
     auto node = GetHost();
     CHECK_NULL_VOID(node);
+    if (node->GetTag() == V2::ACCESSIBILITY_FOCUS_PAINT_NODE_TAG) {
+        auto paintNodePattern = AceType::DynamicCast<AccessibilityFocusPaintNodePattern>(node->GetPattern());
+        CHECK_NULL_VOID(paintNodePattern);
+        auto focusNode = paintNodePattern->GetFocusNode().Upgrade();
+        CHECK_NULL_VOID(focusNode);
+        auto pipeline = focusNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto rect = pipeline->GetRootRect();
+        std::shared_ptr<Rosen::RectF> drawRect =
+            std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+        UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, drawRect);
+    }
     auto nodeWidth = node->GetGeometryNode()->GetFrameSize().Width();
     auto nodeHeight = node->GetGeometryNode()->GetFrameSize().Height();
 
@@ -3634,8 +3673,11 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Color
     isFocusBoxGlow_ = isFocusBoxGlow;
     if (isAccessibilityFocus) {
         InitAccessibilityFocusModidifer(paintRect, paintColor, borderWidthPx);
-        UpdateDrawRegion(
-            DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
+        auto host = GetHost();
+        if (host && host->GetTag() != V2::ACCESSIBILITY_FOCUS_PAINT_NODE_TAG) {
+            UpdateDrawRegion(
+                DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, accessibilityFocusStateModifier_->GetOverlayRect());
+        }
         rsNode_->AddModifier(accessibilityFocusStateModifier_);
         accessibilityFocusStateModifier_->AttachAnimationRectProperty();
         RequestNextFrame();
@@ -3669,6 +3711,7 @@ void RosenRenderContext::InitAccessibilityFocusModidifer(
     accessibilityFocusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
     accessibilityFocusStateModifier_->SetPaintColor(paintColor);
     accessibilityFocusStateModifier_->SetFrameNode(frameNode);
+    accessibilityFocusStateModifier_->SetNoNeedUICaptured(true);
 }
 
 void RosenRenderContext::InitFocusStateModidifer(
@@ -3967,6 +4010,13 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
             GetLiveChildren(child, childNodes);
         }
     }
+    auto accessibilityFocusPaintNode = node->GetFocusPaintNode();
+    if (accessibilityFocusPaintNode) {
+        childNodes.emplace_back(accessibilityFocusPaintNode);
+        if (accessibilityFocusPaintNode->HasPositionZ()) {
+            pipeline->AddPositionZNode(accessibilityFocusPaintNode->GetId());
+        }
+    }
     auto overlayNode = node->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
     auto property = overlayNode->GetLayoutProperty();
@@ -4178,15 +4228,17 @@ void RosenRenderContext::UpdateMotionBlur(const MotionBlurOption& motionBlurOpti
     rsNode_->SetMotionBlurPara(motionBlurOption.radius, anchor);
 }
 
-void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)
+void RosenRenderContext::UpdateBackBlur(
+    const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckBlurRadiusChanged(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
         // Same with previous value
         return;
     }
     groupProperty->propBlurRadius = radius;
+    groupProperty->propSysOptions = sysOptions;
     SetBackBlurFilter();
     if (blurOption.grayscale.size() > 1) {
         Rosen::Vector2f grayScale(blurOption.grayscale[0], blurOption.grayscale[0]);
@@ -4222,15 +4274,17 @@ void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
     SetFrontBlurFilter();
 }
 
-void RosenRenderContext::UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption)
+void RosenRenderContext::UpdateFrontBlur(
+    const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckBlurRadiusChanged(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius) && groupProperty->CheckSysOptionsForBlurSame(sysOptions)) {
         // Same with previous value
         return;
     }
     groupProperty->propBlurRadius = radius;
+    groupProperty->propSysOptionsForBlur = sysOptions;
     SetFrontBlurFilter();
     if (blurOption.grayscale.size() > 1) {
         Rosen::Vector2f grayScale(blurOption.grayscale[0], blurOption.grayscale[1]);
@@ -5333,6 +5387,22 @@ void RosenRenderContext::DumpInfo()
             auto backgroundEffect = groupProperty->propEffectOption->ToJsonValue()->ToString();
             DumpLog::GetInstance().AddDesc(std::string("backgroundEffect:").append(backgroundEffect));
         }
+        if (groupProperty->propSysOptions.has_value()) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("backDisable:")
+                    .append(std::to_string(groupProperty->propSysOptions->disableSystemAdaptation)));
+        }
+        const auto& foregroundProperty = GetOrCreateForeground();
+        if (foregroundProperty->propSysOptionsForBlur.has_value()) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("blurDisable:")
+                    .append(std::to_string(foregroundProperty->propSysOptionsForBlur->disableSystemAdaptation)));
+        }
+        if (foregroundProperty->propSysOptionsForForeEffect.has_value()) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("foreEffectDisable:")
+                    .append(std::to_string(foregroundProperty->propSysOptionsForForeEffect->disableSystemAdaptation)));
+        }
         auto&& graphicProps = GetOrCreateGraphics();
         if (graphicProps->propFgDynamicBrightnessOption.has_value()) {
             auto fgDynamicBrightness = graphicProps->propFgDynamicBrightnessOption->GetJsonObject();
@@ -5477,6 +5547,28 @@ void RosenRenderContext::DumpInfo()
                                                .append(anchor->GetX().ToString().c_str())
                                                .append(std::string(",anchorY :"))
                                                .append(anchor->GetY().ToString().c_str()));
+        }
+
+        auto rsBlendMode = static_cast<int16_t>(rsNode_->GetStagingProperties().GetColorBlendMode());
+        if (GetBackBlendMode().has_value() || rsBlendMode) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("blendMode:") + std::to_string(rsBlendMode));
+            auto blendMode = static_cast<int16_t>(GetBackBlendMode().value_or(BlendMode::NONE));
+            if (rsBlendMode != blendMode) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("blendMode has difference,arkui:") + std::to_string(blendMode));
+            }
+        }
+        
+        auto rsBlendApplyType = static_cast<int16_t>(rsNode_->GetStagingProperties().GetColorBlendApplyType());
+        if (GetBackBlendApplyType().has_value() || rsBlendApplyType) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("blendApplyType:") + std::to_string(rsBlendApplyType));
+            auto blendApplyType = static_cast<int16_t>(GetBackBlendApplyType().value_or(BlendApplyType::FAST));
+            if (rsBlendApplyType != blendApplyType) {
+                DumpLog::GetInstance().AddDesc(
+                    std::string("blendApplyType has difference,arkui:") + std::to_string(blendApplyType));
+            }
         }
     }
     if (disappearingTransitionCount_) {
@@ -5939,14 +6031,14 @@ RefPtr<Curve> RosenRenderContext::UpdatePlayAnimationValue(const ClickEffectLeve
     return AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
 }
 
-void RosenRenderContext::RegisterSharedTransition(const RefPtr<RenderContext>& other)
+void RosenRenderContext::RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow)
 {
     auto otherContext = AceType::DynamicCast<RosenRenderContext>(other);
     if (!otherContext) {
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    RSNode::RegisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId());
+    RSNode::RegisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId(), isInSameWindow);
 }
 
 void RosenRenderContext::UnregisterSharedTransition(const RefPtr<RenderContext>& other)
@@ -6409,6 +6501,7 @@ void RosenRenderContext::NotifyHostTransformUpdated(bool changed)
     CHECK_NULL_VOID(host);
     host->NotifyTransformInfoChanged();
     host->OnNodeTransformInfoUpdate(changed);
+    host->UpdateAccessibilityNodeRect();
 }
 
 void RosenRenderContext::SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate)
@@ -6819,5 +6912,98 @@ void RosenRenderContext::DumpSimplifyStagingProperties(std::unique_ptr<JsonValue
             json->Put("TransformAlpha", std::to_string(arkAlpha.value()).c_str());
         }
     }
+}
+
+void RosenRenderContext::FreezeCanvasNode(bool freezeFlag)
+{
+    if (canvasNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "FreezeCanvasNode. %{public}d", freezeFlag);
+        canvasNode_->SetFreeze(freezeFlag);
+    }
+}
+
+void RosenRenderContext::RemoveCanvasNode()
+{
+    if (canvasNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveCanvasNode.");
+        canvasNode_->RemoveFromTree();
+        canvasNode_ = nullptr;
+    }
+}
+
+void RosenRenderContext::CheckAnimationParametersValid(int32_t& animationParam)
+{
+    const int32_t maxTime = 2000;
+    const int32_t defaultTime = 100;
+    if (animationParam <= 0 || animationParam > maxTime) {
+        animationParam = defaultTime;
+    }
+}
+
+bool RosenRenderContext::SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd)
+{
+    static bool animationFlag = false;
+    if (animationFlag) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "animationFlag is true.");
+        return false;
+    }
+    if (!canvasNode_) {
+        return true;
+    }
+
+    FreezeCanvasNode(true);
+    canvasNode_->SetAlpha(1.0f);
+    Rosen::RSTransaction::FlushImplicitTransaction();
+
+    CheckAnimationParametersValid(duration);
+    CheckAnimationParametersValid(delay);
+    AnimationOption option;
+    option.SetDuration(duration);
+    option.SetDelay(delay);
+    option.SetCurve(Curves::EASE_OUT);
+    AnimationUtils::Animate(option,
+        [this]() {
+            if (canvasNode_) {
+                animationFlag = true;
+                canvasNode_->SetAlpha(0.0f);
+            }
+        },
+        [this, isDragEnd]() {
+            if (canvasNode_) {
+                canvasNode_->SetAlpha(1.0f);
+            }
+            FreezeCanvasNode(false);
+            if (isDragEnd) {
+                RemoveCanvasNode();
+            }
+            if (callbackAnimateEnd_) {
+                callbackAnimateEnd_();
+            }
+            Rosen::RSTransaction::FlushImplicitTransaction();
+            animationFlag = false;
+            if (callbackCachedAnimateAction_) {
+                callbackCachedAnimateAction_();
+            }
+        });
+        return true;
+}
+
+void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode)
+{
+    if (canvasNode_ && rootNode) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
+        canvasNode_->SetLinkedRootNodeId(rootNode->GetRenderContext()->GetNodeId());
+        Rosen::RSTransaction::FlushImplicitTransaction();
+    }
+}
+
+std::shared_ptr<Rosen::RSCanvasNode> RosenRenderContext::GetCanvasNode()
+{
+    if (!canvasNode_) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSCanvasNode.");
+        canvasNode_ = Rosen::RSCanvasNode::Create();
+        Rosen::RSTransaction::FlushImplicitTransaction();
+    }
+    return canvasNode_;
 }
 } // namespace OHOS::Ace::NG

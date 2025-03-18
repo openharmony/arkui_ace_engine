@@ -402,7 +402,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew013, TestSize.Level1)
     auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     auto context = AceType::MakeRefPtr<RenderContext>();
-    rosenRenderContext->RegisterSharedTransition(context);
+    rosenRenderContext->RegisterSharedTransition(context, true);
     float scaleValue = 1.0; // 4.0 is the value of scaleValue
     rosenRenderContext->UpdatePlayAnimationValue(ClickEffectLevel::LIGHT, scaleValue);
     EXPECT_EQ(scaleValue, 1.0);
