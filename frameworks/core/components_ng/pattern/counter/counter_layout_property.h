@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components/counter/counter_theme.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CounterLayoutProperty : public LinearLayoutProperty {

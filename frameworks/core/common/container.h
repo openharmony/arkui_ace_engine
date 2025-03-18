@@ -55,7 +55,6 @@
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
