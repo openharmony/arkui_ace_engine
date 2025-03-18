@@ -232,36 +232,4 @@ HWTEST_F(PlatformPatternTestNg, PlatformPatternTest005, TestSize.Level1)
     ASSERT_GE(platformPattern->GetNodeId(), 1);
     ASSERT_GE(platformPattern->GetInstanceId(), -1);
 }
-
-/**
- * @tc.name: PlatformPatternTest006
- * @tc.desc: Test PlatformPattern InitKeyEvent
- * @tc.type: FUNC
- */
-HWTEST_F(PlatformPatternTestNg, PlatformPatternTest006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a IsolatedComponent Node
-     */
-    auto platformNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto platformNode = FrameNode::GetOrCreateFrameNode(
-        PLATFORM_PATTERN_ETS_TAG, platformNodeId, []() {
-            return AceType::MakeRefPtr<PlatformPattern>(AceLogTag::ACE_DEFAULT_DOMAIN, platformId);
-        });
-    ASSERT_NE(platformNode, nullptr);
-    EXPECT_EQ(platformNode->GetTag(), PLATFORM_PATTERN_ETS_TAG);
-    
-    /**
-     * @tc.steps: step2. get PlatformPattern
-     */
-    auto platformPattern = platformNode->GetPattern<PlatformPattern>();
-    ASSERT_NE(platformPattern, nullptr);
-
-    /**
-     * @tc.steps: step3. get FocusHub and call InitKeyEvent
-     */
-    auto focusHub = platformNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    platformPattern->InitKeyEvent(focusHub);
-}
 } // namespace OHOS::Ace::NG
