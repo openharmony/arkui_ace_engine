@@ -5231,12 +5231,12 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         WindowMaximize();
         return;
     }
-    bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (type == WindowSizeChangeReason::ROTATION) {
         if (delegate_) {
             delegate_->MaximizeResize();
         }
     }
+    bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (!isSmoothDragResizeEnabled) {
                 return;
     }
