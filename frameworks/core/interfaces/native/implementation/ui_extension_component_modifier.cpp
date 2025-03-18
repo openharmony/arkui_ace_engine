@@ -218,8 +218,8 @@ void OnErrorImpl(Ark_NativePointer node,
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(weakNode);
         arkCallback.Invoke(Ark_BusinessError{
-            .name  = Converter::ArkValue<Ark_String>(name),
-            .message = Converter::ArkValue<Ark_String>(message),
+            .name  = Converter::ArkValue<Ark_String>(name, Converter::FC),
+            .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
             .code = Converter::ArkValue<Ark_Number>(code)});
     };
     UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
