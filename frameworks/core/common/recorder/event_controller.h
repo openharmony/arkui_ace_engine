@@ -52,16 +52,6 @@ public:
         return hasCached_;
     }
 
-    bool HasWebProcessed() const
-    {
-        return hasWebProcessed_;
-    }
-
-    std::string GetCacheJsCode() const
-    {
-        return cacheJsCode_;
-    }
-
 private:
     struct CacheEvent {
         EventCategory category;
@@ -71,8 +61,8 @@ private:
     EventController() = default;
     ~EventController() = default;
     void NotifyConfigChange();
-    void ApplyNewestConfig(bool isExposureChanged, bool isWebChanged) const;
-    void ApplyExposureCfgInner(const std::shared_ptr<Config>& config, bool isExposureChanged, bool isWebChanged) const;
+    void ApplyNewestConfig(bool isExposureChanged) const;
+    void ApplyExposureCfgInner(const std::shared_ptr<Config>& config, bool isExposureChanged) const;
     void CacheEventIfNeed(EventCategory category, int32_t eventType,
         const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams);
     void NotifyCacheEventsIfNeed() const;
@@ -81,8 +71,6 @@ private:
     std::vector<UIEventClient> clientList_;
     std::vector<CacheEvent> cacheEvents_;
     bool hasCached_ = false;
-    bool hasWebProcessed_ = false;
-    std::string cacheJsCode_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventController);
 };
