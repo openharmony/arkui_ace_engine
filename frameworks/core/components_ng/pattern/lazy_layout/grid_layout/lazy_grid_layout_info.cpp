@@ -24,7 +24,7 @@ void LazyGridLayoutInfo::EstimateItemSize()
 {
     if (!posMap_.empty()) {
         float totalSize = posMap_.rbegin()->second.endPos + spaceWidth_ - posMap_.begin()->second.startPos;
-        int32_t totalCount = (posMap_.rbegin()->first + 1 - posMap_.begin()->first) / lanes_;
+        int32_t totalCount = (posMap_.size() + lanes_ - 1) / lanes_;
         estimateItemSize_ = totalSize / totalCount - spaceWidth_;
     }
 }
