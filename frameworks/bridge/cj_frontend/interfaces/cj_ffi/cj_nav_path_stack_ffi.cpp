@@ -45,7 +45,7 @@ void CJNavPathStack::PushPath(CJNavPathInfo info, bool animated, LaunchMode laun
 {
     if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON || launchMode == LaunchMode::POP_TO_SINGLETON) {
         int32_t index = -1;
-        for (int i = 0; i < pathArray_.size(); ++i) {
+        for (int i = 0; static_cast<unsigned long>(i) < pathArray_.size(); ++i) {
             if (pathArray_[i].name == info.name) {
                 index = i;
                 break;
@@ -96,7 +96,7 @@ void CJNavPathStack::ReplacePath(CJNavPathInfo info, bool animated, LaunchMode l
 {
     int32_t index = -1;
     if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON || launchMode == LaunchMode::POP_TO_SINGLETON) {
-        for (int i = 0; i < pathArray_.size(); ++i) {
+        for (int i = 0; static_cast<unsigned long>(i) < pathArray_.size(); ++i) {
             if (pathArray_[i].name == info.name) {
                 index = i;
                 break;
@@ -142,7 +142,7 @@ int32_t CJNavPathStack::RemoveByIndexes(std::vector<int32_t> indexes)
 
 void CJNavPathStack::RemoveIndex(int32_t index)
 {
-    if (pathArray_.size() == 0 || index >= pathArray_.size()) {
+    if (pathArray_.size() == static_cast<unsigned long>(0) || static_cast<unsigned long>(index) >= pathArray_.size()) {
         return;
     }
     pathArray_.erase(pathArray_.begin() + index);
@@ -173,7 +173,7 @@ int32_t CJNavPathStack::RemoveByName(std::string name)
 bool CJNavPathStack::RemoveByNavDestinationId(std::string navDestinationId)
 {
     int32_t index = -1;
-    for (int i = 0; i < pathArray_.size(); i++) {
+    for (int i = 0; static_cast<unsigned long>(i) < pathArray_.size(); i++) {
         if (pathArray_[i].navDestinationId == navDestinationId) {
             index = i;
             break;
@@ -242,7 +242,7 @@ int32_t CJNavPathStack::PopToName(std::string name, std::string result, bool ani
 
 void CJNavPathStack::PopToIndex(int32_t index, std::string result, bool animated)
 {
-    if (pathArray_.size() == 0 || index >= pathArray_.size()) {
+    if (pathArray_.size() == static_cast<unsigned long>(0) || static_cast<unsigned long>(index) >= pathArray_.size()) {
         return;
     }
     CJNavPathInfo currentPathInfo = pathArray_.back();
@@ -284,7 +284,7 @@ int32_t CJNavPathStack::MoveToTop(std::string name, bool animated)
 
 void CJNavPathStack::MoveIndexToTop(int32_t index, bool animated)
 {
-    if (pathArray_.size() == 0 || index >= pathArray_.size()) {
+    if (pathArray_.size() == static_cast<unsigned long>(0) || static_cast<unsigned long>(index) >= pathArray_.size()) {
         return;
     }
     auto info = pathArray_[index];
@@ -318,7 +318,7 @@ std::vector<std::string> CJNavPathStack::GetAllPathName()
 std::string CJNavPathStack::GetParamByIndex(int32_t index)
 {
     std::string param;
-    if (index >= pathArray_.size()) {
+    if (static_cast<unsigned long>(index) >= pathArray_.size()) {
         return param;
     }
     param = pathArray_[index].param;
@@ -348,7 +348,7 @@ std::vector<int32_t> CJNavPathStack::GetAllPathIndex()
 std::vector<int32_t> CJNavPathStack::GetIndexByName(std::string name)
 {
     std::vector<int32_t> indexs;
-    for (int i = 0; i < pathArray_.size(); ++i) {
+    for (int i = 0; static_cast<unsigned long>(i) < pathArray_.size(); ++i) {
         if (pathArray_[i].name == name) {
             indexs.push_back(i);
         }
@@ -358,7 +358,7 @@ std::vector<int32_t> CJNavPathStack::GetIndexByName(std::string name)
 
 int32_t CJNavPathStack::GetIndexFromIndex(int32_t index)
 {
-    for (int i = 0; i < pathArray_.size(); i++) {
+    for (int i = 0; static_cast<unsigned long>(i) < pathArray_.size(); i++) {
         if (pathArray_[i].index == index) {
             return i;
         }
@@ -400,7 +400,7 @@ void CJNavPathStack::SetAnimated(bool animated)
 
 void CJNavPathStack::SetNavDestinationId(int32_t index, const std::string& navDestinationId)
 {
-    if (index >= pathArray_.size()) {
+    if (static_cast<unsigned long>(index) >= pathArray_.size()) {
         return;
     }
     pathArray_[index].navDestinationId = navDestinationId.c_str();
@@ -408,7 +408,7 @@ void CJNavPathStack::SetNavDestinationId(int32_t index, const std::string& navDe
 
 std::optional<CJNavPathInfo> CJNavPathStack::GetPathInfo(int32_t index)
 {
-    if (index >= pathArray_.size()) {
+    if (static_cast<unsigned long>(index) >= pathArray_.size()) {
         return std::nullopt;
     }
     return pathArray_[index];
@@ -416,7 +416,7 @@ std::optional<CJNavPathInfo> CJNavPathStack::GetPathInfo(int32_t index)
 
 void CJNavPathStack::SetNeedUpdateByIndex(int32_t index, bool needUpdate)
 {
-    if (index >= pathArray_.size()) {
+    if (static_cast<unsigned long>(index) >= pathArray_.size()) {
         return;
     }
     pathArray_[index].needUpdate = needUpdate;
@@ -424,7 +424,7 @@ void CJNavPathStack::SetNeedUpdateByIndex(int32_t index, bool needUpdate)
 
 void CJNavPathStack::SetNeedBuildNewInstanceByIndex(int32_t index, bool needBuildNewInstance)
 {
-    if (index >= pathArray_.size()) {
+    if (static_cast<unsigned long>(index) >= pathArray_.size()) {
         return;
     }
     pathArray_[index].needBuildNewInstance = needBuildNewInstance;
@@ -432,7 +432,7 @@ void CJNavPathStack::SetNeedBuildNewInstanceByIndex(int32_t index, bool needBuil
 
 void CJNavPathStack::SetIsEntryByIndex(int32_t index, bool isEntry)
 {
-    if (index >= pathArray_.size()) {
+    if (static_cast<unsigned long>(index) >= pathArray_.size()) {
         return;
     }
     pathArray_[index].isEntry = isEntry;
@@ -440,7 +440,7 @@ void CJNavPathStack::SetIsEntryByIndex(int32_t index, bool isEntry)
 
 void CJNavPathStack::SetFromRecoveryByIndex(int32_t index, bool fromRecovery)
 {
-    if (index >= pathArray_.size()) {
+    if (static_cast<unsigned long>(index) >= pathArray_.size()) {
         return;
     }
     pathArray_[index].fromRecovery = fromRecovery;
@@ -448,7 +448,7 @@ void CJNavPathStack::SetFromRecoveryByIndex(int32_t index, bool fromRecovery)
 
 void CJNavPathStack::SetRecoveryFromReplaceDestinationByIndex(int32_t index, bool recoveryFromReplaceDestination)
 {
-    if (index >= pathArray_.size()) {
+    if (static_cast<unsigned long>(index) >= pathArray_.size()) {
         return;
     }
     pathArray_[index].recoveryFromReplaceDestination = recoveryFromReplaceDestination;

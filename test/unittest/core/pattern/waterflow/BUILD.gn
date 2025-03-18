@@ -24,6 +24,7 @@ ace_unittest("water_flow_test_original") {
   type = "new"
   sources = [
     "water_flow_misc_test.cpp",
+    "water_flow_property_test.cpp",
     "water_flow_regular_test.cpp",
     "water_flow_top_down_test.cpp",
   ]

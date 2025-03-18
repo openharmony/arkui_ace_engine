@@ -64,7 +64,7 @@ public:
      * @param safeArea The new navigation indictor safe area.
      * @return True if the incoming safe area is identical to the current one, false otherwise.
      */
-    bool CheckNavArea(const SafeAreaInsets& safeArea);
+    bool CheckNavSafeArea(const SafeAreaInsets& safeArea);
 
     /**
      * @brief Updates the navigation indictor safe area.
@@ -72,7 +72,7 @@ public:
      * @param safeArea The new navigation indictor safe area.
      * @return True if the system safe area was modified, false otherwise.
      */
-    bool UpdateNavArea(const SafeAreaInsets& safeArea);
+    bool UpdateNavSafeArea(const SafeAreaInsets& safeArea);
 
     /**
      * @brief Retrieves the system safe area insets.

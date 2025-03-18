@@ -14,6 +14,7 @@
  */
 
 #include "grid_test_ng.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {

@@ -30,6 +30,7 @@ public:
     ColorModeProcessor();
     ColorModeProcessor(const ColorMode colorMode)
     {
+        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
         if (colorMode != ColorMode::COLOR_MODE_UNDEFINED) {
             adapter_ = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
             CHECK_NULL_VOID(adapter_);
@@ -39,7 +40,7 @@ public:
     }
     ~ColorModeProcessor()
     {
-        CHECK_NULL_VOID(adapter_);
+        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && adapter_);
         if (colorMode_ != ColorMode::COLOR_MODE_UNDEFINED) {
             adapter_->UpdateColorMode(colorMode_);
         }

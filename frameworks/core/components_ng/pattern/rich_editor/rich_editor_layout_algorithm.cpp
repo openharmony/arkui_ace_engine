@@ -111,12 +111,12 @@ RefPtr<Paragraph> RichEditorLayoutAlgorithm::GetOrCreateParagraph(const std::lis
 
 void RichEditorLayoutAlgorithm::AppendNewLineSpan()
 {
-    static RefPtr<SpanItem> tailNewLineSpan = AceType::MakeRefPtr<SpanItem>();
     CHECK_NULL_VOID(!allSpans_.empty());
     auto lastSpan = allSpans_.back();
     CHECK_NULL_VOID(lastSpan);
     if (lastSpan->content.back() == u'\n') {
         std::list<RefPtr<SpanItem>> newGroup;
+        auto tailNewLineSpan = AceType::MakeRefPtr<SpanItem>();
         tailNewLineSpan->content = u"\n";
         tailNewLineSpan->SetNeedRemoveNewLine(true);
         CopySpanStyle(lastSpan, tailNewLineSpan);

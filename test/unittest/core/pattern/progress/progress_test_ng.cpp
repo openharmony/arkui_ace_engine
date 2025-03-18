@@ -1329,7 +1329,7 @@ HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest002, TestSize.Level1)
 HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest003, TestSize.Level1)
 {
     int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     /**
      * @tc.steps: step1. Create the progress modifier.
      */
@@ -1390,5 +1390,259 @@ HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest003, TestSize.Level1)
     EXPECT_EQ(progressModifier->value_->Get(), 10.0f);
 
     Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ProgressModelTest001
+ * @tc.desc: Test ResetColor and ResetBackgroundColor of linear progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelTest001, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    RefPtr<ProgressPaintProperty> paintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetColor(FRONT_COLOR);
+    modelNg.SetBackgroundColor(BG_COLOR);
+    EXPECT_EQ(paintProperty->GetColorValue(), FRONT_COLOR);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
+    modelNg.ResetColor();
+    modelNg.ResetBackgroundColor();
+    EXPECT_EQ(paintProperty->HasColor(), false);
+    EXPECT_EQ(paintProperty->HasBackgroundColor(), false);
+}
+
+/**
+ * @tc.name: ProgressModelTest002
+ * @tc.desc: Test ResetGradientColor and ResetBackgroundColor of ring progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelTest002, TestSize.Level1)
+{
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorEnd.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorEnd);
+    gradientColorStart.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorStart);
+
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
+    RefPtr<ProgressPaintProperty> paintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetGradientColor(gradient);
+    modelNg.SetBackgroundColor(BG_COLOR);
+    EXPECT_EQ(paintProperty->GetGradientColorValue(), gradient);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
+    modelNg.ResetGradientColor();
+    modelNg.ResetBackgroundColor();
+    EXPECT_EQ(paintProperty->HasGradientColor(), false);
+    EXPECT_EQ(paintProperty->HasBackgroundColor(), false);
+}
+
+/**
+ * @tc.name: ProgressModelTest003
+ * @tc.desc: Test Reset fuction of capsule progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelTest003, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+    RefPtr<ProgressPaintProperty> paintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetColor(FRONT_COLOR);
+    modelNg.SetBorderColor(BORDER_COLOR);
+    modelNg.SetBackgroundColor(BG_COLOR);
+    modelNg.SetFontColor(FRONT_COLOR);
+    EXPECT_EQ(paintProperty->GetColorValue(), FRONT_COLOR);
+    EXPECT_EQ(paintProperty->GetBorderColorValue(), BORDER_COLOR);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
+    EXPECT_EQ(paintProperty->GetTextColorValue(BG_COLOR), FRONT_COLOR);
+    modelNg.ResetColor();
+    modelNg.ResetBorderColor();
+    modelNg.ResetBackgroundColor();
+    modelNg.ResetFontColor();
+    EXPECT_EQ(paintProperty->HasColor(), false);
+    EXPECT_EQ(paintProperty->HasBorderColor(), false);
+    EXPECT_EQ(paintProperty->HasBackgroundColor(), false);
+    EXPECT_EQ(paintProperty->HasTextColor(), false);
+}
+
+/**
+ * @tc.name: ProgressModelTest004
+ * @tc.desc: Test ResetColor and ResetBackgroundColor of linear progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelTest004, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ProgressPaintProperty> paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetColor(frameNode, FRONT_COLOR);
+    modelNg.SetBackgroundColor(frameNode, BG_COLOR);
+    EXPECT_EQ(paintProperty->GetColorValue(), FRONT_COLOR);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
+    modelNg.ResetColor(frameNode);
+    modelNg.ResetBackgroundColor(frameNode);
+    EXPECT_EQ(paintProperty->HasColor(), false);
+    EXPECT_EQ(paintProperty->HasBackgroundColor(), false);
+}
+
+/**
+ * @tc.name: ProgressModelTest005
+ * @tc.desc: Test ResetGradientColor and ResetBackgroundColor of ring progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressModelTest005, TestSize.Level1)
+{
+    Gradient gradient;
+    GradientColor gradientColorEnd;
+    GradientColor gradientColorStart;
+    gradientColorEnd.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorStart.SetLinearColor(LinearColor(Color::WHITE));
+    gradientColorEnd.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorEnd);
+    gradientColorStart.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorStart);
+
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ProgressPaintProperty> paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetGradientColor(frameNode, gradient);
+    modelNg.SetBackgroundColor(frameNode, BG_COLOR);
+    EXPECT_EQ(paintProperty->GetGradientColorValue(), gradient);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), BG_COLOR);
+    modelNg.ResetGradientColor(frameNode);
+    modelNg.ResetBackgroundColor(frameNode);
+    EXPECT_EQ(paintProperty->HasGradientColor(), false);
+    EXPECT_EQ(paintProperty->HasBackgroundColor(), false);
+}
+
+/**
+ * @tc.name: ProgressPatternTest001
+ * @tc.desc: Test OnThemeScopeUpdate fuction of progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternTest001, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ProgressPaintProperty> paintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetColor(FRONT_COLOR);
+    modelNg.SetBackgroundColor(BG_COLOR);
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    modelNg.ResetColor();
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    modelNg.SetColor(FRONT_COLOR);
+    modelNg.ResetBackgroundColor();
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+}
+
+/**
+ * @tc.name: ProgressPatternTest002
+ * @tc.desc: Test OnThemeScopeUpdate fuction of progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternTest002, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
+    RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ProgressPaintProperty> paintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetColor(FRONT_COLOR);
+    modelNg.SetBackgroundColor(BG_COLOR);
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    modelNg.ResetColor();
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    modelNg.SetColor(FRONT_COLOR);
+    modelNg.ResetBackgroundColor();
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+}
+
+/**
+ * @tc.name: ProgressPatternTest003
+ * @tc.desc: Test OnThemeScopeUpdate fuction of progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternTest003, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_CAPSULE);
+    RefPtr<ProgressPattern> pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ProgressPaintProperty> paintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetColor(FRONT_COLOR);
+    modelNg.SetBackgroundColor(BG_COLOR);
+    modelNg.SetBorderColor(BORDER_COLOR);
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    modelNg.ResetColor();
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    modelNg.SetColor(FRONT_COLOR);
+    modelNg.ResetBackgroundColor();
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+
+    modelNg.SetBackgroundColor(BG_COLOR);
+    modelNg.ResetBorderColor();
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode_->GetThemeScopeId()));
+}
+
+/**
+ * @tc.name: ProgressThemeWrapperTest001
+ * @tc.desc: Test Builder fuction of ProgressThemeWrapper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressThemeWrapperTest001, TestSize.Level1)
+{
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
+    ASSERT_NE(themeConstants, nullptr);
+    auto progressThemeWrapper = ProgressThemeWrapper::WrapperBuilder().BuildWrapper(themeConstants);
+    EXPECT_NE(progressThemeWrapper, nullptr);
+    auto progressTheme = AceType::DynamicCast<ProgressTheme>(progressThemeWrapper);
+    ASSERT_NE(progressTheme, nullptr);
+
+    std::vector<Color> colors;
+    TestProperty testProperty;
+    colors.reserve(TokenColors::TOTAL_NUMBER);
+    for (int i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
+        colors.push_back(Color(testProperty.colors_[i]));
+    }
+    auto themeColors = AceType::MakeRefPtr<TokenColors>();
+    themeColors->SetColors(std::move(colors));
+    testProperty.tokenColors_ = themeColors;
+    auto tokenTheme = AceType::MakeRefPtr<TokenTheme>(TOKEN_THEME_ID);
+
+    EXPECT_NE(progressTheme->GetLoadingColor(), colors[TokenColors::ICON_SECONDARY]);
+    EXPECT_NE(progressTheme->GetCapsuleBgColor(), colors[TokenColors::COMP_BACKGROUND_TERTIARY]);
+    EXPECT_NE(progressTheme->GetRingProgressBgColor(), colors[TokenColors::COMP_BACKGROUND_TERTIARY]);
+    EXPECT_NE(progressTheme->GetTrackBgColor(), colors[TokenColors::COMP_BACKGROUND_TERTIARY]);
+    EXPECT_NE(progressTheme->GetCapsuleSelectColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
+    EXPECT_NE(progressTheme->GetTrackSelectedColor(), colors[TokenColors::BACKGROUND_EMPHASIZE]);
+    EXPECT_NE(progressTheme->GetBorderColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
+
+    tokenTheme->SetColors(testProperty.tokenColors_);
+    ASSERT_NE(tokenTheme, nullptr);
+    progressThemeWrapper->ApplyTokenTheme(*tokenTheme);
+    EXPECT_EQ(progressTheme->GetLoadingColor(), colors[TokenColors::ICON_SECONDARY]);
+    EXPECT_EQ(progressTheme->GetCapsuleBgColor(), colors[TokenColors::COMP_BACKGROUND_TERTIARY]);
+    EXPECT_EQ(progressTheme->GetRingProgressBgColor(), colors[TokenColors::COMP_BACKGROUND_TERTIARY]);
+    EXPECT_EQ(progressTheme->GetTrackBgColor(), colors[TokenColors::COMP_BACKGROUND_TERTIARY]);
+    EXPECT_EQ(progressTheme->GetCapsuleSelectColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
+    EXPECT_EQ(progressTheme->GetTrackSelectedColor(), colors[TokenColors::BACKGROUND_EMPHASIZE]);
+    EXPECT_EQ(progressTheme->GetBorderColor(), colors[TokenColors::COMP_EMPHASIZE_SECONDARY]);
 }
 } // namespace OHOS::Ace::NG

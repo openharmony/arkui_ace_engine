@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import { accessibility } from '@kit.AccessibilityKit';
 import { KeyCode } from '@kit.InputKit';
+import { i18n } from '@kit.LocalizationKit';
 
 class CustomThemeImpl implements CustomTheme {
   public colors?: CustomColors;
@@ -61,12 +62,8 @@ const FADEOUT_ENABLE: string = 'true';
 
 // 'sys.float.alert_container_max_width'
 const MAX_DIALOG_WIDTH: number = getNumberByResourceId(125831042, 400);
-// 'sys.float.alert_right_padding_horizontal'
-const BUTTON_HORIZONTAL_MARGIN: number = getNumberByResourceId(125831054, 16);
 // 'sys.float.padding_level8'
 const BUTTON_HORIZONTAL_PADDING: number = getNumberByResourceId(125830927, 16);
-// 'sys.float.alert_button_horizontal_space'
-const BUTTON_HORIZONTAL_SPACE: number = getNumberByResourceId(125831051, 8);
 // 'sys.float.Body_L'
 const BODY_L = getNumberByResourceId(125830970, 16);
 // 'sys.float.Body_M'
@@ -78,6 +75,12 @@ const TITLE_S = getNumberByResourceId(125830966, 20);
 // 'sys.float.padding_level8'
 const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
 
+const BUTTON_HORIZONTAL_MARGIN = lazyInit<number>(() => {
+  return getLengthMetricsByResource($r('sys.float.alert_right_padding_horizontal'), 16);
+});
+const BUTTON_HORIZONTAL_SPACE = lazyInit<number>(() => {
+  return getLengthMetricsByResource($r('sys.float.alert_button_horizontal_space'), 8);
+});
 const BUTTON_MIN_FONT_SIZE = lazyInit<number>(() => {
   return getLengthMetricsByResource($r('sys.float.dialog_button_font_min_size'), 9);
 });
@@ -156,7 +159,7 @@ export struct TipsDialog {
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlignment: TextAlign = TextAlign.Center;
+  @State textAlignment: TextAlign = TextAlign.Start;
   marginOffset: number = 0;
   // the controller of content area scroll
   contentScroller: Scroller = new Scroller();
@@ -165,6 +168,11 @@ export struct TipsDialog {
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State minContentHeight: number = 160;
+  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
+    if (this.content) {
+      this.textAlignment = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
+    }
+  }
   imageIndex: number = 0;
   textIndex: number = 1;
   checkBoxIndex: number = 2;
@@ -190,7 +198,8 @@ export struct TipsDialog {
       title: this.title,
       content: this.content,
       checkTips: this.checkTips,
-      minContentHeight: this.minContentHeight
+      minContentHeight: this.minContentHeight,
+      updateTextAlign: this.updateTextAlign,
     }) {
       ForEach([this.imageIndex, this.textIndex, this.checkBoxIndex], (index: number) => {
         if (index === this.imageIndex) {
@@ -367,6 +376,8 @@ struct TipsDialogContentLayout {
   title?: ResourceStr | null = null;
   content?: ResourceStr | null = null;
   checkTips?: ResourceStr | null = null;
+  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
+  };
   @Link minContentHeight: number;
   @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
   imageIndex: number = 0;
@@ -420,6 +431,7 @@ struct TipsDialogContentLayout {
 
     if (this.title !== null || this.content !== null) {
       let textChild: Measurable = children[this.textIndex];
+      this.updateTextAlign(sizeResult.width);
       let contentMaxHeight: number = Number(constraint.maxHeight) - imageMeasureResult.height - checkBoxHeight;
       let contentConstraint: ConstraintSizeOptions =
         {
@@ -504,6 +516,7 @@ export struct SelectDialog {
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
+                      .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
@@ -511,8 +524,6 @@ export struct SelectDialog {
                       .id(String(index))
                       .focusable(false)
                       .accessibilityLevel('no')
-                      .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
-                      .radioStyle({ uncheckedBorderColor: Color.Transparent })
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -648,6 +659,8 @@ struct ConfirmDialogContentLayout {
   textIndex: number = 0;
   checkboxIndex: number = 1;
   @Link minContentHeight: number;
+  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
+  };
 
   @Builder
   doNothingBuilder() {
@@ -673,6 +686,7 @@ struct ConfirmDialogContentLayout {
     if (children.length < childrenSize) {
       return sizeResult;
     }
+    this.updateTextAlign(sizeResult.width);
     let height: number = 0;
     let checkboxChild: Measurable = children[this.checkboxIndex];
     let checkboxConstraint: ConstraintSizeOptions = {
@@ -715,12 +729,17 @@ export struct ConfirmDialog {
   onCheckedChange?: Callback<boolean>;
   contentScroller: Scroller = new Scroller();
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlign: TextAlign = TextAlign.Center;
+  @State textAlign: TextAlign = TextAlign.Start;
   marginOffset: number = 0;
   @State fontSizeScale: number = 1;
   @State minContentHeight: number = MIN_CONTENT_HEIGHT;
   textIndex: number = 0;
   checkboxIndex: number = 1;
+  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
+    if (this.content) {
+      this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
+    }
+  }
 
   @Builder
   textBuilder(): void {
@@ -804,7 +823,7 @@ export struct ConfirmDialog {
 
   @Builder
   buildContent(): void {
-    ConfirmDialogContentLayout({ minContentHeight: this.minContentHeight }) {
+    ConfirmDialogContentLayout({ minContentHeight: this.minContentHeight, updateTextAlign: this.updateTextAlign }) {
       ForEach([this.textIndex, this.checkboxIndex], (index: number) => {
         if (index === this.textIndex) {
           WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
@@ -868,7 +887,7 @@ export struct AlertDialog {
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlign: TextAlign = TextAlign.Center;
+  @State textAlign: TextAlign = TextAlign.Start;
   // the controller of content area
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
@@ -909,6 +928,9 @@ export struct AlertDialog {
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
           .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
           .textAlign(this.textAlign)
+          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+            this.updateTextAlign(Number(newValue.width));
+          })
           .onKeyEvent((event: KeyEvent) => {
             if (event) {
               resolveKeyEvent(event, this.contentScroller);
@@ -926,6 +948,10 @@ export struct AlertDialog {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
     this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.initButtons();
+  }
+
+  private updateTextAlign(maxWidth: number): void {
+    this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
   }
 
   private initButtons(): void {
@@ -1151,7 +1177,7 @@ struct CustomDialogContentComponent {
     let maxHeight: number = Number(constraint.maxHeight);
     this.fontSizeScale = this.updateFontScale();
     this.updateFontSize();
-    this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
+    this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN() * 2);
     this.titleMinHeight = this.getTitleAreaMinHeight();
     let height: number = 0;
     children.forEach((child) => {
@@ -1272,7 +1298,7 @@ struct CustomDialogContentComponent {
           .minFontSize(this.primaryTitleMinFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
       }
@@ -1292,7 +1318,7 @@ struct CustomDialogContentComponent {
           .minFontSize(this.secondaryTitleMinFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
       }
@@ -1484,7 +1510,7 @@ struct CustomDialogContentComponent {
               .color(this.getDividerColor())
               .vertical(true)
           }
-          .width(BUTTON_HORIZONTAL_SPACE * 2)
+          .width(BUTTON_HORIZONTAL_SPACE() * 2)
           .justifyContent(FlexAlign.Center)
 
           this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
@@ -1569,8 +1595,8 @@ struct CustomDialogContentComponent {
         return true;
       }
       let isVertical: boolean = false;
-      let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN -
-        BUTTON_HORIZONTAL_SPACE - 2 * BUTTON_HORIZONTAL_PADDING);
+      let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
+        BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
       this.buttons.forEach((button) => {
         let contentSize: SizeOptions = measure.measureTextSize({
           textContent: button.value,
@@ -1760,6 +1786,43 @@ function getAccessibilityText(resource: ResourceStr, selected: boolean): string 
 }
 
 /**
+ * get Text Align
+ *
+ * @param maxWidth maxWidth
+ * @param content textContent
+ * @param fontSize fontSize
+ * @returns textAlign
+ */
+function getTextAlign(maxWidth: number, content: ResourceStr, fontSize: number | string | Resource): TextAlign {
+  let contentSize: SizeOptions = measure.measureTextSize({
+    textContent: content,
+    fontSize: fontSize,
+    constraintWidth: maxWidth,
+  });
+  let oneLineSize: SizeOptions = measure.measureTextSize({
+    textContent: content,
+    fontSize: fontSize,
+  });
+  if (getTextHeight(contentSize) <= getTextHeight(oneLineSize)) {
+    return TextAlign.Center;
+  }
+  return TextAlign.Start;
+}
+
+/**
+ * get text height
+ *
+ * @param textSize textSize
+ * @returns text height
+ */
+function getTextHeight(textSize: SizeOptions): number {
+  if (textSize && textSize.height !== null && textSize.height !== undefined) {
+    return Number(textSize.height);
+  }
+  return 0;
+}
+
+/**
  * resolve content area keyEvent
  *
  * @param event keyEvent
@@ -1900,7 +1963,7 @@ export struct PopoverDialog {
       try {
         let screenSize: display.Display = display.getDefaultDisplaySync();
         let screenWidth: number = px2vp(screenSize.width);
-        if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+        if (screenWidth - BUTTON_HORIZONTAL_MARGIN() - BUTTON_HORIZONTAL_MARGIN() > MAX_DIALOG_WIDTH) {
           this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
         } else {
           this.popover.width = this.dialogWidth;

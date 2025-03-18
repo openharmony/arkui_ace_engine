@@ -26,6 +26,13 @@ struct CJBadgeStyle {
     double fontSize;
     double badgeSize;
     uint32_t badgeColor;
+};
+
+struct CJBadgeStyleV2 {
+    uint32_t color;
+    double fontSize;
+    double badgeSize;
+    uint32_t badgeColor;
     uint32_t fontWeight;
     uint32_t borderColor;
     double borderWidth;
@@ -33,7 +40,10 @@ struct CJBadgeStyle {
 };
 
 CJ_EXPORT void FfiOHOSAceFrameworkBadgeCreate(int32_t count, CJBadgeStyle style, int32_t position, int32_t maxCount);
+CJ_EXPORT void FfiOHOSAceFrameworkBadgeCreateV2(
+    int32_t count, CJBadgeStyleV2 style, int32_t position, int32_t maxCount);
 CJ_EXPORT void FfiOHOSAceFrameworkBadgeCreateText(const char* value, CJBadgeStyle style, int32_t position);
+CJ_EXPORT void FfiOHOSAceFrameworkBadgeCreateTextV2(const char* value, CJBadgeStyleV2 style, int32_t position);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_BADGE_FFI_H

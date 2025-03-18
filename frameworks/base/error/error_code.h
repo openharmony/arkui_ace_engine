@@ -83,10 +83,11 @@ constexpr int32_t ERROR_CODE_AI_ANALYSIS_UNSUPPORTED = 110001;
 constexpr int32_t ERROR_CODE_AI_ANALYSIS_IS_ONGOING = 110002;
 constexpr int32_t ERROR_CODE_AI_ANALYSIS_IS_STOPPED = 110003;
 
-// Drag event error code
+// Drag event error code (190001 ~ 191000)
 constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_FOUND = 190001;  // GetData failed, data not found.
 constexpr int32_t ERROR_CODE_DRAG_DATA_ERROR = 190002;      // GetData failed, data error.
 constexpr int32_t ERROR_CODE_DRAG_DATA_NOT_ONDROP = 190003; // Operation no allowed for current pharse.
+constexpr int32_t ERROR_CODE_DRAG_OPERATION_FAILED = 190004; // Operation failed.
 
 // custom dialog error code
 constexpr int32_t ERROR_CODE_DIALOG_CONTENT_ERROR = 103301;
@@ -109,12 +110,12 @@ constexpr int32_t ERROR_CODE_TARGET_ID_NOT_EXIST = 120004;
 constexpr int32_t ERROR_CODE_TARGET_NOT_ON_MAIN_TREE = 120005;
 constexpr int32_t ERROR_CODE_TARGET_NOT_PAGE_CHILD = 120006;
 
-// RequestFocus error code
+// RequestFocus error code (150001 ~ 151000)
 constexpr int32_t ERROR_CODE_NON_FOCUSABLE = 150001;
 constexpr int32_t ERROR_CODE_NON_FOCUSABLE_ANCESTOR = 150002;
 constexpr int32_t ERROR_CODE_NON_EXIST = 150003;
 
-// ComponentSnapshot error code
+// ComponentSnapshot error code (160001 ~ 161000), 1610001 ~ 163000 reserved
 constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_IMAGE_LOAD_ERROR = 160001;
 constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002;
 
@@ -122,7 +123,7 @@ constexpr int32_t ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002;
 constexpr int32_t ERROR_CODE_FROM_HTML_CONVERT_ERROR = 170001;
 constexpr int32_t ERROR_CODE_STYLED_STRING_CONVERT_ERROR = 170002;
 
-// Gesture error code
+// Gesture error code (180001 ~ 181000)
 constexpr int32_t ERROR_CODE_NON_SCROLLABLE_CONTAINER = 180001;
 constexpr int32_t ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH = 180002;
 } // namespace OHOS::Ace

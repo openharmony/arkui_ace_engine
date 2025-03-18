@@ -2009,11 +2009,11 @@ HWTEST_F(SelectOverlayManagerTestNg, ContentHandleGlobalEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsTouchInSelectOverlayArea
+ * @tc.name: IsTouchInSelectOverlayArea001
  * @tc.desc: test IsTouchInSelectOverlayArea
  * @tc.type: FUNC
  */
-HWTEST_F(SelectOverlayManagerTestNg, IsTouchInSelectOverlayArea, TestSize.Level1)
+HWTEST_F(SelectOverlayManagerTestNg, IsTouchInSelectOverlayArea001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. IsTouchInSelectOverlayArea
@@ -2023,6 +2023,33 @@ HWTEST_F(SelectOverlayManagerTestNg, IsTouchInSelectOverlayArea, TestSize.Level1
     auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
     PointF point { 9.0f, 12.0f };
     content.SetHolder(holder);
+    content.IsTouchInSelectOverlayArea(point);
+    EXPECT_FALSE(content.IsOpen());
+}
+
+/**
+ * @tc.name: IsTouchInSelectOverlayArea002
+ * @tc.desc: test IsTouchInSelectOverlayArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, IsTouchInSelectOverlayArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto holder = AceType::MakeRefPtr<SelectOverlayHolder>();
+    PointF point { 9.0f, 12.0f };
+    content.SetHolder(holder);
+
+    /**
+     * @tc.steps: step2. call IsTouchInSelectOverlayArea
+     */
     content.IsTouchInSelectOverlayArea(point);
     EXPECT_FALSE(content.IsOpen());
 }

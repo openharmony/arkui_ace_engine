@@ -38,6 +38,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string ITEM_CONTENT = "item";
+constexpr float DEFAULT_HEIGHT = 2.0f;
+constexpr float DEFAULT_SIZE = 4.0f;
+constexpr float DEFAULT_WIDTH = 20.0f;
 
 RefPtr<FrameNode> CreateMenuItem(std::string content)
 {
@@ -54,12 +57,24 @@ RefPtr<FrameNode> CreateMenuItemGroup()
         V2::MENU_ITEM_GROUP_ETS_TAG, 0, []() { return AceType::MakeRefPtr<MenuItemGroupPattern>(); });
     return menuItemGroup;
 }
+
+RefPtr<LayoutWrapperNode> CreateLayoutWrapper(RefPtr<FrameNode>& node)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    if (geometryNode == nullptr) {
+        return nullptr;
+    }
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(node, geometryNode, node->GetLayoutProperty());
+    layoutWrapper->SetLayoutAlgorithm(node->GetLayoutAlgorithm());
+    return layoutWrapper;
+}
 } // namespace
 
 class MenuDividerTestNG : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    PaintWrapper* GetPaintWrapper(RefPtr<FrameNode> node);
 };
 
 void MenuDividerTestNG::SetUpTestCase()
@@ -81,6 +96,15 @@ void MenuDividerTestNG::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+PaintWrapper* MenuDividerTestNG::GetPaintWrapper(RefPtr<FrameNode> node)
+{
+    auto renderContext = node->GetRenderContext();
+    auto geometryNode = node->GetGeometryNode();
+    auto paintProperty = node->GetPaintProperty<PaintProperty>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    return paintWrapper;
 }
 
 /**
@@ -136,14 +160,14 @@ HWTEST_F(MenuDividerTestNG, MenuDividerTest002, TestSize.Level1)
     menuPattern->UpdateMenuItemDivider();
     EXPECT_EQ(bottomDivider->GetParent(), nullptr);
     /**
-     * @tc.steps: step3. make is select, call UpdateMenuItemDivider
+     * @tc.steps: step4. make is select, call UpdateMenuItemDivider
      * @tc.expected: the bottom divider not have parent
      */
     menuPattern->isSelectMenu_ = true;
     menuPattern->UpdateMenuItemDivider();
     EXPECT_EQ(bottomDivider->GetParent(), nullptr);
     /**
-     * @tc.steps: step3. push option into menu, call UpdateMenuItemDivider
+     * @tc.steps: step5. push option into menu, call UpdateMenuItemDivider
      * @tc.expected: the bottom divider not have parent
      */
     menuPattern->options_.push_back(firstItem);
@@ -236,7 +260,7 @@ HWTEST_F(MenuDividerTestNG, MenuDividerTest004, TestSize.Level1)
     menuPattern->options_.push_back(secondItem);
     menuPattern->UpdateMenuItemDivider();
     /**
-     * @tc.steps: second menu item hover
+     * @tc.steps: step4. second menu item hover
      * @tc.expected: bottom divider as top divider, the hover status is true
      */
     secondPattern->UpdateDividerHoverStatus(true);
@@ -288,7 +312,7 @@ HWTEST_F(MenuDividerTestNG, MenuDividerTest005, TestSize.Level1)
     menuPattern->options_.push_back(secondItem);
     menuPattern->UpdateMenuItemDivider();
     /**
-     * @tc.steps: second menu item hover
+     * @tc.steps: step4. second menu item hover
      * @tc.expected: bottom divider as top divider, the hover status is true
      */
     secondPattern->UpdateDividerSelectedStatus(true);
@@ -442,5 +466,179 @@ HWTEST_F(MenuDividerTestNG, MenuDividerTest008, TestSize.Level1)
     EXPECT_EQ(bottomDivider->GetParent(), nullptr);
     bottomDivider = secondPattern->GetBottomDivider();
     EXPECT_NE(bottomDivider->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: MenuDividerTest009
+ * @tc.desc: test the MenuDividerLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuDividerTestNG, MenuDividerTest009, TestSize.Level1)
+{
+    auto menuItem = CreateMenuItem(ITEM_CONTENT);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto bottomDivider = menuItemPattern->GetBottomDivider();
+    EXPECT_NE(bottomDivider, nullptr);
+    auto dividerPattern = bottomDivider->GetPattern<MenuDividerPattern>();
+    ASSERT_NE(dividerPattern, nullptr);
+    auto layoutAlgorithm = dividerPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto dividerLayoutAlgorithm = AceType::DynamicCast<MenuDividerLayoutAlgorithm>(layoutAlgorithm);
+    auto property = bottomDivider->GetPaintProperty<MenuDividerPaintProperty>();
+    property->UpdateStrokeWidth(Dimension(DEFAULT_HEIGHT, DimensionUnit::INVALID));
+    auto layoutWrapper = CreateLayoutWrapper(bottomDivider);
+    LayoutConstraintF parentLayoutConstraint;
+    auto size = dividerLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(size.value().Height(), 0.0f);
+    property->UpdateStrokeWidth(Dimension(DEFAULT_HEIGHT, DimensionUnit::PX));
+    size = dividerLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(size.value().Height(), DEFAULT_HEIGHT);
+}
+
+/**
+ * @tc.name: MenuDividerTest010
+ * @tc.desc: test the MenuDividerPattern CreateNodePaintMethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuDividerTestNG, MenuDividerTest010, TestSize.Level1)
+{
+    auto bottomDivider = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    auto dividerPattern = bottomDivider->GetPattern<MenuDividerPattern>();
+    ASSERT_NE(dividerPattern, nullptr);
+    auto paintMethodOld = dividerPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethodOld, nullptr);
+    auto paintMethodNew = dividerPattern->CreateNodePaintMethod();
+    EXPECT_EQ(paintMethodOld, paintMethodNew);
+    auto modifierOld = paintMethodNew->GetContentModifier(GetPaintWrapper(bottomDivider));
+    ASSERT_NE(modifierOld, nullptr);
+    auto modifierNew = paintMethodNew->GetContentModifier(GetPaintWrapper(bottomDivider));
+    EXPECT_EQ(modifierOld, modifierNew);
+}
+
+/**
+ * @tc.name: MenuDividerTest011
+ * @tc.desc: test the MenuDividerPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuDividerTestNG, MenuDividerTest011, TestSize.Level1)
+{
+    auto bottomDivider = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    auto dividerPattern = bottomDivider->GetPattern<MenuDividerPattern>();
+    ASSERT_NE(dividerPattern, nullptr);
+    auto layoutWrapper = CreateLayoutWrapper(bottomDivider);
+    DirtySwapConfig config;
+    layoutWrapper->skipMeasureContent_ = true;
+    config.skipMeasure = true;
+    EXPECT_FALSE(dividerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    config.skipMeasure = false;
+    EXPECT_FALSE(dividerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    layoutWrapper->skipMeasureContent_ = false;
+    EXPECT_TRUE(dividerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+}
+
+/**
+ * @tc.name: MenuDividerTest012
+ * @tc.desc: test the MenuDividerModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuDividerTestNG, MenuDividerTest012, TestSize.Level1)
+{
+    auto modifier = AceType::MakeRefPtr<MenuDividerModifier>(0.0f, Color::BLACK);
+    Testing::MockCanvas canvas;
+
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(2);
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext context = { canvas, DEFAULT_WIDTH, DEFAULT_HEIGHT };
+    modifier->SetDefaultShow(true);
+    modifier->onDraw(context);
+    modifier->SetDefaultShow(false);
+    modifier->onDraw(context);
+    modifier->SetSelected(true);
+    modifier->onDraw(context);
+    modifier->SetHover(true);
+    modifier->onDraw(context);
+    modifier->SetPress(true);
+    modifier->onDraw(context);
+}
+
+/**
+ * @tc.name: MenuDividerTest013
+ * @tc.desc: test the MenuDividerPaintMethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuDividerTestNG, MenuDividerTest013, TestSize.Level1)
+{
+    auto bottomDivider = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    auto dividerPattern = bottomDivider->GetPattern<MenuDividerPattern>();
+    ASSERT_NE(dividerPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<MenuDividerPaintMethod>(dividerPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    auto paintWrapper = GetPaintWrapper(bottomDivider);
+    auto modifier = paintMethod->GetContentModifier(paintWrapper);
+    ASSERT_NE(modifier, nullptr);
+    auto paintProperty = bottomDivider->GetPaintProperty<MenuDividerPaintProperty>();
+    paintProperty->UpdateStrokeWidth(Dimension(DEFAULT_HEIGHT, DimensionUnit::INVALID));
+    paintMethod->UpdateModfierParams(paintWrapper);
+    EXPECT_EQ(paintMethod->dividerModifier_->strokeWidth_->Get(), 0.0f);
+    paintProperty->UpdateStrokeWidth(Dimension(DEFAULT_HEIGHT, DimensionUnit::PX));
+    paintMethod->UpdateModfierParams(paintWrapper);
+    EXPECT_EQ(paintMethod->dividerModifier_->strokeWidth_->Get(), DEFAULT_HEIGHT);
+    paintProperty->UpdateDividerColor(Color::BLACK);
+    paintMethod->isOption_ = true;
+    paintMethod->UpdateModfierParams(paintWrapper);
+    EXPECT_EQ(paintMethod->dividerModifier_->dividerColor_->Get(), Color::BLACK);
+    paintMethod->isOption_ = false;
+    paintProperty->UpdateDividerColor(Color::FOREGROUND);
+    paintMethod->UpdateModfierParams(paintWrapper);
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_EQ(paintMethod->dividerModifier_->dividerColor_->Get(), selectTheme->GetLineColor());
+}
+
+/**
+ * @tc.name: MenuDividerTest014
+ * @tc.desc: test the MenuDividerPaintMethod
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuDividerTestNG, MenuDividerTest014, TestSize.Level1)
+{
+    auto bottomDivider = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    auto dividerPattern = bottomDivider->GetPattern<MenuDividerPattern>();
+    ASSERT_NE(dividerPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<MenuDividerPaintMethod>(dividerPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    auto paintWrapper = GetPaintWrapper(bottomDivider);
+    auto modifier = paintMethod->GetContentModifier(paintWrapper);
+    ASSERT_NE(modifier, nullptr);
+    auto paintProperty = bottomDivider->GetPaintProperty<MenuDividerPaintProperty>();
+    auto startMargin = 0.0f;
+    auto endMargin = 0.0f;
+    paintProperty->UpdateStartMargin(Dimension(-1, DimensionUnit::PX));
+    paintProperty->UpdateEndMargin(Dimension(-1, DimensionUnit::PX));
+    paintMethod->GetDividerMargin(startMargin, endMargin, paintProperty, SizeF(DEFAULT_SIZE, DEFAULT_SIZE));
+    EXPECT_EQ(startMargin, 0.0f);
+    EXPECT_EQ(endMargin, 0.0f);
+    paintProperty->UpdateStartMargin(Dimension(DEFAULT_SIZE, DimensionUnit::PX));
+    paintProperty->UpdateEndMargin(Dimension(DEFAULT_SIZE, DimensionUnit::PX));
+    paintMethod->GetDividerMargin(startMargin, endMargin, paintProperty, SizeF(DEFAULT_SIZE, DEFAULT_SIZE));
+    EXPECT_EQ(startMargin, 0.0f);
+    EXPECT_EQ(endMargin, 0.0f);
+    paintProperty->UpdateStartMargin(Dimension(DEFAULT_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateEndMargin(Dimension(DEFAULT_WIDTH, DimensionUnit::PX));
+    paintMethod->GetDividerMargin(startMargin, endMargin, paintProperty, SizeF(DEFAULT_SIZE, DEFAULT_SIZE));
+    EXPECT_EQ(startMargin, 0.0f);
+    EXPECT_EQ(endMargin, 0.0f);
+    paintProperty->UpdateStartMargin(Dimension(DEFAULT_HEIGHT, DimensionUnit::PX));
+    paintProperty->UpdateEndMargin(Dimension(DEFAULT_HEIGHT, DimensionUnit::PX));
+    paintMethod->GetDividerMargin(startMargin, endMargin, paintProperty, SizeF(DEFAULT_SIZE, DEFAULT_SIZE));
+    EXPECT_EQ(startMargin, DEFAULT_HEIGHT);
+    EXPECT_EQ(endMargin, DEFAULT_HEIGHT);
 }
 } // namespace OHOS::Ace::NG

@@ -15,13 +15,8 @@
 
 #include "core/components/font/rosen_font_collection.h"
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/src/minikin/FontFamily.h"
-#include "txt/src/minikin/FontLanguageListCache.h"
-#else
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "rosen_text/font_collection.h"
-#endif
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkTypeface.h"
 #endif
@@ -31,32 +26,6 @@ namespace OHOS::Ace {
 
 RosenFontCollection RosenFontCollection::instance;
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
-{
-    std::call_once(fontFlag_, [this]() {
-        auto rosenCollection = RSFontCollection::GetInstance(false);
-        auto collectionTxtBase = rosenCollection->GetFontCollection();
-        auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
-        if (collectionTxt) {
-            fontCollection_ = collectionTxt->GetFontCollection();
-            dynamicFontManager_ = collectionTxt->GetDynamicFontManager();
-        } else {
-            TAG_LOGW(AceLogTag::ACE_FONT, "Fail to get font Follection!");
-        }
-    });
-    return fontCollection_;
-}
-
-#ifndef USE_ROSEN_DRAWING
-sk_sp<txt::DynamicFontManager> RosenFontCollection::GetDynamicFontManager()
-#else
-std::shared_ptr<RSFontMgr> RosenFontCollection::GetDynamicFontManager()
-#endif
-{
-    return dynamicFontManager_;
-}
-#else
 std::shared_ptr<Rosen::FontCollection> RosenFontCollection::GetFontCollection()
 {
     std::call_once(fontFlag_, [this]() {
@@ -65,23 +34,12 @@ std::shared_ptr<Rosen::FontCollection> RosenFontCollection::GetFontCollection()
     });
     return fontCollection_;
 }
-#endif
 
 void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName)
 {
     std::call_once(fontFlag_, [this]() {
-#ifndef USE_GRAPHIC_TEXT_GINE
-        auto rosenCollection = RSFontCollection::GetInstance(false);
-        auto collectionTxtBase = rosenCollection->GetFontCollection();
-        auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
-        if (collectionTxt) {
-            fontCollection_ = collectionTxt->GetFontCollection();
-            dynamicFontManager_ = collectionTxt->GetDynamicFontManager();
-        }
-#else
         auto fontCollection = AceType::DynamicCast<NG::TxtFontCollection>(NG::FontCollection::Current());
         fontCollection_ = fontCollection->GetRawFontCollection();
-#endif
     });
 
     if (families_.find(familyName) != families_.end()) {
@@ -91,121 +49,99 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
     families_.emplace(familyName);
 
     if (fontCollection_) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-#ifndef USE_ROSEN_DRAWING
-        std::unique_ptr<SkStreamAsset> font_stream = std::make_unique<SkMemoryStream>(fontData, length, true);
-        sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(std::move(font_stream));
-        txt::TypefaceFontAssetProvider& font_provider = dynamicFontManager_->font_provider();
-        if (familyName.empty()) {
-            font_provider.RegisterTypeface(typeface);
-        } else {
-            font_provider.RegisterTypeface(typeface, familyName);
-        }
-        fontCollection_->ClearFontFamilyCache();
-#else
-        TAG_LOGW(AceLogTag::ACE_FONT, "Drawing is not supported dynamic font");
-#endif
-#else
         TAG_LOGI(AceLogTag::ACE_FONT, "LoadFontFromList familyName:%{public}s, length:%{public}d", familyName.c_str(),
             static_cast<int32_t>(length));
         fontCollection_->LoadFont(familyName, fontData, length);
-#endif
     }
 }
 
 void RosenFontCollection::InitializeFontCollection()
 {
     std::call_once(fontFlag_, [this]() {
-#ifndef USE_GRAPHIC_TEXT_GINE
-    auto rosenCollection = RSFontCollection::GetInstance(false);
-    auto collectionTxtBase = rosenCollection->GetFontCollection();
-    auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
-    if (collectionTxt) {
-        fontCollection_ = collectionTxt->GetFontCollection();
-        dynamicFontManager_ = collectionTxt->GetDynamicFontManager();
-    }
-#else
     auto fontCollection = AceType::DynamicCast<NG::TxtFontCollection>(NG::FontCollection::Current());
     fontCollection_ = fontCollection->GetRawFontCollection();
-#endif
     });
 }
 
-void RosenFontCollection::LoadThemeFont(const char* fontFamily, std::unique_ptr<char[]> buffer, size_t size)
+void RosenFontCollection::LoadThemeFont(
+    const char* fontFamily, const std::vector<std::pair<const uint8_t*, size_t>>& data)
 {
     const std::string familyName = fontFamily;
-    const uint8_t* data = reinterpret_cast<uint8_t*>(buffer.get());
-    if (fontCollection_) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-#ifndef USE_ROSEN_DRAWING
-        std::unique_ptr<SkStreamAsset> font_stream = std::make_unique<SkMemoryStream>(data, size, true);
-        sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(std::move(font_stream));
-        txt::TypefaceFontAssetProvider& font_provider = dynamicFontManager_->font_provider();
-        if (familyName.empty()) {
-            font_provider.RegisterTypeface(typeface);
-        } else {
-            font_provider.RegisterTypeface(typeface, familyName);
-        }
-        fontCollection_->ClearFontFamilyCache();
-#else
-        TAG_LOGW(AceLogTag::ACE_FONT, "Drawing is not supported");
-#endif
-#else
-        fontCollection_->LoadThemeFont("", nullptr, 0);
-        TAG_LOGI(AceLogTag::ACE_FONT, "LoadThemeFont [%{public}s:%{public}d]", familyName.c_str(),
-            static_cast<int32_t>(size));
-        fontCollection_->LoadThemeFont(familyName, data, size);
-#endif
+    CHECK_NULL_VOID(fontCollection_);
+    fontCollection_->ClearThemeFont();
+    TAG_LOGI(AceLogTag::ACE_FONT, "LoadThemeFont:%{public}s", familyName.c_str());
+    auto typeface = fontCollection_->LoadThemeFont(familyName, data);
+    if (typeface.size() != data.size()) {
+        fontCollection_->ClearThemeFont();
+        TAG_LOGW(AceLogTag::ACE_FONT, "LoadThemeFont failed, familyName:%{public}s", familyName.c_str());
     }
 }
 
-void RosenFontCollection::LoadFontFamily(const char* fontFamily, const char* familySrc)
+void RosenFontCollection::LoadFontFamily(const char* fontFamily, const std::vector<std::string>& familySrc)
 {
-    const std::string path = familySrc;
-    if (currentFamily_ == path) {
+    if (currentFamily_.size() == familySrc.size() &&
+        std::equal(currentFamily_.begin(), currentFamily_.end(), familySrc.begin())) {
         TAG_LOGI(AceLogTag::ACE_FONT, "This font has already been registered.");
         return;
     }
     InitializeFontCollection();
-    auto ret = StdFilesystemExists(path);
-    if (!ret) {
-        TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily %{public}s not exist", path.c_str());
+    for (const auto& path : familySrc) {
+        auto ret = StdFilesystemExists(path);
+        if (!ret) {
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily %{public}s not exist", path.c_str());
+            return;
+        }
+    }
+    std::vector<std::pair<std::unique_ptr<char[]>, size_t>> buffers;
+    if (!LoadFontBuffers(familySrc, buffers)) {
         return;
     }
+    currentFamily_ = familySrc;
+    std::vector<std::pair<const uint8_t*, size_t>> fontData;
+    for (const auto& buffer : buffers) {
+        fontData.emplace_back(reinterpret_cast<const uint8_t*>(buffer.first.get()), buffer.second);
+    }
+    LoadThemeFont(fontFamily, fontData);
+}
 
-    std::ifstream ifs(path, std::ios_base::in);
-    if (!ifs.is_open()) {
-        TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily file open fail, %{public}s", path.c_str());
-        return;
-    }
-    ifs.seekg(0, ifs.end);
-    if (!ifs.good()) {
+bool RosenFontCollection::LoadFontBuffers(
+    const std::vector<std::string>& familySrc, std::vector<std::pair<std::unique_ptr<char[]>, size_t>>& buffers)
+{
+    for (const auto& path : familySrc) {
+        std::ifstream ifs(path, std::ios_base::in);
+        if (!ifs.is_open()) {
+            TAG_LOGW(AceLogTag::ACE_FONT, "FontFamily file open fail, %{public}s", path.c_str());
+            return false;
+        }
+        ifs.seekg(0, ifs.end);
+        if (!ifs.good()) {
+            ifs.close();
+            TAG_LOGW(AceLogTag::ACE_FONT, "font file is bad");
+            return false;
+        }
+        auto size = ifs.tellg();
+        if (ifs.fail()) {
+            ifs.close();
+            TAG_LOGW(AceLogTag::ACE_FONT, "get size failed");
+            return false;
+        }
+        ifs.seekg(ifs.beg);
+        if (!ifs.good()) {
+            ifs.close();
+            TAG_LOGW(AceLogTag::ACE_FONT, "file seek failed");
+            return false;
+        }
+        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size);
+        ifs.read(buffer.get(), size);
+        if (!ifs.good()) {
+            ifs.close();
+            TAG_LOGW(AceLogTag::ACE_FONT, "read file failed");
+            return false;
+        }
         ifs.close();
-        TAG_LOGW(AceLogTag::ACE_FONT, "font file is bad");
-        return;
+        buffers.emplace_back(std::move(buffer), static_cast<size_t>(size));
     }
-    auto size = ifs.tellg();
-    if (ifs.fail()) {
-        ifs.close();
-        TAG_LOGW(AceLogTag::ACE_FONT, "get size failed");
-        return;
-    }
-    ifs.seekg(ifs.beg);
-    if (!ifs.good()) {
-        ifs.close();
-        TAG_LOGW(AceLogTag::ACE_FONT, "file seek failed");
-        return;
-    }
-    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(size);
-    ifs.read(buffer.get(), size);
-    if (!ifs.good()) {
-        ifs.close();
-        TAG_LOGW(AceLogTag::ACE_FONT, "read file failed");
-        return;
-    }
-    ifs.close();
-    currentFamily_ = path;
-    LoadThemeFont(fontFamily, std::move(buffer), size);
+    return true;
 }
 
 bool RosenFontCollection::StdFilesystemExists(const std::string &path)
@@ -224,23 +160,11 @@ void RosenFontCollection::VaryFontCollectionWithFontWeightScale(float fontWeight
     if (LessOrEqual(fontWeightScale, 0.0)) {
         return;
     }
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-    if (fontCollection_) {
-        fontCollection_->VaryFontCollectionWithFontWeightScale(fontWeightScale);
-    }
-#endif
 }
 
 void RosenFontCollection::LoadSystemFont()
 {
     ACE_FUNCTION_TRACE();
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-    if (fontCollection_) {
-        fontCollection_->LoadSystemFont();
-    }
-#endif
 }
 
 void RosenFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
@@ -251,12 +175,6 @@ void RosenFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
         return;
     }
     isZawgyiMyanmar_ = isZawgyiMyanmar;
-
-#ifndef USE_GRAPHIC_TEXT_GINE
-    if (fontCollection_) {
-        fontCollection_->SetIsZawgyiMyanmar(isZawgyiMyanmar);
-    }
-#endif
 
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         if (container) {

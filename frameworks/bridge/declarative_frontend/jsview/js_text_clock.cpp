@@ -29,6 +29,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "frameworks/core/components/text_clock/text_clock_theme.h"
 
 namespace OHOS::Ace {
 
@@ -159,20 +160,20 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = pipelineContext->GetTheme<TextClockTheme>();
     CHECK_NULL_VOID(theme);
 
     CalcDimension fontSize;
     if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
-        fontSize = theme->GetTextStyle().GetFontSize();
+        fontSize = theme->GetTextStyleClock().GetFontSize();
     }
 
     if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
+        auto theme = pipelineContext->GetTheme<TextClockTheme>();
         CHECK_NULL_VOID(theme);
-        fontSize = theme->GetTextStyle().GetFontSize();
+        fontSize = theme->GetTextStyleClock().GetFontSize();
     }
 
     TextClockModel::GetInstance()->SetFontSize(fontSize);
@@ -183,11 +184,11 @@ void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
+    RefPtr<TextClockTheme> textTheme = GetTheme<TextClockTheme>();
     CHECK_NULL_VOID(textTheme);
     const auto& fontWeight = info[0];
     if (fontWeight->IsUndefined()) {
-        TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+        TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyleClock().GetFontWeight());
         return;
     }
 
@@ -200,7 +201,7 @@ void JSTextClock::SetFontWeight(const JSCallbackInfo& info)
         }
         TextClockModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
     } else {
-        TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+        TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyleClock().GetFontWeight());
     }
 }
 
