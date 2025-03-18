@@ -17,12 +17,9 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
-#include "base/json/json_util.h"
-#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+
 namespace OHOS::Ace {
 const std::set<std::string> UiTranslateManagerImpl::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene",
     "root", "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
@@ -35,7 +32,7 @@ void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> n
 }
 void UiTranslateManagerImpl::RemoveTranslateListener(int32_t nodeId)
 {
-    listenerMap_[nodeId] = nullptr;
+    listenerMap_.erase(nodeId);
 }
 
 void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
@@ -83,20 +80,26 @@ void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isCont
 void UiTranslateManagerImpl::SendTranslateResult(
     int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids)
 {
-    auto frameNode = listenerMap_[nodeId].Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<NG::WebPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SendTranslateResult(results, ids);
+    auto iter = listenerMap_.find(nodeId);
+    if (iter != listenerMap_.end()) {
+        auto frameNode = iter->second.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SendTranslateResult(results, ids);
+    }
 }
 
 void UiTranslateManagerImpl::SendTranslateResult(int32_t nodeId, std::string res)
 {
-    auto frameNode = listenerMap_[nodeId].Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<NG::WebPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SendTranslateResult(res);
+    auto iter = listenerMap_.find(nodeId);
+    if (iter != listenerMap_.end()) {
+        auto frameNode = iter->second.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SendTranslateResult(res);
+    }
 }
 
 void UiTranslateManagerImpl::ResetTranslate(int32_t nodeId)
@@ -114,11 +117,14 @@ void UiTranslateManagerImpl::ResetTranslate(int32_t nodeId)
             pattern->EndTranslate();
         }
     } else {
-        auto frameNode = listenerMap_[nodeId].Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<NG::WebPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->EndTranslate();
+        auto iter = listenerMap_.find(nodeId);
+        if (iter != listenerMap_.end()) {
+            auto frameNode = iter->second.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pattern = frameNode->GetPattern<NG::WebPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->EndTranslate();
+        }
     }
 }
 
@@ -129,6 +135,7 @@ void UiTranslateManagerImpl::ClearMap()
 
 void UiTranslateManagerImpl::SendPixelMap()
 {
+    LOGI("manager start sendPixelMap");
     UiSessionManager::GetInstance()->SendPixelMap(pixelMap_);
 }
 

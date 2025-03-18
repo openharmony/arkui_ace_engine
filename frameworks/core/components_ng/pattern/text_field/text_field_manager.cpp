@@ -78,8 +78,9 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
-    position_ = position; // use for keyboard avoidance, uses like caret position
-    optionalPosition_ = position;
+    auto y = std::max(0.0, position.GetY());
+    position_ = {position.GetX(), y};
+    optionalPosition_ = position_;
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField)
@@ -492,6 +493,48 @@ bool TextFieldManagerNG::IsAutoFillPasswordType(const TextFieldInfo& textFieldIn
            textFieldInfo.inputType == TextInputType::NUMBER_PASSWORD ||
            textFieldInfo.contentType == TextContentType::VISIBLE_PASSWORD ||
            textFieldInfo.contentType == TextContentType::NEW_PASSWORD;
+}
+
+void TextFieldManagerNG::SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField)
+{
+    const auto& pattern = onFocusTextField.Upgrade();
+    if (pattern && pattern->GetHost()) {
+        onFocusTextFieldId_ = pattern->GetHost()->GetId();
+    }
+    if (onFocusTextField_ != onFocusTextField) {
+        SetImeAttached(false);
+        GetOnFocusTextFieldInfo(onFocusTextField);
+    }
+    onFocusTextField_ = onFocusTextField;
+}
+
+bool TextFieldManagerNG::GetImeShow() const
+{
+    if (!imeShow_ && imeAttachCalled_) {
+        TAG_LOGI(ACE_KEYBOARD, "imeNotShown but attach called, still consider that as shown");
+    }
+    return imeShow_ || imeAttachCalled_;
+}
+
+void TextFieldManagerNG::AddAvoidKeyboardCallback(
+    int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback)
+{
+    if (isCustomKeyboard) {
+        avoidCustomKeyboardCallbacks_.insert({ id, std::move(callback) });
+    } else {
+        avoidSystemKeyboardCallbacks_.insert({ id, std::move(callback) });
+    }
+}
+
+void TextFieldManagerNG::OnAfterAvoidKeyboard(bool isCustomKeyboard)
+{
+    auto callbacks =
+        isCustomKeyboard ? std::move(avoidCustomKeyboardCallbacks_) : std::move(avoidSystemKeyboardCallbacks_);
+    for (const auto& pair : callbacks) {
+        if (pair.second) {
+            pair.second();
+        }
+    }
 }
 
 TextFieldManagerNG::~TextFieldManagerNG()

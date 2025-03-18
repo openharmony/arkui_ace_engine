@@ -384,7 +384,32 @@ int32_t UIContentServiceProxy::GetWebViewCurrentLanguage(const EventCallback& ev
         LOGW("GetWebViewCurrentLanguage send request failed");
         return REPLY_ERROR;
     }
-    return REPLY_ERROR;
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetCurrentPageName(const std::function<void(std::string)>& finishCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetCurrentPageName write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("write processId failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("GetCurrentPageName is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetCurrentPageName(finishCallback);
+    if (Remote()->SendRequest(GET_CURRENT_PAGE_NAME, data, reply, option) != ERR_NONE) {
+        LOGW("GetCurrentPageName send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
 }
 
 int32_t UIContentServiceProxy::StartWebViewTranslate(

@@ -104,8 +104,13 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             SendTranslateResultStrInner(data, reply, option);
             break;
         }
+        case GET_CURRENT_PAGE_NAME: {
+            GetCurrentPageNameInner(data, reply, option);
+            break;
+        }
         case GET_CURRENT_SHOWING_IMAGE: {
             GetCurrentImagesShowingInner(data, reply, option);
+            break;
         }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
@@ -261,6 +266,12 @@ int32_t UiContentStub::SendTranslateResultStrInner(MessageParcel& data, MessageP
     int32_t nodeId = data.ReadInt32();
     std::string result = data.ReadString();
     reply.WriteInt32(SendTranslateResult(nodeId, result));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetCurrentPageNameInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(GetCurrentPageName(nullptr));
     return NO_ERROR;
 }
 

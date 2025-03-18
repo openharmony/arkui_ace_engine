@@ -431,6 +431,11 @@ public:
         return navigationStack_->GetAllNavDestinationNodesPrev();
     }
 
+    bool GetIsPreForceSetList()
+    {
+        return navigationStack_->GetIsPreForceSetList();
+    }
+
     void DialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible);
 
@@ -484,6 +489,10 @@ public:
     {
         return isInDividerDrag_;
     }
+
+    bool IsPageLevelConfigEnabled(bool considerSize = true);
+    void OnStartOneTransitionAnimation();
+    void OnFinishOneTransitionAnimation();
 
 private:
     void FireOnNewParam(const RefPtr<UINode>& uiNode);
@@ -584,7 +593,24 @@ private:
     void UnregisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
     virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode, bool skipCheck = false);
     void UpdateToobarFocusColor();
+    void GenerateLastStandardPage(NavPathList& navPathList);
+    RefPtr<UINode> FindNavDestinationNodeInPreList(const uint64_t navDestinationId) const;
+    bool IsStandardPage(const RefPtr<UINode>& uiNode) const;
     void UpdateDividerBackgroundColor();
+
+    void GetVisibleNodes(bool isPre, std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
+    void UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& topDestination);
+    std::optional<int32_t> CalcRotateAngleWithDisplayOrientation(
+        DisplayOrientation curOri, DisplayOrientation targetOri);
+    void GetAllNodes(
+        std::vector<RefPtr<NavDestinationNodeBase>>& invisibleNodes,
+        std::vector<RefPtr<NavDestinationNodeBase>>& visibleNodes);
+    void OnAllTransitionAnimationFinish();
+    void UpdateSystemBarConfigForSizeChanged();
+    RefPtr<NavDestinationNodeBase> GetLastStandardNodeOrNavBar();
+    void ShowOrHideSystemBarIfNeeded(bool isShow);
+    bool IsEquivalentToStackMode();
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -642,6 +668,10 @@ private:
     SizeF navigationSize_;
     std::optional<NavBarPosition> preNavBarPosition_;
     bool topFromSingletonMoved_ = false;
+
+    std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
+    int32_t runningTransitionCount_ = 0;
+    bool isTransitionRunning_ = false;
 };
 
 } // namespace OHOS::Ace::NG

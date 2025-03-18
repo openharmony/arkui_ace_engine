@@ -27,6 +27,7 @@ constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
 constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
 constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
+constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
 constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
@@ -41,12 +42,14 @@ constexpr int32_t SLIDE_OFF_EVENT = 0;
 constexpr int32_t SLIDE_DETECTING = 2;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
 constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
+constexpr int32_t MOVE_DETECTING = 7;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
 constexpr int32_t PUSH_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t POP_PAGE_EVENT = 0;
 constexpr int32_t AXIS_OFF_EVENT = 1;
 constexpr int32_t AXIS_IS_PAD = 0;
 constexpr int32_t AXIS_IS_MOUSE = 1;
+constexpr int64_t TIME_INTERVAL = 300;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -72,6 +75,9 @@ constexpr char KEY_CODE[] = "key_code";
 constexpr char AXIS_OFF[] = "axis_off";
 constexpr char AXIS_NORMAL_UP_SPEED[] = "0.0";
 constexpr char AXIS_EVENT_TYPE[] = "axis_event_type";
+constexpr char FROM_PAGE_INFO[] = "from_page";
+constexpr char TO_PAGE_INFO[] = "to_page";
+constexpr char TRANSITION_MODE[] = "transition_mode";
 #ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
@@ -93,6 +99,12 @@ ResSchedReport& ResSchedReport::GetInstance()
 {
     static ResSchedReport instance;
     return instance;
+}
+
+ResSchedReport::ResSchedReport()
+{
+    reportDataFunc_ = LoadReportDataFunc();
+    reportSyncEventFunc_ = LoadReportSyncEventFunc();
 }
 
 void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param)
@@ -173,22 +185,18 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
 void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     const std::unordered_map<std::string, std::string>& payload)
 {
-    if (reportDataFunc_ == nullptr) {
-        reportDataFunc_ = LoadReportDataFunc();
+    if (!reportDataFunc_) {
+        LOGD("reportDataFunc_ is null!");
+        return;
     }
-    if (reportDataFunc_ != nullptr) {
-        reportDataFunc_(resType, value, payload);
-    }
+    reportDataFunc_(resType, value, payload);
 }
 
 void ResSchedReport::ResScheSyncEventReport(const uint32_t resType, const int64_t value,
-    const std::unordered_map<std::string, std::string>& payload,
-    std::unordered_map<std::string, std::string>& reply)
+    const std::unordered_map<std::string, std::string>& payload, std::unordered_map<std::string, std::string>& reply)
 {
-    if (reportSyncEventFunc_ == nullptr) {
-        reportSyncEventFunc_ = LoadReportSyncEventFunc();
-    }
     if (!reportSyncEventFunc_) {
+        LOGD("reportSyncEventFunc_ is null!");
         return;
     }
     reportSyncEventFunc_(resType, value, payload, reply);
@@ -346,6 +354,16 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSlide_ = true;
     }
+    static uint64_t lastTime = 0;
+    auto now = std::chrono::steady_clock::now();
+    uint64_t curMs = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
+    if (isInSlide_ && curMs - lastTime >= TIME_INTERVAL) {
+        lastTime = curMs;
+        std::unordered_map<std::string, std::string> payload;
+        LoadAceApplicationContext(payload);
+        ResSchedDataReport(RES_TYPE_SLIDE, MOVE_DETECTING, payload);
+    }
 }
 
 void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent)
@@ -490,6 +508,22 @@ void ResSchedReport::OnAxisEvent(const AxisEvent& axisEvent)
         default:
             break;
     }
+}
+
+void ResSchedReport::HandlePageTransition(const std::string& fromPage,
+    const std::string& toPage, const std::string& mode)
+{
+    if (fromPage.empty() || toPage.empty()) {
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "rss report page transition empty info:%{public}s, %{public}s",
+            fromPage.c_str(), toPage.c_str());
+        return;
+    }
+    std::unordered_map<std::string, std::string> payload;
+    payload[FROM_PAGE_INFO] = fromPage;
+    payload[TO_PAGE_INFO] = toPage;
+    payload[TRANSITION_MODE] = mode;
+    LoadAceApplicationContext(payload);
+    ResSchedDataReport(RES_TYPE_PAGE_TRANSITION, 0, payload);
 }
 
 ResSchedReportScope::ResSchedReportScope(const std::string& name,

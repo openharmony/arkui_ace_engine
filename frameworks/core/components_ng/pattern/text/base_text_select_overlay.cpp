@@ -1190,9 +1190,15 @@ bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (renderContext->GetClipEdge().value_or(false)) {
+            auto isOverTheParentBottom = GreatNotEqual(contentRect.Top(), parentContentRect.Bottom());
             contentRect = contentRect.IntersectRectT(parentContentRect);
+            if (isOverTheParentBottom) {
+                contentRect.SetTop(parentContentRect.Bottom());
+            }
         }
         contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
+        contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
+        contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));

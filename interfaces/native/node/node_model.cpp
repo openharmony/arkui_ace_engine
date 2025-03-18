@@ -348,7 +348,7 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     // already check in entry point.
-    if (nodePtr->type == -1) {
+    if (nodePtr->type == -1 && !nodePtr->isBindNative) {
         return ERROR_CODE_NATIVE_IMPL_BUILDER_NODE_ERROR;
     }
     const auto* impl = GetFullImpl();
@@ -424,7 +424,7 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
     if (!nodePtr->extraData) {
         return;
     }
-    if (nodePtr->type == -1) {
+    if (nodePtr->type == -1 && !nodePtr->isBindNative) {
         return;
     }
     auto* extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
@@ -480,7 +480,6 @@ void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 
 void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
-    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
     uiEvent.eventTypeId = C_KEY_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->keyEvent);
 }
@@ -875,6 +874,12 @@ int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
         return iter->second;
     }
     return -1;
+}
+
+void RegisterBindNativeNode(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    g_nodeSet.emplace(node);
 }
 } // namespace OHOS::Ace::NodeModel
 

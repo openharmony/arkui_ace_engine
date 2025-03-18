@@ -15,28 +15,6 @@
 
 #include "html_to_span.h"
 
-#include "base/geometry/dimension.h"
-#include "base/image/file_uri_helper.h"
-#include "base/image/image_source.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utf_helper.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/image_provider/image_provider.h"
-#include "core/components_ng/pattern/text/span/mutable_span_string.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
@@ -221,8 +199,10 @@ Dimension HtmlToSpan::FromString(const std::string& str)
 
     for (int32_t i = static_cast<int32_t>(str.length()) - 1; i >= 0; --i) {
         if (str[i] >= '0' && str[i] <= '9') {
-            value = StringUtils::StringToDouble(str.substr(0, i + 1));
-            auto subStr = str.substr(i + 1);
+            auto startIndex = i + 1;
+            value = StringUtils::StringToDouble(str.substr(0, startIndex));
+            startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(str.length()));
+            auto subStr = str.substr(startIndex);
             if (subStr == "pt") {
                 value = static_cast<int>(value * PT_TO_PX + ROUND_TO_INT);
                 break;
@@ -418,9 +398,10 @@ Color HtmlToSpan::ToSpanColor(const std::string& value)
     std::string color = value;
     std::string tmp = value;
     tmp.erase(std::remove(tmp.begin(), tmp.end(), ' '), tmp.end());
-    auto regStr = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+    auto regStr = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) ?
         "#[0-9A-Fa-f]{6,8}" : "#[0-9A-Fa-f]{7,8}";
-    if (std::regex_match(tmp, matches, std::regex(regStr))) {
+    constexpr auto tmpLeastLength = 3;
+    if (std::regex_match(tmp, matches, std::regex(regStr)) && tmp.length() >= tmpLeastLength) {
         auto rgb = tmp.substr(1);
         // remove last 2 character rgba -> argb
         rgb.erase(rgb.length() - 2, 2);

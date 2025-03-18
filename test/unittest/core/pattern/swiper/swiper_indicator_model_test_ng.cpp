@@ -75,7 +75,7 @@ void IndicatorModelTestNg::Create(const std::function<void(IndicatorModelNG)>& c
     EXPECT_NE(indicatorLayoutProperty_, nullptr);
     indicatorAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
     indicatorController_ = indicatorPattern_->GetIndicatorController();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void IndicatorModelTestNg::CreateWithItem(const std::function<void(IndicatorModelNG)>& callback, int32_t itemNumber)
@@ -90,19 +90,19 @@ void IndicatorModelTestNg::CreateWithItem(const std::function<void(IndicatorMode
 void IndicatorModelTestNg::ShowNextPage()
 {
     indicatorController_->ShowNext();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void IndicatorModelTestNg::ShowPreviousPage()
 {
     indicatorController_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void IndicatorModelTestNg::ChangeIndex(int32_t index, bool useAnimation)
 {
     indicatorController_->ChangeIndex(index, useAnimation);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 /**
@@ -680,7 +680,7 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg014, TestSize.Level1)
     });
     indicatorLayoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     indicatorPattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     indicatorPattern_->isRepeatClicked_ = false;
     indicatorPattern_->mouseClickIndex_ = 0;
     std::optional<int32_t> mouseClickIndex;

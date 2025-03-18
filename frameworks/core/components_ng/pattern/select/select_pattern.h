@@ -189,6 +189,7 @@ public:
     void SetSpace(const Dimension& value);
     void SetArrowPosition(const ArrowPosition value);
     void SetMenuAlign(const MenuAlign& menuAlign);
+    void SetAvoidance(const Avoidance& avoidance);
 
     std::string GetValue();
     std::string ProvideRestoreInfo() override;
@@ -204,6 +205,7 @@ public:
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
     void SetDivider(const SelectDivider& divider);
+    void SetDividerMode(const std::optional<DividerMode>& mode);
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
     Dimension GetSelectLeftRightMargin() const;
@@ -333,6 +335,7 @@ private:
     bool isHover_ = false;
     bool isSelected_ = false;
     MenuAlign menuAlign_;
+    Avoidance avoidance_;
     std::string selectValue_;
     bool isFitTrigger_ = false;
     ControlSize controlSize_ = ControlSize::NORMAL;

@@ -143,4 +143,11 @@ int32_t UIContentServiceStubImpl::GetCurrentImagesShowing(
     UiSessionManager::GetInstance()->GetPixelMap();
     return NO_ERROR;
 }
+
+int32_t UIContentServiceStubImpl::GetCurrentPageName(const EventCallback& eventCallback)
+{
+    UiSessionManager::GetInstance()->GetCurrentPageName();
+    return NO_ERROR;
+}
+
 } // namespace OHOS::Ace

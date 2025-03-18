@@ -15,26 +15,13 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
-#include <cerrno>
-#include <fstream>
-#include <functional>
-#include <memory>
-#include <regex>
-
-#include "ability_context.h"
-#include "ability_info.h"
 #include "auto_fill_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "js_native_api.h"
-#include "pointer_event.h"
 #include "scene_board_judgement.h"
-#include "ui/base/utils/utils.h"
 #include "ui/rs_surface_node.h"
 #include "ui_extension_context.h"
-#include "window_manager.h"
-#include "wm/wm_common.h"
+#include "wm_common.h"
 
-#include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
@@ -43,50 +30,26 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "adapter/ohos/osal/page_viewport_config_ohos.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/system_bar_style_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
 #include "adapter/ohos/osal/window_utils.h"
 #include "base/i18n/localization.h"
-#include "base/json/json_util.h"
-#include "base/log/ace_trace.h"
-#include "base/log/dump_log.h"
-#include "base/log/event_report.h"
-#include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
-#include "base/log/log.h"
-#include "base/log/log_wrapper.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/task_dependency_manager.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/device_config.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
 #include "bridge/card_frontend/card_frontend.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "bridge/js_frontend/js_frontend.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
-#include "core/common/asset_manager_impl.h"
-#include "core/common/container.h"
-#include "core/common/container_consts.h"
-#include "core/common/container_scope.h"
-#include "core/common/platform_window.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
-#include "core/common/window.h"
-#include "core/components/theme/theme_constants.h"
-#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -126,6 +89,7 @@ const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
 const std::string ASSET_LIBARCH_PATH = "/lib/arm";
 #endif
+const std::string THEME_JSON = "theme_config.json";
 
 #ifndef NG_BUILD
 constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
@@ -135,10 +99,101 @@ const char* GetEngineSharedLibrary()
 }
 #endif
 
+class FrontendOrientationListener : public OHOS::Rosen::IPreferredOrientationChangeListener  {
+public:
+    explicit FrontendOrientationListener(int32_t instanceId, WeakPtr<NG::NavigationManager> mgr)
+        : instanceId_(instanceId), mgr_(mgr) {}
+    ~FrontendOrientationListener() = default;
+
+    void OnPreferredOrientationChange(OHOS::Rosen::Orientation ori) override
+    {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set orientation to: %{public}d", static_cast<int32_t>(ori));
+        auto container = AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto task = [mgr = mgr_, ori]() {
+            auto navMgr = mgr.Upgrade();
+            CHECK_NULL_VOID(navMgr);
+            navMgr->SetOrientationByWindowApi(static_cast<Orientation>(static_cast<int32_t>(ori)));
+        };
+        if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            task();
+            return;
+        }
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI,
+            "ArkUIOnFrontendOrientationSetted", PriorityType::VIP);
+    }
+
+private:
+    int32_t instanceId_ = -1;
+    WeakPtr<NG::NavigationManager> mgr_;
+};
+
+class WindowOrientationChangeListener : public OHOS::Rosen::IWindowOrientationChangeListener {
+public:
+    explicit WindowOrientationChangeListener(int32_t instanceId, WeakPtr<NG::NavigationManager> mgr)
+        : instanceId_(instanceId), mgr_(mgr) {}
+    ~WindowOrientationChangeListener() = default;
+
+    void OnOrientationChange() override
+    {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "window orientation change");
+        auto container = AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto task = [mgr = mgr_, instanceId = instanceId_]() {
+            ContainerScope scope(instanceId);
+            auto navMgr = mgr.Upgrade();
+            CHECK_NULL_VOID(navMgr);
+            navMgr->OnOrientationChanged();
+        };
+        if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            task();
+            return;
+        }
+        taskExecutor->PostSyncTask(std::move(task), TaskExecutor::TaskType::UI,
+            "ArkUIOnOrientationChange", PriorityType::VIP);
+    }
+
+private:
+    int32_t instanceId_ = -1;
+    WeakPtr<NG::NavigationManager> mgr_;
+};
+
 constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
 const char* GetDeclarativeSharedLibrary()
 {
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
+}
+
+void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const RefPtr<PipelineBase>& pipelineContext)
+{
+    std::string themeJsonContent;
+    bool loadThemeJsonFlag = OHOS::Ace::Framework::GetAssetContentImpl(assetManager, THEME_JSON, themeJsonContent);
+    if (loadThemeJsonFlag) {
+        auto themeRootJson = JsonUtil::ParseJsonString(themeJsonContent);
+        if (themeRootJson) {
+            auto systemThemeId = themeRootJson->GetInt("systemTheme", -1);
+            if (systemThemeId != -1) {
+                auto themeManager = pipelineContext->GetThemeManager();
+                themeManager->LoadSystemTheme(systemThemeId);
+                auto checkTheme = themeManager->GetSystemTheme();
+                LOGI("get systemTheme id from json success, systemTheme id = %{public}d", checkTheme);
+            } else {
+                LOGW("get systemTheme id from json failed, not a number");
+            }
+        } else {
+            LOGW("get systemTheme id from json failed, parse theme json file failed");
+        }
+    } else {
+        LOGW("get systemTheme id from json failed, %{public}s not found", THEME_JSON.c_str());
+    }
 }
 
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
@@ -171,6 +226,7 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     ThemeConstants::InitDeviceType();
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     pipelineContext->SetThemeManager(themeManager);
+    LoadSystemThemeFromJson(assetManager, pipelineContext);
     themeManager->SetColorScheme(colorScheme);
     themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
@@ -185,6 +241,8 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         defaultBundleName, defaultModuleName, instanceId, resourceAdapter, true);
     if (!bundleName.empty() && !moduleName.empty()) {
         ResourceManager::GetInstance().RegisterMainResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter);
+        ResourceManager::GetInstance().RegisterMainResourceAdapter(
+            bundleName, moduleName, INSTANCE_ID_UNDEFINED, resourceAdapter);
     }
 }
 
@@ -986,25 +1044,17 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
 void AceContainer::InitializeCallback()
 {
     ACE_FUNCTION_TRACE();
-
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_,
-                                    isTouchEventsPassThrough = isTouchEventsPassThrough_](const TouchEvent& event,
+    auto touchPassMode = AceApplicationInfo::GetInstance().GetTouchEventPassMode();
+    bool isDebugAcc = (SystemProperties::GetTouchAccelarate() == static_cast<int32_t>(TouchPassMode::ACCELERATE));
+    pipelineContext_->SetTouchAccelarate((touchPassMode == TouchPassMode::ACCELERATE) || isDebugAcc);
+    pipelineContext_->SetTouchPassThrough(touchPassMode == TouchPassMode::PASS_THROUGH);
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](const TouchEvent& event,
                                     const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
-        bool passThroughMode = false;
-        if (isTouchEventsPassThrough.has_value()) {
-            passThroughMode = isTouchEventsPassThrough.value();
-        } else {
-            auto container = Platform::AceContainer::GetContainer(id);
-            if (container) {
-                passThroughMode = AceApplicationInfo::GetInstance().IsTouchEventsPassThrough();
-                container->SetTouchEventsPassThroughMode(passThroughMode);
-            }
-        }
         context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
-        auto touchTask = [context, event, markProcess, node, mode = passThroughMode]() {
+        auto touchTask = [context, event, markProcess, node]() {
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
@@ -1012,9 +1062,9 @@ void AceContainer::InitializeCallback()
                 context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
-                    context->OnTouchEvent(event, node, false, mode);
+                    context->OnTouchEvent(event, node, false);
                 } else {
-                    context->OnTouchEvent(event, false, mode);
+                    context->OnTouchEvent(event, false);
                 }
             }
             CHECK_NULL_VOID(markProcess);
@@ -1302,6 +1352,7 @@ void AceContainer::SetView(const RefPtr<AceView>& view, double density, int32_t 
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    window->Init();
 #else
     auto platformWindow = PlatformWindow::Create(view);
     CHECK_NULL_VOID(platformWindow);
@@ -1327,6 +1378,7 @@ UIContentErrorCode AceContainer::SetViewNew(
         container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+        window->Init();
         container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
 
@@ -2277,7 +2329,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
         UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
-        pipeline->SaveTranslateManager(uiTranslateManager);
+        if (pipeline) {
+            pipeline->SaveTranslateManager(uiTranslateManager);
+        } else {
+            LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
+        }
     } else {
         LOGI("Create old pipeline.");
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
@@ -2290,8 +2346,14 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
-    pipeline->SaveTranslateManager(uiTranslateManager);
+    if (pipeline) {
+        pipeline->SaveTranslateManager(uiTranslateManager);
+    } else {
+        LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
+    }
 #endif
+    RegisterOrientationUpdateListener();
+    RegisterOrientationChangeListener();
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
     RegisterAvoidInfoCallback();
@@ -2786,17 +2848,22 @@ void AceContainer::CheckAndSetFontFamily()
         }
     }
     path = path.append("/fonts/");
-    familyName = GetFontFamilyName(path);
-    if (familyName.empty()) {
+    auto fontFamilyNames = GetFontFamilyName(path);
+    if (fontFamilyNames.empty()) {
+        TAG_LOGI(AceLogTag::ACE_FONT, "FontFamilyNames is empty");
         return;
     }
-    path = path.append(familyName);
+    familyName = fontFamilyNames[0];
+    std::vector<std::string> fullPath;
+    for (const auto& fontFamilyName : fontFamilyNames) {
+        fullPath.push_back(path + fontFamilyName);
+    }
     if (isFormRender_) {
         // Resolve garbled characters caused by FRS multi-thread async
         std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
-        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+        fontManager->SetFontFamily(familyName.c_str(), fullPath);
     } else {
-        fontManager->SetFontFamily(familyName.c_str(), path.c_str());
+        fontManager->SetFontFamily(familyName.c_str(), fullPath);
     }
 }
 
@@ -3411,13 +3478,20 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     MMI::PointerEvent::PointerItem pointerItem;
     auto iter = currentEvents_.find(dragPointerEvent.pointerId);
     if (iter == currentEvents_.end()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find PointerEvent, pointerId: %{public}d.", dragPointerEvent.pointerId);
         return false;
     }
 
     auto currentPointerEvent = iter->second;
     CHECK_NULL_RETURN(currentPointerEvent, false);
     dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
-    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem) || !pointerItem.IsPressed()) {
+    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem)) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not find pointerItem, pointerId: %{public}d.", dragPointerEvent.pointerId);
+        return false;
+    }
+    if (!pointerItem.IsPressed()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Current pointer is not pressed, pointerId: %{public}d.",
+            dragPointerEvent.pointerId);
         return false;
     }
     dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
@@ -3471,6 +3545,8 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
     }
     dragPointerEvent.displayX = pointerItem.GetDisplayX();
     dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    dragPointerEvent.windowX = pointerItem.GetWindowX();
+    dragPointerEvent.windowY = pointerItem.GetWindowY();
     return true;
 }
 
@@ -4083,5 +4159,97 @@ void AceContainer::RegisterAvoidInfoDataProcessCallback()
     };
     avoidInfoMgr->SetParseAvoidInfoCallback(std::move(parseCallback));
     avoidInfoMgr->SetBuildAvoidInfoCallback(std::move(buildCallback));
+}
+
+RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
+{
+    return nullptr;
+}
+
+RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation orientation,
+    bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
+{
+    return nullptr;
+}
+
+void AceContainer::SetRequestedOrientation(Orientation orientation, bool needAnimation)
+{
+    CHECK_NULL_VOID(uiWindow_);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetRequestedOrientation ori:%{public}d, needAnimation:%{public}d",
+        static_cast<int32_t>(orientation), needAnimation);
+    uiWindow_->SetRequestedOrientation(
+        static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation)), needAnimation);
+}
+
+Orientation AceContainer::GetRequestedOrientation()
+{
+    CHECK_NULL_RETURN(uiWindow_, Orientation::UNSPECIFIED);
+    auto ori = uiWindow_->GetRequestedOrientation();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "GetRequestedOrientation ori:%{public}d", static_cast<int32_t>(ori));
+    return static_cast<Orientation>(static_cast<int32_t>(ori));
+}
+
+void AceContainer::RegisterOrientationUpdateListener()
+{
+    CHECK_NULL_VOID(uiWindow_);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    auto navigationMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationMgr);
+    auto orientation = uiWindow_->GetRequestedOrientation();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set initial ori:%{public}d", static_cast<int32_t>(orientation));
+    navigationMgr->SetOrientationByWindowApi(static_cast<Orientation>(static_cast<int32_t>(orientation)));
+    auto listener = new FrontendOrientationListener(GetInstanceId(), WeakPtr(navigationMgr));
+    if (uiWindow_->RegisterPreferredOrientationChangeListener(listener) != Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to register Orientation listener");
+    }
+}
+
+void AceContainer::RegisterOrientationChangeListener()
+{
+    CHECK_NULL_VOID(uiWindow_);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    auto navigationMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationMgr);
+    auto listener = new WindowOrientationChangeListener(GetInstanceId(), WeakPtr(navigationMgr));
+    if (uiWindow_->RegisterOrientationChangeListener(listener) != Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to register Orientation change listener");
+    }
+}
+
+bool AceContainer::IsPcOrPadFreeMultiWindowMode() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->IsPcOrPadFreeMultiWindowMode();
+}
+
+bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool animation)
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    Rosen::WindowType winType;
+    switch (type) {
+        case SystemBarType::STATUS:
+            winType = Rosen::WindowType::WINDOW_TYPE_STATUS_BAR;
+            break;
+        case SystemBarType::NAVIGATION_INDICATOR:
+            winType = Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
+            break;
+        default:
+            return false;
+    }
+    auto property = uiWindow_->GetSystemBarPropertyByType(winType);
+    property.enable_ = enable;
+    property.enableAnimation_ = animation;
+    property.settingFlag_ = static_cast<Rosen::SystemBarSettingFlag>(
+        static_cast<int32_t>(property.settingFlag_) |
+        static_cast<int32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set SystemBar: type:%{public}d, enable:%{public}d, animation:%{public}d",
+        static_cast<int32_t>(type), enable, animation);
+    if (Rosen::WMError::WM_OK != uiWindow_->SetSpecificBarProperty(winType, property)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to set systemBar property");
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::Platform

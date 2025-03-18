@@ -54,6 +54,7 @@
  *     onGetRid4Index: (forIndex: number) => [number, number],
  *     onRecycleItems: (fromIndex: number, toIndex: number) => void,
  *     onActiveRange: (fromIndex: number, toIndex: number, isLoop: boolean) => void,
+ *     onMoveFromTo: (moveFrom: number, moveTo: number) => void,
  *     onPurge: () => void;
  *     onMoveHandler: (from: number, to: number) => void;
  *
@@ -96,20 +97,19 @@ public:
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge);
 
     RepeatVirtualScroll2Node(int32_t nodeId, int32_t totalCount,
         const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
         const std::function<void(IndexType, IndexType)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
+        const std::function<void(IndexType, IndexType)>& onMoveFromTo,
         const std::function<void()>& onPurge);
 
     ~RepeatVirtualScroll2Node() override = default;
 
-    void UpdateTotalCount(uint32_t totalCount)
-    {
-        totalCount_ = totalCount;
-    }
+    void UpdateTotalCount(uint32_t totalCount);
 
     // Number of children that Repeat can product
     // returns TotalCount
@@ -118,7 +118,10 @@ public:
     // called from TS upon Repeat rerender
     // tell the Container to invalid its layout
     // incl re-layout of children start from startIndex
-    void RequestContainerReLayout(IndexType startIndex);
+    void RequestContainerReLayout(IndexType startIndex = INT_MIN);
+
+    // trigger FrameNode::NotifyChangeWithCount()
+    void NotifyContainerLayoutChange(int32_t startIndex, int32_t count, NG::UINode::NotificationType notificationType);
 
     /**
      * GetChildren re-assembles children_ and cleanup the L1 cache
@@ -187,11 +190,15 @@ public:
 
     // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
+
     void MoveData(int32_t from, int32_t to) override;
+    void FireOnMove(int32_t from, int32_t to) override;
+    void InitDragManager(const RefPtr<FrameNode>& childNode);
+    void InitAllChildrenDragManager(bool init);
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
-    void InitDragManager(const RefPtr<UINode>& childNode);
-    void InitAllChildrenDragManager(bool init);
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
@@ -232,6 +239,9 @@ private:
     // tell TS to purge nodes exceeding cachedCount
     void Purge();
 
+    // freeze spare node in L2
+    void FreezeSpareNode();
+
     // check whether index is in the L1 cache range
     bool CheckNode4IndexInL1(
         int32_t index, int32_t nStart, int32_t nEnd, RepeatVirtualScroll2Caches::CacheItem& cacheItem);
@@ -266,14 +276,15 @@ private:
     int32_t prevActiveRangeEnd_ = -1;
 
     // remove from final version
-    int32_t prevRecycleFrom = -1;
-    int32_t prevRecycleTo = -1;
+    int32_t prevRecycleFrom_ = -1;
+    int32_t prevRecycleTo_ = -1;
 
     // run next DoSetActiveChild range even if range unchanged
     bool forceRunDoSetActiveRange_ = false;
 
     std::function<void(IndexType, IndexType)> onRecycleItems_;
     std::function<void(int32_t, int32_t, bool)> onActiveRange_;
+    std::function<void(IndexType, IndexType)> onMoveFromTo_;
     std::function<void()> onPurge_;
 
     // true in the time from requesting idle / predict task until exec predict tsk.

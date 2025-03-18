@@ -36,9 +36,8 @@ HWTEST_F(RefreshAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
 
     accessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_FORWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step2. When IsScrollable() == false
@@ -48,7 +47,8 @@ HWTEST_F(RefreshAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 
     accessibilityProperty_->ResetSupportAction();
-    EXPECT_EQ(GetActions(accessibilityProperty_), 0);
+    expectedActions = {};
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**

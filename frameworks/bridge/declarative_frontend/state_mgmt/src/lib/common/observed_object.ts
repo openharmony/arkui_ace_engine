@@ -127,7 +127,7 @@ class SubscribableHandler {
     stateMgmtConsole.debug(`SubscribableHandler: constructor done`);
   }
 
-  private isPropertyTracked(obj: Object, property: string): boolean {
+  protected isPropertyTracked(obj: Object, property: string): boolean {
     return Reflect.has(obj, `___TRACKED_${property}`) ||
       property === TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY ||
       property === TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY;
@@ -210,9 +210,10 @@ class SubscribableHandler {
           case ObserveV2.SYMBOL_REFS:
           case ObserveV2.V2_DECO_META:
           case ObserveV2.SYMBOL_MAKE_OBSERVED:
-          case ObserveV2.SYMBOL_PROXY_GET_TARGET:
             // return result unmonitored
             return Reflect.get(target, property, receiver);
+          case ObserveV2.SYMBOL_PROXY_GET_TARGET:
+            return undefined;
           case SubscribableHandler.ENABLE_V2_COMPATIBLE:
             return this.enableV2Compatible_;
           default:
@@ -230,6 +231,12 @@ class SubscribableHandler {
         // add dependency view model object for V1V2 compatibility
         if (isTracked && this.enableV2Compatible_) {
           ObserveV2.getObserve().addRefV2Compatibility(target, propertyStr);
+
+          // do same as V2 proxy, call to autoProxyObject:
+          // Array, Set, Map length functions fireChange(object, OB_LENGTH)
+          if (typeof result === "object" && (Array.isArray(result) || result instanceof Set || result instanceof Map)) {
+            ObserveV2.getObserve().addRefV2Compatibility(result, ObserveV2.OB_LENGTH);
+          }
         }
       } else {
         // result is function or in compatibility mode (in compat mode cbFunc will never be set)
@@ -238,6 +245,12 @@ class SubscribableHandler {
         // add dependency view model object for V1V2 compatibility
         if (this.enableV2Compatible_ && typeof result !== 'function') {
           ObserveV2.getObserve().addRefV2Compatibility(target, propertyStr);
+
+          // do same as V2 proxy, call to autoProxyObject:
+          // Array, Set, Map length functions fireChange(object, OB_LENGTH)
+          if (typeof result === "object" && (Array.isArray(result) || result instanceof Set || result instanceof Map)) {
+            ObserveV2.getObserve().addRefV2Compatibility(result, ObserveV2.OB_LENGTH);
+          }
         }
       }
       return result;
@@ -267,50 +280,44 @@ class SubscribableHandler {
         case SubscribableHandler.ENABLE_V2_COMPATIBLE:
           this.enableV2Compatible_ = true;
           return true;
+        case ObserveV2.SYMBOL_PROXY_GET_TARGET:
+          // Do nothing, just return
+          return true;
         default:
           break;
       }
     }
-    // this is added for stability test: Reflect.get target is not object
-    try {
-      if (Reflect.get(target, property) === newValue) {
-        return true;
-      }
-    } catch (error) {
-      ArkTools.print('SubscribableHandler: set', target);
-      stateMgmtConsole.error(`An error occurred in SubscribableHandler set, target type is: ${typeof target}, ${error.message}`);
-      throw error;
+
+    if (Reflect.get(target, property) === newValue) {
+      return true;
     }
+
     Reflect.set(target, property, newValue);
     const propString = String(property);
     if (TrackedObject.isCompatibilityMode(target)) {
       stateMgmtConsole.debug(`SubscribableHandler: set ObservedObject property '${propString}' (object property tracking compatibility mode).`);
       this.notifyObjectPropertyHasChanged(propString, newValue);
-
-      // mark view model object 'target' property 'propString' as changed
-      // Notify affected elements and ensure its nested objects are V2-compatible
-      if (this.enableV2Compatible_) {
-        ObserveV2.getObserve().fireChange(target, propString);
-        ObservedObject.enableV2CompatibleNoWarn(newValue);
-      }
     } else {
       if (this.isPropertyTracked(target, propString)) {
         stateMgmtConsole.debug(`SubscribableHandler: set ObservedObject property '@Track ${propString}'.`);
         this.notifyTrackedObjectPropertyHasChanged(propString);
 
-        // mark view model object 'target' property 'propString' as changed
-        // Notify affected elements and ensure its nested objects are V2-compatible
-        if (this.enableV2Compatible_) {
-          ObserveV2.getObserve().fireChange(target, propString);
-          ObservedObject.enableV2CompatibleNoWarn(newValue);
-        }
       } else {
         stateMgmtConsole.debug(`SubscribableHandler: set ObservedObject property '${propString}' (object property tracking mode) is NOT @Tracked!`);
+        return true;
       }
+    }
+
+    // mark view model object 'target' property 'propString' as changed
+    // Notify affected elements and ensure its nested objects are V2-compatible
+    if (this.enableV2Compatible_) {
+      ObserveV2.getObserve().fireChange(target, propString);
+      ObservedObject.enableV2CompatibleNoWarn(newValue);
     }
     return true;
   }
 }
+
 
 class SubscribableMapSetHandler extends SubscribableHandler {
   constructor(owningProperty: IPropertySubscriber) {
@@ -386,7 +393,10 @@ class SubscribableMapSetHandler extends SubscribableHandler {
         return (...args): any => target[key](...args);
       }
       if (key === ObserveV2.SYMBOL_PROXY_GET_TARGET) {
-        return target;
+        return undefined;
+      }
+      if (key === SubscribableHandler.ENABLE_V2_COMPATIBLE) {
+        return this.enableV2Compatible_;
       }
       return target[key];
     }
@@ -442,7 +452,7 @@ class SubscribableMapSetHandler extends SubscribableHandler {
       return (): void => {
         if (target.size > 0) {
           target.forEach((_, prop) => {
-             ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString(), true);
+             ObserveV2.getObserve().fireChange(conditionalTarget, prop.toString(), undefined, true);
           });
           target.clear();
           ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
@@ -508,6 +518,13 @@ class SubscribableMapSetHandler extends SubscribableHandler {
           let item = target.get(prop);
           // change from V2 proxy, this condition is never true in V2Compat
           // (typeof item === 'object' && this.isMakeObserved_) ? RefInfo.get(item)[RefInfo.MAKE_OBSERVED_PROXY] : 
+
+          
+          // do same as V2 proxy, call to autoProxyObject:
+          // Array, Set, Map length functions fireChange(object, OB_LENGTH)
+          if (typeof item === "object" && (Array.isArray(item) || item instanceof Set || item instanceof Map)) {
+            ObserveV2.getObserve().addRefV2Compatibility(item, ObserveV2.OB_LENGTH);
+          }
           return item;
         };
       }
@@ -569,24 +586,24 @@ class SubscribableDateHandler extends SubscribableHandler {
     let ret = super.get(target, property);
 
     if (typeof ret === 'function') {
+      const self = this;
       if (this.dateSetFunctions.has(property)) {
-        const self = this;
         return function () {
           // execute original function with given arguments
           let result = ret.apply(this, arguments);
           self.notifyObjectPropertyHasChanged(property.toString(), this);
-
-          if (this.enableV2Compatible_) {
+          // enableV2Compatibility handling to fire Date change
+          if (self.enableV2Compatible_) {
             ObserveV2.getObserve().fireChange(target, ObjectProxyHandler.OB_DATE);
           }
 
           return result;
           // bind 'this' to target inside the function
         }.bind(target)
+      } else if (self.enableV2Compatible_) {
+        ObserveV2.getObserve().addRefV2Compatibility(target, ObjectProxyHandler.OB_DATE);
       }
       return ret.bind(target);
-    } else if (this.enableV2Compatible_) {
-      ObserveV2.getObserve().addRefV2Compatibility(target, ObjectProxyHandler.OB_DATE);
     }
     return ret;
   }
@@ -654,7 +671,10 @@ class SubscribableArrayHandler extends SubscribableHandler {
         return (...args): any => target[key](...args);
       }
       if (key === ObserveV2.SYMBOL_PROXY_GET_TARGET) {
-        return target;
+        return undefined;
+      }
+      if (key === SubscribableHandler.ENABLE_V2_COMPATIBLE) {
+        return this.enableV2Compatible_;
       }
       return target[key];
     }
@@ -670,6 +690,13 @@ class SubscribableArrayHandler extends SubscribableHandler {
 
     if (typeof ret !== 'function') {
       ObserveV2.getObserve().addRefV2Compatibility(conditionalTarget, key);
+
+      // do same as V2 proxy, call to autoProxyObject:
+      // Array, Set, Map length functions fireChange(object, OB_LENGTH)
+      if (typeof ret === "object" && (Array.isArray(ret) || ret instanceof Set || ret instanceof Map)) {
+        ObserveV2.getObserve().addRefV2Compatibility(ret, ObserveV2.OB_LENGTH);
+      }
+
       return ret;
     }
 
@@ -730,20 +757,52 @@ class SubscribableArrayHandler extends SubscribableHandler {
         return result;
       };
     } else {
-      return ret.bind(target); 
+      return ret.bind(target);
     }
   }
 
-  set(target: Array<any>, key: string | symbol, value: any): boolean {
-    if (this.enableV2Compatible_) {
-      const originalLength = target.length;
-      const result = super.set(target, key, value);
-      const arrayLenChanged = target.length !== originalLength;
-      ObserveV2.getObserve().fireChange(target, ObserveV2.OB_LENGTH);
-      return result;
-    } else {
-      return super.set(target, key, value);
+  // Introduced a separate set function in ArrayHandlers to reduce multiple condition checks, specifically
+  // for handling fireChange on array length changes.
+  // If property is a symbol, super.set gets called used to manage all symbol-related cases.
+  public set(target: Array<any>, property: PropertyKey, newValue: any): boolean {
+
+    if (typeof property === 'symbol') {
+      // Handle symbols using the parent class
+      return super.set(target, property, newValue);
     }
+
+    let oldArrayLength: number | undefined;
+
+    if (Reflect.get(target, property) === newValue) {
+      return true;
+    }
+    if (this.enableV2Compatible_) {
+      oldArrayLength = target.length;
+    }
+
+    Reflect.set(target, property, newValue);
+    const propString = String(property);
+
+    if (TrackedObject.isCompatibilityMode(target)) {
+      stateMgmtConsole.debug(`SubscribableArrayHandler: set ObservedObject property '${propString}' (object property tracking compatibility mode).`);
+      this.notifyObjectPropertyHasChanged(propString, newValue);
+    } else {
+      if (this.isPropertyTracked(target, propString)) {
+        stateMgmtConsole.debug(`SubscribableArrayHandler: set ObservedObject property '@Track ${propString}'.`);
+        this.notifyTrackedObjectPropertyHasChanged(propString);
+      } else {
+        stateMgmtConsole.debug(`SubscribableArrayHandler: set ObservedObject property '${propString}' (object property tracking mode) is NOT @Tracked!`);
+        return true;
+      }
+    }
+
+    if (this.enableV2Compatible_) {
+      const arrayLenChanged = target.length !== oldArrayLength;
+      ObserveV2.getObserve().fireChange(target, arrayLenChanged ? ObserveV2.OB_LENGTH : propString);
+      ObservedObject.enableV2CompatibleNoWarn(newValue);
+    }
+    //
+    return true;
   }
 }
 
@@ -913,11 +972,6 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
       return;
     }
 
-    // Mark the object as visited to prevent circular references in future calls
-    visitedObjects.add(obj);
-
-    obj[SubscribableHandler.ENABLE_V2_COMPATIBLE] = true;
-
     // Get the unproxied/raw object
     const rawObj = ObservedObject.GetRawObject(obj);
 
@@ -925,15 +979,16 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     if (!rawObj || typeof rawObj !== 'object') {
       return;
     }
+    stateMgmtConsole.debug(`enableV2CompatibleInternal object of class '${obj?.constructor?.name}'`)
+    // Mark the object as visited to prevent circular references in future calls
+    visitedObjects.add(obj);
+
+    obj[SubscribableHandler.ENABLE_V2_COMPATIBLE] = true;
 
     // Recursively process Array elements
     if (Array.isArray(rawObj)) {
       rawObj.forEach(item => this.enableV2CompatibleNoWarn(item));
-    } else if (rawObj instanceof Map) { // Recursively process nested Map values
-      for (const item of rawObj.values()) {
-        this.enableV2CompatibleNoWarn(item);
-      }
-    } else if (rawObj instanceof Set) { // Recursively process nested Set values
+    } else if ((rawObj instanceof Map) || (rawObj instanceof Set)) { // Recursively process nested Map values
       for (const item of rawObj.values()) {
         this.enableV2CompatibleNoWarn(item);
       }

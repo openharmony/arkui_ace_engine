@@ -45,6 +45,7 @@ public:
         const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, float toolbarHeight,
         bool isNeedToCreatePaddingAndBorder);
     static void UpdateContentSafeAreaPadding(const RefPtr<NavDestinationNodeBase>& nodeBase, float titleBarHeight);
+    static bool EnableToolBarAdaptation(const RefPtr<NavDestinationNodeBase>& nodeBase);
 };
 
 } // namespace OHOS::Ace::NG

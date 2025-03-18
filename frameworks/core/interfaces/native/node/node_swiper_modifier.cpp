@@ -434,14 +434,32 @@ void GetFontContent(
     }
 }
 
+void ParseDigitIndicatorBottomAndIgnoreSize(const std::vector<std::string>& digitIndicatorInfo,
+    SwiperDigitalParameters& digitalParameters)
+{
+    auto digitBottomValue =
+        digitIndicatorInfo[DIGIT_INDICATOR_BOTTOM] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_BOTTOM];
+    auto ignoreSize = digitIndicatorInfo[DIGIT_INDICATOR_IGNORE_SIZE] == "-" ? "" :
+        digitIndicatorInfo[DIGIT_INDICATOR_IGNORE_SIZE];
+    
+    auto setIgnoreSize = digitIndicatorInfo[DIGIT_INDICATOR_SET_IGNORE_SIZE] == "-" ? "" :
+        digitIndicatorInfo[DIGIT_INDICATOR_SET_IGNORE_SIZE];
+
+    auto bottom = ParseIndicatorDimension(digitBottomValue);
+    digitalParameters.dimBottom = bottom;
+    if (!bottom.has_value() || (bottom.has_value() && (bottom.value() == 0.0_vp))) {
+        digitalParameters.ignoreSizeValue = (ignoreSize == "1" ? true : false);
+    } else {
+        digitalParameters.ignoreSizeValue = false;
+    }
+}
+
 SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& digitIndicatorInfo)
 {
     auto dotLeftValue = digitIndicatorInfo[DIGIT_INDICATOR_LEFT] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_LEFT];
     auto dotTopValue = digitIndicatorInfo[DIGIT_INDICATOR_TOP] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_TOP];
     auto dotRightValue =
         digitIndicatorInfo[DIGIT_INDICATOR_RIGHT] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_RIGHT];
-    auto dotBottomValue =
-        digitIndicatorInfo[DIGIT_INDICATOR_BOTTOM] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_BOTTOM];
     auto fontColorValue =
         digitIndicatorInfo[DIGIT_INDICATOR_FONT_COLOR] == "-" ? "" : digitIndicatorInfo[DIGIT_INDICATOR_FONT_COLOR];
     auto selectedFontColorValue = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_FONT_COLOR] == "-"
@@ -459,11 +477,6 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     auto selectedDigitFontWeight = digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT] == "-"
                                        ? ""
                                        : digitIndicatorInfo[DIGIT_INDICATOR_SELECTED_DIGIT_FONT_WEIGHT];
-    auto ignoreSize = digitIndicatorInfo[DIGIT_INDICATOR_IGNORE_SIZE] == "-" ? "" :
-        digitIndicatorInfo[DIGIT_INDICATOR_IGNORE_SIZE];
-    
-    auto setIgnoreSize = digitIndicatorInfo[DIGIT_INDICATOR_SET_IGNORE_SIZE] == "-" ? "" :
-        digitIndicatorInfo[DIGIT_INDICATOR_SET_IGNORE_SIZE];
 
     auto pipelineContext = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
@@ -474,7 +487,7 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     digitalParameters.dimLeft = ParseIndicatorDimension(dotLeftValue);
     digitalParameters.dimTop = ParseIndicatorDimension(dotTopValue);
     digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
-    digitalParameters.dimBottom = ParseIndicatorDimension(dotBottomValue);
+
     Color fontColor;
     parseOk = Color::ParseColorString(fontColorValue, fontColor);
     digitalParameters.fontColor =
@@ -482,7 +495,7 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     parseOk = Color::ParseColorString(selectedFontColorValue, fontColor);
     digitalParameters.selectedFontColor =
         parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
-    digitalParameters.ignoreSizeValue = (ignoreSize == "1" ? true : false);
+    ParseDigitIndicatorBottomAndIgnoreSize(digitIndicatorInfo, digitalParameters);
     GetFontContent(digitFontSize, digitFontWeight, false, digitalParameters);
     GetFontContent(selectedDigitFontSize, selectedDigitFontWeight, true, digitalParameters);
     return digitalParameters;
@@ -615,6 +628,15 @@ void InitSwiperArrowParameters(
     swiperArrowParameters.arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
 }
 
+int32_t VectorStringToInt(std::vector<std::string>& vectorStr, int32_t index)
+{
+    int32_t value = 0;
+    if (index < vectorStr.size()) {
+        value = StringUtils::StringToInt(vectorStr[index]);
+    }
+    return value;
+}
+
 void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -622,8 +644,8 @@ void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
     std::vector<std::string> res;
     std::string displayArrowValues = std::string(displayArrowStr);
     StringUtils::StringSplitter(displayArrowValues, '|', res);
-    int32_t displayArrowValue = StringUtils::StringToInt(res[DISPLAY_ARROW_VALUE]);
-    int32_t displayArrowCAPI = StringUtils::StringToInt(res[DISPLAY_ARROW_CAPI]);
+    int32_t displayArrowValue = VectorStringToInt(res, DISPLAY_ARROW_VALUE);
+    int32_t displayArrowCAPI = VectorStringToInt(res, DISPLAY_ARROW_CAPI);
     if (displayArrowValue == DISPLAY_ARROW_OBJECT) {
         SwiperArrowParameters swiperArrowParameters;
         if (!GetArrowInfo(res, swiperArrowParameters)) {
@@ -655,7 +677,7 @@ void SetSwiperDisplayArrow(ArkUINodeHandle node, ArkUI_CharPtr displayArrowStr)
         SwiperModelNG::SetDisplayArrow(frameNode, false);
         return;
     }
-    int32_t isHoverShow = StringUtils::StringToInt(res[DISPLAY_ARROW_IS_HOVER_SHOW_INDEX]);
+    int32_t isHoverShow = VectorStringToInt(res, DISPLAY_ARROW_IS_HOVER_SHOW_INDEX);
     if (isHoverShow != DISPLAY_ARROW_IS_HOVER_SHOW_UNDEFINED) {
         SwiperModelNG::SetHoverShow(frameNode, isHoverShow == 1 ? true : false);
     } else {

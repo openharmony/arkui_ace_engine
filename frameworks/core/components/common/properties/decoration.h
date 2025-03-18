@@ -23,30 +23,34 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/rect.h"
+#include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animatable_color.h"
+#include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/common_decoration.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components/common/properties/effect_option.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/outline_style.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/theme_utils.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 
+class PipelineContext;
+
 constexpr double CENTER_OFFSET = 50.0;
-constexpr double FULL_IMG_SIZE = 100.0;
 constexpr double BOX_BEGIN_SIZE = 0.0;
 constexpr double BOX_END_SIZE = 100.0;
 constexpr double PERCENT_TRANSLATE = 100.0;
@@ -92,95 +96,23 @@ enum class SpreadMethod {
     REPEAT,
 };
 
-struct MotionBlurAnchor {
-    float x = 0.0f;
-    float y = 0.0f;
-    bool operator==(const MotionBlurAnchor& other) const
-    {
-        return NearEqual(x, other.x) && NearEqual(y, other.y);
-    }
-    bool operator!=(const MotionBlurAnchor& other) const
-    {
-        return !operator==(other);
-    }
+enum class HapticFeedbackMode {
+    DISABLED,
+    ENABLED,
+    AUTO,
 };
 
-struct MotionBlurOption {
-    float radius = 0.0f;
-    MotionBlurAnchor anchor;
-    bool operator==(const MotionBlurOption& other) const
+struct SysOptions {
+    bool disableSystemAdaptation = true;
+    bool operator==(const SysOptions& other) const
     {
-        return NearEqual(radius, other.radius) && anchor == other.anchor;
-    }
-    bool operator!=(const MotionBlurOption& other) const
-    {
-        return !operator==(other);
+        return disableSystemAdaptation == other.disableSystemAdaptation;
     }
 };
 
 struct MenuPreviewAnimationOptions {
     float scaleFrom { -1.0f };
     float scaleTo { -1.0f };
-};
-
-
-
-struct BrightnessOption {
-    double rate { 1.0f };
-    double lightUpDegree { 0.0f };
-    double cubicCoeff { 0.0f };
-    double quadCoeff { 0.0f };
-    double saturation { 1.0f };
-    std::vector<float> posRGB = { 0.0f, 0.0f, 0.0f };
-    std::vector<float> negRGB = { 0.0f, 0.0f, 0.0f };
-    double fraction { 1.0f };
-    bool operator==(const BrightnessOption& other) const
-    {
-        return NearEqual(rate, other.rate) && NearEqual(lightUpDegree, other.lightUpDegree) &&
-               NearEqual(cubicCoeff, other.cubicCoeff) && NearEqual(quadCoeff, other.quadCoeff) &&
-               NearEqual(saturation, other.saturation) && posRGB == other.posRGB && negRGB == other.negRGB &&
-               NearEqual(fraction, other.fraction);
-    }
-    std::unique_ptr<JsonValue> GetJsonObject() const;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter, std::string key) const;
-};
-
-struct PixStretchEffectOption {
-    Dimension left;
-    Dimension top;
-    Dimension right;
-    Dimension bottom;
-    bool operator==(const PixStretchEffectOption& other) const
-    {
-        return left == other.left && top == other.top && right == other.right && bottom == other.bottom;
-    }
-
-    bool IsPercentOption() const
-    {
-        return (left.Unit() == DimensionUnit::PERCENT && top.Unit() == DimensionUnit::PERCENT &&
-                right.Unit() == DimensionUnit::PERCENT && bottom.Unit() == DimensionUnit::PERCENT);
-    }
-
-    void ResetValue()
-    {
-        left = Dimension(0.0f);
-        top = Dimension(0.0f);
-        right = Dimension(0.0f);
-        bottom = Dimension(0.0f);
-    }
-
-    std::string ToString() const
-    {
-        return std::string("PixStretchEffectOption (")
-            .append(left.ToString())
-            .append(",")
-            .append(top.ToString())
-            .append(",")
-            .append(right.ToString())
-            .append(",")
-            .append(bottom.ToString())
-            .append(")");
-    }
 };
 
 struct LinearGradientInfo {
@@ -582,281 +514,6 @@ private:
     std::string href_;
 };
 
-enum class ACE_EXPORT BackgroundImageSizeType {
-    CONTAIN = 0,
-    COVER,
-    AUTO,
-    FILL,
-    LENGTH,
-    PERCENT,
-};
-
-enum class ACE_EXPORT ClickEffectLevel {
-    UNDEFINED = -1,
-    LIGHT = 0,
-    MIDDLE,
-    HEAVY,
-};
-
-struct ClickEffectInfo {
-    ClickEffectLevel level = ClickEffectLevel::LIGHT;
-    float scaleNumber = 0.0f;
-    bool operator==(const ClickEffectInfo& other) const
-    {
-        return level == other.level && NearEqual(scaleNumber, other.scaleNumber);
-    }
-};
-
-class ACE_FORCE_EXPORT BackgroundImageSize final {
-public:
-    BackgroundImageSize() = default;
-    BackgroundImageSize(BackgroundImageSizeType type, double value) : typeX_(type), valueX_(value) {}
-    BackgroundImageSize(BackgroundImageSizeType typeX, double valueX, BackgroundImageSizeType typeY, double valueY)
-        : typeX_(typeX), valueX_(valueX), typeY_(typeY), valueY_(valueY)
-    {}
-    ~BackgroundImageSize() = default;
-
-    void SetSizeTypeX(BackgroundImageSizeType type);
-    void SetSizeTypeY(BackgroundImageSizeType type);
-    void SetSizeValueX(double value);
-    void SetSizeValueY(double value);
-    bool IsValid() const;
-    BackgroundImageSizeType GetSizeTypeX() const;
-    BackgroundImageSizeType GetSizeTypeY() const;
-    double GetSizeValueX() const;
-    double GetSizeValueY() const;
-
-    BackgroundImageSize operator+(const BackgroundImageSize& size) const;
-    BackgroundImageSize operator-(const BackgroundImageSize& size) const;
-    BackgroundImageSize operator*(double value) const;
-
-    bool operator==(const BackgroundImageSize& size) const;
-    bool operator!=(const BackgroundImageSize& size) const;
-
-    std::string ToString() const;
-
-private:
-    BackgroundImageSizeType typeX_ { BackgroundImageSizeType::AUTO };
-    double valueX_ = 0.0;
-    BackgroundImageSizeType typeY_ { BackgroundImageSizeType::AUTO };
-    double valueY_ = 0.0;
-};
-
-enum class ACE_EXPORT BackgroundImagePositionType {
-    PERCENT = 0,
-    PX,
-};
-
-class ACE_EXPORT BackgroundImagePosition {
-public:
-    BackgroundImagePosition() = default;
-    ~BackgroundImagePosition() = default;
-    BackgroundImagePosition(
-        BackgroundImagePositionType typeX, double valueX, BackgroundImagePositionType typeY, double valueY)
-        : typeX_(typeX), typeY_(typeY), valueX_(AnimatableDimension(valueX)), valueY_(AnimatableDimension(valueY))
-    {}
-
-    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
-    {
-        valueX_.SetContextAndCallback(context, callback);
-        valueY_.SetContextAndCallback(context, callback);
-    }
-
-    void SetSizeTypeX(BackgroundImagePositionType type)
-    {
-        typeX_ = type;
-    }
-
-    void SetSizeX(const AnimatableDimension& sizeX)
-    {
-        if (sizeX.Unit() == DimensionUnit::PERCENT) {
-            typeX_ = BackgroundImagePositionType::PERCENT;
-        } else {
-            typeX_ = BackgroundImagePositionType::PX;
-        }
-        valueX_ = sizeX;
-    }
-
-    void SetSizeTypeY(BackgroundImagePositionType type)
-    {
-        typeY_ = type;
-    }
-
-    void SetSizeY(const AnimatableDimension& sizeY)
-    {
-        if (sizeY.Unit() == DimensionUnit::PERCENT) {
-            typeY_ = BackgroundImagePositionType::PERCENT;
-        } else {
-            typeY_ = BackgroundImagePositionType::PX;
-        }
-        valueY_ = sizeY;
-    }
-
-    void SetSizeValueX(double value)
-    {
-        valueX_ = AnimatableDimension(value);
-    }
-
-    void SetSizeValueY(double value)
-    {
-        valueY_ = AnimatableDimension(value);
-    }
-
-    void SetIsAlign(bool isAlign)
-    {
-        isAlign_ = isAlign;
-    }
-
-    BackgroundImagePositionType GetSizeTypeX() const
-    {
-        return typeX_;
-    }
-
-    BackgroundImagePositionType GetSizeTypeY() const
-    {
-        return typeY_;
-    }
-
-    const AnimatableDimension& GetSizeX() const
-    {
-        return valueX_;
-    }
-
-    const AnimatableDimension& GetSizeY() const
-    {
-        return valueY_;
-    }
-
-    double GetSizeValueX() const
-    {
-        return valueX_.Value();
-    }
-
-    double GetSizeValueY() const
-    {
-        return valueY_.Value();
-    }
-
-    bool IsAlign() const
-    {
-        return isAlign_;
-    }
-
-    BackgroundImagePosition operator+(const BackgroundImagePosition& position) const;
-
-    BackgroundImagePosition operator-(const BackgroundImagePosition& position) const;
-
-    BackgroundImagePosition operator*(double value) const;
-
-    bool operator==(const BackgroundImagePosition& backgroundImagePosition) const;
-
-    bool operator!=(const BackgroundImagePosition& backgroundImagePosition) const;
-
-    std::string ToString() const;
-
-private:
-    BackgroundImagePositionType typeX_ { BackgroundImagePositionType::PX };
-    BackgroundImagePositionType typeY_ { BackgroundImagePositionType::PX };
-    AnimatableDimension valueX_ = AnimatableDimension(-1.0);
-    AnimatableDimension valueY_ = AnimatableDimension(0.0);
-    bool isAlign_ = false;
-};
-
-class ImageObjectPosition final : public BackgroundImagePosition {};
-
-class BackgroundImage final : public AceType {
-    DECLARE_ACE_TYPE(BackgroundImage, AceType);
-
-public:
-    BackgroundImage() = default;
-    ~BackgroundImage() override = default;
-
-    const BackgroundImageSize& GetImageSize() const
-    {
-        return imageSize_;
-    }
-
-    const BackgroundImagePosition& GetImagePosition() const
-    {
-        return imagePosition_;
-    }
-
-    ImageRepeat GetImageRepeat() const
-    {
-        return imageRepeat_;
-    }
-
-    const std::string& GetSrc() const
-    {
-        return src_;
-    }
-
-    void SetImageSize(BackgroundImageSize imageSize)
-    {
-        imageSize_ = imageSize;
-    }
-
-    void SetImageSize(BackgroundImageSizeType type, double value = FULL_IMG_SIZE)
-    {
-        imageSize_ = BackgroundImageSize(type, value);
-    }
-
-    void SetImageSize(BackgroundImageSizeType typeX, double valueX, BackgroundImageSizeType typeY, double valueY)
-    {
-        imageSize_ = BackgroundImageSize(typeX, valueX, typeY, valueY);
-    }
-
-    void SetImagePosition(const BackgroundImagePosition& imagePosition)
-    {
-        imagePosition_ = imagePosition;
-    }
-
-    void SetImagePosition(
-        BackgroundImagePositionType typeX, double valueX, BackgroundImagePositionType typeY, double valueY)
-    {
-        imagePosition_ = BackgroundImagePosition(typeX, valueX, typeY, valueY);
-    }
-
-    void SetImageRepeat(const ImageRepeat& imageRepeat)
-    {
-        imageRepeat_ = imageRepeat;
-    }
-
-    void SetSrc(const std::string& src, const RefPtr<ThemeConstants>& themeConstants)
-    {
-        // If match the regex, src with the outer "url()" removed is returned.
-        // Otherwise return a copy of src directly.
-        auto imgSrc = std::regex_replace(src, std::regex(R"(^url\(\s*['"]?\s*([^()]+?)\s*['"]?\s*\)$)"), "$1");
-        src_ = ThemeUtils::ProcessImageSource(imgSrc, themeConstants);
-    }
-
-    void SetParsedSrc(const std::string& src)
-    {
-        // src is processed by ParseJsMedia function
-        src_ = src;
-    }
-
-    bool operator==(const BackgroundImage& image) const
-    {
-        bool fileName = src_ == image.GetSrc();
-        bool size = imageSize_ == image.GetImageSize();
-        bool position = imagePosition_ == image.GetImagePosition();
-        bool repeat = imageRepeat_ == image.GetImageRepeat();
-        return fileName && size && position && repeat;
-    }
-
-    bool operator!=(const BackgroundImage& image) const
-    {
-        return !operator==(image);
-    }
-
-private:
-    std::string src_;
-    BackgroundImageSize imageSize_;
-    BackgroundImagePosition imagePosition_;
-    ImageRepeat imageRepeat_ { ImageRepeat::REPEAT };
-};
-
 class ArcBackground final : public AceType {
     DECLARE_ACE_TYPE(ArcBackground, AceType);
 
@@ -933,57 +590,7 @@ public:
     }
 
     void SetGradient(const Gradient& gradient, const WeakPtr<PipelineContext>& context = nullptr,
-        const RenderNodeAnimationCallback& callback = nullptr)
-    {
-        gradient_ = gradient;
-        if (callback) {
-            switch (gradient_.GetType()) {
-                case GradientType::LINEAR:
-                    if (gradient_.GetLinearGradient().angle) {
-                        gradient_.GetLinearGradient().angle->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    break;
-                case GradientType::SWEEP:
-                    if (gradient_.GetSweepGradient().centerX) {
-                        gradient_.GetSweepGradient().centerX->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    if (gradient_.GetSweepGradient().centerY) {
-                        gradient_.GetSweepGradient().centerY->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    if (gradient_.GetSweepGradient().startAngle) {
-                        gradient_.GetSweepGradient().startAngle->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    if (gradient_.GetSweepGradient().endAngle) {
-                        gradient_.GetSweepGradient().endAngle->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    if (gradient_.GetSweepGradient().rotation) {
-                        gradient_.GetSweepGradient().rotation->SetContextAndCallbackAfterFirstAssign(context, callback);
-                    }
-                    break;
-                case GradientType::RADIAL:
-                    if (gradient_.GetRadialGradient().radialHorizontalSize) {
-                        gradient_.GetRadialGradient().radialHorizontalSize->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    if (gradient_.GetRadialGradient().radialVerticalSize) {
-                        gradient_.GetRadialGradient().radialVerticalSize->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    if (gradient_.GetRadialGradient().radialCenterX) {
-                        gradient_.GetRadialGradient().radialCenterX->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    if (gradient_.GetRadialGradient().radialCenterY) {
-                        gradient_.GetRadialGradient().radialCenterY->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+        const RenderNodeAnimationCallback& callback = nullptr);
 
     void SetBorderImageGradient(const Gradient& gradient)
     {

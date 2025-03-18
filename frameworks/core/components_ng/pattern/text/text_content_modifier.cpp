@@ -430,14 +430,7 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
         paintOffset_.GetY(), contentRect.ToString().c_str());
 
-    PropertyChangeFlag flag = 0;
-    if (NeedMeasureUpdate(flag)) {
-        host->MarkDirtyNode(flag);
-        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->OnPropertyChangeMeasure();
-    }
-
+    AnimationMeasureUpdate(host);
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
         CHECK_NULL_VOID(contentSize_);
@@ -453,7 +446,10 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
-            textPattern->DumpRecord(std::to_string(host->GetId()) + " ,paintOffset:" + paintOffset_.ToString().c_str());
+            auto logTag = "DrawText paintOffset:" + paintOffset_.ToString() +
+                          " ,IncludeIndent:" + std::to_string(pManager->GetTextWidthIncludeIndent());
+            textPattern->DumpRecord(logTag);
+            textPattern->LogForFormRender(logTag);
             DrawText(canvas, pManager);
         } else {
             // Racing
@@ -809,6 +805,17 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
     }
 }
 
+void TextContentModifier::AnimationMeasureUpdate(const RefPtr<FrameNode>& host)
+{
+    PropertyChangeFlag flag = 0;
+    if (NeedMeasureUpdate(flag)) {
+        host->MarkDirtyNode(flag);
+        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->OnPropertyChangeMeasure();
+    }
+}
+
 bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 {
     flag = 0;
@@ -1022,6 +1029,10 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
 
     marqueeSet_ = true;
     ResumeTextRace(false);
+
+    if (!IsMarqueeVisible()) {
+        PauseAnimation();
+    }
 }
 
 void TextContentModifier::StopTextRace()
@@ -1039,7 +1050,7 @@ void TextContentModifier::StopTextRace()
 void TextContentModifier::ResumeAnimation()
 {
     CHECK_NULL_VOID(raceAnimation_);
-    if (!CheckMarqueeState(MarqueeState::PAUSED)) {
+    if (!CheckMarqueeState(MarqueeState::PAUSED) || !IsMarqueeVisible()) {
         return;
     }
     AnimationUtils::ResumeAnimation(raceAnimation_);
@@ -1450,5 +1461,18 @@ void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const Fade
     canvas.DrawRect(clipInnerRect);
     canvas.DetachBrush();
     canvas.Restore();
+}
+
+bool TextContentModifier::IsMarqueeVisible() const
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, true);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_RETURN(host, true);
+    RectF visibleRect;
+    RectF visibleInnerRect;
+    RectF frameRect;
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    return Positive(visibleInnerRect.Width()) && Positive(visibleInnerRect.Height());
 }
 } // namespace OHOS::Ace::NG

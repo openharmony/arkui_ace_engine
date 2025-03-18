@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "base/geometry/arc.h"
 #include "base/memory/ace_type.h"
+#include "base/thread/task_executor.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
@@ -38,6 +39,7 @@ class ProgressModifier : public ContentModifier {
 
 public:
     explicit ProgressModifier(
+        const WeakPtr<FrameNode>& host,
         const ProgressAnimatableProperty& progressAnimatableProperty = ProgressAnimatableProperty {});
     ~ProgressModifier() override = default;
     void onDraw(DrawingContext& context) override;
@@ -143,6 +145,7 @@ private:
         return container && container->IsDynamicRender() &&
                container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
     }
+    uint32_t GetThemeScopeId() const;
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
@@ -188,6 +191,7 @@ private:
     float sweepingDateBackup_ = 0.0f;
     bool dateUpdated_ = false;
     Dimension ringProgressLeftPadding_ = 0.0_vp;
+    WeakPtr<FrameNode> host_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };

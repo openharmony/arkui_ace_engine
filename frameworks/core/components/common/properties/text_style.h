@@ -471,6 +471,16 @@ public:
         lineSpacing_ = lineSpacing;
     }
 
+    const Dimension& GetParagraphSpacing() const
+    {
+        return paragraphSpacing_;
+    }
+
+    void SetParagraphSpacing(const Dimension& paragraphSpacing)
+    {
+        paragraphSpacing_ = paragraphSpacing;
+    }
+
     bool HasHeightOverride() const
     {
         return hasHeightOverride_;
@@ -806,6 +816,7 @@ private:
     Dimension textIndent_ { 0.0f, DimensionUnit::PX };
     Dimension letterSpacing_;
     Dimension lineSpacing_;
+    Dimension paragraphSpacing_ { 0.0f, DimensionUnit::PX };
     FontWeight fontWeight_ { FontWeight::NORMAL };
     FontStyle fontStyle_ { FontStyle::NORMAL };
     TextBaseline textBaseline_ { TextBaseline::ALPHABETIC };

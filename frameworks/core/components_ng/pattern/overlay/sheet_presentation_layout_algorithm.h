@@ -76,6 +76,10 @@ public:
 
     void CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper);
     void CalculateSheetOffsetInOtherScenes(LayoutWrapper* layoutWrapper);
+
+    void LayoutTitleBuilder(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
+    void LayoutScrollNode(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
+    void LayoutCloseIcon(const NG::OffsetF& translate, LayoutWrapper* layoutWrapper);
 private:
     float GetWidthByScreenSizeType(const float maxWidth, LayoutWrapper* layoutWrapper) const;
     float GetHeightByScreenSizeType(const float maxHeight, const float maxWidth, LayoutWrapper* layoutWrapper) const;

@@ -13,27 +13,25 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
-#include "base/system_bar/system_bar_style.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_navdestination_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_navigation_stack_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
-#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
-#include "core/components_ng/pattern/navrouter/navdestination_context.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_ng/base/view_stack_model.h"
 
 #include "cj_lambda.h"
 #include "pixel_map_impl.h"
+
+#include "base/system_bar/system_bar_style.h"
+#include "base/utils/utils.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_navigation_stack_ffi.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
+#include "core/components_ng/property/safe_area_insets.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
 namespace {
-const std::vector<Dimension> TITLE_HEIGHT = {
-    NG::SINGLE_LINE_TITLEBAR_HEIGHT,
-    NG::DOUBLE_LINE_TITLEBAR_HEIGHT
-};
+const std::vector<Dimension> TITLE_HEIGHT = { NG::SINGLE_LINE_TITLEBAR_HEIGHT, NG::DOUBLE_LINE_TITLEBAR_HEIGHT };
 
 constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
 constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
@@ -162,14 +160,16 @@ void ParseTitlebarOptions(CJNavigationTitleOptions options)
     NG::NavigationTitlebarOptions titlebarOptions;
     titlebarOptions.bgOptions.color.reset();
     titlebarOptions.bgOptions.color = Color(options.backgroundColor);
-    titlebarOptions.bgOptions.blurStyle.reset();
-    titlebarOptions.bgOptions.blurStyle = static_cast<BlurStyle>(options.backgroundBlurStyle);
+    titlebarOptions.bgOptions.blurStyleOption.reset();
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = static_cast<BlurStyle>(options.backgroundBlurStyle);
+    titlebarOptions.bgOptions.blurStyleOption = blurStyleOption;
     titlebarOptions.brOptions.paddingStart.reset();
-    titlebarOptions.brOptions.paddingStart = CalcDimension(options.paddingStart,
-        static_cast<DimensionUnit>(options.paddingStartUnit));
+    titlebarOptions.brOptions.paddingStart =
+        CalcDimension(options.paddingStart, static_cast<DimensionUnit>(options.paddingStartUnit));
     titlebarOptions.brOptions.paddingEnd.reset();
-    titlebarOptions.brOptions.paddingEnd = CalcDimension(options.paddingEnd,
-        static_cast<DimensionUnit>(options.paddingEndUnit));
+    titlebarOptions.brOptions.paddingEnd =
+        CalcDimension(options.paddingEnd, static_cast<DimensionUnit>(options.paddingEndUnit));
     titlebarOptions.brOptions.barStyle.reset();
     titlebarOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle);
     NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(titlebarOptions));
@@ -187,22 +187,22 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithBuilderOptions(void (*builder)
     ParseTitlebarOptions(options);
 }
 
-void FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitleOptions(const char* main,
-    const char* sub, CJNavigationTitleOptions options)
+void FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitleOptions(
+    const char* main, const char* sub, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitle(main, sub);
     ParseTitlebarOptions(options);
 }
 
-void FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeightOptions(void (*builder)(),
-    int32_t titleHeightMode, CJNavigationTitleOptions options)
+void FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeightOptions(
+    void (*builder)(), int32_t titleHeightMode, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeight(builder, titleHeightMode);
     ParseTitlebarOptions(options);
 }
 
-void FfiOHOSAceFrameworkNavdestinationSetTitleWithHeightOptions(void (*builder)(), double height,
-    int32_t heightUnit, CJNavigationTitleOptions options)
+void FfiOHOSAceFrameworkNavdestinationSetTitleWithHeightOptions(
+    void (*builder)(), double height, int32_t heightUnit, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithHeight(builder, height, heightUnit);
     ParseTitlebarOptions(options);
@@ -227,8 +227,8 @@ void FfiOHOSAceFrameworkNavdestinationSetBackButtonIconWithUrl(const char* url)
     std::vector<std::string> nameList;
     nameList.emplace_back("");
     nameList.emplace_back("");
-    NavDestinationModel::GetInstance()->SetBackButtonIcon(nullptr, std::string(url),
-        imageOption, pixelMapRef, nameList);
+    NavDestinationModel::GetInstance()->SetBackButtonIcon(
+        nullptr, std::string(url), imageOption, pixelMapRef, nameList);
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetBackButtonIconWithPixelMap(int64_t pixelMapId)
@@ -290,12 +290,13 @@ void FfiOHOSAceFrameworkNavdestinationIgnoreLayoutSafeArea(VectorInt32Ptr types,
 {
     const auto& typesArray = *reinterpret_cast<std::vector<int32_t>*>(types);
     const auto& edgeArray = *reinterpret_cast<std::vector<int32_t>*>(edges);
-    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL};
+    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
     if (typesArray.size() > 0) {
         uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
         for (size_t i = 0; i < typesArray.size(); ++i) {
             auto value = typesArray.at(i);
-            if (value >= SAFE_AREA_TYPE_LIMIT || value == SAFE_AREA_EDGE_SYSTEM) {
+            if (value >= static_cast<int32_t>(SAFE_AREA_TYPE_LIMIT) ||
+                value == static_cast<int32_t>(SAFE_AREA_EDGE_SYSTEM)) {
                 safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
                 break;
             }
@@ -306,11 +307,11 @@ void FfiOHOSAceFrameworkNavdestinationIgnoreLayoutSafeArea(VectorInt32Ptr types,
         uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
         for (size_t i = 0; i < edgeArray.size(); ++i) {
             auto value = edgeArray.at(i);
-            if (value >= SAFE_AREA_EDGE_LIMIT) {
+            if (value >= static_cast<int32_t>(SAFE_AREA_EDGE_LIMIT)) {
                 safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
                 break;
             }
-            if (value == SAFE_AREA_EDGE_TOP || value== SAFE_AREA_EDGE_BOTTOM) {
+            if (value == SAFE_AREA_EDGE_TOP || value == SAFE_AREA_EDGE_BOTTOM) {
                 safeAreaEdge |= (1 << (uint32_t)value);
             }
         }
@@ -354,4 +355,4 @@ void FfiOHOSAceFrameworkNavdestinationSetOnWillDisappear(void (*callback)())
 {
     NavDestinationModel::GetInstance()->SetOnWillDisAppear(CJLambda::Create(callback));
 }
-} //extern "C"
+} // extern "C"

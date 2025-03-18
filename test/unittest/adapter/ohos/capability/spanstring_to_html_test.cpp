@@ -177,7 +177,6 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert001, TestSize.Level1)
     EXPECT_EQ(items.size(), spanString->GetSpanItems().size());
 }
 
-
 /**
  * @tc.name: SpanStringConvert002
  * @tc.desc: This test case checks the HTML conversion when special HTML tags like `<strong>`, `<del>`,
@@ -396,7 +395,6 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert006, TestSize.Level1)
      */
     EXPECT_EQ(items.size(), spanString->GetSpanItems().size());
 }
-
 
 /**
  * @tc.name: SpanStringConvert007

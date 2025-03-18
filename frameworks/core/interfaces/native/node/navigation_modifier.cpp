@@ -288,7 +288,9 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
         finalOptions.bgOptions.color = Color(options.colorValue.value);
     }
     if (options.blurStyle.isSet) {
-        finalOptions.bgOptions.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        BlurStyleOption blurStyleOption;
+        blurStyleOption.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        finalOptions.bgOptions.blurStyleOption = blurStyleOption;
     }
     if (options.barStyle.isSet) {
         finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);

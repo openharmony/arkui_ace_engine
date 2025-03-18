@@ -23,6 +23,8 @@
 namespace OHOS::Ace::NG {
 
 thread_local int64_t currentAccessibilityId_ = 0;
+const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
+    "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
@@ -32,11 +34,6 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         nodeInfo_ = std::make_unique<PerformanceCheckNode>();
         nodeInfo_->codeRow = pos.first;
         nodeInfo_->codeCol = pos.second;
-    }
-    apiVersion_ = Container::GetCurrentApiTargetVersion();
-    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        depth_ = 1;
-        hostPageId_ = INT32_MAX;
     }
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -381,7 +378,7 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     if (parent->IsInDestroying()) {
         parent->SetChildrenInDestroying();
     }
-    if (parent->GetPageId() != 0 && parent->GetPageId() != INT32_MAX) {
+    if (parent->GetPageId() != 0) {
         SetHostPageId(parent->GetPageId());
     }
     AfterMountToParent();
@@ -445,11 +442,7 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    depth_ = -1;
-    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        SetDepth(1);
-        SetHostPageIdByParent(INT32_MAX);
-    }
+    SetDepth(1);
     UpdateThemeScopeId(0);
 }
 
@@ -542,9 +535,6 @@ void UINode::DoAddChild(
         child->UpdateThemeScopeId(themeScopeId);
     }
     child->SetDepth(GetDepth() + 1);
-    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        child->SetHostPageIdByParent(hostPageId_);
-    }
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
         child->UpdateNodeStatus(nodeStatus_);
     }
@@ -1026,6 +1016,9 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
             DumpLog::GetInstance().Append(depth, tag_, static_cast<int32_t>(GetChildren().size()));
         }
     }
+    if (!CheckVisibleOrActive()) {
+        return;
+    }
     for (const auto& item : GetChildren()) {
         item->DumpTree(depth + 1, hasJson);
     }
@@ -1036,6 +1029,34 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson);
     }
+}
+
+void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
+{
+    auto currentNode = JsonUtil::Create(true);
+    auto childrenNodeArray = JsonUtil::CreateArray(true);
+    auto children = GetChildren();
+    currentNode->Put("childSize", static_cast<int32_t>(children.size()));
+    currentNode->Put("ID", nodeId_);
+    currentNode->Put("Depth", GetDepth());
+    currentNode->Put("InstanceId", instanceId_);
+    currentNode->Put("AccessibilityId", accessibilityId_);
+    if (IsDisappearing()) {
+        currentNode->Put("IsDisappearing", IsDisappearing());
+    }
+    DumpInfo(currentNode);
+    for (auto& child : children) {
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(child);
+        if (frameNode && layoutTags_.find(frameNode->GetTag()) != layoutTags_.end() && !frameNode->IsActive()) {
+            continue;
+        }
+        auto childNode = JsonUtil::Create(true);
+        child->DumpTreeJsonForDiff(childNode);
+        childrenNodeArray->PutRef(std::move(childNode));
+    }
+    currentNode->PutRef("children", std::move(childrenNodeArray));
+    std::string key = isRoot_ ? tag_ : tag_ + "_" + std::to_string(nodeId_);
+    json->PutRef(key.c_str(), std::move(currentNode));
 }
 
 void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
@@ -1745,10 +1766,7 @@ bool UINode::GetIsRootBuilderNode() const
 void UINode::CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
     std::list<int32_t>& reservedElmtId, bool isEntry)
 {
-    ContainerScope scope(instanceId_);
-    auto container = Container::Current();
-    auto greatOrEqualApi13 =
-        container && container->GetApiTargetVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    auto greatOrEqualApi13 = GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
         bool needByTransition = child->IsDisappearing();
         if (greatOrEqualApi13) {
@@ -1786,7 +1804,7 @@ void UINode::CollectReservedChildren(std::list<int32_t>& reservedElmtId)
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
-    auto greatOrEqualApi13 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
+    auto greatOrEqualApi13 = GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
         bool needByTransition = child->IsDisappearing();
         if (greatOrEqualApi13) {
@@ -2040,11 +2058,27 @@ bool UINode::HasSkipNode()
 
 void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) || !child || !child->IsReusableNode()) {
+    if (LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) || !child || !child->IsReusableNode()) {
         return;
     }
     if (!IsInDestroying() && child->IsInDestroying()) {
         child->SetDestroying(false, false);
     }
+}
+
+bool UINode::GreatOrEqualAPITargetVersion(PlatformVersion version) const
+{
+    if (!context_ || context_->GetApiTargetVersion() == 0) {
+        return apiVersion_ >= static_cast<int32_t>(version);
+    }
+    return context_->GreatOrEqualAPITargetVersion(version);
+}
+
+bool UINode::LessThanAPITargetVersion(PlatformVersion version) const
+{
+    if (!context_ || context_->GetApiTargetVersion() == 0) {
+        return apiVersion_ < static_cast<int32_t>(version);
+    }
+    return context_->LessThanAPITargetVersion(version);
 }
 } // namespace OHOS::Ace::NG

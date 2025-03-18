@@ -208,13 +208,50 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
     canvas.ClipRoundRect(roundRect, RSClipOp::INTERSECT, true);
 }
 
+void SliderContentModifier::AddStepPoint(float startX, float startY, float endX, float endY, RSCanvas& canvas)
+{
+    auto stepRatio = stepRatio_->Get();
+    if (NearEqual(stepRatio, .0f)) {
+        return;
+    }
+
+    auto stepsLengthX = (endX - startX) * stepRatio;
+    auto stepsLengthY = (endY - startY) * stepRatio;
+    auto stepSize = stepSize_->Get();
+    auto trackThickness = trackThickness_->Get();
+    if (GreatNotEqual(stepSize, trackThickness)) {
+        stepSize = trackThickness;
+    }
+
+    if (reverse_) {
+        while (GreatOrEqual(endX, startX) && GreatOrEqual(endY, startY)) {
+            canvas.DrawCircle(RSPoint(endX, endY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
+            stepPointVec_.emplace_back(PointF(endX, endY));
+            endX -= stepsLengthX;
+            endY -= stepsLengthY;
+        }
+        if (!NearEqual(endX, startX) || !NearEqual(endY, startY)) {
+            stepPointVec_.emplace_back(PointF(startX, startY));
+        }
+    } else {
+        while (LessOrEqual(startX, endX) && LessOrEqual(startY, endY)) {
+            canvas.DrawCircle(RSPoint(startX, startY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
+            stepPointVec_.emplace_back(PointF(startX, startY));
+            startX += stepsLengthX;
+            startY += stepsLengthY;
+        }
+        if (!NearEqual(startX, endX) || !NearEqual(startY, endY)) {
+            stepPointVec_.emplace_back(PointF(endX, endY));
+        }
+    }
+}
+
 void SliderContentModifier::DrawStep(DrawingContext& context)
 {
     if (!isShowStep_->Get()) {
         return;
     }
     auto& canvas = context.canvas;
-    auto stepSize = stepSize_->Get();
     auto stepColor = stepColor_->Get();
     auto backStart = backStart_->Get();
     auto backEnd = backEnd_->Get();
@@ -229,35 +266,13 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
     if (NearEqual(startX, endX) && NearEqual(startY, endY)) {
         return;
     }
-    auto stepsLengthX = (endX - startX) * stepRatio;
-    auto stepsLengthY = (endY - startY) * stepRatio;
-    auto trackThickness = trackThickness_->Get();
-    if (GreatNotEqual(stepSize, trackThickness)) {
-        stepSize = trackThickness;
-    }
 
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(stepColor));
     canvas.AttachBrush(brush);
     stepPointVec_.clear();
-
-    if (reverse_) {
-        while (GreatOrEqual(endX, startX) && GreatOrEqual(endY, startY)) {
-            canvas.DrawCircle(RSPoint(endX, endY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
-            stepPointVec_.emplace_back(PointF(endX, endY));
-            endX -= stepsLengthX;
-            endY -= stepsLengthY;
-        }
-    } else {
-        while (LessOrEqual(startX, endX) && LessOrEqual(startY, endY)) {
-            canvas.DrawCircle(RSPoint(startX, startY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
-            stepPointVec_.emplace_back(PointF(startX, startY));
-            startX += stepsLengthX;
-            startY += stepsLengthY;
-        }
-    }
-
+    AddStepPoint(startX, startY, endX, endY, canvas);
     canvas.DetachBrush();
 }
 

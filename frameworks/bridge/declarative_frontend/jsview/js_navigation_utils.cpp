@@ -25,6 +25,8 @@ namespace {
 // navigation title bar options
 constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
 constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
+constexpr char BACKGROUND_BLUR_STYLE_OPTIONS_PROPERTY[] = "backgroundBlurStyleOptions";
+constexpr char BACKGROUND_EFFECT_PROPERTY[] = "backgroundEffect";
 constexpr char BAR_STYLE_PROPERTY[] = "barStyle";
 constexpr char PADDING_START_PROPERTY[] = "paddingStart";
 constexpr char PADDING_END_PROPERTY[] = "paddingEnd";
@@ -63,7 +65,8 @@ void ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
 void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options)
 {
     options.color.reset();
-    options.blurStyle.reset();
+    options.blurStyleOption.reset();
+    options.effectOption.reset();
     if (!obj->IsObject()) {
         return;
     }
@@ -73,13 +76,25 @@ void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOpt
     if (JSViewAbstract::ParseJsColor(colorProperty, color)) {
         options.color = color;
     }
+    BlurStyleOption styleOptions;
     auto blurProperty = optObj->GetProperty(BACKGROUND_BLUR_STYLE_PROPERTY);
     if (blurProperty->IsNumber()) {
         auto blurStyle = blurProperty->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            options.blurStyle = static_cast<BlurStyle>(blurStyle);
+            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
+    }
+    auto blurOptionProperty = optObj->GetProperty(BACKGROUND_BLUR_STYLE_OPTIONS_PROPERTY);
+    if (blurOptionProperty->IsObject()) {
+        JSViewAbstract::ParseBlurStyleOption(blurOptionProperty, styleOptions);
+    }
+    options.blurStyleOption = styleOptions;
+    auto effectProperty = optObj->GetProperty(BACKGROUND_EFFECT_PROPERTY);
+    if (effectProperty->IsObject()) {
+        EffectOption effectOption;
+        JSViewAbstract::ParseEffectOption(effectProperty, effectOption);
+        options.effectOption = effectOption;
     }
 }
 
@@ -186,7 +201,9 @@ void JSNavigationUtils::ParseTitleBarOptions(
             CHECK_NULL_VOID(theme);
             auto blurStyle = static_cast<BlurStyle>(theme->GetTitlebarBackgroundBlurStyle());
             if (blurStyle != BlurStyle::NO_MATERIAL) {
-                options.bgOptions.blurStyle = blurStyle;
+                BlurStyleOption blurStyleOption;
+                blurStyleOption.blurStyle = blurStyle;
+                options.bgOptions.blurStyleOption = blurStyleOption;
                 options.bgOptions.color = Color::TRANSPARENT;
             }
         }
@@ -216,7 +233,9 @@ void JSNavigationUtils::ParseToolbarOptions(const JSCallbackInfo& info, NG::Navi
         CHECK_NULL_VOID(theme);
         auto blurStyle = static_cast<BlurStyle>(theme->GetToolbarBackgroundBlurStyle());
         if (blurStyle != BlurStyle::NO_MATERIAL) {
-            options.bgOptions.blurStyle = blurStyle;
+            BlurStyleOption blurStyleOption;
+            blurStyleOption.blurStyle = blurStyle;
+            options.bgOptions.blurStyleOption = blurStyleOption;
             options.bgOptions.color = Color::TRANSPARENT;
         }
     }
@@ -238,6 +257,25 @@ void JSNavigationUtils::ParseHideToolBarText(const JSCallbackInfo& info, bool& h
         if (JSViewAbstract::ParseJsBool(hideTextProperty, isHideText)) {
             hideText = isHideText;
         }
+    }
+}
+
+void JSNavigationUtils::ParseToolBarMoreButtonOptions(const JSRef<JSVal>& optObj, NG::MoreButtonOptions& options)
+{
+    if (optObj->IsObject()) {
+        NG::NavigationBackgroundOptions moreButtonBackgroundOptions;
+        ParseBackgroundOptions(optObj, moreButtonBackgroundOptions);
+        options.bgOptions = moreButtonBackgroundOptions;
+    }
+}
+
+void JSNavigationUtils::ParseMenuOptions(const JSRef<JSVal>& optObj, NG::NavigationMenuOptions& options)
+{
+    if (optObj->IsObject()) {
+        // set more button options.
+        NG::NavigationBackgroundOptions moreButtonBackgroundOptions;
+        ParseBackgroundOptions(optObj, moreButtonBackgroundOptions);
+        options.mbOptions.bgOptions = moreButtonBackgroundOptions;
     }
 }
 

@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -301,10 +302,20 @@ void SelectPattern::RegisterOnHover()
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
+        auto selectRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(selectRenderContext);
         // update hover status, repaint background color
         if (isHover) {
+            float scaleHover = theme->GetSelectHoverOrFocusedScale();
+            VectorF scale(scaleHover, scaleHover);
+            auto&& transform = selectRenderContext->GetOrCreateTransform();
+            CHECK_NULL_VOID(transform);
+            if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
+                selectRenderContext->SetScale(scaleHover, scaleHover);
+            }
             pattern->SetBgBlendColor(theme->GetHoverColor());
         } else {
+            selectRenderContext->SetScale(1.0f, 1.0f);
             pattern->SetBgBlendColor(Color::TRANSPARENT);
         }
         pattern->PlayBgColorAnimation();
@@ -469,7 +480,7 @@ void SelectPattern::SetFocusStyle()
         GetShadowFromTheme(shadowStyle, shadow);
         selectRenderContext->UpdateBackShadow(shadow);
     }
-    float scaleFocus = selectTheme->GetSelectFocusedScale();
+    float scaleFocus = selectTheme->GetSelectHoverOrFocusedScale();
     VectorF scale(scaleFocus, scaleFocus);
     if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
         scaleModify_ = true;
@@ -1442,6 +1453,16 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
 
+void SelectPattern::SetAvoidance(const Avoidance& avoidance)
+{
+    avoidance_ = avoidance;
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateSelectAvoidanceMode(avoidance.mode);
+}
+
 std::string SelectPattern::ProvideRestoreInfo()
 {
     auto jsonObj = JsonUtil::Create(true);
@@ -1765,6 +1786,18 @@ void SelectPattern::SetDivider(const SelectDivider& divider)
         auto props = option->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateDivider(divider);
+        auto optionPattern = option->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        auto frameNode = optionPattern->GetBottomDivider();
+        if (!frameNode) {
+            continue;
+        }
+        auto dividerProperty = frameNode->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(dividerProperty);
+        dividerProperty->UpdateStrokeWidth(divider.strokeWidth);
+        dividerProperty->UpdateDividerColor(divider.color);
+        dividerProperty->UpdateStartMargin(divider.startMargin);
+        dividerProperty->UpdateEndMargin(divider.endMargin);
     }
 }
 
@@ -1787,5 +1820,21 @@ void SelectPattern::ResetFontColor()
     context->UpdateForegroundColor(selectTheme->GetFontColor());
     context->UpdateForegroundColorFlag(false);
     context->ResetForegroundColorStrategy();
+}
+
+void SelectPattern::SetDividerMode(const std::optional<DividerMode>& mode)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    if (mode.has_value()) {
+        menuLayoutProps->UpdateItemDividerMode(mode.value());
+    } else {
+        menuLayoutProps->ResetItemDividerMode();
+    }
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->UpdateMenuItemDivider();
 }
 } // namespace OHOS::Ace::NG

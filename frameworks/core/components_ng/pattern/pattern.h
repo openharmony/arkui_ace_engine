@@ -34,7 +34,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
-
+#include "core/common/container_consts.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -124,7 +124,9 @@ public:
 
     void DetachFromFrameNode(FrameNode* frameNode)
     {
+        onDetach_ = true;
         OnDetachFromFrameNode(frameNode);
+        onDetach_ = false;
         frameNode_.Reset();
     }
 
@@ -357,13 +359,16 @@ public:
 
     RefPtr<FrameNode> GetHost() const
     {
+        if (onDetach_ && SystemProperties::DetectGetHostOnDetach()) {
+            LOGF_ABORT("fatal: can't GetHost at detaching period");
+        }
         return frameNode_.Upgrade();
     }
 
     int32_t GetHostInstanceId() const
     {
         auto host = GetHost();
-        CHECK_NULL_RETURN(host, -1); // -1 means no valid id exists
+        CHECK_NULL_RETURN(host, INSTANCE_ID_UNDEFINED);
         return host->GetInstanceId();
     }
 
@@ -677,6 +682,11 @@ public:
     virtual void EndTranslate() {};
     virtual void SendTranslateResult(std::string results) {};
 
+    virtual bool BorderUnoccupied() const
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
@@ -684,6 +694,7 @@ protected:
     WeakPtr<FrameNode> frameNode_;
 
 private:
+    bool onDetach_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };
 } // namespace OHOS::Ace::NG

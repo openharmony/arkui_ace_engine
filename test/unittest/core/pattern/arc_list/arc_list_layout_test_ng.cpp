@@ -14,6 +14,8 @@
  */
 
 #include "arc_list_test_ng.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -93,7 +95,7 @@ HWTEST_F(ArcListLayoutTestNg, PaintMethod003, TestSize.Level1)
      */
     layoutProperty_->UpdateListDirection(Axis::HORIZONTAL);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     paint = UpdateOverlayModifier();
     scrollBarOverlayModifier = paint->scrollBarOverlayModifier_.Upgrade();
     scrollBar = paint->scrollBar_.Upgrade();
@@ -350,7 +352,7 @@ HWTEST_F(ArcListLayoutTestNg, ListLayout_SafeArea001, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
     CreateDone();
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(LIST_WIDTH, LIST_HEIGHT)));
 }
@@ -370,7 +372,7 @@ HWTEST_F(ArcListLayoutTestNg, ListLayout_SafeArea002, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
     CreateDone();
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(LIST_WIDTH, LIST_HEIGHT)));
 }
@@ -560,4 +562,648 @@ HWTEST_F(ArcListLayoutTestNg, MeasureList001, TestSize.Level1)
 
     EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetTargetIndex().value_or(-99), -99));
 }
+
+/**
+ * @tc.name: FixPredictSnapPos001
+ * @tc.desc: Test ArcListLayoutAlgorithm::FixPredictSnapPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapPos001, TestSize.Level1)
+{
+    int32_t count = 3;
+
+    ListModelNG model = CreateList();
+    CreateListItems(count);
+    CreateDone();
+
+    // For check FixPredictSnapOffset switch cover, in this case predictSnapEndPos_ is not set.
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    listLayoutAlgorithm->FixPredictSnapPos();
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_EQ(listLayoutAlgorithm->predictSnapOffset_, 100.0);
+}
+
+/**
+ * @tc.name: FixPredictSnapPos002
+ * @tc.desc: Test ArcListLayoutAlgorithm::FixPredictSnapPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapPos002, TestSize.Level1)
+{
+    int32_t count = 3;
+
+    ListModelNG model = CreateList();
+    CreateListItems(count);
+    CreateDone();
+
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    // For check MeasureList switch cover, in this case targetIndexStaged_ is not set.
+    listLayoutAlgorithm->SetPredictSnapOffset(100.0);
+    listLayoutAlgorithm->SetPredictSnapEndPosition(200.0);
+    listLayoutAlgorithm->FixPredictSnapPos();
+    listLayoutAlgorithm->headerIndex_ = 0;
+    listLayoutAlgorithm->SetTargetIndex(1);
+    listLayoutAlgorithm->MeasureList(Referenced::RawPtr(frameNode_));
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetTargetIndex().value_or(-99), -99));
+}
+
+/**
+ * @tc.name: FixPredictSnapOffsetAlignCenter001
+ * @tc.desc: Test ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetAlignCenter001, TestSize.Level1)
+{
+    int32_t count = 3;
+
+    ListModelNG model = CreateList();
+    CreateListItems(count);
+    CreateDone();
+
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    listLayoutAlgorithm->SetItemInfo(0, { 0, 1.0, 2.0, true });
+    listLayoutAlgorithm->FixPredictSnapOffsetAlignCenter();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+}
+
+/**
+ * @tc.name: FixPredictSnapOffsetAlignCenter002
+ * @tc.desc: Test ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetAlignCenter002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign::END
+     * @tc.expected: not contentStartOffset
+     */
+    ListModelNG model = CreateList();
+    // Make ListHeight not an integer multiple of ListItems
+    ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT - DEVIATION_HEIGHT));
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+}
+
+/**
+ * @tc.name: FixPredictSnapOffsetAlignCenter003
+ * @tc.desc: Test ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetAlignCenter003, TestSize.Level1)
+{
+    int32_t count = 3;
+
+    ListModelNG model = CreateList();
+    CreateListItems(count);
+    CreateDone();
+
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    listLayoutAlgorithm->SetItemInfo(0, { 0, 1.0, 200.0, true });
+    listLayoutAlgorithm->totalOffset_ = 1000.0;
+    listLayoutAlgorithm->FixPredictSnapOffsetAlignCenter();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+}
+
+/**
+ * @tc.name: FixPredictSnapOffsetAlignCenter004
+ * @tc.desc: Test ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetAlignCenter004, TestSize.Level1)
+{
+    int32_t count = 3;
+
+    ListModelNG model = CreateList();
+    CreateListItems(count);
+    CreateDone();
+
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    listLayoutAlgorithm->SetItemInfo(0, { 0, 1.f, 2.f, true });
+    listLayoutAlgorithm->isSpringEffect_ = false;
+    listLayoutAlgorithm->FixPredictSnapOffsetAlignCenter();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: FixPredictSnapOffsetAlignCenter005
+ * @tc.desc: Test ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetAlignCenter005, TestSize.Level1)
+{
+    int32_t count = 3;
+
+    ListModelNG model = CreateList();
+    CreateListItems(count);
+    CreateDone();
+
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    listLayoutAlgorithm->SetItemInfo(0, { 0, 1.0, 200.0, true });
+    listLayoutAlgorithm->totalOffset_ = 1000.0;
+    listLayoutAlgorithm->isSpringEffect_ = false;
+    listLayoutAlgorithm->FixPredictSnapOffsetAlignCenter();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+}
+
+/**
+ * @tc.name: FixPredictSnapOffsetAlignCenter006
+ * @tc.desc: Test ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetAlignCenter006, TestSize.Level1)
+{
+    int32_t count = 3;
+
+    ListModelNG model = CreateList();
+    CreateListItems(count);
+    CreateDone();
+
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    listLayoutAlgorithm->SetItemInfo(0, { 0, 1.0, 200.0, true });
+    listLayoutAlgorithm->totalOffset_ = 200.0;
+    listLayoutAlgorithm->totalItemCount_ = 3;
+    listLayoutAlgorithm->FixPredictSnapOffsetAlignCenter();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+}
+
+/**
+ * @tc.name: FixPredictSnapOffsetAlignCenter007
+ * @tc.desc: Test ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetAlignCenter007, TestSize.Level1)
+{
+    int32_t count = 3;
+
+    ListModelNG model = CreateList();
+    CreateListItems(count);
+    CreateDone();
+
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    listLayoutAlgorithm->SetItemInfo(0, { 0, 10.0, 240.0, true });
+    listLayoutAlgorithm->spaceWidth_ = 50;
+    listLayoutAlgorithm->totalOffset_ = 200.0;
+    listLayoutAlgorithm->predictSnapOffset_ = 100.0;
+    listLayoutAlgorithm->contentMainSize_ = 20;
+    listLayoutAlgorithm->totalItemCount_ = 1;
+    listLayoutAlgorithm->FixPredictSnapOffsetAlignCenter();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+}
+
+/**
+ * @tc.name: MeasureHeader001
+ * @tc.desc: Test ArcListLayoutAlgorithm::MeasureHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, MeasureHeader001, TestSize.Level1)
+{
+    int32_t count = 3;
+
+    ListModelNG model = CreateList();
+    CreateListItems(count);
+    CreateDone();
+
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    // For check MeasureList switch cover, in this case targetIndexStaged_ is not set.
+    listLayoutAlgorithm->SetPredictSnapOffset(100.0);
+    listLayoutAlgorithm->SetPredictSnapEndPosition(200.0);
+
+    listLayoutAlgorithm->SetTargetIndex(1);
+    listLayoutAlgorithm->headerIndex_ = 0;
+    listLayoutAlgorithm->MeasureList(Referenced::RawPtr(frameNode_));
+
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetTargetIndex().value_or(-99), -99));
+}
+
+/**
+ * @tc.name: LayoutHeader001
+ * @tc.desc: Test ArcListLayoutAlgorithm::LayoutHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, LayoutHeader001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, -1, listPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    /**
+     * @tc.steps: step2. call Layout function.
+     */
+    // set reverse true
+    auto listLayoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    listLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, geometryNode, listLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    ArcListLayoutAlgorithm listLayoutAlgorithm(200, 100);
+    LayoutConstraintF layoutConstraint;
+    layoutWrapper->layoutProperty_->layoutConstraint_ = layoutConstraint;
+    layoutWrapper->layoutProperty_->contentConstraint_ = layoutConstraint;
+    struct ListItemInfo listItemInfo1;
+    listItemInfo1.startPos = 0.0f;
+    listItemInfo1.endPos = 180.0f;
+    listLayoutAlgorithm.contentMainSize_ = 720.0f;
+    listLayoutAlgorithm.itemPosition_.emplace(std::make_pair(0, listItemInfo1));
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(listLayoutAlgorithm.itemPosition_.begin()->first);
+    auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+    float crossSize = 300.0f;
+    int32_t startIndex = 0;
+    listLayoutAlgorithm.LayoutItem(
+        wrapper, 0, listLayoutAlgorithm.itemPosition_.begin()->second, startIndex, crossSize);
+    float crossOffset = listLayoutAlgorithm.CalculateLaneCrossOffset(crossSize, size.Width(), false);
+    auto offset = OffsetF(crossSize - crossOffset - size.Width(), listItemInfo1.startPos);
+    EXPECT_EQ(150, crossOffset);
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
+    EXPECT_EQ(layoutDirection, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: LayoutHeader002
+ * @tc.desc: Test ArcListLayoutAlgorithm::LayoutHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, LayoutHeader002, TestSize.Level1)
+{
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->OnModifyDone();
+    auto algorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(200, 100);
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto* layoutWrapper = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    auto props = layoutWrapper->GetLayoutProperty();
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    // create menu item
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    // set selectTheme to themeManager before using themeManager to get selectTheme
+    // test measure
+    algorithm->Measure(layoutWrapper);
+    // @tc.expected: menu content width = item width, height = sum(item height)
+    auto expectedSize = SizeF(0, 0);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), expectedSize);
+
+    // test layout
+    algorithm->Layout(layoutWrapper);
+    parentLayoutConstraint.selfIdealSize.SetWidth(10);
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+    algorithm->paddingOffset_ = padding.Offset();
+    algorithm->headerIndex_ = 0;
+    algorithm->Measure(layoutWrapper);
+    algorithm->Layout(layoutWrapper);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Height(), 0);
+    algorithm->LayoutHeader(layoutWrapper, algorithm->paddingOffset_, 5.0);
+    algorithm->MeasureHeader(layoutWrapper);
+    EXPECT_EQ(algorithm->headerIndex_, 0);
+    delete(layoutWrapper);
+}
+
+/**
+ * @tc.name: LayoutHeader003
+ * @tc.desc: Test ArcListLayoutAlgorithm::LayoutHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, LayoutHeader003, TestSize.Level1)
+{
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->OnModifyDone();
+    auto algorithm = AceType::MakeRefPtr<ArcListLayoutAlgorithm>(200, 100);
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto* layoutWrapper = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    auto props = layoutWrapper->GetLayoutProperty();
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    // create menu item
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    // set selectTheme to themeManager before using themeManager to get selectTheme
+    // test measure
+    algorithm->Measure(layoutWrapper);
+    // @tc.expected: menu content width = item width, height = sum(item height)
+    auto expectedSize = SizeF(0, 0);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), expectedSize);
+
+    // test layout
+    algorithm->Layout(layoutWrapper);
+    parentLayoutConstraint.selfIdealSize.SetWidth(10);
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+    algorithm->paddingOffset_ = padding.Offset();
+    algorithm->headerIndex_ = 0;
+    algorithm->SetItemInfo(0, { 0, 1.0, 200.0, true });
+    algorithm->startHeaderPos_ = 1000.0;
+    algorithm->headerMainSize_ = -200.0;
+    algorithm->headerOffset_ = -50.0;
+    algorithm->expandSafeArea_ = true;
+    algorithm->LayoutHeader(layoutWrapper, algorithm->paddingOffset_, 5.0);
+    EXPECT_EQ(algorithm->headerIndex_, 0);
+}
+
+/**
+ * @tc.name: CreateLayoutAlgorithm001
+ * @tc.desc: Test ArcListPattern::CreateLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, CreateLayoutAlgorithm001, TestSize.Level1)
+{
+    ListModelNG model = CreateListWithHeader();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    ListItemGroupLayoutInfo info;
+    info.atStart = true;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    pattern_->itemPosition_[DEFAULT_LANES] = itemInfo;
+
+    pattern_->startMainPos_ = START_MAIN_POS;
+    pattern_->startIndex_ = 0;
+    pattern_->scrollSource_ = SCROLL_FROM_BAR;
+    pattern_->predictSnapEndPos_ = PREDICT_SNAPEND_POS;
+    pattern_->SetPredictSnapOffset(END_NODE_LEN);
+    pattern_->CreateLayoutAlgorithm();
+    EXPECT_EQ(pattern_->scrollSource_, SCROLL_FROM_BAR);
+}
+
+/**
+ * @tc.name: GetSnapCenterOverScrollPos001
+ * @tc.desc: Test ArcListPattern::GetSnapCenterOverScrollPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, GetSnapCenterOverScrollPos001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+    pattern_->SetPredictSnapOffset(END_NODE_LEN);
+
+    float startPos = 30.0;
+    float prevScroll = 20.0;
+    pattern_->startIndex_ = 0;
+    pattern_->GetSnapCenterOverScrollPos(startPos, prevScroll);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+}
+
+/**
+ * @tc.name: GetSnapCenterOverScrollPos002
+ * @tc.desc: Test ArcListPattern::GetSnapCenterOverScrollPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, GetSnapCenterOverScrollPos002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+    pattern_->SetPredictSnapOffset(100.0);
+
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 3;
+    pattern_->maxListItemIndex_ = 3;
+    float startPos = 30.0;
+    float prevScroll = 20.0;
+    pattern_->endMainPos_ = 40.0;
+    pattern_->currentDelta_ = 3.0;
+    pattern_->contentMainSize_ = 100;
+    pattern_->GetSnapCenterOverScrollPos(startPos, prevScroll);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+}
+
+/**
+ * @tc.name: HandleScrollBarOutBoundary001
+ * @tc.desc: Test ArcListPattern::HandleScrollBarOutBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, HandleScrollBarOutBoundary001, TestSize.Level1)
+{
+    ListModelNG model = CreateListWithHeader();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    ListItemGroupLayoutInfo info;
+    info.atStart = true;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    pattern_->itemPosition_[1] = itemInfo;
+    pattern_->isScrollable_ = true;
+
+    pattern_->startMainPos_ = 200.0;
+    pattern_->startIndex_ = 0;
+    pattern_->predictSnapEndPos_ = 34.5;
+    pattern_->HandleScrollBarOutBoundary();
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+}
+
+/**
+ * @tc.name: HandleScrollBarOutBoundary002
+ * @tc.desc: Test ArcListPattern::HandleScrollBarOutBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, HandleScrollBarOutBoundary002, TestSize.Level1)
+{
+    ListModelNG model = CreateListWithHeader();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+
+    ListItemGroupLayoutInfo info;
+    info.atStart = true;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    pattern_->itemPosition_[1] = itemInfo;
+    pattern_->startIndex_ = 0;
+    pattern_->contentEndOffset_ = 0;
+    pattern_->contentStartOffset_ = 0;
+    pattern_->isScrollable_ = true;
+
+    pattern_->startMainPos_ = 200.0;
+    pattern_->endIndex_ = 3;
+    pattern_->maxListItemIndex_ = 3;
+    pattern_->endMainPos_ = 4;
+    pattern_->contentMainSize_ = 400.0;
+    pattern_->predictSnapEndPos_ = 34.5;
+    pattern_->HandleScrollBarOutBoundary();
+    pattern_->SetPredictSnapOffset(100.0);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    ASSERT_NE(listLayoutAlgorithm, nullptr);
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+}
+
+/**
+ * @tc.name: HandleScrollBarOutBoundary003
+ * @tc.desc: Test ArcListPattern::HandleScrollBarOutBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, HandleScrollBarOutBoundary003, TestSize.Level1)
+{
+    ListModelNG model = CreateListWithHeader();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+    pattern_->HandleScrollBarOutBoundary();
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+}
+
+/**
+ * @tc.name: HandleScrollBarOutBoundary004
+ * @tc.desc: Test ArcListPattern::HandleScrollBarOutBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, HandleScrollBarOutBoundary004, TestSize.Level1)
+{
+    ListModelNG model = CreateListWithHeader();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+    ListItemGroupLayoutInfo info;
+    info.atStart = true;
+    struct ListItemInfo itemInfo;
+    itemInfo.id = 0;
+    itemInfo.isGroup = true;
+    itemInfo.groupInfo = info;
+    pattern_->itemPosition_[1] = itemInfo;
+
+    pattern_->SetScrollBar(nullptr);
+    pattern_->SetScrollBarProxy(nullptr);
+    pattern_->HandleScrollBarOutBoundary();
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+}
+
+/**
+ * @tc.name: GetItemDisplayInfo001
+ * @tc.desc: Test ArcListPattern::GetItemDisplayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, GetItemDisplayInfo001, TestSize.Level1)
+{
+    ListModelNG model = CreateListWithHeader();
+    CreateListItems(DEFAULT_ITEM_COUNT);
+    CreateDone();
+    pattern_->GetHost()->GetOrCreateChildByIndex(0, false) = nullptr;
+    pattern_->GetItemDisplayInfo(0);
+
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: StartVibrator001
+ * @tc.desc: Test ArcListPattern::StartVibrator
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListLayoutTestNg, StartVibrator001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(ARC_ITEM_COUNT);
+    CreateDone();
+    auto scrollable = pattern_->CreateScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->SetCrownEventDragging(true);
+    pattern_->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    pattern_->scrollableEvent_->SetScrollable(scrollable);
+    pattern_->StartVibrator(true);
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+}
+#endif
 } // namespace OHOS::Ace::NG

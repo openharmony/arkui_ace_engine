@@ -18,7 +18,7 @@ import mediaquery from '@ohos.mediaquery';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node'
 import componentUtils from '@ohos.arkui.componentUtils';
-import { SymbolGlyphModifier } from '@kit.ArkUI';
+import { SymbolGlyphModifier, Configuration } from '@kit.ArkUI';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -161,7 +161,7 @@ export const defaultTheme: PopupTheme = {
     fillColor: $r('sys.color.icon_secondary'),
     hoverColor: $r('sys.color.ohos_id_color_hover'),
     backgroundColor: $r('sys.color.ohos_id_color_background_transparent'),
-    symbolSize: 18,
+    symbolSize: '18vp',
     accessibilityMessage: $r('sys.string.off_used_for_accessibility_text')
   },
 };
@@ -656,7 +656,7 @@ export struct PopupComponent {
     }
     if (this.maxWidth !== undefined) {
       if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
-        maxWidthSize = px2vp(this.maxWidth);
+        maxWidthSize = this.maxWidth;
       } else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
         maxWidthSize = POPUP_DEFAULT_MAXWIDTH
       } else {
@@ -682,6 +682,14 @@ export struct PopupComponent {
     this.messageMaxWidth = applyMaxWidth;
     this.messageMaxWeight = this.getMessageMaxWeight()
     return applyMaxSize
+  }
+
+  private getTitleTextAlign(): TextAlign {
+    let titleAlign = TextAlign.Start;
+    if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
+      titleAlign = TextAlign.End;
+    }
+    return titleAlign
   }
 
   build() {
@@ -711,6 +719,7 @@ export struct PopupComponent {
               .fontSize(this.getTitleFontSize())
               .fontColor(this.getTitleFontColor())
               .constraintSize({ minHeight: this.getCloseButtonHeight() })
+              .textAlign(this.getTitleTextAlign())
             if (this.showClose || this.showClose === void (0)) {
               Button() {
                 SymbolGlyph()

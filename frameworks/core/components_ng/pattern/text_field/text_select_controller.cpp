@@ -20,7 +20,6 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
-#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 
@@ -434,6 +433,12 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
             auto dy = handleRect.GetY() + handleRect.Height() - contentBottomBoundary;
             textRect.SetTop(textRect.GetY() - dy);
             handleRect.SetTop(handleRect.GetY() - dy);
+        } else if (LessNotEqual(handleRect.GetY() + handleRect.Height(),
+            contentRect_.GetY() + contentRect_.Height()) &&
+            GreatNotEqual(handleRect.Height(), contentRect_.Height())) {
+            auto dy = contentRect_.GetY() - handleRect.GetY();
+            textRect.SetTop(textRect.GetY() + dy);
+            handleRect.SetTop(handleRect.GetY() + dy);
         }
     }
 

@@ -69,19 +69,22 @@ struct MenuParam {
     bool hasPreviewTransitionEffect = false;
     RefPtr<NG::ChainedTransitionEffect> previewTransition;
     MenuType type = MenuType::MENU;
-    MenuPreviewMode previewMode = MenuPreviewMode::NONE;
+    std::optional<MenuPreviewMode> previewMode;
     MenuPreviewAnimationOptions previewAnimationOptions;
     bool isShowHoverImage = false;
     MenuPreviewAnimationOptions hoverImageAnimationOptions;
     std::optional<EffectOption> backgroundEffectOption;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> backgroundBlurStyleOption;
     std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<NG::BorderRadiusProperty> previewBorderRadius;
     std::optional<NG::MarginProperty> layoutRegionMargin;
     bool isPreviewContainScale = false;
     std::optional<BlurStyleOption> blurStyleOption;
     std::optional<EffectOption> effectOption;
+    HapticFeedbackMode hapticFeedbackMode = HapticFeedbackMode::DISABLED;
+    bool disappearScaleToTarget = false;
 };
 
 } // namespace OHOS::Ace::NG

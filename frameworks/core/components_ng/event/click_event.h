@@ -96,6 +96,11 @@ public:
         return userCallback_ != nullptr;
     }
 
+    bool IsComponentClickable() const
+    {
+        return !(clickEvents_.empty() && !clickAfterEvents_ && !userCallback_ && !jsFrameNodeCallback_);
+    }
+
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
         if (clickEvents_.empty()) {

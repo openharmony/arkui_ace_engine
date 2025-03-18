@@ -102,7 +102,7 @@ public:
         TAG_LOGE(AceLogTag::ACE_ROUTER, "fire onNewParam failed, jsViewFunction_ is null!");
     }
 
-    virtual void RenderJSExecution(int64_t deadline, bool& isTimeout);
+    virtual void RenderJSExecution();
 
     virtual void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) {};
 
@@ -321,7 +321,15 @@ public:
 
     void DoRenderJSExecution(int64_t deadline, bool& isTimeout);
 
-    void RenderJSExecution(int64_t deadline, bool& isTimeout) override;
+    /**
+     * RenderJSExecutionForPrebuild is only applicable to the PreBuild of components.
+     * Unlike RenderJSExecution, when RenderJSExecutionForPrebuild is repeatedly called,
+     * it will not execute the logic that was previously executed
+     * deadline is the input parameter. It represents the expected completion time of this function
+     * isTimeout is the output parameter. When the function is not completed before the deadline, isTimeout = true
+     * We will repeatedly call this function in the next frame until isTimeout = false
+     */
+    void RenderJSExecutionForPrebuild(int64_t deadline, bool& isTimeout);
 
     RefPtr<AceType> InitialRender(int64_t deadline, bool& isTimeout);
 

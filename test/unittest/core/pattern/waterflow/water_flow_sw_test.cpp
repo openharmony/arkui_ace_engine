@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <random>
 
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
@@ -50,7 +49,7 @@ HWTEST_F(WaterFlowSWTest, LazyforeachReloaded01, TestSize.Level1)
 
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 7);
-    
+
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(1));
     EXPECT_EQ(mockLazy->GetHistoryTotalCount(), 50);
     EXPECT_EQ(lazyForEachNode->FrameCount(), 50);
@@ -119,10 +118,12 @@ HWTEST_F(WaterFlowSWTest, NoConvert001, TestSize.Level1)
 {
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
-    std::mt19937 rng(1); // random number generator
-    std::uniform_int_distribution<int> dist(100, 300);
+    vector<int> heights = { 183, 300, 244, 287, 100, 125, 160, 300, 129, 147, 118, 179, 137, 177, 169, 234, 179, 288,
+        208, 270, 184, 162, 237, 205, 141, 189, 276, 146, 105, 207, 234, 283, 183, 191, 212, 186, 128, 288, 139, 256,
+        260, 243, 294, 261, 162 }; // randomly generated
+    ASSERT_EQ(heights.size(), 45);
     for (int i = 0; i < 45; ++i) {
-        CreateItemWithHeight(dist(rng));
+        CreateItemWithHeight(heights[i]);
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_16);

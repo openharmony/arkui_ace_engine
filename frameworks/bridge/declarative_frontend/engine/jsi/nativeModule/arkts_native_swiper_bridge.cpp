@@ -695,12 +695,18 @@ std::string ParseBottom(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool
     if (hasIgnoreSize) {
         CalcDimension bottomcCalc;
         bool parseOK =  ArkTSUtils::ParseJsLengthMetrics(vm, jsValue, bottomcCalc);
-        bottomcCalc = (parseOK && bottomcCalc > 0.0_vp) ? bottomcCalc : 0.0_vp;
-        bottom = bottomcCalc.ToString();
+        if (!parseOK) {
+            bottom = GetIntStringByValueRef(vm, jsValue);
+            return bottom;
+        } else {
+            bottomcCalc = bottomcCalc > 0.0_vp ? bottomcCalc : 0.0_vp;
+            bottom = bottomcCalc.ToString();
+            return bottom;
+        }
     } else {
         bottom = GetIntStringByValueRef(vm, jsValue);
+        return bottom;
     }
-    return bottom;
 }
 
 std::optional<bool> ParseIgrnoreSize(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool hasIgrnoreSize)
@@ -796,12 +802,12 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
     Local<JSValueRef> maxDisplayCountArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_MAX_DISPLAY_COUNT);
     auto maxDisplayCount = GetIntStringByValueRef(vm, maxDisplayCountArg);
     std::string bottom = "-";
-    std::string spaceAndBottom = "-";
-    GetSpaceAndBottom(runtimeCallInfo, vm, bottom, spaceAndBottom);
+    std::string spaceAndIgnoreSize = "-";
+    GetSpaceAndBottom(runtimeCallInfo, vm, bottom, spaceAndIgnoreSize);
     std::string indicatorStr = itemWidth + "|" + itemHeight + "|" + selectedItemWidth + "|" +
                                selectedItemHeight + "|" + mask + "|" + colorStr + "|" + selectedColor + "|" + left +
                                "|" + top + "|" + right + "|" + bottom + "|" + maxDisplayCount + "|" +
-                               spaceAndBottom;
+                               spaceAndIgnoreSize;
     return indicatorStr;
 }
 std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)

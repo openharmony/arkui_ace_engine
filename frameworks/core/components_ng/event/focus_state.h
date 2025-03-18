@@ -38,8 +38,12 @@ class FocusState : public virtual AceType {
 
 public:
     FocusState() = default;
-    explicit FocusState(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE);
-    explicit FocusState(const WeakPtr<FrameNode>& frameNode, FocusType type = FocusType::DISABLE);
+    explicit FocusState(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE)
+        : eventHub_(eventHub), focusType_(type)
+    {}
+    explicit FocusState(const WeakPtr<FrameNode>& frameNode, FocusType type = FocusType::DISABLE)
+        : frameNode_(frameNode), focusType_(type)
+    {}
     virtual ~FocusState() = default;
 
     void SetLastWeakFocusNode(const WeakPtr<FocusHub>& focusHub)

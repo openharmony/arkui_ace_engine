@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -153,6 +154,29 @@ void MenuItemPattern::OnMountToParentDone()
     UpdateTextNodes();
 }
 
+void MenuItemPattern::AttachBottomDivider()
+{
+    CHECK_NULL_VOID(bottomDivider_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    RemoveBottomDivider();
+    auto index = parent->GetChildIndex(host);
+    if (index >= 0) {
+        bottomDivider_->MountToParent(parent, ++index);
+    }
+}
+
+void MenuItemPattern::RemoveBottomDivider()
+{
+    CHECK_NULL_VOID(bottomDivider_);
+    auto dividerParent = bottomDivider_->GetParent();
+    if (dividerParent) {
+        dividerParent->RemoveChild(bottomDivider_);
+    }
+}
+
 void MenuItemPattern::OnAttachToFrameNode()
 {
     InitFocusPadding();
@@ -161,6 +185,7 @@ void MenuItemPattern::OnAttachToFrameNode()
     RegisterOnTouch();
     RegisterOnPress();
     RegisterOnHover();
+    CreateBottomDivider();
 }
 
 void CustomMenuItemPattern::OnAttachToFrameNode()
@@ -168,6 +193,17 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
     InitFocusPadding();
     RegisterOnKeyEvent();
     RegisterOnTouch();
+    CreateBottomDivider();
+}
+
+void MenuItemPattern::CreateBottomDivider()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bottomDivider_ = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    auto dividerPattern = bottomDivider_->GetPattern<MenuDividerPattern>();
+    dividerPattern->BindMenuItem(host);
 }
 
 void MenuItemPattern::InitFocusPadding()
@@ -802,7 +838,7 @@ void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
     }
 }
 
-void MenuItemPattern::HideEmbedded()
+void MenuItemPattern::HideEmbedded(bool isNeedAnimation)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -812,7 +848,7 @@ void MenuItemPattern::HideEmbedded()
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     CHECK_NULL_VOID(embeddedMenu_);
-    HideEmbeddedExpandMenu(embeddedMenu_);
+    HideEmbeddedExpandMenu(embeddedMenu_, isNeedAnimation);
     embeddedMenu_ = nullptr;
     menuPattern->SetShowedSubMenu(nullptr);
     menuPattern->RemoveEmbeddedMenuItem(host);
@@ -957,7 +993,7 @@ void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expanda
     menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
 }
 
-void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode)
+void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode, bool isNeedAnimation)
 {
     CHECK_NULL_VOID(expandableNode);
     auto host = GetHost();
@@ -971,10 +1007,12 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     CHECK_NULL_VOID(expandableAreaContext);
 
     AnimationOption option = AnimationOption();
-    auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
-    option.SetCurve(rotateOption);
-    RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
-    expandableAreaContext->UpdateChainedTransition(opacity);
+    if (isNeedAnimation) {
+        auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
+        option.SetCurve(rotateOption);
+        RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
+        expandableAreaContext->UpdateChainedTransition(opacity);
+    }
     MenuRemoveChild(expandableNode, menuFocusType_ == MENU_FOCUS_TYPE);
 
     AnimationUtils::Animate(option, [host, expandableNode, menuWrapperPattern]() {
@@ -1272,10 +1310,12 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
             menuWrapperPattern->SetLastTouchItem(host);
         }
         props->UpdatePress(true);
+        UpdateDividerPressStatus(true);
         menuPattern->OnItemPressed(parent, index_, true);
     } else {
         SetBgBlendColor(isHovered_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         props->UpdatePress(false);
+        UpdateDividerPressStatus(false);
         menuPattern->OnItemPressed(parent, index_, false);
     }
     PlayBgColorAnimation(false);
@@ -1339,6 +1379,7 @@ void MenuItemPattern::OnHover(bool isHover)
         auto props = GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateHover(isHover);
+        UpdateDividerHoverStatus(isHover);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         if (isHover || !IsSelected()) {
             UpdateNextNodeDivider(!isHover);
@@ -1354,6 +1395,7 @@ void MenuItemPattern::OnHover(bool isHover)
         auto parent = AceType::DynamicCast<UINode>(host->GetParent());
         SetBgBlendColor(isHover || isSubMenuShowed_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         props->UpdateHover(isHover || isSubMenuShowed_);
+        UpdateDividerHoverStatus(isHover || isSubMenuShowed_);
         PostHoverSubMenuTask();
         menuPattern->OnItemPressed(parent, index_, isHover || isSubMenuShowed_, true);
         PlayBgColorAnimation();
@@ -2853,6 +2895,7 @@ void MenuItemPattern::OnPress(const UIState& state)
         PlayBgColorAnimation(false);
 
         props->UpdatePress(true);
+        UpdateDividerPressStatus(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         // disable next option node's divider
         UpdateNextNodeDivider(false);
@@ -2866,6 +2909,7 @@ void MenuItemPattern::OnPress(const UIState& state)
         PlayBgColorAnimation(false);
 
         props->UpdatePress(false);
+        UpdateDividerPressStatus(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         if (!IsSelected()) {
             UpdateNextNodeDivider(true);
@@ -2976,5 +3020,56 @@ void MenuItemPattern::UpdatePasteDisabledOpacity(const double disabledColorAlpha
     CHECK_NULL_VOID(pasteButtonRenderContext);
     pasteButtonRenderContext->UpdateOpacity(disabledColorAlpha);
     pasteButton_->MarkModifyDone();
+}
+
+void MenuItemPattern::UpdateDividerSelectedStatus(bool isSelected)
+{
+    if (bottomDivider_) {
+        auto bottomPaintProperty = bottomDivider_->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(bottomPaintProperty);
+        bottomPaintProperty->UpdateBottomSelected(isSelected);
+        bottomDivider_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    auto topDivider = GetTopDivider();
+    if (topDivider) {
+        auto topPaintProperty = topDivider->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(topPaintProperty);
+        topPaintProperty->UpdateTopSelected(isSelected);
+        topDivider->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void MenuItemPattern::UpdateDividerHoverStatus(bool isHover)
+{
+    if (bottomDivider_) {
+        auto bottomPaintProperty = bottomDivider_->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(bottomPaintProperty);
+        bottomPaintProperty->UpdateBottomHover(isHover);
+        bottomDivider_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    auto topDivider = GetTopDivider();
+    if (topDivider) {
+        auto topPaintProperty = topDivider->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(topPaintProperty);
+        topPaintProperty->UpdateTopHover(isHover);
+        topDivider->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void MenuItemPattern::UpdateDividerPressStatus(bool isPress)
+{
+    if (bottomDivider_) {
+        auto bottomPaintProperty = bottomDivider_->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(bottomPaintProperty);
+        bottomPaintProperty->UpdateBottomPress(isPress);
+        bottomDivider_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    auto topDivider = GetTopDivider();
+    if (topDivider) {
+        auto topPaintProperty = topDivider->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(topPaintProperty);
+        topPaintProperty->UpdateTopPress(isPress);
+        topDivider->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 } // namespace OHOS::Ace::NG

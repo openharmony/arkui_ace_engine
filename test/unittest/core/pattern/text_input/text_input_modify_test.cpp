@@ -74,6 +74,7 @@ protected:
     static void TearDownTestSuite();
     void TearDown() override;
 
+    void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
     void CreateTextField(const std::string& text = "", const std::string& placeHolder = "",
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
     static void ExpectCallParagraphMethods(ExpectParagraphParams params);
@@ -146,6 +147,20 @@ void TextInputModifyBase::ExpectCallParagraphMethods(ExpectParagraphParams param
     EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(params.longestLine));
     EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(params.maxWidth));
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
+}
+
+void TextInputModifyBase::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
 }
 
 void TextInputModifyBase::CreateTextField(
@@ -1379,7 +1394,7 @@ HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
      * @tc.steps: step3. call DumpViewDataPageNode.
      */
     pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType);
-    EXPECT_EQ(pattern_->selectController_->caretInfo_.index, 26);
+    EXPECT_EQ(pattern_->selectController_->caretInfo_.index, 0);
 }
 
 /**

@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
@@ -68,6 +69,7 @@ constexpr int32_t JS_ENUM_TRANSITIONTYPE_FADE = 4;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_EXPLODE = 5;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_RIGHT = 6;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_BOTTOM = 7;
+constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
 
 NG::NavigationSystemTransitionType ParseTransitionType(int32_t value)
 {
@@ -302,7 +304,16 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     if (isSymbol) {
         SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
-
+    std::string backButtonAccessibilityText;
+    if (info.Length() > 1) {
+        if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
+            std::string backButtonAccessibilityText;
+            ParseJsString(info[1], backButtonAccessibilityText);
+            NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList,
+                true, backButtonAccessibilityText);
+            return;
+        }
+    }
     NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
 
@@ -397,6 +408,12 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
         return;
     }
 
+    NG::NavigationMenuOptions options;
+    if (info.Length() > 1) {
+        auto optObj = JSRef<JSObject>::Cast(info[1]);
+        auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
+        JSNavigationUtils::ParseMenuOptions(moreButtonProperty, options);
+    }
     if (info[0]->IsUndefined() || info[0]->IsArray()) {
         std::vector<NG::BarItem> menuItems;
         if (info[0]->IsUndefined()) {
@@ -406,6 +423,7 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
             JSNavigationUtils::ParseBarItems(targetNode, info, JSRef<JSArray>::Cast(info[0]), menuItems);
         }
         NavDestinationModel::GetInstance()->SetMenuItems(std::move(menuItems));
+        NavDestinationModel::GetInstance()->SetMenuOptions(std::move(options));
         return;
     } else if (info[0]->IsObject()) {
         auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
@@ -416,6 +434,7 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();
             NavDestinationModel::GetInstance()->SetCustomMenu(customNode);
+            NavDestinationModel::GetInstance()->SetMenuOptions(std::move(options));
         }
     }
 }
@@ -553,6 +572,13 @@ void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
             JSNavigationUtils::ParseToolbarItemsConfiguration(
                 targetNode, info, JSRef<JSArray>::Cast(info[0]), toolBarItems);
         }
+        NG::MoreButtonOptions toolbarMoreButtonOptions;
+        if (info.Length() > 1) {
+            auto optObj = JSRef<JSObject>::Cast(info[1]);
+            auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
+            JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
+        }
+        NavDestinationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
         NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
     } else if (info[0]->IsObject()) {
         auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");

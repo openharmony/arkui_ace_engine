@@ -19,10 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 class TextInputResponseArea : public virtual AceType {
@@ -54,6 +51,9 @@ public:
     SizeF GetFrameSize(bool withSafeArea = false);
 
     virtual void CreateIconRect(RoundRect& paintRect, bool isFocus) {}
+
+    void SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
+        float hoverRectHeight, bool isFocus);
 
 protected:
     Alignment GetStackAlignment(const TextDirection& userDirection);
@@ -154,16 +154,7 @@ public:
 
     const RefPtr<FrameNode> GetFrameNode() override;
 
-    void ClearArea() override
-    {
-        auto hostPattern = hostPattern_.Upgrade();
-        CHECK_NULL_VOID(hostPattern);
-        auto host = hostPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        CHECK_NULL_VOID(unitNode_);
-        host->RemoveChildAndReturnIndex(unitNode_);
-        areaRect_.Reset();
-    }
+    void ClearArea() override;
 
 private:
     bool IsShowUnit();

@@ -1212,7 +1212,9 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions001, TestSize.Level1)
 
     NavigationTitlebarOptions opt;
     opt.bgOptions.color = std::make_optional(Color(0xff0000ff));
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
     opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
     opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
@@ -1226,8 +1228,8 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions001, TestSize.Level1)
     EXPECT_TRUE(options.bgOptions.color.has_value());
     EXPECT_EQ(options.bgOptions.color.value(), Color(0xff0000ff));
 
-    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
-    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::NO_MATERIAL);
+    EXPECT_TRUE(options.bgOptions.blurStyleOption.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
 
     EXPECT_TRUE(options.brOptions.barStyle.has_value());
     EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STACK);
@@ -1259,7 +1261,9 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
 
     NavigationTitlebarOptions opt;
     opt.bgOptions.color = std::make_optional(Color(0xff00ff00));
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::REGULAR);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::REGULAR;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
     opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
     opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
@@ -1273,8 +1277,8 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
     EXPECT_TRUE(options.bgOptions.color.has_value());
     EXPECT_EQ(options.bgOptions.color.value(), Color(0xff00ff00));
 
-    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
-    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::REGULAR);
+    EXPECT_TRUE(options.bgOptions.blurStyleOption.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyleOption->blurStyle, BlurStyle::REGULAR);
 
     EXPECT_TRUE(options.brOptions.barStyle.has_value());
     EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STANDARD);

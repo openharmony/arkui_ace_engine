@@ -645,3 +645,30 @@ HWTEST_F(DialogModelTest, DialogModelTest042, TestSize.Level1)
     Dispose(nativeDialogHandle);
     nativeDialogHandle = nullptr;
 }
+
+/**
+ * @tc.name: DialogModelTest043
+ * @tc.desc: Test SetFocusable function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest043, TestSize.Level1)
+{
+    int32_t ret = SetFocusable(nullptr, false);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DialogModelTest044
+ * @tc.desc: Test SetFocusable function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest044, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetFocusable(nativeDialogHandle, false);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}

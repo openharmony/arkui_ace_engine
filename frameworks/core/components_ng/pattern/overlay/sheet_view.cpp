@@ -66,8 +66,10 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     CHECK_NULL_RETURN(operationColumn, nullptr);
     operationColumn->MountToParent(sheetNode);
+    sheetPattern->SetTitleBuilderNode(WeakPtr<FrameNode>(operationColumn));
     auto scrollNode = CreateScrollNode(sheetStyle);
     CHECK_NULL_RETURN(scrollNode, nullptr);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scrollNode));
     builder->MountToParent(scrollNode);
 
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
@@ -198,6 +200,9 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
 
     CreateCloseIconNode(buttonNode);
     buttonNode->MountToParent(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->SetCloseButtonNode(WeakPtr<FrameNode>(buttonNode));
 
     // set accessibilityProperty to sheet close button
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();

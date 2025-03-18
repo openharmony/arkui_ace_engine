@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <utility>
 
@@ -23,16 +24,20 @@
 #define protected public
 #define private public
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_common.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
@@ -44,6 +49,8 @@
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/border_property.h"
+#include "ui/base/utils/utils.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -497,6 +504,282 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     auto blurStyleOption = renderContext->GetFrontBlurStyle();
     ASSERT_EQ(blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
+    blur.blurStyle = BlurStyle::THIN;
+    blur.scale = 0.0f;
+    renderContext->UpdateFrontBlurStyle(blur);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest019
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest019, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontBlurRadius(Dimension(0.0f));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest020
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest020, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackBlendMode(BlendMode::NONE);
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+    renderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+    renderContext->UpdateBackBlendMode(BlendMode::DST_OVER);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest021
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest021, TestSize.Level1)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+    std::vector<RectF> borderRects;
+
+    auto renderContext = node->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_FALSE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+    BorderWidthProperty borderWidth;
+    borderWidth.leftDimen = Dimension(0.0f);
+    borderWidth.rightDimen = Dimension(0.0f);
+    borderWidth.topDimen = Dimension(0.0f);
+    borderWidth.bottomDimen = Dimension(0.0f);
+    renderContext->UpdateBorderWidth(borderWidth);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+    borderWidth.leftDimen = Dimension(2.0f);
+    borderWidth.rightDimen = Dimension(2.0f);
+    borderWidth.topDimen = Dimension(2.0f);
+    borderWidth.bottomDimen = Dimension(2.0f);
+    renderContext->UpdateBorderWidth(borderWidth);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+    BorderColorProperty borderColor;
+    borderColor.leftColor = Color::WHITE;
+    borderColor.rightColor = Color::WHITE;
+    borderColor.topColor = Color::WHITE;
+    borderColor.bottomColor = Color::WHITE;
+    renderContext->UpdateBorderColor(borderColor);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest022
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest022, TestSize.Level1)
+{
+    float radius = 0.0;
+    float deltaY = 1.0;
+    float distance = 2.0;
+    int32_t multiplier = 1;
+
+    ASSERT_TRUE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    distance = 0.0;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    multiplier = 0;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    radius = 3.0;
+    multiplier = 1;
+    ASSERT_TRUE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    multiplier = -1;
+    ASSERT_TRUE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    distance = 9.0;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest023
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest023, TestSize.Level1)
+{
+    RectF parentRect = RectF(0.0, 0.0, 0.0, 0.0);
+    RectF rect = RectF(0.0, 0.0, 0.0, 0.0);
+    GradientDirection direction = GradientDirection::LEFT_TOP;
+    float ratio = 0.5;
+    float radius = 0.0;
+
+    ASSERT_FALSE(SecurityComponentHandler::CheckDiagonalLinearGradientBlur(parentRect,
+        rect, direction, ratio, radius));
+    direction = GradientDirection::LEFT_BOTTOM;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDiagonalLinearGradientBlur(parentRect,
+        rect, direction, ratio, radius));
+    direction = GradientDirection::RIGHT_TOP;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDiagonalLinearGradientBlur(parentRect,
+        rect, direction, ratio, radius));
+    direction = GradientDirection::RIGHT_BOTTOM;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDiagonalLinearGradientBlur(parentRect,
+        rect, direction, ratio, radius));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckGetBorderRadiusTest001
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckGetBorderRadiusTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->SetLayoutRect(RectF(0.0, 0.0, 10.0, 10.0));
+    layoutProperty->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CIRCLE));
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    layoutProperty->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    layoutProperty->UpdateBackgroundType(static_cast<int32_t>(ButtonType::NORMAL));
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    node->AddChild(buttonNode);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_BOTTOM), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_BOTTOM), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT), 0.0);
+    auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    BorderRadiusProperty borderRadius;
+    bgProp->UpdateBorderRadius(borderRadius);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_BOTTOM), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_BOTTOM), 0.0);
+    borderRadius.radiusTopLeft = Dimension(10.0);
+    borderRadius.radiusTopRight = Dimension(10.0);
+    borderRadius.radiusBottomLeft = Dimension(10.0);
+    borderRadius.radiusTopLeft = Dimension(10.0);
+    bgProp->UpdateBorderRadius(borderRadius);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_BOTTOM), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_BOTTOM), 0.0);
+}
+
+/**
+ * @tc.name: SecurityComponentCheckRectIntersectTest001
+ * @tc.desc: Test security component CheckRectIntersect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckRectIntersectTest001, TestSize.Level1)
+{
+    RectF dest = RectF(0.0f, 0.0f, 5.0f, 5.0f);
+    int32_t secNodeId = 0;
+    std::unordered_map<int32_t, std::pair<std::string, NG::RectF>> nodeId2Rect;
+    std::unordered_map<int32_t, int32_t> nodeId2Zindex;
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(10.0f, 10.0f, 2.0f, 2.0f));
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Zindex[0] = 0;
+    nodeId2Zindex[1] = -1;
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(1.0f, 1.0f, 0.0f, 0.0f));
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Zindex[1] = 1;
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(1.0f, 1.0f, 0.0f, 0.0f));
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(1.0f, 1.0f, 1.0f, 0.0f));
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(1.0f, 1.0f, 1.0f, 1.0f));
+    ASSERT_TRUE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+}
+
+/**
+ * @tc.name: SecurityComponentUpdateClipRectTest001
+ * @tc.desc: Test security component CheckRectIntersect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentUpdateClipRectTest001, TestSize.Level1)
+{
+    RectF clipRect = RectF(0.0f, 0.0f, 1.0f, 1.0f);
+    RectF paintRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+
+    RectF result = SecurityComponentHandler::UpdateClipRect(clipRect, paintRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 0.0f));
+
+    paintRect = RectF(0.0f, 0.0f, 2.0f, 2.0f);
+    result = SecurityComponentHandler::UpdateClipRect(clipRect, paintRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 1.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 1.0f));
+
+    clipRect = RectF(0.0f, 0.0f, -1.0f, -1.0f);
+    result = SecurityComponentHandler::UpdatePaintRect(paintRect, clipRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 2.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 2.0f));
+
+    clipRect = RectF(0.0f, 0.0f, -1.0f, 0.0f);
+    result = SecurityComponentHandler::UpdatePaintRect(paintRect, clipRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 0.0f));
+
+    clipRect = RectF(0.0f, 0.0f, 1.0f, 1.0f);
+    result = SecurityComponentHandler::UpdatePaintRect(paintRect, clipRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 1.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 1.0f));
 }
 
 /**
@@ -1780,5 +2063,54 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOut
     buttonAlgorithm->textLeftBottomPoint_ = SizeF(13, 10);
     buttonAlgorithm->textRightBottomPoint_ = SizeF(15, 10);
     EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmUpdateTextRectPointTest001
+ * @tc.desc: Test security component IsTextOutOfRangeInNormal
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateTextRectPointTest001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->SetInternal();
+    buttonAlgorithm->buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonAlgorithm->buttonLayoutProperty_);
+    buttonAlgorithm->buttonLayoutProperty_->UpdateBorderRadius(BorderRadiusProperty(Dimension(5.0)));
+    buttonAlgorithm->icon_.width_ = 6.0;
+    buttonAlgorithm->icon_.height_ = 6.0;
+    buttonAlgorithm->text_.width_ = 4.0;
+    buttonAlgorithm->text_.height_ = 4.0;
+    buttonAlgorithm->top_.height_ = 10.0;
+    buttonAlgorithm->left_.width_ = 10.0;
+    buttonAlgorithm->middle_.height_ = 5.0;
+    buttonAlgorithm->middle_.width_ = 5.0;
+
+    buttonAlgorithm->UpdateTextRectPoint();
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 11.0f));
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 21.0f));
+
+    buttonAlgorithm->icon_.width_ = 3.0;
+    buttonAlgorithm->icon_.height_ = 3.0;
+    buttonAlgorithm->UpdateTextRectPoint();
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 10.0f));
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 18.0f));
+
+    buttonAlgorithm->isVertical_ = false;
+    buttonAlgorithm->UpdateTextRectPoint();
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 18.0f));
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 10.0f));
+
+    buttonAlgorithm->icon_.width_ = 6.0;
+    buttonAlgorithm->icon_.height_ = 6.0;
+    buttonAlgorithm->UpdateTextRectPoint();
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 21.0f));
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 11.0f));
 }
 } // namespace OHOS::Ace::NG
