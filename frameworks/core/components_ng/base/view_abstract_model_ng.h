@@ -144,14 +144,14 @@ public:
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
     }
 
-    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override
+    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
+        ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle, sysOptions);
     }
 
-    void SetBackgroundEffect(const EffectOption& effectOption) override
+    void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetBackgroundEffect(effectOption);
+        ViewAbstract::SetBackgroundEffect(effectOption, sysOptions);
     }
 
     void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) override
@@ -159,9 +159,9 @@ public:
         ViewAbstract::SetBackgroundImageResizableSlice(slice);
     }
 
-    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
+    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
+        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle, sysOptions);
     }
 
     void SetSphericalEffect(double radio) override
@@ -790,9 +790,9 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
-    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override
+    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetBackdropBlur(radius, blurOption);
+        ViewAbstract::SetBackdropBlur(radius, blurOption, sysOptions);
     }
 
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override
@@ -824,9 +824,9 @@ public:
         ViewAbstract::SetBrightnessBlender(brightnessBlender);
     }
 
-    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
+    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetFrontBlur(radius, blurOption);
+        ViewAbstract::SetFrontBlur(radius, blurOption, sysOptions);
     }
 
     void SetMotionBlur(const MotionBlurOption& motionBlurOption) override
@@ -1347,6 +1347,8 @@ public:
     void BindMenuGesture(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
 
+    void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
+
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
@@ -1412,9 +1414,9 @@ public:
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
 
-    void SetForegroundEffect(float radius) override
+    void SetForegroundEffect(float radius, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetForegroundEffect(radius);
+        ViewAbstract::SetForegroundEffect(radius, sysOptions);
     }
 
     void DisableOnClick() override
@@ -1639,6 +1641,7 @@ public:
     static std::string GetAccessibilityText(FrameNode* frameNode);
     static std::string GetAccessibilityDescription(FrameNode* frameNode);
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
+    static bool CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode);
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

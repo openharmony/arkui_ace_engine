@@ -1310,7 +1310,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
         PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
     }
-    bool forceMeasure = GetPattern()->ReusedNodeSkipMeasure();
+    bool forceMeasure = !GetPattern()->ReusedNodeSkipMeasure();
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess() && forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1488,6 +1488,9 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
             safeAreaManager->RemoveRestoreNode(WeakClaim(this));
         }
     }
+    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->OnAccessibilityDetachFromMainTree();
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -2385,6 +2388,9 @@ void FrameNode::RebuildRenderContextTree()
         if (property && property->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
             children.push_back(overlayNode_);
         }
+    }
+    if (accessibilityFocusPaintNode_) {
+        children.push_back(accessibilityFocusPaintNode_);
     }
     for (const auto& child : children) {
         frameChildren_.emplace(child);
@@ -3599,25 +3605,6 @@ VectorF FrameNode::GetTransformScaleRelativeToWindow() const
     return finalScale;
 }
 
-int32_t FrameNode::GetTransformRotateRelativeToWindow(bool excludeSelf)
-{
-    int32_t FULL_CIRCLE_ANGLE = 360;
-    int32_t rotateDegree = 0;
-    auto context = GetRenderContext();
-    if (context && !excludeSelf) {
-        rotateDegree = context->GetRotateDegree();
-    }
-    auto parent = GetAncestorNodeOfFrame(true);
-    while (parent) {
-        auto contextParent = parent->GetRenderContext();
-        if (contextParent) {
-            rotateDegree += contextParent->GetRotateDegree();
-        }
-        parent = parent->GetAncestorNodeOfFrame(true);
-    }
-    return rotateDegree %= FULL_CIRCLE_ANGLE;
-}
-
 // returns a node's rect relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
@@ -3886,6 +3873,21 @@ void FrameNode::OnAccessibilityEventForVirtualNode(AccessibilityEventType eventT
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
+    }
+}
+
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = GetAccessibilityId();
+        event.startIndex = startIndex;
+        event.endIndex = endIndex;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
     }
 }
 
@@ -4622,17 +4624,11 @@ void FrameNode::UpdateAccessibilityNodeRect()
     if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         return;
     }
-    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
-    if (isFocus && !IsAccessibilityVirtualNode()) {
-        if (accessibilityProperty->IsMatchAccessibilityResponseRegion(false)) {
-            auto rectInt = accessibilityProperty->GetAccessibilityResponseRegionRect(false);
-            renderContext_->UpdateAccessibilityFocusRect(rectInt);
-        } else {
-            renderContext_->UpdateAccessibilityRoundRect();
-        }
-    }
+    auto context = GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto accessibilityManager = context->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->UpdateAccessibilityNodeRect(Claim(this));
 }
 
 bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
@@ -4718,9 +4714,8 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 
     UpdateAccessibilityNodeRect();
     ProcessAccessibilityVirtualNode();
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    pipeline->SendUpdateVirtualNodeFocusEvent();
+    CHECK_NULL_RETURN(context, false);
+    context->SendUpdateVirtualNodeFocusEvent();
     return true;
 }
 
@@ -6561,5 +6556,12 @@ void FrameNode::FireFrameNodeDestructorCallback()
 const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 {
     return kitNode_;
+}
+
+bool FrameNode::IsDrawFocusOnTop() const
+{
+    auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return static_cast<FocusDrawLevel>(accessibilityProperty->GetFocusDrawLevel()) == FocusDrawLevel::TOP;
 }
 } // namespace OHOS::Ace::NG

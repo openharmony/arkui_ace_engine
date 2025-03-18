@@ -48,8 +48,9 @@ void SvgMask::OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& s
     // ready to render mask content
     auto canvasLayerCount = static_cast<int32_t>(canvas.GetSaveCount());
     RosenSvgPainter::SetMask(&canvas);
-    auto maskContentRule = TransformForCurrentOBB(canvas, svgCoordinateSystemContext, maskAttr_.maskContentUnits,
-        svgCoordinateSystemContext.GetContainerRect().Left(), svgCoordinateSystemContext.GetContainerRect().Top());
+    auto maskContentRule = BuildContentScaleRule(svgCoordinateSystemContext, maskAttr_.maskContentUnits);
+    TransformForCurrentOBB(canvas, maskContentRule,  svgCoordinateSystemContext.GetContainerRect().GetSize(),
+        svgCoordinateSystemContext.GetContainerRect().GetOffset());
     // subgraph does not use image components parameter fillColor
     maskContentRule.SetUseFillColor(false);
     DrawChildren(canvas, maskContentRule);

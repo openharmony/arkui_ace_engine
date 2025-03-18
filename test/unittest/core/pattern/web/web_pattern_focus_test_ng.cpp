@@ -419,9 +419,11 @@ HWTEST_F(WebPatternFocusTestNg, OnTextSelected_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->overlayCreating_ = false;
+    webPattern->awaitingOnTextSelected_ = true;
     webPattern->OnTextSelected();
     ASSERT_NE(webPattern->delegate_, nullptr);
     EXPECT_TRUE(webPattern->overlayCreating_);
+    EXPECT_FALSE(webPattern->awaitingOnTextSelected_);
 #endif
 }
 

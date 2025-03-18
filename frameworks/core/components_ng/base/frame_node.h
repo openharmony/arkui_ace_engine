@@ -500,8 +500,6 @@ public:
 
     VectorF GetTransformScaleRelativeToWindow() const;
 
-    int32_t GetTransformRotateRelativeToWindow(bool excludeSelf = false);
-
     RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
     // deprecated, please use GetPaintRectOffsetNG.
@@ -548,6 +546,9 @@ public:
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
 
     void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
+
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
 
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
@@ -1282,6 +1283,33 @@ public:
     }
     bool CheckVisibleOrActive() override;
 
+    void SetPaintNode(const RefPtr<FrameNode>& paintNode)
+    {
+        paintNode_ = paintNode;
+    }
+
+    const RefPtr<FrameNode>& GetPaintNode() const
+    {
+        return paintNode_;
+    }
+
+    void SetFocusPaintNode(const RefPtr<FrameNode>& accessibilityFocusPaintNode)
+    {
+        accessibilityFocusPaintNode_ = accessibilityFocusPaintNode;
+    }
+
+    const RefPtr<FrameNode>& GetFocusPaintNode() const
+    {
+        return accessibilityFocusPaintNode_;
+    }
+
+    bool IsDrawFocusOnTop() const;
+
+    void SetNeedLazyLayout(bool value)
+    {
+        layoutProperty_->SetNeedLazyLayout(value);
+    }
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1524,6 +1552,10 @@ private:
     bool hasPositionZ_ = false;
 
     RefPtr<FrameNode> overlayNode_;
+
+    RefPtr<FrameNode> paintNode_;
+
+    RefPtr<FrameNode> accessibilityFocusPaintNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 

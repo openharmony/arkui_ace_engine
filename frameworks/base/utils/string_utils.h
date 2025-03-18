@@ -687,6 +687,17 @@ inline void SplitStr(const std::string& str, const std::string& sep, std::vector
     }
 }
 
+inline bool CStringEqual(const char* first, const char* second)
+{
+    if (first == nullptr && second == nullptr) {
+        return true;
+    }
+    if (first && second) {
+        return std::strcmp(first, second) == 0;
+    }
+    return false;
+}
+
 const std::string ACE_FORCE_EXPORT FormatString(const char* fmt, ...);
 
 inline bool StartWith(const std::string& dst, const std::string& prefix)

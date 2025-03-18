@@ -58,6 +58,15 @@ constexpr int HALF_ANGLE = 180;
 constexpr int THREE_QUARTER_ANGLE = 270;
 constexpr int FULL_ANGLE = 360;
 
+class MockFrameNode : public FrameNode {
+public:
+    VectorF GetTransformScale()
+    {
+        VectorF testScale {1.2f, 1.2f};
+        return testScale;
+    }
+};
+
 class AccessibilityManagerNgTestNg : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -272,6 +281,10 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     endNode->SetParent(frameNode);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);
     EXPECT_EQ(result, true);
+
+    auto endNodeMock = MockFrameNode::CreateFrameNode("main", NUMTWO, AceType::MakeRefPtr<Pattern>(), true);
+    result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNodeMock, hoverPoint, pointNode);
+    EXPECT_EQ(result, true);
 }
 
 /**
@@ -463,6 +476,11 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest009, TestSize.L
 
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
     EXPECT_EQ(accessibilityManagerNg.hoverState_.idle, false);
+
+    accessibilityManagerNg.hoverState_.eventType = AccessibilityHoverEventType::MOVE;
+    auto ret = accessibilityManagerNg.IsEventTypeChangeDirectHandleHover(
+        AccessibilityHoverEventType::EXIT);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -597,5 +615,84 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityRectTest006, TestSize.Level1
     EXPECT_EQ(rect.GetWidth(), 200);
     // height = 200*3 = 600
     EXPECT_EQ(rect.GetHeight(), 600);
+}
+
+/**
+* @tc.name: IsHandlePipelineAccessibilityHoverEnter001
+* @tc.desc: IsHandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->context_ = nullptr;
+
+    AccessibilityManagerNG manager{};
+    bool result = manager.IsHandlePipelineAccessibilityHoverEnter(frameNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+* @tc.name: IsHandlePipelineAccessibilityHoverEnter002
+* @tc.desc: IsHandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    
+    AccessibilityManagerNG manager;
+    bool result = manager.IsHandlePipelineAccessibilityHoverEnter(frameNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+* @tc.name: IsHandlePipelineAccessibilityHoverEnter003
+* @tc.desc: IsHandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipe = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(pipe);
+    AccessibilityManagerNG manager;
+    bool result = manager.IsHandlePipelineAccessibilityHoverEnter(frameNode);
+    EXPECT_FALSE(result);
+}
+
+/**
+* @tc.name: HandlePipelineAccessibilityHoverEnter001
+* @tc.desc: HandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
+HWTEST_F(AccessibilityManagerNgTestNg, HandlePipelineAccessibilityHoverEnter001, TestSize.Level1) {
+    AccessibilityManagerNG manager;
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    TouchEvent event;
+    int32_t eventType;
+    // Case 1: Test with AccessibilityHoverEventType::ENTER
+    eventType = static_cast<int32_t>(AccessibilityHoverEventType::ENTER);
+    manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
+
+    // Case 2: Test with AccessibilityHoverEventType::MOVE
+    eventType = static_cast<int32_t>(AccessibilityHoverEventType::MOVE);
+    manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
+
+    // Case 3: Test with AccessibilityHoverEventType::EXIT
+    eventType = static_cast<int32_t>(AccessibilityHoverEventType::EXIT);
+    manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
+
+    // Case 4: Test with an invalid event type (default case)
+    eventType = -1; // Invalid type
+    manager.HandlePipelineAccessibilityHoverEnter(frameNode, event, eventType);
 }
 } // namespace OHOS::Ace::NG

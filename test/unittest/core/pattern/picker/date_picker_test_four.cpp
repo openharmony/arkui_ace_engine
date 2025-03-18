@@ -1405,6 +1405,8 @@ HWTEST_F(DatePickerTestFour, OnDetachFromFrameNodeTest002, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestFour, InitHapticControllerTest001, TestSize.Level1)
 {
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     CreateDatePickerColumnNode();
     ASSERT_NE(columnNode_, nullptr);
     ASSERT_NE(columnPattern_, nullptr);
@@ -1414,6 +1416,7 @@ HWTEST_F(DatePickerTestFour, InitHapticControllerTest001, TestSize.Level1)
     columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
     columnPattern_->InitHapticController();
     EXPECT_TRUE(columnPattern_->isEnableHaptic_);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1423,6 +1426,8 @@ HWTEST_F(DatePickerTestFour, InitHapticControllerTest001, TestSize.Level1)
  */
 HWTEST_F(DatePickerTestFour, InitHapticControllerTest002, TestSize.Level1)
 {
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
     CreateDatePickerColumnNode();
     ASSERT_NE(columnNode_, nullptr);
     ASSERT_NE(columnPattern_, nullptr);
@@ -1442,6 +1447,7 @@ HWTEST_F(DatePickerTestFour, InitHapticControllerTest002, TestSize.Level1)
     columnPattern_->hapticController_ = nullptr;
     columnPattern_->InitHapticController();
     EXPECT_EQ(columnPattern_->hapticController_, nullptr);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

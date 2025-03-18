@@ -754,6 +754,7 @@ let FormDimension;
   FormDimension.DIMENSION_6_4 = 7;
   FormDimension.DIMENSION_2_3 = 8;
   FormDimension.DIMENSION_3_3 = 9;
+  FormDimension.DIMENSION_3_4 = 10;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -1024,6 +1025,14 @@ let SearchType;
   SearchType[SearchType.NUMBER_DECIMAL = 12] = 'NUMBER_DECIMAL';
   SearchType[SearchType.URL = 13] = 'URL';
 })(SearchType || (SearchType = {}));
+
+let AutoCapitalizationMode;
+(function (AutoCapitalizationMode) {
+  AutoCapitalizationMode[AutoCapitalizationMode["NONE"] = 0] = "NONE";
+  AutoCapitalizationMode[AutoCapitalizationMode["WORDS"] = 1] = "WORDS";
+  AutoCapitalizationMode[AutoCapitalizationMode["SENTENCES"] = 2] = "SENTENCES";
+  AutoCapitalizationMode[AutoCapitalizationMode["ALL_CHARACTERS"] = 3] = "ALL_CHARACTERS";
+})(AutoCapitalizationMode || (AutoCapitalizationMode = {}));
 
 let TextAreaType;
 (function (TextAreaType) {
@@ -2272,6 +2281,7 @@ class NavPathInfo {
     this.fromRecovery = false;
     this.mode = undefined;
     this.singletonMoved = false;
+    this.isForceSet = undefined;
   }
 }
 
@@ -2294,6 +2304,12 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
+  }
+  getPathStack() {
+    return this.nativeStack?.getPathStack(this);
+  }
+  setPathStack(pathStack, animated) {
+    this.nativeStack?.setPathStack(this, pathStack, animated);
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {

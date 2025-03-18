@@ -186,9 +186,21 @@ void TextFieldController::ClearPreviewText()
         textFieldPattern->GetPreviewTextStart(),
         textFieldPattern->GetPreviewTextEnd(),
     };
-    textFieldPattern->SetPreviewText(u"", range);
+    PreviewTextInfo info = {
+        .text = u"",
+        .range = range,
+        .isIme = false
+    };
+    textFieldPattern->SetPreviewTextOperation(info);
     textFieldPattern->FinishTextPreviewOperation();
     textFieldPattern->NotifyImfFinishTextPreview();
+}
+
+std::u16string TextFieldController::GetText()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, u"");
+    return textFieldPattern->GetTextUtf16Value();
 }
 
 SelectionInfo TextFieldController::GetSelection()

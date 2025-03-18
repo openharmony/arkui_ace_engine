@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,45 +13,45 @@
  * limitations under the License.
  */
 
-const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
-const accessibility = requireNapi('accessibility');
-const intl = requireNapi('intl');
-
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
 
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const accessibility = requireNapi('accessibility');
+const intl = requireNapi('intl');
+
 export var CounterType;
-(function (b14) {
-  b14[(b14['LIST'] = 0)] = 'LIST';
-  b14[(b14['COMPACT'] = 1)] = 'COMPACT';
-  b14[(b14['INLINE'] = 2)] = 'INLINE';
-  b14[(b14['INLINE_DATE'] = 3)] = 'INLINE_DATE';
+(function (CounterType) {
+  CounterType[(CounterType['LIST'] = 0)] = 'LIST';
+  CounterType[(CounterType['COMPACT'] = 1)] = 'COMPACT';
+  CounterType[(CounterType['INLINE'] = 2)] = 'INLINE';
+  CounterType[(CounterType['INLINE_DATE'] = 3)] = 'INLINE_DATE';
 })(CounterType || (CounterType = {}));
 var FocusText;
-(function (a14) {
-  a14[(a14['NONE'] = 0)] = 'NONE';
-  a14[(a14['TEXT1'] = 1)] = 'TEXT1';
-  a14[(a14['TEXT2'] = 2)] = 'TEXT2';
-  a14[(a14['TEXT3'] = 3)] = 'TEXT3';
+(function (FocusText) {
+  FocusText[(FocusText['NONE'] = 0)] = 'NONE';
+  FocusText[(FocusText['TEXT1'] = 1)] = 'TEXT1';
+  FocusText[(FocusText['TEXT2'] = 2)] = 'TEXT2';
+  FocusText[(FocusText['TEXT3'] = 3)] = 'TEXT3';
 })(FocusText || (FocusText = {}));
 export class CommonOptions {}
 export class InlineStyleOptions extends CommonOptions {}
 export class NumberStyleOptions extends InlineStyleOptions {}
 export class DateData {
-  constructor(x13, y13, z13) {
-    this.year = x13;
-    this.month = y13;
-    this.day = z13;
+  constructor(year, month, day) {
+    this.year = year;
+    this.month = month;
+    this.day = day;
   }
   toString() {
-    let u13 = this.year.toString() + '-';
-    let v13 =
+    let date = this.year.toString() + '-';
+    let month =
       this.month < 10 ? '0' + this.month.toString() : this.month.toString();
-    u13 += v13 + '-';
-    let w13 = this.day < 10 ? '0' + this.day.toString() : this.day.toString();
-    u13 += w13;
-    return u13;
+    date += month + '-';
+    let day = this.day < 10 ? '0' + this.day.toString() : this.day.toString();
+    date += day;
+    return date;
   }
 }
 export class DateStyleOptions extends CommonOptions {}
@@ -61,6 +61,7 @@ export class CounterOptions {
   }
 }
 class CounterResource {}
+// counter color
 CounterResource.BUTTON_BACKGROUD_COLOR = {
   id: -1,
   type: 10001,
@@ -96,6 +97,7 @@ CounterResource.COUNTER_BORDER_COLOR = {
   bundleName: '__harDefaultBundleName__',
   moduleName: '__harDefaultModuleName__',
 };
+// button icon
 CounterResource.BUTTON_ADD_ICON = {
   id: -1,
   type: 20000,
@@ -124,6 +126,7 @@ CounterResource.BUTTON_ARROW_DOWN = {
   bundleName: '__harDefaultBundleName__',
   moduleName: '__harDefaultModuleName__',
 };
+// counter size
 CounterResource.BUTTON_BORDER_FOCUSED_WIDTH = '2vp';
 CounterResource.BUTTON_BORDER_BLUR_WIDTH = '0vp';
 CounterResource.COUNTER_BORDER_WIDTH_NUMBER = 1;
@@ -283,13 +286,20 @@ CounterConstant.AUSPICIOUS_FOUR = 4;
 CounterConstant.AUSPICIOUS_HUNDRED = 100;
 CounterConstant.AUSPICIOUS_FOUR_HUNDRED = 400;
 export class CounterComponent extends ViewPU {
-  constructor(o13, p13, q13, r13 = -1, s13 = undefined, t13) {
-    super(o13, q13, r13, t13);
-    if (typeof s13 === 'function') {
-      this.paramsGenerator_ = s13;
+  constructor(
+    parent,
+    params,
+    __localStorage,
+    elmtId = -1,
+    paramsLambda = undefined,
+    extraInfo
+  ) {
+    super(parent, __localStorage, elmtId, extraInfo);
+    if (typeof paramsLambda === 'function') {
+      this.paramsGenerator_ = paramsLambda;
     }
     this.__options = new SynchedPropertyObjectOneWayPU(
-      p13.options,
+      params.options,
       this,
       'options'
     );
@@ -454,240 +464,240 @@ export class CounterComponent extends ViewPU {
     this.initFlag = true;
     this.increaseStr = getContext().resourceManager.getStringSync(125834852);
     this.reduceStr = getContext().resourceManager.getStringSync(125834853);
-    this.setInitiallyProvidedValue(p13);
+    this.setInitiallyProvidedValue(params);
     this.declareWatch('options', this.onOptionsChange);
     this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(n13) {
-    if (n13.type !== undefined) {
-      this.type = n13.type;
+  setInitiallyProvidedValue(params) {
+    if (params.type !== undefined) {
+      this.type = params.type;
     }
-    if (n13.counterDirection !== undefined) {
-      this.counterDirection = n13.counterDirection;
+    if (params.counterDirection !== undefined) {
+      this.counterDirection = params.counterDirection;
     }
-    if (n13.choverEffect !== undefined) {
-      this.choverEffect = n13.choverEffect;
+    if (params.choverEffect !== undefined) {
+      this.choverEffect = params.choverEffect;
     }
-    if (n13.focusEnable !== undefined) {
-      this.focusEnable = n13.focusEnable;
+    if (params.focusEnable !== undefined) {
+      this.focusEnable = params.focusEnable;
     }
-    if (n13.step !== undefined) {
-      this.step = n13.step;
+    if (params.step !== undefined) {
+      this.step = params.step;
     }
-    if (n13.inputValue !== undefined) {
-      this.inputValue = n13.inputValue;
+    if (params.inputValue !== undefined) {
+      this.inputValue = params.inputValue;
     }
-    if (n13.inputYear !== undefined) {
-      this.inputYear = n13.inputYear;
+    if (params.inputYear !== undefined) {
+      this.inputYear = params.inputYear;
     }
-    if (n13.inputMoon !== undefined) {
-      this.inputMoon = n13.inputMoon;
+    if (params.inputMoon !== undefined) {
+      this.inputMoon = params.inputMoon;
     }
-    if (n13.inputDay !== undefined) {
-      this.inputDay = n13.inputDay;
+    if (params.inputDay !== undefined) {
+      this.inputDay = params.inputDay;
     }
-    if (n13.inputHour !== undefined) {
-      this.inputHour = n13.inputHour;
+    if (params.inputHour !== undefined) {
+      this.inputHour = params.inputHour;
     }
-    if (n13.inputMinute !== undefined) {
-      this.inputMinute = n13.inputMinute;
+    if (params.inputMinute !== undefined) {
+      this.inputMinute = params.inputMinute;
     }
-    if (n13.inputSecond !== undefined) {
-      this.inputSecond = n13.inputSecond;
+    if (params.inputSecond !== undefined) {
+      this.inputSecond = params.inputSecond;
     }
-    if (n13.subOpacity !== undefined) {
-      this.subOpacity = n13.subOpacity;
+    if (params.subOpacity !== undefined) {
+      this.subOpacity = params.subOpacity;
     }
-    if (n13.addOpacity !== undefined) {
-      this.addOpacity = n13.addOpacity;
+    if (params.addOpacity !== undefined) {
+      this.addOpacity = params.addOpacity;
     }
-    if (n13.subBtnStateEffect !== undefined) {
-      this.subBtnStateEffect = n13.subBtnStateEffect;
+    if (params.subBtnStateEffect !== undefined) {
+      this.subBtnStateEffect = params.subBtnStateEffect;
     }
-    if (n13.addBtnStateEffect !== undefined) {
-      this.addBtnStateEffect = n13.addBtnStateEffect;
+    if (params.addBtnStateEffect !== undefined) {
+      this.addBtnStateEffect = params.addBtnStateEffect;
     }
-    if (n13.focusText !== undefined) {
-      this.focusText = n13.focusText;
+    if (params.focusText !== undefined) {
+      this.focusText = params.focusText;
     }
-    if (n13.hasFocusText1 !== undefined) {
-      this.hasFocusText1 = n13.hasFocusText1;
+    if (params.hasFocusText1 !== undefined) {
+      this.hasFocusText1 = params.hasFocusText1;
     }
-    if (n13.hasFocusText2 !== undefined) {
-      this.hasFocusText2 = n13.hasFocusText2;
+    if (params.hasFocusText2 !== undefined) {
+      this.hasFocusText2 = params.hasFocusText2;
     }
-    if (n13.hasFocusText3 !== undefined) {
-      this.hasFocusText3 = n13.hasFocusText3;
+    if (params.hasFocusText3 !== undefined) {
+      this.hasFocusText3 = params.hasFocusText3;
     }
-    if (n13.subBtnFocusWidh !== undefined) {
-      this.subBtnFocusWidh = n13.subBtnFocusWidh;
+    if (params.subBtnFocusWidh !== undefined) {
+      this.subBtnFocusWidh = params.subBtnFocusWidh;
     }
-    if (n13.addBtnFocusWidh !== undefined) {
-      this.addBtnFocusWidh = n13.addBtnFocusWidh;
+    if (params.addBtnFocusWidh !== undefined) {
+      this.addBtnFocusWidh = params.addBtnFocusWidh;
     }
-    if (n13.value !== undefined) {
-      this.value = n13.value;
+    if (params.value !== undefined) {
+      this.value = params.value;
     }
-    if (n13.year !== undefined) {
-      this.year = n13.year;
+    if (params.year !== undefined) {
+      this.year = params.year;
     }
-    if (n13.month !== undefined) {
-      this.month = n13.month;
+    if (params.month !== undefined) {
+      this.month = params.month;
     }
-    if (n13.day !== undefined) {
-      this.day = n13.day;
+    if (params.day !== undefined) {
+      this.day = params.day;
     }
-    if (n13.hour !== undefined) {
-      this.hour = n13.hour;
+    if (params.hour !== undefined) {
+      this.hour = params.hour;
     }
-    if (n13.minute !== undefined) {
-      this.minute = n13.minute;
+    if (params.minute !== undefined) {
+      this.minute = params.minute;
     }
-    if (n13.second !== undefined) {
-      this.second = n13.second;
+    if (params.second !== undefined) {
+      this.second = params.second;
     }
-    if (n13.subBtnEnabled !== undefined) {
-      this.subBtnEnabled = n13.subBtnEnabled;
+    if (params.subBtnEnabled !== undefined) {
+      this.subBtnEnabled = params.subBtnEnabled;
     }
-    if (n13.addBtnEnabled !== undefined) {
-      this.addBtnEnabled = n13.addBtnEnabled;
+    if (params.addBtnEnabled !== undefined) {
+      this.addBtnEnabled = params.addBtnEnabled;
     }
-    if (n13.hasInputText1 !== undefined) {
-      this.hasInputText1 = n13.hasInputText1;
+    if (params.hasInputText1 !== undefined) {
+      this.hasInputText1 = params.hasInputText1;
     }
-    if (n13.hasInputText2 !== undefined) {
-      this.hasInputText2 = n13.hasInputText2;
+    if (params.hasInputText2 !== undefined) {
+      this.hasInputText2 = params.hasInputText2;
     }
-    if (n13.hasInputText3 !== undefined) {
-      this.hasInputText3 = n13.hasInputText3;
+    if (params.hasInputText3 !== undefined) {
+      this.hasInputText3 = params.hasInputText3;
     }
-    if (n13.textWidth !== undefined) {
-      this.textWidth = n13.textWidth;
+    if (params.textWidth !== undefined) {
+      this.textWidth = params.textWidth;
     }
-    if (n13.min !== undefined) {
-      this.min = n13.min;
+    if (params.min !== undefined) {
+      this.min = params.min;
     }
-    if (n13.max !== undefined) {
-      this.max = n13.max;
+    if (params.max !== undefined) {
+      this.max = params.max;
     }
-    if (n13.maxYear !== undefined) {
-      this.maxYear = n13.maxYear;
+    if (params.maxYear !== undefined) {
+      this.maxYear = params.maxYear;
     }
-    if (n13.minYear !== undefined) {
-      this.minYear = n13.minYear;
+    if (params.minYear !== undefined) {
+      this.minYear = params.minYear;
     }
-    if (n13.numberStrList !== undefined) {
-      this.numberStrList = n13.numberStrList;
+    if (params.numberStrList !== undefined) {
+      this.numberStrList = params.numberStrList;
     }
-    if (n13.onHoverIncrease !== undefined) {
-      this.onHoverIncrease = n13.onHoverIncrease;
+    if (params.onHoverIncrease !== undefined) {
+      this.onHoverIncrease = params.onHoverIncrease;
     }
-    if (n13.onHoverDecrease !== undefined) {
-      this.onHoverDecrease = n13.onHoverDecrease;
+    if (params.onHoverDecrease !== undefined) {
+      this.onHoverDecrease = params.onHoverDecrease;
     }
-    if (n13.onFocusIncrease !== undefined) {
-      this.onFocusIncrease = n13.onFocusIncrease;
+    if (params.onFocusIncrease !== undefined) {
+      this.onFocusIncrease = params.onFocusIncrease;
     }
-    if (n13.onFocusDecrease !== undefined) {
-      this.onFocusDecrease = n13.onFocusDecrease;
+    if (params.onFocusDecrease !== undefined) {
+      this.onFocusDecrease = params.onFocusDecrease;
     }
-    if (n13.onBlurIncrease !== undefined) {
-      this.onBlurIncrease = n13.onBlurIncrease;
+    if (params.onBlurIncrease !== undefined) {
+      this.onBlurIncrease = params.onBlurIncrease;
     }
-    if (n13.onBlurDecrease !== undefined) {
-      this.onBlurDecrease = n13.onBlurDecrease;
+    if (params.onBlurDecrease !== undefined) {
+      this.onBlurDecrease = params.onBlurDecrease;
     }
-    if (n13.onChange !== undefined) {
-      this.onChange = n13.onChange;
+    if (params.onChange !== undefined) {
+      this.onChange = params.onChange;
     }
-    if (n13.onDateChange !== undefined) {
-      this.onDateChange = n13.onDateChange;
+    if (params.onDateChange !== undefined) {
+      this.onDateChange = params.onDateChange;
     }
-    if (n13.timeoutID1 !== undefined) {
-      this.timeoutID1 = n13.timeoutID1;
+    if (params.timeoutID1 !== undefined) {
+      this.timeoutID1 = params.timeoutID1;
     }
-    if (n13.timeoutID2 !== undefined) {
-      this.timeoutID2 = n13.timeoutID2;
+    if (params.timeoutID2 !== undefined) {
+      this.timeoutID2 = params.timeoutID2;
     }
-    if (n13.timeoutID3 !== undefined) {
-      this.timeoutID3 = n13.timeoutID3;
+    if (params.timeoutID3 !== undefined) {
+      this.timeoutID3 = params.timeoutID3;
     }
-    if (n13.numberStyleOptions !== undefined) {
-      this.numberStyleOptions = n13.numberStyleOptions;
+    if (params.numberStyleOptions !== undefined) {
+      this.numberStyleOptions = params.numberStyleOptions;
     }
-    if (n13.dateStyleOptions !== undefined) {
-      this.dateStyleOptions = n13.dateStyleOptions;
+    if (params.dateStyleOptions !== undefined) {
+      this.dateStyleOptions = params.dateStyleOptions;
     }
-    if (n13.inlineStyleOptions !== undefined) {
-      this.inlineStyleOptions = n13.inlineStyleOptions;
+    if (params.inlineStyleOptions !== undefined) {
+      this.inlineStyleOptions = params.inlineStyleOptions;
     }
-    if (n13.timeStamp !== undefined) {
-      this.timeStamp = n13.timeStamp;
+    if (params.timeStamp !== undefined) {
+      this.timeStamp = params.timeStamp;
     }
-    if (n13.hasTextWidth !== undefined) {
-      this.hasTextWidth = n13.hasTextWidth;
+    if (params.hasTextWidth !== undefined) {
+      this.hasTextWidth = params.hasTextWidth;
     }
-    if (n13.controller1 !== undefined) {
-      this.controller1 = n13.controller1;
+    if (params.controller1 !== undefined) {
+      this.controller1 = params.controller1;
     }
-    if (n13.controller2 !== undefined) {
-      this.controller2 = n13.controller2;
+    if (params.controller2 !== undefined) {
+      this.controller2 = params.controller2;
     }
-    if (n13.controller3 !== undefined) {
-      this.controller3 = n13.controller3;
+    if (params.controller3 !== undefined) {
+      this.controller3 = params.controller3;
     }
-    if (n13.initFlag !== undefined) {
-      this.initFlag = n13.initFlag;
+    if (params.initFlag !== undefined) {
+      this.initFlag = params.initFlag;
     }
-    if (n13.increaseStr !== undefined) {
-      this.increaseStr = n13.increaseStr;
+    if (params.increaseStr !== undefined) {
+      this.increaseStr = params.increaseStr;
     }
-    if (n13.reduceStr !== undefined) {
-      this.reduceStr = n13.reduceStr;
+    if (params.reduceStr !== undefined) {
+      this.reduceStr = params.reduceStr;
     }
   }
-  updateStateVars(m13) {
-    this.__options.reset(m13.options);
+  updateStateVars(params) {
+    this.__options.reset(params.options);
   }
-  purgeVariableDependenciesOnElmtId(l13) {
-    this.__options.purgeDependencyOnElmtId(l13);
-    this.__type.purgeDependencyOnElmtId(l13);
-    this.__counterDirection.purgeDependencyOnElmtId(l13);
-    this.__choverEffect.purgeDependencyOnElmtId(l13);
-    this.__focusEnable.purgeDependencyOnElmtId(l13);
-    this.__step.purgeDependencyOnElmtId(l13);
-    this.__inputValue.purgeDependencyOnElmtId(l13);
-    this.__inputYear.purgeDependencyOnElmtId(l13);
-    this.__inputMoon.purgeDependencyOnElmtId(l13);
-    this.__inputDay.purgeDependencyOnElmtId(l13);
-    this.__inputHour.purgeDependencyOnElmtId(l13);
-    this.__inputMinute.purgeDependencyOnElmtId(l13);
-    this.__inputSecond.purgeDependencyOnElmtId(l13);
-    this.__subOpacity.purgeDependencyOnElmtId(l13);
-    this.__addOpacity.purgeDependencyOnElmtId(l13);
-    this.__subBtnStateEffect.purgeDependencyOnElmtId(l13);
-    this.__addBtnStateEffect.purgeDependencyOnElmtId(l13);
-    this.__focusText.purgeDependencyOnElmtId(l13);
-    this.__hasFocusText1.purgeDependencyOnElmtId(l13);
-    this.__hasFocusText2.purgeDependencyOnElmtId(l13);
-    this.__hasFocusText3.purgeDependencyOnElmtId(l13);
-    this.__subBtnFocusWidh.purgeDependencyOnElmtId(l13);
-    this.__addBtnFocusWidh.purgeDependencyOnElmtId(l13);
-    this.__value.purgeDependencyOnElmtId(l13);
-    this.__year.purgeDependencyOnElmtId(l13);
-    this.__month.purgeDependencyOnElmtId(l13);
-    this.__day.purgeDependencyOnElmtId(l13);
-    this.__hour.purgeDependencyOnElmtId(l13);
-    this.__minute.purgeDependencyOnElmtId(l13);
-    this.__second.purgeDependencyOnElmtId(l13);
-    this.__subBtnEnabled.purgeDependencyOnElmtId(l13);
-    this.__addBtnEnabled.purgeDependencyOnElmtId(l13);
-    this.__hasInputText1.purgeDependencyOnElmtId(l13);
-    this.__hasInputText2.purgeDependencyOnElmtId(l13);
-    this.__hasInputText3.purgeDependencyOnElmtId(l13);
-    this.__textWidth.purgeDependencyOnElmtId(l13);
-    this.__min.purgeDependencyOnElmtId(l13);
-    this.__max.purgeDependencyOnElmtId(l13);
+  purgeVariableDependenciesOnElmtId(rmElmtId) {
+    this.__options.purgeDependencyOnElmtId(rmElmtId);
+    this.__type.purgeDependencyOnElmtId(rmElmtId);
+    this.__counterDirection.purgeDependencyOnElmtId(rmElmtId);
+    this.__choverEffect.purgeDependencyOnElmtId(rmElmtId);
+    this.__focusEnable.purgeDependencyOnElmtId(rmElmtId);
+    this.__step.purgeDependencyOnElmtId(rmElmtId);
+    this.__inputValue.purgeDependencyOnElmtId(rmElmtId);
+    this.__inputYear.purgeDependencyOnElmtId(rmElmtId);
+    this.__inputMoon.purgeDependencyOnElmtId(rmElmtId);
+    this.__inputDay.purgeDependencyOnElmtId(rmElmtId);
+    this.__inputHour.purgeDependencyOnElmtId(rmElmtId);
+    this.__inputMinute.purgeDependencyOnElmtId(rmElmtId);
+    this.__inputSecond.purgeDependencyOnElmtId(rmElmtId);
+    this.__subOpacity.purgeDependencyOnElmtId(rmElmtId);
+    this.__addOpacity.purgeDependencyOnElmtId(rmElmtId);
+    this.__subBtnStateEffect.purgeDependencyOnElmtId(rmElmtId);
+    this.__addBtnStateEffect.purgeDependencyOnElmtId(rmElmtId);
+    this.__focusText.purgeDependencyOnElmtId(rmElmtId);
+    this.__hasFocusText1.purgeDependencyOnElmtId(rmElmtId);
+    this.__hasFocusText2.purgeDependencyOnElmtId(rmElmtId);
+    this.__hasFocusText3.purgeDependencyOnElmtId(rmElmtId);
+    this.__subBtnFocusWidh.purgeDependencyOnElmtId(rmElmtId);
+    this.__addBtnFocusWidh.purgeDependencyOnElmtId(rmElmtId);
+    this.__value.purgeDependencyOnElmtId(rmElmtId);
+    this.__year.purgeDependencyOnElmtId(rmElmtId);
+    this.__month.purgeDependencyOnElmtId(rmElmtId);
+    this.__day.purgeDependencyOnElmtId(rmElmtId);
+    this.__hour.purgeDependencyOnElmtId(rmElmtId);
+    this.__minute.purgeDependencyOnElmtId(rmElmtId);
+    this.__second.purgeDependencyOnElmtId(rmElmtId);
+    this.__subBtnEnabled.purgeDependencyOnElmtId(rmElmtId);
+    this.__addBtnEnabled.purgeDependencyOnElmtId(rmElmtId);
+    this.__hasInputText1.purgeDependencyOnElmtId(rmElmtId);
+    this.__hasInputText2.purgeDependencyOnElmtId(rmElmtId);
+    this.__hasInputText3.purgeDependencyOnElmtId(rmElmtId);
+    this.__textWidth.purgeDependencyOnElmtId(rmElmtId);
+    this.__min.purgeDependencyOnElmtId(rmElmtId);
+    this.__max.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
     this.__options.aboutToBeDeleted();
@@ -734,259 +744,264 @@ export class CounterComponent extends ViewPU {
   get options() {
     return this.__options.get();
   }
-  set options(k13) {
-    this.__options.set(k13);
+  set options(newValue) {
+    this.__options.set(newValue);
   }
   get type() {
     return this.__type.get();
   }
-  set type(j13) {
-    this.__type.set(j13);
+  set type(newValue) {
+    this.__type.set(newValue);
   }
   get counterDirection() {
     return this.__counterDirection.get();
   }
-  set counterDirection(i13) {
-    this.__counterDirection.set(i13);
+  set counterDirection(newValue) {
+    this.__counterDirection.set(newValue);
   }
   get choverEffect() {
     return this.__choverEffect.get();
   }
-  set choverEffect(h13) {
-    this.__choverEffect.set(h13);
+  set choverEffect(newValue) {
+    this.__choverEffect.set(newValue);
   }
   get focusEnable() {
     return this.__focusEnable.get();
   }
-  set focusEnable(g13) {
-    this.__focusEnable.set(g13);
+  set focusEnable(newValue) {
+    this.__focusEnable.set(newValue);
   }
   get step() {
     return this.__step.get();
   }
-  set step(f13) {
-    this.__step.set(f13);
+  set step(newValue) {
+    this.__step.set(newValue);
   }
   get inputValue() {
     return this.__inputValue.get();
   }
-  set inputValue(e13) {
-    this.__inputValue.set(e13);
+  set inputValue(newValue) {
+    this.__inputValue.set(newValue);
   }
   get inputYear() {
     return this.__inputYear.get();
   }
-  set inputYear(d13) {
-    this.__inputYear.set(d13);
+  set inputYear(newValue) {
+    this.__inputYear.set(newValue);
   }
   get inputMoon() {
     return this.__inputMoon.get();
   }
-  set inputMoon(c13) {
-    this.__inputMoon.set(c13);
+  set inputMoon(newValue) {
+    this.__inputMoon.set(newValue);
   }
   get inputDay() {
     return this.__inputDay.get();
   }
-  set inputDay(b13) {
-    this.__inputDay.set(b13);
+  set inputDay(newValue) {
+    this.__inputDay.set(newValue);
   }
   get inputHour() {
     return this.__inputHour.get();
   }
-  set inputHour(a13) {
-    this.__inputHour.set(a13);
+  set inputHour(newValue) {
+    this.__inputHour.set(newValue);
   }
   get inputMinute() {
     return this.__inputMinute.get();
   }
-  set inputMinute(z12) {
-    this.__inputMinute.set(z12);
+  set inputMinute(newValue) {
+    this.__inputMinute.set(newValue);
   }
   get inputSecond() {
     return this.__inputSecond.get();
   }
-  set inputSecond(y12) {
-    this.__inputSecond.set(y12);
+  set inputSecond(newValue) {
+    this.__inputSecond.set(newValue);
   }
   get subOpacity() {
     return this.__subOpacity.get();
   }
-  set subOpacity(x12) {
-    this.__subOpacity.set(x12);
+  set subOpacity(newValue) {
+    this.__subOpacity.set(newValue);
   }
   get addOpacity() {
     return this.__addOpacity.get();
   }
-  set addOpacity(w12) {
-    this.__addOpacity.set(w12);
+  set addOpacity(newValue) {
+    this.__addOpacity.set(newValue);
   }
   get subBtnStateEffect() {
     return this.__subBtnStateEffect.get();
   }
-  set subBtnStateEffect(v12) {
-    this.__subBtnStateEffect.set(v12);
+  set subBtnStateEffect(newValue) {
+    this.__subBtnStateEffect.set(newValue);
   }
   get addBtnStateEffect() {
     return this.__addBtnStateEffect.get();
   }
-  set addBtnStateEffect(u12) {
-    this.__addBtnStateEffect.set(u12);
+  set addBtnStateEffect(newValue) {
+    this.__addBtnStateEffect.set(newValue);
   }
   get focusText() {
     return this.__focusText.get();
   }
-  set focusText(t12) {
-    this.__focusText.set(t12);
+  set focusText(newValue) {
+    this.__focusText.set(newValue);
   }
   get hasFocusText1() {
     return this.__hasFocusText1.get();
   }
-  set hasFocusText1(s12) {
-    this.__hasFocusText1.set(s12);
+  set hasFocusText1(newValue) {
+    this.__hasFocusText1.set(newValue);
   }
   get hasFocusText2() {
     return this.__hasFocusText2.get();
   }
-  set hasFocusText2(r12) {
-    this.__hasFocusText2.set(r12);
+  set hasFocusText2(newValue) {
+    this.__hasFocusText2.set(newValue);
   }
   get hasFocusText3() {
     return this.__hasFocusText3.get();
   }
-  set hasFocusText3(q12) {
-    this.__hasFocusText3.set(q12);
+  set hasFocusText3(newValue) {
+    this.__hasFocusText3.set(newValue);
   }
   get subBtnFocusWidh() {
     return this.__subBtnFocusWidh.get();
   }
-  set subBtnFocusWidh(p12) {
-    this.__subBtnFocusWidh.set(p12);
+  set subBtnFocusWidh(newValue) {
+    this.__subBtnFocusWidh.set(newValue);
   }
   get addBtnFocusWidh() {
     return this.__addBtnFocusWidh.get();
   }
-  set addBtnFocusWidh(o12) {
-    this.__addBtnFocusWidh.set(o12);
+  set addBtnFocusWidh(newValue) {
+    this.__addBtnFocusWidh.set(newValue);
   }
   get value() {
     return this.__value.get();
   }
-  set value(n12) {
-    this.__value.set(n12);
+  set value(newValue) {
+    this.__value.set(newValue);
   }
   get year() {
     return this.__year.get();
   }
-  set year(m12) {
-    this.__year.set(m12);
+  set year(newValue) {
+    this.__year.set(newValue);
   }
   get month() {
     return this.__month.get();
   }
-  set month(l12) {
-    this.__month.set(l12);
+  set month(newValue) {
+    this.__month.set(newValue);
   }
   get day() {
     return this.__day.get();
   }
-  set day(k12) {
-    this.__day.set(k12);
+  set day(newValue) {
+    this.__day.set(newValue);
   }
   get hour() {
     return this.__hour.get();
   }
-  set hour(j12) {
-    this.__hour.set(j12);
+  set hour(newValue) {
+    this.__hour.set(newValue);
   }
   get minute() {
     return this.__minute.get();
   }
-  set minute(i12) {
-    this.__minute.set(i12);
+  set minute(newValue) {
+    this.__minute.set(newValue);
   }
   get second() {
     return this.__second.get();
   }
-  set second(h12) {
-    this.__second.set(h12);
+  set second(newValue) {
+    this.__second.set(newValue);
   }
   get subBtnEnabled() {
     return this.__subBtnEnabled.get();
   }
-  set subBtnEnabled(g12) {
-    this.__subBtnEnabled.set(g12);
+  set subBtnEnabled(newValue) {
+    this.__subBtnEnabled.set(newValue);
   }
   get addBtnEnabled() {
     return this.__addBtnEnabled.get();
   }
-  set addBtnEnabled(f12) {
-    this.__addBtnEnabled.set(f12);
+  set addBtnEnabled(newValue) {
+    this.__addBtnEnabled.set(newValue);
   }
   get hasInputText1() {
     return this.__hasInputText1.get();
   }
-  set hasInputText1(e12) {
-    this.__hasInputText1.set(e12);
+  set hasInputText1(newValue) {
+    this.__hasInputText1.set(newValue);
   }
   get hasInputText2() {
     return this.__hasInputText2.get();
   }
-  set hasInputText2(d12) {
-    this.__hasInputText2.set(d12);
+  set hasInputText2(newValue) {
+    this.__hasInputText2.set(newValue);
   }
   get hasInputText3() {
     return this.__hasInputText3.get();
   }
-  set hasInputText3(c12) {
-    this.__hasInputText3.set(c12);
+  set hasInputText3(newValue) {
+    this.__hasInputText3.set(newValue);
   }
   get textWidth() {
     return this.__textWidth.get();
   }
-  set textWidth(b12) {
-    this.__textWidth.set(b12);
+  set textWidth(newValue) {
+    this.__textWidth.set(newValue);
   }
   get min() {
     return this.__min.get();
   }
-  set min(a12) {
-    this.__min.set(a12);
+  set min(newValue) {
+    this.__min.set(newValue);
   }
   get max() {
     return this.__max.get();
   }
-  set max(z11) {
-    this.__max.set(z11);
+  set max(newValue) {
+    this.__max.set(newValue);
   }
   getTextInputFontSize() {
-    let w11 = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
-    let x11 = this.getUIContext();
-    let y11 = x11.getHostContext()?.config?.fontSizeScale ?? 1;
-    if (y11 < 1) {
-      return w11 + 'fp';
+    let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
+    let uiContext = this.getUIContext();
+    let fontSizeScale = uiContext.getHostContext()?.config?.fontSizeScale ?? 1;
+    if (fontSizeScale < 1) {
+      return fontSize + 'fp';
     } else {
-      return w11 + 'vp';
+      return fontSize + 'vp';
     }
   }
-  getDateYear() {
-    let r11 = new intl.Locale();
-    let s11 = r11.toString();
-    let t11 = new Date(this.year, this.month - 1, this.day);
-    let u11 = new intl.DateTimeFormat(s11, { year: 'numeric' });
-    let v11 = u11.format(t11);
-    return v11;
+  getDate(value) {
+    return `[n2] ${value} [n0]`;
   }
-  getDateMonth() {
-    let m11 = new intl.Locale();
-    let n11 = m11.toString();
-    let o11 = new Date(this.year, this.month - 1, this.day);
-    let p11 = new intl.DateTimeFormat(n11, { month: 'long' });
-    let q11 = p11.format(o11);
-    return q11;
+  getDateYear(value) {
+    let locale = new intl.Locale();
+    let localeID = locale.toString();
+    let date = new Date(this.year, this.month - 1, this.day);
+    date.setFullYear(this.year);
+    let dateFormatYear = new intl.DateTimeFormat(localeID, { year: 'numeric' });
+    let formattedDateYear = dateFormatYear.format(date);
+    return this.getDate(formattedDateYear);
   }
-  getDateDay() {
-    let l11 = new Map([
+  getDateMonth(value) {
+    let locale = new intl.Locale();
+    let localeID = locale.toString();
+    let date = new Date(this.year, this.month - 1, this.day);
+    date.setFullYear(this.year);
+    let dateFormatMonth = new intl.DateTimeFormat(localeID, { month: 'long' });
+    let formattedDateMonth = dateFormatMonth.format(date);
+    return this.getDate(formattedDateMonth);
+  }
+  getDateDay(value) {
+    let dateDayMap = new Map([
       [
         1,
         getContext().resourceManager.getStringByNameSync(
@@ -1174,18 +1189,18 @@ export class CounterComponent extends ViewPU {
         ),
       ],
     ]);
-    return l11.get(this.day);
+    return this.getDate(dateDayMap.get(this.day));
   }
-  convertNumberToString(k11) {
-    if (k11 >= 0 && k11 < CounterConstant.COUNTER_TEN_NUMBER) {
-      return this.numberStrList[k11];
+  convertNumberToString(value) {
+    if (value >= 0 && value < CounterConstant.COUNTER_TEN_NUMBER) {
+      return this.numberStrList[value];
     } else {
-      return k11.toString();
+      return value.toString();
     }
   }
   aboutToAppear() {
-    let j11 = new Date();
-    this.timeStamp = j11.getTime();
+    let dateTime = new Date();
+    this.timeStamp = dateTime.getTime();
     if (this.options !== undefined && this.options !== null) {
       this.onOptionsChange();
     }
@@ -1398,12 +1413,18 @@ export class CounterComponent extends ViewPU {
       }
       this.updateInlineStyleOptions();
     } else if (this.type === CounterType.INLINE_DATE) {
-      let i11 = this.options.dateOptions;
-      if (i11 !== undefined) {
-        i11.year = i11.year ? i11.year : CounterConstant.COUNTER_MIN_YEAR;
-        i11.month = i11.month ? i11.month : CounterConstant.COUNTER_MIN_MONTH;
-        i11.day = i11.day ? i11.day : CounterConstant.COUNTER_MIN_DAY;
-        this.dateStyleOptions = i11;
+      let options = this.options.dateOptions;
+      if (options !== undefined) {
+        options.year = options.year
+          ? options.year
+          : CounterConstant.COUNTER_MIN_YEAR;
+        options.month = options.month
+          ? options.month
+          : CounterConstant.COUNTER_MIN_MONTH;
+        options.day = options.day
+          ? options.day
+          : CounterConstant.COUNTER_MIN_DAY;
+        this.dateStyleOptions = options;
       }
       this.updateDateStyleOptions();
     } else {
@@ -1537,28 +1558,27 @@ export class CounterComponent extends ViewPU {
         }
       }
       try {
-        let a11 = new intl.Locale();
-        let b11 = a11.toString();
-        let c11 = new Date(this.year, this.month - 1, this.day);
-        let d11 = new intl.DateTimeFormat(b11, { year: 'numeric' });
-        let e11 = d11.format(c11);
-        let f11 = new intl.DateTimeFormat(b11, { month: 'long' });
-        let g11 = f11.format(c11);
-        let h11 = {
+        let eventInfo = {
           type: 'announceForAccessibility',
           bundleName: getContext()?.abilityInfo?.bundleName,
           triggerAction: 'click',
           textAnnouncedForAccessibility:
-            e11 + ',' + e11 + '/' + g11 + '/' + this.getDateDay(),
+            this.getDateYear(this.year) +
+            ',' +
+            this.getDateYear(this.year) +
+            '/' +
+            this.getDateMonth(this.month) +
+            '/' +
+            this.getDateDay(this.day),
         };
-        accessibility.sendAccessibilityEvent(h11).then(() => {
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility subYear click send event');
         });
-      } catch (x10) {
-        let y10 = x10.code;
-        let z10 = x10.message;
+      } catch (exception) {
+        let code = exception.code;
+        let message = exception.message;
         console.log(
-          `Accessility subYear faild error code:${y10} message:${z10}`
+          `Accessility subYear faild error code:${code} message:${message}`
         );
       }
     } else if (this.focusText === FocusText.TEXT2) {
@@ -1570,28 +1590,27 @@ export class CounterComponent extends ViewPU {
         this.hasFocusText2 = true;
       }
       try {
-        let p10 = new intl.Locale();
-        let q10 = p10.toString();
-        let r10 = new Date(this.year, this.month - 1, this.day);
-        let s10 = new intl.DateTimeFormat(q10, { year: 'numeric' });
-        let t10 = s10.format(r10);
-        let u10 = new intl.DateTimeFormat(q10, { month: 'long' });
-        let v10 = u10.format(r10);
-        let w10 = {
+        let eventInfo = {
           type: 'announceForAccessibility',
           bundleName: getContext()?.abilityInfo?.bundleName,
           triggerAction: 'click',
           textAnnouncedForAccessibility:
-            v10 + ',' + t10 + '/' + v10 + '/' + this.getDateDay(),
+            this.getDateMonth(this.month) +
+            ',' +
+            this.getDateYear(this.year) +
+            '/' +
+            this.getDateMonth(this.month) +
+            '/' +
+            this.getDateDay(this.day),
         };
-        accessibility.sendAccessibilityEvent(w10).then(() => {
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility subMonth click send event');
         });
-      } catch (m10) {
-        let n10 = m10.code;
-        let o10 = m10.message;
+      } catch (exception) {
+        let code = exception.code;
+        let message = exception.message;
         console.log(
-          `Accessility subMonth faild error code:${n10} message:${o10}`
+          `Accessility subMonth faild error code:${code} message:${message}`
         );
       }
     } else if (this.focusText === FocusText.TEXT3) {
@@ -1603,28 +1622,27 @@ export class CounterComponent extends ViewPU {
         this.hasFocusText3 = true;
       }
       try {
-        let e10 = new intl.Locale();
-        let f10 = e10.toString();
-        let g10 = new Date(this.year, this.month - 1, this.day);
-        let h10 = new intl.DateTimeFormat(f10, { year: 'numeric' });
-        let i10 = h10.format(g10);
-        let j10 = new intl.DateTimeFormat(f10, { month: 'long' });
-        let k10 = j10.format(g10);
-        let l10 = {
+        let eventInfo = {
           type: 'announceForAccessibility',
           bundleName: getContext()?.abilityInfo?.bundleName,
           triggerAction: 'click',
           textAnnouncedForAccessibility:
-            this.getDateDay() + ',' + i10 + '/' + k10 + '/' + this.getDateDay(),
+            this.getDateDay(this.day) +
+            ',' +
+            this.getDateYear(this.year) +
+            '/' +
+            this.getDateMonth(this.month) +
+            '/' +
+            this.getDateDay(this.day),
         };
-        accessibility.sendAccessibilityEvent(l10).then(() => {
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility subDay click send event');
         });
-      } catch (b10) {
-        let c10 = b10.code;
-        let d10 = b10.message;
+      } catch (exception) {
+        let code = exception.code;
+        let message = exception.message;
         console.log(
-          `Accessility subDay faild error code:${c10} message:${d10}`
+          `Accessility subDay faild error code:${code} message:${message}`
         );
       }
     } else {
@@ -1723,28 +1741,27 @@ export class CounterComponent extends ViewPU {
         }
       }
       try {
-        let t9 = new intl.Locale();
-        let u9 = t9.toString();
-        let v9 = new Date(this.year, this.month - 1, this.day);
-        let w9 = new intl.DateTimeFormat(u9, { year: 'numeric' });
-        let x9 = w9.format(v9);
-        let y9 = new intl.DateTimeFormat(u9, { month: 'long' });
-        let z9 = y9.format(v9);
-        let a10 = {
+        let eventInfo = {
           type: 'announceForAccessibility',
           bundleName: getContext()?.abilityInfo?.bundleName,
           triggerAction: 'click',
           textAnnouncedForAccessibility:
-            x9 + ',' + x9 + '/' + z9 + '/' + this.getDateDay(),
+            this.getDateYear(this.year) +
+            ',' +
+            this.getDateYear(this.year) +
+            '/' +
+            this.getDateMonth(this.month) +
+            '/' +
+            this.getDateDay(this.day),
         };
-        accessibility.sendAccessibilityEvent(a10).then(() => {
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility addYear click send event');
         });
-      } catch (q9) {
-        let r9 = q9.code;
-        let s9 = q9.message;
+      } catch (exception) {
+        let code = exception.code;
+        let message = exception.message;
         console.log(
-          `Accessility addYear click faild error code:${r9} message:${s9}`
+          `Accessility addYear click faild error code:${code} message:${message}`
         );
       }
     } else if (this.focusText === FocusText.TEXT2) {
@@ -1756,28 +1773,27 @@ export class CounterComponent extends ViewPU {
         this.hasFocusText2 = true;
       }
       try {
-        let i9 = new intl.Locale();
-        let j9 = i9.toString();
-        let k9 = new Date(this.year, this.month - 1, this.day);
-        let l9 = new intl.DateTimeFormat(j9, { year: 'numeric' });
-        let m9 = l9.format(k9);
-        let n9 = new intl.DateTimeFormat(j9, { month: 'long' });
-        let o9 = n9.format(k9);
-        let p9 = {
+        let eventInfo = {
           type: 'announceForAccessibility',
           bundleName: getContext()?.abilityInfo?.bundleName,
           triggerAction: 'click',
           textAnnouncedForAccessibility:
-            o9 + ',' + m9 + '/' + o9 + '/' + this.getDateDay(),
+            this.getDateMonth(this.month) +
+            ',' +
+            this.getDateYear(this.year) +
+            '/' +
+            this.getDateMonth(this.month) +
+            '/' +
+            this.getDateDay(this.day),
         };
-        accessibility.sendAccessibilityEvent(p9).then(() => {
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility addMonth click send event');
         });
-      } catch (f9) {
-        let g9 = f9.code;
-        let h9 = f9.message;
+      } catch (exception) {
+        let code = exception.code;
+        let message = exception.message;
         console.log(
-          `Accessility addMonth faild error code:${g9} message:${h9}`
+          `Accessility addMonth faild error code:${code} message:${message}`
         );
       }
     } else if (this.focusText === FocusText.TEXT3) {
@@ -1789,27 +1805,28 @@ export class CounterComponent extends ViewPU {
         this.hasFocusText3 = true;
       }
       try {
-        let x8 = new intl.Locale();
-        let y8 = x8.toString();
-        let z8 = new Date(this.year, this.month - 1, this.day);
-        let a9 = new intl.DateTimeFormat(y8, { year: 'numeric' });
-        let b9 = a9.format(z8);
-        let c9 = new intl.DateTimeFormat(y8, { month: 'long' });
-        let d9 = c9.format(z8);
-        let e9 = {
+        let eventInfo = {
           type: 'announceForAccessibility',
           bundleName: getContext()?.abilityInfo?.bundleName,
           triggerAction: 'click',
           textAnnouncedForAccessibility:
-            this.getDateDay() + ',' + b9 + '/' + d9 + '/' + this.getDateDay(),
+            this.getDateDay(this.day) +
+            ',' +
+            this.getDateYear(this.year) +
+            '/' +
+            this.getDateMonth(this.month) +
+            '/' +
+            this.getDateDay(this.day),
         };
-        accessibility.sendAccessibilityEvent(e9).then(() => {
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           console.log('Accessility addDay click send event');
         });
-      } catch (u8) {
-        let v8 = u8.code;
-        let w8 = u8.message;
-        console.log(`Accessility addDay faild error code:${v8} message:${w8}`);
+      } catch (exception) {
+        let code = exception.code;
+        let message = exception.message;
+        console.log(
+          `Accessility addDay faild error code:${code} message:${message}`
+        );
       }
     } else {
       this.focusDayWithAdd();
@@ -2002,44 +2019,44 @@ export class CounterComponent extends ViewPU {
     return this.getValue().length > 0 ? this.getValue().length : 1;
   }
   getYear() {
-    let t8 = this.year.toString();
-    if (t8.length === 1) {
-      t8 = '000' + t8;
-    } else if (t8.length === 2) {
-      t8 = '00' + t8;
-    } else if (t8.length === 3) {
-      t8 = '0' + t8;
+    let year = this.year.toString();
+    if (year.length === 1) {
+      year = '000' + year;
+    } else if (year.length === 2) {
+      year = '00' + year;
+    } else if (year.length === 3) {
+      year = '0' + year;
     } else {
-      t8 = t8;
+      year = year;
     }
-    return t8;
+    return year;
   }
-  focusWithTarget(r8) {
+  focusWithTarget(key) {
     setTimeout(() => {
-      let s8 = focusControl.requestFocus(r8);
-      if (s8) {
+      let res = focusControl.requestFocus(key);
+      if (res) {
         console.log('Request success');
       } else {
         console.log('Request failed');
       }
     });
   }
-  focusCurrentText(q8) {
-    if (q8 === FocusText.TEXT1) {
+  focusCurrentText(text) {
+    if (text === FocusText.TEXT1) {
       if (this.focusText === FocusText.NONE) {
         this.focusText = FocusText.TEXT1;
       }
       if (!this.hasFocusText1) {
         this.hasFocusText1 = true;
       }
-    } else if (q8 === FocusText.TEXT2) {
+    } else if (text === FocusText.TEXT2) {
       if (this.focusText === FocusText.NONE) {
         this.focusText = FocusText.TEXT2;
       }
       if (!this.hasFocusText2) {
         this.hasFocusText2 = true;
       }
-    } else if (q8 === FocusText.TEXT3) {
+    } else if (text === FocusText.TEXT3) {
       if (this.focusText === FocusText.NONE) {
         this.focusText = FocusText.TEXT3;
       }
@@ -2056,48 +2073,52 @@ export class CounterComponent extends ViewPU {
       return this.min.toString().length + 1;
     }
   }
-  resourceToVp(o8) {
+  resourceToVp(value) {
     try {
-      if (o8.id !== -1) {
-        return px2vp(getContext(this).resourceManager.getNumber(o8.id));
+      if (value.id !== -1) {
+        return px2vp(getContext(this).resourceManager.getNumber(value.id));
       } else {
         return px2vp(
           getContext(this).resourceManager.getNumberByName(
-            o8.params[0].split('.')[2]
+            value.params[0].split('.')[2]
           )
         );
       }
-    } catch (p8) {
+    } catch (error) {
       return CounterResource.COUNTER_LIST_PADDING;
     }
   }
-  getAccessibilityResource(j8) {
-    let k8 = '';
+  getAccessibilityResource(resource) {
+    let accessibilityResource = '';
     try {
-      if (typeof j8 === 'string') {
-        k8 = j8;
+      if (typeof resource === 'string') {
+        accessibilityResource = resource;
       } else {
-        k8 = getContext()?.resourceManager?.getStringSync(j8?.id);
+        accessibilityResource = getContext()?.resourceManager?.getStringSync(
+          resource?.id
+        );
       }
-    } catch (l8) {
-      let m8 = l8.code;
-      let n8 = l8.message;
-      console.log(`Get accessility resource error code:${m8} message:${n8}`);
+    } catch (error) {
+      let code = error.code;
+      let message = error.message;
+      console.log(
+        `Get accessility resource error code:${code} message:${message}`
+      );
     }
-    return k8;
+    return accessibilityResource;
   }
   initialRender() {
-    this.observeComponentCreation2((a, b) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
       if (this.type === CounterType.LIST) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((h8, i8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             RelativeContainer.create();
             RelativeContainer.direction(this.counterDirection);
             RelativeContainer.width('100%');
             RelativeContainer.height(CounterResource.COUNTER_LIST_HEIGHT);
           }, RelativeContainer);
-          this.observeComponentCreation2((f8, g8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.numberStyleOptions.label);
             Text.direction(this.counterDirection);
             Text.fontSize(CounterResource.COUNTER_LIST_LABEL_SIZE);
@@ -2118,7 +2139,7 @@ export class CounterComponent extends ViewPU {
             Text.id('Text');
           }, Text);
           Text.pop();
-          this.observeComponentCreation2((d8, e8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.direction(this.counterDirection);
             Row.height(CounterResource.COUNTER_LIST_BUTTON_SIZE);
@@ -2134,7 +2155,7 @@ export class CounterComponent extends ViewPU {
             Row.tabIndex(0);
             Row.id('Row1');
           }, Row);
-          this.observeComponentCreation2((b8, c8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.direction(this.counterDirection);
             Stack.width(CounterResource.COUNTER_LIST_BUTTON_SIZE);
@@ -2144,7 +2165,7 @@ export class CounterComponent extends ViewPU {
             Stack.borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR);
             Stack.clip(true);
           }, Stack);
-          this.observeComponentCreation2((z7, a8) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(CounterResource.BUTTON_SUB_ICON);
             Image.direction(this.counterDirection);
             Image.width(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE);
@@ -2152,7 +2173,7 @@ export class CounterComponent extends ViewPU {
             Image.fillColor(CounterResource.BUTTON_ICON_COLOR);
             Image.opacity(this.subOpacity);
           }, Image);
-          this.observeComponentCreation2((l7, m7) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel({
               type: ButtonType.Circle,
               stateEffect: this.subBtnStateEffect,
@@ -2181,28 +2202,28 @@ export class CounterComponent extends ViewPU {
             Button.opacity(this.subOpacity);
             Button.enabled(this.subBtnEnabled);
             Button.key('ListSubButton' + this.timeStamp.toString());
-            Button.onKeyEvent((y7) => {
+            Button.onKeyEvent(event => {
               this.subBtnFocusWidh =
                 CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
-              if (y7.keyCode === CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusButton();
-                y7.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                y7.type === KeyType.Down &&
-                y7.keyCode === CounterConstant.KEYCODE_MOVE_HOME
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME
               ) {
-                y7.stopPropagation();
+                event.stopPropagation();
                 this.homeFirstValue();
                 this.focusWithTarget(
                   'ListAddButton' + this.timeStamp.toString()
                 );
               }
               if (
-                y7.type === KeyType.Down &&
-                y7.keyCode === CounterConstant.KEYCODE_MOVE_END
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END
               ) {
-                y7.stopPropagation();
+                event.stopPropagation();
                 if (this.addBtnStateEffect) {
                   this.addBtnStateEffect = false;
                   this.addOpacity =
@@ -2215,37 +2236,37 @@ export class CounterComponent extends ViewPU {
                 );
               }
             });
-            Button.onClick((t7) => {
+            Button.onClick(event => {
               this.subValue();
               this.onChange?.(this.value);
               if (
-                t7.source === SourceType.Mouse ||
-                t7.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
               try {
-                let x7 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'click',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(x7).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility subValue click send event');
                 });
-              } catch (u7) {
-                let v7 = u7.code;
-                let w7 = u7.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility subValue faild error code:${v7} message:${w7}`
+                  `Accessility subValue faild error code:${code} message:${message}`
                 );
               }
             });
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: true });
-            LongPressGesture.onAction((s7) => {
-              if (s7.repeat) {
+            LongPressGesture.onAction(event => {
+              if (event.repeat) {
                 this.subValue();
                 this.onChange?.(this.value);
               }
@@ -2253,28 +2274,28 @@ export class CounterComponent extends ViewPU {
             });
             LongPressGesture.onActionEnd(() => {
               try {
-                let r7 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'common',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(r7).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility subValue longPress send event');
                 });
-              } catch (o7) {
-                let p7 = o7.code;
-                let q7 = o7.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility subValue longPress faild error code:${p7} message:${q7}`
+                  `Accessility subValue longPress faild error code:${code} message:${message}`
                 );
               }
             });
             LongPressGesture.pop();
             Gesture.pop();
             Button.hoverEffect(this.choverEffect);
-            Button.onHover((n7) => {
-              this.onHoverDecrease && this.onHoverDecrease(n7);
+            Button.onHover(isHover => {
+              this.onHoverDecrease && this.onHoverDecrease(isHover);
             });
             Button.focusable(this.focusEnable);
             Button.onFocus(() => {
@@ -2290,11 +2311,11 @@ export class CounterComponent extends ViewPU {
           }, Button);
           Button.pop();
           Stack.pop();
-          this.observeComponentCreation2((f7, g7) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.hasTextWidth) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((j7, k7) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   Text.create(this.value.toString());
                   Text.accessibilityText(
                     this.getAccessibilityResource(
@@ -2325,7 +2346,7 @@ export class CounterComponent extends ViewPU {
               });
             } else {
               this.ifElseBranchUpdateFunction(1, () => {
-                this.observeComponentCreation2((h7, i7) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   Text.create(this.value.toString());
                   Text.accessibilityText(
                     this.getAccessibilityResource(
@@ -2356,7 +2377,7 @@ export class CounterComponent extends ViewPU {
             }
           }, If);
           If.pop();
-          this.observeComponentCreation2((d7, e7) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.direction(this.counterDirection);
             Stack.width(CounterResource.COUNTER_LIST_BUTTON_SIZE);
@@ -2366,7 +2387,7 @@ export class CounterComponent extends ViewPU {
             Stack.borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR);
             Stack.clip(true);
           }, Stack);
-          this.observeComponentCreation2((b7, c7) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(CounterResource.BUTTON_ADD_ICON);
             Image.direction(this.counterDirection);
             Image.width(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE);
@@ -2374,7 +2395,7 @@ export class CounterComponent extends ViewPU {
             Image.fillColor(CounterResource.BUTTON_ICON_COLOR);
             Image.opacity(this.addOpacity);
           }, Image);
-          this.observeComponentCreation2((n6, o6) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel({
               type: ButtonType.Circle,
               stateEffect: this.addBtnStateEffect,
@@ -2402,18 +2423,18 @@ export class CounterComponent extends ViewPU {
             Button.opacity(this.addOpacity);
             Button.enabled(this.addBtnEnabled);
             Button.key('ListAddButton' + this.timeStamp.toString());
-            Button.onKeyEvent((a7) => {
+            Button.onKeyEvent(event => {
               this.addBtnFocusWidh =
                 CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
-              if (a7.keyCode === CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusButton();
-                a7.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                a7.type === KeyType.Down &&
-                a7.keyCode === CounterConstant.KEYCODE_MOVE_HOME
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME
               ) {
-                a7.stopPropagation();
+                event.stopPropagation();
                 this.homeFirstValue();
                 if (this.subBtnStateEffect) {
                   this.subBtnStateEffect = false;
@@ -2426,47 +2447,47 @@ export class CounterComponent extends ViewPU {
                 );
               }
               if (
-                a7.type === KeyType.Down &&
-                a7.keyCode === CounterConstant.KEYCODE_MOVE_END
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END
               ) {
-                a7.stopPropagation();
+                event.stopPropagation();
                 this.endLastValue();
                 this.focusWithTarget(
                   'ListSubButton' + this.timeStamp.toString()
                 );
               }
             });
-            Button.onClick((v6) => {
+            Button.onClick(event => {
               this.addValue();
               this.onChange?.(this.value);
               if (
-                v6.source === SourceType.Mouse ||
-                v6.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
               try {
-                let z6 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'click',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(z6).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility addValue click send event');
                 });
-              } catch (w6) {
-                let x6 = w6.code;
-                let y6 = w6.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility addValue click longPress faild error code:${x6} message:${y6}`
+                  `Accessility addValue click longPress faild error code:${code} message:${message}`
                 );
               }
             });
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: true });
-            LongPressGesture.onAction((u6) => {
-              if (u6.repeat) {
+            LongPressGesture.onAction(event => {
+              if (event.repeat) {
                 this.addValue();
                 this.onChange?.(this.value);
               }
@@ -2474,28 +2495,28 @@ export class CounterComponent extends ViewPU {
             });
             LongPressGesture.onActionEnd(() => {
               try {
-                let t6 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'common',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(t6).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility addValue longPress send event');
                 });
-              } catch (q6) {
-                let r6 = q6.code;
-                let s6 = q6.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility addValue longPress longPress faild error code:${r6} message:${s6}`
+                  `Accessility addValue longPress longPress faild error code:${code} message:${message}`
                 );
               }
             });
             LongPressGesture.pop();
             Gesture.pop();
             Button.hoverEffect(this.choverEffect);
-            Button.onHover((p6) => {
-              this.onHoverIncrease && this.onHoverIncrease(p6);
+            Button.onHover(isHover => {
+              this.onHoverIncrease && this.onHoverIncrease(isHover);
             });
             Button.focusable(this.focusEnable);
             Button.onFocus(() => {
@@ -2516,10 +2537,10 @@ export class CounterComponent extends ViewPU {
         });
       } else if (this.type === CounterType.COMPACT) {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((l6, m6) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
           }, Column);
-          this.observeComponentCreation2((j6, k6) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.direction(this.counterDirection);
             Row.tabIndex(0);
@@ -2529,7 +2550,7 @@ export class CounterComponent extends ViewPU {
             Row.borderColor(CounterResource.COUNTER_BORDER_COLOR);
             Row.borderRadius(CounterResource.COUNTER_COMPACT_CONTAINER_RADIUS);
           }, Row);
-          this.observeComponentCreation2((h6, i6) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
             Stack.height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
@@ -2545,7 +2566,7 @@ export class CounterComponent extends ViewPU {
             });
             Stack.clip(true);
           }, Stack);
-          this.observeComponentCreation2((f6, g6) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(CounterResource.BUTTON_SUB_ICON);
             Image.direction(this.counterDirection);
             Image.width(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE);
@@ -2553,7 +2574,7 @@ export class CounterComponent extends ViewPU {
             Image.fillColor(CounterResource.BUTTON_ICON_COLOR);
             Image.opacity(this.subOpacity);
           }, Image);
-          this.observeComponentCreation2((r5, s5) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel({
               type: ButtonType.Circle,
               stateEffect: this.subBtnStateEffect,
@@ -2575,28 +2596,28 @@ export class CounterComponent extends ViewPU {
             Button.opacity(this.subOpacity);
             Button.enabled(this.subBtnEnabled);
             Button.key('CompactSubButton' + this.timeStamp.toString());
-            Button.onKeyEvent((e6) => {
+            Button.onKeyEvent(event => {
               this.subBtnFocusWidh =
                 CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
-              if (e6.keyCode === CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusButton();
-                e6.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                e6.type === KeyType.Down &&
-                e6.keyCode === CounterConstant.KEYCODE_MOVE_HOME
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME
               ) {
-                e6.stopPropagation();
+                event.stopPropagation();
                 this.homeFirstValue();
                 this.focusWithTarget(
                   'CompactAddButton' + this.timeStamp.toString()
                 );
               }
               if (
-                e6.type === KeyType.Down &&
-                e6.keyCode === CounterConstant.KEYCODE_MOVE_END
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END
               ) {
-                e6.stopPropagation();
+                event.stopPropagation();
                 this.endLastValue();
                 if (this.addBtnStateEffect) {
                   this.addBtnStateEffect = false;
@@ -2609,71 +2630,71 @@ export class CounterComponent extends ViewPU {
                 );
               }
             });
-            Button.onClick((z5) => {
+            Button.onClick(event => {
               this.subValue();
               this.onChange?.(this.value);
               if (
-                z5.source === SourceType.Mouse ||
-                z5.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
               try {
-                let d6 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'click',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(d6).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility subValue click send event');
                 });
-              } catch (a6) {
-                let b6 = a6.code;
-                let c6 = a6.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility subValue click longPress faild error code:${b6} message:${c6}`
+                  `Accessility subValue click longPress faild error code:${code} message:${message}`
                 );
               }
             });
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: true });
-            LongPressGesture.onAction((y5) => {
-              if (y5.repeat) {
+            LongPressGesture.onAction(event => {
+              if (event.repeat) {
                 this.subValue();
                 this.onChange?.(this.value);
               }
               if (
-                y5.source === SourceType.Mouse ||
-                y5.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             });
             LongPressGesture.onActionEnd(() => {
               try {
-                let x5 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'common',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(x5).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility subValue longPress send event');
                 });
-              } catch (u5) {
-                let v5 = u5.code;
-                let w5 = u5.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility subValue longPress longPress faild error code:${v5} message:${w5}`
+                  `Accessility subValue longPress longPress faild error code:${code} message:${message}`
                 );
               }
             });
             LongPressGesture.pop();
             Gesture.pop();
             Button.hoverEffect(this.choverEffect);
-            Button.onHover((t5) => {
-              this.onHoverDecrease && this.onHoverDecrease(t5);
+            Button.onHover(isHover => {
+              this.onHoverDecrease && this.onHoverDecrease(isHover);
             });
             Button.focusable(this.focusEnable);
             Button.groupDefaultFocus(true);
@@ -2690,11 +2711,11 @@ export class CounterComponent extends ViewPU {
           }, Button);
           Button.pop();
           Stack.pop();
-          this.observeComponentCreation2((l5, m5) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.hasTextWidth) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((p5, q5) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   Text.create(this.value.toString());
                   Text.accessibilityText(
                     this.getAccessibilityResource(
@@ -2724,7 +2745,7 @@ export class CounterComponent extends ViewPU {
               });
             } else {
               this.ifElseBranchUpdateFunction(1, () => {
-                this.observeComponentCreation2((n5, o5) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   Text.create(this.value.toString());
                   Text.accessibilityText(
                     this.getAccessibilityResource(
@@ -2755,7 +2776,7 @@ export class CounterComponent extends ViewPU {
             }
           }, If);
           If.pop();
-          this.observeComponentCreation2((j5, k5) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.direction(this.counterDirection);
             Stack.width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
@@ -2772,7 +2793,7 @@ export class CounterComponent extends ViewPU {
             });
             Stack.clip(true);
           }, Stack);
-          this.observeComponentCreation2((h5, i5) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(CounterResource.BUTTON_ADD_ICON);
             Image.direction(this.counterDirection);
             Image.width(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE);
@@ -2780,7 +2801,7 @@ export class CounterComponent extends ViewPU {
             Image.fillColor(CounterResource.BUTTON_ICON_COLOR);
             Image.opacity(this.addOpacity);
           }, Image);
-          this.observeComponentCreation2((t4, u4) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel({
               type: ButtonType.Circle,
               stateEffect: this.addBtnStateEffect,
@@ -2802,18 +2823,18 @@ export class CounterComponent extends ViewPU {
             Button.opacity(this.addOpacity);
             Button.enabled(this.addBtnEnabled);
             Button.key('CompactAddButton' + this.timeStamp.toString());
-            Button.onKeyEvent((g5) => {
+            Button.onKeyEvent(event => {
               this.addBtnFocusWidh =
                 CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
-              if (g5.keyCode === CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusButton();
-                g5.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                g5.type === KeyType.Down &&
-                g5.keyCode === CounterConstant.KEYCODE_MOVE_HOME
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME
               ) {
-                g5.stopPropagation();
+                event.stopPropagation();
                 this.homeFirstValue();
                 if (this.subBtnStateEffect) {
                   this.subBtnStateEffect = false;
@@ -2826,81 +2847,81 @@ export class CounterComponent extends ViewPU {
                 );
               }
               if (
-                g5.type === KeyType.Down &&
-                g5.keyCode === CounterConstant.KEYCODE_MOVE_END
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END
               ) {
-                g5.stopPropagation();
+                event.stopPropagation();
                 this.endLastValue();
                 this.focusWithTarget(
                   'CompactSubButton' + this.timeStamp.toString()
                 );
               }
             });
-            Button.onClick((b5) => {
+            Button.onClick(event => {
               this.addValue();
               this.onChange?.(this.value);
               if (
-                b5.source === SourceType.Mouse ||
-                b5.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
               try {
-                let f5 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'click',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(f5).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility addValue click send event');
                 });
-              } catch (c5) {
-                let d5 = c5.code;
-                let e5 = c5.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility addValue click longPress faild error code:${d5} message:${e5}`
+                  `Accessility addValue click longPress faild error code:${code} message:${message}`
                 );
               }
             });
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: true });
-            LongPressGesture.onAction((a5) => {
-              if (a5.repeat) {
+            LongPressGesture.onAction(event => {
+              if (event.repeat) {
                 this.addValue();
                 this.onChange?.(this.value);
               }
               if (
-                a5.source === SourceType.Mouse ||
-                a5.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             });
             LongPressGesture.onActionEnd(() => {
               try {
-                let z4 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'common',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(z4).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility addValue longPress send event');
                 });
-              } catch (w4) {
-                let x4 = w4.code;
-                let y4 = w4.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility addValue longPress longPress faild error code:${x4} message:${y4}`
+                  `Accessility addValue longPress longPress faild error code:${code} message:${message}`
                 );
               }
             });
             LongPressGesture.pop();
             Gesture.pop();
             Button.hoverEffect(this.choverEffect);
-            Button.onHover((v4) => {
-              this.onHoverIncrease && this.onHoverIncrease(v4);
+            Button.onHover(isHover => {
+              this.onHoverIncrease && this.onHoverIncrease(isHover);
             });
             Button.focusable(this.focusEnable);
             Button.onFocus(() => {
@@ -2917,7 +2938,7 @@ export class CounterComponent extends ViewPU {
           Button.pop();
           Stack.pop();
           Row.pop();
-          this.observeComponentCreation2((r4, s4) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.numberStyleOptions.label);
             Text.direction(this.counterDirection);
             Text.margin({
@@ -2935,7 +2956,7 @@ export class CounterComponent extends ViewPU {
         });
       } else if (this.type === CounterType.INLINE) {
         this.ifElseBranchUpdateFunction(2, () => {
-          this.observeComponentCreation2((p4, q4) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.direction(this.counterDirection);
             Row.height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT);
@@ -2944,11 +2965,11 @@ export class CounterComponent extends ViewPU {
             Row.borderRadius(CounterResource.COUNTER_INLINE_RADIUS);
             Row.clip(true);
           }, Row);
-          this.observeComponentCreation2((r3, s3) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.hasTextWidth) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((n4, o4) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   RelativeContainer.create();
                   RelativeContainer.direction(this.counterDirection);
                   RelativeContainer.margin({
@@ -2962,7 +2983,7 @@ export class CounterComponent extends ViewPU {
                   RelativeContainer.height('100%');
                   RelativeContainer.width(this.textWidth);
                 }, RelativeContainer);
-                this.observeComponentCreation2((e4, f4) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   TextInput.create({
                     text: this.hasInputText1
                       ? this.inputValue
@@ -3011,82 +3032,82 @@ export class CounterComponent extends ViewPU {
                       : Color.Transparent
                   );
                   TextInput.key('InlineTextInput' + this.timeStamp.toString());
-                  TextInput.onKeyEvent((m4) => {
+                  TextInput.onKeyEvent(event => {
                     this.focusCurrentText(FocusText.TEXT1);
-                    if (m4.keyCode === CounterConstant.KEYCODE_ESC) {
+                    if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                       this.resetFocusText();
-                      m4.stopPropagation();
+                      event.stopPropagation();
                     }
                     if (
-                      m4.type === KeyType.Down &&
-                      m4.keyCode === CounterConstant.KEYCODE_DPAD_UP
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_DPAD_UP
                     ) {
                       this.addValue();
-                      m4.stopPropagation();
+                      event.stopPropagation();
                     }
                     if (
-                      m4.type === KeyType.Down &&
-                      m4.keyCode === CounterConstant.KEYCODE_MOVE_HOME
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_MOVE_HOME
                     ) {
-                      m4.stopPropagation();
+                      event.stopPropagation();
                       this.focusWithTarget(
                         'InlineTextInput' + this.timeStamp.toString()
                       );
                     }
                     if (
-                      m4.type === KeyType.Down &&
-                      m4.keyCode === CounterConstant.KEYCODE_MOVE_END
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_MOVE_END
                     ) {
-                      m4.stopPropagation();
+                      event.stopPropagation();
                       this.focusWithTarget(
                         'InlineTextInput' + this.timeStamp.toString()
                       );
                     }
                     if (
-                      m4.type === KeyType.Down &&
-                      m4.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
                     ) {
                       this.subValue();
-                      m4.stopPropagation();
+                      event.stopPropagation();
                     }
                     if (
-                      m4.type === KeyType.Down &&
-                      m4.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
                     ) {
                       this.focusWithTarget(
                         'InlineTextInput' + this.timeStamp.toString()
                       );
-                      m4.stopPropagation();
+                      event.stopPropagation();
                     }
                     if (
-                      m4.type === KeyType.Down &&
-                      m4.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
                     ) {
                       this.focusWithTarget(
                         'InlineTextInput' + this.timeStamp.toString()
                       );
-                      m4.stopPropagation();
+                      event.stopPropagation();
                     }
                   });
-                  TextInput.onChange((i4) => {
-                    this.inputValue = i4;
-                    for (let k4 = 0; k4 < i4.length; k4++) {
-                      let l4 = i4[k4];
-                      if (l4 === '+' || l4 === '*' || l4 === '#') {
+                  TextInput.onChange(value => {
+                    this.inputValue = value;
+                    for (let i = 0; i < value.length; i++) {
+                      let c = value[i];
+                      if (c === '+' || c === '*' || c === '#') {
                         this.value -= 1;
                         this.value += 1;
                         this.inputValue = this.value.toString();
                         return;
                       }
-                      if (l4 === '-' && k4 !== 0) {
-                        this.inputValue = l4;
+                      if (c === '-' && i !== 0) {
+                        this.inputValue = c;
                         break;
                       }
                     }
                     this.hasInputText1 = true;
-                    let j4 = i4[i4.length - 1];
-                    if (i4.length === this.getMaxLength()) {
-                      this.inputValue = j4;
+                    let c = value[value.length - 1];
+                    if (value.length === this.getMaxLength()) {
+                      this.inputValue = c;
                     }
                     if (this.timeoutID1 !== -1) {
                       clearTimeout(this.timeoutID1);
@@ -3106,9 +3127,9 @@ export class CounterComponent extends ViewPU {
                         (Number(this.inputValue) < this.min &&
                           this.inputValue.length <= this.min.toString().length)
                       ) {
-                        this.inputValue = j4;
+                        this.inputValue = c;
                       }
-                      if (i4.length < this.getMaxLength()) {
+                      if (value.length < this.getMaxLength()) {
                         this.timeoutID1 = setTimeout(() => {
                           if (
                             this.inputValue !== '' &&
@@ -3126,7 +3147,7 @@ export class CounterComponent extends ViewPU {
                     }
                     this.updateInlineEnableSate();
                   });
-                  TextInput.onSubmit((h4) => {
+                  TextInput.onSubmit(enterKey => {
                     if (this.timeoutID1 != -1) {
                       clearTimeout(this.timeoutID1);
                       this.timeoutID1 = -1;
@@ -3158,7 +3179,7 @@ export class CounterComponent extends ViewPU {
                     this.focusText = FocusText.NONE;
                     this.hasFocusText1 = false;
                   });
-                  TextInput.onClick((g4) => {
+                  TextInput.onClick(event => {
                     this.focusText = FocusText.TEXT1;
                     this.hasFocusText1 = true;
                     this.focusWithTarget(
@@ -3173,7 +3194,7 @@ export class CounterComponent extends ViewPU {
               });
             } else {
               this.ifElseBranchUpdateFunction(1, () => {
-                this.observeComponentCreation2((c4, d4) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   Row.create();
                   Row.direction(this.counterDirection);
                   Row.margin({
@@ -3185,7 +3206,7 @@ export class CounterComponent extends ViewPU {
                     ),
                   });
                 }, Row);
-                this.observeComponentCreation2((t3, u3) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   TextInput.create({
                     text: this.hasInputText1
                       ? this.inputValue
@@ -3223,64 +3244,64 @@ export class CounterComponent extends ViewPU {
                       : Color.Transparent
                   );
                   TextInput.key('InlineTextInput' + this.timeStamp.toString());
-                  TextInput.onKeyEvent((b4) => {
+                  TextInput.onKeyEvent(event => {
                     this.focusCurrentText(FocusText.TEXT1);
-                    if (b4.keyCode === CounterConstant.KEYCODE_ESC) {
+                    if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                       this.resetFocusText();
-                      b4.stopPropagation();
+                      event.stopPropagation();
                     }
                     if (
-                      b4.type === KeyType.Down &&
-                      b4.keyCode === CounterConstant.KEYCODE_DPAD_UP
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_DPAD_UP
                     ) {
                       this.addValue();
-                      b4.stopPropagation();
+                      event.stopPropagation();
                     }
                     if (
-                      b4.type === KeyType.Down &&
-                      b4.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
                     ) {
                       this.subValue();
-                      b4.stopPropagation();
+                      event.stopPropagation();
                     }
                     if (
-                      b4.type === KeyType.Down &&
-                      b4.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
                     ) {
                       this.focusWithTarget(
                         'InlineTextInput' + this.timeStamp.toString()
                       );
-                      b4.stopPropagation();
+                      event.stopPropagation();
                     }
                     if (
-                      b4.type === KeyType.Down &&
-                      b4.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
+                      event.type === KeyType.Down &&
+                      event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
                     ) {
                       this.focusWithTarget(
                         'InlineTextInput' + this.timeStamp.toString()
                       );
-                      b4.stopPropagation();
+                      event.stopPropagation();
                     }
                   });
-                  TextInput.onChange((x3) => {
-                    this.inputValue = x3;
-                    for (let z3 = 0; z3 < x3.length; z3++) {
-                      let a4 = x3[z3];
-                      if (a4 === '+' || a4 === '*' || a4 === '#') {
+                  TextInput.onChange(value => {
+                    this.inputValue = value;
+                    for (let i = 0; i < value.length; i++) {
+                      let c = value[i];
+                      if (c === '+' || c === '*' || c === '#') {
                         this.value -= 1;
                         this.value += 1;
                         this.inputValue = this.value.toString();
                         return;
                       }
-                      if (a4 === '-' && z3 !== 0) {
-                        this.inputValue = a4;
+                      if (c === '-' && i !== 0) {
+                        this.inputValue = c;
                         break;
                       }
                     }
                     this.hasInputText1 = true;
-                    let y3 = x3[x3.length - 1];
-                    if (x3.length === this.getMaxLength()) {
-                      this.inputValue = y3;
+                    let c = value[value.length - 1];
+                    if (value.length === this.getMaxLength()) {
+                      this.inputValue = c;
                     }
                     if (this.timeoutID1 !== -1) {
                       clearTimeout(this.timeoutID1);
@@ -3300,9 +3321,9 @@ export class CounterComponent extends ViewPU {
                         (Number(this.inputValue) < this.min &&
                           this.inputValue.length <= this.min.toString().length)
                       ) {
-                        this.inputValue = y3;
+                        this.inputValue = c;
                       }
-                      if (x3.length < this.getMaxLength()) {
+                      if (value.length < this.getMaxLength()) {
                         this.timeoutID1 = setTimeout(() => {
                           if (
                             this.inputValue !== '' &&
@@ -3320,7 +3341,7 @@ export class CounterComponent extends ViewPU {
                     }
                     this.updateInlineEnableSate();
                   });
-                  TextInput.onSubmit((w3) => {
+                  TextInput.onSubmit(enterKey => {
                     if (this.timeoutID1 !== -1) {
                       clearTimeout(this.timeoutID1);
                       this.timeoutID1 = -1;
@@ -3352,7 +3373,7 @@ export class CounterComponent extends ViewPU {
                     this.focusText = FocusText.NONE;
                     this.hasFocusText1 = false;
                   });
-                  TextInput.onClick((v3) => {
+                  TextInput.onClick(event => {
                     this.focusText = FocusText.TEXT1;
                     this.hasFocusText1 = true;
                     this.focusWithTarget(
@@ -3368,7 +3389,7 @@ export class CounterComponent extends ViewPU {
             }
           }, If);
           If.pop();
-          this.observeComponentCreation2((p3, q3) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.direction(this.counterDirection);
             Column.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
@@ -3380,7 +3401,7 @@ export class CounterComponent extends ViewPU {
             });
             Column.borderColor(CounterResource.COUNTER_BORDER_COLOR);
           }, Column);
-          this.observeComponentCreation2((n3, o3) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.direction(this.counterDirection);
             Stack.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
@@ -3390,7 +3411,7 @@ export class CounterComponent extends ViewPU {
             Stack.borderColor(CounterResource.COUNTER_BORDER_COLOR);
             Stack.clip(true);
           }, Stack);
-          this.observeComponentCreation2((l3, m3) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Rect.create();
             Rect.direction(this.counterDirection);
             Rect.width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH);
@@ -3409,7 +3430,7 @@ export class CounterComponent extends ViewPU {
             Rect.margin({ end: LengthMetrics.vp(2) });
             Rect.fillOpacity(0);
           }, Rect);
-          this.observeComponentCreation2((j3, k3) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(CounterResource.BUTTON_ARROW_UP);
             Image.direction(this.counterDirection);
             Image.width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH);
@@ -3417,7 +3438,7 @@ export class CounterComponent extends ViewPU {
             Image.fillColor(CounterResource.BUTTON_ICON_COLOR);
             Image.opacity(this.addOpacity);
           }, Image);
-          this.observeComponentCreation2((w2, x2) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel({
               type: ButtonType.Normal,
               stateEffect: this.addBtnStateEffect,
@@ -3438,64 +3459,64 @@ export class CounterComponent extends ViewPU {
             Button.backgroundColor(Color.Transparent);
             Button.opacity(this.addOpacity);
             Button.enabled(this.addBtnEnabled);
-            Button.onClick((e3) => {
+            Button.onClick(event => {
               this.addValue();
               if (
-                e3.source === SourceType.Mouse ||
-                e3.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
               try {
-                let i3 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'click',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(i3).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility addValue click send event');
                 });
-              } catch (f3) {
-                let g3 = f3.code;
-                let h3 = f3.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility addValue click longPress faild error code:${g3} message:${h3}`
+                  `Accessility addValue click longPress faild error code:${code} message:${message}`
                 );
               }
             });
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: true });
-            LongPressGesture.onAction((d3) => {
-              if (d3.repeat) {
+            LongPressGesture.onAction(event => {
+              if (event.repeat) {
                 this.addValue();
               }
               this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
             });
             LongPressGesture.onActionEnd(() => {
               try {
-                let c3 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'common',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(c3).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility addValue longPress send event');
                 });
-              } catch (z2) {
-                let a3 = z2.code;
-                let b3 = z2.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility addValue longPress faild error code:${a3} message:${b3}`
+                  `Accessility addValue longPress faild error code:${code} message:${message}`
                 );
               }
             });
             LongPressGesture.pop();
             Gesture.pop();
             Button.hoverEffect(this.choverEffect);
-            Button.onHover((y2) => {
-              this.onHoverIncrease && this.onHoverIncrease(y2);
+            Button.onHover(isHover => {
+              this.onHoverIncrease && this.onHoverIncrease(isHover);
             });
             Button.focusable(false);
             Button.onFocus(() => {
@@ -3510,14 +3531,14 @@ export class CounterComponent extends ViewPU {
           }, Button);
           Button.pop();
           Stack.pop();
-          this.observeComponentCreation2((u2, v2) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.direction(this.counterDirection);
             Stack.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
             Stack.height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT);
             Stack.clip(true);
           }, Stack);
-          this.observeComponentCreation2((s2, t2) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Rect.create();
             Rect.direction(this.counterDirection);
             Rect.width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH);
@@ -3540,7 +3561,7 @@ export class CounterComponent extends ViewPU {
             });
             Rect.fillOpacity(0);
           }, Rect);
-          this.observeComponentCreation2((q2, r2) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(CounterResource.BUTTON_ARROW_DOWN);
             Image.direction(this.counterDirection);
             Image.width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH);
@@ -3548,7 +3569,7 @@ export class CounterComponent extends ViewPU {
             Image.fillColor(CounterResource.BUTTON_ICON_COLOR);
             Image.opacity(this.subOpacity);
           }, Image);
-          this.observeComponentCreation2((d2, e2) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel({
               type: ButtonType.Normal,
               stateEffect: this.subBtnStateEffect,
@@ -3569,64 +3590,64 @@ export class CounterComponent extends ViewPU {
             Button.backgroundColor(Color.Transparent);
             Button.opacity(this.subOpacity);
             Button.enabled(this.subBtnEnabled);
-            Button.onClick((l2) => {
+            Button.onClick(event => {
               this.subValue();
               if (
-                l2.source === SourceType.Mouse ||
-                l2.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
               try {
-                let p2 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'click',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(p2).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility subValue click send event');
                 });
-              } catch (m2) {
-                let n2 = m2.code;
-                let o2 = m2.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility subValue click faild error code:${n2} message:${o2}`
+                  `Accessility subValue click faild error code:${code} message:${message}`
                 );
               }
             });
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: true });
-            LongPressGesture.onAction((k2) => {
-              if (k2.repeat) {
+            LongPressGesture.onAction(event => {
+              if (event.repeat) {
                 this.subValue();
               }
               this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
             });
             LongPressGesture.onActionEnd(() => {
               try {
-                let j2 = {
+                let eventInfo = {
                   type: 'announceForAccessibility',
                   bundleName: getContext()?.abilityInfo?.bundleName,
                   triggerAction: 'common',
                   textAnnouncedForAccessibility: this.value?.toString(),
                 };
-                accessibility.sendAccessibilityEvent(j2).then(() => {
+                accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                   console.log('Accessility subValue longPress send event');
                 });
-              } catch (g2) {
-                let h2 = g2.code;
-                let i2 = g2.message;
+              } catch (exception) {
+                let code = exception.code;
+                let message = exception.message;
                 console.log(
-                  `Accessility subValue longPress faild error code:${h2} message:${i2}`
+                  `Accessility subValue longPress faild error code:${code} message:${message}`
                 );
               }
             });
             LongPressGesture.pop();
             Gesture.pop();
             Button.hoverEffect(this.choverEffect);
-            Button.onHover((f2) => {
-              this.onHoverDecrease && this.onHoverDecrease(f2);
+            Button.onHover(isHover => {
+              this.onHoverDecrease && this.onHoverDecrease(isHover);
             });
             Button.focusable(false);
             Button.onFocus(() => {
@@ -3646,7 +3667,7 @@ export class CounterComponent extends ViewPU {
         });
       } else if (this.type === CounterType.INLINE_DATE) {
         this.ifElseBranchUpdateFunction(3, () => {
-          this.observeComponentCreation2((b2, c2) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.direction(this.counterDirection);
             Row.height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT);
@@ -3655,7 +3676,7 @@ export class CounterComponent extends ViewPU {
             Row.borderRadius(CounterResource.COUNTER_INLINE_RADIUS);
             Row.clip(true);
           }, Row);
-          this.observeComponentCreation2((z1, a2) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.direction(this.counterDirection);
             Row.width('92vp');
@@ -3669,14 +3690,14 @@ export class CounterComponent extends ViewPU {
               ),
             });
           }, Row);
-          this.observeComponentCreation2((s1, t1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             TextInput.create({
               text: this.hasInputText1
                 ? this.inputYear.toString()
                 : this.getYear(),
               controller: this.controller1,
             });
-            TextInput.accessibilityText(this.getDateYear());
+            TextInput.accessibilityText(this.getDateYear(this.year));
             TextInput.accessibilityDescription({
               id: -1,
               type: 10003,
@@ -3706,64 +3727,64 @@ export class CounterComponent extends ViewPU {
             TextInput.borderRadius(0);
             TextInput.borderWidth(0);
             TextInput.key('DateTextInput1' + this.timeStamp.toString());
-            TextInput.onKeyEvent((y1) => {
+            TextInput.onKeyEvent(event => {
               this.focusCurrentText(FocusText.TEXT1);
-              if (y1.keyCode === CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusText();
-                y1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                y1.type === KeyType.Down &&
-                y1.keyCode === CounterConstant.KEYCODE_DPAD_UP
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_UP
               ) {
                 this.addDate();
-                y1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                y1.type === KeyType.Down &&
-                y1.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
               ) {
                 this.subDate();
-                y1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                y1.type === KeyType.Down &&
-                y1.keyCode === CounterConstant.KEYCODE_MOVE_HOME
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME
               ) {
                 this.homeFocusText();
-                y1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                y1.type === KeyType.Down &&
-                y1.keyCode === CounterConstant.KEYCODE_MOVE_END
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END
               ) {
                 this.endFocusText();
-                y1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                y1.type === KeyType.Down &&
-                y1.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
               ) {
                 this.focusWithTarget(
                   'DateTextInput1' + this.timeStamp.toString()
                 );
-                y1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                y1.type === KeyType.Down &&
-                y1.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
               ) {
                 this.focusWithTarget(
                   'DateTextInput2' + this.timeStamp.toString()
                 );
               }
             });
-            TextInput.onChange((w1) => {
-              if (w1.length !== 4) {
+            TextInput.onChange(value => {
+              if (value.length !== 4) {
                 this.hasInputText1 = true;
               }
-              this.inputYear = Number(w1);
-              if (w1.length === 5) {
+              this.inputYear = Number(value);
+              if (value.length === 5) {
                 this.inputYear = this.inputYear % 10;
               }
               if (this.timeoutID1 !== -1) {
@@ -3784,12 +3805,12 @@ export class CounterComponent extends ViewPU {
                 this.updateDateEnableSate();
                 this.updateDay();
               }
-              if (w1.length === 4) {
-                let x1 = new DateData(this.year, this.month, this.day);
-                this.onDateChange?.(x1);
+              if (value.length === 4) {
+                let date = new DateData(this.year, this.month, this.day);
+                this.onDateChange?.(date);
               }
             });
-            TextInput.onSubmit((v1) => {
+            TextInput.onSubmit(enterKey => {
               if (this.timeoutID1 !== -1) {
                 clearTimeout(this.timeoutID1);
                 this.timeoutID1 = -1;
@@ -3822,14 +3843,14 @@ export class CounterComponent extends ViewPU {
               this.hasFocusText1 = false;
               this.updateDateEnableSate();
             });
-            TextInput.onClick((u1) => {
+            TextInput.onClick(event => {
               this.focusText = FocusText.TEXT1;
               this.hasFocusText1 = true;
               this.updateDateEnableSate();
               this.controller1.caretPosition(this.getYear().length);
             });
           }, TextInput);
-          this.observeComponentCreation2((q1, r1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('/');
             Text.accessibilityLevel('no');
             Text.direction(this.counterDirection);
@@ -3842,14 +3863,14 @@ export class CounterComponent extends ViewPU {
             Text.width('8vp');
           }, Text);
           Text.pop();
-          this.observeComponentCreation2((j1, k1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             TextInput.create({
               text: this.hasInputText2
                 ? this.inputMoon.toString()
                 : this.convertNumberToString(this.month),
               controller: this.controller2,
             });
-            TextInput.accessibilityText(this.getDateMonth());
+            TextInput.accessibilityText(this.getDateMonth(this.month));
             TextInput.accessibilityDescription({
               id: -1,
               type: 10003,
@@ -3878,74 +3899,74 @@ export class CounterComponent extends ViewPU {
             TextInput.height('20vp');
             TextInput.borderRadius(0);
             TextInput.key('DateTextInput2' + this.timeStamp.toString());
-            TextInput.onKeyEvent((p1) => {
+            TextInput.onKeyEvent(event => {
               this.focusCurrentText(FocusText.TEXT2);
-              if (p1.keyCode === CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusText();
-                p1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                p1.type === KeyType.Down &&
-                p1.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
               ) {
                 this.subDate();
                 this.updateDay();
-                p1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                p1.type === KeyType.Down &&
-                p1.keyCode === CounterConstant.KEYCODE_DPAD_UP
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_UP
               ) {
                 this.addDate();
                 this.updateDay();
-                p1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                p1.type === KeyType.Down &&
-                p1.keyCode === CounterConstant.KEYCODE_MOVE_HOME
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME
               ) {
                 this.homeFocusText();
-                p1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                p1.type === KeyType.Down &&
-                p1.keyCode === CounterConstant.KEYCODE_MOVE_END
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END
               ) {
                 this.endFocusText();
-                p1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                p1.type === KeyType.Down &&
-                p1.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
               ) {
                 this.focusWithTarget(
                   'DateTextInput1' + this.timeStamp.toString()
                 );
               }
               if (
-                p1.type === KeyType.Down &&
-                p1.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
               ) {
                 this.focusWithTarget(
                   'DateTextInput3' + this.timeStamp.toString()
                 );
               }
               if (
-                p1.type === KeyType.Down &&
-                p1.keyCode === CounterConstant.KEYCODE_TAB
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_TAB
               ) {
-                p1.stopPropagation();
+                event.stopPropagation();
                 this.focusWithTarget(
                   'DateTextInput1' + this.timeStamp.toString()
                 );
               }
             });
-            TextInput.onChange((n1) => {
-              this.inputMoon = Number(n1);
-              if (n1.length !== 2) {
+            TextInput.onChange(value => {
+              this.inputMoon = Number(value);
+              if (value.length !== 2) {
                 this.hasInputText2 = true;
               }
-              if (n1.length === 3) {
+              if (value.length === 3) {
                 this.inputMoon = this.inputMoon % 10;
               }
               if (this.timeoutID2 !== -1) {
@@ -3963,13 +3984,13 @@ export class CounterComponent extends ViewPU {
                 }
                 this.updateDay();
               }, 1000);
-              if (n1.length === 2) {
+              if (value.length === 2) {
                 this.hasInputText2 = false;
                 this.month -= 1;
                 if (this.inputMoon >= 1 && this.inputMoon <= 12) {
                   this.month = this.inputMoon;
-                  let o1 = new DateData(this.year, this.month, this.day);
-                  this.onDateChange?.(o1);
+                  let date = new DateData(this.year, this.month, this.day);
+                  this.onDateChange?.(date);
                 } else {
                   this.month += 1;
                   this.inputMoon = this.month;
@@ -3977,7 +3998,7 @@ export class CounterComponent extends ViewPU {
                 this.updateDay();
               }
             });
-            TextInput.onSubmit((m1) => {
+            TextInput.onSubmit(enterKey => {
               if (this.timeoutID2 !== -1) {
                 clearTimeout(this.timeoutID2);
                 this.timeoutID2 = -1;
@@ -4005,7 +4026,7 @@ export class CounterComponent extends ViewPU {
               this.focusText = FocusText.NONE;
               this.hasFocusText2 = false;
             });
-            TextInput.onClick((l1) => {
+            TextInput.onClick(event => {
               this.focusText = FocusText.TEXT2;
               this.hasFocusText2 = true;
               this.controller2.caretPosition(
@@ -4013,7 +4034,7 @@ export class CounterComponent extends ViewPU {
               );
             });
           }, TextInput);
-          this.observeComponentCreation2((h1, i1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create('/');
             Text.accessibilityLevel('no');
             Text.direction(this.counterDirection);
@@ -4026,14 +4047,14 @@ export class CounterComponent extends ViewPU {
             Text.width('8vp');
           }, Text);
           Text.pop();
-          this.observeComponentCreation2((a1, b1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             TextInput.create({
               text: this.hasInputText3
                 ? this.inputDay.toString()
                 : this.convertNumberToString(this.day),
               controller: this.controller3,
             });
-            TextInput.accessibilityText(this.getDateDay());
+            TextInput.accessibilityText(this.getDateDay(this.day));
             TextInput.accessibilityDescription({
               id: -1,
               type: 10003,
@@ -4062,73 +4083,73 @@ export class CounterComponent extends ViewPU {
             TextInput.height('20vp');
             TextInput.borderRadius(0);
             TextInput.key('DateTextInput3' + this.timeStamp.toString());
-            TextInput.onKeyEvent((g1) => {
+            TextInput.onKeyEvent(event => {
               this.focusCurrentText(FocusText.TEXT3);
-              if (g1.keyCode === CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusText();
-                g1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                g1.type === KeyType.Down &&
-                g1.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN
               ) {
                 this.subDate();
-                g1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                g1.type === KeyType.Down &&
-                g1.keyCode === CounterConstant.KEYCODE_DPAD_UP
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_UP
               ) {
                 this.addDate();
-                g1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                g1.type === KeyType.Down &&
-                g1.keyCode === CounterConstant.KEYCODE_MOVE_HOME
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_HOME
               ) {
                 this.homeFocusText();
-                g1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                g1.type === KeyType.Down &&
-                g1.keyCode === CounterConstant.KEYCODE_MOVE_END
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_MOVE_END
               ) {
                 this.endFocusText();
-                g1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                g1.type === KeyType.Down &&
-                g1.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT
               ) {
                 this.focusWithTarget(
                   'DateTextInput2' + this.timeStamp.toString()
                 );
               }
               if (
-                g1.type === KeyType.Down &&
-                g1.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT
               ) {
                 this.focusWithTarget(
                   'DateTextInput3' + this.timeStamp.toString()
                 );
-                g1.stopPropagation();
+                event.stopPropagation();
               }
               if (
-                g1.type === KeyType.Down &&
-                g1.keyCode === CounterConstant.KEYCODE_TAB
+                event.type === KeyType.Down &&
+                event.keyCode === CounterConstant.KEYCODE_TAB
               ) {
-                g1.stopPropagation();
+                event.stopPropagation();
                 this.focusWithTarget(
                   'DateTextInput1' + this.timeStamp.toString()
                 );
               }
             });
-            TextInput.onChange((e1) => {
-              this.inputDay = Number(e1);
-              if (e1.length !== 2) {
+            TextInput.onChange(value => {
+              this.inputDay = Number(value);
+              if (value.length !== 2) {
                 this.hasInputText3 = true;
               }
-              if (e1.length === 3) {
+              if (value.length === 3) {
                 this.inputDay = this.inputDay % 10;
               }
               if (this.timeoutID3 !== -1) {
@@ -4148,7 +4169,7 @@ export class CounterComponent extends ViewPU {
                   this.inputDay = this.day;
                 }
               }, 1000);
-              if (e1.length === 2) {
+              if (value.length === 2) {
                 this.hasInputText3 = false;
                 this.day -= 1;
                 if (
@@ -4156,15 +4177,15 @@ export class CounterComponent extends ViewPU {
                   this.inputDay <= this.getDayNumber()
                 ) {
                   this.day = this.inputDay;
-                  let f1 = new DateData(this.year, this.month, this.day);
-                  this.onDateChange?.(f1);
+                  let date = new DateData(this.year, this.month, this.day);
+                  this.onDateChange?.(date);
                 } else {
                   this.day += 1;
                   this.inputDay = this.day;
                 }
               }
             });
-            TextInput.onSubmit((d1) => {
+            TextInput.onSubmit(enterKey => {
               if (this.timeoutID3 !== -1) {
                 clearTimeout(this.timeoutID3);
                 this.timeoutID3 = -1;
@@ -4191,7 +4212,7 @@ export class CounterComponent extends ViewPU {
               this.focusText = FocusText.NONE;
               this.hasFocusText3 = false;
             });
-            TextInput.onClick((c1) => {
+            TextInput.onClick(event => {
               this.focusText = FocusText.TEXT3;
               this.hasFocusText3 = true;
               this.controller3.caretPosition(
@@ -4200,7 +4221,7 @@ export class CounterComponent extends ViewPU {
             });
           }, TextInput);
           Row.pop();
-          this.observeComponentCreation2((y, z) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.direction(this.counterDirection);
             Column.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
@@ -4212,7 +4233,7 @@ export class CounterComponent extends ViewPU {
             });
             Column.borderColor(CounterResource.COUNTER_BORDER_COLOR);
           }, Column);
-          this.observeComponentCreation2((w, x) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
             Stack.height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT);
@@ -4221,7 +4242,7 @@ export class CounterComponent extends ViewPU {
             Stack.borderColor(CounterResource.COUNTER_BORDER_COLOR);
             Stack.clip(true);
           }, Stack);
-          this.observeComponentCreation2((u, v) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Rect.create();
             Rect.direction(this.counterDirection);
             Rect.width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH);
@@ -4240,7 +4261,7 @@ export class CounterComponent extends ViewPU {
             Rect.margin({ end: LengthMetrics.vp(1) });
             Rect.fillOpacity(0);
           }, Rect);
-          this.observeComponentCreation2((s, t) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(CounterResource.BUTTON_ARROW_UP);
             Image.direction(this.counterDirection);
             Image.width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH);
@@ -4248,7 +4269,7 @@ export class CounterComponent extends ViewPU {
             Image.fillColor(CounterResource.BUTTON_ICON_COLOR);
             Image.opacity(this.addOpacity);
           }, Image);
-          this.observeComponentCreation2((n, o) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel({
               type: ButtonType.Normal,
               stateEffect: this.addBtnStateEffect,
@@ -4273,19 +4294,19 @@ export class CounterComponent extends ViewPU {
             Button.backgroundColor(Color.Transparent);
             Button.opacity(this.addOpacity);
             Button.enabled(this.addBtnEnabled);
-            Button.onClick((r) => {
+            Button.onClick(event => {
               this.accessibilityBroadcastAddDate();
               if (
-                r.source === SourceType.Mouse ||
-                r.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             });
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: true });
-            LongPressGesture.onAction((q) => {
-              if (q.repeat) {
+            LongPressGesture.onAction(event => {
+              if (event.repeat) {
                 this.addDate();
               }
               this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -4296,8 +4317,8 @@ export class CounterComponent extends ViewPU {
             LongPressGesture.pop();
             Gesture.pop();
             Button.hoverEffect(this.choverEffect);
-            Button.onHover((p) => {
-              this.onHoverIncrease && this.onHoverIncrease(p);
+            Button.onHover(isHover => {
+              this.onHoverIncrease && this.onHoverIncrease(isHover);
             });
             Button.focusable(false);
             Button.onFocus(() => {
@@ -4312,13 +4333,13 @@ export class CounterComponent extends ViewPU {
           }, Button);
           Button.pop();
           Stack.pop();
-          this.observeComponentCreation2((l, m) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
             Stack.height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT);
             Stack.clip(true);
           }, Stack);
-          this.observeComponentCreation2((j, k) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Rect.create();
             Rect.direction(this.counterDirection);
             Rect.width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH);
@@ -4341,7 +4362,7 @@ export class CounterComponent extends ViewPU {
             });
             Rect.fillOpacity(0);
           }, Rect);
-          this.observeComponentCreation2((h, i) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(CounterResource.BUTTON_ARROW_DOWN);
             Image.direction(this.counterDirection);
             Image.width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH);
@@ -4349,7 +4370,7 @@ export class CounterComponent extends ViewPU {
             Image.fillColor(CounterResource.BUTTON_ICON_COLOR);
             Image.opacity(this.subOpacity);
           }, Image);
-          this.observeComponentCreation2((c, d) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel({
               type: ButtonType.Normal,
               stateEffect: this.subBtnStateEffect,
@@ -4374,19 +4395,19 @@ export class CounterComponent extends ViewPU {
             Button.backgroundColor(Color.Transparent);
             Button.opacity(this.subOpacity);
             Button.enabled(this.subBtnEnabled);
-            Button.onClick((g) => {
+            Button.onClick(event => {
               this.accessibilityBroadcastSubDate();
               if (
-                g.source === SourceType.Mouse ||
-                g.source === SourceType.TouchScreen
+                event.source === SourceType.Mouse ||
+                event.source === SourceType.TouchScreen
               ) {
                 this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             });
             Gesture.create(GesturePriority.Low);
             LongPressGesture.create({ repeat: true });
-            LongPressGesture.onAction((f) => {
-              if (f.repeat) {
+            LongPressGesture.onAction(event => {
+              if (event.repeat) {
                 this.subDate();
               }
               this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -4397,8 +4418,8 @@ export class CounterComponent extends ViewPU {
             LongPressGesture.pop();
             Gesture.pop();
             Button.hoverEffect(this.choverEffect);
-            Button.onHover((e) => {
-              this.onHoverDecrease && this.onHoverDecrease(e);
+            Button.onHover(isHover => {
+              this.onHoverDecrease && this.onHoverDecrease(isHover);
             });
             Button.focusable(false);
             Button.onFocus(() => {

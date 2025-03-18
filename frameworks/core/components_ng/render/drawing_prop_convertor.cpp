@@ -207,6 +207,7 @@ RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& 
     RSTextStyle rsTextStyle;
     rsTextStyle.color = ToRSColor(textStyle.GetTextColor());
     rsTextStyle.decoration = ToRSTextDecoration(textStyle.GetTextDecoration());
+    rsTextStyle.decorationStyle = ToRSTextDecorationStyle(textStyle.GetTextDecorationStyle());
     rsTextStyle.decorationColor = ToRSColor(textStyle.GetTextDecorationColor());
 
     rsTextStyle.fontWeight = ToRSFontWeight(textStyle.GetFontWeight());

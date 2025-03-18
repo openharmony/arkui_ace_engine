@@ -14,9 +14,11 @@
  */
 
 import abilityTest from './Ability.test';
-import promptActionCustomDialogBootcampTest from './promptActionCustomDialogBootcamp.test';
+import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.test';
+
 
 export default function testsuite() {
   abilityTest();
-  promptActionCustomDialogBootcampTest();
+  ListItemGroupBootcampTest();
+
 }

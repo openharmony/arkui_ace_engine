@@ -42,16 +42,16 @@ struct DrawableInfo {
     int32_t originalHeight = 0;
 };
 
+enum class DrawableType {
+    BASE = 0,
+    LAYERED = 1,
+    ANIMATED = 2,
+    PIXELMAP = 3,
+    VECTOR = 4,
+};
+
 class DRAWABLE_FORCE_EXPORT DrawableDescriptor {
 public:
-    enum class DrawableType {
-        BASE = 0,
-        LAYERED = 1,
-        ANIMATED = 2,
-        PIXELMAP = 3,
-        VECTOR = 4,
-    };
-
     using RedrawCallback = std::function<void()>;
 
     DrawableDescriptor() = default;

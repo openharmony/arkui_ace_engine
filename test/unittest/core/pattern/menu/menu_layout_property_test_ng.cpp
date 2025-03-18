@@ -27,14 +27,13 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
-#include "test/unittest/core/pattern/test_ng.h"
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components/theme/theme_attributes.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -56,7 +55,6 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/select/select_theme_wrapper.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
@@ -93,21 +91,6 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
-
-RefPtr<Theme> GetTheme(ThemeType type)
-{
-    if (type == TextTheme::TypeId()) {
-        return AceType::MakeRefPtr<TextTheme>();
-    } else if (type == IconTheme::TypeId()) {
-        return AceType::MakeRefPtr<IconTheme>();
-    } else if (type == SelectTheme::TypeId()) {
-        return AceType::MakeRefPtr<SelectTheme>();
-    } else if (type == SelectTheme::TypeId()) {
-        return AceType::MakeRefPtr<MenuTheme>();
-    } else {
-        return nullptr;
-    }
-}
 } // namespace
 class MenuLayoutPropertyTestNg : public testing::Test {
 public:
@@ -117,7 +100,6 @@ public:
     void TearDown() override;
     void MockPipelineContextGetTheme();
     void InitMenuLayoutPropertyTestNg();
-    void InitTargetFrameNode();
     void InitMenuItemTestNg();
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
@@ -125,9 +107,6 @@ public:
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
     RefPtr<FrameNode> menuItemFrameNode_;
-    RefPtr<FrameNode> targetFrameNode_;
-    int32_t targetId_ = 0;
-    std::string targetTag_ = "";
     RefPtr<MenuItemPattern> menuItemPattern_;
     RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
 };
@@ -142,8 +121,6 @@ void MenuLayoutPropertyTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    InitTargetFrameNode();
     MockContainer::SetUp();
 }
 
@@ -166,10 +143,16 @@ void MenuLayoutPropertyTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        return GetTheme(type);
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
     });
-    EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 void MenuLayoutPropertyTestNg::InitMenuLayoutPropertyTestNg()
@@ -180,15 +163,6 @@ void MenuLayoutPropertyTestNg::InitMenuLayoutPropertyTestNg()
 
     menuAccessibilityProperty_ = menuFrameNode_->GetAccessibilityProperty<MenuAccessibilityProperty>();
     ASSERT_NE(menuAccessibilityProperty_, nullptr);
-}
-
-void MenuLayoutPropertyTestNg::InitTargetFrameNode()
-{
-    targetFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    ASSERT_NE(targetFrameNode_, nullptr);
-    targetId_ = targetFrameNode_->GetId();
-    targetTag_ = targetFrameNode_->GetTag();
 }
 
 void MenuLayoutPropertyTestNg::InitMenuItemTestNg()
@@ -301,7 +275,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, GetFontSize002, TestSize.Level1)
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -352,7 +326,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, GetFontWeight002, TestSize.Level1)
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -378,7 +352,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, GetFontWeight003, TestSize.Level1)
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -532,38 +506,27 @@ HWTEST_F(MenuLayoutPropertyTestNg, Clone002, TestSize.Level1)
  */
 HWTEST_F(MenuLayoutPropertyTestNg, ToJsonValue001, TestSize.Level1)
 {
-    MockPipelineContextGetTheme();
-    std::vector<OptionParam> optionParams;
-    optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
-    optionParams.emplace_back("MenuItem2", "", nullptr);
-    MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
-    ASSERT_NE(menuWrapperNode, nullptr);
-    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
-    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
-    ASSERT_NE(menuNode, nullptr);
-    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-    property->UpdateMenuOffset(OffsetF(25.0f, 30.0f));
-    property->UpdatePositionOffset(OffsetF(25.0f, 30.0f));
-    property->UpdateTitle("title");
-    property->UpdateFontSize(Dimension(25.0f));
-    property->UpdateFontColor(Color::RED);
-    property->UpdateFontWeight(FontWeight::BOLD);
-    property->UpdateItemDivider(ITEM_DIVIDER);
-    property->UpdateItemGroupDivider(ITEM_DIVIDER);
-    property->UpdateExpandingMode(SubMenuExpandingMode::EMBEDDED);
+    MenuLayoutProperty property;
+    property.UpdateMenuOffset(OffsetF(25.0f, 30.0f));
+    property.UpdatePositionOffset(OffsetF(25.0f, 30.0f));
+    property.UpdateTitle("title");
+    property.UpdateFontSize(Dimension(25.0f));
+    property.UpdateFontColor(Color::RED);
+    property.UpdateFontWeight(FontWeight::BOLD);
+    property.UpdateItemDivider(ITEM_DIVIDER);
+    property.UpdateItemGroupDivider(ITEM_DIVIDER);
+    property.UpdateExpandingMode(SubMenuExpandingMode::EMBEDDED);
 
     auto json = JsonUtil::Create(true);
-    property->ToJsonValue(json, filter);
+    property.ToJsonValue(json, filter);
     auto fontJsonObject = json->GetObject("font");
     EXPECT_EQ(json->GetString("title"), "title");
     EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
     EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
     EXPECT_EQ(json->GetString("fontColor"), Color::RED.ColorToString());
     EXPECT_EQ(fontJsonObject->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
-    property->UpdateExpandingMode(SubMenuExpandingMode::STACK);
-    property->ToJsonValue(json, filter);
+    property.UpdateExpandingMode(SubMenuExpandingMode::STACK);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("title"), "title");
     EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
     EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
@@ -583,7 +546,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, ToJsonValue002, TestSize.Level1)
     optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
     optionParams.emplace_back("MenuItem2", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -701,7 +664,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, SetFontSize001, TestSize.Level1)
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -727,7 +690,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, SetFontSize002, TestSize.Level1)
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -752,7 +715,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, SetFontColor001, TestSize.Level1)
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -761,7 +724,8 @@ HWTEST_F(MenuLayoutPropertyTestNg, SetFontColor001, TestSize.Level1)
     ASSERT_NE(property, nullptr);
     ViewStackProcessor::GetInstance()->Push(menuNode);
     MneuModelInstance.SetFontColor(Color::RED);
-    ASSERT_FALSE(property->GetFontColor().has_value());
+    ASSERT_TRUE(property->GetFontColor().has_value());
+    EXPECT_EQ(property->GetFontColor().value(), Color::RED);
     ViewStackProcessor::GetInstance()->Finish();
 }
 
@@ -777,7 +741,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, SetFontColor002, TestSize.Level1)
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -800,7 +764,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, SetFontColor003, TestSize.Level1)
     std::vector<OptionParam> optionParams;
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -809,7 +773,8 @@ HWTEST_F(MenuLayoutPropertyTestNg, SetFontColor003, TestSize.Level1)
     ASSERT_NE(property, nullptr);
     ViewStackProcessor::GetInstance()->Push(menuNode);
     MneuModelInstance.SetFontColor(Color::RED);
-    ASSERT_FALSE(property->GetFontColor().has_value());
+    ASSERT_TRUE(property->GetFontColor().has_value());
+    EXPECT_EQ(property->GetFontColor().value(), Color::RED);
     MneuModelInstance.SetFontColor(std::nullopt);
     ASSERT_FALSE(property->GetFontColor().has_value());
     ViewStackProcessor::GetInstance()->Finish();
@@ -831,7 +796,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, GetMenuPlacement001, TestSize.Level1)
     optionParams.emplace_back("MenuItem", "", nullptr);
     MenuParam menuParam;
     menuParam.placement = OHOS::Ace::Placement::TOP;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams), targetId_, targetTag_, TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -860,7 +825,7 @@ HWTEST_F(MenuLayoutPropertyTestNg, GetMenuPlacement002, TestSize.Level1)
     MenuParam menuParam;
     menuParam.placement = OHOS::Ace::Placement::BOTTOM;
     menuParam.type = TYPE;
-    auto menuWrapperNode = MenuView::Create(textNode, targetId_, targetTag_, menuParam);
+    auto menuWrapperNode = MenuView::Create(textNode, TARGET_ID, "", menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));

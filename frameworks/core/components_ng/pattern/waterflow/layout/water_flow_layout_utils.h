@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H
 #include <string>
 
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -33,6 +34,8 @@ public:
         bool haveUserDefSize = false;
     };
     static LayoutConstraintF CreateChildConstraint(const ConstraintParams& params,
+        const RefPtr<WaterFlowLayoutProperty>& props, const RefPtr<LayoutWrapper>& child);
+    static LayoutConstraintF CreateChildConstraint(const ConstraintParams& params, const ViewPosReference& posRef,
         const RefPtr<WaterFlowLayoutProperty>& props, const RefPtr<LayoutWrapper>& child);
 
     /**
@@ -59,6 +62,7 @@ public:
      */
     static float GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, int32_t idx);
     static void UpdateItemIdealSize(const RefPtr<LayoutWrapper>& item, Axis axis, float userHeight);
+    static AdjustOffset GetAdjustOffset(const RefPtr<LayoutWrapper>& item);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H
