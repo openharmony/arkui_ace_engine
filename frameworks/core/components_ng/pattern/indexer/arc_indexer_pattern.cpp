@@ -815,7 +815,7 @@ void ArcIndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
     CHECK_NULL_VOID(pipelineContext);
     auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+    auto paintProperty = host->GetPaintProperty<ArcIndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     Color selectedBackgroundColor =
         paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColorArc());

@@ -733,10 +733,13 @@ void setGestureInterrupterToNodeWithUserData(
     ArkUINodeHandle node, void* userData, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     auto onGestureRecognizerJudgeBegin =
-        [frameNode, userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
+        [weak = AceType::WeakClaim(frameNode), userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
             const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        auto node = weak.Upgrade();
+        CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
         GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
@@ -771,8 +774,7 @@ void setGestureInterrupterToNodeWithUserData(
         ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
         interruptInfo.inputEvent = &inputEvent;
         interruptInfo.gestureEvent = &arkUIGestureEvent;
-
-        auto touchRecognizers = CreateTouchRecognizers(frameNode, info, interruptInfo);
+        auto touchRecognizers = CreateTouchRecognizers(AceType::RawPtr(node), info, interruptInfo);
         auto result = interrupter(&interruptInfo);
         delete[] othersRecognizer;
         DestroyTouchRecognizers(touchRecognizers, interruptInfo);

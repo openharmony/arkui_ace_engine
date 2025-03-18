@@ -260,6 +260,18 @@ void ForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
     onMoveEvent_ = onMove;
 }
 
+void ForEachNode::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+    std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+    std::function<void(int32_t)>&& onDrop)
+{
+    if (onMoveEvent_) {
+        onLongPressEvent_ = onLongPress;
+        onDragStartEvent_ = onDragStart;
+        onMoveThroughEvent_ = onMoveThrough;
+        onDropEvent_ = onDrop;
+    }
+}
+
 void ForEachNode::MoveData(int32_t from, int32_t to)
 {
     if (from == to) {
@@ -314,6 +326,10 @@ void ForEachNode::InitAllChildrenDragManager(bool init)
     CHECK_NULL_VOID(parentNode);
     if (parentNode->GetTag() != V2::LIST_ETS_TAG) {
         onMoveEvent_ = nullptr;
+        onLongPressEvent_ = nullptr;
+        onDragStartEvent_ = nullptr;
+        onMoveThroughEvent_ = nullptr;
+        onDropEvent_ = nullptr;
         return;
     }
     const auto& children = GetChildren();

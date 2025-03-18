@@ -17,6 +17,8 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "text_base.h"
 
+#include "core/components_ng/pattern/stage/page_pattern.h"
+
 namespace OHOS::Ace::NG {
 
 class TextTestNineNg : public TextBases {
@@ -43,6 +45,8 @@ void TextTestNineNg::SetUpTestSuite()
 {
     TextBases::SetUpTestSuite();
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 }
 
 /**
@@ -232,5 +236,293 @@ HWTEST_F(TextTestNineNg, CheckHandleVisible001, TestSize.Level1)
      */
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(lastPlatformVersion);
     MockContainer::Current()->SetApiTargetVersion(lastPlatformVersion);
+}
+
+/**
+ * @tc.name: SetupMagnifier001
+ * @tc.desc: test TextSelectOverlay::UpdateClipHandleViewPort(), while no AncestorNode & API 10.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, SetupMagnifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create root and target node, init builder func, set api version 10
+     * @tc.expected: targetNode != nullptr
+     */
+    auto lastPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+
+    auto [frameNode, pattern] = Init();
+    pattern->contentRect_ = RectF { 0, 0, 30, 30 };
+    pattern->copyOption_ = CopyOptions::Local;
+    GestureEvent info;
+    info.localLocation_ = Offset { 1, 1 };
+
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), 0);
+
+    /**
+     * @tc.steps: step2. recover api version info.
+     */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(lastPlatformVersion);
+    MockContainer::Current()->SetApiTargetVersion(lastPlatformVersion);
+}
+
+/**
+ * @tc.name: SetupMagnifier002
+ * @tc.desc: test TextSelectOverlay::UpdateClipHandleViewPort(), while no AncestorNode & API 12.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, SetupMagnifier002, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    pattern->contentRect_ = RectF { 0, 0, 30, 30 };
+    pattern->copyOption_ = CopyOptions::Local;
+    GestureEvent info;
+    info.localLocation_ = Offset { 1, 1 };
+
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), 0);
+}
+
+/**
+ * @tc.name: SetupMagnifier011
+ * @tc.desc: test TextSelectOverlay::UpdateClipHandleViewPort(), while AncestorNode.clipEdge=false & visibleRect is
+ * always {0，0，0，0} step into prev branch 1, it means text rect.Top() > page rect.Height().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, SetupMagnifier011, TestSize.Level1)
+{
+    // 设置api 12
+    auto [textNode, pattern] = Init();
+    textNode->GetGeometryNode()->SetContentSize({ 5, 12 });
+    textNode->GetGeometryNode()->SetContentOffset({ 5, 14 });
+    pattern->copyOption_ = CopyOptions::Local;
+    GestureEvent info;
+    info.localLocation_ = Offset { 1, 1 };
+
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
+    textNode->SetParent(pageNode);
+
+    pageNode->GetRenderContext()->UpdateClipEdge(false);
+    auto pageGeoNode = pageNode->GetGeometryNode();
+
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
+}
+
+/**
+ * @tc.name: SetupMagnifier013
+ * @tc.desc: test TextSelectOverlay::UpdateClipHandleViewPort(), while AncestorNode.clipEdge=false, step into prev
+ * branch 2&3, it means text rect.Top() < page rect.Height(); text rect.Left() > page rect.Width().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, SetupMagnifier013, TestSize.Level1)
+{
+    // 设置api 12
+    auto [textNode, pattern] = Init();
+    textNode->GetGeometryNode()->SetContentSize({ 5, 10 });
+    textNode->GetGeometryNode()->SetContentOffset({ 5, -20 });
+    pattern->copyOption_ = CopyOptions::Local;
+    GestureEvent info;
+    info.localLocation_ = Offset { 1, 1 };
+
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
+    textNode->SetParent(pageNode);
+
+    pageNode->GetRenderContext()->UpdateClipEdge(false);
+    auto pageGeoNode = pageNode->GetGeometryNode();
+
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(5, pattern->magnifierController_->hostViewPort_->Width());
+}
+
+/**
+ * @tc.name: SetupMagnifier014
+ * @tc.desc: test TextSelectOverlay::UpdateClipHandleViewPort(), while AncestorNode.clipEdge=false, step into prev
+ * branch 2&4, it means text rect.Top() < page rect.Height(); text rect.Left() < page rect.Width().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, SetupMagnifier014, TestSize.Level1)
+{
+    auto [textNode, pattern] = Init();
+    textNode->GetGeometryNode()->SetContentSize({ 5, 10 });
+    textNode->GetGeometryNode()->SetContentOffset({ -11, -20 });
+    pattern->copyOption_ = CopyOptions::Local;
+    GestureEvent info;
+    info.localLocation_ = Offset { 1, 1 };
+
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
+    textNode->SetParent(pageNode);
+
+    pageNode->GetRenderContext()->UpdateClipEdge(false);
+    auto pageGeoNode = pageNode->GetGeometryNode();
+
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(11, pattern->magnifierController_->hostViewPort_->Width());
+}
+
+/**
+ * @tc.name: SetupMagnifier021
+ * @tc.desc: test TextSelectOverlay::UpdateClipHandleViewPort(), while AncestorNode.clipEdge=true, step into clip branch
+ * 1,, it means text rect.Top() > page rect.Height().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, SetupMagnifier021, TestSize.Level1)
+{
+    auto [textNode, pattern] = Init();
+    textNode->GetGeometryNode()->SetContentSize({ 5, 12 });
+    textNode->GetGeometryNode()->SetContentOffset({ 5, 14 });
+    pattern->copyOption_ = CopyOptions::Local;
+    GestureEvent info;
+    info.localLocation_ = Offset { 1, 1 };
+
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
+    textNode->SetParent(pageNode);
+
+    // 需要给 swiper 加一个主题，主题的GetClip 返回一个true或false
+    auto renderContext = pageNode->GetRenderContext();
+    renderContext->UpdateClipEdge(true);
+
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+}
+
+/**
+ * @tc.name: SetupMagnifier022
+ * @tc.desc: test TextSelectOverlay::UpdateClipHandleViewPort(), while AncestorNode.clipEdge=true, step into clip branch
+ * 2&3,, it means text rect.Top() < page rect.Height(); text rect.Left() > page rect.Width()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, SetupMagnifier022, TestSize.Level1)
+{
+    auto [textNode, pattern] = Init();
+    textNode->GetGeometryNode()->SetContentSize({ 5, 10 });
+    textNode->GetGeometryNode()->SetContentOffset({ 5, -20 });
+    pattern->copyOption_ = CopyOptions::Local;
+    GestureEvent info;
+    info.localLocation_ = Offset { 1, 1 };
+
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
+    textNode->SetParent(pageNode);
+
+    // 需要给 swiper 加一个主题，主题的GetClip 返回一个true或false
+    auto renderContext = pageNode->GetRenderContext();
+    renderContext->UpdateClipEdge(true);
+
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+}
+
+/**
+ * @tc.name: SetupMagnifier024
+ * @tc.desc: test TextSelectOverlay::UpdateClipHandleViewPort(), while AncestorNode.clipEdge=true, step into clip branch
+ * 2&4,, it means text rect.Top() < page rect.Height(); text rect.Left() < page rect.Width()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, SetupMagnifier024, TestSize.Level1)
+{
+    auto [textNode, pattern] = Init();
+    textNode->GetGeometryNode()->SetContentSize({ 5, 10 });
+    textNode->GetGeometryNode()->SetContentOffset({ -11, -20 });
+    pattern->copyOption_ = CopyOptions::Local;
+    GestureEvent info;
+    info.localLocation_ = Offset { 1, 1 };
+
+    auto pageNode = FrameNode::GetOrCreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
+    textNode->SetParent(pageNode);
+
+    // 需要给 swiper 加一个主题，主题的GetClip 返回一个true或false
+    auto renderContext = pageNode->GetRenderContext();
+    renderContext->UpdateClipEdge(true);
+
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(0, pattern->magnifierController_->hostViewPort_->Width());
+}
+
+/**
+ * @tc.name: CheckAndAdjustHandle001
+ * @tc.desc: test text_pattern.cpp CheckAndAdjustHandle function, case clipEdge == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckAndAdjustHandle001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF paintRect = { 0, 0, 10, 10 };
+    auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckAndAdjustHandle002
+ * @tc.desc: test text_pattern.cpp CheckAndAdjustHandle function, case clipEdge == true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckAndAdjustHandle002, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(true);
+    RectF paintRect = { 0, 0, 10, 10 };
+    auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckAndAdjustHandle003
+ * @tc.desc: test text_pattern.cpp CheckAndAdjustHandle function, case handleLevelMode_ == HandleLevelMode::EMBED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, CheckAndAdjustHandle003, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF paintRect = { 0, 0, 10, 10 };
+    pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    auto result = pattern->selectOverlay_->CheckAndAdjustHandle(paintRect);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test text_pattern.cpp OnHandleMove function, case handleLevelMode_ == HandleLevelMode::OVERLAY.
+    textPattern->HasContext == false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, OnHandleMove001, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF handleRect = { 0, 0, 10, 10 };
+    bool isFirst = true;
+    pattern->textForDisplay_ = u"";
+    pattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
+}
+
+/**
+* @tc.name: OnHandleMove002
+* @tc.desc: test text_pattern.cpp OnHandleMove function, case textPattern->HasContext == true,
+   magnifierController_ != nullptr.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNineNg, OnHandleMove002, TestSize.Level1)
+{
+    auto [frameNode, pattern] = Init();
+    EXPECT_EQ(-1, pattern->GetTextSelector().GetStart());
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    RectF handleRect = { 0, 0, 10, 10 };
+    bool isFirst = true;
+    pattern->textForDisplay_ = u"1";
+    pattern->selectOverlay_->OnHandleMove(handleRect, isFirst);
+    EXPECT_EQ(0, pattern->GetTextSelector().GetStart());
 }
 } // namespace OHOS::Ace::NG

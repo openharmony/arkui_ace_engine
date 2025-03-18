@@ -103,6 +103,13 @@ enum class AxisModel {
     ABS_HAT0Y,
 };
 
+enum class GestureCallbackType {
+    START = 0,
+    UPDATE,
+    END,
+    CANCEL,
+};
+
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

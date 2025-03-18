@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
@@ -303,7 +304,16 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     if (isSymbol) {
         SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
-
+    std::string backButtonAccessibilityText;
+    if (info.Length() > 1) {
+        if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
+            std::string backButtonAccessibilityText;
+            ParseJsString(info[1], backButtonAccessibilityText);
+            NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList,
+                true, backButtonAccessibilityText);
+            return;
+        }
+    }
     NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
 

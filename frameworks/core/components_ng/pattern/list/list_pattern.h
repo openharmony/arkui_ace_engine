@@ -398,6 +398,10 @@ public:
         return isStackFromEnd_;
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void StartVibrator(bool bEdge);
+#endif
+
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -418,10 +422,11 @@ protected:
     {
         return ScrollAlign::AUTO;
     }
-    virtual void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex) {}
+    virtual void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex);
     virtual float GetStartOverScrollOffset(float offset, float startMainPos) const;
     virtual float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
-
+    void SetLayoutAlgorithmParams(
+        const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     bool isFadingEdge_ = false;
     int32_t maxListItemIndex_ = 0;
@@ -489,6 +494,8 @@ private:
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     bool IsScrollSnapAlignCenter() const;
+    void SetLayoutAlgorithmJumpAlign(
+        const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
     void SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm);
     void SetChainAnimationCallback();
     bool NeedScrollSnapAlignEffect() const;

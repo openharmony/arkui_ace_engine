@@ -99,6 +99,14 @@ void TextTimerModelNG::SetOnTimer(std::function<void(int64_t, int64_t)> && onCha
     eventHub->SetOnTimer(std::move(onChange));
 }
 
+void TextTimerModelNG::SetOnTimer(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnTimer(std::move(onChange));
+}
+
 RefPtr<FrameNode> TextTimerModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto textTimerNode =

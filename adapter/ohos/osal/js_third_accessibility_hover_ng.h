@@ -35,7 +35,6 @@ struct MouseEvent;
 struct TouchEvent;
 
 namespace Framework {
-class FrameNode;
 class JsAccessibilityManager;
 struct ActionParam;
 class JsThirdProviderInteractionOperation;

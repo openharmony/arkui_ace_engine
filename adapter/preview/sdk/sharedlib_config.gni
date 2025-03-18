@@ -213,6 +213,12 @@ _arkui_shared_libs = [
     lib_names = [ "focuscontroller" ]
   },
   {
+    label = "//foundation/arkui/ace_engine/interfaces/napi/kits:napi_group"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "containerutils" ]
+  },
+  {
     label = "//foundation/arkui/ace_engine/component_ext/arc_alphabet_indexer:arcalphabetindexer"
     subsystem_name = "arkui"
     part_name = "ace_engine"
@@ -395,6 +401,12 @@ napi_modules = [
         lib_names = [ "dialog" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/dialogv2/interfaces:dialogv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "dialogv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/editabletitlebar/interfaces:editabletitlebar"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -411,6 +423,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "progressbutton" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/progressbuttonv2/interfaces:progressbuttonv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "progressbuttonv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/selecttitlebar/interfaces:selecttitlebar"
@@ -447,6 +465,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "toolbar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/toolbarv2/interfaces:toolbarv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "toolbarv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/treeview/interfaces:treeview"

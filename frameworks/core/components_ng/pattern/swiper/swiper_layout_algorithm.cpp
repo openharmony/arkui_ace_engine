@@ -96,8 +96,9 @@ void SwiperLayoutAlgorithm::UpdateLayoutInfoBeforeMeasureSwiper(
     auto nextMargin = NearZero(nextMargin_) ? 0.0f : nextMargin_ + spaceWidth_;
     endMainPos_ = currentOffset_ + contentMainSize_ - prevMargin - nextMargin;
 
+    prevMarginIgnoreBlank_ = property->GetPrevMarginIgnoreBlank().value_or(false);
     if (!isLoop_ && jumpIndex_.has_value() && totalItemCount_ > property->GetDisplayCount().value_or(1)) {
-        if (property->GetPrevMarginIgnoreBlank().value_or(false) && jumpIndex_.value() == 0) {
+        if (prevMarginIgnoreBlank_ && jumpIndex_.value() == 0) {
             ignoreBlankOffset_ = Positive(prevMargin_) ? -(prevMargin_ + spaceWidth_) : 0.0f;
         } else if (property->GetNextMarginIgnoreBlank().value_or(false) &&
                    jumpIndex_.value() >= (totalItemCount_ - property->GetDisplayCount().value_or(1))) {
@@ -864,8 +865,13 @@ bool SwiperLayoutAlgorithm::NeedMeasureForward(
     if (cachedLayout) {
         return currentIndex < cachedEndIndex_;
     }
-
-    return LessNotEqual(currentEndPos, forwardEndPos) || (targetIndex_ && currentIndex < targetIndex_.value());
+    auto contentMainSize = contentMainSize_;
+    if (Positive(prevMargin_) && !prevMarginIgnoreBlank_) {
+        contentMainSize -= prevMargin_ + spaceWidth_;
+    }
+    bool isLayoutOver = overScrollFeature_ && GreatOrEqual(currentEndPos, contentMainSize);
+    return !isLayoutOver &&
+           (LessNotEqual(currentEndPos, forwardEndPos) || (targetIndex_ && currentIndex < targetIndex_.value()));
 }
 
 void SwiperLayoutAlgorithm::AdjustOffsetOnForward(float currentEndPos)
@@ -1604,10 +1610,7 @@ void SwiperLayoutAlgorithm::ArrowLayout(
                     : (indicatorFrameRect.Bottom() + padding.bottom.value_or(0.0f) +
                           swiperIndicatorTheme->GetArrowScale().ConvertToPx() - indicatorPadding - normalArrowMargin);
         }
-        auto offsetX = indicatorFrameRect.Left() +
-            (indicatorFrameSize.Width() - GetHeightForDigit(layoutWrapper, arrowFrameSize.Width())) * 0.5f;
-
-        arrowOffset.SetX(offsetX);
+        arrowOffset.SetX(indicatorFrameRect.Left() + (indicatorFrameSize.Width() - arrowFrameSize.Width()) * 0.5f);
         arrowOffset.SetY(startPoint);
         if (isLeftArrow && !NonNegative(arrowOffset.GetY() - padding.top.value_or(0.0f))) {
             arrowOffset.SetY(padding.top.value_or(0.0f));

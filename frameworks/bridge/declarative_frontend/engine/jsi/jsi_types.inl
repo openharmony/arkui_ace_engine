@@ -143,6 +143,9 @@ JsiType<T> JsiType<T>::New(Args&&... args)
 template<typename T>
 T JsiValue::ToNumber() const
 {
+    if (ACE_UNLIKELY(SystemProperties::DetectJsObjTypeConvertion() && !IsNumber())) {
+        LOGF_ABORT("bad call to ToNumber.");
+    }
     return JsiValueConvertor::fromJsiValue<T>(GetEcmaVM(), GetLocalHandle());
 }
 

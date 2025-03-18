@@ -122,10 +122,11 @@ public:
             theme->borderColorSmall_ = buttonPattern->GetAttr<Color>("color_border_small", Color());
             theme->shadowNormal_ = static_cast<uint32_t>(buttonPattern->GetAttr<double>("shadow_default", 0.0));
             theme->shadowFocus_ = static_cast<uint32_t>(buttonPattern->GetAttr<double>("shadow_focus", 0.0));
-            theme->scaleFocus_ =  buttonPattern->GetAttr<double>("scale_focus", 0.0);
+            theme->scaleHoverOrFocus_ =  buttonPattern->GetAttr<double>("scale_focus", 0.0);
             theme->paddingText_ = buttonPattern->GetAttr<Dimension>("padding_text", 0.0_vp);
             theme->textBackgroundFocus_ = buttonPattern->GetAttr<Color>("focus_bg_text", Color());
             theme->normalBackgroundFocus_ = buttonPattern->GetAttr<Color>("normal_button_focus_bgcolor", Color());
+            theme->emphasizeBackgroundFocus_ = buttonPattern->GetAttr<Color>("emphasize_focus_color", Color());
             theme->bigFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_big_font_size_scale", 0.0);
             theme->largeFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_large_font_size_scale", 0.0);
             theme->maxFontSizeScale_ = buttonPattern->GetAttr<double>("button_aging_max_font_size_scale", 0.0);
@@ -320,9 +321,9 @@ public:
         return shadowFocus_;
     }
 
-    double GetScaleFocus() const
+    double GetScaleHoverOrFocus() const
     {
-        return scaleFocus_;
+        return scaleHoverOrFocus_;
     }
 
     const Dimension& GetMinCircleButtonDiameter() const
@@ -488,6 +489,11 @@ public:
         return normalBackgroundFocus_;
     }
 
+    const Color& GetEmphasizeBackgroundFocus() const
+    {
+        return emphasizeBackgroundFocus_;
+    }
+
     float GetBigFontSizeScale() const
     {
         return bigFontSizeScale_;
@@ -553,6 +559,7 @@ private:
     Color borderColorSmall_;
     Color textBackgroundFocus_;
     Color normalBackgroundFocus_;
+    Color emphasizeBackgroundFocus_;
     TextStyle textStyle_;
     Edge padding_;
     Edge minCircleButtonPadding_;
@@ -585,7 +592,7 @@ private:
     std::unordered_map<ControlSize, Edge> paddingMap_;
     std::unordered_map<ControlSize, Dimension> borderRadiusMap_;
     double bgDisabledAlpha_ = 1.0;
-    double scaleFocus_ = 1.0;
+    double scaleHoverOrFocus_ = 1.0;
     uint32_t textMaxLines_ = 1;
     uint32_t shadowNormal_ = 0;
     uint32_t shadowFocus_ = 0;

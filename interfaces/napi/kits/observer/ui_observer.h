@@ -28,6 +28,7 @@
 #include "ui_observer_listener.h"
 
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::Napi {
 class UIObserver {
@@ -105,6 +106,38 @@ public:
     static void UnRegisterTabContentStateCallback(const std::string& id, napi_value cb);
     static void HandleTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
 
+    static void RegisterBeforePanStartCallback(
+        napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterBeforePanStartCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterBeforePanStartCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
+    static void UnRegisterBeforePanStartCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void RegisterBeforePanEndCallback(
+        napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterBeforePanEndCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterBeforePanEndCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
+    static void UnRegisterBeforePanEndCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void RegisterAfterPanStartCallback(
+        napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterAfterPanStartCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterAfterPanStartCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
+    static void UnRegisterAfterPanStartCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void RegisterAfterPanEndCallback(
+        napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterAfterPanEndCallback(
+        int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterAfterPanEndCallback(napi_env env, napi_value uiAbilityContext, napi_value callback);
+    static void UnRegisterAfterPanEndCallback(int32_t uiContextInstanceId, napi_value callback);
+    static void HandlePanGestureAccept(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
+        const RefPtr<NG::PanRecognizer>& current, const RefPtr<NG::FrameNode>& frameNode,
+        const NG::PanGestureInfo& panGestureInfo);
+    using PanGestureListenersPair =
+        std::pair<std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>&,
+            std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>&>;
+    static PanGestureListenersPair GetPanGestureListeners(const NG::PanGestureInfo& panGestureInfo);
+
     static bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str);
     static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
 private:
@@ -146,12 +179,33 @@ private:
     static std::list<std::shared_ptr<UIObserverListener>> tabContentStateListeners_;
     static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedTabContentStateListeners_;
+    static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+        abilityContextBeforePanStartListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedBeforePanStartListeners_;
+    static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+        abilityContextBeforePanEndListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedBeforePanEndListeners_;
+    static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+        abilityContextAfterPanStartListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedAfterPanStartListeners_;
+    static std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+        abilityContextAfterPanEndListeners_;
+    static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedAfterPanEndListeners_;
 
     static std::unordered_map<napi_ref, NavIdAndListenersMap> abilityUIContextNavDesSwitchListeners_;
     static std::unordered_map<int32_t, NavIdAndListenersMap> uiContextNavDesSwitchListeners_;
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> infosForNavDesSwitch_;
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> willClickInfos_;
     static std::unordered_map<napi_ref, NG::AbilityContextInfo> didClickInfos_;
+    static std::unordered_map<napi_ref, NG::AbilityContextInfo> beforePanStartInfos_;
+    static std::unordered_map<napi_ref, NG::AbilityContextInfo> beforePanEndInfos_;
+    static std::unordered_map<napi_ref, NG::AbilityContextInfo> afterPanStartInfos_;
+    static std::unordered_map<napi_ref, NG::AbilityContextInfo> afterPanEndInfos_;
+    static std::unordered_map<napi_ref, NG::AbilityContextInfo> PanGestureInfos_;
 };
 } // namespace OHOS::Ace::Napi
 #endif // FOUNDATION_ACE_INTERFACES_OBSERVER_H

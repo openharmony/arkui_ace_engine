@@ -209,8 +209,9 @@ public:
     bool ChangeRenderType(int32_t renderType);
 
 private:
+    static void ParseImageAIOptions(const JSRef<JSVal>& jsValue);
     static void ExtractInfoToXComponentOptions(
-        XComponentOptions& options, JSRef<JSObject> controllerObj, const JSCallbackInfo& info);
+        XComponentOptions& options, JSRef<JSObject>& controllerObj, const JSCallbackInfo& info);
 
     RefPtr<AceType> frameNode_;
 };

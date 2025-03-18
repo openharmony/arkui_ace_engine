@@ -91,7 +91,7 @@ void DragDropInitiatingStateReady::HandleLongPressOnAction(const GestureEvent& i
         dragDropManager->SetDragDampStartPoint(info.GetGlobalPoint());
         dragDropManager->SetDraggingPointer(info.GetPointerId());
     }
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::PRESS));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::PRESS));
 }
 
 void DragDropInitiatingStateReady::HandleTouchEvent(const TouchEvent& touchEvent)
@@ -121,7 +121,7 @@ void DragDropInitiatingStateReady::HandlePanOnActionEnd(const GestureEvent& info
     dragDropManager->SetIsDisableDefaultDropAnimation(true);
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 
 void DragDropInitiatingStateReady::HandlePanOnReject()
@@ -131,7 +131,10 @@ void DragDropInitiatingStateReady::HandlePanOnReject()
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
-    if (manager->IsGatherWithMenu()) {
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (manager->IsGatherWithMenu() || !params.hasGatherNode) {
         return;
     }
     manager->RemoveGatherNode();
@@ -141,6 +144,6 @@ void DragDropInitiatingStateReady::HandleSequenceOnActionCancel(const GestureEve
 {
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 } // namespace OHOS::Ace::NG
