@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_OBJECT_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_OBJECT_NG_H
 
+#include <shared_mutex>
+
 #include "base/utils/noncopyable.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
@@ -42,7 +44,7 @@ public:
 
     const SizeF& GetImageSize() const;
     const ImageSourceInfo& GetSourceInfo() const;
-    const RefPtr<ImageData>& GetData() const;
+    RefPtr<ImageData> GetData() const;
     int32_t GetFrameCount() const;
     ImageRotateOrientation GetOrientation() const;
     ImageRotateOrientation GetUserOrientation() const;
@@ -80,6 +82,8 @@ protected:
     ImageRotateOrientation orientation_ = ImageRotateOrientation::UP;
     ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
     SizeF imageSize_ { -1.0, -1.0 };
+    // Mutex to protect concurrent access to data_
+    mutable std::shared_mutex dataMutex_;
     // no longer needed after making canvas image
     RefPtr<ImageData> data_;
     int32_t frameCount_ = 1;
