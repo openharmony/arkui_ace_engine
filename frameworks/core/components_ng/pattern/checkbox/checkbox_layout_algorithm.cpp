@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
 
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -27,7 +28,7 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             host->GetGeometryNode()->ResetContent();
         } else {
             host->GetGeometryNode()->Reset();

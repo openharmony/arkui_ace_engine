@@ -97,7 +97,7 @@ void JSIfElse::GetRetakenElmtIds(const JSCallbackInfo& info)
 
 void JSIfElse::SetBranchId(const JSCallbackInfo& info)
 {
-    int32_t paramsLength = 3;
+    uint32_t paramsLength = 3;
     if (!info[0]->IsNumber()) {
         return;
     }

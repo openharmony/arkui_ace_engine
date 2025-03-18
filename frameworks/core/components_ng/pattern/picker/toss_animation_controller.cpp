@@ -186,25 +186,6 @@ void TossAnimationController::CreatePropertyCallback()
             return;
         }
         column->UpdateToss(static_cast<int>(position));
-        auto ref = weak.Upgrade();
-        CHECK_NULL_VOID(ref);
-        if (position > 0.0f) {
-            if (static_cast<int>(ref->end_) == std::ceil(position)) {
-                column->UpdateFinishToss(std::ceil(position));
-            } else if (static_cast<int>(ref->end_) < std::ceil(position)) {
-                return;
-            } else {
-                column->UpdateToss(std::ceil(position));
-            }
-        } else {
-            if (static_cast<int>(ref->end_) == std::floor(position)) {
-                column->UpdateFinishToss(std::floor(position));
-            } else if (static_cast<int>(ref->end_) > std::floor(position)) {
-                return;
-            } else {
-                column->UpdateToss(std::floor(position));
-            }
-        }
         column->SetTossStatus(true);
     };
     property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));

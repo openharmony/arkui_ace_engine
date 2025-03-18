@@ -24,11 +24,11 @@ es2abc_gen_abc("gen_dialog_abc") {
   extra_args = [ "--module" ]
 }
 
-es2abc_gen_abc("gen_dialog_v16_abc") {
-  src_js = rebase_path("dialog_v16.js")
-  dst_file = rebase_path(target_out_dir + "/dialog_v16.abc")
-  in_puts = [ "dialog_v16.js" ]
-  out_puts = [ target_out_dir + "/dialog_v16.abc" ]
+es2abc_gen_abc("gen_dialog_v18_abc") {
+  src_js = rebase_path("dialog_v18.js")
+  dst_file = rebase_path(target_out_dir + "/dialog_v18.abc")
+  in_puts = [ "dialog_v18.js" ]
+  out_puts = [ target_out_dir + "/dialog_v18.abc" ]
   extra_args = [ "--module" ]
 }
 
@@ -38,11 +38,11 @@ gen_js_obj("dialog_abc") {
   dep = ":gen_dialog_abc"
 }
 
-gen_js_obj("dialog_v16_abc") {
-  input = get_label_info(":gen_dialog_v16_abc", "target_out_dir") +
-          "/dialog_v16.abc"
-  output = target_out_dir + "/dialog_v16_abc.o"
-  dep = ":gen_dialog_v16_abc"
+gen_js_obj("dialog_v18_abc") {
+  input = get_label_info(":gen_dialog_v18_abc", "target_out_dir") +
+          "/dialog_v18.abc"
+  output = target_out_dir + "/dialog_v18_abc.o"
+  dep = ":gen_dialog_v18_abc"
 }
 
 gen_obj("dialog_abc_preview") {
@@ -51,11 +51,11 @@ gen_obj("dialog_abc_preview") {
   snapshot_dep = [ ":gen_dialog_abc" ]
 }
 
-gen_obj("dialog_v16_abc_preview") {
-  input = get_label_info(":gen_dialog_v16_abc", "target_out_dir") +
-          "/dialog_v16.abc"
-  output = target_out_dir + "/dialog_v16_abc.c"
-  snapshot_dep = [ ":gen_dialog_v16_abc" ]
+gen_obj("dialog_v18_abc_preview") {
+  input = get_label_info(":gen_dialog_v18_abc", "target_out_dir") +
+          "/dialog_v18.abc"
+  output = target_out_dir + "/dialog_v18_abc.c"
+  snapshot_dep = [ ":gen_dialog_v18_abc" ]
 }
 
 template("dialog_static") {
@@ -85,12 +85,12 @@ template("dialog_static") {
     if (use_mingw_win || use_mac || use_linux) {
       deps += [
         ":gen_obj_src_dialog_abc_preview",
-        ":gen_obj_src_dialog_v16_abc_preview",
+        ":gen_obj_src_dialog_v18_abc_preview",
       ]
     } else {
       deps += [
         ":dialog_abc",
-        ":dialog_v16_abc",
+        ":dialog_v18_abc",
       ]
     }
 

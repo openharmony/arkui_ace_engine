@@ -28,6 +28,7 @@
 #include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/shadow.h"
@@ -45,6 +46,7 @@ enum class BlurStyle;
 
 namespace OHOS::Ace::NG {
 
+// backdropBlur backgroundBlurStyle backgroundEffect
 struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImage, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageRepeat, ImageRepeat);
@@ -77,6 +79,13 @@ struct BackgroundProperty {
         return NearEqual(propBackdropBlurOption->grayscale[0], blurOption.grayscale[0])
             && NearEqual(propBackdropBlurOption->grayscale[1], blurOption.grayscale[1]);
     }
+    bool CheckSystemAdaptationSame(const SysOptions& sysOptions) const
+    {
+        if (!propSysOptions.has_value()) {
+            return false;
+        }
+        return NearEqual(propSysOptions.value(), sysOptions);
+    }
     bool CheckEffectOption(const std::optional<EffectOption>& effectOption) const
     {
         if (!effectOption.has_value()) {
@@ -91,6 +100,7 @@ struct BackgroundProperty {
     std::optional<Dimension> propBlurRadius;
     std::optional<EffectOption> propEffectOption;
     std::optional<BlurOption> propBackdropBlurOption;
+    std::optional<SysOptions> propSysOptions;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
@@ -102,6 +112,7 @@ struct CustomBackgroundProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
+// blur foregroundBlurStyle foregroundEffect
 struct ForegroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MotionBlur, MotionBlurOption);
     bool CheckBlurStyleOption(const std::optional<BlurStyleOption>& option) const
@@ -121,8 +132,24 @@ struct ForegroundProperty {
         }
         return NearEqual(propBlurRadius.value(), radius);
     }
+    bool CheckSysOptionsForBlurSame(const SysOptions& sysOptions) const
+    {
+        if (!propSysOptionsForBlur.has_value()) {
+            return false;
+        }
+        return NearEqual(propSysOptionsForBlur.value(), sysOptions);
+    }
+    bool CheckSysOptionsForEffectSame(const SysOptions& sysOptions) const
+    {
+        if (!propSysOptionsForForeEffect.has_value()) {
+            return false;
+        }
+        return NearEqual(propSysOptionsForForeEffect.value(), sysOptions);
+    }
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
+    std::optional<SysOptions> propSysOptionsForBlur;
+    std::optional<SysOptions> propSysOptionsForForeEffect;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundEffect, float);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };

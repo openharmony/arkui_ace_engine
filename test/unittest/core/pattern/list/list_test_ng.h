@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,7 +84,6 @@ protected:
     RefPtr<ListPattern> pattern_;
     RefPtr<ListEventHub> eventHub_;
     RefPtr<ListLayoutProperty> layoutProperty_;
-    RefPtr<ScrollablePaintProperty> paintProperty_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LIST_LIST_TEST_NG_H

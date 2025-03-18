@@ -23,13 +23,20 @@
 using namespace OHOS::Ace;
 
 extern "C" {
-void FfiOHOSAceFrameworkRadioCreate(
+void FfiOHOSAceFrameworkRadioCreate(const char* group, const char* value)
+{
+    std::optional<int32_t> indicator;
+    RadioModel::GetInstance()->Create(std::optional<std::string>(value), std::optional<std::string>(group), indicator);
+}
+
+void FfiOHOSAceFrameworkRadioWithIndicatorCreate(
     const char* group, const char* value, int32_t indicatorType, void (*indicatorBuilder)())
 {
     std::optional<int32_t> indicator(indicatorType);
     RadioModel::GetInstance()->Create(std::optional<std::string>(value), std::optional<std::string>(group), indicator);
     RadioModel::GetInstance()->SetBuilder(CJLambda::Create(indicatorBuilder));
 }
+
 void FfiOHOSAceFrameworkRadioChecked(bool value)
 {
     RadioModel::GetInstance()->SetChecked(value);
