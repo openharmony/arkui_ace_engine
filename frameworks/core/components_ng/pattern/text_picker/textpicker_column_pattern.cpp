@@ -1010,12 +1010,15 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
 
-    if (selectedMarkPaint_) {
-        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
+        if (selectedMarkPaint_) {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
+        } else {
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(false, false).GetTextColor());
+        }
     } else {
-        textLayoutProperty->UpdateTextColor(
-            textPickerLayoutProperty->GetSelectedColor().value_or(
-                pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+        textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetSelectedColor().value_or(
+            pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     }
 
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
@@ -1152,7 +1155,7 @@ void TextPickerColumnPattern::SetSelectColor(const RefPtr<TextLayoutProperty>& t
 {
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, percent);
-    if (selectedMarkPaint_ && isEqual) {
+    if (selectedMarkPaint_ && isEqual && !isUserSetSelectColor_) {
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -2166,6 +2169,16 @@ void TextPickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>&
 
     textNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+}
+
+void TextPickerColumnPattern::UpdateUserSetSelectColor()
+{
+    isUserSetSelectColor_ = true;
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    UpdateSelectedTextColor(pickerTheme);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

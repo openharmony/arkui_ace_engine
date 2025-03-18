@@ -316,6 +316,9 @@ class __RepeatVirtualScroll2Impl<T> {
     // register drag drop manager, only used for List
     private onMoveHandler_?: OnMoveHandler;
 
+    // register drag drop Handler Class, only used for List onMove
+    private itemDragEventHandler_?: ItemDragEventHandler;
+
     // update from C++ when MoveData happens
     // reset from C++ when FireOnMove happens
     private moveFromTo_?: [number, number] = undefined;
@@ -443,6 +446,7 @@ class __RepeatVirtualScroll2Impl<T> {
         this.arr_[__RepeatVirtualScroll2Impl.REF_META].add(this.selfPtr_);
 
         this.onMoveHandler_ = config.onMoveHandler;
+        this.itemDragEventHandler_ = config.itemDragEventHandler;
 
         this.owningViewV2_ = config.owningView_;
         if (!(this.owningViewV2_ instanceof ViewV2)) {
@@ -519,7 +523,7 @@ class __RepeatVirtualScroll2Impl<T> {
         });
 
         // init onMove
-        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_);
+        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_, this.itemDragEventHandler_);
 
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) initialRender() data array length: `,
             `${this.arr_.length}, totalCount: ${this.totalCount_} - done`);
@@ -560,7 +564,7 @@ class __RepeatVirtualScroll2Impl<T> {
 
         // update onMove
         // scenario: developers control whether onMove exists or not dynamically. 
-        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_);
+        RepeatVirtualScroll2Native.onMove(this.repeatElmtId_, this.onMoveHandler_, this.itemDragEventHandler_);
 
         const activeRangeFrom = this.activeRange_[0];
         const activeRangeTo = this.activeRange_[1];
@@ -891,6 +895,10 @@ class __RepeatVirtualScroll2Impl<T> {
                 stateMgmtConsole.debug(`correcting key of activeDataItem index ${prevIndex} from `,
                     `'${activateDataItems[prevIndex].key}' to '${prevKey}'.`);
                 activateDataItems[prevIndex].key = prevKey;
+
+                if (!this.rerenderOngoing_) {
+                    this.owningViewV2_.uiNodeNeedUpdateV2(this.repeatElmtId_);
+                }
             }
         }
         stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}): `,
@@ -1005,7 +1013,9 @@ class __RepeatVirtualScroll2Impl<T> {
 
         try {
             // execute item builder function
+            const isTemplate: boolean = (ttype !== RepeatEachFuncTtype);
             itemGenFunc(repeatItem);
+            RepeatVirtualScroll2Native.setCreateByTemplate(isTemplate);
         } catch (e) {
             this.stopRecordDependencies();
             

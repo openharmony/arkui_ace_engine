@@ -34,6 +34,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propEnableArrow_ = CloneEnableArrow();
         value->propUseCustom_ = CloneUseCustom();
+        value->propIsTips_ = CloneIsTips();
         value->propPlacement_ = ClonePlacement();
         value->propShowInSubWindow_ = CloneShowInSubWindow();
         value->propDisplayWindowOffset_ = CloneDisplayWindowOffset();
@@ -55,6 +56,7 @@ public:
         ResetEnableArrow();
         ResetPlacement();
         ResetUseCustom();
+        ResetIsTips();
         ResetShowInSubWindow();
         ResetDisplayWindowOffset();
         ResetTargetSpace();
@@ -70,6 +72,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseCustom, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsTips, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Placement, Placement, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayWindowOffset, OffsetF, PROPERTY_UPDATE_MEASURE);

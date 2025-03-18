@@ -31,6 +31,7 @@ class __RepeatVirtualScrollImpl<T> {
 
     private mkRepeatItem_: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     private onMoveHandler_?: OnMoveHandler;
+    private itemDragEventHandler?: ItemDragEventHandler;
 
     // index <-> key maps
     private key4Index_: Map<number, string> = new Map<number, string>();
@@ -63,6 +64,7 @@ class __RepeatVirtualScrollImpl<T> {
 
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
+        this.itemDragEventHandler = config.itemDragEventHandler;
 
         if (isInitialRender) {
             this.reusable_ = config.reusable;
@@ -279,7 +281,7 @@ class __RepeatVirtualScrollImpl<T> {
             onGetTypes4Range,
             onSetActiveRange
         }, this.reusable_);
-        RepeatVirtualScrollNative.onMove(this.onMoveHandler_);
+        RepeatVirtualScrollNative.onMove(this.onMoveHandler_, this.itemDragEventHandler);
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll`);
     }
 

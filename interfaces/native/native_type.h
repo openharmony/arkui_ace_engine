@@ -555,7 +555,7 @@ typedef enum {
 /**
  * @brief Enumerates the modes of the date picker.
  *
- * @since 16
+ * @since 18
  */
 typedef enum {
     /** A mode that displays the date in months, days of month, and years. */
@@ -2103,7 +2103,7 @@ typedef enum {
     ARKUI_BUTTON_TYPE_CIRCLE,
     /**
      * Rounded rectangle button.
-     * @since 16
+     * @since 18
      */
     ARKUI_BUTTON_ROUNDED_RECTANGLE = 8
 } ArkUI_ButtonType;
@@ -2244,17 +2244,17 @@ typedef enum {
     ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH = 180002,
     /**
      * @error The event is not a clone event.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT = 180003,
     /**
      * @error The component status is abnormal.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL = 180004,
     /**
      * @error No component hit to respond to the event.
-     * @since 16
+     * @since 15
      */
     ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT = 180005,
     /** invalid styled string */
@@ -2311,6 +2311,30 @@ typedef enum {
     /** Footer area of the <b>ListItemGroup</b> component. */
     ARKUI_LIST_ITEM_SWIPE_AREA_FOOTER,
 } ArkUI_ListItemGroupArea;
+
+/**
+ * @brief Enumerates the keyboard avoidance modes.
+ *
+ * @since 18
+ */
+typedef enum {
+    /** Automatically avoids the soft keyboard and compresses the height when reaching the maximum limit. */
+    ARKUI_KEYBOARD_AVOID_MODE_DEFAULT = 0,
+    /** Does not avoid the keyboard. */
+    ARKUI_KEYBOARD_AVOID_MODE_NONE,
+}ArkUI_KeyboardAvoidMode;
+
+/**
+ * @brief Enumerates the types of display areas for the hover mode.
+ *
+ * @since 18
+ */
+typedef enum {
+    /** Upper half screen. */
+    ARKUI_HOVER_MODE_AREA_TYPE_TOP = 0,
+    /** Lower half screen. */
+    ARKUI_HOVER_MODE_AREA_TYPE_BOTTOM,
+}ArkUI_HoverModeAreaType;
 
 /**
  * @brief defines the enumerated value of the direction of the extended security zone.

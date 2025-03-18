@@ -69,7 +69,7 @@ public:
     void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode);
 
 private:
-    ResSchedReport() {}
+    ResSchedReport();
     ~ResSchedReport() {}
     void HandleTouchDown(const TouchEvent& touchEvent);
     void HandleTouchUp(const TouchEvent& touchEvent);

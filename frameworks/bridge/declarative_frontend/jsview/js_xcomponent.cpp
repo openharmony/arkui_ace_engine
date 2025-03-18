@@ -209,6 +209,8 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     }
     XComponentOptions options;
     JSRef<JSObject> controllerObj;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto aiOptions = paramObject->GetProperty("imageAIOptions");
     ExtractInfoToXComponentOptions(options, controllerObj, info);
     if (options.id == std::nullopt && options.xcomponentController == nullptr &&
         (options.xcomponentType == XComponentType::SURFACE || options.xcomponentType == XComponentType::TEXTURE)) {
@@ -231,24 +233,11 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         auto soPath = info[1]->ToString();
         XComponentModel::GetInstance()->SetSoPath(soPath);
     }
-
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto aiOptions = paramObject->GetProperty("imageAIOptions");
-    if (aiOptions->IsObject()) {
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        CHECK_NULL_VOID(nativeEngine);
-        panda::Local<JsiValue> value = aiOptions.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
-        XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
-    }
+    ParseImageAIOptions(aiOptions);
 }
 
 void JSXComponent::ExtractInfoToXComponentOptions(
-    XComponentOptions& options, JSRef<JSObject> controllerObj, const JSCallbackInfo& info)
+    XComponentOptions& options, JSRef<JSObject>& controllerObj, const JSCallbackInfo& info)
 {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto id = paramObject->GetProperty("id");
@@ -308,6 +297,22 @@ void* JSXComponent::Create(const XComponentParams& params)
         TaskExecutor::TaskType::JS, "ArkUIXComponentCreate");
 
     return jsXComponent;
+}
+
+void JSXComponent::ParseImageAIOptions(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    panda::Local<JsiValue> value = jsValue.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
 }
 
 bool JSXComponent::ChangeRenderType(int32_t renderType)

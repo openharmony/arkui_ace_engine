@@ -2051,7 +2051,8 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmCalcFra
     indicatorPattern->OnModifyDone();
     auto algorithm = AceType::DynamicCast<DigitIndicatorLayoutAlgorithm>(indicatorPattern->CreateLayoutAlgorithm());
     float indicatorHeight = 20.0f;
-    auto frameHeight = algorithm->CalcFrameHeight(indicatorNode_, indicatorHeight);
+    float indicatorDigitPadding = 0.0f;
+    auto frameHeight = algorithm->CalcFrameHeight(indicatorNode_, indicatorHeight, indicatorDigitPadding);
     EXPECT_EQ(frameHeight, 20.0f);
 }
 } // namespace OHOS::Ace::NG

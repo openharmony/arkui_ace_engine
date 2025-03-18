@@ -19,6 +19,7 @@
 #include "core/common/ace_engine_ext.h"
 #include "core/components/image/image_event.h"
 #include "core/components/text_overlay/text_overlay_component.h"
+#include "core/components/theme/icon_theme.h"
 
 namespace OHOS::Ace {
 namespace {

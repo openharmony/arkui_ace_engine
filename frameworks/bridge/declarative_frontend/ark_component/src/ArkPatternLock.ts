@@ -167,6 +167,53 @@ class PatternLockActivateCircleStyleModifier extends ModifierWithKey<CircleStyle
   }
 }
 
+class PatternLockBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('patternLockBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundColor(node);
+    } else {
+      getUINativeModule().common.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+declare type OnPatternCompleteFunc = (input: Array<number>) => void
+class PatternLockOnPatternCompleteModifer extends ModifierWithKey<OnPatternCompleteFunc> {
+  constructor(value: OnPatternCompleteFunc) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('patternLockOnPatternComplete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().patternLock.resetPatternLockOnPatternComplete(node);
+    } else {
+      getUINativeModule().patternLock.setPatternLockOnPatternComplete(node, this.value);
+    }
+  }
+}
+
+declare type OnDotConnectFunc = (input: Array<number>) => void
+class PatternLockOnDotConnectModifer extends ModifierWithKey<OnDotConnectFunc> {
+  constructor(value: OnDotConnectFunc) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('patternLockOnDotConnect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().patternLock.resetPatternLockOnDotConnect(node);
+    } else {
+      getUINativeModule().patternLock.setPatternLockOnDotConnect(node, this.value);
+    }
+  }
+}
+
 class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -216,11 +263,20 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
       PatternLockActivateCircleStyleModifier, value);
     return this;
   }
-  onPatternComplete(callback: (input: Array<number>) => void): PatternLockAttribute {
-    throw new Error('Method not implemented.');
+  onPatternComplete(callback: (input: Array<number>) => void): this {
+    modifierWithKey(this._modifiersWithKeys, PatternLockOnPatternCompleteModifer.identity,
+      PatternLockOnDotConnectModifer, callback);
+    return this;
   }
-  onDotConnect(callback: any): PatternLockAttribute {
-    throw new Error('Method not implemented.');
+  onDotConnect(callback: any): this {
+    modifierWithKey(this._modifiersWithKeys, PatternLockOnDotConnectModifer.identity,
+      PatternLockOnDotConnectModifer, callback);
+    return this;
+  }
+  backgroundColor(value: ResourceColor): PatternLockAttribute {
+    modifierWithKey(this._modifiersWithKeys, PatternLockBackgroundColorModifier.identity,
+      PatternLockBackgroundColorModifier, value);
+    return this;
   }
 }
 // @ts-ignore

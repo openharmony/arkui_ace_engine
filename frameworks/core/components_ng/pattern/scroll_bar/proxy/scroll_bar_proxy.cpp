@@ -175,13 +175,16 @@ void ScrollBarProxy::NotifyScrollBar(int32_t scrollSource) const
         if (!host) {
             continue;
         }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !scrollBar->HasChild()) {
+        if (scrollBar->UseInnerScrollBar()) {
             scrollBar->SetScrollableNodeOffset(scrollableNodeOffset);
             scrollBar->UpdateScrollBarOffset(scrollSource);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        } else {
-            scrollBar->SetScrollableNodeOffset(
-                !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
+            return;
+        }
+
+        scrollBar->SetScrollableNodeOffset(
+            !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
+        if (!host->CheckNeedForceMeasureAndLayout()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }
@@ -320,7 +323,7 @@ bool ScrollBarProxy::IsScrollSnapTrigger() const
         if (!scrollBar) {
             continue;
         }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !scrollBar->HasChild()) {
+        if (scrollBar->UseInnerScrollBar()) {
             auto innerScrollBar = scrollBar->GetScrollBar();
             if (!innerScrollBar) {
                 continue;
@@ -331,5 +334,19 @@ bool ScrollBarProxy::IsScrollSnapTrigger() const
         }
     }
     return false;
+}
+
+void ScrollBarProxy::MarkScrollBarDirty() const
+{
+    for (auto bar : scrollBars_) {
+        auto scrollBarPattern = bar.Upgrade();
+        if (!scrollBarPattern || scrollBarPattern->UseInnerScrollBar()) {
+            continue;
+        }
+        auto host = scrollBarPattern->GetHost();
+        if (host && !host->CheckNeedForceMeasureAndLayout()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

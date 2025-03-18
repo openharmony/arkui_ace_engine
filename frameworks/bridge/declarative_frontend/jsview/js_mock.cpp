@@ -163,6 +163,34 @@ void JSMockLocalStorage::JSBind(BindingTarget globalObj)
     JSClass<JSMockLocalStorage>::Bind(globalObj);
 }
 
+void JSMockViewBuildNodeBase::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSMockViewBuildNodeBase>::Declare("ViewBuildNodeBase");
+
+    JSClass<JSMockViewBuildNodeBase>::StaticMethod(
+        "setArkThemeScopeManager", &JSMockViewBuildNodeBase::SetArkThemeScopeManager);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod("id__", &JSMockViewBuildNodeBase::Id);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod("debugInfo__", &JSMockViewBuildNodeBase::DebugInfo);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod("debugInfoElmtId", &JSMockViewBuildNodeBase::DebugInfoElmtId);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod("getChildById", &JSMockViewBuildNodeBase::GetChildById);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod("addChild", &JSMockViewBuildNodeBase::AddChild);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod(
+        "purgeDeletedElmtIds", &JSMockViewBuildNodeBase::PurgeDeletedElmtIds);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod(
+        "updateStateVarsOfChildByElmtId", &JSMockViewBuildNodeBase::UpdateStateVarsOfChildByElmtId);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod("createOrGetNode", &JSMockViewBuildNodeBase::CreateOrGetNode);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod(
+        "ifElseBranchUpdateFunction", &JSMockViewBuildNodeBase::IfElseBranchUpdateFunction);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod(
+        "onWillApplyThemeInternally", &JSMockViewBuildNodeBase::OnWillApplyThemeInternally);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod("onWillApplyTheme", &JSMockViewBuildNodeBase::OnWillApplyTheme);
+    JSClass<JSMockViewBuildNodeBase>::CustomMethod(
+        "onGlobalThemeChanged", &JSMockViewBuildNodeBase::OnGlobalThemeChanged);
+
+    JSClass<JSMockViewBuildNodeBase>::Bind(
+        globalObj, JSMockViewBuildNodeBase::ConstructorCallback, JSMockViewBuildNodeBase::DestructorCallback);
+}
+
 void JSMock::JSBind(BindingTarget globalObj)
 {
     JSMockBaseNode::JSBind(globalObj);
@@ -173,6 +201,7 @@ void JSMock::JSBind(BindingTarget globalObj)
     MockCustomDialogController::JSBind(globalObj);
     JSMockLocalStorage::JSBind(globalObj);
     JSMockNativeCustomSpan::JSBind(globalObj);
+    JSMockViewBuildNodeBase::JSBind(globalObj);
 }
 
 void JSLoadV2Decorator(const shared_ptr<JsValue> globalPtr, const shared_ptr<JsRuntime> runtime)

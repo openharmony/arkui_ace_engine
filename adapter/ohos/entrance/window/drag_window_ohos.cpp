@@ -15,11 +15,7 @@
 
 #include "drag_window_ohos.h"
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/paragraph_txt.h"
-#else
 #include "rosen_text/typography.h"
-#endif
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSamplingOptions.h"
@@ -311,13 +307,8 @@ void DragWindowOhos::DrawImage(void* drawingImage)
 #endif
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-void DragWindowOhos::DrawText(
-    std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText)
-#else
 void DragWindowOhos::DrawText(
     std::shared_ptr<Rosen::Typography> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText)
-#endif
 {
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND

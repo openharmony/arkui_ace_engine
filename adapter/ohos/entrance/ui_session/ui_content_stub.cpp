@@ -110,6 +110,7 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case GET_CURRENT_SHOWING_IMAGE: {
             GetCurrentImagesShowingInner(data, reply, option);
+            break;
         }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
