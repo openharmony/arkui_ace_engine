@@ -116,7 +116,7 @@ export abstract class PropertyTranslator {
      * re-assign values when struct is reused. Called in RebindStates
      */
     translateToReuse(): ts.Statement | undefined {
-        return this.translateToUpdate()
+        return undefined
     }
 
     createStateOf(type: ts.TypeNode | undefined, ...initializer: ts.Expression[]): ts.Expression {
