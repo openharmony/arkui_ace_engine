@@ -2089,9 +2089,16 @@ class CustomDialogContentComponent extends ViewV2 {
     this.secondaryTitleFontColorWithTheme = n14.colors.fontSecondary;
   }
   aboutToAppear() {
-    let m14 = this.getUIContext();
-    this.isFollowingSystemFontScale = m14.isFollowingSystemFontScale();
-    this.appMaxFontScale = m14.getMaxFontScale();
+    try {
+      let m14 = this.getUIContext();
+      this.isFollowingSystemFontScale = m14?.isFollowingSystemFontScale();
+      this.appMaxFontScale = m14?.getMaxFontScale();
+    }
+    catch (err) {
+      let code = err?.code;
+      let message = err?.message;
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+    }
     this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
   }
