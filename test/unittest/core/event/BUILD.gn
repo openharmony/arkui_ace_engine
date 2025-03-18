@@ -69,8 +69,12 @@ ace_unittest("focus_hub_test_ng") {
   module_output = "events"
   sources = [
     "focus_core/focus_api_test.cpp",
+    "focus_core/focus_area_test.cpp",
+    "focus_core/focus_creatbox_test.cpp",
+    "focus_core/focus_request_test.cpp",
     "focus_core/focus_test_base.cpp",
     "focus_core/focus_window_test.cpp",
+    "focus_core/passive_last_focus_test.cpp",
     "focus_hub_test_ng.cpp",
     "focus_hub_test_ng_branch_coverage.cpp",
     "focus_hub_test_ng_for_property_config.cpp",
