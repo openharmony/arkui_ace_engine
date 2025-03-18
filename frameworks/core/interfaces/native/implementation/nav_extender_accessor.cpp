@@ -28,34 +28,68 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
 {
     auto stack = peer;
     CHECK_NULL_VOID(stack);
+    auto navigationStack = stack->GetNavPathStack();
+    CHECK_NULL_VOID(navigationStack);
     auto updater = [callback = CallbackHelper(*callback)]() {
         Converter::ConvContext ctx;
         auto name = Converter::ArkValue<Ark_String>("", &ctx);
         callback.Invoke(name);
     };
-    stack->SetUpdateCallback(std::move(updater));
+    navigationStack->SetOnStateChangedCallback(std::move(updater));
 }
 void SyncStackImpl(Ark_NavPathStack peer)
 {
+    CHECK_NULL_VOID(peer);
+    auto stack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(stack);
+    auto navigationNode = AceType::DynamicCast<FrameNode>(stack->GetNavigationNode().Upgrade());
+    CHECK_NULL_VOID(navigationNode);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
+    stack->ClearNodeList();
 }
 Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
                                 Ark_Int32 index)
 {
-    return {};
+    auto invalidVal = Converter::ArkValue<Ark_Boolean>(false);
+    auto navigationNode = reinterpret_cast<FrameNode*>(navigation);
+    CHECK_NULL_RETURN(navigationNode, invalidVal);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, invalidVal);
+    auto isCreated = pattern->CheckNeedCreate(index);
+    return Converter::ArkValue<Ark_Boolean>(isCreated);
 }
 Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,
                                        Ark_Int32 flag)
 {
-    return {};
+    auto frameNode = NavigationModelNG::CreateFrameNode(peer);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 void SetNavigationOptionsImpl(Ark_NativePointer navigation,
                               Ark_NavPathStack stack)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(navigation);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(stack);
+    auto navigationPattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    auto navigationStack = stack->GetNavPathStack();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationStack->SetOnStateChangedCallback(nullptr);
 }
 void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
                                Ark_Int32 index,
                                Ark_NativePointer node)
 {
+    CHECK_NULL_VOID(peer);
+    auto stack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(stack);
+    int32_t curIndex = Converter::Convert<int32_t>(index);
+    stack->AddCustomNode(curIndex, Referenced::Claim(reinterpret_cast<UINode*>(node)));
 }
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()

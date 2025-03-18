@@ -83,8 +83,8 @@ public:
     static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
 
 private:
-    void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
-    void CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
+    static void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
+    static void CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
 };
 } // namespace OHOS::Ace::NG
 
