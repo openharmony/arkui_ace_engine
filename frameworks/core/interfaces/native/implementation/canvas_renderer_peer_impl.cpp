@@ -623,6 +623,10 @@ void CanvasRendererPeerImpl::SetTransform(TransformParam& param)
 void CanvasRendererPeerImpl::SetTransform(const std::optional<Matrix2DPeer*>& optMatrix)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
+    if (!(optMatrix && optMatrix.value())) {
+        renderingContext2DModel_->ResetTransform();
+        return;
+    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         CHECK_NULL_VOID(optMatrix && optMatrix.value());
         auto matrix = optMatrix.value();
