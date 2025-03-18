@@ -149,10 +149,10 @@ Rect SvgFe::ResolvePrimitiveSubRegion()
         return filterAreaContext.GetFilterArea();
     }
     auto primitiveRule = filterAreaContext.GetPrimitiveRule();
-    auto measuredX = GetMeasuredPosition(feAttr_.x, primitiveRule, SvgLengthType::HORIZONTAL);
-    auto measuredY = GetMeasuredPosition(feAttr_.y, primitiveRule, SvgLengthType::VERTICAL);
-    auto measuredWidth = GetMeasuredLength(feAttr_.width, primitiveRule, SvgLengthType::HORIZONTAL);
-    auto measuredHeight = GetMeasuredLength(feAttr_.height, primitiveRule, SvgLengthType::VERTICAL);
+    auto measuredX = GetRegionPosition(feAttr_.x, primitiveRule, SvgLengthType::HORIZONTAL);
+    auto measuredY = GetRegionPosition(feAttr_.y, primitiveRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetRegionLength(feAttr_.width, primitiveRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetRegionLength(feAttr_.height, primitiveRule, SvgLengthType::VERTICAL);
 
     Rect primitiveArea = {measuredX, measuredY, measuredWidth, measuredHeight};
     return filterAreaContext.GetFilterArea().IntersectRect(primitiveArea);

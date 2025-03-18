@@ -75,6 +75,8 @@ CJ_EXPORT void FfiInteractableViewOnDragLeave(void (*callback)(CJDragEvent event
 CJ_EXPORT void FfiInteractableViewOnDrop(void (*callback)(CJDragEvent event, const char* extraParams));
 CJ_EXPORT void FfiInteractableViewOnDragEnd(void (*callback)(CJDragEvent event, const char* extraParams));
 CJ_EXPORT void FfiInteractableViewOnPreDrag(void (*callback)(int32_t status));
+CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDetach(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnSizeChange(void (*callback)(CJSizeOptions, CJSizeOptions));
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXT_FFI_H

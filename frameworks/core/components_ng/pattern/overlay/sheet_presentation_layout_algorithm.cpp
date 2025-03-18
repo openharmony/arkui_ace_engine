@@ -373,7 +373,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void SheetPresentationLayoutAlgorithm::UpdateTranslateOffsetWithPlacement(OffsetF& translate)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         translate += OffsetF(0, SHEET_ARROW_HEIGHT.ConvertToPx());
         return;
     }
@@ -422,7 +422,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const float pa
             height = GetHeightBySheetStyle(parentConstraintHeight, parentConstraintWidth, layoutWrapper) +
                 SHEET_ARROW_HEIGHT.ConvertToPx();
             // The sheet height can only be confirmed after the placement is confirmed.
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 height -= SHEET_ARROW_HEIGHT.ConvertToPx();
             }
             break;
@@ -586,7 +586,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
 
 void SheetPresentationLayoutAlgorithm::UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         maxHeight -= SHEET_ARROW_HEIGHT.ConvertToPx();
         return;
     }
@@ -654,7 +654,7 @@ void SheetPresentationLayoutAlgorithm::UpdatePopupInfoAndRemeasure(LayoutWrapper
     sheetPopupInfo_ = sheetPopupInfo;
     sheetOffsetX_ = sheetPopupInfo.sheetOffsetX;
     sheetOffsetY_ = sheetPopupInfo.sheetOffsetY;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     sheetWidth_ = sheetWidth;
@@ -666,7 +666,7 @@ void SheetPresentationLayoutAlgorithm::UpdatePopupInfoAndRemeasure(LayoutWrapper
 
 void SheetPresentationLayoutAlgorithm::AddArrowHeightToSheetSize()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ||
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ||
         sheetType_ != SheetType::SHEET_POPUP) {
         return;
     }

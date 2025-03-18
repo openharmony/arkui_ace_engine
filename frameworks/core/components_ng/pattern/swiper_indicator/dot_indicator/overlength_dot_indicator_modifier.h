@@ -197,6 +197,11 @@ public:
         isAutoPlay_ = isAutoPlay;
     }
 
+    void SetIsBindIndicator(bool isBindIndicator)
+    {
+        isBindIndicator_ = isBindIndicator;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
     void InitOverlongSelectedIndex(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
@@ -226,6 +231,8 @@ private:
     OverlongType RevertOverlongType(OverlongType overlongType) const;
     void StopBlackAnimation();
     bool NeedUpdateWhenAnimationFinish() const;
+    float CalcRealPadding(
+        float unselectedIndicatorRadius, float selectedIndicatorRadius, OverlongType overlongType) const;
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;
@@ -264,6 +271,7 @@ private:
     bool isHorizontalAndRTL_ = false;
     bool needUpdate_ = true;
     bool isAutoPlay_ = false;
+    bool isBindIndicator_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

@@ -37,8 +37,8 @@ void SvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
         auto filterContext = GetFilterContext();
         auto primitiveRule = filterContext.GetPrimitiveRule();
         if (primitiveRule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
-            dx = feOffsetAttr_.dx.Value() * primitiveRule.GetBaseRect().Width();
-            dy = feOffsetAttr_.dy.Value() * primitiveRule.GetBaseRect().Height();
+            dx = feOffsetAttr_.dx.Value() * primitiveRule.GetContainerRect().Width();
+            dy = feOffsetAttr_.dy.Value() * primitiveRule.GetContainerRect().Height();
         } else {
             dx = feOffsetAttr_.dx.Value();
             dy = feOffsetAttr_.dy.Value();
