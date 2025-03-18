@@ -125,6 +125,10 @@ Scrollable::~Scrollable()
     if (!IsStopped()) {
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
         AceAsyncTraceEnd(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
+        if (!context_.Invalid()) {
+            auto context = context_.Upgrade();
+            context->SetUiDvsyncSwitch(false);
+        }
     }
     StopFrictionAnimation();
     StopSpringAnimation();
