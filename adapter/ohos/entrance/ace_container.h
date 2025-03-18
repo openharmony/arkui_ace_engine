@@ -881,6 +881,7 @@ private:
 
     void RegisterOrientationUpdateListener();
     void RegisterOrientationChangeListener();
+    void InitSystemBarConfig();
     bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsFullScreenWindow() const override
     {
