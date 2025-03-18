@@ -183,6 +183,19 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
         unselectedMaskNode->MountToParent(tabBarNode);
         InitUnselectedMaskNode(unselectedMaskNode);
     }
+    InitAccessibilityZIndex(swiperNode, tabBarNode);
+}
+
+void TabsModelNG::InitAccessibilityZIndex(RefPtr<FrameNode>& swiperNode, RefPtr<FrameNode>& tabBarNode)
+{
+    CHECK_NULL_VOID(swiperNode);
+    CHECK_NULL_VOID(tabBarNode);
+    auto swiperAccessibilityProperty = swiperNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(swiperAccessibilityProperty);
+    auto tabBarAccessibilityProperty = tabBarNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(tabBarAccessibilityProperty);
+    swiperAccessibilityProperty->SetAccessibilityZIndex(1);
+    tabBarAccessibilityProperty->SetAccessibilityZIndex(0);
 }
 
 RefPtr<FrameNode> TabsModelNG::CreateFrameNode(int32_t nodeId)

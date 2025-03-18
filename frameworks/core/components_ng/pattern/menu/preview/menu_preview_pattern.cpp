@@ -64,28 +64,11 @@ void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuT
         []() { DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED); });
     context->UpdateTransformScale(VectorF(previewBeforeAnimationScale, previewBeforeAnimationScale));
 
-    CHECK_NULL_VOID(menuPattern);
-    auto menuWrapper = menuPattern->GetMenuWrapper();
-    CHECK_NULL_VOID(menuWrapper);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto callback = [menuWrapperPattern, scaleFrom = previewBeforeAnimationScale, scaleTo = previewAfterAnimationScale](
-                        float rate) {
-        CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
-        menuWrapperPattern->SetAnimationPreviewScale(rate * (scaleTo - scaleFrom) + scaleFrom);
-    };
-    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
-    CHECK_NULL_VOID(animateProperty);
-    context->AttachNodeAnimatableProperty(animateProperty);
-    animateProperty->Set(0.0);
-
     AnimationUtils::Animate(
         scaleOption,
-        [context, previewAfterAnimationScale, animateProperty]() {
+        [context, previewAfterAnimationScale]() {
             CHECK_NULL_VOID(context);
             context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
-            CHECK_NULL_VOID(animateProperty);
-            animateProperty->Set(1.0);
         },
         scaleOption.GetOnFinishEvent());
 }

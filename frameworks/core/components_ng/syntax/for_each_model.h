@@ -54,6 +54,9 @@ public:
     virtual void CreateNewChildFinish(const std::string& id) = 0;
 
     virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
+    virtual void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+        std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+        std::function<void(int32_t)>&& onDrop) = 0;
 };
 } // namespace OHOS::Ace::NG
 

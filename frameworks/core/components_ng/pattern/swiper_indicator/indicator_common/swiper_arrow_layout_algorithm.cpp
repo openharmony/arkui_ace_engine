@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.h"
 
+#include "core/components_ng/layout/layout_property.h"
 namespace OHOS::Ace::NG {
 void SwiperArrowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {

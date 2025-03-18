@@ -434,7 +434,7 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
     if (!AceType::InstanceOf<NG::FrameNode>(node) || AceType::InstanceOf<NG::CustomMeasureLayoutNode>(node)) {
         auto parent = node->GetParent();
         if (parent && parent->GetTag() == V2::RECYCLE_VIEW_ETS_TAG) {
-            parent = node->GetParent();
+            parent = parent->GetParent();
         }
         if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
             node = parent;
@@ -869,6 +869,7 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     static const std::vector<const char*> nodeTypeArray = {
         OHOS::Ace::V2::STACK_ETS_TAG,
         OHOS::Ace::V2::XCOMPONENT_ETS_TAG,
+        OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG,
     };
     auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), moveNode->GetTag());
     if (pos == nodeTypeArray.end()) {
@@ -880,16 +881,17 @@ ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkU
     }
     auto oldParent = moveNode->GetParent();
     moveNode->setIsMoving(true);
+    auto moveNodeRef = AceType::Claim(moveNode);
     if (oldParent) {
-        oldParent->RemoveChild(AceType::Claim(moveNode));
+        oldParent->RemoveChild(moveNodeRef);
         oldParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     int32_t childCount = toNode->TotalChildCount();
     if (index >= childCount || index < 0) {
-        toNode->AddChild(AceType::Claim(moveNode));
+        toNode->AddChild(moveNodeRef);
     } else {
         auto indexChild = toNode->GetChildAtIndex(index);
-        toNode->AddChildBefore(AceType::Claim(moveNode), indexChild);
+        toNode->AddChildBefore(moveNodeRef, indexChild);
     }
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);

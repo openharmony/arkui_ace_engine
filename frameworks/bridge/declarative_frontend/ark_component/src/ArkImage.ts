@@ -159,10 +159,10 @@ class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
     if (reset) {
       getUINativeModule().image.resetResizable(node);
     } else {
-      if (!isUndefined(this.value.lattice)) {
+      if (!isUndefined(this.value.lattice) && !isNull(this.value.lattice)) {
         getUINativeModule().image.setResizableLattice(node, this.value.lattice);
       }
-      if (!isUndefined(this.value.slice)) {
+      if (!isUndefined(this.value.slice) && !isNull(this.value.slice)) {
         let sliceTop: Length | undefined;
         let sliceRight: Length | undefined;
         let sliceBottom: Length | undefined;
@@ -860,6 +860,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   analyzerConfig(value: object): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
+    return this;
+  }
+  resizable(value: ResizableOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ImageResizableModifier.identity, ImageResizableModifier, value);
     return this;
   }
 }

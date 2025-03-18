@@ -17,9 +17,11 @@
 
 #include <optional>
 #include <string>
+#include <unordered_set>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/rect.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"

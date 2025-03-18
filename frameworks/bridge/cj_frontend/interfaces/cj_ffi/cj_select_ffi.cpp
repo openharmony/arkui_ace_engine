@@ -258,6 +258,11 @@ void FfiOHOSAceFrameworkSelectSetMenuBackgroundBlurStyle(int32_t value)
 #endif
 }
 
+void FfiOHOSAceFrameworkSelectSetBackgroundColor(uint32_t color)
+{
+    SelectModel::GetInstance()->BackgroundColor(Color(color));
+}
+
 void FfiOHOSAceFrameworkSelectSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
     Dimension widthValue(width, static_cast<DimensionUnit>(widthUnit));

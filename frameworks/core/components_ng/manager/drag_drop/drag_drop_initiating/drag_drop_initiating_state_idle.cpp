@@ -52,6 +52,9 @@ void DragDropInitiatingStateIdle::Init(int32_t currentState)
     AsyncDragEnd();
     ResetBorderRadiusAnimation();
     UnRegisterDragListener();
+    if (params.isNeedGather) {
+        DragDropFuncWrapper::ResetNode(frameNode);
+    }
     if (currentState != static_cast<int32_t>(DragDropInitiatingStatus::READY)) {
         if (gestureHub->GetTextDraggable()) {
             params.preScaledPixelMap = nullptr;
@@ -149,13 +152,18 @@ void DragDropInitiatingStateIdle::StartGatherTask()
         params.showGatherCallback.Cancel();
         return;
     }
-    auto&& showGatherCallback = [weakNode = AceType::WeakClaim(RawPtr(frameNode)), fingerId = params.idleFingerId]() {
-        auto frameNode = weakNode.Upgrade();
+    auto&& showGatherCallback = [weakMachine = WeakPtr<DragDropInitiatingStateMachine>(machine)]() {
+        auto machine = weakMachine.Upgrade();
+        CHECK_NULL_VOID(machine);
+        auto& params = machine->GetDragDropInitiatingParams();
+        auto frameNode = params.frameNode.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        if (DragDropFuncWrapper::CheckIfNeedGetThumbnailPixelMap(frameNode, fingerId)) {
+        if (DragDropFuncWrapper::CheckIfNeedGetThumbnailPixelMap(frameNode, params.idleFingerId)) {
             return;
         }
-        DragAnimationHelper::ShowGatherNodeAnimation(frameNode);
+        if (DragAnimationHelper::ShowGatherNodeAnimation(frameNode)) {
+            params.hasGatherNode = true;
+        }
     };
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
@@ -202,6 +210,7 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
     params.triggeredSourceType = touchEvent.sourceType;
     params.idleFingerId = touchEvent.id;
     params.isNeedGather = DragDropFuncWrapper::CheckIsNeedGather(frameNode);
+    params.touchOffset = Offset(touchEvent.x, touchEvent.y);
     RegisterDragListener();
     if (touchEvent.sourceType != SourceType::MOUSE) {
         if (DragDropFuncWrapper::IsTextCategoryComponent(frameNode->GetTag())) {
@@ -223,7 +232,7 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
         CHECK_NULL_VOID(eventHub);
         dragDropManager->SetIsAnyDraggableHit(gestureHub->IsAllowedDrag(eventHub));
     }
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::READY));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::READY));
 }
 
 void DragDropInitiatingStateIdle::RegisterDragListener()

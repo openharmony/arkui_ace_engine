@@ -432,6 +432,8 @@ void SelectModelImpl::SetArrowPosition(const ArrowPosition value) {}
 
 void SelectModelImpl::SetMenuAlign(const MenuAlign& menuAlign) {}
 
+void SelectModelImpl::SetAvoidance(const Avoidance& avoidance) {}
+
 void SelectModelImpl::SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) {}
 
 void SelectModelImpl::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) {}

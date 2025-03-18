@@ -555,7 +555,7 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
         }
         const float startPos = SectionStartPos(lanes_[i]);
         if (std::any_of(lanes_[i].begin(), lanes_[i].end(),
-                [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
+            [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos, 0.01); })) {
             return true;
         }
         if (lanes_[i].empty() || lanes_[i][0].items_.empty()) {
@@ -877,7 +877,7 @@ bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t i
 {
     using std::abs, std::round, std::clamp;
     const float offset = StartPos() + delta_;
-    if (LessOrEqual(abs(offset), viewport * 2.0f)) {
+    if (LessOrEqual(abs(delta_), viewport * 2.0f)) {
         return false;
     }
     const int32_t startIdx = StartIndex();
@@ -981,5 +981,23 @@ const Lane* WaterFlowLayoutInfoSW::GetLane(int32_t itemIdx) const
         return nullptr;
     }
     return &lane;
+}
+
+float WaterFlowLayoutInfoSW::GetDistanceToTop(int32_t itemIdx, int32_t laneIdx, float mainGap) const
+{
+    if (!ItemInView(itemIdx)) {
+        int32_t seg = GetSegment(itemIdx);
+        return lanes_[seg][laneIdx].endPos;
+    }
+    return DistanceToTop(itemIdx, mainGap);
+}
+
+float WaterFlowLayoutInfoSW::GetDistanceToBottom(int32_t itemIdx, int32_t laneIdx, float mainSize, float mainGap) const
+{
+    if (!ItemInView(itemIdx)) {
+        int32_t seg = GetSegment(itemIdx);
+        return lanes_[seg][laneIdx].startPos;
+    }
+    return DistanceToBottom(itemIdx, mainSize, mainGap);
 }
 } // namespace OHOS::Ace::NG

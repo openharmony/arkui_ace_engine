@@ -26,6 +26,47 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float SMALLEST_POINT_RATIO = 1.0f / 3.0f;
+constexpr float SECOND_SMALLEST_POINT_RATIO = 2.0f / 3.0f;
+constexpr int32_t OVERLONG_SMALL_COUNT = 2;
+} // namespace
+SizeF DotIndicatorLayoutAlgorithm::CalcIndicatorFrameSize(
+    LayoutWrapper* layoutWrapper, float indicatorWidth, float indicatorHeight)
+{
+    SizeF frameSize = { -1.0f, -1.0f };
+    CHECK_NULL_RETURN(layoutWrapper, frameSize);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, frameSize);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, frameSize);
+
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (isSingle_ && calcLayoutConstraint && calcLayoutConstraint->selfIdealSize) {
+        auto idealSize =
+            CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
+        auto width = calcLayoutConstraint->selfIdealSize->Width();
+        auto height = calcLayoutConstraint->selfIdealSize->Height();
+        if (width) {
+            indicatorWidth_ = std::max(indicatorWidth_, idealSize.Width());
+        }
+
+        if (height) {
+            indicatorHeight_ = std::max(indicatorHeight_, idealSize.Height());
+        }
+    }
+
+    do {
+        frameSize.SetSizeT(SizeF { indicatorWidth_, indicatorHeight_ });
+        if (frameSize.IsNonNegative()) {
+            break;
+        }
+        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    } while (false);
+
+    return frameSize;
+}
+
 void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -61,6 +102,9 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
     float indicatorScale = theme->GetIndicatorScale();
+    if ((maxDisplayCount_ > 0 || !indicatorInteractive_) && isBindIndicator_) {
+        indicatorScale = 1.0f;
+    }
     userItemWidth *= indicatorScale;
     userItemHeight *= indicatorScale;
     userSelectedItemWidth *= indicatorScale;
@@ -79,6 +123,11 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     
     auto indicatorDotItemSpace = paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
     auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (indicatorDisplayCount_ - 1);
+    if (maxDisplayCount_ > 0 && isBindIndicator_) {
+        allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (maxDisplayCount_ - 1);
+        allPointDiameterSum = userItemWidth * (maxDisplayCount_ - OVERLONG_SMALL_COUNT - 1) + userSelectedItemWidth +
+                              userItemWidth * SECOND_SMALLEST_POINT_RATIO + userItemWidth * SMALLEST_POINT_RATIO;
+    }
     auto paddingSide = theme->GetIndicatorPaddingDot().ConvertToPx();
     
     auto indicatorWidth = paddingSide + allPointDiameterSum + allPointSpaceSum + paddingSide;
@@ -96,29 +145,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         ignorSizeIndicatorHeight_ = ignoreSize ? noPaddingIndicatorWidth : indicatorWidth;
     }
 
-    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
-    if (isSingle_ && calcLayoutConstraint && calcLayoutConstraint->selfIdealSize) {
-        auto idealSize =
-            CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
-        auto width = calcLayoutConstraint->selfIdealSize->Width();
-        auto height = calcLayoutConstraint->selfIdealSize->Height();
-        if (width) {
-            indicatorWidth_ = std::max(indicatorWidth_, idealSize.Width());
-        }
-
-        if (height) {
-            indicatorHeight_ = std::max(indicatorHeight_, idealSize.Height());
-        }
-    }
-    SizeF frameSize = { -1.0f, -1.0f };
-    do {
-        frameSize.SetSizeT(SizeF { indicatorWidth_, indicatorHeight_ });
-        if (frameSize.IsNonNegative()) {
-            break;
-        }
-        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-    } while (false);
-
+    auto frameSize = CalcIndicatorFrameSize(layoutWrapper, indicatorWidth, indicatorHeight);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(frameSize);

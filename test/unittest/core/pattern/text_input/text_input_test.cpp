@@ -246,13 +246,13 @@ HWTEST_F(TextFieldUXTest, CleanNode004, TestSize.Level1)
 
 /**
  * @tc.name: CleanNode005
- * @tc.desc: Test showCancelSymbolIcon true, since VERSION_SIXTEEN
+ * @tc.desc: Test showCancelSymbolIcon true, since VERSION_EIGHTEEN
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, CleanNode005, TestSize.Level1)
 {
     int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
 
     /**
      * @tc.steps: step1. Initialize text input, set cancelSymbolIcon not nullptr
@@ -294,7 +294,7 @@ HWTEST_F(TextFieldUXTest, CleanNode005, TestSize.Level1)
 HWTEST_F(TextFieldUXTest, CleanNode006, TestSize.Level1)
 {
     int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
-    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
 
     /**
      * @tc.steps: step1. Initialize text input, set cancelSymbolIcon nullptr

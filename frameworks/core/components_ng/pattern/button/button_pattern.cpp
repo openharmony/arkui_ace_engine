@@ -619,6 +619,17 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
         CHECK_NULL_VOID(renderContext);
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             MOUSE_HOVER_DURATION, Curves::FRICTION);
+        if (isHover) {
+            auto pipeline = host->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+            SetButtonScale(renderContext, buttonTheme);
+        } else {
+            if (scaleModify_) {
+                scaleModify_ = false;
+                renderContext->SetScale(1.0f, 1.0f);
+            }
+        }
     }
     UpdateTexOverflow(isHover || isFocus_);
 }
@@ -1099,11 +1110,11 @@ void ButtonPattern::SetBlurButtonStyle(RefPtr<RenderContext>& renderContext, Ref
         scaleModify_ = false;
         renderContext->SetScale(1.0f, 1.0f);
     }
-    if (bgColorModify_ && buttonStyle != ButtonStyleMode::EMPHASIZE) {
+    if (bgColorModify_) {
         bgColorModify_ = false;
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
     }
-    if (buttonStyle != ButtonStyleMode::EMPHASIZE && focusTextColorModify_) {
+    if (focusTextColorModify_) {
         focusTextColorModify_ = false;
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
@@ -1127,23 +1138,15 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<RenderContext>& renderContext, Re
         HandleShadowStyle(buttonStyle, shadowStyle, renderContext, buttonTheme);
         shadowModify_ = true;
     }
-
-    if (renderContext->GetOrCreateTransform()) {
-        float scaleFocus = buttonTheme->GetScaleFocus();
-        VectorF scale(scaleFocus, scaleFocus);
-        auto&& transform = renderContext->GetOrCreateTransform();
-        if (scaleFocus != 1.0 && (!transform->HasTransformScale() || transform->GetTransformScale() == scale)) {
-            scaleModify_ = true;
-            renderContext->SetScale(scaleFocus, scaleFocus);
-        }
-    }
-
+    SetButtonScale(renderContext, buttonTheme);
     bgColorModify_ = renderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
     if (bgColorModify_) {
         if (buttonStyle == ButtonStyleMode::TEXT) {
             renderContext->UpdateBackgroundColor(buttonTheme->GetTextBackgroundFocus());
         } else if (buttonStyle == ButtonStyleMode::NORMAL) {
             renderContext->UpdateBackgroundColor(buttonTheme->GetNormalBackgroundFocus());
+        } else if (buttonStyle == ButtonStyleMode::EMPHASIZE) {
+            renderContext->UpdateBackgroundColor(buttonTheme->GetEmphasizeBackgroundFocus());
         }
     }
 
@@ -1159,6 +1162,19 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<RenderContext>& renderContext, Re
         textNode->MarkDirtyNode();
     }
     UpdateTexOverflow(true);
+}
+
+void ButtonPattern::SetButtonScale(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme)
+{
+    if (renderContext->GetOrCreateTransform()) {
+        float scaleHoverOrFocus = buttonTheme->GetScaleHoverOrFocus();
+        VectorF scale(scaleHoverOrFocus, scaleHoverOrFocus);
+        auto&& transform = renderContext->GetOrCreateTransform();
+        if (scaleHoverOrFocus != 1.0 && (!transform->HasTransformScale() || transform->GetTransformScale() == scale)) {
+            scaleModify_ = true;
+            renderContext->SetScale(scaleHoverOrFocus, scaleHoverOrFocus);
+        }
+    }
 }
 
 void ButtonPattern::UpdateButtonStyle()
