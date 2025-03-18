@@ -54,6 +54,8 @@ public:
 
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    void UpdatePaintMethod(
+        const RefPtr<CanvasImage>& canvasImage, const ImagePaintMethodConfig& imagePainterMethodConfig = {});
 
 private:
     void UpdatePaintConfig(PaintWrapper* paintWrapper);
