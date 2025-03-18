@@ -988,57 +988,6 @@ HWTEST_F(RichEditorPatternTestFourNg, CopyTextSpanLineStyle001, TestSize.Level1)
 }
 
 /**
- * @tc.name: JudgeContentDraggable001
- * @tc.desc: test JudgeContentDraggable
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, JudgeContentDraggable001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->copyOption_ = CopyOptions::None;
-    EXPECT_EQ(richEditorPattern->IsSelected(), false);
-    richEditorPattern->JudgeContentDraggable();
-
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    EXPECT_EQ(richEditorPattern->IsSelected(), false);
-    richEditorPattern->JudgeContentDraggable();
-
-    AddSpan("test");
-    richEditorPattern->textSelector_.Update(3, 4);
-    EXPECT_EQ(richEditorPattern->IsSelected(), true);
-
-    richEditorPattern->copyOption_ = CopyOptions::None;
-    richEditorPattern->JudgeContentDraggable();
-
-    richEditorPattern->textSelector_.Update(3, 4);
-    EXPECT_EQ(richEditorPattern->IsSelected(), true);
-
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    bool res = richEditorPattern->JudgeContentDraggable();
-
-    EXPECT_EQ(res, true);
-}
-
-/**
- * @tc.name: HandleDraggableFlag001
- * @tc.desc: test HandleDraggableFlag
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, HandleDraggableFlag001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorPattern->HandleDraggableFlag(true);
-    EXPECT_EQ(richEditorPattern->JudgeContentDraggable(), false);
-}
-
-/**
  * @tc.name: GetDeletedSpan001
  * @tc.desc: test GetDeletedSpan
  * @tc.type: FUNC

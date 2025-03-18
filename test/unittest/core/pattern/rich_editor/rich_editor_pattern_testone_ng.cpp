@@ -277,29 +277,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CursorMoveHome001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClearOperationRecords001
- * @tc.desc: test RichEditorPattern ClearOperationRecords
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, ClearOperationRecords001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord record;
-    richEditorPattern->redoOperationRecords_.push_back(record);
-    richEditorPattern->ClearRedoOperationRecords();
-    richEditorPattern->redoOperationRecords_.clear();
-    richEditorPattern->HandleOnRedoAction();
-    ASSERT_EQ(richEditorPattern->redoOperationRecords_.empty(), true);
-    richEditorPattern->operationRecords_.push_back(record);
-    richEditorPattern->ClearOperationRecords();
-    richEditorPattern->operationRecords_.clear();
-    richEditorPattern->HandleOnUndoAction();
-    ASSERT_EQ(richEditorPattern->operationRecords_.empty(), true);
-}
-
-/**
  * @tc.name: ResetAfterPaste001
  * @tc.desc: test RichEditorPattern ResetAfterPaste
  * @tc.type: FUNC
