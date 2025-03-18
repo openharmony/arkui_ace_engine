@@ -2695,6 +2695,14 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetOverlayBuilder(frameNode, std::move(buildFunc), align, offsetX, offsetY);
+}
+
+void ViewAbstract::SetOverlayBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
     if (buildFunc) {
         auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
             ScopedViewStackProcessor builderViewStackProcessor;
@@ -2711,9 +2719,9 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
             stackNode->AddChild(node);
             overlayNode = stackNode;
         }
-        AddOverlayToFrameNode(overlayNode, align, offsetX, offsetY);
+        AddOverlayToFrameNode(frameNode, overlayNode, align, offsetX, offsetY);
     } else {
-        AddOverlayToFrameNode(nullptr, align, offsetX, offsetY);
+        AddOverlayToFrameNode(frameNode, nullptr, align, offsetX, offsetY);
     }
 }
 
@@ -2724,14 +2732,14 @@ void ViewAbstract::SetOverlayComponentContent(const RefPtr<NG::FrameNode>& conte
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    AddOverlayToFrameNode(contentNode, align, offsetX, offsetY);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    AddOverlayToFrameNode(frameNode, contentNode, align, offsetX, offsetY);
 }
 
-void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
+void ViewAbstract::AddOverlayToFrameNode(FrameNode* frameNode, const RefPtr<NG::FrameNode>& overlayNode,
     const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
     const std::optional<Dimension>& offsetY)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (overlayNode == nullptr) {
         frameNode->SetOverlayNode(nullptr);

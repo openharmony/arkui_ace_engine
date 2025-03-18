@@ -376,6 +376,9 @@ public:
     static void SetOverlayBuilder(std::function<void()>&& buildFunc,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
+    static void SetOverlayBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
     static void SetOverlayComponentContent(const RefPtr<NG::FrameNode>& contentNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
@@ -798,7 +801,7 @@ public:
 private:
     static void AddDragFrameNodeToManager();
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
-    static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
+    static void AddOverlayToFrameNode(FrameNode* frameNode, const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
 };
