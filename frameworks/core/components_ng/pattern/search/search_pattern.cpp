@@ -1774,6 +1774,8 @@ std::string SearchPattern::SearchTypeToString() const
             return "SearchType.PHONE_NUMBER";
         case TextInputType::URL:
             return "SearchType.URL";
+        case TextInputType::NUMBER_DECIMAL:
+            return "SearchType.NUMBER_DECIMAL";
         default:
             return "SearchType.NORMAL";
     }
