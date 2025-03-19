@@ -59,7 +59,11 @@ void SheetPresentationTestNg::SetUpTestCase()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
-            return AceType::MakeRefPtr<SheetTheme>();
+            auto  sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+            sheetTheme->closeIconButtonWidth_ = SHEET_CLOSE_ICON_WIDTH;
+            sheetTheme->centerDefaultWidth_ = SHEET_LANDSCAPE_WIDTH;
+            sheetTheme->sheetCloseIconTitleSpaceNew_ = SHEET_CLOSE_ICON_TITLE_SPACE_NEW;
+            return sheetTheme;
         } else {
             return nullptr;
         }
