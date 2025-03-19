@@ -197,12 +197,15 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     ani_string aniParams;
     env_->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
 
-    ani_ref app;
-    if (env_->Class_CallStaticMethod_Ref(appClass, create, &app, aniUrl, aniParams, false, entryObject) != ANI_OK) {
+    ani_ref appLocal;
+    if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, entryObject) !=
+        ANI_OK) {
         LOGE("createApplication returned null");
         // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
+
+    env_->GlobalReference_Create(appLocal, &app_);
 
     ani_method start;
     if (env_->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
@@ -213,7 +216,7 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     }
 
     ani_long result;
-    if (env_->Object_CallMethod_Long(static_cast<ani_object>(app), start, &result) != ANI_OK) {
+    if (env_->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result) != ANI_OK) {
         LOGE("call start method returned null");
         // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
@@ -221,7 +224,7 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 
     // TODO: init event loop
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
-    pipeline_->SetVsyncListener([env = env_, app]() { RunArkoalaEventLoop(env, app); });
+    pipeline_->SetVsyncListener([env = env_, app = app_]() { RunArkoalaEventLoop(env, app); });
 
     return UIContentErrorCode::NO_ERRORS;
 }
@@ -243,5 +246,11 @@ void* ArktsFrontend::GetShared(int32_t id)
         return nullptr;
     }
     return it->second;
+}
+
+void ArktsFrontend::Destroy()
+{
+    CHECK_NULL_VOID(env_);
+    env_->GlobalReference_Delete(app_);
 }
 } // namespace OHOS::Ace
