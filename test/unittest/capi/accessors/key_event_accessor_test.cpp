@@ -223,9 +223,19 @@ HWTEST_F(KeyEventAccessorTest, setKeyCodeInvalidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getKeyTextValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getKeyTextValidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getKeyText, nullptr);
+    const std::vector<std::string> TEST_PLAN {
+        "KEY_FN", "0", "test", "a"
+    };
+    for (auto keyText : TEST_PLAN) {
+        KeyEvent keyEvent;
+        keyEvent.key = keyText;
+        *eventInfo_ = KeyEventInfo(keyEvent);
+        auto result = accessor_->getKeyText(peer_);
+        EXPECT_EQ(Converter::Convert<std::string>(result), keyText);
+    }
 }
 
 /**
@@ -233,9 +243,10 @@ HWTEST_F(KeyEventAccessorTest, DISABLED_getKeyTextValidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, DISABLED_getKeyTextInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, getKeyTextInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getKeyText, nullptr);
+    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getKeyText(nullptr)), "");
 }
 
 /**
