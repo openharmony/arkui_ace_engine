@@ -1716,7 +1716,7 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateVisibility(visible, true);
+        layoutProperty->UpdateVisibility(visible, true, true);
     }
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -4032,7 +4032,7 @@ void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateVisibility(visible, true);
+        layoutProperty->UpdateVisibility(visible, true, true);
     }
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
