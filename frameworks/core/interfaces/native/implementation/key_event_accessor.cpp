@@ -76,9 +76,7 @@ Ark_String GetKeyTextImpl(Ark_KeyEvent peer)
     const auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, {});
     const auto keyText = info->GetKeyText();
-    LOGE("ARKOALA KeyEventAccessor::GetKeyTextImpl is not implemented "
-        "-> incorrect return Converter::ArkValue<Ark_String>(keyText): %s", keyText);
-    return {};
+    return Converter::ArkValue<Ark_String>(keyText, Converter::FC);
 }
 void SetKeyTextImpl(Ark_KeyEvent peer,
                     const Ark_String* keyText)
