@@ -1715,7 +1715,8 @@ void TextPattern::RecoverCopyOption()
         CloseSelectOverlay();
         ResetSelection();
     }
-    if (children.empty() && CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+    if ((children.empty() || isSpanStringMode_) &&
+        CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         dataDetectorAdapter_->textForAI_ = textForDisplay_;
         dataDetectorAdapter_->StartAITask();
     }
