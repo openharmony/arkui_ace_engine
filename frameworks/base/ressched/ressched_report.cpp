@@ -15,6 +15,8 @@
 
 #include "base/ressched/ressched_report.h"
 
+#define LIKELY(x) __builtin_expect(!!(x), 1)
+
 namespace OHOS::Ace {
 namespace Ressched {
 constexpr uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
@@ -411,7 +413,7 @@ double ResSchedReport::GetUpVelocity(const ResEventInfo& lastMoveInfo,
 
 void ResSchedReport::LoadPageEvent(int32_t value)
 {
-    if (ACE_LIKELY((value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)
+    if (LIKELY((value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)
         || (value == ResDefine::LOAD_PAGE_NO_REQUEST_FRAME_EVENT && loadPageRequestFrameOn_ == false))) {
         return;
     } else if (value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == true) {
