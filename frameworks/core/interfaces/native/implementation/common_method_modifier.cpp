@@ -4667,12 +4667,14 @@ void Blur0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto blur = Converter::OptConvert<float>(*value);
-    auto blurOptions = Converter::OptConvert<BlurOption>(*options);
-    if (blurOptions) {
-        CalcDimension dimensionBlur(blur ? blur.value() : 0, DimensionUnit::PX);
-        ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions.value());
+    auto blur = Converter::Convert<float>(*value);
+    BlurOption blurOptions;
+    auto optionsOpt = Converter::OptConvert<BlurOption>(*options);
+    if (optionsOpt.has_value()) {
+        blurOptions = optionsOpt.value();
     }
+    CalcDimension dimensionBlur(blur, DimensionUnit::PX);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
 }
 void Blur1Impl(Ark_NativePointer node,
                const Opt_Number* blurRadius,
@@ -4680,9 +4682,14 @@ void Blur1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(blurRadius);
-    //auto convValue = Converter::OptConvert<type>(blurRadius); // for enums
-    //CommonMethodModelNG::SetBlur1(frameNode, convValue);
+    auto blur = Converter::OptConvert<float>(*blurRadius).value_or(0.f);
+    BlurOption blurOptions;
+    auto optionsOpt = Converter::OptConvert<BlurOption>(*options);
+    if (optionsOpt.has_value()) {
+        blurOptions = optionsOpt.value();
+    }
+    CalcDimension dimensionBlur(blur, DimensionUnit::PX);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
 }
 void LinearGradientBlur0Impl(Ark_NativePointer node,
                              const Ark_Number* value,

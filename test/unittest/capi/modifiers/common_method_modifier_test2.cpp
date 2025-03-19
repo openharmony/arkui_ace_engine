@@ -81,6 +81,9 @@ static const Opt_Length OPT_LEN_VALID = Converter::ArkValue<Opt_Length>(VALID_VA
 constexpr double OFFSET_X = 60.4;
 constexpr double OFFSET_Y = 85.5;
 
+constexpr int32_t GRAYSCALE_MAX = 127;
+constexpr int32_t GRAYSCALE_MIN = 0;
+
 static const Ark_Rectangle ARK_RECT_EMPTY {
     OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY, OPT_LEN_EMPTY
 };
@@ -1341,24 +1344,213 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundBlurStyle, TestSize.Level1)
 }
 
 /*
- * @tc.name: setBlur
+ * @tc.name: setBlur0Valid1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, DISABLED_setBlur, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, setBlur0Valid1, TestSize.Level1)
 {
-    Ark_Number value = Converter::ArkValue<Ark_Number>(2.3f);
-    Opt_BlurOptions options = {
-        .value = {
-            .grayscale = {
-                .value0 = Converter::ArkValue<Ark_Number>(7),
-                .value1 = Converter::ArkValue<Ark_Number>(7),
-            }
+    double blurRadiusBefore = 3.1415;
+    auto value = Converter::ArkValue<Ark_Number>(blurRadiusBefore);
+    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(Ark_Empty());
+    modifier_->setBlur0(node_, &value, &optionOpt);
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
+    EXPECT_NEAR(blurRadiusBefore, blurRadiusAfter, FLT_EPSILON);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 0);
+}
+
+/*
+ * @tc.name: setBlur0Valid2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBlur0Valid2, TestSize.Level1)
+{
+    double blurRadiusBefore = 3.1415;
+    int32_t grayCoeff1 = 7;
+    int32_t grayCoeff2 = 14;
+    auto value = Converter::ArkValue<Ark_Number>(blurRadiusBefore);
+    Ark_BlurOptions options = {
+        .grayscale = {
+            .value0 = Converter::ArkValue<Ark_Number>(grayCoeff1),
+            .value1 = Converter::ArkValue<Ark_Number>(grayCoeff2),
         }
     };
-    modifier_->setBlur0(node_, &value, &options);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_BLUR_NAME);
-    EXPECT_EQ(strResult, "");
+    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
+    modifier_->setBlur0(node_, &value, &optionOpt);
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
+    EXPECT_NEAR(blurRadiusBefore, blurRadiusAfter, FLT_EPSILON);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], grayCoeff1, FLT_EPSILON);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[1], grayCoeff2, FLT_EPSILON);
+}
+
+/*
+ * @tc.name: setBlur0Invalid1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBlur0Invalid1, TestSize.Level1)
+{
+    double blurRadiusBefore = 3.1415;
+    int32_t grayCoeff1 = GRAYSCALE_MIN - 1;
+    int32_t grayCoeff2 = GRAYSCALE_MAX + 1;
+    auto value = Converter::ArkValue<Ark_Number>(blurRadiusBefore);
+    Ark_BlurOptions options = {
+        .grayscale = {
+            .value0 = Converter::ArkValue<Ark_Number>(grayCoeff1),
+            .value1 = Converter::ArkValue<Ark_Number>(grayCoeff2),
+        }
+    };
+    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
+    modifier_->setBlur0(node_, &value, &optionOpt);
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
+    EXPECT_NEAR(blurRadiusBefore, blurRadiusAfter, FLT_EPSILON);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], 0, FLT_EPSILON);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[1], 0, FLT_EPSILON);
+}
+
+/*
+ * @tc.name: setBlur0Invalid2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBlur0Invalid2, TestSize.Level1)
+{
+    double blurRadiusBefore = 3.1415;
+    int32_t grayCoeff1 = GRAYSCALE_MAX + 1;
+    int32_t grayCoeff2 = GRAYSCALE_MIN - 1;
+    auto value = Converter::ArkValue<Ark_Number>(blurRadiusBefore);
+    Ark_BlurOptions options = {
+        .grayscale = {
+            .value0 = Converter::ArkValue<Ark_Number>(grayCoeff1),
+            .value1 = Converter::ArkValue<Ark_Number>(grayCoeff2),
+        }
+    };
+    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
+    modifier_->setBlur0(node_, &value, &optionOpt);
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
+    EXPECT_NEAR(blurRadiusBefore, blurRadiusAfter, FLT_EPSILON);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], 0, FLT_EPSILON);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[1], 0, FLT_EPSILON);
+}
+
+/*
+ * @tc.name: setBlur1Valid1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBlur1Valid1, TestSize.Level1)
+{
+    double blurRadiusBefore = 3.1415;
+    auto value = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(Ark_Empty());
+    modifier_->setBlur1(node_, &value, &optionOpt);
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
+    EXPECT_NEAR(blurRadiusBefore, blurRadiusAfter, FLT_EPSILON);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 0);
+}
+
+/*
+ * @tc.name: setBlur1Valid2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBlur1Valid2, TestSize.Level1)
+{
+    double blurRadiusBefore = 3.1415;
+    int32_t grayCoeff1 = 7;
+    int32_t grayCoeff2 = 14;
+    auto value = Converter::ArkValue<Opt_Number>(blurRadiusBefore);
+    Ark_BlurOptions options = {
+        .grayscale = {
+            .value0 = Converter::ArkValue<Ark_Number>(grayCoeff1),
+            .value1 = Converter::ArkValue<Ark_Number>(grayCoeff2),
+        }
+    };
+    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
+    modifier_->setBlur1(node_, &value, &optionOpt);
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
+    EXPECT_NEAR(blurRadiusBefore, blurRadiusAfter, FLT_EPSILON);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], grayCoeff1, FLT_EPSILON);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[1], grayCoeff2, FLT_EPSILON);
+}
+
+/*
+ * @tc.name: setBlur1Invalid1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBlur1Invalid1, TestSize.Level1)
+{
+    int32_t grayCoeff1 = GRAYSCALE_MIN - 1;
+    int32_t grayCoeff2 = GRAYSCALE_MAX + 1;
+    auto value = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    Ark_BlurOptions options = {
+        .grayscale = {
+            .value0 = Converter::ArkValue<Ark_Number>(grayCoeff1),
+            .value1 = Converter::ArkValue<Ark_Number>(grayCoeff2),
+        }
+    };
+    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
+    modifier_->setBlur1(node_, &value, &optionOpt);
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
+    EXPECT_NEAR(0, blurRadiusAfter, FLT_EPSILON);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], 0, FLT_EPSILON);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[1], 0, FLT_EPSILON);
+}
+
+/*
+ * @tc.name: setBlur1Invalid2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, setBlur1Invalid2, TestSize.Level1)
+{
+    int32_t grayCoeff1 = GRAYSCALE_MAX + 1;
+    int32_t grayCoeff2 = GRAYSCALE_MIN - 1;
+    auto value = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    Ark_BlurOptions options = {
+        .grayscale = {
+            .value0 = Converter::ArkValue<Ark_Number>(grayCoeff1),
+            .value1 = Converter::ArkValue<Ark_Number>(grayCoeff2),
+        }
+    };
+    Opt_BlurOptions optionOpt = Converter::ArkValue<Opt_BlurOptions>(options);
+    modifier_->setBlur1(node_, &value, &optionOpt);
+    auto json = GetJsonValue(node_);
+    ASSERT_NE(json, nullptr);
+    double blurRadiusAfter = GetAttrValue<double>(json, ATTRIBUTE_BLUR_NAME);
+    EXPECT_NEAR(0, blurRadiusAfter, FLT_EPSILON);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_EQ(renderMock->foregroundBlurOption.grayscale.size(), 2);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[0], 0, FLT_EPSILON);
+    EXPECT_NEAR(renderMock->foregroundBlurOption.grayscale[1], 0, FLT_EPSILON);
 }
 
 /*

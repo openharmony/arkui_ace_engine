@@ -139,6 +139,13 @@ public:
         groupProperty->propMotionBlur = motionBlurOption;
     }
 
+    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption)
+    {
+        const auto& groupProperty = GetOrCreateForeground();
+        groupProperty->propBlurRadius = radius;
+        foregroundBlurOption = blurOption;
+    }
+
     void UpdateTransition(const TransitionOptions& options)
     {
         const auto& groupPropertyA = GetOrCreateTransitionAppearing();
@@ -204,6 +211,7 @@ public:
     float opacityMultiplier_ = 1.0f;
     std::function<void()> transitionOutCallback_;
     BlurOption backdropBlurOption;
+    BlurOption foregroundBlurOption;
     RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
     TransitionFinishCallback transitionUserCallback_;
 };
