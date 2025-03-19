@@ -103,6 +103,12 @@ void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, 
 void EventReport::ReportClipboardFailEvent(const std::string& errorType)
 {}
 
-void EventReport::SendDiffFrameRatesDuring(const std::string &scene, const NG::FRCSceneFpsInfo &curFRCSceneFpsInfo_)
+void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_)
+{}
+
+void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status)
+{}
+ 
+void EventReport::AddFrameRateDuration(int32_t frameRate, int32_t duration)
 {}
 } // namespace OHOS::Ace
