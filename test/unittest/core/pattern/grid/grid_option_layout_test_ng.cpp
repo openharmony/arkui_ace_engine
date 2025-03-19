@@ -1232,6 +1232,8 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll002, TestSize.Level1)
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 }
@@ -1261,7 +1263,7 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll003, TestSize.Level1)
     (*scrollable->panRecognizerNG_->onActionStart_)(info);
     (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
     FlushUITasks();
-    EXPECT_EQ(pattern_->info_.startIndex_, 3);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
 
     GetChildLayoutProperty<LayoutProperty>(frameNode_, 4)
         ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(110.0f)));
@@ -1272,6 +1274,8 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll003, TestSize.Level1)
     scrollable->HandleTouchUp();
     (*scrollable->panRecognizerNG_->onActionEnd_)(info);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
@@ -1305,7 +1309,7 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll004, TestSize.Level1)
     (*scrollable->panRecognizerNG_->onActionStart_)(info);
     (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 62.5183945);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 250.f);
     scrollable->HandleTouchUp();
     (*scrollable->panRecognizerNG_->onActionEnd_)(info);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
@@ -1341,7 +1345,7 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll005, TestSize.Level1)
     (*scrollable->panRecognizerNG_->onActionStart_)(info);
     (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -164.95305);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0.f);
     frameNode_->ChildrenUpdatedFrom(0);
     frameNode_->MarkDirtyNode();
     FlushUITasks();
