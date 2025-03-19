@@ -88,13 +88,6 @@ struct CacheMatrixInfo {
     RectF paintRectWithTransform;
 };
 
-struct FRCSceneFpsInfo {
-    int32_t duration_120 = 0;
-    int32_t duration_90 = 0;
-    int32_t duration_72 = 0;
-    int32_t duration_60 = 0;
-};
-
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -797,14 +790,6 @@ public:
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
 
-    void FrameRateDurationsStatisticsStart();
-
-    void FrameRateDurationsStatisticsRunning(int32_t expectedRate, const std::string &scene);
-
-    void FrameRateDurationsStatisticsEnd(const std::string &scene);
- 
-    void AddFrameRateDuration(int32_t frameRate, int32_t duration);
- 
     void TryPrintDebugLog(const std::string& scene, float speed, SceneStatus status);
 
     OffsetF GetParentGlobalOffsetDuringLayout() const;
