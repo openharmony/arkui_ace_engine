@@ -1222,6 +1222,14 @@ public:
         return aiSpanMap;
     }
 
+    void SetTextDetectEnable(bool enable) override
+    {
+        auto currentEnable = textDetectEnable_;
+        TextPattern::SetTextDetectEnable(enable);
+        CHECK_NULL_VOID(enable && !currentEnable && CanStartAITask());
+        IF_TRUE(!dataDetectorAdapter_->aiDetectInitialized_, dataDetectorAdapter_->StartAITask());
+    }
+
 protected:
     bool CanStartAITask() override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
