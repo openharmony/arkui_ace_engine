@@ -5280,6 +5280,8 @@ struct ArkUISelectModifier {
     void (*resetSelectDividerStyle)(ArkUINodeHandle node);
     void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 modeValue);
     void (*resetAvoidance)(ArkUINodeHandle node);
+    void (*setOnSelect)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
+        int32_t index, ArkUI_CharPtr text));
 };
 
 /** Common for all API variants.*/
