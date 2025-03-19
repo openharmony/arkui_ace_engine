@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
+#include "core/components_ng/base/observer_handler.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -548,5 +549,45 @@ HWTEST_F(GestureRecognizerTestNg, GestureRecognizerHandleEvent001, TestSize.Leve
     clickRecognizerPtr->fingersId_.insert(0);
     result = clickRecognizerPtr->AboutToMinusCurrentFingers(0);
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: HandlePanGestureAccept_001
+ * @tc.desc: Test GestureRecognizer function: HandlePanGestureAccept
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(GestureRecognizerTestNg, HandlePanGestureAccept_001, TestSize.Level1)
+{
+    PanDirection direction;
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(SINGLE_FINGER_NUMBER, direction, 0);
+    ASSERT_NE(panRecognizerPtr, nullptr);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    panRecognizerPtr->SetOnActionStart(start);
+    panRecognizerPtr->SetOnActionEnd(end);
+    panRecognizerPtr->HandlePanGestureAccept(info, PanGestureState::AFTER, panRecognizerPtr->onActionStart_);
+    EXPECT_EQ(panRecognizerPtr->currentCallbackState_, CurrentCallbackState::START);
+}
+
+ /**
+  * @tc.name: HandlePanGestureAccept_002
+  * @tc.desc: Test GestureRecognizer function: HandlePanGestureAccept
+  * @tc.type: FUNC
+  */
+
+HWTEST_F(GestureRecognizerTestNg, HandlePanGestureAccept_002, TestSize.Level1)
+{
+    PanDirection direction;
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(SINGLE_FINGER_NUMBER, direction, 0);
+    ASSERT_NE(panRecognizerPtr, nullptr);
+    GestureEvent info;
+    auto start = [](GestureEvent& info) {};
+    auto end = [](GestureEvent& info) {};
+    panRecognizerPtr->SetOnActionStart(start);
+    panRecognizerPtr->SetOnActionEnd(end);
+    panRecognizerPtr->HandlePanGestureAccept(info, PanGestureState::AFTER, panRecognizerPtr->onActionEnd_);
+    EXPECT_EQ(panRecognizerPtr->currentCallbackState_, CurrentCallbackState::END);
 }
 } // namespace OHOS::Ace::NG
