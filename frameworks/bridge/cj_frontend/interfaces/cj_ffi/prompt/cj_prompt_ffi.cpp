@@ -287,8 +287,8 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
     DialogProperties dialogProperties = {
         .autoCancel = options.autoCancel,
         .maskColor = Color(ColorAlphaAdapt(options.maskColor)),
-        .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
         .isShowInSubWindow = options.showInSubWindow,
+        .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
         .isModal = options.isModal,
         .enableHoverMode = options.enableHoverMode,
         .isSysBlurStyle = false,

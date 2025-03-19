@@ -17,8 +17,10 @@
 
 #include "cj_lambda.h"
 
+#include "bridge/common/utils/utils.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components/picker/picker_theme.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -134,7 +136,7 @@ void TextPickerDialogShow(std::vector<std::string> range, uint32_t selected, con
 } // namespace OHOS::Ace
 
 extern "C" {
-VectorRangeContentHandle FFICJVectorCreateRangeContent(int64_t size)
+VectorRangeContentHandle FFICJCreateVectorRangeContent(int64_t size)
 {
     return new std::vector<CJRangeContent>(size);
 }
@@ -150,16 +152,16 @@ void FFICJVectorRangeContentSetElement(
 {
     auto actualVec = reinterpret_cast<std::vector<CJRangeContent>*>(vec);
     (*actualVec)[index] = rangeContentOptions;
-}
+} 
 
-VectorTextCascadePickerOptionsHandle FFICJVectorCreateTextCascadePickerOptions(int64_t size)
+VectorTextCascadePickerOptionsHandle FFICJVectorTextCascadePickerOptions(int64_t size)
 {
     return new std::vector<CJTextCascadePickerOptions>(size);
 }
 
 void FFICJVectorTextCascadePickerOptionsDelete(VectorTextCascadePickerOptionsHandle vec)
 {
-    auto actualVec = reinterpret_cast<std::vector<CJTextCascadePickerOptions>*>(vec);
+    auto actualVec= reinterpret_cast<std::vector<CJTextCascadePickerOptions>*>(vec);
     delete actualVec;
 }
 
@@ -167,64 +169,162 @@ void FFICJVectorTextCascadePickerOptionsSetElement(
     VectorTextCascadePickerOptionsHandle vec, int64_t index, CJTextCascadePickerOptions textCascadeOptions)
 {
     auto actualVec = reinterpret_cast<std::vector<CJTextCascadePickerOptions>*>(vec);
-    (*actualVec)[index] = textCascadeOptions;
+    (*actualVec)[index] = textCascadePickerOptions;
 }
 
-void FfiOHOSAceFrameworkTextPickerCreate(ParseTextArrayParam params)
+void FfiOHOSAceFrameworkTextPickerCreateSingle(CJTextArrayParam params)
 {
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    bool firstBuild = targetNode && targetNode->IsFirstBuilding();
-    if (!firstBuild) {
-        return;
-    }
-    
-    // auto actualVec = reinterpret_cast<std::vector<std::string>*>(vecContent);
+    const auto& actualVec = *reinterpret_cast<std::vector<std::string>*>(params.result);
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
+    TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
 
-    if (!param.result.empty()) {
-        TextPickerModel::GetInstance()->SetSingleRange(true);
-        FfiOHOSAceFrameworkTextPickerCreateSingle(theme, param);
-    } else {
-        FfiOHOSAceFrameworkTextPickerCreateMulti(theme, optionsAttr, param);
+    std::vector<NG::RangeConent> result;
+
+    for (const auto& text : *actualVec) {
+        NG::RangeContent content;
+        content.icon_ = "";
+        content.text_ = text;
+        result.emplace_back(content);
     }
+
     WeakPtr<NG::FrameNode> targetNode =
-            AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());        
-        auto valuechangeEvent = [lambda = CJLambda::Create(param.valueChangeEvent), node = targetNode](const std::string& value) -> void {
-            LOGI("FfiOHOSAceFrameworkRefreshCreateWithChangeEvent value is %{public}s", value.c_str());
+            AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto selectedchangeEvent = [lambda = CJLambda::Create(params.selectedChangeEvent), node = targetNode](const std::vector<double>& value) -> void {
             PipelineContext::SetCallBackNode(node);
-            bool newValue = value == "true";
-            lambda(newValue);
+            lambda(static_cast<uint32_t>(value[0]));
         };
-        auto selectedchangeEvent = [lambda = CJLambda::Create(param.selectedChangeEvent), node = targetNode](const std::string& value) -> void {
-            LOGI("FfiOHOSAceFrameworkRefreshCreateWithChangeEvent value is %{public}s", value.c_str());
+        auto valuechangeEvent = [lambda = CJLambda::Create(params.valueChangeEvent), node = targetNode](const std::vector<std::string>& value) -> void {
             PipelineContext::SetCallBackNode(node);
-            bool newValue = value == "true";
-            lambda(newValue);
-        };   
+            lambda(value[0].c_str());
+        };
+
+    TextPickerModel::GetInstance()->SetSingleRange(true);
+    TextPickerModel::GetInstance()->Create(theme, params.kind);
+    TextPickerModel::GetInstance()->SetRange(result);
+    TextPickerModel::GetInstance()->SetSelected(params.selected);
+    TextPickerModel::GetInstance()->SetValue(params.value);
+    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
     TextPickerModel::GetInstance()->SetOnValueChangeEvent(std::move(valuechangeEvent));
-    TextPickerModel::GetInstance()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));   
-    return;
+    TextPickerModel::GetInstance()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));
+    delete actualVec;
 }
 
-void FfiOHOSAceFrameworkTextPickerCreateSingle(const RefPtr<PickerTheme>& theme, ParseTextArrayParam& param)
+void FfiOHOSAceFrameworkTextPickerCreateMulti(CJTextArrayParam params)
 {
-    TextPickerModel::GetInstance()->Create(theme, param.kind);
-    TextPickerModel::GetInstance()->SetRange(param.result);
-    TextPickerModel::GetInstance()->SetSelected(param.selected);
-    TextPickerModel::GetInstance()->SetValue(param.value);
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
     TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
-}
-
-void FfiOHOSAceFrameworkTextPickerCreateMulti(const RefPtr<PickerTheme>& theme, ParseTextArrayParam& param)
-{
     TextPickerModel::GetInstance()->MultiInit(theme);
-    TextPickerModel::GetInstance()->SetValues(param.values);
-    TextPickerModel::GetInstance()->SetSelecteds(param.selecteds);
-    TextPickerModel::GetInstance()->SetIsCascade(param.isCascade);
-    TextPickerModel::GetInstance()->SetHasSelectAttr(param.isHasSelectAttr);
-    TextPickerModel::GetInstance()->SetColumns(param.options);
+
+    const auto& valuesVec = *reinterpret_cast<std::vector<std::string>*>(params.values);
+    const auto& selectedVec = *reinterpret_cast<std::vector<std::uint32_t>*>(params.selecteds);
+    const auto& optionsVec = *reinterpret_cast<std::vector<CJTextCascadePickerOptions>*>(params.result);
+
+    std::vector<NG::TextCascadePickerOptions> options;
+    for(const auto& content:optionsVec) {
+        NG::TextCascadePickerOptions option;
+        option.rangeResult = *reinterpret_cast<std::vector<std::string>*>(content.rangeResult);
+        options.emplace_back(option);
+    }
+
+    WeakPtr<NG::FrameNode> targetNode =
+            AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto selectedchangeEvent = [lambda = CJLambda::Create(params.selectedsChangeEvent), node = targetNode](const std::vector<double>& value) -> void {
+            PipelineContext::SetCallBackNode(node);
+            std::vector<uint32_t> transSelelceds;
+            for (const auto& val : value) {
+                transSelelceds.push_back(static_cast<uint32_t>(val));
+            }
+            lambda(&transSelelceds);
+            LOGI("bind selectedchangeEvent success");
+        };
+        auto valuechangeEvent = [lambda = CJLambda::Create(params.valuesChangeEvent), node = targetNode](const std::vector<std::string>& value) -> void {
+            PipelineContext::SetCallBackNode(node);
+            std::vector<std::string> transValues;
+            for(const auto& val : value) {
+                transValues->push_back(val);
+            }
+            lambda(reinterpret_cast<VectorStringHandle>(transValues));
+            LOGI("bind valuechangeEvent success");
+        };
+
+    TextPickerModel::GetInstance()->SetSelecteds(selectedVec);
+    TextPickerModel::GetInstance()->SetValues(valuesVec);
+    TextPickerModel::GetInstance()->SetIsCascade(params.isCascade);
+    TextPickerModel::GetInstance()->SetHasSelectAttr(params.isHasSelectAttr);
+    TextPickerModel::GetInstance()->SetColumns(options);
+    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
+    TextPickerModel::GetInstance()->SetOnValueChangeEvent(std::move(valuechangeEvent));
+    TextPickerModel::GetInstance()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));
+    delete valuesVec;
+    delete selectedVec;
+    delete optionsVecp;
+}
+
+void generatecascadeoptions(const std::vector<CJTextCascadePickerOptions>& optionsvec,
+                                std::vector<NG::TextCascadePickerOptions>& options) {
+    if(optionsvec.empty()) {
+        return;
+    }
+    for (const CJTextCascadePickerOptions& content : optionsvec) {
+        NG::TextCascadePickerOptions option;
+        option.rangeResult = *reinterpret_cast<std::vector<std::string>*>(content.rangeResult);
+        auto temp = reinterpret_cast<std::vector<CJTextCascadePickerOptions>*>(content.children);
+        if(temp!=nullptr) {
+            generatecascadeoptions(*temp,option.children)
+        }
+        options.emplace_back(option);
+    }
+}
+
+void FfiOHOSAceFrameworkTextPickerCreateCascade(CJTextArrayParamMulti params)
+{
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
     TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
+    TextPickerModel::GetInstance()->MultiInit(theme);
+
+    const auto& valuesVec = *reinterpret_cast<std::vector<std::string>*>(params.values);
+    const auto& selectedVec = *reinterpret_cast<std::vector<std::uint32_t>*>(params.selecteds);
+    const auto& optionsVec = *reinterpret_cast<std::vector<CJTextCascadePickerOptions>*>(params.result);
+
+    std::vector<NG::TextCascadePickerOptions> options;
+
+    generatecascadeoptions(optionsVec,options);
+
+    WeakPtr<NG::FrameNode> targetNode =
+            AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        auto selectedchangeEvent = [lambda = CJLambda::Create(params.selectedsChangeEvent), node = targetNode](const std::vector<double>& value) -> void {
+            PipelineContext::SetCallBackNode(node);
+            std::vector<uint32_t> transSelelceds;
+            for (const auto& val : value) {
+                transSelelceds.push_back(static_cast<uint32_t>(val));
+            }
+            lambda(&transSelelceds);
+            LOGI("bind selectedchangeEvent success");
+        };
+        auto valuechangeEvent = [lambda = CJLambda::Create(params.valuesChangeEvent), node = targetNode](const std::vector<std::string>& value) -> void {
+            PipelineContext::SetCallBackNode(node);
+            std::vector<std::string> transValues;
+            for(const auto& val : value) {
+                transValues->push_back(val);
+            }
+            lambda(reinterpret_cast<VectorStringHandle>(transValues));
+            LOGI("bind valuechangeEvent success");
+        };
+
+    TextPickerModel::GetInstance()->SetSelecteds(selectedVec);
+    TextPickerModel::GetInstance()->SetValues(valuesVec);
+    TextPickerModel::GetInstance()->SetIsCascade(params.isCascade);
+    TextPickerModel::GetInstance()->SetHasSelectAttr(params.isHasSelectAttr);
+    TextPickerModel::GetInstance()->SetColumns(options);
+    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
+    TextPickerModel::GetInstance()->SetOnValueChangeEvent(std::move(valuechangeEvent));
+    TextPickerModel::GetInstance()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));
+    delete valuesVec;
+    delete selectedVec;
+    delete optionsVecp;
 }
 
 void FfiOHOSAceFrameworkTextPickerSetDefaultPickerItemHeight(double height, int32_t unit)
@@ -348,7 +448,7 @@ void FfiOHOSAceFrameworkTextPickerOnChange(void (*callback)(CJTextPickerResult p
     return;
 }
 
-void FfiOHOSAceFrameworkTextPickerDialogShow(VectorStringPtr vecContent, CJDialogShow value)
+void FfiOHOSAceFrameworkTextPickerDialogShow(VectorStringHandle vecContent, CJDialogShow value)
 {
     auto actualVec = reinterpret_cast<std::vector<std::string>*>(vecContent);
     Dimension itemHeight(value.height, static_cast<DimensionUnit>(value.heightUnit));
@@ -357,5 +457,11 @@ void FfiOHOSAceFrameworkTextPickerDialogShow(VectorStringPtr vecContent, CJDialo
     auto cancelEvent = TextPickerCancelEvent(CJLambda::Create(value.cancel));
     TextPickerDialogShow(*actualVec, value.selected, itemHeight, dialogEvent, cancelEvent);
     return;
+}
+
+void FfiOHOSAceFrameworkTextPickerSetOpacity(double opacity)
+{
+    ViewAbstractModel::GetInstance()->SetOpacity(opacity);
+    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
 }
 }
