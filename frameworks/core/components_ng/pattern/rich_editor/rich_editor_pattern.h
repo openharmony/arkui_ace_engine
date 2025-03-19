@@ -1677,6 +1677,7 @@ private:
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
+    bool isInterceptMouseRightRelease_ = false;
     bool isEditing_ = false;
     int32_t dragPosition_ = 0;
     // Action when "enter" pressed.

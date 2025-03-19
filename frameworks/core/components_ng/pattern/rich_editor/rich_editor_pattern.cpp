@@ -7550,9 +7550,13 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
 void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
 {
     CHECK_NULL_VOID(!IsPreviewTextInputting());
+    IF_TRUE(IsDragging(), isInterceptMouseRightRelease_ = true);
     auto focusHub = GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable()) {
+    CHECK_NULL_VOID(focusHub && focusHub->IsFocusable());
+    if (info.GetAction() == MouseAction::RELEASE && isInterceptMouseRightRelease_) {
+        usingMouseRightButton_ = false;
+        isMousePressed_ = false;
+        isInterceptMouseRightRelease_ = false;
         return;
     }
     if (info.GetAction() == MouseAction::PRESS) {
