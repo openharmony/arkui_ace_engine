@@ -470,6 +470,22 @@ bool ViewAbstract::ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result)
     if (!resourceWrapper) {
         return false;
     }
+    if (obj.id == -1) {
+        if (!obj.paramsJsonStr) {
+            return false;
+        }
+        auto params = JsonUtil::ParseJsonString(obj.paramsJsonStr);
+        if (!params->IsArray()) {
+            return false;
+        }
+        auto param = params->GetArrayItem(0);
+        auto symbol = resourceWrapper->GetSymbolByName(param->GetString().c_str());
+        if (!symbol) {
+            return false;
+        }
+        result = symbol;
+        return true;
+    }
     if (obj.type == static_cast<int32_t>(ResourceType::SYMBOL)) {
         result = resourceWrapper->GetSymbolById(static_cast<uint32_t>(obj.id));
         return true;

@@ -179,6 +179,18 @@ void CustomNodeBase::Reset()
     destroyFunc_ = nullptr;
     didBuildFunc_ = nullptr;
     setActiveFunc_ = nullptr;
+    pageTransitionFunc_ = nullptr;
+    reloadFunc_ = nullptr;
+    completeReloadFunc_ = nullptr;
+    forceNodeUpdateFunc_ = nullptr;
+    hasNodeUpdateFunc_ = nullptr;
+    recycleCustomNodeFunc_ = nullptr;
+    recycleRenderFunc_ = nullptr;
+    onDumpInfoFunc_ = nullptr;
+    onDumpInspectorFunc_ = nullptr;
+    getThisFunc_ = nullptr;
+    onRecycleFunc_ = nullptr;
+    onReuseFunc_ = nullptr;
 }
 
 void CustomNodeBase::SetJSViewName(std::string&& name)

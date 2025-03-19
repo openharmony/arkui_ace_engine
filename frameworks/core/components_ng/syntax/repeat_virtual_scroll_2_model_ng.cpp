@@ -118,4 +118,12 @@ void RepeatVirtualScroll2ModelNG::SetItemDragHandler(int32_t repeatElmtId, std::
     repeatNode->SetItemDragHandler(
         std::move(onLongPress), std::move(onDragStart), std::move(onMoveThrough), std::move(onDrop));
 }
+
+void RepeatVirtualScroll2ModelNG::SetCreateByTemplate(bool isCreatedByTemplate)
+{
+    auto childOfRepeat = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (childOfRepeat) {
+        childOfRepeat->SetAllowReusableV2Descendant(!isCreatedByTemplate);
+    }
+}
 } // namespace OHOS::Ace::NG

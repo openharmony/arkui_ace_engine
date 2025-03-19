@@ -635,18 +635,24 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     };
     if (image_) {
         image_->SetDrawCompleteCallback(std::move(drawCompleteCallback));
-        return MakeRefPtr<ImagePaintMethod>(image_, imagePaintMethodConfig);
+        imagePaintMethod_->UpdatePaintMethod(image_, imagePaintMethodConfig);
+        return imagePaintMethod_;
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
         altImage_->SetDrawCompleteCallback(std::move(drawCompleteCallback));
-        return MakeRefPtr<ImagePaintMethod>(altImage_, imagePaintMethodConfig);
+        imagePaintMethod_->UpdatePaintMethod(altImage_, imagePaintMethodConfig);
+        return imagePaintMethod_;
     }
     CreateObscuredImage();
     if (obscuredImage_) {
         obscuredImage_->SetDrawCompleteCallback(std::move(drawCompleteCallback));
-        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, imagePaintMethodConfig);
+        imagePaintMethod_->UpdatePaintMethod(obscuredImage_, imagePaintMethodConfig);
+        return imagePaintMethod_;
     }
-    return MakeRefPtr<ImagePaintMethod>(nullptr, imagePaintMethodConfig);
+    imagePaintMethodConfig.imageContentModifier = nullptr;
+    imagePaintMethodConfig.imageOverlayModifier = nullptr;
+    imagePaintMethod_->UpdatePaintMethod(nullptr, imagePaintMethodConfig);
+    return imagePaintMethod_;
 }
 
 void ImagePattern::CreateModifier()
@@ -912,7 +918,7 @@ void ImagePattern::OnAnimatedModifyDone()
     }
     GenerateCachedImages();
     auto index = nowImageIndex_;
-    if ((status_ == Animator::Status::IDLE || status_ == Animator::Status::STOPPED) && !firstUpdateEvent_) {
+    if ((status_ == AnimatorStatus::IDLE || status_ == AnimatorStatus::STOPPED) && !firstUpdateEvent_) {
         index = 0;
     }
 
@@ -948,16 +954,16 @@ void ImagePattern::ControlAnimation(int32_t index)
         }
     }
     switch (status_) {
-        case Animator::Status::IDLE:
+        case AnimatorStatus::IDLE:
             animator_->Cancel();
             ResetFormAnimationFlag();
             SetShowingIndex(index);
             break;
-        case Animator::Status::PAUSED:
+        case AnimatorStatus::PAUSED:
             animator_->Pause();
             ResetFormAnimationFlag();
             break;
-        case Animator::Status::STOPPED:
+        case AnimatorStatus::STOPPED:
             animator_->Finish();
             ResetFormAnimationFlag();
             break;
@@ -1384,6 +1390,7 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderCtx);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
+    imagePaintMethod_ = MakeRefPtr<ImagePaintMethod>(nullptr);
     if (GetIsAnimation()) {
         renderCtx->SetClipToFrame(true);
     } else {
@@ -1398,6 +1405,7 @@ void ImagePattern::OnAttachToFrameNode()
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     selectedColor_ = textTheme->GetSelectedColor();
+    overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
     auto imageTheme = pipeline->GetTheme<ImageTheme>();
     CHECK_NULL_VOID(imageTheme);
     smoothEdge_ = imageTheme->GetMinEdgeAntialiasing();
@@ -2745,7 +2753,7 @@ FocusPattern ImagePattern::GetFocusPattern() const
 
 void ImagePattern::OnActive()
 {
-    if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+    if (status_ == AnimatorStatus::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (!animator_->HasScheduler()) {
@@ -2757,6 +2765,13 @@ void ImagePattern::OnActive()
             }
         }
         animator_->Forward();
+    }
+}
+
+void ImagePattern::OnInActive()
+{
+    if (status_ == AnimatorStatus::RUNNING) {
+        animator_->Pause();
     }
 }
 } // namespace OHOS::Ace::NG

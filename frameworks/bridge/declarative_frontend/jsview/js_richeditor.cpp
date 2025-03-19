@@ -262,8 +262,7 @@ JSRef<JSObject> JSRichEditor::CreateJsTextBackgroundStyle(const TextBackgroundSt
 {
     JSRef<JSObject> textBackgroundStyleObj = JSRef<JSObject>::New();
     textBackgroundStyleObj->SetProperty<std::string>("color", style.backgroundColor->ColorToString());
-    textBackgroundStyleObj->SetProperty<std::string>(
-        "BorderRadiusProperty", style.backgroundRadius->ToString());
+    textBackgroundStyleObj->SetProperty<std::string>("radius", style.backgroundRadius->ToString());
     return textBackgroundStyleObj;
 }
 
@@ -1590,9 +1589,9 @@ void JSRichEditorBaseController::ParseTextUrlStyle(const JSRef<JSObject>& jsObje
     CHECK_NULL_VOID(!urlStyleObj->IsUndefined());
  
     JSRef<JSVal> urlObj = urlStyleObj->GetProperty("url");
-    CHECK_NULL_VOID(!urlObj->IsEmpty() && urlObj->IsString());
- 
-    urlAddressOpt = urlObj->ToU16String();
+    std::u16string urlAddress;
+    CHECK_NULL_VOID(JSContainerBase::ParseJsString(urlObj, urlAddress));
+    urlAddressOpt = urlAddress;
 }
 
 void JSRichEditorController::ParseUserGesture(
@@ -2222,7 +2221,7 @@ void JSRichEditorController::ParseParagraphSpacing(const JSRef<JSObject>& styleO
     auto paragraphSpacing = styleObject->GetProperty("paragraphSpacing");
     CalcDimension size;
     if (!paragraphSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(paragraphSpacing, size, false) &&
-        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
+        !size.IsNegative() && size.Unit() != DimensionUnit::PERCENT) {
         style.paragraphSpacing = size;
     }
 }

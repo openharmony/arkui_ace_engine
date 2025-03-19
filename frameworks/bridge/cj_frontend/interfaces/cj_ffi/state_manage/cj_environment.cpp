@@ -15,8 +15,9 @@
 
 #include "cj_environment.h"
 
+#include "base/i18n/localization.h"
 #include "core/common/environment/environment_proxy.h"
-#include "frameworks/base/i18n/localization.h"
+#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

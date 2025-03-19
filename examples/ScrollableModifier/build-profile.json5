@@ -1,0 +1,70 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\lenovo\\.ohos\\config\\default_MyApplication2_-rVpnEBfbZYYvyB4WOoRnv5qm36ej--P_a_qv1zue30=.cer",
+          "storePassword": "0000001B8DCADA139F94A79D28CE4B2F63ED40D03C2A6059DE99EC638C26098E8FA1983DD59163E84DD7CC",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B0B51AF63E21D1DF1BAEC68B15EEDF22696E0DA2ACF76AE2816E877E4FB4EF2D487D859C9C77BD6",
+          "profile": "C:\\Users\\lenovo\\.ohos\\config\\default_MyApplication2_-rVpnEBfbZYYvyB4WOoRnv5qm36ej--P_a_qv1zue30=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\lenovo\\.ohos\\config\\default_MyApplication2_-rVpnEBfbZYYvyB4WOoRnv5qm36ej--P_a_qv1zue30=.p12"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compatibleSdkVersion": "5.0.0(12)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

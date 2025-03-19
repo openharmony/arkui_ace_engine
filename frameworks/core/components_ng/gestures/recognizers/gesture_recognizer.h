@@ -37,6 +37,8 @@ struct DelayedTask {
 
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
+enum class CurrentCallbackState { READY, START, UPDATE, END, CANCEL};
+
 inline std::string TransRefereeState(RefereeState state)
 {
     const char *str[] = { "READY", "DETECTING", "PENDING", "PENDING_BLOCKED", "SUCCEED_BLOCKED", "SUCCEED", "FAIL" };
@@ -48,7 +50,7 @@ inline std::string TransRefereeState(RefereeState state)
 
 class FrameNode;
 
-class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
+class ACE_FORCE_EXPORT NGGestureRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
 
 public:
@@ -461,6 +463,8 @@ protected:
     GesturePriority priority_ = GesturePriority::Low;
 
     GestureMask priorityMask_ = GestureMask::Normal;
+
+    CurrentCallbackState currentCallbackState_ = CurrentCallbackState::READY;
 
     bool isExternalGesture_ = false;
     bool fromCardOrUIExtension_ = false;

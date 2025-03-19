@@ -431,6 +431,7 @@ struct custombutton {
   }
 
   onShowMenuWithTimer() {
+    this.onCancelMenuTimer()
     if (!this.hideSplit && this.isFocused) {
       this.showMenuTimeoutId = setTimeout(() => {
         this.isShowMenu = true
@@ -688,6 +689,11 @@ struct custombutton {
         this.onAreaChangeEvent(oldValue, newValue)
       })
       .gesture(PanGesture())
+      .onTouch((event?: TouchEvent) => {
+        if(event) {
+          event.stopPropagation();
+        }
+      })
     }
     .justifyContent(FlexAlign.End)
     .visibility(this.rowVisibility)

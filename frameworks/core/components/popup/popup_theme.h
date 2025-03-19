@@ -96,17 +96,30 @@ public:
             theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
             theme->fontPrimaryColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
+            theme->popupShadowStyle_ = static_cast<ShadowStyle>(
+                pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
+            theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
+                "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            ParseAdditionalStylePattern(pattern, theme);
+            ParseTipsPattern(pattern, theme);
+        }
+        void ParseTipsPattern(const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
+        {
             auto tipsDoubleBorderEnable = pattern->GetAttr<std::string>("tips_double_border_enable", "1");
             theme->tipsDoubleBorderEnable_ = StringUtils::StringToInt(tipsDoubleBorderEnable);
             theme->tipsOuterBorderWidth_ = pattern->GetAttr<Dimension>("tips_outer_border_width", 1.0_vp);
             theme->tipsOuterBorderColor_ = pattern->GetAttr<Color>("tips_outer_border_color", Color::TRANSPARENT);
             theme->tipsInnerBorderWidth_ = pattern->GetAttr<Dimension>("tips_inner_border_width", 1.0_vp);
             theme->tipsInnerBorderColor_ = pattern->GetAttr<Color>("tips_inner_border_color", Color::TRANSPARENT);
-            theme->popupShadowStyle_ = static_cast<ShadowStyle>(
-                pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
-            theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
-                "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
-            ParseAdditionalStylePattern(pattern, theme);
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
+                theme->tipsOuterBorderWidth_ = pattern->GetAttr<Dimension>("tips_outer_border_width", 1.0_vp);
+                theme->tipsOuterBorderColor_ =
+                    pattern->GetAttr<Color>("tips_outer_border_color_dark", Color::TRANSPARENT);
+            }
+            theme->tipsPadding_ = Edge(pattern->GetAttr<Dimension>("tips_horizontal_padding", 8.0_vp),
+                pattern->GetAttr<Dimension>("tips_vertical_padding", 8.0_vp),
+                pattern->GetAttr<Dimension>("tips_horizontal_padding", 8.0_vp),
+                pattern->GetAttr<Dimension>("tips_vertical_padding", 8.0_vp));
         }
         void ParseAdditionalStylePattern(
             const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
@@ -128,6 +141,11 @@ public:
     const Edge& GetPadding() const
     {
         return padding_;
+    }
+
+    const Edge& GetTipsPadding() const
+    {
+        return tipsPadding_;
     }
 
     const Color& GetMaskColor() const
@@ -423,6 +441,7 @@ protected:
 
 private:
     Edge padding_;
+    Edge tipsPadding_;
     Color maskColor_;
     Color backgroundColor_;
     Color buttonHoverColor_ = Color(0x0cffffff);

@@ -223,7 +223,8 @@ public:
     virtual bool IsVisibleChangeNodeExists(NodeId nodeId) = 0;
     virtual void UpdateEventTarget(NodeId id, BaseEventInfo& info) = 0;
     virtual void SetWindowPos(int32_t left, int32_t top, int32_t windowId) = 0;
-    virtual Rect GetFinalRealRectInfo(const RefPtr<NG::FrameNode>& node) { return {}; }
+    virtual AccessibilityParentRectInfo GetTransformRectInfoRelativeToWindow(
+        const RefPtr<NG::FrameNode>& node, const RefPtr<PipelineBase>& context) { return {}; }
 #ifdef WINDOW_SCENE_SUPPORTED
     virtual void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
@@ -310,6 +311,11 @@ public:
 
     virtual void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) {}
 
+    virtual void UpdateAccessibilityNextFocusIdMap(int32_t containerId,
+                                                   const std::string& nextFocusInspectorKey, int64_t preAccessibilityId)
+    {
+    }
+
     bool IsRegister()
     {
         return isReg_;
@@ -342,6 +348,8 @@ public:
     }
 
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
+    virtual void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) {}
+    virtual void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) {}
 
     virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
     {

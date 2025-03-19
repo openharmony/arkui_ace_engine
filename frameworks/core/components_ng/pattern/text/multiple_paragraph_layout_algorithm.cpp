@@ -424,8 +424,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .indent = textStyle.GetTextIndent(),
         .halfLeading = textStyle.GetHalfLeading(),
+        .indent = textStyle.GetTextIndent(),
         .paragraphSpacing = textStyle.GetParagraphSpacing()
         };
 }
@@ -518,7 +518,8 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     currentParagraphPlaceholderCount_ = 0;
     paragraphFontSize_ = paraStyle.fontSize;
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
-    for (auto&& group : spans_) {
+    for (auto groupIt = spans_.begin(); groupIt != spans_.end(); groupIt++) {
+        auto& group = *(groupIt);
         ParagraphStyle spanParagraphStyle = paraStyle;
         if (paraStyle.maxLines != UINT32_MAX) {
             if (!paragraphManager_->GetParagraphs().empty()) {
@@ -533,6 +534,10 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                 spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
                     textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
             }
+            spanParagraphStyle.isEndAddParagraphSpacing =
+                paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&
+                Positive(paraStyleSpanItem->textLineStyle->GetParagraphSpacingValue().ConvertToPx()) &&
+                std::next(groupIt) != spans_.end();
         }
         auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle, aiSpanMap);
         CHECK_NULL_RETURN(paragraph, false);

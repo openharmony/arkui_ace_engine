@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
+#include "base/display_manager/display_manager.h"
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
@@ -61,10 +63,9 @@ RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float hei
 
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (layoutProperty) {
-        layoutProperty->UpdateXComponentType(type);
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(calcWidth, calcHeight));
-    }
+    CHECK_NULL_RETURN(layoutProperty, frameNode);
+    layoutProperty->UpdateXComponentType(type);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(calcWidth, calcHeight));
     return frameNode;
 }
 
@@ -86,9 +87,7 @@ std::optional<std::string> XComponentModelNG::GetLibraryName()
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto type = GetTypeImpl(frameNode);
-    if (type == XComponentType::COMPONENT) {
-        return std::nullopt;
-    }
+    CHECK_EQUAL_RETURN(type, XComponentType::COMPONENT, std::nullopt);
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(xcPattern, std::nullopt);
     return xcPattern->GetLibraryName();
@@ -145,9 +144,8 @@ void XComponentModelNG::SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad)
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     if (xcPattern->NeedTriggerLoadEventImmediately()) {
-        if (onLoad) {
-            onLoad(xcPattern->GetId());
-        }
+        CHECK_NULL_VOID(onLoad);
+        onLoad(xcPattern->GetId());
         return;
     }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
@@ -306,6 +304,12 @@ void XComponentModelNG::EnableTransparentLayer(bool isTransparentLayer)
     xcPattern->EnableTransparentLayer(isTransparentLayer);
 }
 
+void XComponentModelNG::SetScreenId(uint64_t screenId)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetScreenId(frameNode, screenId);
+}
+
 bool XComponentModelNG::IsTexture(FrameNode *frameNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
@@ -327,9 +331,8 @@ RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::
     auto pattern = AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::CNODE);
     auto frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId, pattern);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (layoutProperty) {
-        layoutProperty->UpdateXComponentType(type);
-    }
+    CHECK_NULL_RETURN(layoutProperty, frameNode);
+    layoutProperty->UpdateXComponentType(type);
     return frameNode;
 }
 
@@ -339,6 +342,7 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     auto type = params->type;
     auto libraryName = params->libraryName;
     auto controller = params->controller;
+    auto screenId = params->screenId;
 
     RefPtr<FrameNode> frameNode;
     if (id.empty() && controller == nullptr && (type == XComponentType::SURFACE || type == XComponentType::TEXTURE)) {
@@ -357,7 +361,24 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
         xcPattern->SetImageAIOptions(params->aiOptions);
     }
+    if (type == XComponentType::SURFACE && screenId.has_value()) {
+        SetScreenId(Referenced::RawPtr(frameNode), screenId.value());
+    }
     return frameNode;
+}
+
+void XComponentModelNG::SetScreenId(FrameNode* frameNode, uint64_t screenId)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    uint64_t rsScreenId = 0u;
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s][screenId: %" PRIu64 "]", xcPattern->GetId().c_str(),
+        screenId);
+    if (!DisplayManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsScreenId)) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "ConvertScreenIdToRsScreenId fail");
+    }
+    xcPattern->SetScreenId(rsScreenId);
 }
 
 void XComponentModelNG::SetXComponentId(FrameNode* frameNode, const std::string& id)

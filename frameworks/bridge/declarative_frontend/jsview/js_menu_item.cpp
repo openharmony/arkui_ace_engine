@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_item_theme.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
 
 namespace OHOS::Ace {
@@ -48,6 +49,52 @@ MenuItemModel* MenuItemModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+void JSMenuItem::ParseMenuItemOptionsResource(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuItemObj, MenuItemProperties& menuItemProps)
+{
+    std::string startIconPath;
+    std::string contentStr;
+    std::string endIconPath;
+    std::string labelStr;
+    std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
+
+    auto startIcon = menuItemObj->GetProperty("startIcon");
+    auto content = menuItemObj->GetProperty("content");
+    auto endIcon = menuItemObj->GetProperty("endIcon");
+    auto label = menuItemObj->GetProperty("labelInfo");
+    auto symbolStart = menuItemObj->GetProperty("symbolStartIcon");
+    auto symbolEnd = menuItemObj->GetProperty("symbolEndIcon");
+
+    if (symbolStart->IsObject()) {
+        JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolStart);
+        menuItemProps.startApply = symbolApply;
+    } else if (ParseJsMedia(startIcon, startIconPath)) {
+        std::string bundleName;
+        std::string moduleName;
+        GetJsMediaBundleInfo(startIcon, bundleName, moduleName);
+        ImageSourceInfo imageSourceInfo(startIconPath, bundleName, moduleName);
+        menuItemProps.startIcon = imageSourceInfo;
+    }
+
+    ParseJsString(content, contentStr);
+    menuItemProps.content = contentStr;
+
+    if (symbolEnd->IsObject()) {
+        JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolEnd);
+        menuItemProps.endApply = symbolApply;
+    } else if (ParseJsMedia(endIcon, endIconPath)) {
+        std::string bundleName;
+        std::string moduleName;
+        GetJsMediaBundleInfo(endIcon, bundleName, moduleName);
+        ImageSourceInfo imageSourceInfo(endIconPath, bundleName, moduleName);
+        menuItemProps.endIcon = imageSourceInfo;
+    }
+
+    if (ParseJsString(label, labelStr)) {
+        menuItemProps.labelInfo = labelStr;
+    }
+}
+
 void JSMenuItem::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || (!info[0]->IsObject() && !info[0]->IsFunction())) {
@@ -68,50 +115,8 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         MenuItemModel::GetInstance()->Create(customNode);
     } else {
         auto menuItemObj = JSRef<JSObject>::Cast(info[0]);
-
-        std::string startIconPath;
-        std::string contentStr;
-        std::string endIconPath;
-        std::string labelStr;
         MenuItemProperties menuItemProps;
-        std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
-
-        auto startIcon = menuItemObj->GetProperty("startIcon");
-        auto content = menuItemObj->GetProperty("content");
-        auto endIcon = menuItemObj->GetProperty("endIcon");
-        auto label = menuItemObj->GetProperty("labelInfo");
-        auto symbolStart = menuItemObj->GetProperty("symbolStartIcon");
-        auto symbolEnd = menuItemObj->GetProperty("symbolEndIcon");
-
-        if (symbolStart->IsObject()) {
-            JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolStart);
-            menuItemProps.startApply = symbolApply;
-        } else if (ParseJsMedia(startIcon, startIconPath)) {
-            std::string bundleName;
-            std::string moduleName;
-            GetJsMediaBundleInfo(startIcon, bundleName, moduleName);
-            ImageSourceInfo imageSourceInfo(startIconPath, bundleName, moduleName);
-            menuItemProps.startIcon = imageSourceInfo;
-        }
-
-        ParseJsString(content, contentStr);
-        menuItemProps.content = contentStr;
-
-        if (symbolEnd->IsObject()) {
-            JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolEnd);
-            menuItemProps.endApply = symbolApply;
-        } else if (ParseJsMedia(endIcon, endIconPath)) {
-            std::string bundleName;
-            std::string moduleName;
-            GetJsMediaBundleInfo(endIcon, bundleName, moduleName);
-            ImageSourceInfo imageSourceInfo(endIconPath, bundleName, moduleName);
-            menuItemProps.endIcon = imageSourceInfo;
-        }
-
-        if (ParseJsString(label, labelStr)) {
-            menuItemProps.labelInfo = labelStr;
-        }
-
+        ParseMenuItemOptionsResource(info, menuItemObj, menuItemProps);
         auto builder = menuItemObj->GetProperty("builder");
         if (!builder.IsEmpty() && builder->IsFunction()) {
             auto subBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
@@ -128,6 +133,7 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         }
         MenuItemModel::GetInstance()->Create(menuItemProps);
     }
+    JSMenuItemTheme::ApplyTheme();
 }
 
 void JSMenuItem::JSBind(BindingTarget globalObj)

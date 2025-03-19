@@ -445,6 +445,7 @@ public:
     void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
+    void GetSheetTypeWithCenter(SheetType& sheetType);
 
     void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
 

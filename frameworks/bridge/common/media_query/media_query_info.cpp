@@ -79,7 +79,7 @@ std::unique_ptr<JsonValue> MediaQueryInfo::GetMediaQueryJsonInfo()
     auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline && pipeline->GetWindowManager() &&
         pipeline->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
             width -= static_cast<int32_t>(2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
         }
         height -= static_cast<int32_t>(

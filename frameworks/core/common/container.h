@@ -43,6 +43,7 @@
 #include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
+#include "core/common/page_viewport_config.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/settings.h"
@@ -54,7 +55,6 @@
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -210,6 +210,33 @@ public:
         return Orientation::UNSPECIFIED;
     }
 
+    void SetCurrentDisplayOrientation(DisplayOrientation orientation)
+    {
+        displayOrientation_ = orientation;
+    }
+    DisplayOrientation GetCurrentDisplayOrientation() const
+    {
+        return displayOrientation_;
+    }
+    virtual RefPtr<PageViewportConfig> GetCurrentViewportConfig() const
+    {
+        return nullptr;
+    }
+    virtual RefPtr<PageViewportConfig> GetTargetViewportConfig(Orientation orientation,
+        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
+    {
+        return nullptr;
+    }
+    virtual void SetRequestedOrientation(
+        Orientation orientation, bool needAnimation = true) {}
+    virtual Orientation GetRequestedOrientation()
+    {
+        return Orientation::UNSPECIFIED;
+    }
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool IsFullScreenWindow() const { return true; }
+    virtual bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) { return true; }
+
     virtual RefPtr<DisplayInfo> GetDisplayInfo();
 
     virtual void InitIsFoldable();
@@ -217,6 +244,13 @@ public:
     virtual bool IsFoldable();
 
     virtual FoldStatus GetCurrentFoldStatus();
+
+    virtual FoldStatus GetFoldStatusFromListener()
+    {
+        return GetCurrentFoldStatus();
+    }
+
+    virtual void InitFoldStatusFromListener() {}
 
     virtual NG::SafeAreaInsets GetKeyboardSafeArea();
 
@@ -554,28 +588,47 @@ public:
         return nullptr;
     }
 
-    /*
-     *this interface is just use before api12(not include api12),after api12 when you judge version,use
-     *LessThanAPITargetVersion(PlatformVersion version)
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use LessThanAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
     static bool LessThanAPIVersion(PlatformVersion version);
 
-    /*
-     *this interface is just use before api12(not include api12),after api12 when you judge version,use
-     *GreatOrEqualAPITargetVersion(PlatformVersion version)
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use GreatOrEqualAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
     static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
-    /*
-     *this interface is just for when you use LessThanAPIVersion in instance does not exist situation
+    /**
+     * @description: Compare whether the min compatible api version of the application is less than the incoming target
+     * version. This interface is just for when you use LessThanAPIVersion in instance does not exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
     static bool LessThanAPIVersionWithCheck(PlatformVersion version);
 
-    /*
-     *this interface is just for when you use GreatOrEqualAPIVersion in instance does not exist situation
+    /**
+     * @description: Compare whether the min compatible api version of the application is greater than or equal to the
+     * incoming target version. This interface is just for when you use GreatOrEqualAPIVersion in instance does not
+     * exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
      */
     static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
 
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming target
+     * version.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
@@ -584,6 +637,12 @@ public:
         return apiTargetVersion < static_cast<int32_t>(version);
     }
 
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
@@ -624,11 +683,19 @@ public:
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetFontWeightScale(int32_t instanceId, float fontScale);
 
+    /**
+     * @description: Get the target api version of the application.
+     * @return: The target api version of the application.
+     */
     int32_t GetApiTargetVersion() const
     {
         return apiTargetVersion_;
     }
 
+    /**
+     * @description: Set the target api version of the application.
+     * @param: The target api version of the application.
+     */
     void SetApiTargetVersion(int32_t apiTargetVersion)
     {
         apiTargetVersion_ = apiTargetVersion % 1000;
@@ -649,6 +716,11 @@ public:
     virtual void CheckAndSetFontFamily() {};
 
     virtual bool IsFreeMultiWindow() const
+    {
+        return false;
+    }
+
+    virtual bool IsWaterfallWindow() const
     {
         return false;
     }
@@ -715,7 +787,7 @@ public:
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);
-    std::string GetFontFamilyName(std::string path);
+    std::vector<std::string> GetFontFamilyName(const std::string& path);
     bool endsWith(std::string str, std::string suffix);
 
 private:
@@ -741,6 +813,7 @@ private:
     std::string filesDataPath_;
     std::string tempDir_;
     bool usePartialUpdate_ = false;
+    DisplayOrientation displayOrientation_ = DisplayOrientation::PORTRAIT;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
     RefPtr<NG::NavigationRoute> navigationRoute_;

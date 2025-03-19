@@ -116,6 +116,8 @@ public:
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
+    static RefPtr<FrameNode> GetFrameNodeOnly(const std::string& tag, int32_t nodeId);
+
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
 
@@ -296,6 +298,12 @@ public:
     template<typename T>
     T* GetPatternPtr() const
     {
+        if (ACE_UNLIKELY(pattern_ &&
+            SystemProperties::DetectAceObjTypeConvertion() &&
+            !DynamicCast<T>(pattern_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
+                GetPatternTypeName(), T::TypeName());
+        }
         return reinterpret_cast<T*>(RawPtr(pattern_));
     }
 
@@ -314,6 +322,12 @@ public:
     template<typename T>
     T* GetLayoutPropertyPtr() const
     {
+        if (ACE_UNLIKELY(layoutProperty_ &&
+            SystemProperties::DetectAceObjTypeConvertion() &&
+            !DynamicCast<T>(layoutProperty_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
+                GetLayoutPropertyTypeName(), T::TypeName());
+        }
         return reinterpret_cast<T*>(RawPtr(layoutProperty_));
     }
 
@@ -326,6 +340,12 @@ public:
     template<typename T>
     T* GetPaintPropertyPtr() const
     {
+        if (ACE_UNLIKELY(paintProperty_ &&
+            SystemProperties::DetectAceObjTypeConvertion() &&
+            !DynamicCast<T>(paintProperty_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
+                GetPaintPropertyTypeName(), T::TypeName());
+        }
         return reinterpret_cast<T*>(RawPtr(paintProperty_));
     }
 
@@ -415,6 +435,11 @@ public:
 
     bool IsAtomicNode() const override;
 
+    int32_t OnRecvCommand(const std::string& command) override
+    {
+        return 0;
+    }
+
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void RebuildRenderContextTree() override;
@@ -499,8 +524,6 @@ public:
     OffsetF GetTransformRelativeOffset() const;
 
     VectorF GetTransformScaleRelativeToWindow() const;
-
-    int32_t GetTransformRotateRelativeToWindow(bool excludeSelf = false);
 
     RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
@@ -1285,6 +1308,33 @@ public:
     }
     bool CheckVisibleOrActive() override;
 
+    void SetPaintNode(const RefPtr<FrameNode>& paintNode)
+    {
+        paintNode_ = paintNode;
+    }
+
+    const RefPtr<FrameNode>& GetPaintNode() const
+    {
+        return paintNode_;
+    }
+
+    void SetFocusPaintNode(const RefPtr<FrameNode>& accessibilityFocusPaintNode)
+    {
+        accessibilityFocusPaintNode_ = accessibilityFocusPaintNode;
+    }
+
+    const RefPtr<FrameNode>& GetFocusPaintNode() const
+    {
+        return accessibilityFocusPaintNode_;
+    }
+
+    bool IsDrawFocusOnTop() const;
+
+    void SetNeedLazyLayout(bool value)
+    {
+        layoutProperty_->SetNeedLazyLayout(value);
+    }
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1425,6 +1475,10 @@ private:
 
     void ResetPredictNodes();
 
+    const char* GetPatternTypeName() const;
+    const char* GetLayoutPropertyTypeName() const;
+    const char* GetPaintPropertyTypeName() const;
+
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1527,6 +1581,10 @@ private:
     bool hasPositionZ_ = false;
 
     RefPtr<FrameNode> overlayNode_;
+
+    RefPtr<FrameNode> paintNode_;
+
+    RefPtr<FrameNode> accessibilityFocusPaintNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 

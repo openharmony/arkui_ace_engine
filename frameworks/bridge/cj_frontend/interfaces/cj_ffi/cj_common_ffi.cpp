@@ -15,7 +15,10 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 
+#include <malloc.h>
+
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
+#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -39,6 +42,11 @@ void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCallback cjCtr
 int64_t FfiGeneralSizeOfPointer()
 {
     return sizeof(void*);
+}
+
+CJ_EXPORT bool FfiOHOSAceFrameworkCanIUse(char* syscapString)
+{
+    return OHOS::Ace::SystemProperties::IsSyscapExist(syscapString);
 }
 }
 
@@ -110,5 +118,14 @@ void AssambleCJClickInfo(const OHOS::Ace::GestureEvent& event, CJClickInfo& clic
     clickInfo.displayX = screenOffset.GetX() / currtDensity;
     clickInfo.displayY = screenOffset.GetY() / currtDensity;
     clickInfo.source = static_cast<int32_t>(event.GetSourceDevice());
+}
+
+void ReleaseCJDragItemInfo(CJDragItemInfo& info)
+{
+    // extraInfo is malloced by cj callback, should be released after cffi used.
+    if (info.extraInfo != nullptr) {
+        free(info.extraInfo);
+        info.extraInfo = nullptr;
+    }
 }
 } // namespace OHOS::Ace

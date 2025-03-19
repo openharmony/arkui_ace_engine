@@ -941,8 +941,8 @@ HWTEST_F(TextPickerModelTestNg, getTextPickerRange001, TestSize.Level1)
     auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(node, nullptr);
 
-    textPickerModelNG.options_.clear();
-    textPickerModelNG.rangeValue_.clear();
+    textPickerModelNG.SetCascadeColumns({});
+    textPickerModelNG.SetRange({});
     textPickerModelNG.isSingleRange_ = false;
 
     auto result = textPickerModelNG.getTextPickerRange(node);

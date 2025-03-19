@@ -406,7 +406,7 @@ void SubwindowManager::ClearMenuNG(int32_t instanceId, int32_t targetId, bool in
     }
 }
 
-void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
+void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId, bool isForceClear)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear popup in subwindow enter");
     RefPtr<Subwindow> subwindow;
@@ -417,7 +417,7 @@ void SubwindowManager::ClearPopupInSubwindow(int32_t instanceId)
         subwindow = GetCurrentWindow();
     }
     if (subwindow) {
-        subwindow->ClearPopupNG();
+        subwindow->ClearPopupNG(isForceClear);
     }
 }
 
@@ -498,15 +498,18 @@ void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
+    if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
+        return;
+    }
 
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
-    auto subwindow = manager->GetSubwindow(containerId);
+    auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
     if (!IsSubwindowExist(subwindow)) {
         subwindow = Subwindow::CreateSubwindow(containerId);
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
-        manager->AddSubwindow(containerId, subwindow);
+        manager->AddSubwindow(containerId, SubwindowType::TYPE_POPUP, subwindow);
     }
     subwindow->ShowTipsNG(targetNode->GetId(), popupInfo, appearingTime, appearingTimeWithContinuousOperation);
 }
@@ -516,10 +519,11 @@ void SubwindowManager::HideTipsNG(int32_t targetId, int32_t disappearingTime, in
     RefPtr<Subwindow> subwindow;
     if (instanceId != -1) {
         // get the subwindow which overlay node in, not current
-        subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
+        subwindow = GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
     } else {
         subwindow = GetCurrentWindow();
     }
+
     if (subwindow) {
         subwindow->HideTipsNG(targetId, disappearingTime);
     }
@@ -1467,7 +1471,7 @@ SubwindowKey SubwindowManager::GetCurrentSubwindowKey(int32_t instanceId, Subwin
         displayId = container->GetCurrentDisplayId();
         searchKey.foldStatus =
             isSuperFoldDisplayDevice_ && (displayId == DEFAULT_DISPLAY_ID || displayId == VIRTUAL_DISPLAY_ID)
-                ? container->GetCurrentFoldStatus()
+                ? container->GetFoldStatusFromListener()
                 : FoldStatus::UNKNOWN;
     }
 
@@ -1623,7 +1627,8 @@ bool SubwindowManager::IsWindowEnableSubWindowMenu(
 
 const RefPtr<Subwindow> SubwindowManager::GetSubwindowByType(int32_t instanceId, SubwindowType windowType)
 {
-    if (instanceId >= MIN_SUBCONTAINER_ID) {
+    if (instanceId >= MIN_SUBCONTAINER_ID && windowType != SubwindowType::TYPE_SYSTEM_TOP_MOST_TOAST &&
+        windowType != SubwindowType::TYPE_TOP_MOST_TOAST) {
         return GetSubwindowById(instanceId);
     }
 

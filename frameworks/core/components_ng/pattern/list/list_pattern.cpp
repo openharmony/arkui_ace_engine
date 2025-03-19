@@ -44,6 +44,9 @@ constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr int DEFAULT_HEADER_VALUE = 2;
 constexpr int DEFAULT_FOOTER_VALUE = 3;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
+#endif
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -389,6 +392,7 @@ bool ListPattern::UpdateStartListItemIndex()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    CHECK_EQUAL_RETURN(host->GetChildTrueTotalCount(), 0, false);
     auto startWrapper = host->GetOrCreateChildByIndex(startIndex_);
     int32_t startArea = -1;
     int32_t startItemIndexInGroup = -1;
@@ -416,6 +420,7 @@ bool ListPattern::UpdateEndListItemIndex()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    CHECK_EQUAL_RETURN(host->GetChildTrueTotalCount(), 0, false);
     auto endWrapper = host->GetOrCreateChildByIndex(endIndex_);
     int32_t endArea = -1;
     int32_t endItemIndexInGroup = -1;
@@ -958,6 +963,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
     currentDelta_ = lastDelta + userOffset;
+    MarkScrollBarProxyDirty();
     return true;
 }
 
@@ -2510,7 +2516,7 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     }
     float overOffset = 0.0f;
     if (!itemPosition_.empty()) {
-        auto res = GetOutBoundaryOffset(-dragOffset, false);
+        auto res = GetOutBoundaryOffset(0.0f, true);
         overOffset = std::max(res.start, res.end);
         if (!NearZero(res.end)) {
             overOffset = -overOffset;
@@ -3120,4 +3126,26 @@ SizeF ListPattern::GetChildrenExpandedSize()
     }
     return SizeF();
 }
+
+void ListPattern::OnMidIndexChanged(int32_t lastIndex, int32_t curIndex)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
+
+    StartVibrator(curIndex == 0 || curIndex == totalCnt - 1);
+#endif
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ListPattern::StartVibrator(bool bEdge)
+{
+    if (!GetCrownEventDragging() || bEdge) {
+        return;
+    }
+    const char* effectId = HAPTIC_STRENGTH1;
+    VibratorUtils::StartVibraFeedback(effectId);
+}
+#endif
 } // namespace OHOS::Ace::NG

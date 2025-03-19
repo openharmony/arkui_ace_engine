@@ -72,6 +72,7 @@ void IndexerPattern::OnModifyDone()
     bool autoCollapseModeChanged = true;
     bool itemCountChanged = false;
     InitArrayValue(autoCollapseModeChanged, itemCountChanged);
+    ReportSelectEvent();
     BuildArrayValueItems();
     bool removeBubble = false;
     auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
@@ -125,9 +126,10 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
             if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
-                    lastCollapsingMode_ == IndexerCollapsingMode::FIVE) &&
-                (propSelect > sharpItemCount_)) {
+                    lastCollapsingMode_ == IndexerCollapsingMode::FIVE) && (propSelect > sharpItemCount_)) {
                 propSelect = GetAutoCollapseIndex(propSelect);
+            } else {
+                collapsedIndex_ = 0;
             }
         } else {
             sharpItemCount_ = 0;
@@ -139,7 +141,9 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
         sharpItemCount_ = 0;
         itemCountChanged = (itemCount_ != 0);
         itemCount_ = 0;
+        collapsedIndex_ = 0;
         arrayValue_.clear();
+        collapsedItemNums_.clear();
     }
     if (propSelect != selected_ || collapsedIndex_ != lastCollapsedIndex_) {
         selected_ = propSelect;
@@ -402,7 +406,7 @@ int32_t IndexerPattern::GetActualIndex(int32_t index)
                         static_cast<int32_t>(std::find(fullArrayValue_.begin(), fullArrayValue_.end(),
                         arrayValue_.at(index).first) - fullArrayValue_.begin()) : index;
     int32_t fullArraySize = static_cast<int32_t>(fullArrayValue_.size());
-    return std::clamp(actualIndex + collapsedIndex_, 0, fullArraySize);
+    return std::clamp(actualIndex + collapsedIndex_, 0, fullArraySize > 0 ? fullArraySize - 1 : 0);
 }
 
 void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -595,6 +599,7 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset, bool isTouch)
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, -1);
     int32_t index = 0;
+    int32_t arraySize = static_cast<int32_t>(collapsedItemNums_.size());
     for (auto child : host->GetChildren()) {
         auto childNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_RETURN(childNode, -1);
@@ -608,9 +613,10 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset, bool isTouch)
             LessNotEqual(offset.GetY(), childOffset.GetY() + itemHeight_)) {
                 if (isTouch) {
                     collapsedIndex_ = 0;
-                } else {
+                } else if (arraySize > 0) {
                     float yOffset = offset.GetY() - childOffset.GetY();
-                    int32_t itemNum = collapsedItemNums_[index] < 1 ? 1 : collapsedItemNums_[index];
+                    int32_t itemIndex = std::clamp(index, 0, arraySize - 1);
+                    int32_t itemNum = collapsedItemNums_[itemIndex] < 1 ? 1 : collapsedItemNums_[itemIndex];
                     float itemHeight = itemHeight_ / itemNum;
                     collapsedIndex_ = NearZero(itemHeight) ? 0 : floor(yOffset / itemHeight);
                 }
@@ -1680,6 +1686,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
+    ReportPoupSelectEvent();
     if (onPopupSelected) {
         onPopupSelected(index);
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected");
@@ -2000,9 +2007,14 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
             onCreatChangeEvent(actualIndex);
         }
         auto onSelected = indexerEventHub->GetOnSelected();
-        if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
-            TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
-            onSelected(actualIndex); // fire onSelected with an item's index from original array
+        if ((selectIndex >= 0) && (selectIndex < itemCount_)) {
+            if (onSelected) {
+                TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
+                onSelected(actualIndex); // fire onSelected with an item's index from original array
+            }
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+            TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER,
+                "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected", GetHost()->GetId());
         }
     }
     selectedChangedForHaptic_ = lastFireSelectIndex_ != selected_;
@@ -2161,5 +2173,21 @@ void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ActualItemCount", itemCount_);
     json->Put("FullItemCount", static_cast<int32_t>(fullArrayValue_.size()));
     json->Put("MaxContentHeight", maxContentHeight_);
+}
+
+void IndexerPattern::ReportSelectEvent()
+{
+    if (initialized_ && selectChanged_) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+        TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected",
+            GetHost()->GetId());
+    }
+}
+
+void IndexerPattern::ReportPoupSelectEvent()
+{
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onPopupSelect");
+    TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onPopupSelect",
+        GetHost()->GetId());
 }
 } // namespace OHOS::Ace::NG

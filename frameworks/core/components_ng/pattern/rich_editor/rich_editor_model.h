@@ -82,6 +82,7 @@ struct UpdateSpanStyle {
         updateTextShadows.reset();
         updateFontFeature.reset();
         updateTextBackgroundStyle.reset();
+        updateUrlAddress.reset();
 
         updateLineHeight.reset();
         updateHalfLeading.reset();

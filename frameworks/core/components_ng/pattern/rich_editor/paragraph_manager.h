@@ -112,6 +112,7 @@ private:
         CaretMetricsF secondMetrics;
         int32_t relativeStart = 0;
         int32_t relativeEnd = 0;
+        float paragraphSpacing = 0.0f;
     };
     static void MakeBlankLineRectsInParagraph(std::vector<RectF>& result, const ParagraphInfo& info,
         const SelectData& selectData);

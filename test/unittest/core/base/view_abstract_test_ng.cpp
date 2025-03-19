@@ -15,6 +15,7 @@
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1755,21 +1756,25 @@ HWTEST_F(ViewAbstractTestNg, ClosePopup, TestSize.Level1)
 }
 
 /**
- * @tc.name: OpenMenu
+ * @tc.name: OpenMenu001
  * @tc.desc: Test OpenMenu of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTestNg, OpenMenu, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, OpenMenu001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create some FrameNode and menuParam.
      */
     auto pipelineContext = PipelineContext::GetCurrentContext();
     MenuParam menuParam;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
     auto contentNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     RefPtr<FrameNode> contentNode2 = nullptr;
+    auto contentNode3 =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     int32_t targetId = targetNode->GetId();
@@ -1799,17 +1804,18 @@ HWTEST_F(ViewAbstractTestNg, OpenMenu, TestSize.Level1)
     targetNodePipelineContext->SetThemeManager(themeManager);
     targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
     EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode3, targetId), ERROR_CODE_NO_ERROR);
 }
 
 /**
- * @tc.name: UpdateMenu
+ * @tc.name: UpdateMenu001
  * @tc.desc: Test UpdateMenu of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTestNg, UpdateMenu, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, UpdateMenu001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create some FrameNode and menuParam.
@@ -1838,7 +1844,7 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu, TestSize.Level1)
     targetNodePipelineContext->SetThemeManager(themeManager);
     targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
     /**
      * @tc.expected: Return expected results.
      */
@@ -1853,11 +1859,240 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu, TestSize.Level1)
 }
 
 /**
- * @tc.name: CloseMenu
+ * @tc.name: UpdateMenu002
+ * @tc.desc: Test UpdateMenu of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, UpdateMenu002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and menuParam.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    MenuParam menuParam;
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    RefPtr<FrameNode> contentNode2 = nullptr;
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto targetId = targetNode->GetId();
+    auto targetNodePipelineContext = targetNode->GetContextWithCheck();
+    ASSERT_NE(targetNodePipelineContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    targetNodePipelineContext->SetThemeManager(themeManager);
+    targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
+    auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->menuMap_[targetId];
+    auto contentNodePipelineContext = contentNode->GetContextWithCheck();
+    contentNodePipelineContext->overlayManager_ = nullptr;
+    EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_INTERNAL_ERROR);
+    contentNodePipelineContext->overlayManager_ = overlayManager;
+}
+
+/**
+ * @tc.name: UpdateMenu003
+ * @tc.desc: Test UpdateMenu of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, UpdateMenu003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and menuParam.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    MenuParam menuParam;
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    RefPtr<FrameNode> contentNode2 = nullptr;
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto targetId = targetNode->GetId();
+    auto targetNodePipelineContext = targetNode->GetContextWithCheck();
+    ASSERT_NE(targetNodePipelineContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    targetNodePipelineContext->SetThemeManager(themeManager);
+    targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
+    auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->menuMap_[targetId];
+    auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(contentNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menuWrapperNode->GetPattern());
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto menu = wrapperPattern->GetMenu();
+    ASSERT_NE(menu, nullptr);
+    auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+    ASSERT_NE(menuPattern, nullptr);
+    auto menuItem = FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+    menuItem->MountToParent(menu);
+
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, V2::MENU_TAG, MenuType::SUB_MENU));
+    subMenu->MountToParent(menuWrapperNode);
+    menuPattern->SetShowedSubMenu(subMenu);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    menuPattern->AddEmbeddedMenuItem(menuItem);
+
+    EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: UpdateMenu004
+ * @tc.desc: Test UpdateMenu of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, UpdateMenu004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and menuParam.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    MenuParam menuParam;
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    RefPtr<FrameNode> contentNode2 = nullptr;
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto targetId = targetNode->GetId();
+    auto targetNodePipelineContext = targetNode->GetContextWithCheck();
+    ASSERT_NE(targetNodePipelineContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    targetNodePipelineContext->SetThemeManager(themeManager);
+    targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
+    auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->menuMap_[targetId];
+    auto menuWrapperNode = overlayManager->GetMenuNodeWithExistContent(contentNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto wrapperPattern = AceType::DynamicCast<MenuWrapperPattern>(menuWrapperNode->GetPattern());
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto menu = wrapperPattern->GetMenu();
+    ASSERT_NE(menu, nullptr);
+    auto menuPattern = AceType::DynamicCast<MenuPattern>(menu->GetPattern());
+    ASSERT_NE(menuPattern, nullptr);
+    auto menuItem = FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+    menuItem->MountToParent(menu);
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, V2::MENU_ETS_TAG, MenuType::SUB_MENU));
+    subMenu->MountToParent(menuWrapperNode);
+    menuPattern->SetShowedSubMenu(subMenu);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
+    EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: CloseMenu001
  * @tc.desc: Test CloseMenu of View_Abstract
  * @tc.type: FUNC
  */
-HWTEST_F(ViewAbstractTestNg, CloseMenu, TestSize.Level1)
+HWTEST_F(ViewAbstractTestNg, CloseMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and menuParam.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    MenuParam menuParam;
+    auto contentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    RefPtr<FrameNode> contentNode2 = nullptr;
+
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    targetNode->onMainTree_ = true;
+    targetNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto targetId = targetNode->GetId();
+    auto targetNodePipelineContext = targetNode->GetContextWithCheck();
+    ASSERT_NE(targetNodePipelineContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    targetNodePipelineContext->SetThemeManager(themeManager);
+    targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ViewAbstract::OpenMenu(menuParam, contentNode, targetId), ERROR_CODE_NO_ERROR);
+    auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->menuMap_[targetId];
+    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode2), ERROR_CODE_DIALOG_CONTENT_ERROR);
+    overlayManager->menuMap_.clear();
+    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+}
+
+/**
+ * @tc.name: CloseMenu002
+ * @tc.desc: Test CloseMenu of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CloseMenu002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create some FrameNode and menuParam.
@@ -1888,6 +2123,7 @@ HWTEST_F(ViewAbstractTestNg, CloseMenu, TestSize.Level1)
     targetNodePipelineContext->SetEventManager(AceType::MakeRefPtr<EventManager>());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
     /**
      * @tc.expected: Return expected results.
      */
@@ -1895,10 +2131,10 @@ HWTEST_F(ViewAbstractTestNg, CloseMenu, TestSize.Level1)
     auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
     ASSERT_NE(overlayManager, nullptr);
     overlayManager->menuMap_[targetId];
-    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode2), ERROR_CODE_DIALOG_CONTENT_ERROR);
-    overlayManager->menuMap_.clear();
-    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
+    auto contentNodePipelineContext = contentNode->GetContextWithCheck();
+    contentNodePipelineContext->overlayManager_ = nullptr;
+    EXPECT_EQ(ViewAbstract::CloseMenu(contentNode), ERROR_CODE_INTERNAL_ERROR);
+    contentNodePipelineContext->overlayManager_ = overlayManager;
 }
 
 /**

@@ -34,6 +34,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_paint_property.h"
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
@@ -71,6 +73,9 @@ constexpr MenuType TYPE = MenuType::MENU;
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
+constexpr float OFFSET_FIRST = 20.0f;
+constexpr float OFFSET_SECOND = 5.0f;
+constexpr float PAN_MAX_VELOCITY = 2000.0f;
 } // namespace
 class MenuPattern2TestNg : public testing::Test {
 public:
@@ -100,7 +105,6 @@ void MenuPattern2TestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void MenuPattern2TestNg::TearDown()
@@ -554,5 +558,627 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount001, TestSize.Level1)
     auto menuRenderContext = innerMenuNode->GetRenderContext();
     ASSERT_NE(menuRenderContext, nullptr);
     EXPECT_EQ(menuRenderContext->GetBorderRadius(), borderRadius);
+}
+
+/**
+ * @tc.name: UpdateMenuItemDivider001
+ * @tc.desc: Test the case where isSelectMenu is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuItemDivider001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
+     * ->menuItemNode
+     */
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode1);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+
+    menuPattern->SetIsSelectMenu(false);
+    menuPattern->UpdateMenuItemDivider();
+
+    menuPattern->options_.clear();
+    menuPattern->UpdateMenuItemDivider();
+}
+
+/**
+ * @tc.name: UpdateMenuItemDivider002
+ * @tc.desc: Test the case where dividerMode is FLOATING_ABOVE_MENU or EMBEDDED_IN_MENU
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuItemDivider002, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto option1 = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    auto option2 = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    menuPattern->options_.push_back(option1);
+    menuPattern->options_.push_back(option2);
+    menuPattern->isSelectMenu_ = true;
+
+    auto layoutProperty = outerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    layoutProperty->UpdateItemDividerMode(DividerMode::FLOATING_ABOVE_MENU);
+    menuPattern->UpdateMenuItemDivider();
+
+    layoutProperty->UpdateItemDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    menuPattern->UpdateMenuItemDivider();
+}
+
+/**
+ * @tc.name: UpdateMenuItemDivider003
+ * @tc.desc: Test UpdateMenuItemDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuItemDivider003, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->isSelectMenu_ = true;
+    RefPtr<FrameNode> nullOption = nullptr;
+    menuPattern->options_.push_back(nullOption);
+    menuPattern->UpdateMenuItemDivider();
+}
+
+/**
+ * @tc.name: UpdateMenuItemDivider004
+ * @tc.desc: Test UpdateMenuItemDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuItemDivider004, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto option1 = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    auto option2 = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    auto option3 = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    menuPattern->options_.push_back(option1);
+    menuPattern->options_.push_back(option2);
+    menuPattern->options_.push_back(option3);
+    menuPattern->isSelectMenu_ = true;
+
+    auto layoutProperty = outerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    layoutProperty->UpdateItemDividerMode(DividerMode::FLOATING_ABOVE_MENU);
+    menuPattern->UpdateMenuItemDivider();
+}
+
+/**
+ * @tc.name:  UpdateMenuDividerWithMode001
+ * @tc.desc: Test  UpdateMenuDividerWithMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode001, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto previousNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto layoutProperty = outerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    layoutProperty->UpdateItemDividerMode(DividerMode::FLOATING_ABOVE_MENU);
+    int32_t index = 0;
+    auto previousPattern = previousNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(previousPattern, nullptr);
+    auto previousDivider = FrameNode::GetOrCreateFrameNode(
+            V2::MENU_DIVIDER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() {return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    previousPattern->bottomDivider_ = previousDivider;
+
+    menuPattern->UpdateMenuDividerWithMode(previousNode, currentNode, layoutProperty, index);
+    EXPECT_EQ(index, 0);
+}
+
+/**
+ * @tc.name:  UpdateMenuDividerWithMode002
+ * @tc.desc: Test  UpdateMenuDividerWithMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode002, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto previousNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto layoutProperty = outerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    layoutProperty->UpdateItemDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    int32_t index = 0;
+    auto previousPattern = previousNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(previousPattern, nullptr);
+    auto previousDivider = FrameNode::GetOrCreateFrameNode(
+            V2::MENU_DIVIDER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() {return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    previousPattern->bottomDivider_ = previousDivider;
+
+    menuPattern->UpdateMenuDividerWithMode(previousNode, currentNode, layoutProperty, index);
+    EXPECT_TRUE(previousPattern->GetBottomDivider());
+}
+
+/**
+ * @tc.name:  UpdateMenuDividerWithMode003
+ * @tc.desc: Test  UpdateMenuDividerWithMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode003, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto previousNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto layoutProperty = outerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    layoutProperty->UpdateItemDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    int32_t index = 0;
+    auto previousPattern = previousNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(previousPattern, nullptr);
+    auto previousDivider = FrameNode::GetOrCreateFrameNode(
+            V2::MENU_DIVIDER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() {return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    previousPattern->bottomDivider_ = previousDivider;
+
+    menuPattern->isNeedDivider_ = false;
+    menuPattern->UpdateMenuDividerWithMode(previousNode, currentNode, layoutProperty, index);
+    EXPECT_EQ(index, 0);
+}
+
+/**
+ * @tc.name:  UpdateMenuDividerWithMode004
+ * @tc.desc: Test  UpdateMenuDividerWithMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode004, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto layoutProperty = outerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    int32_t index = 0;
+    menuPattern->UpdateMenuDividerWithMode(nullptr, currentNode, layoutProperty, index);
+}
+
+/**
+ * @tc.name:  UpdateMenuDividerWithMode005
+ * @tc.desc: Test  UpdateMenuDividerWithMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode005, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto previousNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    auto layoutProperty = outerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    int32_t index = 0;
+    auto previousPattern = previousNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(previousPattern, nullptr);
+    auto previousDivider = FrameNode::GetOrCreateFrameNode(
+            V2::MENU_DIVIDER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() {return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    previousPattern->bottomDivider_ = previousDivider;
+
+    menuPattern->UpdateMenuDividerWithMode(previousNode, nullptr, layoutProperty, index);
+}
+
+/**
+ * @tc.name:  UpdateMenuDividerWithMode006
+ * @tc.desc: Test  UpdateMenuDividerWithMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateMenuDividerWithMode006, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto previousNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(previousNode, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    int32_t index = 0;
+    auto previousPattern = previousNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(previousPattern, nullptr);
+    auto previousDivider = FrameNode::GetOrCreateFrameNode(
+            V2::MENU_DIVIDER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() {return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    previousPattern->bottomDivider_ = previousDivider;
+    menuPattern->UpdateMenuDividerWithMode(previousNode, currentNode, nullptr, index);
+}
+
+/**
+ * @tc.name:  UpdateDividerProperty001
+ * @tc.desc: Test  UpdateDividerProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateDividerProperty001, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(
+            V2::MENU_DIVIDER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() {return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    V2::ItemDivider dividerValue;
+    dividerValue.strokeWidth = Dimension(2.0f, DimensionUnit::PX);
+    dividerValue.color = Color::RED;
+    dividerValue.startMargin = Dimension(10.0f, DimensionUnit::PX);
+    dividerValue.endMargin = Dimension(10.0f, DimensionUnit::PX);
+    std::optional<V2::ItemDivider> divider = dividerValue;
+
+    menuPattern->UpdateDividerProperty(dividerNode, divider);
+    auto paintProperty = dividerNode->GetPaintProperty<MenuDividerPaintProperty>();
+    EXPECT_EQ(paintProperty->GetStrokeWidth(), Dimension(2.0f, DimensionUnit::PX));
+    EXPECT_EQ(paintProperty->GetDividerColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetStartMargin(), Dimension(10.0f, DimensionUnit::PX));
+    EXPECT_EQ(paintProperty->GetEndMargin(), Dimension(10.0f, DimensionUnit::PX));
+}
+
+/**
+ * @tc.name:  UpdateDividerProperty002
+ * @tc.desc: Test  UpdateDividerProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateDividerProperty002, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(
+            V2::MENU_DIVIDER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() {return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    std::optional<V2::ItemDivider> divider;
+    menuPattern->UpdateDividerProperty(dividerNode, divider);
+}
+
+/**
+ * @tc.name:  GetMenuOffset001
+ * @tc.desc: Test  GetMenuOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, GetMenuOffset001, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(outerMenuNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(scrollNode);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto [originOffset, endOffset] = menuPattern->GetMenuOffset(outerMenuNode, true);
+    EXPECT_EQ(originOffset, OffsetF());
+    EXPECT_EQ(endOffset, OffsetF());
+}
+
+/**
+ * @tc.name:  GetMenuOffset002
+ * @tc.desc: Test  GetMenuOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, GetMenuOffset002, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(outerMenuNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(scrollNode);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->SetClickMenuItemId(menuItemNode->GetId());
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    auto [originOffset, endOffset] = menuPattern->GetMenuOffset(outerMenuNode, true);
+    ASSERT_NE(originOffset, OffsetF());
+    ASSERT_NE(endOffset, OffsetF());
+}
+
+/**
+ * @tc.name:  IsSelectOverlayDefaultModeRightClickMenu001
+ * @tc.desc: Test  IsSelectOverlayDefaultModeRightClickMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, IsSelectOverlayDefaultModeRightClickMenu001, TestSize.Level1)
+{
+    auto menuWrapperNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() {return AceType::MakeRefPtr<MenuWrapperPattern>(1);});
+    ASSERT_NE(menuWrapperNode, nullptr);
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    outerMenuNode->MountToParent(menuWrapperNode);
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU;
+
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    menuWrapperPattern->SetIsSelectOverlaySubWindowWrapper(false);
+
+    bool res = menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name:  HandleDragEnd001
+ * @tc.desc: Test  HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, HandleDragEnd001, TestSize.Level1)
+{
+    auto menuPreviewPattern = AceType::MakeRefPtr<MenuPreviewPattern>();
+    ASSERT_NE(menuPreviewPattern, nullptr);
+    menuPreviewPattern->HandleDragEnd(OFFSET_FIRST, OFFSET_FIRST, PAN_MAX_VELOCITY);
+    menuPreviewPattern->HandleDragEnd(OFFSET_SECOND, OFFSET_FIRST, PAN_MAX_VELOCITY);
+    menuPreviewPattern->HandleDragEnd(OFFSET_FIRST, OFFSET_SECOND, 3000.0f);
+}
+
+/**
+ * @tc.name:  UpdateShowScale001
+ * @tc.desc: Test  UpdateShowScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, UpdateShowScale001, TestSize.Level1)
+{
+    auto menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    auto menuRenderContext = menuNode->GetRenderContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE);
+    ASSERT_NE(menuPattern, nullptr);
+    MenuPreviewPattern menuPreviewPattern;
+    menuPreviewPattern.hasPreviewTransitionEffect_ = true;
+    menuPreviewPattern.UpdateShowScale(menuRenderContext, menuTheme, menuPattern);
+    RefPtr<MenuPattern> nullMenuPattern;
+    menuPreviewPattern.UpdateShowScale(menuRenderContext, menuTheme, nullMenuPattern);
 }
 } // namespace OHOS::Ace::NG

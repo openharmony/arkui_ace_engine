@@ -2474,4 +2474,69 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg092, TestSize.Level1)
     frameNode->AddFrameNodeChangeInfoFlag(0);
     EXPECT_EQ(frameNode->GetChangeInfoFlag(), 0);
 }
+
+/**
+ * @tc.name: FrameNodeTestNg093
+ * @tc.desc: Test SetPaintNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, SetPaintNode, TestSize.Level1)
+{
+    auto paintNode = AceType::MakeRefPtr<FrameNode>("paintNodeTag", 2, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->SetPaintNode(paintNode);
+    EXPECT_EQ(frameNode->GetPaintNode(), paintNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg094
+ * @tc.desc: Test GetPaintNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPaintNodeTest, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
+    FrameNode frameNode("testTag", 1, pattern);
+    RefPtr<FrameNode> paintNode = AceType::MakeRefPtr<FrameNode>("paintNodeTag", 2, pattern);
+    frameNode.SetPaintNode(paintNode);
+    const RefPtr<FrameNode>& result = frameNode.GetPaintNode();
+    ASSERT_EQ(result, paintNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg095
+ * @tc.desc: Test SetFocusPaintNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, SetFocusPaintNodeTest, TestSize.Level1)
+{
+    auto focusPaintNode = AceType::MakeRefPtr<FrameNode>("focusTag", 2, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->SetFocusPaintNode(focusPaintNode);
+    EXPECT_EQ(frameNode->GetFocusPaintNode(), focusPaintNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg096
+ * @tc.desc: Test GetFocusPaintNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetFocusPaintNodeTest, TestSize.Level1)
+{
+    auto focusPaintNode = AceType::MakeRefPtr<FrameNode>("focusPaintNode", 2, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->SetFocusPaintNode(focusPaintNode);
+    EXPECT_EQ(frameNode->GetFocusPaintNode(), focusPaintNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg097
+ * @tc.desc: Test IsDrawFocusOnTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, IsDrawFocusOnTopTest, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_FALSE(frameNode->IsDrawFocusOnTop());
+}
 } // namespace OHOS::Ace::NG

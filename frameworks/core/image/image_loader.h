@@ -110,7 +110,7 @@ public:
     ~NetworkImageLoader() override = default;
     std::shared_ptr<RSData> LoadImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
-    static bool DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId);
+    static bool DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync);
 };
 
 class InternalImageLoader final : public ImageLoader {

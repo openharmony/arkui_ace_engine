@@ -239,7 +239,7 @@ void JSFontSpan::GetFontStyle(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontStyle.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)?
+    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)?
         JSVal(ToJSValue(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value()))) :
         JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontStyle.value())))));
     info.SetReturnValue(ret);
@@ -253,7 +253,7 @@ void JSFontSpan::GetFontWeight(const JSCallbackInfo& info)
     if (!fontSpan_->GetFont().fontWeight.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)?
+    auto ret = JSRef<JSVal>::Make(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)?
         JSVal(ToJSValue(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value()))) :
         JSVal(ToJSValue(std::to_string(static_cast<int32_t>(fontSpan_->GetFont().fontWeight.value())))));
     info.SetReturnValue(ret);

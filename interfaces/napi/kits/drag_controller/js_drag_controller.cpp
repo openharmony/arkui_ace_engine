@@ -992,6 +992,8 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
 #endif
     if (ret == 0) {
+        asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
+            asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
         if (NG::DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
             asyncCtx->isSwitchedToSubWindow = true;
         }

@@ -305,4 +305,43 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarMarginTest001, TestSize.Level1)
     EXPECT_EQ(frameOffset.GetX(), 10.0f);
     EXPECT_EQ(frameOffset.GetY(), 10.0f);
 }
+
+/**
+ * @tc.name: TabBarBarGridAlign
+ * @tc.desc: test barGridAlign in RTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarUniversalAttributeTestNg, TabBarBarGridAlign, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    auto geometryNode = tabBarNode_->GetGeometryNode();
+    EXPECT_NE(geometryNode, nullptr);
+    EXPECT_EQ(geometryNode->GetFrameSize().Width(), 720.0f);
+    EXPECT_EQ(geometryNode->GetFrameSize().Height(), 56.0f);
+    auto childNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    EXPECT_NE(childNode, nullptr);
+    auto childGeometryNode = childNode->GetGeometryNode();
+    EXPECT_NE(childGeometryNode, nullptr);
+
+    BarGridColumnOptions options;
+    options.sm = 4;
+    options.margin = Dimension(10);
+    model.SetBarGridAlign(AceType::RawPtr(frameNode_), options);
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(400.0f));
+    FlushUITasks();
+    auto childOffset = childGeometryNode->GetMarginFrameOffset();
+    EXPECT_EQ(childOffset.GetX(), 10.0f);
+
+    ViewAbstract::SetLayoutDirection(AceType::RawPtr(tabBarNode_), TextDirection::RTL);
+    FlushUITasks();
+    childNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(TABCONTENT_NUMBER - 1));
+    EXPECT_NE(childNode, nullptr);
+    childGeometryNode = childNode->GetGeometryNode();
+    EXPECT_NE(childGeometryNode, nullptr);
+    childOffset = childGeometryNode->GetMarginFrameOffset();
+    EXPECT_EQ(childOffset.GetX(), 10.0f);
+}
 } // namespace OHOS::Ace::NG

@@ -263,6 +263,23 @@ class UIContext {
         this.instanceId_ = instanceId;
     }
 
+    static createUIContextWithoutWindow(context) {
+        let utils = globalThis.requireNapi('arkui.containerUtils');
+        let uicontext = undefined;
+        if (utils) {
+            uicontext = utils.createContainerWithoutWindow(context);
+        }
+
+        return uicontext;
+    }
+
+    static destroyUIContextWithoutWindow() {
+        let utils = globalThis.requireNapi('arkui.containerUtils');
+        if (utils) {
+            utils.destroyContainerWithoutWindow();
+        }
+    }
+
     getDragController() {
         this.dragController_ = new DragController(this.instanceId_);
         return this.dragController_;
@@ -524,6 +541,19 @@ class UIContext {
         let keyBoardAvoidMode = __KeyboardAvoid__.getKeyboardAvoid();
         __JSScopeUtil__.restoreInstanceId();
         return keyBoardAvoidMode;
+    }
+
+    setPixelRoundMode(pixelRoundMode) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.setPixelRoundMode(pixelRoundMode);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getPixelRoundMode() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelRoundMode = JSViewAbstract.getPixelRoundMode();
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelRoundMode;
     }
 
     dispatchKeyEvent(node, event) {

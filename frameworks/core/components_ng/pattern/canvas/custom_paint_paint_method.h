@@ -411,7 +411,7 @@ protected:
 
     RSBitmapFormat GetBitmapFormat()
     {
-        if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
             return RSBitmapFormat { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_PREMUL };
         } else {
             return RSBitmapFormat { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };

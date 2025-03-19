@@ -1227,41 +1227,6 @@ HWTEST_F(RichEditorPatternTestSixNg, BeforeAddImage001, TestSize.Level1)
 }
 
 /**
- * @tc.name: UndoDrag003
- * @tc.desc: test UndoDrag
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, UndoDrag003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord record;
-    record.addText = u"test123\n";
-    record.deleteCaretPostion = 1;
-    auto caretPosition = richEditorPattern->caretPosition_;
-    richEditorPattern->UndoDrag(record);
-    EXPECT_NE(richEditorPattern->caretPosition_, caretPosition);
-}
-
-/**
- * @tc.name: RedoDrag003
- * @tc.desc: test RedoDrag
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, RedoDrag003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord record;
-    record.deleteCaretPostion = 1;
-    auto caretPosition = richEditorPattern->caretPosition_;
-    richEditorPattern->RedoDrag(record);
-    EXPECT_EQ(richEditorPattern->caretPosition_, caretPosition);
-}
-
-/**
  * @tc.name: SetPreviewMenuParam001
  * @tc.desc: test SetPreviewMenuParam
  * @tc.type: FUNC
@@ -1278,24 +1243,6 @@ HWTEST_F(RichEditorPatternTestSixNg, SetPreviewMenuParam001, TestSize.Level1)
 
     richEditorPattern->SetPreviewMenuParam(spanType, builder, menuParam);
     EXPECT_TRUE(richEditorPattern->oneStepDragController_);
-}
-
-/**
- * @tc.name: OnPlaceholderHover001
- * @tc.desc: test OnPlaceholderHover
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, OnPlaceholderHover001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->currentMouseStyle_ = MouseFormat::DEFAULT;
-    richEditorPattern->OnPlaceholderHover(true);
-    EXPECT_NE(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
-
-    richEditorPattern->OnPlaceholderHover(false);
-    EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
 }
 
 /**

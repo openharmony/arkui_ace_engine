@@ -60,9 +60,6 @@ const std::string PNG_FILE_EXTENSION = "png";
 constexpr int32_t MEDIA_TYPE_AUD = 0;
 constexpr float VOLUME_STEP = 0.05f;
 
-// Default error, empty string.
-const std::string ERROR = "";
-
 enum SliderChangeMode {
     BEGIN = 0,
     MOVING,
@@ -134,29 +131,20 @@ SizeF MeasureVideoContentLayout(const SizeF& layoutSize, const RefPtr<VideoLayou
 
     auto videoSize = layoutProperty->GetVideoSizeValue(SizeF(0, 0));
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
-    SizeF contentSize = { 0.0, 0.0 };
     switch (imageFit) {
         case ImageFit::CONTAIN:
-            contentSize = CalculateFitContain(videoSize, layoutSize);
-            break;
+            return CalculateFitContain(videoSize, layoutSize);
         case ImageFit::FILL:
-            contentSize = CalculateFitFill(layoutSize);
-            break;
+            return CalculateFitFill(layoutSize);
         case ImageFit::COVER:
-            contentSize = CalculateFitCover(videoSize, layoutSize);
-            break;
+            return CalculateFitCover(videoSize, layoutSize);
         case ImageFit::NONE:
-            contentSize = CalculateFitNone(videoSize);
-            break;
+            return CalculateFitNone(videoSize);
         case ImageFit::SCALE_DOWN:
-            contentSize = CalculateFitScaleDown(videoSize, layoutSize);
-            break;
+            return CalculateFitScaleDown(videoSize, layoutSize);
         default:
-            contentSize = CalculateFitContain(videoSize, layoutSize);
+            return CalculateFitContain(videoSize, layoutSize);
     }
-
-    // Just return contentSize as the video frame area.
-    return contentSize;
 }
 
 float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
@@ -301,6 +289,32 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
 
     mediaPlayer->RegisterMediaPlayerEvent(
         positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
+}
+
+std::string StatusToString(PlaybackStatus status)
+{
+    switch (status) {
+        case PlaybackStatus::ERROR:
+            return "ERROR";
+        case PlaybackStatus::IDLE:
+            return "IDLE";
+        case PlaybackStatus::INITIALIZED:
+            return "INITIALIZED";
+        case PlaybackStatus::PREPARED:
+            return "PREPARED";
+        case PlaybackStatus::STARTED:
+            return "STARTED";
+        case PlaybackStatus::PAUSED:
+            return "PAUSED";
+        case PlaybackStatus::STOPPED:
+            return "STOPPED";
+        case PlaybackStatus::PLAYBACK_COMPLETE:
+            return "PLAYBACK_COMPLETE";
+        case PlaybackStatus::NONE:
+            return "NONE";
+        default:
+            return "Invalid";
+    }
 }
 } // namespace
 
@@ -489,39 +503,6 @@ void VideoPattern::OnTextureRefresh(void* surface)
 }
 #endif
 
-void VideoPattern::PrintPlayerStatus(PlaybackStatus status)
-{
-    switch (status) {
-        case PlaybackStatus::ERROR:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is ERROR.", hostId_);
-            break;
-        case PlaybackStatus::IDLE:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is IDLE.", hostId_);
-            break;
-        case PlaybackStatus::PREPARED:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is PREPARED.", hostId_);
-            break;
-        case PlaybackStatus::STARTED:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is STARTED.", hostId_);
-            break;
-        case PlaybackStatus::PAUSED:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is PAUSED.", hostId_);
-            break;
-        case PlaybackStatus::STOPPED:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is STOPPED.", hostId_);
-            break;
-        case PlaybackStatus::PLAYBACK_COMPLETE:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is PLAYBACK_COMPLETE.", hostId_);
-            break;
-        case PlaybackStatus::NONE:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is NONE.", hostId_);
-            break;
-        default:
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] Invalid player status.", hostId_);
-            break;
-    }
-}
-
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 {
     isInitialState_ = isInitialState_ ? currentPos == 0 : false;
@@ -541,60 +522,47 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
     currentPos_ = isSeeking_ ? currentPos_ : currentPos;
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto json = JsonUtil::Create(true);
-    json->Put("time", static_cast<double>(currentPos));
-    auto param = json->ToString();
-    eventHub->FireUpdateEvent(param);
+    eventHub->FireUpdateEvent(static_cast<double>(currentPos));
 }
 
-void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status)
+void VideoPattern::ChangePlayerStatus(const PlaybackStatus& status)
 {
-    if (isPlaying) {
-        auto json = JsonUtil::Create(true);
-        json->Put("start", "");
-        auto param = json->ToString();
-        auto eventHub = GetEventHub<VideoEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireStartEvent(param);
-    }
-
-    if (status == PlaybackStatus::PAUSED) {
-        auto json = JsonUtil::Create(true);
-        json->Put("pause", "");
-        auto param = json->ToString();
-        auto eventHub = GetEventHub<VideoEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FirePauseEvent(param);
-    }
-
-    if (status == PlaybackStatus::STOPPED) {
-        auto json = JsonUtil::Create(true);
-        json->Put("stop", "");
-        auto param = json->ToString();
-        auto eventHub = GetEventHub<VideoEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireStopEvent(param);
-    }
-
-    if (status == PlaybackStatus::PREPARED) {
-        ContainerScope scope(instanceId_);
-        if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
-            return;
+    auto eventHub = GetEventHub<VideoEventHub>();
+    switch (status) {
+        case PlaybackStatus::STARTED:
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireStartEvent();
+            break;
+        case PlaybackStatus::PAUSED:
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FirePauseEvent();
+            break;
+        case PlaybackStatus::STOPPED:
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireStopEvent();
+            break;
+        case PlaybackStatus::PREPARED: {
+            ContainerScope scope(instanceId_);
+            if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+                return;
+            }
+            int32_t milliSecondDuration = 0;
+            mediaPlayer_->GetDuration(milliSecondDuration);
+            OnPrepared(milliSecondDuration / MILLISECONDS_TO_SECONDS, 0, true);
+            break;
         }
-        int32_t milliSecondDuration = 0;
-        mediaPlayer_->GetDuration(milliSecondDuration);
-        OnPrepared(milliSecondDuration / MILLISECONDS_TO_SECONDS, 0, true);
-        return;
-    }
-
-    if (status == PlaybackStatus::PLAYBACK_COMPLETE) {
-        OnCompletion();
+        case PlaybackStatus::PLAYBACK_COMPLETE:
+            OnCompletion();
+            break;
+        default:
+            break;
     }
 }
 
 void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 {
-    PrintPlayerStatus(status);
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is %{public}s.", hostId_,
+        StatusToString(status).c_str());
     bool isPlaying = (status == PlaybackStatus::STARTED);
     if (isPlaying_ != isPlaying) {
         isPlaying_ = isPlaying;
@@ -605,30 +573,21 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
         isInitialState_ = !isPlaying;
     }
 
-    ChangePlayerStatus(isPlaying, status);
+    ChangePlayerStatus(status);
 }
 
 void VideoPattern::OnError(const std::string& errorId)
 {
+    AddChild();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto video = AceType::DynamicCast<VideoNode>(host);
-    CHECK_NULL_VOID(video);
-    auto column = AceType::DynamicCast<FrameNode>(video->GetMediaColumn());
-    CHECK_NULL_VOID(column);
-    auto renderContext = column->GetRenderContext();
-    renderContext->AddChild(renderContextForMediaPlayer_, 0);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
 
-    std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
-    auto json = JsonUtil::Create(true);
-    json->Put("error", "");
-    auto param = json->ToString();
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireErrorEvent(param);
+    eventHub->FireErrorEvent();
 }
 
 void VideoPattern::OnResolutionChange() const
@@ -710,12 +669,9 @@ void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needF
     ChangePlayButtonTag(playBtn);
 
     if (needFireEvent) {
-        auto json = JsonUtil::Create(true);
-        json->Put("duration", static_cast<double>(duration_));
-        auto param = json->ToString();
         auto eventHub = GetEventHub<VideoEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->FirePreparedEvent(param);
+        eventHub->FirePreparedEvent(static_cast<double>(duration_));
     }
     TAG_LOGI(AceLogTag::ACE_VIDEO,
         "Video[%{public}d] duration: %{public}u, loop: %{public}d, muted: %{public}d, Speed: %{public}f", hostId_,
@@ -742,12 +698,9 @@ void VideoPattern::OnCompletion()
     isPlaying_ = false;
     currentPos_ = duration_;
     OnUpdateTime(currentPos_, CURRENT_POS);
-    auto json = JsonUtil::Create(true);
-    json->Put("finish", "");
-    auto param = json->ToString();
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireFinishEvent(param);
+    eventHub->FireFinishEvent();
 }
 
 bool VideoPattern::HasPlayer() const
@@ -848,9 +801,7 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
     auto layoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     bool needControlBar = layoutProperty->GetControlsValue(true);
-    if (!needControlBar) {
-        return;
-    }
+    CHECK_NULL_VOID(needControlBar);
 
     RefPtr<UINode> controlBar = nullptr;
     auto children = host->GetChildren();
@@ -1021,8 +972,6 @@ void VideoPattern::OnModifyDone()
     }
     auto eventHub = GetEventHub<VideoEventHub>();
     if (!AceType::InstanceOf<VideoFullScreenPattern>(this)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         eventHub->SetInspectorId(host->GetInspectorIdValue(""));
     }
     if (!IsSupportImageAnalyzer()) {
@@ -1243,12 +1192,8 @@ void VideoPattern::UpdateVideoProperty()
     UpdateMuted();
 }
 
-void VideoPattern::OnRebuildFrame()
+void VideoPattern::AddChild()
 {
-    if (!renderSurface_ || !renderSurface_->IsSurfaceValid()) {
-        TAG_LOGW(AceLogTag::ACE_VIDEO, "MediaPlayer surface is not valid");
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto video = AceType::DynamicCast<VideoNode>(host);
@@ -1257,6 +1202,15 @@ void VideoPattern::OnRebuildFrame()
     CHECK_NULL_VOID(column);
     auto renderContext = column->GetRenderContext();
     renderContext->AddChild(renderContextForMediaPlayer_, 0);
+}
+
+void VideoPattern::OnRebuildFrame()
+{
+    if (!renderSurface_ || !renderSurface_->IsSurfaceValid()) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "MediaPlayer surface is not valid");
+        return;
+    }
+    AddChild();
 }
 
 void VideoPattern::RemoveMediaPlayerSurfaceNode()
@@ -1410,7 +1364,7 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
     controlBar->AddChild(currentPosText);
 
     auto slider = CreateSlider();
-    CHECK_NULL_RETURN(currentPosText, nullptr);
+    CHECK_NULL_RETURN(slider, nullptr);
     controlBar->AddChild(slider);
 
     auto durationText = CreateText(duration_);
@@ -1869,25 +1823,18 @@ void VideoPattern::OnSliderChange(float posTime, int32_t mode)
     SetCurrentTime(posTime, OHOS::Ace::SeekMode::SEEK_CLOSEST);
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto json = JsonUtil::Create(true);
-    json->Put("time", static_cast<double>(posTime));
-    auto param = json->ToString();
-    CHECK_NULL_VOID(eventHub);
     if (mode == SliderChangeMode::BEGIN || mode == SliderChangeMode::MOVING) {
-        eventHub->FireSeekingEvent(param);
+        eventHub->FireSeekingEvent(static_cast<double>(posTime));
     } else if (mode == SliderChangeMode::END) {
-        eventHub->FireSeekedEvent(param);
+        eventHub->FireSeekedEvent(static_cast<double>(posTime));
     }
 }
 
 void VideoPattern::OnFullScreenChange(bool isFullScreen)
 {
-    auto json = JsonUtil::Create(true);
-    json->Put("fullscreen", isFullScreen);
-    auto param = json->ToString();
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->FireFullScreenChangeEvent(param);
+    eventHub->FireFullScreenChangeEvent(isFullScreen);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();

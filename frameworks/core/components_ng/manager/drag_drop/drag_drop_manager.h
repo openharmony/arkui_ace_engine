@@ -385,6 +385,7 @@ public:
     void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
         const OffsetF& gatherNodeCenter, PreparedInfoForDrag& data, Point point = { 1, 1 });
     void SetDragStartAnimationOption(AnimationOption& option, int32_t containerId);
+    void HandleStartDragAnimationFinish(int32_t containerId);
     void DragAnimationCurve(RefPtr<Curve> curve);
     void DragStartTransitionAnimation(
         PreparedInfoForDrag& data, const Offset& newOffset, const DragPreviewInfo& info, AnimationOption option);
@@ -484,6 +485,16 @@ public:
     void SetDragDropPointerEvent(const DragPointerEvent& dragDropPointerEvent)
     {
         dragDropPointerEvent_ = dragDropPointerEvent;
+    }
+
+    const DragPointerEvent& GetDragAnimationPointerEvent() const
+    {
+        return dragAnimationPointerEvent_;
+    }
+
+    void SetDragAnimationPointerEvent(const DragPointerEvent& pointerEvent)
+    {
+        dragAnimationPointerEvent_ = pointerEvent;
     }
 
     bool IsDragFwkShow() const
@@ -746,6 +757,7 @@ private:
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     DragPointerEvent dragDropPointerEvent_;
+    DragPointerEvent dragAnimationPointerEvent_;
     bool isDragFwkShow_ = true;
     OffsetF pixelMapOffset_;
     OffsetF curPointerOffset_;

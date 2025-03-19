@@ -126,7 +126,7 @@ public:
     void CloseMenu();
     void ClearMenu();
     void ClearMenuNG(int32_t instanceId = -1, int32_t targetId = -1, bool inWindow = true, bool showAnimation = false);
-    void ClearPopupInSubwindow(int32_t instanceId = -1);
+    void ClearPopupInSubwindow(int32_t instanceId = -1, bool isForceClear = false);
     ACE_FORCE_EXPORT RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
@@ -189,6 +189,7 @@ public:
 
     void OnUIExtensionWindowSizeChange(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     void OnHostWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason);
+    void OnWaterfallModeChanged(int32_t instanceId, bool enabled) {}
     void HideSheetSubWindow(int32_t containerId);
     void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
