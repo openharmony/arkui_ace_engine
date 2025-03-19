@@ -206,6 +206,10 @@ const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor();
 const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor();
+const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor();
+const GENERATED_ArkUILayeredDrawableDescriptorAccessor* GetLayeredDrawableDescriptorAccessor();
+const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* GetPixelMapDrawableDescriptorAccessor();
+const GENERATED_ArkUIAnimatedDrawableDescriptorAccessor* GetAnimatedDrawableDescriptorAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
 const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
 const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor();
@@ -220,6 +224,7 @@ const GENERATED_ArkUIEllipseShapeAccessor* GetEllipseShapeAccessor();
 const GENERATED_ArkUIPathShapeAccessor* GetPathShapeAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos_measure_utilsAccessor();
+const GENERATED_ArkUISymbolEffectAccessor* GetSymbolEffectAccessor();
 const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor();
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor();
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor();
@@ -317,6 +322,7 @@ const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffe
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
 const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor();
+const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor();
 const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor();
 const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor();
@@ -505,6 +511,10 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLazyForEachOpsAccessor,
         GetSystemOpsAccessor,
         GetFocusControllerAccessor,
+        GetDrawableDescriptorAccessor,
+        GetLayeredDrawableDescriptorAccessor,
+        GetPixelMapDrawableDescriptorAccessor,
+        GetAnimatedDrawableDescriptorAccessor,
         GetDrawingCanvasAccessor,
         GetLengthMetricsAccessor,
         GetColorMetricsAccessor,
@@ -519,6 +529,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPathShapeAccessor,
         GetGlobalScope_ohos_fontAccessor,
         GetGlobalScope_ohos_measure_utilsAccessor,
+        GetSymbolEffectAccessor,
         GetScaleSymbolEffectAccessor,
         GetReplaceSymbolEffectAccessor,
         GetFrameNodeAccessor,
@@ -616,6 +627,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetAppearSymbolEffectAccessor,
         GetDisappearSymbolEffectAccessor,
         GetBounceSymbolEffectAccessor,
+        GetPulseSymbolEffectAccessor,
         GetTabsControllerAccessor,
         GetTabContentTransitionProxyAccessor,
         GetTextControllerAccessor,
