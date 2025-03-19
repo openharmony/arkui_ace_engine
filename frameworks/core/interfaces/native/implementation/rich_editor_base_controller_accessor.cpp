@@ -45,7 +45,7 @@ std::vector<Shadow> Convert(const Ark_Union_ShadowOptions_Array_ShadowOptions& s
     return ret;
 }
 template<>
-struct UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
+UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
 {
     UpdateSpanStyle ret;
     ret.updateTextColor = Converter::OptConvert<Color>(src.fontColor);
@@ -70,6 +70,51 @@ struct UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
         ret.updateLetterSpacing = letterSpacingOpt.value();
     }
     return ret;
+}
+
+void AssignArkValue(Ark_DecorationStyleInterface& dst, const UpdateSpanStyle& src,
+    Converter::ConvContext *ctx)
+{
+    auto color = src.updateTextDecorationColor.value_or(Color::BLACK);
+    auto strColor = Converter::ArkValue<Ark_String>(color.ToString(), ctx);
+    dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(strColor);
+    auto style = src.updateTextDecorationStyle.value_or(static_cast<TextDecorationStyle>(-1));
+    dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.updateTextDecorationStyle);
+    dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.updateTextDecoration.value_or(TextDecoration::NONE));
+}
+
+void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Converter::ConvContext *ctx)
+{
+    auto color = src.updateTextColor.value_or(Color::BLACK);
+    auto strColor = Converter::ArkValue<Ark_String>(color.ToString(), ctx);
+    dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(strColor);
+    dst.fontSize = Converter::ArkUnion<Opt_Union_Length_Number,
+        Ark_Length>(src.updateFontSize.value_or(CalcDimension()));
+    dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(src.updateItalicFontStyle);
+    auto arkFontWeight = Converter::ArkValue<Ark_FontWeight>(src.updateFontWeight.value_or(FontWeight::NORMAL));
+    dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String,
+        Ark_FontWeight>(arkFontWeight);
+    Ark_String fontFamilies = {};
+    if (src.updateFontFamily && !src.updateFontFamily->empty()) {
+        auto families = src.updateFontFamily.value();
+        fontFamilies = Converter::ArkValue<Ark_String>(families[0], ctx);
+    }
+    dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(fontFamilies);
+    dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(src, ctx);
+    auto shadowVec = src.updateTextShadows.value_or(std::vector<Shadow>());
+    auto array = Converter::ArkValue<Array_ShadowOptions>(shadowVec, ctx);
+    dst.textShadow = Converter::ArkUnion<Opt_Union_ShadowOptions_Array_ShadowOptions, Array_ShadowOptions>(array);
+    auto str = Converter::ArkValue<Ark_String>(src.updateLetterSpacing.value_or(CalcDimension()).ToString(), ctx);
+    dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(str);
+    str = Converter::ArkValue<Ark_String>(src.updateLineHeight.value_or(CalcDimension()).ToString(), ctx);
+    dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(str);
+    dst.fontFeature = Converter::ArkValue<Opt_String>(src.updateFontFeature);
+}
+
+void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, Converter::ConvContext *ctx)
+{
+    dst.offset = ArkValue<Ark_Number>(src.offset.value_or(0.0f));
+    dst.value = ArkValue<Ark_String>(src.value.value_or(std::u16string()), ctx);
 }
 }
 
@@ -113,7 +158,10 @@ void CloseSelectionMenuImpl(Ark_RichEditorBaseController peer)
 Ark_RichEditorTextStyle GetTypingStyleImpl(Ark_RichEditorBaseController peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    LOGW("RichEditorBaseControllerAccessor:: GetTypingStyleImpl is not implemented");
+    auto style = peer->GetTypingStyle();
+    if (style) {
+        return Converter::ArkValue<Ark_RichEditorTextStyle>(style.value(), Converter::FC);
+    }
     return {};
 }
 void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
@@ -122,7 +170,7 @@ void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(value);
     auto textStyle = Converter::OptConvert<TextStyle>(*value);
-    auto typingStyle = Converter::OptConvert<struct UpdateSpanStyle>(*value);
+    auto typingStyle = Converter::OptConvert<UpdateSpanStyle>(*value);
     peer->SetTypingStyle(typingStyle, textStyle);
 }
 void SetSelectionImpl(Ark_RichEditorBaseController peer,
@@ -160,11 +208,9 @@ Ark_LayoutManager GetLayoutManagerImpl(Ark_RichEditorBaseController peer)
 }
 Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
 {
-    LOGW("RichEditorBaseControllerAccessor:: GetPreviewTextImpl is not implemented");
-    // fix a return value
     CHECK_NULL_RETURN(peer, {});
-    peer->GetPreviewText();
-    return {};
+    auto result = peer->GetPreviewText();
+    return Converter::ArkValue<Ark_PreviewText>(result, Converter::FC);
 }
 Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
 {

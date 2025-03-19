@@ -56,12 +56,65 @@ static const std::vector<std::string> FONT_FAMILIES = { "serif" };
 static constexpr double FONT_SIZE = 10.0;
 static constexpr OHOS::Ace::FontWeight FONT_WEIGHT = OHOS::Ace::FontWeight::NORMAL;
 static constexpr OHOS::Ace::FontStyle FONT_STYLE = OHOS::Ace::FontStyle::NORMAL;
-static const OHOS::Ace::Color FONT_COLOUR = OHOS::Ace::Color::RED;
-
+static constexpr auto TEXT_DECOR = OHOS::Ace::TextDecoration::UNDERLINE;
+static constexpr auto TEXT_DECOR_STYLE = OHOS::Ace::TextDecorationStyle::DOTTED;
+static const auto FONT_COLOR = OHOS::Ace::Color::RED;
+static constexpr int32_t TEST_SHADOW_COUNT = 2;
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+
+UpdateSpanStyle GetUpdateSpanStyle()
+{
+    UpdateSpanStyle ret;
+    ret.updateTextColor = FONT_COLOR;
+    ret.updateFontSize = FONT_SIZE;
+    ret.updateItalicFontStyle = FONT_STYLE;
+    ret.updateFontWeight = FONT_WEIGHT;
+    ret.updateFontFamily= FONT_FAMILIES;
+    ret.updateTextDecoration = TEXT_DECOR;
+    ret.updateTextDecorationColor = FONT_COLOR;
+    ret.updateTextDecorationStyle = TEXT_DECOR_STYLE;
+    std::vector<Shadow> shadowVec;
+    shadowVec.push_back(Shadow());
+    shadowVec.push_back(Shadow(FONT_SIZE, Offset(FONT_SIZE, FONT_SIZE), FONT_COLOR, ShadowStyle::OuterDefaultXS));
+    ret.updateTextShadows = shadowVec;
+    ret.updateLineHeight = CalcDimension(FONT_SIZE);
+    ret.updateLetterSpacing = CalcDimension(FONT_SIZE);
+    return ret;
+}
+
+void CheckRichEditorTextStyle(Ark_RichEditorTextStyle &style)
+{
+    auto valOptFontSize = Converter::OptConvert<Dimension>(style.fontSize);
+    ASSERT_EQ(valOptFontSize.value_or(Dimension()).Value(), FONT_SIZE);
+    auto valOptColor = Converter::OptConvert<Color>(style.fontColor);
+    ASSERT_EQ(valOptColor.value_or(Color::TRANSPARENT), FONT_COLOR);
+    auto valOptFontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(style.fontStyle);
+    ASSERT_EQ(valOptFontStyle.value_or(OHOS::Ace::FontStyle::NONE), FONT_STYLE);
+    auto valOptFontWeight = Converter::OptConvert<OHOS::Ace::FontWeight>(style.fontWeight);
+    ASSERT_EQ(valOptFontWeight.value_or(OHOS::Ace::FontWeight::W100), FONT_WEIGHT);
+    auto valOptFontFamily = Converter::OptConvert<std::string>(style.fontFamily);
+    ASSERT_EQ(valOptFontFamily.value_or(""), FONT_FAMILIES[0]);
+    
+    auto arkDecor = Converter::OptConvert<Ark_DecorationStyleInterface>(style.decoration);
+    ASSERT_NE(arkDecor, std::nullopt);
+    valOptColor = Converter::OptConvert<Color>(arkDecor->color);
+    ASSERT_EQ(valOptColor.value_or(Color::TRANSPARENT), FONT_COLOR);
+
+    auto valDecType = Converter::OptConvert<OHOS::Ace::TextDecoration>(arkDecor->type);
+    ASSERT_EQ(valDecType, TEXT_DECOR);
+    auto valOptDecStyle = Converter::OptConvert<OHOS::Ace::TextDecorationStyle>(arkDecor->style);
+    ASSERT_EQ(valOptDecStyle.value_or(OHOS::Ace::TextDecorationStyle::SOLID), TEXT_DECOR_STYLE);
+    auto shadowsOpt = Converter::OptConvert<std::vector<Shadow>>(style.textShadow);
+    ASSERT_NE(shadowsOpt, std::nullopt);
+    ASSERT_EQ(shadowsOpt->size(), TEST_SHADOW_COUNT);
+    valOptFontSize = Converter::OptConvert<Dimension>(style.lineHeight);
+    ASSERT_EQ(valOptFontSize.value_or(Dimension()).Value(), FONT_SIZE);
+    valOptFontSize = Converter::OptConvert<Dimension>(style.letterSpacing);
+    ASSERT_EQ(valOptFontSize.value_or(Dimension()).Value(), FONT_SIZE);
+}
 
 namespace {
 class MockRichEditorBaseController : public RichEditorBaseController {
@@ -74,9 +127,24 @@ public:
     MOCK_METHOD(bool, IsEditing, ());
     MOCK_METHOD(void, StopEditing, ());
     MOCK_METHOD(void, SetSelection, (int32_t, int32_t, const std::optional<SelectionOptions>&, bool));
-    MOCK_METHOD(void, SetTypingStyle, (std::optional<struct UpdateSpanStyle>, std::optional<TextStyle>));
+    MOCK_METHOD(void, SetTypingStyle, (std::optional<UpdateSpanStyle>, std::optional<TextStyle>));
     MOCK_METHOD(const PreviewTextInfo, GetPreviewTextInfo, (), (const));
     MOCK_METHOD(WeakPtr<LayoutInfoInterface>, GetLayoutInfoInterface, ());
+};
+
+class TestRichEditorBaseController2 : public RichEditorBaseController {
+    public:
+    void SetTypingStyle(std::optional<UpdateSpanStyle> style, std::optional<TextStyle> textStyle) override
+    {
+        style_ = style;
+        textStyle_ = textStyle;
+    }
+    std::optional<UpdateSpanStyle> GetTypingStyle() override
+    {
+        return style_;
+    }
+    std::optional<UpdateSpanStyle> style_;
+    std::optional<TextStyle> textStyle_;
 };
 } // namespace
 
@@ -86,26 +154,32 @@ public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-
         mockRichEditorController_ = new MockRichEditorBaseController();
         mockRichEditorControllerKeeper_ = AceType::Claim(mockRichEditorController_);
         ASSERT_NE(mockRichEditorControllerKeeper_, nullptr);
-
-        auto peerImpl = reinterpret_cast<GeneratedModifier::RichEditorBaseControllerPeerImpl *>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->AddTargetController(mockRichEditorControllerKeeper_);
-
-        ASSERT_NE(mockRichEditorController_, nullptr);
+        peer_->AddTargetController(mockRichEditorControllerKeeper_);
     }
 
     void TearDown() override
     {
         mockRichEditorControllerKeeper_ = nullptr;
         mockRichEditorController_ = nullptr;
+        controller2_ = nullptr;
+        controllerKeeper2_ = nullptr;
+    }
+
+    void SetUp2()
+    {
+        controller2_ = new TestRichEditorBaseController2();
+        controllerKeeper2_ = AceType::Claim(controller2_);
+        ASSERT_NE(controllerKeeper2_, nullptr);
+        peer_->AddTargetController(controllerKeeper2_);
     }
 
     MockRichEditorBaseController *mockRichEditorController_ = nullptr;
     RefPtr<MockRichEditorBaseController> mockRichEditorControllerKeeper_ = nullptr;
+    TestRichEditorBaseController2 *controller2_ = nullptr;
+    RefPtr<TestRichEditorBaseController2> controllerKeeper2_ = nullptr;
 };
 
 /**
@@ -205,12 +279,12 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setSelectionTest, TestSize.Level1
 HWTEST_F(RichEditorBaseControllerAccessorTest, setTypingStyleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTypingStyle, nullptr);
-    std::optional<struct UpdateSpanStyle> spanStyle = UpdateSpanStyle();
-    spanStyle->updateTextColor = FONT_COLOUR;
+    std::optional<UpdateSpanStyle> spanStyle = UpdateSpanStyle();
+    spanStyle->updateTextColor = FONT_COLOR;
     spanStyle->updateFontSize = CalcDimension(FONT_SIZE);
     spanStyle->updateItalicFontStyle = FONT_STYLE;
     spanStyle->updateFontWeight = FONT_WEIGHT;
-    std::optional<TextStyle> textStyle = TextStyle(FONT_FAMILIES, FONT_SIZE, FONT_WEIGHT, FONT_STYLE, FONT_COLOUR);
+    std::optional<TextStyle> textStyle = TextStyle(FONT_FAMILIES, FONT_SIZE, FONT_WEIGHT, FONT_STYLE, FONT_COLOR);
     EXPECT_CALL(*mockRichEditorController_, SetTypingStyle(spanStyle, textStyle)).Times(1);
     Converter::ConvContext ctx;
     auto value = Converter::ArkValue<Ark_RichEditorTextStyle>(*textStyle, &ctx);
@@ -218,11 +292,26 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setTypingStyleTest, TestSize.Leve
 }
 
 /**
+ * @tc.name: getTypingStyleTest
+ * @tc.desc: Check the functionality of setTypingStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseControllerAccessorTest, getTypingStyleTest, TestSize.Level1)
+{
+    SetUp2();
+    ASSERT_NE(accessor_->getTypingStyle, nullptr);
+    accessor_->getTypingStyle(peer_);
+    controller2_->style_ = GetUpdateSpanStyle();
+    auto result = accessor_->getTypingStyle(peer_);
+    CheckRichEditorTextStyle(result);
+}
+
+/**
  * @tc.name: GetPreviewTextTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseControllerAccessorTest, DISABLED_GetPreviewTextTest, TestSize.Level1)
+HWTEST_F(RichEditorBaseControllerAccessorTest, GetPreviewTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPreviewText, nullptr);
     PreviewTextInfo previewText = {.offset = 1, .value = u"info"};
