@@ -456,7 +456,7 @@ export struct SubHeader {
   @Builder
   rightAreaParent(): void {
     if (this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW) {
-      Button({ type: ButtonType.Normal, stateEffect: false }) {
+      Button({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false }) {
         this.rightArea();
       }
       .focusable(this.operationItem ? true : false)
@@ -820,7 +820,7 @@ export struct SubHeader {
   TextArrowStyle(textArrow: OperationOption): void {
     if (textArrow && textArrow.value && textArrow.value.toString().length > 0) {
       Stack() {
-        Button({ type: ButtonType.Normal, stateEffect: false }) {
+        Button({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false }) {
           TextArrowLayout() {
             ForEach([INDEX_ZERO, INDEX_ONE], (index: number) => {
               if (index === INDEX_ZERO) {

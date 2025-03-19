@@ -833,7 +833,7 @@ export class SubHeader extends ViewPU {
             if (this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((v12, w12) => {
-                        Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
+                        Button.createWithChild({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false });
                         Button.focusable(this.operationItem ? true : false);
                         Button.margin(INDEX_ZERO);
                         Button.padding(INDEX_ZERO);
@@ -1500,7 +1500,7 @@ export class SubHeader extends ViewPU {
                         });
                     }, Stack);
                     this.observeComponentCreation2((e7, f7) => {
-                        Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
+                        Button.createWithChild({ type: ButtonType.Normal, buttonStyle: ButtonStyleMode.TEXTUAL, stateEffect: false });
                         Button.padding(INDEX_ZERO);
                         Button.margin({ start: this.leftIconMargin() });
                         Button.backgroundColor(ObservedObject.GetRawObject(this.textArrowBgColor));
