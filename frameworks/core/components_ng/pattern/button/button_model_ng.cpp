@@ -722,14 +722,24 @@ void ButtonModelNG::SetCreateWithLabel(FrameNode* frameNode, bool createWithLabe
     property->UpdateCreateWithLabel(createWithLabel);
 }
 
-void ButtonModelNG::SetMinFontScale(FrameNode* frameNode, float minFontScale)
+void ButtonModelNG::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontScale, minFontScale, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontScale, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontScale, frameNode);
+    }
 }
 
-void ButtonModelNG::SetMaxFontScale(FrameNode* frameNode, float maxFontScale)
+void ButtonModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontScale, maxFontScale, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontScale, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontScale, frameNode);
+    }
 }
 
 float ButtonModelNG::GetMinFontScale(FrameNode* frameNode)

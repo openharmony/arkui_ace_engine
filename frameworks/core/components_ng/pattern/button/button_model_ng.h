@@ -92,8 +92,8 @@ public:
     static void SetLabelWithCheck(FrameNode* frameNode, const char* label);
     static void SetCreateWithLabel(FrameNode* frameNode, bool createWithLabel);
     static bool GetAutoDisable(FrameNode* frameNode);
-    static void SetMinFontScale(FrameNode* frameNode, float minFontScale);
-    static void SetMaxFontScale(FrameNode* frameNode, float maxFontScale);
+    static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& minFontScale);
+    static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& maxFontScale);
     static float GetMinFontScale(FrameNode* frameNode);
     static float GetMaxFontScale(FrameNode* frameNode);
 

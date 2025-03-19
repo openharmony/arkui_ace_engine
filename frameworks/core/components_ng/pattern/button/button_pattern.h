@@ -200,10 +200,15 @@ public:
         labelJsValue->Put("maxLines", std::to_string(layoutProperty->GetMaxLines().value_or(DEFAULT_MAXLINES)).c_str());
         labelJsValue->Put("minFontSize", layoutProperty->GetMinFontSizeValue(Dimension(0)).ToString().c_str());
         labelJsValue->Put("maxFontSize", layoutProperty->GetMaxFontSizeValue(Dimension(0)).ToString().c_str());
+
+        json->PutExtAttr("minFontScale",
+                         std::to_string(layoutProperty->GetMinFontScale().value_or(0.0f)).c_str(), filter);
+        json->PutExtAttr("maxFontScale", std::to_string(layoutProperty->GetMaxFontScale().value_or(
+            static_cast<float>(INT32_MAX))).c_str(), filter);
+
         labelJsValue->Put("heightAdaptivePolicy",
             V2::ConvertWrapTextHeightAdaptivePolicyToString(
-                layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
-                .c_str());
+                layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
         labelJsValue->Put("font", fontJsValue->ToString().c_str());
         json->PutExtAttr("labelStyle", labelJsValue->ToString().c_str(), filter);
 
