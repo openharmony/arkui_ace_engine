@@ -1358,7 +1358,7 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
     auto&& assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
-        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, bool isRestricted) {
+        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, void** mapper, bool isRestricted) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             return;
