@@ -696,14 +696,27 @@ void FrameNode::InitializePatternAndContext()
     }
 }
 
+void FrameNode::DumpLayoutInfo()
+{
+    auto layoutInfoString = layoutProperty_->LayoutInfoToString();
+    if (!layoutInfoString.empty()) {
+        DumpLog::GetInstance().AddDesc(std::string("LayoutInfo: ").append(layoutInfoString.c_str()));
+    }
+    const auto& flexItemProperty = layoutProperty_->GetFlexItemProperty();
+    if (flexItemProperty) {
+        auto flexLayoutInfoString = flexItemProperty->FlexLayoutInfoToString();
+        if (!flexLayoutInfoString.empty()) {
+            DumpLog::GetInstance().AddDesc(std::string("FlexLayoutInfo: ").append(flexLayoutInfoString.c_str()));
+        }
+    }
+}
+
 void FrameNode::DumpSafeAreaInfo()
 {
     auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
     if (opts) {
-        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaExpandOpts()
-                                           ->ToString()
-                                           .append(",hostPageId: ")
-                                           .append(std::to_string(GetPageId()).c_str()));
+        DumpLog::GetInstance().AddDesc(
+            opts->ToString().append(",hostPageId: ").append(std::to_string(GetPageId()).c_str()));
     }
     if (layoutProperty_->GetSafeAreaInsets()) {
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
@@ -806,6 +819,7 @@ void FrameNode::DumpCommonInfo()
     }
     DumpExtensionHandlerInfo();
     DumpSafeAreaInfo();
+    DumpLayoutInfo();
     if (layoutProperty_->GetCalcLayoutConstraint()) {
         DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
                                            .append(layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()));

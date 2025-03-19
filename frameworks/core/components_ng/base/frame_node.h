@@ -1346,6 +1346,8 @@ private:
     void BuildLayoutInfo(std::unique_ptr<JsonValue>& json);
 
     void DumpSafeAreaInfo();
+    // add flexLayout && direction && align && aspectRatio dumpInfo
+    void DumpLayoutInfo();
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;

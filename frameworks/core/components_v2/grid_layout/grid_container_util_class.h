@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_CONTAINER_UTIL_CLASS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_CONTAINER_UTIL_CLASS_H
 
+#include <sstream>
 #include <utility>
 
 #include "base/geometry/dimension.h"
@@ -45,6 +46,20 @@ struct GridContainerSize : public Referenced {
     int32_t lg = DEFAULT_COLUMN_NUMBER;
     int32_t xl = DEFAULT_COLUMN_NUMBER;
     int32_t xxl = DEFAULT_COLUMN_NUMBER;
+
+    std::string ToString()
+    {
+        std::stringstream ss;
+        ss << "GridContainerSize: {";
+        ss << "xs: " << xs << ", ";
+        ss << "sm: " << sm << ", ";
+        ss << "md: " << md << ", ";
+        ss << "lg: " << lg << ", ";
+        ss << "xl: " << xl << ", ";
+        ss << "xxl: " << xxl;
+        ss << " }";
+        return ss.str();
+    }
 };
 
 enum class BreakPointsReference {
@@ -125,6 +140,26 @@ public:
     Dimension yXl;
     Dimension xXXl;
     Dimension yXXl;
+
+    std::string ToString()
+    {
+        std::stringstream ss;
+        ss << "Gutter: {";
+        ss << "xXs: " << xXs.ToString().c_str() << ", ";
+        ss << "yXs: " << yXs.ToString().c_str() << ", ";
+        ss << "xSm: " << xSm.ToString().c_str() << ", ";
+        ss << "ySm: " << ySm.ToString().c_str() << ", ";
+        ss << "xMd: " << xMd.ToString().c_str() << ", ";
+        ss << "yMd: " << yMd.ToString().c_str() << ", ";
+        ss << "xLg: " << xLg.ToString().c_str() << ", ";
+        ss << "yLg: " << yLg.ToString().c_str() << ", ";
+        ss << "xXl: " << xXl.ToString().c_str() << ", ";
+        ss << "yXl: " << yXl.ToString().c_str() << ", ";
+        ss << "xXXl: " << xXXl.ToString().c_str() << ", ";
+        ss << "yXXl: " << yXXl.ToString().c_str();
+        ss << " }";
+        return ss.str();
+    }
 };
 
 class BreakPoints : public AceType {
@@ -136,6 +171,20 @@ public:
         BreakPoints, (reference)(breakpoints))
     BreakPointsReference reference = BreakPointsReference::WindowSize;
     std::vector<std::string> breakpoints { "320vp", "600vp", "840vp" };
+
+    std::string ToString()
+    {
+        std::stringstream ss;
+        ss << "BreakPoints: {";
+        ss << "reference: " << static_cast<int32_t>(reference) << ", ";
+        ss << "breakpoints: [";
+        for (const auto& breakpoint : breakpoints) {
+            ss << breakpoint << ", ";
+        }
+        ss << "]";
+        ss << " }";
+        return ss.str();
+    }
 };
 
 } // namespace OHOS::Ace::V2

@@ -18,6 +18,7 @@
 
 #include "grid_col_layout_property.h"
 
+#include "base/log/dump_log.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -49,6 +50,15 @@ public:
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         return { false, true, ScopeType::OTHERS };
+    }
+
+    void DumpInfo() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = DynamicCast<GridColLayoutProperty>(host->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        DumpLog::GetInstance().AddDesc(layoutProperty->ToString().c_str());
     }
 };
 } // namespace OHOS::Ace::NG
