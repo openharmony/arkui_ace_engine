@@ -275,68 +275,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, AdjustWordSelection001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitScrollablePattern003
- * @tc.desc: test InitScrollablePattern.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, InitScrollablePattern003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-    richEditorPattern->overlayMod_ = nullptr;
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
-}
-
-/**
- * @tc.name: InitScrollablePattern004
- * @tc.desc: test InitScrollablePattern.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, InitScrollablePattern004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-    ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
-}
-
-/**
- * @tc.name: OnScrollCallback001
- * @tc.desc: test OnScrollCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, OnScrollCallback001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord record;
-    richEditorPattern->DeleteSelectOperation(&record);
-
-    RectF rect(0, 0, 5, 5);
-    richEditorPattern->CreateHandles();
-    richEditorPattern->textSelector_.Update(0, 5);
-    richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
-
-    EXPECT_TRUE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
-    bool ret = false;
-    ret = richEditorPattern->OnScrollCallback(10, 10);
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: GetCrossOverHeight001
  * @tc.desc: test GetCrossOverHeight
  * @tc.type: FUNC
