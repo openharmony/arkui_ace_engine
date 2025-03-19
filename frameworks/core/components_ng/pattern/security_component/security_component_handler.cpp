@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #include "ui/base/geometry/dimension.h"
+#include "ui/base/utils/utils.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/geometry/dimension.h"
@@ -569,7 +570,29 @@ bool SecurityComponentHandler::CheckPixelStretchEffect(const RefPtr<FrameNode>& 
     return false;
 }
 
-bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::string& message)
+bool SecurityComponentHandler::CheckForegroundEffect(const RefPtr<FrameNode>& node, std::string& message,
+    const RefPtr<RenderContext>& renderContext, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    if (!NearEqual(renderContext->GetForegroundEffect().value_or(0.0f), 0.0f)) {
+        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.foregroundBlurRadius_ = renderContext->GetForegroundEffect().value();
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckOverlayText(const RefPtr<FrameNode>& node, std::string& message,
+    const RefPtr<RenderContext>& renderContext, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    auto overlayText = renderContext->GetOverlayText();
+    if (overlayText.has_value()) {
+        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.isOverlayTextSet_ = true;
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::string& message,
+    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
     const auto& renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -584,7 +607,9 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::s
         CheckColorBlend(node, renderContext, message) || CheckClipMask(node, renderContext, message) ||
         CheckForegroundColor(node, renderContext, message) || CheckSphericalEffect(node, renderContext, message) ||
         CheckLightUpEffect(node, renderContext, message) || CheckPixelStretchEffect(node, renderContext, message) ||
-        CheckForegroundBlurStyle(node, renderContext, message) || CheckBlendMode(node, renderContext, message)) {
+        CheckForegroundBlurStyle(node, renderContext, message) || CheckBlendMode(node, renderContext, message) ||
+        CheckForegroundEffect(node, message, renderContext, buttonInfo) ||
+        CheckOverlayText(node, message, renderContext, buttonInfo)) {
         return true;
     }
     return false;
@@ -624,6 +649,22 @@ bool SecurityComponentHandler::IsSecComponentClipped(RefPtr<FrameNode>& parentNo
     return false;
 }
 
+bool SecurityComponentHandler::CheckOverlayNode(RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node,
+    std::string& message, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    CHECK_NULL_RETURN(parentNode, false);
+    auto overlayNode = parentNode->GetOverlayNode();
+    CHECK_NULL_RETURN(overlayNode, false);
+    auto overlayRect = overlayNode->GetPaintRectWithTransform();
+    CHECK_NULL_RETURN(node, false);
+    auto secRect = node->GetPaintRectWithTransform();
+    if (overlayRect.IsInnerIntersectWithRound(secRect)) {
+        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.isOverlayNodeCovered_ = true;
+    }
+    return false;
+}
+
 bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, std::string& message)
 {
@@ -644,10 +685,11 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
         if (parentNode->CheckTopWindowBoundary()) {
             break;
         }
-        if (CheckRenderEffect(parentNode, message) || CheckParentBorder(parentNode, frameRect, message)) {
+        if (CheckRenderEffect(parentNode, message, buttonInfo) || CheckParentBorder(parentNode, frameRect, message)) {
             message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
             return true;
         }
+        CheckOverlayNode(parentNode, node, message, buttonInfo);
         if (CheckLinearGradientBlur(parentNode, node, buttonInfo.hasNonCompatileChange_, buttonInfo.blurRadius_)) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s LinearGradientBlur is set, " \
                 "security component is invalid", parentNode->GetTag().c_str());

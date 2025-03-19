@@ -119,6 +119,9 @@ public:
 
     bool hasNonCompatileChange_ = false;
     double blurRadius_ = 0.0;
+    double foregroundBlurRadius_ = 0.0;
+    bool isOverlayTextSet_ = false;
+    bool isOverlayNodeCovered_ = false;
     int32_t windowId_;
     uint64_t displayId_ = 0;
     int32_t nodeId_;
