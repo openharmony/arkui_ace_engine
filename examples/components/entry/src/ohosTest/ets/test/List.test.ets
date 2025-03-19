@@ -20,5 +20,4 @@ import ListItemGroupBootcampTest from './ScrollAndSwipe/ListItemGroupBootcamp.te
 export default function testsuite() {
   abilityTest();
   ListItemGroupBootcampTest();
-
 }
