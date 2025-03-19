@@ -26,6 +26,7 @@
 
 typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
 typedef struct __ani_env ani_env;
+typedef class __ani_ref *ani_ref;
 
 namespace OHOS::Ace {
 /**
@@ -45,7 +46,7 @@ public:
         return true;
     }
 
-    void Destroy() override {}
+    void Destroy() override;
 
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
 
@@ -198,6 +199,7 @@ private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
     ani_env* env_; // ani_env
+    ani_ref app_;
     bool foregroundFrontend_ = false;
 
     std::unordered_map<int32_t, void*> storageMap_;
