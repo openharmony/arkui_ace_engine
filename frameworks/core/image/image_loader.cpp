@@ -211,13 +211,12 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 }
 
 // NG ImageLoader entrance
-bool NetworkImageLoader::DownloadImage(
-    DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId)
+bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
 {
     return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
-                      std::move(downloadCallback), src, Container::CurrentId(), nodeId)
+                      std::move(downloadCallback), src, Container::CurrentId())
                 : DownloadManager::GetInstance()->DownloadAsyncWithPreload(
-                      std::move(downloadCallback), src, Container::CurrentId(), nodeId);
+                      std::move(downloadCallback), src, Container::CurrentId());
 }
 
 std::shared_ptr<RSData> FileImageLoader::LoadImageData(
