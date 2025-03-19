@@ -1864,4 +1864,15 @@ void AssignCast(std::optional<OHOS::Ace::CommonSubType>& dst, const Ark_EffectDi
         }
     }
 }
+template<>
+void AssignCast(std::optional<OHOS::Ace::FillStyle>& dst, const Ark_EffectFillStyle& src)
+{
+    switch (src) {
+        case ARK_EFFECT_FILL_STYLE_CUMULATIVE: dst = OHOS::Ace::FillStyle::CUMULATIVE; break;
+        case ARK_EFFECT_FILL_STYLE_ITERATIVE: dst = OHOS::Ace::FillStyle::ITERATIVE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_EffectFillStyle: %{public}d", src);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

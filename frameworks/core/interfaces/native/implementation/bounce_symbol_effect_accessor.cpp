@@ -16,16 +16,26 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BounceSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_BounceSymbolEffect peer)
 {
+    delete peer;
 }
 Ark_BounceSymbolEffect CtorImpl(const Opt_EffectScope* scope,
                                 const Opt_EffectDirection* direction)
 {
-    return {};
+    std::optional<OHOS::Ace::ScopeType> optScope;
+    std::optional<OHOS::Ace::CommonSubType> optDirection;
+    if (scope) {
+        optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
+    }
+    if (direction) {
+        optDirection = Converter::OptConvert<OHOS::Ace::CommonSubType>(*direction);
+    }
+    return new BounceSymbolEffectPeer(optScope, optDirection);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,19 +43,41 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_EffectScope GetScopeImpl(Ark_BounceSymbolEffect peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, ARK_EFFECT_SCOPE_LAYER);
+    CHECK_NULL_RETURN(peer->scope, ARK_EFFECT_SCOPE_LAYER);
+    switch (peer->scope.value()) {
+        case OHOS::Ace::ScopeType::LAYER:
+            return ARK_EFFECT_SCOPE_LAYER;
+        case OHOS::Ace::ScopeType::WHOLE:
+            return ARK_EFFECT_SCOPE_WHOLE;
+        default:
+            return ARK_EFFECT_SCOPE_LAYER;
+    }
 }
 void SetScopeImpl(Ark_BounceSymbolEffect peer,
                   Ark_EffectScope scope)
 {
+    CHECK_NULL_VOID(peer);
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
 Ark_EffectDirection GetDirectionImpl(Ark_BounceSymbolEffect peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, ARK_EFFECT_DIRECTION_DOWN);
+    CHECK_NULL_RETURN(peer->direction, ARK_EFFECT_DIRECTION_DOWN);
+    switch (peer->direction.value()) {
+        case OHOS::Ace::CommonSubType::UP:
+            return ARK_EFFECT_DIRECTION_UP;
+        case OHOS::Ace::CommonSubType::DOWN:
+            return ARK_EFFECT_DIRECTION_DOWN;
+        default:
+            return ARK_EFFECT_DIRECTION_DOWN;
+    }
 }
 void SetDirectionImpl(Ark_BounceSymbolEffect peer,
                       Ark_EffectDirection direction)
 {
+    CHECK_NULL_VOID(peer);
+    peer->direction = Converter::OptConvert<OHOS::Ace::CommonSubType>(direction);
 }
 } // BounceSymbolEffectAccessor
 const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor()
@@ -61,8 +93,4 @@ const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor()
     };
     return &BounceSymbolEffectAccessorImpl;
 }
-
-struct BounceSymbolEffectPeer {
-    virtual ~BounceSymbolEffectPeer() = default;
-};
 }

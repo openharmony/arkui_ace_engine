@@ -16,7 +16,7 @@
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
 
-#include "core/interfaces/native/implementation/scale_symbol_effect_peer.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -51,7 +51,8 @@ HWTEST_F(ScaleSymbolEffectAccessorTest, scopeTest, TestSize.Level1)
 {
     auto scope = Converter::ArkValue<Ark_EffectScope>(OHOS::Ace::ScopeType::WHOLE);
     accessor_->setScope(peer_, scope);
-    auto aceScope = peer_->effectOptions.GetScopeType();
+    ASSERT_TRUE(peer_->scope.has_value());
+    auto aceScope = peer_->scope.value();
     ASSERT_EQ(aceScope, OHOS::Ace::ScopeType::WHOLE);
 
     Ark_EffectScope arkScope = accessor_->getScope(peer_);
@@ -65,9 +66,10 @@ HWTEST_F(ScaleSymbolEffectAccessorTest, scopeTest, TestSize.Level1)
  */
 HWTEST_F(ScaleSymbolEffectAccessorTest, directionTest, TestSize.Level1)
 {
-    auto scope = Converter::ArkValue<Ark_EffectDirection>(OHOS::Ace::CommonSubType::UP);
-    accessor_->setDirection(peer_, scope);
-    auto aceDirection = peer_->effectOptions.GetCommonSubType();
+    auto direction = Converter::ArkValue<Ark_EffectDirection>(OHOS::Ace::CommonSubType::UP);
+    accessor_->setDirection(peer_, direction);
+    ASSERT_TRUE(peer_->direction.has_value());
+    auto aceDirection = peer_->direction.value();
     ASSERT_EQ(aceDirection, OHOS::Ace::CommonSubType::UP);
 
     Ark_EffectDirection arkDirection = accessor_->getDirection(peer_);
