@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-module_output_path = "ace_engine_full/animation/animationtest"
+module_output_path = "ace_engine/animation"
 
 ohos_unittest("AnimationTest") {
   module_out_path = module_output_path
