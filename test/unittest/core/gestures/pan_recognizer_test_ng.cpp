@@ -2334,4 +2334,85 @@ HWTEST_F(PanRecognizerTestNg, PanGestureLimitFingerTest002, TestSize.Level1)
     EXPECT_EQ(panRecognizerWithFunc->GetPriorityMask(), GestureMask::Normal);
     EXPECT_EQ(panRecognizerWithFunc->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
 }
+
+/**
+ * @tc.name: IsPanGestureAcceptInAllDirection001
+ * @tc.desc: Test IsPanGestureAcceptInAllDirection function
+ */
+HWTEST_F(PanRecognizerTestNg, IsPanGestureAcceptInAllDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+
+    /**
+     * @tc.steps: step2. set judgeDistance is 0.0 and call IsPanGestureAcceptInAllDirection function.
+     * @tc.expect: gestureAcceptResult is equal to GestureAcceptResult::ACCEPT.
+     */
+    double judgeDistance = 0.0;
+    auto gestureAcceptResult = panRecognizer.IsPanGestureAcceptInAllDirection(judgeDistance);
+    EXPECT_EQ(gestureAcceptResult, PanRecognizer::GestureAcceptResult::ACCEPT);
+
+    /**
+     * @tc.steps: step3. set judgeDistance is 1.0 and call IsPanGestureAcceptInAllDirection function.
+     * @tc.expect: gestureAcceptResult is equal to GestureAcceptResult::DETECTING.
+     */
+    judgeDistance = 1.0;
+    gestureAcceptResult = panRecognizer.IsPanGestureAcceptInAllDirection(judgeDistance);
+    EXPECT_EQ(gestureAcceptResult, PanRecognizer::GestureAcceptResult::DETECTING);
+}
+
+/**
+ * @tc.name: PanRecognizerTest001
+ * @tc.desc: Test OnAccepted function
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, OnAcceptedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+
+    /**
+     * @tc.steps: step2. call OnAccepted function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanoseconds(currentTime);
+    TimeStamp time(nanoseconds);
+    panRecognizer.firstInputTime_ = time;
+    panRecognizer.isTouchEventFinished_ = true;
+    panRecognizer.SetEnabled(false);
+    panRecognizer.OnAccepted();
+    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::SUCCEED);
+    EXPECT_FALSE(panRecognizer.isStartTriggered_);
+}
+
+/**
+ * @tc.name: HandleTouchUpEvent001
+ * @tc.desc: Test HandleTouchUpEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, HandleTouchUpEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+
+    /**
+     * @tc.steps: step2. set axisEvent.isRotationEvent is true and call HandleTouchUp function.
+     * @tc.expected: result equals.
+     */
+    AxisEvent axisEvent;
+    axisEvent.isRotationEvent = true;
+    panRecognizer.HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(panRecognizer.globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(panRecognizer.globalPoint_.GetY(), axisEvent.y);
+}
 } // namespace OHOS::Ace::NG
