@@ -1096,4 +1096,254 @@ HWTEST_F(SwiperIndicatorTestNg, InitOverlongStatus006, TestSize.Level1)
     modifier.InitOverlongStatus(11);
     EXPECT_EQ(modifier.targetSelectedIndex_, 9);
 }
+
+/**
+ * @tc.name: CalcTargetOverlongStatus001
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.realItemCount_ = 12;
+    modifier.CalcTargetOverlongStatus(11, 0);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus002
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 3;
+    modifier.realItemCount_ = 1;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(0, 2);
+    EXPECT_NE(modifier.targetSelectedIndex_, 0);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus003
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus003, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.realItemCount_ = 12;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(5, 0);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus004
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus004, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.realItemCount_ = 12;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(5, 2);
+    EXPECT_NE(modifier.targetOverlongType_, OverlongType::LEFT_FADEOUT_RIGHT_NORMAL);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus005
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus005, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.targetSelectedIndex_ = 3;
+    modifier.realItemCount_ = 1;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(0, 2);
+    EXPECT_NE(modifier.targetOverlongType_, OverlongType::LEFT_FADEOUT_RIGHT_NORMAL);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus006
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus006, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 3;
+    modifier.realItemCount_ = 1;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(0, 2);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus007
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus007, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 7;
+    modifier.realItemCount_ = 1;
+    modifier.maxDisplayCount_ = 5;
+    modifier.CalcTargetOverlongStatus(0, 2);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus008
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus008, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 7;
+    modifier.realItemCount_ = 4;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(0, 2);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus009
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus009, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 7;
+    modifier.realItemCount_ = 3;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(2, 3);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_FADEOUT_RIGHT_NORMAL);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus010
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus010, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 7;
+    modifier.realItemCount_ = 3;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(3, 2);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus011
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus011, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.targetSelectedIndex_ = 8;
+    modifier.realItemCount_ = 3;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(3, 2);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus012
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus012, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 7;
+    modifier.realItemCount_ = 3;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(3, 2);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus013
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus013, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 8;
+    modifier.realItemCount_ = 3;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(3, 2);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus014
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus014, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 7;
+    modifier.realItemCount_ = 4;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(4, 3);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT);
+}
+
+/**
+ * @tc.name: CalcTargetOverlongStatus015
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetOverlongStatus015, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+    modifier.targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    modifier.targetSelectedIndex_ = 7;
+    modifier.realItemCount_ = 3;
+    modifier.maxDisplayCount_ = 10;
+    modifier.CalcTargetOverlongStatus(3, 2);
+    EXPECT_EQ(modifier.targetOverlongType_, OverlongType::LEFT_NORMAL_RIGHT_FADEOUT);
+}
 } // namespace OHOS::Ace::NG
