@@ -20,14 +20,15 @@
 
 namespace OHOS::Ace::NG {
 struct AdjustOffset {
-    float start = 0.0f;
-    float end = 0.0f;
+    float start = 0.0f; // Positive: Top edge adjust up, Negative: Top edge adjust down.
+    float end = 0.0f; // Positive: Bottom edge adjust down, Negative: Bottom edge adjust up.
 };
 
 class LazyLayoutPattern : public Pattern {
     DECLARE_ACE_TYPE(LazyLayoutPattern, Pattern);
 public:
     virtual AdjustOffset GetAdjustOffset() const = 0;
+    virtual AdjustOffset GetAndResetAdjustOffset() = 0;
 };
 }
 #endif

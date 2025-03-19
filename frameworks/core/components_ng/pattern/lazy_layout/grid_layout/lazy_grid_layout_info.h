@@ -60,6 +60,7 @@ public:
 private:
     float UpdatePosMapStart(int32_t updateStart, int32_t updateEnd);
     void UpdatePosMapEnd(int32_t updateEnd);
+    void UpdateTotalMainSize();
     float UpdatePosWithIter(std::map<int, GridItemMainPos>::iterator &it, int32_t& prevIndex, float& prevPos) const;
 
 private:
@@ -73,6 +74,7 @@ private:
 
     int32_t updatedStart_ = INT_MAX;
     int32_t updatedEnd_ = -1;
+    bool spaceUpdated_ = false;
     float estimateItemSize_ = -1.0f;
     AdjustOffset adjustOffset_ {};
 
