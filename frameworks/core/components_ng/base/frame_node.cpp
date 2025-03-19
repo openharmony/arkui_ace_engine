@@ -86,10 +86,6 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8;
 constexpr int32_t MIN_OPINC_AREA = 10000;
 constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 constexpr int32_t DEFAULT_PRECISION = 2;
-constexpr int32_t FRAME_60 = 60;
-constexpr int32_t FRAME_72 = 72;
-constexpr int32_t FRAME_90 = 90;
-constexpr int32_t FRAME_120 = 120;
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -4244,61 +4240,6 @@ int32_t FrameNode::GetNodeExpectedRate()
     return iter->second;
 }
 
-void FrameNode::FrameRateDurationsStatisticsStart()
-{
-    curFRCSceneFpsInfo_ = FRCSceneFpsInfo();
-    calTime_ = 0;
-    calFrameRate_ = 0;
-}
-
-void FrameNode::FrameRateDurationsStatisticsRunning(int32_t expectedRate, const std::string &scene)
-{
-    if (calTime_ == 0) {
-        calTime_ = GetSysTimestamp();
-        calFrameRate_ = expectedRate;
-    }
-    if (expectedRate != calFrameRate_) {
-        int32_t endTime = GetSysTimestamp();
-        int32_t duration = endTime - calTime_;
-        calTime_ = endTime;
-        AddFrameRateDuration(calFrameRate_, duration);
-    }
-    calFrameRate_ = expectedRate;
-}
-
-void FrameNode::FrameRateDurationsStatisticsEnd(const std::string &scene)
-{
-    int32_t endTime = GetSysTimestamp();
-    int32_t duration = endTime - calTime_;
-    calTime_ = endTime;
-    AddFrameRateDuration(calFrameRate_, duration);
-    EventReport::SendDiffFrameRatesDuring(scene, curFRCSceneFpsInfo_);
-}
-
-void FrameNode::AddFrameRateDuration(int32_t frameRate, int32_t duration)
-{
-    switch (frameRate) {
-        case FRAME_120: {
-            curFRCSceneFpsInfo_.duration_120 += duration;
-            break;
-        }
-        case FRAME_90: {
-            curFRCSceneFpsInfo_.duration_90 += duration;
-            break;
-        }
-        case FRAME_72: {
-            curFRCSceneFpsInfo_.duration_72 += duration;
-            break;
-        }
-        case FRAME_60: {
-            curFRCSceneFpsInfo_.duration_60 += duration;
-            break;
-        }
-        default:
-            break;
-    }
-}
-
 void FrameNode::TryPrintDebugLog(const std::string& scene, float speed, SceneStatus status)
 {
     if (SystemProperties::GetDebugEnabled()) {
@@ -4322,6 +4263,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
     auto expectedRate = renderContext->CalcExpectedFrameRate(scene, std::abs(speed));
     auto nodeId = GetId();
     auto iter = sceneRateMap_.find(scene);
+    EventReport::FrameRateDurationsStatistics(expectedRate, scene, status);
 
     switch (status) {
         case SceneStatus::START: {
@@ -4332,7 +4274,6 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
                 sceneRateMap_.emplace(scene, expectedRate);
                 frameRateManager->UpdateNodeRate(nodeId, GetNodeExpectedRate());
             }
-            FrameRateDurationsStatisticsStart();
             return;
         }
         case SceneStatus::RUNNING: {
@@ -4341,7 +4282,6 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
                 auto nodeExpectedRate = GetNodeExpectedRate();
                 frameRateManager->UpdateNodeRate(nodeId, nodeExpectedRate);
             }
-            FrameRateDurationsStatisticsRunning(expectedRate, scene);
             return;
         }
         case SceneStatus::END: {
@@ -4354,7 +4294,6 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
                     frameRateManager->UpdateNodeRate(nodeId, nodeExpectedRate);
                 }
             }
-            FrameRateDurationsStatisticsEnd(scene);
             return;
         }
         default:
