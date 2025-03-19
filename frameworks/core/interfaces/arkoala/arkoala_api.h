@@ -2414,8 +2414,6 @@ struct ArkUICommonModifier {
     void (*resetPrivacySensitive)(ArkUINodeHandle node);
     void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
     void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
-    void (*setOnSelect)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
-        int32_t index, ArkUI_CharPtr text));
 };
 
 struct ArkUICommonShapeModifier {
