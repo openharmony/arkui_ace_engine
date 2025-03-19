@@ -455,9 +455,7 @@ HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveForward001, TestSi
     modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
     modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
     modifier.CalcTargetStatusOnAllPointMoveForward(itemHalfSizes);
-    std::cout << "999" << std::endl;
     EXPECT_EQ(modifier.targetSelectedIndex_, 2);
-    std::cout << "789" << std::endl;
 }
 
 /**
@@ -570,5 +568,532 @@ HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveForward005, TestSi
     modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
     modifier.CalcTargetStatusOnAllPointMoveForward(itemHalfSizes);
     EXPECT_NE(modifier.targetSelectedIndex_, 2);
+}
+
+/**
+ * @tc.name: CalcTargetStatusOnAllPointMoveBackward001
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetStatusOnAllPointMoveBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveBackward001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.isSwiperTouchDown_ = true;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    modifier.currentSelectedIndex_ = 2;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 2);
+}
+
+/**
+ * @tc.name: CalcTargetStatusOnAllPointMoveBackward002
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetStatusOnAllPointMoveBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveBackward002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = true;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    modifier.currentSelectedIndex_ = 2;
+    modifier.turnPageRate_ = 2.0f;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 2);
+}
+/**
+ * @tc.name: CalcTargetStatusOnAllPointMoveBackward003
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetStatusOnAllPointMoveBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveBackward003, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = true;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_NONE;
+    modifier.currentSelectedIndex_ = 2;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
+    EXPECT_NE(modifier.targetSelectedIndex_, 2);
+}
+
+/**
+ * @tc.name: CalcTargetStatusOnAllPointMoveBackward004
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetStatusOnAllPointMoveBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveBackward004, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    modifier.currentSelectedIndex_ = 2;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
+    EXPECT_NE(modifier.targetSelectedIndex_, 2);
+}
+
+/**
+ * @tc.name: CalcTargetStatusOnAllPointMoveBackward005
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcTargetStatusOnAllPointMoveBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcTargetStatusOnAllPointMoveBackward005, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_NONE;
+    modifier.currentSelectedIndex_ = 2;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
+    EXPECT_NE(modifier.targetSelectedIndex_, 2);
+}
+
+/**
+ * @tc.name: CalcAnimationEndCenterX001
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcAnimationEndCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcAnimationEndCenterX001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.isSwiperTouchDown_ = true;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    modifier.currentSelectedIndex_ = 3;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.turnPageRate_ = 2.0f;
+    modifier.animationStartIndex_ = 4;
+    modifier.animationEndIndex_ = 4;
+    modifier.realItemCount_ = 6;
+    modifier.CalcAnimationEndCenterX(itemHalfSizes);
+    EXPECT_EQ(modifier.animationStartIndex_, 4);
+}
+
+/**
+ * @tc.name: CalcAnimationEndCenterX002
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcAnimationEndCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcAnimationEndCenterX002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = true;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    modifier.currentSelectedIndex_ = 3;
+    modifier.turnPageRate_ = 2.0f;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndex_ = 4;
+    modifier.animationEndIndex_ = 4;
+    modifier.realItemCount_ = 6;
+    modifier.CalcAnimationEndCenterX(itemHalfSizes);
+    EXPECT_EQ(modifier.animationStartIndex_, 4);
+}
+/**
+ * @tc.name: CalcAnimationEndCenterX003
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcAnimationEndCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcAnimationEndCenterX003, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = true;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_NONE;
+    modifier.currentSelectedIndex_ = 2;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndex_ = 4;
+    modifier.animationEndIndex_ = 4;
+    modifier.realItemCount_ = 6;
+    modifier.CalcAnimationEndCenterX(itemHalfSizes);
+    EXPECT_EQ(modifier.animationStartIndex_, 4);
+}
+
+/**
+ * @tc.name: CalcAnimationEndCenterX004
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcAnimationEndCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcAnimationEndCenterX004, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    modifier.currentSelectedIndex_ = 2;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndex_ = 4;
+    modifier.animationEndIndex_ = 4;
+    modifier.realItemCount_ = 6;
+    modifier.CalcAnimationEndCenterX(itemHalfSizes);
+    EXPECT_EQ(modifier.animationStartIndex_, 4);
+}
+
+/**
+ * @tc.name: CalcAnimationEndCenterX005
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcAnimationEndCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcAnimationEndCenterX005, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_NONE;
+    modifier.currentSelectedIndex_ = 2;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndex_ = 4;
+    modifier.animationEndIndex_ = 4;
+    modifier.realItemCount_ = 6;
+    modifier.CalcAnimationEndCenterX(itemHalfSizes);
+    EXPECT_EQ(modifier.animationStartIndex_, 4);
+}
+
+/**
+ * @tc.name: CalcAnimationEndCenterX006
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcAnimationEndCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcAnimationEndCenterX006, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_NONE;
+    modifier.currentSelectedIndex_ = 4;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndex_ = 4;
+    modifier.animationEndIndex_ = 5;
+    modifier.realItemCount_ = 6;
+    modifier.moveDirection_ = OverlongIndicatorMove::MOVE_FORWARD;
+    modifier.CalcAnimationEndCenterX(itemHalfSizes);
+    EXPECT_EQ(modifier.moveDirection_, OverlongIndicatorMove::NONE);
+}
+
+/**
+ * @tc.name: CalcAnimationEndCenterX007
+ * @tc.desc: Test OverlengthDotIndicatorModifier CalcAnimationEndCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcAnimationEndCenterX007, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 2;
+    modifier.isSwiperTouchDown_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_NONE;
+    modifier.currentSelectedIndex_ = 4;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndex_ = 5;
+    modifier.animationEndIndex_ = 4;
+    modifier.realItemCount_ = 6;
+    modifier.CalcAnimationEndCenterX(itemHalfSizes);
+    EXPECT_NE(modifier.moveDirection_, OverlongIndicatorMove::MOVE_BACKWARD);
+}
+
+/**
+ * @tc.name: InitOverlongSelectedIndex001
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongSelectedIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongSelectedIndex001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 6;
+    modifier.realItemCount_ = 8;
+    modifier.InitOverlongSelectedIndex(4);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 3);
+}
+
+/**
+ * @tc.name: InitOverlongSelectedIndex002
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongSelectedIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongSelectedIndex002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 8;
+    modifier.realItemCount_ = 6;
+    modifier.InitOverlongSelectedIndex(4);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 4);
+}
+
+/**
+ * @tc.name: InitOverlongSelectedIndex003
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongSelectedIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongSelectedIndex003, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 6;
+    modifier.realItemCount_ = 5;
+    modifier.InitOverlongSelectedIndex(4);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 5);
+}
+
+/**
+ * @tc.name: InitOverlongSelectedIndex004
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongSelectedIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongSelectedIndex004, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 8;
+    modifier.realItemCount_ = 8;
+    modifier.InitOverlongSelectedIndex(4);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 4);
+}
+
+/**
+ * @tc.name: InitOverlongSelectedIndex005
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongSelectedIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongSelectedIndex005, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 10;
+    modifier.realItemCount_ = 15;
+    modifier.InitOverlongSelectedIndex(13);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 8);
+}
+
+/**
+ * @tc.name: InitOverlongSelectedIndex006
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongSelectedIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongSelectedIndex006, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 10;
+    modifier.realItemCount_ = 12;
+    modifier.InitOverlongSelectedIndex(11);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 9);
+}
+
+/**
+ * @tc.name: InitOverlongStatus001
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongStatus001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 6;
+    modifier.realItemCount_ = 8;
+    modifier.InitOverlongStatus(4);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 3);
+}
+
+/**
+ * @tc.name: InitOverlongStatus002
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongStatus002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 8;
+    modifier.realItemCount_ = 6;
+    modifier.InitOverlongStatus(4);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 4);
+}
+
+/**
+ * @tc.name: InitOverlongStatus003
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongStatus003, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 6;
+    modifier.realItemCount_ = 5;
+    modifier.InitOverlongStatus(4);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 5);
+}
+
+/**
+ * @tc.name: InitOverlongStatus004
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongStatus004, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 8;
+    modifier.realItemCount_ = 8;
+    modifier.InitOverlongStatus(4);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 4);
+}
+
+/**
+ * @tc.name: InitOverlongStatus005
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongStatus005, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 10;
+    modifier.realItemCount_ = 15;
+    modifier.InitOverlongStatus(13);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 8);
+}
+
+/**
+ * @tc.name: InitOverlongStatus006
+ * @tc.desc: Test OverlengthDotIndicatorModifier InitOverlongStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, InitOverlongStatus006, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.maxDisplayCount_ = 10;
+    modifier.realItemCount_ = 12;
+    modifier.InitOverlongStatus(11);
+    EXPECT_EQ(modifier.targetSelectedIndex_, 9);
 }
 } // namespace OHOS::Ace::NG
