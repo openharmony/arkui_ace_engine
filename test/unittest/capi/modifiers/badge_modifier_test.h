@@ -22,8 +22,6 @@
 
 namespace OHOS::Ace::NG::Converter {
 
-inline void AssignArkValue(Ark_FontWeight& dst, const FontWeight& src);
-
 inline void AssignArkValue(Ark_BadgePosition& dst, const BadgePosition& src)
 {
     switch (src) {

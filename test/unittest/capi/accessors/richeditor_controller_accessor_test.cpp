@@ -107,19 +107,6 @@ void AssignArkValue(Ark_Type_RichEditorController_updateSpanStyle_value& dst,
         Ark_RichEditorUpdateTextSpanStyleOptions>(src, ctx);
 }
 
-void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src)
-{
-    switch (src) {
-        case FontWeight::LIGHTER: dst = ARK_FONT_WEIGHT_LIGHTER; break;
-        case FontWeight::NORMAL: dst = ARK_FONT_WEIGHT_NORMAL; break;
-        case FontWeight::REGULAR: dst = ARK_FONT_WEIGHT_REGULAR; break;
-        case FontWeight::MEDIUM: dst = ARK_FONT_WEIGHT_MEDIUM; break;
-        case FontWeight::BOLD: dst = ARK_FONT_WEIGHT_BOLD; break;
-        case FontWeight::BOLDER: dst = ARK_FONT_WEIGHT_BOLDER; break;
-        default: LOGE("Unexpected enum value in FontWeight: %{public}d", src);
-    }
-}
-
 void AssignArkValue(Ark_DecorationStyleInterface& dst, const Converter::TextDecorationStruct& src,
                     Converter::ConvContext *ctx)
 {
