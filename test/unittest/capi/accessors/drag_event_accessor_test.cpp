@@ -191,15 +191,25 @@ HWTEST_F(DragEventAccessorTest, GetResultTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetPreviewRectTest, TestSize.Level1)
 {
-    for (auto& [input, value, expected] : testFixtureLengthAnyValidValues) {
-        Rect rect(value.ConvertToPx(), value.ConvertToPx(), value.ConvertToPx(), value.ConvertToPx());
-        dragEvent_->SetPreviewRect(rect);
-        auto arkRect = accessor_->getPreviewRect(peer_);
-        CompareOptLength(arkRect.x, ArkValue<Opt_Length>(expected));
-        CompareOptLength(arkRect.y, ArkValue<Opt_Length>(expected));
-        CompareOptLength(arkRect.width, ArkValue<Opt_Length>(expected));
-        CompareOptLength(arkRect.height, ArkValue<Opt_Length>(expected));
-    }
+    float x = 5.f;
+    float y = 8.f;
+    float width = 55.f;
+    float height = 40.f;
+    Rect rect(x, y, width, height);
+    dragEvent_->SetPreviewRect(rect);
+    auto arkRect = accessor_->getPreviewRect(peer_);
+
+    auto check = [](const Opt_Length& actual, float expected) {
+        auto dim = Converter::OptConvert<Dimension>(actual);
+        ASSERT_TRUE(dim);
+        EXPECT_FLOAT_EQ(dim.value().Value(), expected);
+        EXPECT_EQ(dim.value().Unit(), DimensionUnit::VP);
+    };
+
+    check(arkRect.x, x);
+    check(arkRect.y, y);
+    check(arkRect.width, width);
+    check(arkRect.height, height);
 }
 
 /**
