@@ -279,6 +279,7 @@ void* JSXComponent::Create(const XComponentParams& params)
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(params.elmtId,
         static_cast<float>(params.width), static_cast<float>(params.height), params.xcomponentId,
         static_cast<XComponentType>(params.xcomponentType), params.libraryName, xcomponentController));
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->SetIsArkTsFrameNode(true);
     auto pattern = frameNode->GetPattern<NG::XComponentPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
