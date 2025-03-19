@@ -92,7 +92,7 @@ private:
     void UpdateSafeArea(const RefPtr<FrameNode>& frameNode);
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
-    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
+    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
     void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);

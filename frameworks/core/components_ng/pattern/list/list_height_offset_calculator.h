@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -107,7 +108,8 @@ public:
         auto children = node->GetChildren();
         int32_t index = 0;
         for (const auto& child : children) {
-            if (checkStart && index++ < itemStartIndex_) {  // ignore start header if exist
+            index++;
+            if (checkStart && index <= itemStartIndex_) {  // ignore start header if exist
                 continue;
             }
             if (AceType::InstanceOf<FrameNode>(child)) {

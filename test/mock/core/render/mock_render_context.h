@@ -96,14 +96,15 @@ public:
     void UpdateTranslateInXY(const OffsetF& offset) override;
 #endif
 
-
-    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
+    void UpdateBackBlurStyle(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurStyleOption = bgBlurStyle;
     }
 
-    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
+    void UpdateBackgroundEffect(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions())
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propEffectOption = effectOption;
@@ -135,6 +136,11 @@ public:
         transitionOutCallback_ = std::move(callback);
     }
 
+    void SetActualForegroundColor(const Color& value) override
+    {
+        actualForegroundColor_ = value;
+    }
+
     bool isVisible_ = true;
     bool hasDisappearTransition_ = false;
     RectF rect_;
@@ -143,6 +149,7 @@ public:
     RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
     std::function<void()> transitionOutCallback_;
+    Color actualForegroundColor_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

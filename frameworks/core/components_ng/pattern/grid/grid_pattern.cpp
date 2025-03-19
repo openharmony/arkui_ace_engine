@@ -457,6 +457,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     auto userOffset = FireOnWillScroll(-offset);
     info_.currentOffset_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    ScrollablePattern::MarkScrollBarProxyDirty();
     return true;
 }
 
@@ -490,7 +491,11 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     info_.reachStart_ = info_.startIndex_ == 0 && GreatOrEqual(info_.currentOffset_, 0.0f);
 
+    auto curDelta = info_.currentOffset_ - info_.prevOffset_;
     info_.currentHeight_ = EstimateHeight();
+    bool sizeDiminished =
+        IsOutOfBoundary(true) && !NearZero(curDelta) && (info_.prevHeight_ - info_.currentHeight_ - curDelta > 0.1f);
+
     if (!offsetEnd && info_.offsetEnd_) {
         endHeight_ = info_.currentHeight_;
     }
@@ -505,7 +510,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
     }
     if (!preSpring_) {
-        CheckRestartSpring(false);
+        CheckRestartSpring(sizeDiminished);
     }
     CheckScrollable();
     MarkSelectedItems();
@@ -554,6 +559,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     }
     auto onScrollIndex = gridEventHub->GetOnScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    if (indexChanged) {
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, info_.startIndex_, info_.endIndex_);
+    }
     auto onReachStart = gridEventHub->GetOnReachStart();
     FireOnReachStart(onReachStart);
     auto onReachEnd = gridEventHub->GetOnReachEnd();
@@ -772,9 +780,7 @@ float GridPattern::EstimateHeight() const
     if (isSmoothScrolling_) {
         const auto* infoPtr = UseIrregularLayout() ? &info_ : infoCopy_.get();
         CHECK_NULL_RETURN(infoPtr, 0.0f);
-        int32_t lineIndex = 0;
-        infoPtr->GetLineIndexByIndex(info_.startIndex_, lineIndex);
-        return infoPtr->GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) - info_.currentOffset_;
+        return infoPtr->GetTotalHeightFromZeroIndex(info_.startMainLineIndex_, GetMainGap()) - info_.currentOffset_;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
@@ -988,12 +994,12 @@ float GridPattern::GetEndOffset()
     const bool irregular = UseIrregularLayout();
     float heightInView = info.GetTotalHeightOfItemsInView(mainGap, irregular);
 
-    if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
+    const float totalHeight = GetTotalHeight();
+    if (GetAlwaysEnabled() && LessNotEqual(totalHeight, contentHeight)) {
         // overScroll with contentHeight < viewport
         if (irregular) {
             return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);
         }
-        float totalHeight = info.GetTotalLineHeight(mainGap);
         return totalHeight - heightInView;
     }
 
@@ -1438,13 +1444,17 @@ void GridPattern::StopAnimate()
 
 bool GridPattern::IsPredictOutOfRange(int32_t index) const
 {
-    CHECK_NULL_RETURN(info_.reachEnd_, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, true);
     auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
     return index < info_.startIndex_ - cacheCount || index > info_.endIndex_ + cacheCount;
+}
+
+bool GridPattern::IsPredictInRange(int32_t index) const
+{
+    return index >= info_.startIndex_ && index <= info_.endIndex_;
 }
 
 inline bool GridPattern::UseIrregularLayout() const
@@ -1557,6 +1567,7 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ColumnsTemplate", property->GetColumnsTemplate()->c_str());
     json->Put("CachedCount",
         property->GetCachedCount().has_value() ? std::to_string(property->GetCachedCount().value()).c_str() : "null");
+    json->Put("ShowCache", std::to_string(property->GetShowCachedItemsValue(false)).c_str());
     json->Put("MaxCount",
         property->GetMaxCount().has_value() ? std::to_string(property->GetMaxCount().value()).c_str() : "null");
     json->Put("MinCount",

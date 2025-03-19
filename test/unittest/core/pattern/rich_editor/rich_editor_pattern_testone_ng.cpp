@@ -277,29 +277,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CursorMoveHome001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClearOperationRecords001
- * @tc.desc: test RichEditorPattern ClearOperationRecords
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, ClearOperationRecords001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord record;
-    richEditorPattern->redoOperationRecords_.push_back(record);
-    richEditorPattern->ClearRedoOperationRecords();
-    richEditorPattern->redoOperationRecords_.clear();
-    richEditorPattern->HandleOnRedoAction();
-    ASSERT_EQ(richEditorPattern->redoOperationRecords_.empty(), true);
-    richEditorPattern->operationRecords_.push_back(record);
-    richEditorPattern->ClearOperationRecords();
-    richEditorPattern->operationRecords_.clear();
-    richEditorPattern->HandleOnUndoAction();
-    ASSERT_EQ(richEditorPattern->operationRecords_.empty(), true);
-}
-
-/**
  * @tc.name: ResetAfterPaste001
  * @tc.desc: test RichEditorPattern ResetAfterPaste
  * @tc.type: FUNC
@@ -475,35 +452,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CreateDecorationSpanByTextStyle001, TestSiz
     style.SetFontFeatures(TEXT_FONTFEATURE);
     RefPtr<DecorationSpan> span = richEditorPattern->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
     ASSERT_NE(span, nullptr);
-}
-
-/**
- * @tc.name: MouseDoubleClickParagraphEnd001
- * @tc.desc: test RichEditorPattern MouseDoubleClickParagraphEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, MouseDoubleClickParagraphEnd001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    AddSpan("TEST123");
-    std::u16string content = u"TEST123";
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    richEditorPattern->InsertValueInStyledString(content);
-
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    int32_t index = 7;
-    int32_t index2 = 2;
-    richEditorPattern->MouseDoubleClickParagraphEnd(index2);
-    richEditorPattern->MouseDoubleClickParagraphEnd(index);
-    EXPECT_EQ(richEditorPattern->GetParagraphEndPosition(index), 7);
 }
 
 /**

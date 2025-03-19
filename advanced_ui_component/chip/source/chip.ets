@@ -849,11 +849,13 @@ export struct ChipComponent {
     let currentColor: ResourceColor;
     let themeChipNode = this.theme.chipNode;
     if (this.getChipActive()) {
-      currentColor = this.chipNodeOnFocus && !this.isSetActiveChipBgColor() ? themeChipNode.focusActivatedBgColor :
-        this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
+      currentColor =
+        (this.chipNodeOnFocus || this.isHover) && !this.isSetActiveChipBgColor() ? themeChipNode.focusActivatedBgColor :
+          this.chipNodeActivatedBackgroundColor ?? this.theme.chipNode.activatedBackgroundColor
     } else {
-      currentColor = this.chipNodeOnFocus && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
-        this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
+      currentColor =
+        (this.chipNodeOnFocus || this.isHover) && !this.isSetNormalChipBgColor() ? themeChipNode.focusBgColor :
+          this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
     }
     let sourceColor: ColorMetrics;
     try {
@@ -1246,6 +1248,7 @@ export struct ChipComponent {
           .padding(0)
           .stateEffect(false)
           .focusable(!this.isSuffixIconFocusStyleCustomized)
+          .hoverEffect(this.setHoverEffect())
         } else if (this.suffixIcon?.src !== "") {
           Button({ type: ButtonType.Normal }) {
             Image(this.getSuffixIconSrc())
@@ -1288,6 +1291,7 @@ export struct ChipComponent {
             this.onClicked()
           })
           .focusable(this.getSuffixIconFocusable())
+          .hoverEffect(this.setHoverEffect())
         } else if (this.allowClose ?? true) {
           Button({ type: ButtonType.Normal }) {
             SymbolGlyph($r('sys.symbol.xmark'))
@@ -1312,6 +1316,7 @@ export struct ChipComponent {
             this.deleteChipNodeAnimate()
           })
           .focusable(!this.isSuffixIconFocusStyleCustomized)
+          .hoverEffect(this.setHoverEffect())
         }
       }
       .direction(this.chipDirection)
@@ -1341,34 +1346,28 @@ export struct ChipComponent {
     .accessibilitySelected(this.getAccessibilitySelected())
     .onFocus(() => {
       this.chipNodeOnFocus = true
-      if (this.isSuffixIconFocusStyleCustomized) {
-        this.chipScale = {
-          x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
-          y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
-        };
-      }
+      this.chipZoomIn();
     })
     .onBlur(() => {
       this.chipNodeOnFocus = false
-      if (this.isSuffixIconFocusStyleCustomized) {
-        this.chipScale = {
-          x: 1, y: 1
-        };
-      }
+      this.chipZoomOut();
     })
     .onTouch((event) => {
       this.handleTouch(event)
     })
     .onHover((isHover: boolean) => {
       if (isHover) {
-        this.isShowPressedBackGroundColor = true
+        this.isShowPressedBackGroundColor = true;
+        this.chipZoomIn();
       } else {
         if (!this.isShowPressedBackGroundColor && isHover) {
           this.isShowPressedBackGroundColor = true
         } else {
           this.isShowPressedBackGroundColor = false
         }
+        this.chipZoomOut();
       }
+      this.isHover = isHover;
     })
     .onKeyEvent((event) => {
       if (!event || event.type === null || event.type !== KeyType.Down) {
@@ -1383,6 +1382,27 @@ export struct ChipComponent {
       }
     })
     .onClick(this.onClicked === noop ? undefined : this.onClicked.bind(this))
+  }
+
+  private setHoverEffect(): HoverEffect | undefined {
+    return this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined;
+  }
+
+  private chipZoomOut() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: 1, y: 1
+      };
+    }
+  }
+
+  private chipZoomIn() {
+    if (this.isSuffixIconFocusStyleCustomized) {
+      this.chipScale = {
+        x: this.resourceToNumber(this.theme.chipNode.focusBtnScaleX, 1),
+        y: this.resourceToNumber(this.theme.chipNode.focusBtnScaleY, 1),
+      };
+    }
   }
 
   getSuffixSymbolAccessibilityLevel(): string {

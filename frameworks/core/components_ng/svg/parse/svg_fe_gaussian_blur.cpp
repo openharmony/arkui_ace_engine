@@ -38,8 +38,8 @@ void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFil
         auto filterContext = GetFilterContext();
         auto primitiveRule = filterContext.GetPrimitiveRule();
         if (primitiveRule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
-            stdDeviationX = gaussianBlurAttr_.stdDeviationX * primitiveRule.GetBaseRect().Width();
-            stdDeviationY = gaussianBlurAttr_.stdDeviationY * primitiveRule.GetBaseRect().Height();
+            stdDeviationX = gaussianBlurAttr_.stdDeviationX * primitiveRule.GetContainerRect().Width();
+            stdDeviationY = gaussianBlurAttr_.stdDeviationY * primitiveRule.GetContainerRect().Height();
         } else {
             stdDeviationX = gaussianBlurAttr_.stdDeviationX;
             stdDeviationY = gaussianBlurAttr_.stdDeviationY;

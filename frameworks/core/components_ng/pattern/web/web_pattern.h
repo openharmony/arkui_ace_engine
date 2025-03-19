@@ -481,6 +481,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
@@ -633,6 +634,7 @@ public:
     void OnTooltip(const std::string& tooltip);
     void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
+    void RestoreRenderFit();
     void OnPopupShow(bool show);
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
@@ -729,6 +731,8 @@ public:
     {
         return isNewDragStyle_;
     }
+
+    bool isNeedInterceptedTouchEvent_ = false;
 
     bool IsDragging() const
     {
@@ -835,11 +839,13 @@ private:
     void OnCopyOptionModeUpdate(const int32_t value);
     void OnMetaViewportUpdate(bool value);
     void OnNativeEmbedModeEnabledUpdate(bool value);
+    void OnIntrinsicSizeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
     void WindowDrag(int32_t width, int32_t height);
+    void WindowMaximize();
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
@@ -1137,6 +1143,8 @@ private:
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
+
+    bool isAttachedToMainTree_ = false;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);

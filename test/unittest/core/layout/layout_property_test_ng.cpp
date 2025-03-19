@@ -28,6 +28,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/pipeline/base/element_register.h"
 
 

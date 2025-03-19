@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd. All rights reserved.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -124,7 +125,7 @@ RefPtr<PaintWrapper> ContainerModalPatternEnhanceTestNg::FlushLayoutTask(const R
     return wrapper;
 }
 
-RefPtr<FrameNode> ContainerModalViewEnhanceTestNg ::CreateContent()
+RefPtr<FrameNode> ContainerModalPatternEnhanceTestNg ::CreateContent()
 {
     return AceType::MakeRefPtr<FrameNode>("content", 0, AceType::MakeRefPtr<Pattern>());
 }
@@ -168,7 +169,7 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest003
     auto containerModalPatternEnhance = AceType::MakeRefPtr<ContainerModalPatternEnhance>();
     auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
     SubwindowManager::GetInstance()->SetCurrentSubwindow(subwindow);
-    EXPECT_CALL(*subwindow, GetShown()).WillOnce(testing::Return(true));
+    containerModalPatternEnhance->isHoveredMenu_ = true;
     containerModalPatternEnhance->OnWindowUnfocused();
     auto result = containerModalPatternEnhance->GetIsHoveredMenu();
     EXPECT_TRUE(result);
@@ -559,60 +560,69 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest021
 
 /**
  * @tc.name: ContainerModalPatternEnhanceTest022
- * @tc.desc: Test EnableContainerModalGesture
+ * @tc.desc: Test GetContainerModalComponentRect
  * @tc.type: FUNC
  * @tc.author:
  */
 HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest022, TestSize.Level1)
 {
-    CreateContainerModal();
+    RectF containerModal(0.0f, 0.0f, 0.0f, 0.0f);
+    RectF buttons(0.0f, 0.0f, 0.0f, 0.0f);
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto ret = containerPattern->GetContainerModalComponentRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 0);
+    EXPECT_FALSE(ret);
 
-    // EnableContainerModalGesture to false
-    pattern_->EnableContainerModalGesture(false);
+    auto textGeometryNode = textNode->GetGeometryNode();
+    textGeometryNode->frame_.rect_.width_ = 50.0f;
+    textGeometryNode->frame_.rect_.height_ = 50.0f;
+    ret = containerPattern->GetContainerModalComponentRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 50.0f);
+    EXPECT_FALSE(ret);
 
-    // all events are null
-    auto floatingTitleRow = GetFloatingTitleRow();
-    EXPECT_NE(floatingTitleRow, nullptr);
-    auto floatingTitleRowEventHub = floatingTitleRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(floatingTitleRowEventHub, nullptr);
-    EXPECT_EQ(floatingTitleRowEventHub->IsGestureEmpty(), true);
+    containerPattern->customTitleSettedShow_ = false;
+    ret = containerPattern->GetContainerModalComponentRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 50.0f);
+    EXPECT_FALSE(ret);
+}
 
-    auto customTitleRow = GetCustomTitleRow();
-    EXPECT_NE(customTitleRow, nullptr);
-    auto customTitleRowEventHub = customTitleRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(customTitleRowEventHub, nullptr);
-    EXPECT_EQ(customTitleRowEventHub->IsGestureEmpty(), true);
-    EXPECT_EQ(customTitleRowEventHub->IsPanEventEmpty(), true);
+/**
+ * @tc.name: ContainerModalPatternEnhanceTest023
+ * @tc.desc: Test GetContainerModalButtonsRect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest023, TestSize.Level1)
+{
+    RectF containerModal(0.0f, 0.0f, 0.0f, 0.0f);
+    RectF buttons(0.0f, 0.0f, 0.0f, 0.0f);
+    auto containerModalNode =
+        FrameNode::CreateFrameNode("ContainerModal", 1, AceType::MakeRefPtr<ContainerModalPatternEnhance>());
+    auto textNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<TextPickerColumnPattern>());
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 4, AceType::MakeRefPtr<TextPattern>()));
+    textNode->AddChild(FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 5, AceType::MakeRefPtr<TextPattern>()));
+    containerModalNode->AddChild(textNode);
+    auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
+    auto ret = containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 0);
+    EXPECT_FALSE(ret);
 
-    auto gestureRow = GetGestureRow();
-    EXPECT_NE(gestureRow, nullptr);
-    auto gestureRowEventHub = gestureRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(gestureRowEventHub, nullptr);
-    EXPECT_EQ(gestureRowEventHub->IsGestureEmpty(), true);
-    EXPECT_EQ(gestureRowEventHub->IsPanEventEmpty(), true);
+    auto textGeometryNode = textNode->GetGeometryNode();
+    textGeometryNode->frame_.rect_.width_ = 50.0f;
+    textGeometryNode->frame_.rect_.height_ = 50.0f;
+    ret = containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 50.0f);
+    EXPECT_FALSE(ret);
 
-    // EnableContainerModalGesture to true
-    pattern_->EnableContainerModalGesture(true);
-
-    // all events are not null
-    auto floatingTitleRow = GetFloatingTitleRow();
-    EXPECT_NE(floatingTitleRow, nullptr);
-    auto floatingTitleRowEventHub = floatingTitleRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(floatingTitleRowEventHub, nullptr);
-    EXPECT_EQ(floatingTitleRowEventHub->IsGestureEmpty(), false);
-
-    auto customTitleRow = GetCustomTitleRow();
-    EXPECT_NE(customTitleRow, nullptr);
-    auto customTitleRowEventHub = customTitleRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(customTitleRowEventHub, nullptr);
-    EXPECT_EQ(customTitleRowEventHub->IsGestureEmpty(), false);
-    EXPECT_EQ(customTitleRowEventHub->IsPanEventEmpty(), false);
-
-    auto gestureRow = GetGestureRow();
-    EXPECT_NE(gestureRow, nullptr);
-    auto gestureRowEventHub = gestureRow->GetOrCreateGestureEventHub();
-    EXPECT_NE(gestureRowEventHub, nullptr);
-    EXPECT_EQ(gestureRowEventHub->IsGestureEmpty(), false);
-    EXPECT_EQ(gestureRowEventHub->IsPanEventEmpty(), false);
+    containerPattern->customTitleSettedShow_ = false;
+    ret = containerPattern->GetContainerModalButtonsRect(containerModal, buttons);
+    EXPECT_EQ(containerModal.Width(), 50.0f);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS::Ace::NG

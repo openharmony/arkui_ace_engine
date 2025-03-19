@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include "base/log/event_report.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
+
+#include "base/log/event_report.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -588,7 +590,7 @@ std::pair<bool, bool> ListLanesLayoutAlgorithm::CheckACachedItem(
     }
     bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
     if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper))) {
-        if (isDirty) {
+        if (isDirty && !wrapper->GetHostNode()->IsLayoutComplete()) {
             return std::make_pair(true, true);
         }
         return std::make_pair(false, true);

@@ -22,7 +22,13 @@
 #ifdef ACE_DEBUG
 #define CHECK_RUN_ON(threadType) ACE_DCHECK(OHOS::Ace::CheckThread(TaskExecutor::TaskType::threadType))
 #else
-#define CHECK_RUN_ON(threadType)
+#define CHECK_RUN_ON(threadType)                                                         \
+    do {                                                                                 \
+        if (ACE_UNLIKELY(OHOS::Ace::SystemProperties::DetectContainerMultiThread() &&    \
+                         !OHOS::Ace::CheckThread(TaskExecutor::TaskType::threadType))) { \
+            LOGF_ABORT("CheckThread fail: expected [%{public}s]", #threadType);          \
+        }                                                                                \
+    } while (0)
 #endif
 
 namespace OHOS::Ace {

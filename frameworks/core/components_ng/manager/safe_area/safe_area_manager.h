@@ -64,7 +64,7 @@ public:
      * @param safeArea The new navigation indictor safe area.
      * @return True if the incoming safe area is identical to the current one, false otherwise.
      */
-    bool CheckNavArea(const SafeAreaInsets& safeArea);
+    bool CheckNavSafeArea(const SafeAreaInsets& safeArea);
 
     /**
      * @brief Updates the navigation indictor safe area.
@@ -72,7 +72,7 @@ public:
      * @param safeArea The new navigation indictor safe area.
      * @return True if the system safe area was modified, false otherwise.
      */
-    bool UpdateNavArea(const SafeAreaInsets& safeArea);
+    bool UpdateNavSafeArea(const SafeAreaInsets& safeArea);
 
     /**
      * @brief Retrieves the system safe area insets.
@@ -83,6 +83,11 @@ public:
      * @return The system safe area insets.
      */
     SafeAreaInsets GetSystemSafeArea() const;
+
+    SafeAreaInsets GetNavSafeArea() const
+    {
+        return navSafeArea_;
+    }
 
     /**
      * @brief Cut the incoming area with root size, then check if the result is identical to the cutout safe area.

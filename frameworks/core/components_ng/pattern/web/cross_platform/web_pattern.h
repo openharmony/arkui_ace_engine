@@ -372,6 +372,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MetaViewport, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
@@ -590,6 +591,7 @@ private:
     void CalculateVerticalDrawRect();
     void UpdateSlideOffset(bool isNeedReset = false);
     void OnNativeEmbedModeEnabledUpdate(bool value) {};
+    void OnIntrinsicSizeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnCopyOptionModeUpdate(const int32_t value);

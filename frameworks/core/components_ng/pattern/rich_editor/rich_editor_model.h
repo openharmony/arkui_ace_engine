@@ -82,6 +82,7 @@ struct UpdateSpanStyle {
         updateTextShadows.reset();
         updateFontFeature.reset();
         updateTextBackgroundStyle.reset();
+        updateUrlAddress.reset();
 
         updateLineHeight.reset();
         updateHalfLeading.reset();
@@ -113,6 +114,7 @@ struct UpdateSpanStyle {
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
     std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
+    std::optional<std::u16string> updateUrlAddress = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
     std::optional<bool> updateHalfLeading = std::nullopt;
@@ -186,11 +188,13 @@ struct UpdateParagraphStyle {
         leadingMargin.reset();
         wordBreak.reset();
         lineBreakStrategy.reset();
+        paragraphSpacing.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<WordBreak> wordBreak;
     std::optional<LineBreakStrategy> lineBreakStrategy;
+    std::optional<Dimension> paragraphSpacing;
 
     std::string ToString() const
     {
@@ -199,6 +203,7 @@ struct UpdateParagraphStyle {
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, leadingMargin);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, wordBreak);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, lineBreakStrategy);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paragraphSpacing);
         return jsonValue->ToString();
     }
 };
@@ -222,6 +227,7 @@ struct TextSpanOptions : SpanOptionBase {
     std::u16string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
+    std::optional<std::u16string> urlAddress;
     UserGestureOptions userGestureOption;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;

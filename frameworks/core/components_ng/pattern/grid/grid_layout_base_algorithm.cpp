@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 
+#include "core/components_ng/pattern/grid/grid_pattern.h"
+
 namespace OHOS::Ace::NG {
 
 void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
@@ -66,5 +68,23 @@ void GridLayoutBaseAlgorithm::AdjustChildrenHeight(LayoutWrapper* layoutWrapper)
             child->Measure(childConstraint);
         }
     }
+}
+
+void GridLayoutBaseAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetFadingEdge().value_or(false)) {
+        return;
+    }
+    auto overlayNode = frameNode->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto overlayGeometryNode = overlayNode->GetGeometryNode();
+    CHECK_NULL_VOID(overlayGeometryNode);
+    overlayGeometryNode->SetFrameSize(geometryNode->GetFrameSize());
 }
 } // namespace OHOS::Ace::NG

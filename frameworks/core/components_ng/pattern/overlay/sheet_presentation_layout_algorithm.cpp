@@ -297,7 +297,7 @@ void SheetPresentationLayoutAlgorithm::LayoutCloseIcon(const NG::OffsetF& transl
     auto sheetGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(sheetGeometryNode);
     auto closeIconX = sheetGeometryNode->GetFrameSize().Width() -
-                      static_cast<float>(SHEET_CLOSE_ICON_WIDTH.ConvertToPx()) -
+                      static_cast<float>(sheetTheme->GetCloseIconButtonWidth().ConvertToPx()) -
                       static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
     if (AceApplicationInfo::GetInstance().IsRightToLeft() &&
         AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -373,7 +373,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void SheetPresentationLayoutAlgorithm::UpdateTranslateOffsetWithPlacement(OffsetF& translate)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         translate += OffsetF(0, SHEET_ARROW_HEIGHT.ConvertToPx());
         return;
     }
@@ -422,7 +422,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const float pa
             height = GetHeightBySheetStyle(parentConstraintHeight, parentConstraintWidth, layoutWrapper) +
                 SHEET_ARROW_HEIGHT.ConvertToPx();
             // The sheet height can only be confirmed after the placement is confirmed.
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 height -= SHEET_ARROW_HEIGHT.ConvertToPx();
             }
             break;
@@ -454,7 +454,7 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const float par
         case SheetType::SHEET_BOTTOMLANDSPACE:
             [[fallthrough]];
         case SheetType::SHEET_CENTER:
-            sheetWidth = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
+            sheetWidth = GetCenterDefaultWidth(host);
             break;
         case SheetType::SHEET_POPUP:
             sheetWidth = SHEET_POPUP_WIDTH.ConvertToPx();
@@ -476,6 +476,18 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const float par
         width = sheetWidth;
     }
     return width;
+}
+
+float SheetPresentationLayoutAlgorithm::GetCenterDefaultWidth(const RefPtr<FrameNode>& host) const
+{
+    auto sheetWidth = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
+    CHECK_NULL_RETURN(host, sheetWidth);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, sheetWidth);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_RETURN(sheetTheme, sheetWidth);
+    sheetWidth = sheetTheme->GetCenterDefaultWidth().ConvertToPx();
+    return sheetWidth;
 }
 
 float SheetPresentationLayoutAlgorithm::ComputeMaxHeight(const float parentConstraintHeight,
@@ -586,7 +598,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
 
 void SheetPresentationLayoutAlgorithm::UpdateMaxSizeWithPlacement(float& maxWidth, float& maxHeight)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         maxHeight -= SHEET_ARROW_HEIGHT.ConvertToPx();
         return;
     }
@@ -654,7 +666,7 @@ void SheetPresentationLayoutAlgorithm::UpdatePopupInfoAndRemeasure(LayoutWrapper
     sheetPopupInfo_ = sheetPopupInfo;
     sheetOffsetX_ = sheetPopupInfo.sheetOffsetX;
     sheetOffsetY_ = sheetPopupInfo.sheetOffsetY;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     sheetWidth_ = sheetWidth;
@@ -666,7 +678,7 @@ void SheetPresentationLayoutAlgorithm::UpdatePopupInfoAndRemeasure(LayoutWrapper
 
 void SheetPresentationLayoutAlgorithm::AddArrowHeightToSheetSize()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ||
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ||
         sheetType_ != SheetType::SHEET_POPUP) {
         return;
     }

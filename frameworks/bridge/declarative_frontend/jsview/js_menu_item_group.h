@@ -24,6 +24,10 @@ class JSMenuItemGroup : public JSViewAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
+
+private:
+    static void ParseHeader(const JSRef<JSObject>& object);
+    static void ParseFooter(const JSRef<JSObject>& object);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MENU_ITEM_GROUP_H

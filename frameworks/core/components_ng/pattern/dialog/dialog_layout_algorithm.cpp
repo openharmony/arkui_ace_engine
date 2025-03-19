@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -41,6 +42,7 @@ constexpr double HALF = 2.0;
 constexpr double LANDSCAPE_DIALOG_WIDTH_RATIO = 0.75;
 constexpr Dimension SCROLL_MIN_HEIGHT_SUITOLD = 100.0_vp;
 constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
+constexpr int32_t EXTRA_MASK_NODE_INDEX = 1;
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -72,6 +74,13 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
     isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
+    if (dialogPattern->IsWaterfallWindowMode()) {
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "enableHoverMode for waterfallMode, isShowInSubWindow: %{public}d",
+            isShowInSubWindow_);
+        isHoverMode_ = true;
+        hoverModeArea_ = HoverModeAreaType::TOP_SCREEN;
+    }
+
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
@@ -196,19 +205,19 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
     float restWidth = 0.0f;
     RefPtr<LayoutWrapper> scroll;
     RefPtr<LayoutWrapper> list;
-    for (const auto& children : layoutWrapper->GetAllChildrenWithBuild()) {
-        restWidth = children->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Width();
-        restHeight = children->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Height();
-        for (const auto& grandson : children->GetAllChildrenWithBuild()) {
-            if (grandson->GetHostTag() == V2::SCROLL_ETS_TAG) {
-                scroll = grandson;
-                scrollHeight = grandson->GetGeometryNode()->GetMarginFrameSize().Height();
-            } else if (grandson->GetHostTag() == V2::LIST_ETS_TAG) {
-                list = grandson;
-                listHeight = grandson->GetGeometryNode()->GetMarginFrameSize().Height();
-            } else {
-                restHeight -= grandson->GetGeometryNode()->GetMarginFrameSize().Height();
-            }
+    auto child = layoutWrapper->GetAllChildrenWithBuild().front();
+    CHECK_NULL_VOID(child);
+    restWidth = child->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Width();
+    restHeight = child->GetLayoutProperty()->GetContentLayoutConstraint()->maxSize.Height();
+    for (const auto& grandson : child->GetAllChildrenWithBuild()) {
+        if (grandson->GetHostTag() == V2::SCROLL_ETS_TAG) {
+            scroll = grandson;
+            scrollHeight = grandson->GetGeometryNode()->GetMarginFrameSize().Height();
+        } else if (grandson->GetHostTag() == V2::LIST_ETS_TAG) {
+            list = grandson;
+            listHeight = grandson->GetGeometryNode()->GetMarginFrameSize().Height();
+        } else {
+            restHeight -= grandson->GetGeometryNode()->GetMarginFrameSize().Height();
         }
     }
 
@@ -519,8 +528,8 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
         dialogContext->ClipWithRect(rect);
         dialogContext->UpdateClipEdge(true);
     }
-    if (isUIExtensionSubWindow_ && expandDisplay_) {
-        ClipUIExtensionSubWindowContent(dialog, clipMask);
+    if (isUIExtensionSubWindow_ && isModal_) {
+        ClipUIExtensionSubWindowContent(dialog);
     }
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
@@ -664,6 +673,8 @@ void DialogLayoutAlgorithm::SetSubWindowHotarea(
             auto hostOffset = Offset(hostWindowRect_.GetX(), hostWindowRect_.GetY());
             auto hostSize = Size(hostWindowRect_.Width(), hostWindowRect_.Height());
             rect = isValid ? Rect(hostOffset, hostSize) : Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
+            auto contentRect = Rect(topLeftPoint_.GetX(), topLeftPoint_.GetY(), childSize.Width(), childSize.Height());
+            rects.emplace_back(contentRect);
         } else {
             rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
         }
@@ -952,26 +963,41 @@ void DialogLayoutAlgorithm::UpdateSafeArea(const RefPtr<FrameNode>& frameNode)
     TAG_LOGI(AceLogTag::ACE_DIALOG, "safeAreaInsets: %{public}s", safeAreaInsets_.ToString().c_str());
 }
 
-void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip)
+void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog)
 {
     CHECK_NULL_VOID(dialog);
-    auto dialogContext = dialog->GetRenderContext();
-    CHECK_NULL_VOID(dialogContext);
-
-    if (isClip) {
-        auto shapeRect = AceType::MakeRefPtr<ShapeRect>();
-        shapeRect->SetWidth(Dimension(hostWindowRect_.Width()));
-        shapeRect->SetHeight(Dimension(hostWindowRect_.Height()));
-        shapeRect->SetOffset(DimensionOffset(Dimension(hostWindowRect_.GetX()), Dimension(hostWindowRect_.GetY())));
-        auto isFullScreen =
-            IsGetExpandDisplayValidHeight() && NearEqual(expandDisplayValidHeight_, hostWindowRect_.Height());
-        if (expandDisplay_ && !isFullScreen) {
-            shapeRect->SetRadiusWidth(CONTAINER_OUTER_RADIUS);
+    auto isFullScreen =
+        IsGetExpandDisplayValidHeight() && NearEqual(expandDisplayValidHeight_, hostWindowRect_.Height());
+    auto maskNodePtr = dialog->GetChildByIndex(EXTRA_MASK_NODE_INDEX);
+    CHECK_NULL_VOID(maskNodePtr);
+    auto maskNode = AceType::DynamicCast<FrameNode>(maskNodePtr);
+    CHECK_NULL_VOID(maskNode);
+    auto maskNodeLayoutProp = maskNode->GetLayoutProperty();
+    CHECK_NULL_VOID(maskNodeLayoutProp);
+    auto maskGeometryNode = maskNode->GetGeometryNode();
+    CHECK_NULL_VOID(maskGeometryNode);
+    if (expandDisplay_) {
+        maskNodeLayoutProp->ClearUserDefinedIdealSize(true, true);
+        SizeF realSize;
+        realSize.SetWidth(hostWindowRect_.Width());
+        realSize.SetHeight(hostWindowRect_.Height());
+        maskGeometryNode->SetFrameSize(realSize);
+        OffsetF offset;
+        offset.SetX(hostWindowRect_.GetX());
+        offset.SetY(hostWindowRect_.GetY());
+        maskGeometryNode->SetFrameOffset(offset);
+        if (!isFullScreen) {
+            auto maskNodeContext = maskNode->GetRenderContext();
+            CHECK_NULL_VOID(maskNodeContext);
+            maskNodeContext->UpdateBorderRadius(NG::BorderRadiusPropertyT<Dimension>(CONTAINER_OUTER_RADIUS));
         }
-        dialogContext->UpdateClipShape(shapeRect);
     } else {
-        dialogContext->UpdateClipShape(nullptr);
+        maskNodeLayoutProp->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
+        maskGeometryNode->SetFrameOffset(OffsetF(0, 0));
+        maskNode->Measure(dialog->GetLayoutConstraint());
     }
+    maskNode->Layout();
 }
 
 void DialogLayoutAlgorithm::UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height)

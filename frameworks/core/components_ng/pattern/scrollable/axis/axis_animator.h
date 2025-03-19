@@ -21,6 +21,10 @@
 #include "frameworks/core/components_ng/pattern/scrollable/axis/axis_scroll_motion.h"
 #include "frameworks/core/components_ng/render/animation_utils.h"
 
+namespace OHOS::Ace {
+class Animator;
+}
+
 namespace OHOS::Ace::NG {
 
 using AxisAnimationCallback = std::function<void(float)>;
@@ -49,22 +53,14 @@ public:
 
     void CreateAnimator();
 
-    bool IsRunning()
-    {
-        return axisScrollAnimator_ && axisScrollAnimator_->IsRunning();
-    }
+    bool IsRunning();
 
     RefPtr<AxisScrollMotion> GeAxisScrollMotion() const
     {
         return axisScrollMotion_;
     }
 
-    void StopAxisAnimation()
-    {
-        if (IsRunning()) {
-            axisScrollAnimator_->Stop();
-        }
-    }
+    void StopAxisAnimation();
 
 private:
     WeakPtr<PipelineBase> context_;

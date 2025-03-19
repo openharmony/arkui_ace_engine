@@ -101,6 +101,25 @@ public:
             theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
                 "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
             ParseAdditionalStylePattern(pattern, theme);
+            ParseTipsPattern(pattern, theme);
+        }
+        void ParseTipsPattern(const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
+        {
+            auto tipsDoubleBorderEnable = pattern->GetAttr<std::string>("tips_double_border_enable", "1");
+            theme->tipsDoubleBorderEnable_ = StringUtils::StringToInt(tipsDoubleBorderEnable);
+            theme->tipsOuterBorderWidth_ = pattern->GetAttr<Dimension>("tips_outer_border_width", 1.0_vp);
+            theme->tipsOuterBorderColor_ = pattern->GetAttr<Color>("tips_outer_border_color", Color::TRANSPARENT);
+            theme->tipsInnerBorderWidth_ = pattern->GetAttr<Dimension>("tips_inner_border_width", 1.0_vp);
+            theme->tipsInnerBorderColor_ = pattern->GetAttr<Color>("tips_inner_border_color", Color::TRANSPARENT);
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
+                theme->tipsOuterBorderWidth_ = pattern->GetAttr<Dimension>("tips_outer_border_width", 1.0_vp);
+                theme->tipsOuterBorderColor_ =
+                    pattern->GetAttr<Color>("tips_outer_border_color_dark", Color::TRANSPARENT);
+            }
+            theme->tipsPadding_ = Edge(pattern->GetAttr<Dimension>("tips_horizontal_padding", 8.0_vp),
+                pattern->GetAttr<Dimension>("tips_vertical_padding", 8.0_vp),
+                pattern->GetAttr<Dimension>("tips_horizontal_padding", 8.0_vp),
+                pattern->GetAttr<Dimension>("tips_vertical_padding", 8.0_vp));
         }
         void ParseAdditionalStylePattern(
             const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
@@ -122,6 +141,11 @@ public:
     const Edge& GetPadding() const
     {
         return padding_;
+    }
+
+    const Edge& GetTipsPadding() const
+    {
+        return tipsPadding_;
     }
 
     const Color& GetMaskColor() const
@@ -332,6 +356,31 @@ public:
         return popupInnerBorderColor_;
     }
 
+    int32_t GetTipsDoubleBorderEnable() const
+    {
+        return tipsDoubleBorderEnable_;
+    }
+
+    Dimension GetTipsOuterBorderWidth() const
+    {
+        return tipsOuterBorderWidth_;
+    }
+
+    Color GetTipsOuterBorderColor() const
+    {
+        return tipsOuterBorderColor_;
+    }
+
+    Dimension GetTipsInnerBorderWidth() const
+    {
+        return tipsInnerBorderWidth_;
+    }
+
+    Color GetTipsInnerBorderColor() const
+    {
+        return tipsInnerBorderColor_;
+    }
+
     Color GetButtonFontColor() const
     {
         return buttonFontColor_;
@@ -392,6 +441,7 @@ protected:
 
 private:
     Edge padding_;
+    Edge tipsPadding_;
     Color maskColor_;
     Color backgroundColor_;
     Color buttonHoverColor_ = Color(0x0cffffff);
@@ -403,6 +453,11 @@ private:
     Color popupOuterBorderColor_ = Color::TRANSPARENT;
     Dimension popupInnerBorderWidth_ = 0.8_vp;
     Color popupInnerBorderColor_ = Color::TRANSPARENT;
+    int32_t tipsDoubleBorderEnable_ = 0;
+    Dimension tipsOuterBorderWidth_ = 1.0_vp;
+    Color tipsOuterBorderColor_ = Color::TRANSPARENT;
+    Dimension tipsInnerBorderWidth_ = 1.0_vp;
+    Color tipsInnerBorderColor_ = Color::TRANSPARENT;
 
     TextStyle textStyle_;
     Radius radius_;

@@ -18,6 +18,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -151,7 +152,7 @@ void ArcScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
 
 void ArcScrollBarOverlayModifier::DrawArc(DrawingContext& context)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto strokeWidth = strokeWidth_->Get();
     auto& canvas = context.canvas;
@@ -175,7 +176,7 @@ void ArcScrollBarOverlayModifier::DrawArc(DrawingContext& context)
 void ArcScrollBarOverlayModifier::DrawBackgroundArc(DrawingContext& context)
 {
     CHECK_NULL_VOID(backgroundBarColor_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto& canvas = context.canvas;
     auto strokeWidth = backgroundStrokeWidth_->Get();

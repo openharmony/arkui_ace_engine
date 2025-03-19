@@ -22,6 +22,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_model.h"
 #include "core/components_v2/list/list_properties.h"
 

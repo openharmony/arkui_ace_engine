@@ -157,7 +157,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     const FrontendType& cardType, const FrontendType& uiSyntax)
 {
     LOGI("SubContainer::RunCard RunCard!!! path = %{public}s formSrc = %{public}s", path.c_str(), formSrc.c_str());
-    if (formId == runningCardId_) {
+    if ((formId == runningCardId_) && (uiSyntax == FrontendType::ETS_CARD)) {
         LOGE("the card is showing, no need run again");
         return;
     }

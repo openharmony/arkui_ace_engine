@@ -37,6 +37,11 @@ public:
 
     virtual void LoadSystemTheme(int32_t themeId) {}
 
+    virtual int32_t GetSystemTheme()
+    {
+        return -1;
+    }
+
     virtual void ParseSystemTheme() {}
 
     virtual void LoadCustomTheme(const RefPtr<AssetManager>& assetManager) {}

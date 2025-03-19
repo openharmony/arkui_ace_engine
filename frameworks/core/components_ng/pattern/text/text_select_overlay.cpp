@@ -91,13 +91,7 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
     CHECK_NULL_RETURN(textPattern, false);
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto clip = false;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        clip = true;
-    }
-    if (!renderContext->GetClipEdge().value_or(clip)) {
+    if (!GetRenderClipValue()) {
         if (handleLevelMode_ == HandleLevelMode::EMBED) {
             return true;
         }
@@ -143,13 +137,7 @@ bool TextSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     CHECK_NULL_RETURN(textPattern, false);
     auto host = textPattern->GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto clip = false;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        clip = true;
-    }
-    if (!renderContext->GetClipEdge().value_or(clip)) {
+    if (!GetRenderClipValue()) {
         return true;
     }
     auto contentRect = textPattern->GetTextContentRect();
@@ -196,20 +184,12 @@ OffsetF TextSelectOverlay::GetHandleReferenceOffset(const RectF& handleRect)
     handleOffset.SetY(handleOffset.GetY() + handleRect.Height() / 2.0f);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, handleOffset);
-    auto host = textPattern->GetHost();
-    CHECK_NULL_RETURN(host, handleOffset);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, handleOffset);
     auto contentRect = textPattern->GetTextContentRect();
     auto contentOffset = contentRect.GetOffset();
     if (IsOverlayMode()) {
         contentOffset = contentOffset + GetPaintOffsetWithoutTransform();
     }
-    auto clip = false;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        clip = true;
-    }
-    if (renderContext->GetClipEdge().value_or(clip)) {
+    if (GetRenderClipValue()) {
         handleOffset.SetX(
             std::clamp(handleOffset.GetX(), contentOffset.GetX(), contentOffset.GetX() + contentRect.Width()));
         handleOffset.SetY(
@@ -297,9 +277,14 @@ RectF TextSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
     }
     auto contentRect = pattern->GetTextContentRect();
     auto textRect = pattern->GetTextRect();
+    auto textContentRect = pattern->GetTextContentRect(true);
     res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
-    RectF visibleContentRect(contentRect.GetOffset() + textPaintOffset, contentRect.GetSize());
-    visibleContentRect = GetVisibleRect(pattern->GetHost(), visibleContentRect);
+    RectF visibleContentRect;
+    if (GetRenderClipValue() || LessOrEqual(textContentRect.Height(), contentRect.Height()) ||
+        !GetClipHandleViewPort(visibleContentRect)) {
+        visibleContentRect = RectF(contentRect.GetOffset() + textPaintOffset, contentRect.GetSize());
+        visibleContentRect = GetVisibleRect(pattern->GetHost(), visibleContentRect);
+    }
     auto intersectRect = res.IntersectRectT(visibleContentRect);
     intersectRect.SetWidth(std::max(intersectRect.Width(), 0.0f));
     intersectRect.SetHeight(std::max(intersectRect.Height(), 0.0f));
@@ -508,7 +493,7 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->GetClipEdge().value_or(false)) {
+    if (GetRenderClipValue()) {
         return;
     }
     auto clipNode = host->GetAncestorNodeOfFrame(true);
@@ -628,5 +613,17 @@ bool TextSelectOverlay::AllowShare()
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
     return !textPattern->GetTextSelector().SelectNothing();
+}
+
+bool TextSelectOverlay::GetRenderClipValue() const
+{
+    auto defaultClipValue = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    auto pattern = GetPattern<Pattern>();
+    CHECK_NULL_RETURN(pattern, defaultClipValue);
+    auto host = pattern->GetHost();
+    CHECK_NULL_RETURN(host, defaultClipValue);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultClipValue);
+    return renderContext->GetClipEdge().value_or(defaultClipValue);
 }
 } // namespace OHOS::Ace::NG

@@ -63,6 +63,7 @@ constexpr SwiperHoverFlag HOVER_NONE = 0;
 constexpr SwiperHoverFlag HOVER_SWIPER = 1;
 constexpr SwiperHoverFlag HOVER_INDICATOR = 1 << 1;
 constexpr SwiperHoverFlag HOVER_ARROW = 1 << 2;
+constexpr int32_t NEW_STYLE_MIN_TURN_PAGE_VELOCITY = 780;
 
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
@@ -752,7 +753,7 @@ public:
     bool NeedFastAnimation() const;
     bool IsInFastAnimation() const;
 
-    float CalcCurrentTurnPageRate() const;
+    float CalcCurrentTurnPageRate(bool isTouchBottom = false) const;
     int32_t GetFirstIndexInVisibleArea() const;
     float CalculateGroupTurnPageRate(float additionalOffset);
 
@@ -764,9 +765,22 @@ public:
     void SetBindIndicator(bool bind)
     {
         isBindIndicator_ = bind;
+        // Need to reset the last independent indicator first,
+        // whether it will rebind to a new independent navigation point.
+        ResetIndicatorNode();
     }
 
-    void SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode);
+    void SetJSIndicatorController(std::function<void()> resetFunc)
+    {
+        if (resetFunc_) {
+            resetFunc_();
+        }
+        resetFunc_ = resetFunc;
+    }
+
+    void SetIndicatorNode(const RefPtr<FrameNode>& indicatorNode);
+
+    void ResetIndicatorNode();
 
     RefPtr<FrameNode> GetIndicatorNode() const
     {
@@ -815,8 +829,10 @@ protected:
     std::optional<int32_t> fastCurrentIndex_;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
+    SwiperLayoutAlgorithm::PositionMap itemPositionWillInvisible_;
     std::optional<int32_t> targetIndex_;
     float swiperProportion_ = 2.0f;
+    int32_t newMinTurnPageVelocity_ = NEW_STYLE_MIN_TURN_PAGE_VELOCITY;
     int32_t propertyAnimationIndex_ = -1;
 
     bool hasTabsAncestor_ = false;
@@ -1096,7 +1112,7 @@ private:
     void CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     std::pair<float, float> CalcCurrentPageStatus(float additionalOffset) const;
-    std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset) const;
+    std::pair<float, float> CalcCurrentPageStatusOnRTL(float additionalOffset, bool isTouchBottom = false) const;
 
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
@@ -1184,8 +1200,6 @@ private:
         return !IsLoop() && (prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_) && TotalCount() > GetDisplayCount();
     }
 
-    std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
-
     bool IsItemOverlay() const;
     void UpdateIndicatorOnChildChange();
     void UpdateDigitalIndicator();
@@ -1255,6 +1269,8 @@ private:
     int32_t endIndex_ = 0;
     int32_t oldIndex_ = 0;
     int32_t nextIndex_ = 0;
+    int32_t prevStartIndex_ = 0;
+    int32_t prevEndIndex_ = 0;
 
     PanDirection panDirection_;
 
@@ -1393,8 +1409,9 @@ private:
     TabAnimateMode tabAnimationMode_ = TabAnimateMode::NO_ANIMATION;
     bool isFirstAxisAction_ = true;
     bool stopWhenTouched_ = true;
-    WeakPtr<NG::UINode> indicatorNode_;
+    WeakPtr<FrameNode> indicatorNode_;
     bool isBindIndicator_ = false;
+    std::function<void()> resetFunc_;
 
     SwiperHoverFlag hoverFlag_ = HOVER_NONE;
     GestureStatus gestureStatus_ = GestureStatus::INIT;

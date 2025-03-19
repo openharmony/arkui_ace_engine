@@ -52,7 +52,7 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
 
     BorderRadiusArray radiusXY = BorderRadiusArray();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto paintRectWidth = renderCtx->GetPaintRectWithoutTransform().Width();
         radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth),
                          borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth)),
@@ -148,6 +148,17 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
             matrix[3], matrix[7], matrix[11], matrix[15]);
         config.imageMatrix_ = renderProps->GetImageMatrix().value_or(defaultValue);
     }
+}
+
+void ImagePaintMethod::UpdatePaintMethod(
+    const RefPtr<CanvasImage>& canvasImage, const ImagePaintMethodConfig& imagePainterMethodConfig)
+{
+    selected_ = imagePainterMethodConfig.selected;
+    selected_ = imagePainterMethodConfig.selected;
+    sensitive_ = imagePainterMethodConfig.sensitive, canvasImage_ = canvasImage;
+    interpolationDefault_ = imagePainterMethodConfig.interpolation;
+    imageOverlayModifier_ = imagePainterMethodConfig.imageOverlayModifier;
+    imageContentModifier_ = imagePainterMethodConfig.imageContentModifier;
 }
 
 RefPtr<Modifier> ImagePaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)

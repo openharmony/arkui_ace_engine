@@ -595,7 +595,8 @@ void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINo
     const auto& children = host->GetChildren();
     int32_t index = 0;
     for (auto child : children) {
-        if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+        auto tag = child->GetTag();
+        if (tag == V2::MENU_ITEM_ETS_TAG) {
             auto itemNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(itemNode);
             auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -615,7 +616,7 @@ void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINo
             isNeedDivider_ = true;
             itemPattern->SetIndex(index);
             previousNode = child;
-        } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        } else if (tag == V2::MENU_ITEM_GROUP_ETS_TAG) {
             auto childItemNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(childItemNode);
             auto pattern = childItemNode->GetPattern<MenuItemGroupPattern>();
@@ -630,8 +631,8 @@ void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINo
                 childItemNode->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(accessibilityProperty);
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
-            ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
+        } else if (tag == V2::JS_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG
+            ||  tag == V2::JS_IF_ELSE_ETS_TAG || tag == V2::JS_REPEAT_ETS_TAG) {
             UpdateMenuItemChildren(child, previousNode);
         }
         index++;
@@ -1247,27 +1248,15 @@ void MenuPattern::ShowPreviewPositionAnimation(AnimationOption& option, int32_t 
     previewRenderContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(previewOriginPosition.GetX()), Dimension(previewOriginPosition.GetY())));
 
-    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(
-        -1.0, [menuWrapperPattern, previewOriginPosition, previewPosition](float rate) {
-            CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
-            auto previewOffset = (previewPosition - previewOriginPosition) * rate + previewOriginPosition;
-            menuWrapperPattern->SetAnimationPreviewOffset(previewOffset);
-        });
-    CHECK_NULL_VOID(animateProperty);
-    previewRenderContext->AttachNodeAnimatableProperty(animateProperty);
-    animateProperty->Set(0.0);
-
     if (isHoverImageTarget) {
         option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
         option.SetDelay(delay);
     }
 
-    AnimationUtils::Animate(option, [previewRenderContext, previewPosition, animateProperty]() {
+    AnimationUtils::Animate(option, [previewRenderContext, previewPosition]() {
         CHECK_NULL_VOID(previewRenderContext);
         previewRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-        CHECK_NULL_VOID(animateProperty);
-        animateProperty->Set(1.0);
     });
 }
 
@@ -1291,29 +1280,16 @@ void MenuPattern::ShowPreviewMenuScaleAnimation(
     renderContext->UpdateTransformScale(VectorF(menuAnimationScale, menuAnimationScale));
     renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(originOffset_.GetX()), Dimension(originOffset_.GetY())));
 
-    auto callback = [menuWrapperPattern, originOffset = originOffset_, menuPosition, scaleFrom = menuAnimationScale](
-                        float rate) {
-        CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
-        menuWrapperPattern->SetAnimationMenuOffset((menuPosition - originOffset) * rate + originOffset);
-        menuWrapperPattern->SetAnimationMenuScale((1.0 - scaleFrom) * rate + scaleFrom);
-    };
-    auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
-    CHECK_NULL_VOID(animateProperty);
-    renderContext->AttachNodeAnimatableProperty(animateProperty);
-    animateProperty->Set(0.0);
-
     if (isShowHoverImage_) {
         option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
         option.SetDelay(delay);
     }
 
-    AnimationUtils::Animate(option, [renderContext, menuPosition, animateProperty]() {
+    AnimationUtils::Animate(option, [renderContext, menuPosition]() {
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
         renderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        CHECK_NULL_VOID(animateProperty);
-        animateProperty->Set(1.0);
     });
 }
 
@@ -2073,12 +2049,15 @@ void MenuPattern::HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index,
         if (parent->GetParent()->GetChildIndex(parent) == 0 && syntaxNode) {
             prevNode = GetForEachMenuItem(syntaxNode, false);
         }
-        if (parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG && parent->GetParent()->GetChildIndex(parent) == 0 &&
-            parent->GetParent()->GetTag() == V2::JS_IF_ELSE_ETS_TAG) { // the first item in first group in ifElse
+        bool matchFirstItemInIfElse = parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG &&
+            parent->GetParent()->GetChildIndex(parent) == 0 &&
+            parent->GetParent()->GetTag() == V2::JS_IF_ELSE_ETS_TAG;
+        if (matchFirstItemInIfElse) { // the first item in first group in ifElse
             prevNode = GetOutsideForEachMenuItem(parent->GetParent(), false);
         }
-        if (parent->GetParent()->GetChildIndex(parent) > 0 &&
-            parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) { // not first group in menu
+        bool notFirstGroupInMenu = parent->GetParent()->GetChildIndex(parent) > 0 &&
+            parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG;
+        if (notFirstGroupInMenu) {
             prevNode = GetOutsideForEachMenuItem(parent, false);
         }
     }

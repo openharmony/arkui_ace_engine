@@ -361,6 +361,7 @@ public:
     virtual void CalcReservedHeight();
     void ScheduleDisappearDelayTask();
     float GetMainOffset(const Offset& offset) const;
+    float GetMainSize(const Size& size) const;
     void SetReverse(bool reverse);
     BarDirection CheckBarDirection(const Point& point);
     void InitLongPressEvent();
@@ -673,9 +674,9 @@ private:
     // dump info
     std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
     bool needAddLayoutInfo = false;
+    bool isMousePressed_ = false;
 
 #ifdef ARKUI_CIRCLE_FEATURE
-    bool isMousePressed_ = false;
     Dimension normalBackgroundWidth_;
     Dimension activeBackgroundWidth_;
     double normalStartAngle_ = 0.0;

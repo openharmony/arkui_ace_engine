@@ -142,6 +142,7 @@ private:
     LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);
     void UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
+    void UpdateConstraintSelectHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& LayoutConstraintF);
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
     float GetMenuMaxBottom(const RefPtr<MenuPattern>& menuPattern);
@@ -151,6 +152,9 @@ private:
         const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<GeometryNode>& geometryNode);
     OffsetF MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutProperty>& menuProp, const RefPtr<MenuPattern>& menuPattern,
         const SizeF& size, bool didNeedArrow = false, LayoutWrapper* layoutWrapper = nullptr);
+    OffsetF SelectLayoutAvoidAlgorithm(const RefPtr<MenuLayoutProperty>& menuProp,
+        const RefPtr<MenuPattern>& menuPattern, const SizeF& size, bool didNeedArrow = false,
+        LayoutWrapper* layoutWrapper = nullptr);
     void PlacementRTL(LayoutWrapper* layoutWrapper, Placement& placement_);
     void SetMenuPlacementForAnimation(LayoutWrapper* layoutWrapper);
 
@@ -169,6 +173,7 @@ private:
         const RefPtr<MenuPattern>& menuPattern);
     bool SkipUpdateTargetNodeSize(const RefPtr<FrameNode>& targetNode, const RefPtr<MenuPattern>& menuPattern);
     OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow = false);
+    OffsetF GetSelectChildPosition(const SizeF& childSize, bool didNeedArrow = false);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);
 
@@ -245,6 +250,8 @@ private:
     void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& menuWindowRect);
     void CheckPreviewSize(const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<MenuPattern>& menuPattern);
     void ModifyTargetOffset();
+    OffsetF UpdateMenuPosition(LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& menuNode,
+        RefPtr<MenuPattern> menuPattern, const RefPtr<MenuLayoutProperty>& menuProp);
 
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
@@ -334,6 +341,7 @@ private:
     std::string clipPath_;
     bool isPreviewContainScale_ = false;
     bool holdEmbeddedMenuPosition_ = false;
+    bool didNeedArrow_ = false;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

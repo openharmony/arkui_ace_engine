@@ -576,7 +576,7 @@ HWTEST_F(CalendarPaintMethTest, InitTextStyleTest001, TestSize.Level1)
     RSTextStyle lunarTextStyle;
     paintMethod->appFontFamilies_.push_back("test");
     paintMethod->InitTextStyle(dateTextStyle, lunarTextStyle);
-    EXPECT_TRUE(dateTextStyle.fontSize_ == paintMethod->dayFontSize_);
+    EXPECT_TRUE(dateTextStyle.fontSize == paintMethod->dayFontSize_);
 }
 
 /**
@@ -610,7 +610,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest001, TestSize.L
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, startDate, endDate);
     RSTextStyle dateTextStyle;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textSelectedDayColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textSelectedDayColor_);
 }
 
 /**
@@ -643,7 +643,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest002, TestSize.L
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, startDate, endDate);
     RSTextStyle dateTextStyle;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textNonCurrentMonthColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textNonCurrentMonthColor_);
 }
 
 /**
@@ -677,7 +677,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest003, TestSize.L
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, startDate, endDate);
     RSTextStyle dateTextStyle;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textSelectedDayColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textSelectedDayColor_);
 }
 
 /**
@@ -711,7 +711,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest004, TestSize.L
     RSTextStyle dateTextStyle;
     paintMethod->calendarDay_ = calendarDay;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textNonCurrentMonthColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textNonCurrentMonthColor_);
 }
 
 /**
@@ -746,7 +746,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest005, TestSize.L
     RSTextStyle dateTextStyle;
     paintMethod->calendarDay_ = calendarDay;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textSelectedDayColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textSelectedDayColor_);
 }
 
 /**
@@ -799,7 +799,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest006, TestSize.L
     RSTextStyle dateTextStyle;
     paintMethod->calendarDay_ = calendarDay;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textNonCurrentMonthColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textNonCurrentMonthColor_);
 }
 
 /**
@@ -852,7 +852,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest007, TestSize.L
     RSTextStyle dateTextStyle;
     paintMethod->calendarDay_ = calendarDay;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textNonCurrentMonthTodayColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textNonCurrentMonthTodayColor_);
 }
 
 /**
@@ -899,7 +899,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest008, TestSize.L
     RSTextStyle dateTextStyle;
     paintMethod->calendarDay_ = calendarDay;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textSelectedDayColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textSelectedDayColor_);
 }
 
 /**
@@ -927,7 +927,7 @@ HWTEST_F(CalendarPaintMethTest, SetOffWorkTextStyleTest001, TestSize.Level1)
     RSTextStyle offWorkTextStyle;
     paintMethod->appFontFamilies_.push_back("test");
     paintMethod->SetOffWorkTextStyle(offWorkTextStyle, calendarDay);
-    EXPECT_NE(offWorkTextStyle.fontSize_, 0);
+    EXPECT_NE(offWorkTextStyle.fontSize, 0);
 }
 
 /**
@@ -955,7 +955,7 @@ HWTEST_F(CalendarPaintMethTest, SetOffWorkTextStyleTest002, TestSize.Level1)
     RSTextStyle offWorkTextStyle;
     paintMethod->appFontFamilies_.push_back("test");
     paintMethod->SetOffWorkTextStyle(offWorkTextStyle, calendarDay);
-    EXPECT_EQ(offWorkTextStyle.locale_, Localization::GetInstance()->GetFontLocale());
+    EXPECT_EQ(offWorkTextStyle.locale, Localization::GetInstance()->GetFontLocale());
 }
 
 /**
@@ -982,7 +982,7 @@ HWTEST_F(CalendarPaintMethTest, SetOffWorkTextStyleTest003, TestSize.Level1)
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, defaultDate, defaultDate);
     RSTextStyle offWorkTextStyle;
     paintMethod->SetOffWorkTextStyle(offWorkTextStyle, calendarDay);
-    EXPECT_EQ(offWorkTextStyle.fontWeight_, static_cast<RSFontWeight>(paintMethod->workStateFontWeight_));
+    EXPECT_EQ(offWorkTextStyle.fontWeight, static_cast<RSFontWeight>(paintMethod->workStateFontWeight_));
 }
 
 /**

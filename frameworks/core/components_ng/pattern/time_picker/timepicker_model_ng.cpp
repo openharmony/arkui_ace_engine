@@ -904,4 +904,13 @@ void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
 }
 
+void TimePickerModelNG::UpdateUserSetSelectColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerPattern);
+    timePickerPattern->UpdateUserSetSelectColor();
+}
+
 } // namespace OHOS::Ace::NG

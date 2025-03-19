@@ -449,6 +449,11 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
     CHECK_NULL_VOID(customTitleNode);
     customTitleNode->FireAppTitleCallback(title);
 
+    // call setTitle() callback for backButton bar
+    auto controllButtonRow = GetCustomButtonNode();
+    CHECK_NULL_VOID(controllButtonRow);
+    controllButtonRow->FireAppTitleCallback(title);
+
     auto customFloatingTitleNode = GetFloatingTitleNode();
     CHECK_NULL_VOID(customFloatingTitleNode);
     customFloatingTitleNode->FireAppTitleCallback(title);
@@ -799,20 +804,23 @@ void ContainerModalPattern::InitLayoutProperty()
     buttonsRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
 
-    InitTitleRowLayoutProperty(GetCustomTitleRow());
-    InitTitleRowLayoutProperty(GetFloatingTitleRow());
+    InitTitleRowLayoutProperty(GetCustomTitleRow(), false);
+    InitTitleRowLayoutProperty(GetFloatingTitleRow(), true);
     InitButtonsLayoutProperty();
 
     containerModal->MarkModifyDone();
 }
 
-void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow)
+void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow, bool isFloating)
 {
     CHECK_NULL_VOID(titleRow);
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
+    auto rowHeight = CONTAINER_TITLE_HEIGHT;
+    if (!isFloating) {
+        rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
+    }
     titleRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(rowHeight)));
     titleRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
@@ -832,10 +840,10 @@ void ContainerModalPattern::InitAllTitleRowLayoutProperty()
     CHECK_NULL_VOID(customTitleRow);
     auto floatingTitleRow = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleRow);
-    InitTitleRowLayoutProperty(customTitleRow);
+    InitTitleRowLayoutProperty(customTitleRow, false);
     customTitleRow->MarkModifyDone();
     customTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-    InitTitleRowLayoutProperty(floatingTitleRow);
+    InitTitleRowLayoutProperty(floatingTitleRow, true);
     floatingTitleRow->MarkModifyDone();
     floatingTitleRow->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }

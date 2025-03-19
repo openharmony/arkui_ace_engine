@@ -373,7 +373,7 @@ std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
     auto displayCount = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && swiperPattern->IsSwipeByGroup()) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && swiperPattern->IsSwipeByGroup()) {
         leftArrowIsHidden = (index_ < displayCount);
         rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
     }
@@ -426,10 +426,18 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
             arrowGestureHub->AddClickEvent(arrowClickListener_);
         }
     }
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    if (accessibilityProperty) {
-        accessibilityProperty->SetAccessibilityLevel(
-            visible ? AccessibilityProperty::Level::AUTO : AccessibilityProperty::Level::NO_STR);
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    auto arrowAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (visible) {
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+        arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+    } else {
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        swiperNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
 }
 

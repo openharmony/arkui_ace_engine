@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
@@ -237,7 +238,7 @@ public:
     {
         return dataDetectorAdapter_;
     }
-    const std::map<int32_t, AISpan>& GetAISpanMap()
+    virtual const std::map<int32_t, AISpan>& GetAISpanMap()
     {
         return dataDetectorAdapter_->aiSpanMap_;
     }
@@ -793,6 +794,7 @@ public:
     bool GetOriginCaretPosition(OffsetF& offset) const;
     void ResetOriginCaretPosition();
     bool RecordOriginCaretPosition(const OffsetF& offset);
+    TextDragInfo CreateTextDragInfo();
 
 protected:
     int32_t GetClickedSpanPosition()
@@ -891,6 +893,7 @@ protected:
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
+    virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -968,7 +971,6 @@ private:
     void HandleUrlTouchEvent(const TouchEventInfo& info);
     void URLOnHover(bool isHover);
     bool HandleUrlClick();
-    std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
     void SetAccessibilityAction();
@@ -1033,6 +1035,7 @@ private:
     void ProcessVisibleAreaCallback();
     void PauseSymbolAnimation();
     void ResumeSymbolAnimation();
+    bool IsLocationInFrameRegion(const Offset& localOffset) const;
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1049,6 +1052,7 @@ private:
 
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
+    bool moveOverClickThreshold_ = false;
     bool isMarqueeRunning_ = false;
 
     RefPtr<ParagraphManager> pManager_;

@@ -16,7 +16,9 @@
 #define FOUNDATION_ACE_INTERFACE_DRAWABLE_DESCRIPTOR_BASE_DRAWABLE_DESCRIPTOR_H
 
 #include <cstdint>
+#include <functional>
 #include <memory>
+#include <unordered_map>
 
 #include "base/drawing.h"
 #include "base/image_data.h"
@@ -40,21 +42,24 @@ struct DrawableInfo {
     int32_t originalHeight = 0;
 };
 
+enum class DrawableType {
+    BASE = 0,
+    LAYERED = 1,
+    ANIMATED = 2,
+    PIXELMAP = 3,
+    VECTOR = 4,
+};
+
 class DRAWABLE_FORCE_EXPORT DrawableDescriptor {
 public:
-    enum class DrawableType {
-        BASE = 0,
-        LAYERED = 1,
-        ANIMATED = 2,
-        PIXELMAP = 3,
-        VECTOR = 4,
-    };
-
     using RedrawCallback = std::function<void()>;
 
     DrawableDescriptor() = default;
 
-    virtual ~DrawableDescriptor() = default;
+    virtual ~DrawableDescriptor()
+    {
+        ProcessDestructCallbacks();
+    }
 
     virtual std::shared_ptr<Media::PixelMap> GetPixelMap()
     {
@@ -94,18 +99,44 @@ public:
     virtual void RegisterRedrawCallback(RedrawCallback&& callback) {}
 
     virtual void SetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap) {}
-    
+
     void SetSourceInfo(const SourceInfo& sourceInfo)
     {
         src_ = sourceInfo;
+    }
+
+    void ProcessDestructCallbacks()
+    {
+        for (auto& [_, callback] : destructCallbacks_) {
+            callback();
+        }
+    }
+
+    void AddDestructCallback(void* key, const std::function<void()>& callback)
+    {
+        destructCallbacks_.emplace(key, callback);
+    }
+
+    void RemoveDestructCallback(void* key)
+    {
+        destructCallbacks_.erase(key);
+    }
+
+    SrcType GetSrcType() const
+    {
+        return src_.GetSrcType();
     }
 
 protected:
     SourceInfo src_;
     std::shared_ptr<ImageData> data_;
     std::vector<RedrawCallback> redrawCallbacks_;
+
+private:
+    // holder notice to prevent pointer from hanging
+    std::unordered_map<void*, std::function<void()>> destructCallbacks_;
 };
 } // namespace Drawable
 } // namespace Ace
 } // namespace OHOS
-#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_DRAWABLE_DESCRIPTOR_BASE_DRAWABLE_DESCRIPTOR_H
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_DRAWABLE_DESCRIPTOR_BASE_DRAWABLE_DESCRIPTOR_H

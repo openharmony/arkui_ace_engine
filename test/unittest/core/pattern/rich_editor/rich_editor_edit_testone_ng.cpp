@@ -374,25 +374,6 @@ HWTEST_F(RichEditorEditTestOneNg, InsertValueByPaste001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetThumbnailCallback001
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, GetThumbnailCallback001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto host = richEditorPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-
-    gestureHub->InitDragDropEvent();
-    gestureHub->SetThumbnailCallback(richEditorPattern->GetThumbnailCallback());
-    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
-}
-
-/**
  * @tc.name: CreateHandles001
  * @tc.desc: test CreateHandles
  * @tc.type: FUNC
@@ -973,20 +954,6 @@ HWTEST_F(RichEditorEditTestOneNg, InitScrollablePattern001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetThumbnailCallback002
- * @tc.desc: test GetThumbnailCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, GetThumbnailCallback002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-
-    richEditorPattern->InitDragDropEvent();
-    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
-}
-
-/**
  * @tc.name: VirtualKeyboardAreaChanged002
  * @tc.desc: test OnVirtualKeyboardAreaChanged
  * @tc.type: FUNC
@@ -1035,37 +1002,6 @@ HWTEST_F(RichEditorEditTestOneNg, GetSelectedBackgroundColor001, TestSize.Level1
     richEditorPattern->selectedBackgroundColor_.reset();
     auto ret = richEditorPattern->GetSelectedBackgroundColor();
     EXPECT_NE(ret.GetValue(), 0);
-}
-
-/**
- * @tc.name: HandleOnDragDrop001
- * @tc.desc: test HandleOnDragDrop
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, HandleOnDragDrop001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->HandleOnDragDrop(event);
-    EXPECT_NE(event->GetData(), nullptr);
 }
 
 /**
@@ -1137,7 +1073,8 @@ HWTEST_F(RichEditorEditTestOneNg, GetChangeSpanStyle001, TestSize.Level1)
     richEditorPattern->spans_.emplace_back(spanItem1);
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem2);
-    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
+    std::optional<std::u16string> urlAddress;
+    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
     /**
      * @tc.steps: step2. change parameter and call function.
@@ -1145,13 +1082,13 @@ HWTEST_F(RichEditorEditTestOneNg, GetChangeSpanStyle001, TestSize.Level1)
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem3 = AceType::MakeRefPtr<ImageSpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem3);
     lastInfo.SetSpanIndex(richEditorPattern->spans_.size() - 1);
-    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
+    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
     /**
      * @tc.steps: step4. change parameter and call function.
     */
     lastInfo.SetEraseLength(lastLength - 1);
-    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, spanNode, spanIndex);
+    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
     EXPECT_FALSE(spanTextStyle.has_value());
 }
 
