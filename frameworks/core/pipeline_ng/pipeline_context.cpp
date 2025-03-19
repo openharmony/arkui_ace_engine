@@ -79,7 +79,6 @@ constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
 constexpr int32_t PARAM_NUM = 2;
 constexpr int32_t MAX_MISS_COUNT = 3;
-constexpr int32_t MAX_FLUSH_COUNT = 2;
 constexpr int32_t MAX_RECORD_SECOND = 15;
 constexpr int32_t DEFAULT_RECORD_SECOND = 5;
 constexpr int32_t SECOND_TO_MILLISEC = 1000;
@@ -5150,22 +5149,6 @@ void PipelineContext::RestoreDefault(int32_t windowId)
     mouseStyleManager->SetUserSetCursor(false);
 }
 
-void PipelineContext::FlushAnimationDirtysWhenExist(const AnimationOption& option)
-{
-    int32_t flushCount = 0;
-    bool isDirtyLayoutNodesEmpty = IsDirtyLayoutNodesEmpty();
-    while (!isDirtyLayoutNodesEmpty && !IsLayouting() && !isReloading_) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
-                option.ToString().c_str(), isDirtyLayoutNodesEmpty);
-            break;
-        }
-        FlushUITasks(true);
-        isDirtyLayoutNodesEmpty = IsDirtyLayoutNodesEmpty();
-        flushCount++;
-    }
-}
-
 void PipelineContext::OpenFrontendAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
@@ -5183,7 +5166,6 @@ void PipelineContext::OpenFrontendAnimation(
             SetFormAnimationStartTime(GetMicroTickCount());
         }
     }
-    FlushAnimationDirtysWhenExist(option);
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback);
 }
 
