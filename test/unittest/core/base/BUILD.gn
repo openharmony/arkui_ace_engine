@@ -73,6 +73,12 @@ ace_unittest("view_abstract_test_ng") {
   ]
 }
 
+ace_unittest("view_abstract_test_resetposition_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "view_abstract_test_resetposition_ng.cpp" ]
+}
+
 ace_unittest("view_full_update_model_ng_test") {
   type = "new"
   module_output = "basic"
