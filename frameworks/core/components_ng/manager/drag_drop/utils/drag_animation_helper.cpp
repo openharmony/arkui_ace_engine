@@ -18,6 +18,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -268,6 +269,17 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
             DragDropManager::UpdateGatherNodePosition(overlayManager, frameNode);
         },
         option.GetOnFinishEvent());
+}
+
+void DragAnimationHelper::ShowMenuHideAnimation(const RefPtr<FrameNode>& imageNode, const PreparedInfoForDrag& data)
+{
+    CHECK_NULL_VOID(imageNode);
+    if (imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT || data.hasTransition) {
+        return;
+    }
+    auto menuNode = data.menuNode;
+    CHECK_NULL_VOID(menuNode);
+    MenuView::ExcuteMenuDisappearAnimation(menuNode, data);
 }
 
 void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
@@ -1126,6 +1138,11 @@ void DragAnimationHelper::MountPixelMapSizeContentTransition(
     CreateAndMountMenuPreviewNode(data, stackFrameNode);
     if (data.textRowNode) {
         data.relativeContainerNode->AddChild(data.textRowNode);
+    }
+    if (data.menuNode) {
+        auto menuNode = data.menuNode;
+        MenuView::UpdateMenuNodePosition(data);
+        data.relativeContainerNode->AddChild(data.menuNode);
     }
 }
 

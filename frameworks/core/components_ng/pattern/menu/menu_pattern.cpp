@@ -1228,6 +1228,66 @@ Offset MenuPattern::GetTransformCenter() const
     }
 }
 
+RefPtr<FrameNode> MenuPattern::DuplicateMenuNode(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    auto duplicateMenuNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(menuNode, duplicateMenuNode);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProperty, duplicateMenuNode);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildByIndex(0));
+    CHECK_NULL_RETURN(scrollNode, duplicateMenuNode);
+    auto menuUINode = scrollNode->GetParent();
+    CHECK_NULL_RETURN(menuUINode, duplicateMenuNode);
+    menuUINode->RemoveChild(scrollNode);
+    menuUINode->RebuildRenderContextTree();
+    menuUINode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    duplicateMenuNode->AddChild(scrollNode);
+    if (menuLayoutProperty->GetBorderRadius().has_value()) {
+        BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
+        UpdateBorderRadius(duplicateMenuNode, borderRadius);
+    }
+    SetMenuBackGroundStyle(duplicateMenuNode, menuParam);
+    return duplicateMenuNode;
+}
+
+void MenuPattern::SetMenuBackGroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BlurStyleOption styleOption;
+    if (menuParam.backgroundColor.has_value()) {
+        styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+        renderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    } else {
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            menuParam.backgroundBlurStyle.value_or(static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
+    renderContext->UpdateBackBlurStyle(styleOption);
+    if (menuParam.backgroundBlurStyleOption.has_value()) {
+        BlurStyleOption backgroundBlurStyleOption = menuParam.backgroundBlurStyleOption.value();
+        if (renderContext->GetBackgroundEffect().has_value()) {
+            renderContext->UpdateBackgroundEffect(std::nullopt);
+        }
+        renderContext->UpdateBackBlurStyle(backgroundBlurStyleOption);
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+    }
+    if (menuParam.backgroundEffectOption.has_value()) {
+        EffectOption backgroundEffectOption = menuParam.backgroundEffectOption.value();
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+        if (renderContext->GetBackBlurStyle().has_value()) {
+            renderContext->UpdateBackBlurStyle(std::nullopt);
+        }
+        renderContext->UpdateBackgroundEffect(backgroundEffectOption);
+    }
+}
+
 void MenuPattern::ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay)
 {
     auto menuWrapper = GetMenuWrapper();
