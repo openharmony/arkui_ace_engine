@@ -119,7 +119,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnMountToParentDone() override;
     void SetExportTextureInfoIfNeeded();
-    bool HandleTextureExport(bool isStop);
+    bool HandleTextureExport(bool isStop, FrameNode* frameNode);
     std::function<void()> resetFunc_;
     std::function<RefPtr<UINode>()> makeFunc_;
     std::function<void(const SizeF& size)> resizeFunc_;
