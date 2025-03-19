@@ -152,6 +152,7 @@ constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
 constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 constexpr double DISTANCE_THRESHOLD = 20.0;
+constexpr int32_t TIPS_TIME_MAX = 1000;    // ms
 
 const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
     V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
@@ -1650,6 +1651,9 @@ void OverlayManager::ShowTips(
         UpdatePreviousDisappearingTime(targetId);
         duration = appearingTimeWithContinuousOperation;
     }
+    if (duration > TIPS_TIME_MAX) {
+        duration = TIPS_TIME_MAX;
+    }
 
     auto tipsId = targetId;
     UpdateTipsEnterAndLeaveInfo(tipsId);
@@ -1661,6 +1665,9 @@ void OverlayManager::ShowTips(
         auto isExecuteTask = overlayManager->GetBoolFromTipsEnterAndLeaveInfo(tipsId, times);
         if (!isExecuteTask) {
             overlayManager->EraseTipsEnterAndLeaveInfo(tipsId, times);
+            return;
+        }
+        if (!overlayManager->GetPopupInfo(tipsId).isTips && overlayManager->GetPopupInfo(tipsId).popupNode) {
             return;
         }
         overlayManager->UpdateTipsInfo(tipsId, popupInfo);
@@ -1681,6 +1688,9 @@ void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int3
     if (isInContinus) {
         duration = popupInfo.disappearingTimeWithContinuousOperation;
     }
+    if (duration > TIPS_TIME_MAX) {
+        duration = TIPS_TIME_MAX;
+    }
     UpdateTipsEnterAndLeaveInfoBool(targetId);
     auto tipsId = targetId;
     UpdateTipsEnterAndLeaveInfo(tipsId);
@@ -1696,7 +1706,9 @@ void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int3
         }
         overlayManager->EraseTipsInfo(tipsId);
         overlayManager->EraseTipsStatus(tipsId);
-        overlayManager->HidePopup(tipsId, popupInfo);
+        if (popupInfo.isTips) {
+            overlayManager->HidePopup(tipsId, popupInfo);
+        }
         overlayManager->EraseTipsEnterAndLeaveInfo(tipsId, times);
     };
     auto context = PipelineContext::GetCurrentContext();

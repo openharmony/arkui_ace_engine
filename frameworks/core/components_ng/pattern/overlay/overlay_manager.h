@@ -61,6 +61,7 @@ struct PopupInfo {
     OffsetF targetOffset;
     bool focusable = false;
     bool isAvoidKeyboard = false;
+    bool isTips = false;
     int32_t disappearingTimeWithContinuousOperation = 700;
 };
 

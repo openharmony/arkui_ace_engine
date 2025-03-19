@@ -1521,6 +1521,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractHandleHoverTipsInfoTest001, TestSize.Le
     ASSERT_NE(overlayManager, nullptr);
 
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    popupInfo.isTips = true;
     ViewAbstract::HandleHoverTipsInfo(param, targetNode, popupInfo, false, 1);
     for (const auto& destroyCallback : targetNode->destroyCallbacksMap_) {
         if (destroyCallback.second) {
