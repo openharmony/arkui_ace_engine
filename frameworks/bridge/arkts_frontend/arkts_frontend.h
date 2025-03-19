@@ -16,9 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKTS_FRONTEND_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKTS_FRONTEND_H
 
+#include <set>
+#include <string>
 #include <unordered_map>
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
@@ -29,11 +32,28 @@ typedef struct __ani_env ani_env;
 typedef class __ani_ref *ani_ref;
 
 namespace OHOS::Ace {
+using InspectorFunc = std::function<void()>;
+class InspectorEvent : public virtual AceType {
+    DECLARE_ACE_TYPE(InspectorEvent, AceType)
+public:
+    explicit InspectorEvent(InspectorFunc&& callback) : callback_(std::move(callback)) {}
+    ~InspectorEvent() override = default;
+
+    void operator()() const
+    {
+        if (callback_) {
+            callback_();
+        }
+    }
+    
+private:
+    InspectorFunc callback_;
+};
 /**
  * @brief Proxy class to interact with Koala frontend and static ArkTS runtime.
  *
  */
-class ACE_EXPORT ArktsFrontend : public Frontend {
+class ACE_FORCE_EXPORT ArktsFrontend : public Frontend {
     DECLARE_ACE_TYPE(ArktsFrontend, Frontend);
 
 public:
@@ -129,8 +149,39 @@ public:
     void OnMemoryLevel(const int32_t level) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override {}
-    void OnLayoutCompleted(const std::string& componentId) override {}
-    void OnDrawCompleted(const std::string& componentId) override {}
+    void OnLayoutCompleted(const std::string& componentId) override
+    {
+        auto iter = layoutCallbacks_.find(componentId);
+        if (iter == layoutCallbacks_.end()) {
+            return;
+        }
+        if (taskExecutor_ == nullptr) {
+            return;
+        }
+        auto&& observer = iter->second;
+        taskExecutor_->PostTask(
+            [observer] {
+                (*observer)();
+            }, TaskExecutor::TaskType::JS, "ArkUILayoutCompleted"
+        );
+    }
+
+    void OnDrawCompleted(const std::string& componentId) override
+    {
+        auto iter = drawCallbacks_.find(componentId);
+        if (iter == drawCallbacks_.end()) {
+            return;
+        }
+        if (taskExecutor_ == nullptr) {
+            return;
+        }
+        auto&& observer = iter->second;
+        taskExecutor_->PostTask(
+            [observer] {
+                (*observer)();
+            }, TaskExecutor::TaskType::JS, "ArkUIDrawCompleted"
+        );
+    }
 
     void DumpFrontend() const override {}
     std::string GetPagePath() const override
@@ -194,6 +245,26 @@ public:
     }
 
     void* GetShared(int32_t id);
+    
+    void RegisterLayoutInspectorCallback(const RefPtr<InspectorEvent>& layoutFunc, const std::string& componentId)
+    {
+        layoutCallbacks_[componentId] = layoutFunc;
+    }
+    
+    void RegisterDrawInspectorCallback(const RefPtr<InspectorEvent>& drawFunc, const std::string& componentId)
+    {
+        drawCallbacks_[componentId] = drawFunc;
+    }
+    
+    void UnregisterLayoutInspectorCallback(const std::string& componentId)
+    {
+        layoutCallbacks_.erase(componentId);
+    }
+    
+    void UnregisterDrawInspectorCallback(const std::string& componentId)
+    {
+        drawCallbacks_.erase(componentId);
+    }
 
 private:
     RefPtr<TaskExecutor> taskExecutor_;
@@ -205,6 +276,9 @@ private:
     std::unordered_map<int32_t, void*> storageMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ArktsFrontend);
+    
+    std::map<std::string, RefPtr<InspectorEvent>> layoutCallbacks_;
+    std::map<std::string, RefPtr<InspectorEvent>> drawCallbacks_;
 };
 
 } // namespace OHOS::Ace

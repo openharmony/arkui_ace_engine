@@ -87,6 +87,7 @@
       OHOS::Ace::NG::DragDropFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
       OHOS::Ace::WindowUtils::*;
+      OHOS::Ace::ArktsFrontend::*;
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -193,6 +194,7 @@
       OHOS::Ace::NG::PipelineContext::*;
       OHOS::Ace::NG::OverlayManager::*;
       OHOS::Ace::PipelineBase::PostAsyncEvent*;
+      "OHOS::Ace::PipelineBase::GetFrontend() const";
       OHOS::Ace::NG::UINode::*;
       OHOS::Ace::NG::PagePattern::*;
       OHOS::Ace::NG::StageManager::*;
