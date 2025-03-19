@@ -998,6 +998,41 @@ float WaterFlowLayoutInfoSW::GetDistanceToBottom(int32_t itemIdx, int32_t laneId
         int32_t seg = GetSegment(itemIdx);
         return lanes_[seg][laneIdx].startPos;
     }
-    return DistanceToBottom(itemIdx, mainSize, mainGap);
+    return DistanceToTop(itemIdx, mainGap) + GetCachedHeightInLanes(itemIdx);
+}
+
+float WaterFlowLayoutInfoSW::GetCachedHeightInLanes(int32_t idx) const
+{
+    const auto* lane = GetLane(idx);
+    CHECK_NULL_RETURN(lane, 0.0f);
+    for (const auto& item : lane->items_) {
+        if (item.idx == idx) {
+            return item.mainSize;
+        }
+    }
+    return 0.0f;
+}
+
+void WaterFlowLayoutInfoSW::SetHeightInLanes(int32_t idx, int32_t mainHeight)
+{
+    auto* lane = GetMutableLane(idx);
+    CHECK_NULL_VOID(lane);
+    for (auto& item : lane->items_) {
+        if (item.idx == idx) {
+            item.mainSize = mainHeight;
+        }
+    }
+}
+
+bool WaterFlowLayoutInfoSW::HaveRecordIdx(int32_t idx) const
+{
+    const auto* lane = GetLane(idx);
+    CHECK_NULL_RETURN(lane, false);
+    for (const auto& item : lane->items_) {
+        if (item.idx == idx) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

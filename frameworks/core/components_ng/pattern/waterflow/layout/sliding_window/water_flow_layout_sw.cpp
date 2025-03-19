@@ -266,11 +266,11 @@ void WaterFlowLayoutSW::ApplyDelta(float delta)
         // positive offset is scrolling upwards
         int32_t oldStartIdx = info_->StartIndex();
         FillFront(0.0f, info_->StartIndex() - 1, 0);
-        MeasureLazyChild(oldStartIdx, info_->EndIndex());
+        MeasureRemainingLazyChild(oldStartIdx, info_->EndIndex(), false);
     } else {
         int32_t oldEndIdx = info_->EndIndex();
         FillBack(mainLen_, info_->EndIndex() + 1, itemCnt_ - 1);
-        MeasureLazyChild(info_->StartIndex(), oldEndIdx);
+        MeasureRemainingLazyChild(info_->StartIndex(), oldEndIdx);
     }
 }
 
@@ -695,20 +695,8 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane, bool forward) co
         WaterFlowLayoutUtils::UpdateItemIdealSize(child, axis_, userHeight);
     }
     int32_t seg = info_->GetSegment(idx);
-    if (info_->lanes_[seg].size() == 1) {
-        // If only have one col in current section, calculate ViewPosReference.
-        ViewPosReference ref {
-            .viewPosStart = 0,
-            .viewPosEnd = mainLen_ + info_->expandHeight_,
-            .referencePos = forward ? info_->GetDistanceToTop(idx, lane, mainGaps_[seg])
-                                    : info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[seg]),
-            .referenceEdge = forward ? ReferenceEdge::START : ReferenceEdge::END,
-            .axis = Axis::VERTICAL,
-        };
-        child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-            { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child));
-        auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(child);
-        info_->lanes_[seg][0].startPos -= forward ? adjustOffset.start : 0;
+    if (info_->lanes_[seg].size() == 1 && child->GetLayoutProperty()->GetNeedLazyLayout()) {
+        MeasureLazyChild(child, idx, lane, forward);
     } else {
         child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, props_, child));
@@ -874,16 +862,51 @@ bool WaterFlowLayoutSW::RecoverCachedHelper(int32_t idx, bool front)
     return true;
 }
 
-void WaterFlowLayoutSW::MeasureLazyChild(int32_t startIdx, int32_t endIdx) const
+void WaterFlowLayoutSW::MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward) const
 {
     for (int32_t idx = startIdx; idx <= endIdx; idx++) {
-        auto item = wrapper_->GetChildByIndex(idx);
+        auto item = wrapper_->GetChildByIndex(nodeIdx(idx));
         CHECK_NULL_VOID(item);
         auto itemLayoutProperty = item->GetLayoutProperty();
         if (itemLayoutProperty->GetNeedLazyLayout()) {
             size_t laneIdx = info_->idxToLane_.at(idx);
-            MeasureChild(idx, laneIdx);
+            const float mainLen = MeasureChild(idx, laneIdx, forward);
+            const float cacheHeight = info_->GetCachedHeightInLanes(idx);
+            if (!NearEqual(mainLen, cacheHeight)) {
+                info_->SetHeightInLanes(idx, mainLen);
+            }
         }
+    }
+}
+
+void WaterFlowLayoutSW::MeasureLazyChild(
+    const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, bool forward) const
+{
+    int32_t seg = info_->GetSegment(idx);
+    ViewPosReference ref {
+        .viewPosStart = 0,
+        .viewPosEnd = mainLen_ + info_->expandHeight_,
+        .referencePos = forward ? info_->GetDistanceToTop(idx, lane, mainGaps_[seg])
+                                : info_->GetDistanceToBottom(idx, lane, mainLen_, mainGaps_[seg]),
+        .referenceEdge = forward ? ReferenceEdge::START : ReferenceEdge::END,
+        .axis = Axis::VERTICAL,
+    };
+    child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
+        { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child));
+
+    if (!info_->HaveRecordIdx(idx)) {
+        // if this node is measured for the first time, don't need to adjust position.
+        return;
+    }
+    auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(child);
+    const float measureHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    info_->lanes_[seg][0].startPos -= adjustOffset.start;
+    info_->lanes_[seg][0].endPos += adjustOffset.end;
+    auto allAdjust = std::abs(adjustOffset.start) + std::abs(adjustOffset.end);
+    const float cacheHeight = info_->GetCachedHeightInLanes(idx);
+    if (!NearEqual(allAdjust, std::abs(cacheHeight - measureHeight))) {
+        TAG_LOGI(ACE_WATERFLOW, "AdjustOffset %{public}f is not equal to HeightChange %{public}f", allAdjust,
+            std::abs(cacheHeight - measureHeight));
     }
 }
 } // namespace OHOS::Ace::NG
