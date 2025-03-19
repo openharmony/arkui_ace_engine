@@ -687,10 +687,13 @@ void FormManagerDelegate::DispatchPointerEvent(const
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
         TAG_LOGI(AceLogTag::ACE_FORM, "dispatch down event to renderer");
     }
-    auto disablePanGesture = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_GESTURE_KEY, false);
-    if (!disablePanGesture) {
-        formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
-        return;
+    {
+        std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
+        auto disablePanGesture = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_GESTURE_KEY, false);
+        if (!disablePanGesture) {
+            formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
+            return;
+        }
     }
 
     // pan gesture disabled, not dispatch move event, not concat serialized gesture
