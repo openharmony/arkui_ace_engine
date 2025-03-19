@@ -562,4 +562,48 @@ HWTEST_F(NavDestinationBaseTestNg, UpdateToolBarAndDividerTranslateAndOpacityTes
     navBarPattern->UpdateToolBarAndDividerTranslateAndOpacity(
         hide, toolBarNode, toolBarHeight, toolbarDividerNode, toolBarDividerHeight);
 }
+
+/**
+ * @tc.name: SetToolBarMenuOptionsTest001
+ * @tc.desc: Branch: if (options_.bgOptions.color.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, SetToolBarMenuOptionsTest001, TestSize.Level1)
+{
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationMenuOptions opt;
+    opt.mbOptions.bgOptions.color = std::make_optional(Color(0xff0000ff));
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = BarStyle::STANDARD;
+    NavigationTitleMode currentMode = NavigationTitleMode::MINI;
+    auto navigationNode = CreateNavigationWithTitle(mockNavPathStack, options, currentMode, "navigation", "subtitle");
+    ASSERT_NE(navigationNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarNode());
+    auto navBarPattern = navBarNode->GetPattern<NavDestinationPatternBase>();
+    ASSERT_NE(navBarPattern, nullptr);
+    navBarPattern->SetToolBarMenuOptions(opt);
+    EXPECT_EQ(navBarPattern->GetToolBarMenuOptions().mbOptions.bgOptions.color.value(), Color(0xff0000ff));
+}
+
+/**
+ * @tc.name: SetMenuOptionsTest001
+ * @tc.desc: Branch: if (options_.bgOptions.color.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationBaseTestNg, SetMenuOptionsTest001, TestSize.Level1)
+{
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationMenuOptions opt;
+    opt.mbOptions.bgOptions.color = std::make_optional(Color(0xff0000ff));
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = BarStyle::STANDARD;
+    NavigationTitleMode currentMode = NavigationTitleMode::MINI;
+    auto navigationNode = CreateNavigationWithTitle(mockNavPathStack, options, currentMode, "navigation", "subtitle");
+    ASSERT_NE(navigationNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarNode());
+    auto navBarPattern = navBarNode->GetPattern<NavDestinationPatternBase>();
+    ASSERT_NE(navBarPattern, nullptr);
+    navBarPattern->SetMenuOptions(std::move(opt));
+    EXPECT_EQ(navBarPattern->GetMenuOptions().mbOptions.bgOptions.color.value(), Color(0xff0000ff));
+}
 } // namespace OHOS::Ace::NG
