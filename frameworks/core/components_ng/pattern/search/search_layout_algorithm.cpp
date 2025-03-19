@@ -715,6 +715,14 @@ void SearchLayoutAlgorithm::LayoutSearchIcon(const LayoutSearchParams& params)
     auto iconUserHeight =
         searchIconConstraint->selfIdealSize.Height().value_or(params.searchTheme->GetIconHeight().ConvertToPx());
     float imageVerticalOffset = topPadding;
+    auto host = params.layoutWrapper->GetHostNode();
+    if (host) {
+        auto pipeline = host->GetContext();
+        if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+            // height is rounded in framenode's measure function, iconFrameHeight has no fractional part
+            iconUserHeight = std::floor(iconUserHeight + 0.5f);
+        }
+    }
     if (NearEqual(iconUserHeight, iconFrameHeight)) {
         float iconInterval = (params.searchFrameHeight - iconUserHeight) / 2;
         if (topPadding <= iconInterval && bottomPadding <= iconInterval) {
