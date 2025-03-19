@@ -822,10 +822,13 @@ bool InitSCSymbolIconInfo(OHOS::Security::SecurityComponent::SecCompBase& button
         auto iconProp = iconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(iconProp, false);
         auto fontSize = iconProp->GetFontSize();
+        CHECK_NULL_RETURN(fontSize, false);
         buttonInfo.iconSize_ = fontSize->ConvertToVp();
         auto colorList = iconProp->GetSymbolColorList();
         if (colorList.has_value()) {
-            buttonInfo.iconColor_.value = colorList.value()[0].GetValue();
+            if (!colorList.value().empty()) {
+                buttonInfo.iconColor_.value = colorList.value()[0].GetValue();
+            }
         }
     }
     return true;
