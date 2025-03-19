@@ -15,8 +15,7 @@
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, IconBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
-import { Chip, ChipSize, LengthUnit } from '@kit.ArkUI';
-
+import { Chip, ChipSize, curves, LengthUnit } from '@kit.ArkUI';
 @Component
 export struct ChipBootcamp {
   @Require @Prop title: ResourceStr;
@@ -77,6 +76,9 @@ export struct ChipBootcamp {
   @State chipOptionAllowClose: boolean = true
   @State enableChipOptionDirection: boolean = false
   @State chipOptionDirection: Direction = Direction.Auto
+  @State selection: string | null = null;
+  scroller: Scroller = new Scroller()
+
   build() {
     NavDestination() {
       Drawer({
@@ -85,6 +87,9 @@ export struct ChipBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -92,6 +97,10 @@ export struct ChipBootcamp {
     }
     .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
     .hideTitleBar(true)
+  }
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller',this.scroller)
   }
 
   @Builder
@@ -159,12 +168,13 @@ export struct ChipBootcamp {
         },
         direction: useEnabled(this.enableChipOptionDirection, this.chipOptionDirection)
       })
+
     }
   }
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         RadioBlock({
           title: 'options.size',
@@ -371,6 +381,50 @@ export struct ChipBootcamp {
       }
     }
     .height('52%')
+    .id('scroll')
+  }
+  @Builder
+  ListItemGroupHeaders(str: string) {
+    Row() {
+      Text(str)
+        .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        .fontWeight(FontWeight.Medium)
+      Blank()
+      Image($r('sys.media.ohos_ic_public_arrow_right'))
+        .fillColor($r('sys.color.ohos_id_color_fourth'))
+        .height(24)
+        .width(24)
+        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
+    }
+    .borderRadius(20)
+    .width('100%')
+    .padding({
+      left: 8,
+      right: 8,
+      top: 18,
+      bottom: 18
+    })
+
+    .onClick(() => {
+      if (this.selection === str) {
+        this.selection = null;
+      } else {
+        this.selection = str;
+        AppStorage.setOrCreate('selection', this.selection)
+      }
+    })
+  }
+
+  @Builder
+  Generic() {
+    Scroll(this.scroller) {
+      Column({ space: 8 }) {
+
+      }.width('100%')
+    }
+    .height('52%')
+    .id('scroll')
   }
 }
 
