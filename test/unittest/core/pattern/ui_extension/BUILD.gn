@@ -783,7 +783,7 @@ ace_unittest("session_wrapper_impl_test_new_ng") {
     "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
     "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
     "$ace_root/test/mock/base/mock_task_executor.h",
-    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container_two.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_window.cpp",
