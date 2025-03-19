@@ -143,7 +143,7 @@ void ScrollBarProxy::NotifyScrollStop() const
     }
 }
 
-void ScrollBarProxy::NotifyScrollBar(int32_t scrollSource) const
+void ScrollBarProxy::NotifyScrollBar(int32_t scrollSource)
 {
     auto scrollable = scorllableNode_.scrollableNode.Upgrade();
     if (!scrollable || !CheckScrollable(scrollable)) {
@@ -160,6 +160,15 @@ void ScrollBarProxy::NotifyScrollBar(int32_t scrollSource) const
         controlDistance += GetScrollableNodeDistance(pattern);
         scrollableNodeOffset += -GetScrollableNodeOffset(pattern);
     }
+    if (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) {
+        CHECK_NULL_VOID(!NearZero(scrollableNodeOffset) || !NearZero(lastScrollableNodeOffset_));
+        CHECK_NULL_VOID(!NearEqual(lastScrollableNodeOffset_, lastControlDistance_) ||
+            !NearEqual(scrollableNodeOffset, controlDistance));
+        StopScrollBarAnimator();
+        StartScrollBarAnimator();
+    }
+    lastControlDistance_ = controlDistance;
+    lastScrollableNodeOffset_ = scrollableNodeOffset;
 
     float scrollBarOutBoundaryDistance = GetScrollBarOutBoundaryExtent(scrollable);
     for (const auto& weakScrollBar : scrollBars_) {
