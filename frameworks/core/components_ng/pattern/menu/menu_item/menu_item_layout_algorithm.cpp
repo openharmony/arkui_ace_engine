@@ -126,9 +126,42 @@ std::pair<float, float> MenuItemLayoutAlgorithm::MeasureRightRow(LayoutWrapper* 
     CHECK_NULL_RETURN(layoutWrapper, defaultPair);
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_RETURN(rightRow, defaultPair);
+    auto children = rightRow->GetAllChildrenWithBuild();
+    CHECK_EQUAL_RETURN(children.empty(), true, defaultPair);
     rightRow->Measure(childConstraint);
+
+    auto itemNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(itemNode, defaultPair);
+    auto pipeline = itemNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, defaultPair);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, defaultPair);
+    float iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
+    float spaceWidth = childConstraint.maxSize.Width();
+    float rowWidth = 0.0f;
+    float rowHeight = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ?
+        theme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_;
+    for (auto it = children.rbegin(); it != children.rend();++it) {
+        const auto& child = *it;
+        if (child != children.front()) {
+            child->Measure(childConstraint);
+        } else {
+            auto labelConstraint = childConstraint;
+            labelConstraint.maxSize.SetWidth(spaceWidth);
+            child->Measure(labelConstraint);
+        }
+        auto childGeometryNode = child->GetGeometryNode();
+        CHECK_NULL_RETURN(childGeometryNode, defaultPair);
+        auto childSize = childGeometryNode->GetMarginFrameSize();
+        spaceWidth -= childSize.Width() + iconContentPadding;
+        rowWidth += childSize.Width() + iconContentPadding;
+        rowHeight = std::max(rowHeight, childSize.Height());
+    }
+    rowWidth -= iconContentPadding;
     auto rightRowGeometryNode = rightRow->GetGeometryNode();
     CHECK_NULL_RETURN(rightRowGeometryNode, defaultPair);
+    rightRowGeometryNode->SetFrameSize(SizeF(rowWidth, rowHeight));
+    
     auto marginFrameSize = rightRowGeometryNode->GetMarginFrameSize();
     return {marginFrameSize.Width(), marginFrameSize.Height()};
 }
