@@ -1568,9 +1568,6 @@ private:
     mutable std::shared_mutex colorModeCallbackMutex_;
 
     RefPtr<Kit::FrameNode> kitNode_;
-    FRCSceneFpsInfo curFRCSceneFpsInfo_;
-    int64_t calTime_ = 0;
-    int32_t calFrameRate_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG
