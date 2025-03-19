@@ -428,7 +428,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
         task.Reset([src] { ImageProvider::CreateImageObjHelper(src); });
-        tasks_[src.GetKey()].bgTask_ = task;
+        tasks_[src.GetTaskKey()].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);
         ImageUtils::PostToBg(task, "ArkUIImageProviderCreateImageObject", ctx->GetContainerId());
