@@ -151,7 +151,6 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 const RefPtr<Curve> MOVE_MAGNIFIER_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
 constexpr int32_t LAND_DURATION = 100;
-constexpr float TOUCH_OPACITY = 0.1f;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
     { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
@@ -10764,7 +10763,9 @@ void TextFieldPattern::HandleCancelButtonTouchDown(const RefPtr<TextInputRespons
     responseArea->CreateIconRect(mouseRect, false);
     float cornerRadius = mouseRect.GetRect().Width() / 2;
     mouseRect.SetCornerRadius(cornerRadius);
-    Color touchColor = Color::FromRGBO(0, 0, 0, TOUCH_OPACITY);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto touchColor = textFieldTheme->GetPressColor();
     std::vector<RoundRect> roundRectVector;
     roundRectVector.push_back(mouseRect);
     CHECK_NULL_VOID(textFieldOverlayModifier_);
