@@ -1064,7 +1064,8 @@ typedef struct TabsControllerPeer* Ark_TabsController;
 typedef struct Opt_TabsController Opt_TabsController;
 typedef struct Ark_SymbolGlyphAttribute Ark_SymbolGlyphAttribute;
 typedef struct Opt_SymbolGlyphAttribute Opt_SymbolGlyphAttribute;
-typedef struct Ark_SymbolEffect Ark_SymbolEffect;
+typedef struct SymbolEffectPeer SymbolEffectPeer;
+typedef struct SymbolEffectPeer* Ark_SymbolEffect;
 typedef struct Opt_SymbolEffect Opt_SymbolEffect;
 typedef struct Ark_DigitIndicator Ark_DigitIndicator;
 typedef struct Opt_DigitIndicator Opt_DigitIndicator;
@@ -1247,7 +1248,8 @@ typedef struct Ark_DividerStyleOptions Ark_DividerStyleOptions;
 typedef struct Opt_DividerStyleOptions Opt_DividerStyleOptions;
 typedef struct Ark_ASTCResource Ark_ASTCResource;
 typedef struct Opt_ASTCResource Opt_ASTCResource;
-typedef struct Ark_DrawableDescriptor Ark_DrawableDescriptor;
+typedef struct DrawableDescriptorPeer DrawableDescriptorPeer;
+typedef struct DrawableDescriptorPeer* Ark_DrawableDescriptor;
 typedef struct Opt_DrawableDescriptor Opt_DrawableDescriptor;
 typedef struct Matrix2DPeer Matrix2DPeer;
 typedef struct Matrix2DPeer* Ark_Matrix2D;
@@ -2032,6 +2034,9 @@ typedef struct OnTabsAnimationStartCallback OnTabsAnimationStartCallback;
 typedef struct Opt_OnTabsAnimationStartCallback Opt_OnTabsAnimationStartCallback;
 typedef struct Ark_TabsOptions Ark_TabsOptions;
 typedef struct Opt_TabsOptions Opt_TabsOptions;
+typedef struct PulseSymbolEffectPeer PulseSymbolEffectPeer;
+typedef struct PulseSymbolEffectPeer* Ark_PulseSymbolEffect;
+typedef struct Opt_PulseSymbolEffect Opt_PulseSymbolEffect;
 typedef struct BounceSymbolEffectPeer BounceSymbolEffectPeer;
 typedef struct BounceSymbolEffectPeer* Ark_BounceSymbolEffect;
 typedef struct Opt_BounceSymbolEffect Opt_BounceSymbolEffect;
@@ -2912,6 +2917,19 @@ typedef struct Ark_WebHeader Ark_WebHeader;
 typedef struct Opt_WebHeader Opt_WebHeader;
 typedef struct Array_WebHeader Array_WebHeader;
 typedef struct Opt_Array_WebHeader Opt_Array_WebHeader;
+typedef struct Ark_AnimationOptions Ark_AnimationOptions;
+typedef struct Opt_AnimationOptions Opt_AnimationOptions;
+typedef struct Array_PixelMap Array_PixelMap;
+typedef struct Opt_Array_PixelMap Opt_Array_PixelMap;
+typedef struct AnimatedDrawableDescriptorPeer AnimatedDrawableDescriptorPeer;
+typedef struct AnimatedDrawableDescriptorPeer* Ark_AnimatedDrawableDescriptor;
+typedef struct Opt_AnimatedDrawableDescriptor Opt_AnimatedDrawableDescriptor;
+typedef struct PixelMapDrawableDescriptorPeer PixelMapDrawableDescriptorPeer;
+typedef struct PixelMapDrawableDescriptorPeer* Ark_PixelMapDrawableDescriptor;
+typedef struct Opt_PixelMapDrawableDescriptor Opt_PixelMapDrawableDescriptor;
+typedef struct LayeredDrawableDescriptorPeer LayeredDrawableDescriptorPeer;
+typedef struct LayeredDrawableDescriptorPeer* Ark_LayeredDrawableDescriptor;
+typedef struct Opt_LayeredDrawableDescriptor Opt_LayeredDrawableDescriptor;
 typedef enum Ark_LengthUnit {
     ARK_LENGTH_UNIT_PX = 0,
     ARK_LENGTH_UNIT_VP = 1,
@@ -9361,9 +9379,6 @@ typedef struct Opt_SymbolGlyphAttribute {
     Ark_Tag tag;
     Ark_SymbolGlyphAttribute value;
 } Opt_SymbolGlyphAttribute;
-typedef struct Ark_SymbolEffect {
-    void *handle;
-} Ark_SymbolEffect;
 typedef struct Opt_SymbolEffect {
     Ark_Tag tag;
     Ark_SymbolEffect value;
@@ -10144,9 +10159,6 @@ typedef struct Opt_ASTCResource {
     Ark_Tag tag;
     Ark_ASTCResource value;
 } Opt_ASTCResource;
-typedef struct Ark_DrawableDescriptor {
-    Ark_String _DrawableDescriptorStub;
-} Ark_DrawableDescriptor;
 typedef struct Opt_DrawableDescriptor {
     Ark_Tag tag;
     Ark_DrawableDescriptor value;
@@ -13761,6 +13773,10 @@ typedef struct Opt_TabsOptions {
     Ark_Tag tag;
     Ark_TabsOptions value;
 } Opt_TabsOptions;
+typedef struct Opt_PulseSymbolEffect {
+    Ark_Tag tag;
+    Ark_PulseSymbolEffect value;
+} Opt_PulseSymbolEffect;
 typedef struct Opt_BounceSymbolEffect {
     Ark_Tag tag;
     Ark_BounceSymbolEffect value;
@@ -17442,6 +17458,34 @@ typedef struct Opt_Array_WebHeader {
     Ark_Tag tag;
     Array_WebHeader value;
 } Opt_Array_WebHeader;
+typedef struct Ark_AnimationOptions {
+    Opt_Number duration;
+    Opt_Number iterations;
+} Ark_AnimationOptions;
+typedef struct Opt_AnimationOptions {
+    Ark_Tag tag;
+    Ark_AnimationOptions value;
+} Opt_AnimationOptions;
+typedef struct Array_PixelMap {
+    Ark_PixelMap* array;
+    Ark_Int32 length;
+} Array_PixelMap;
+typedef struct Opt_Array_PixelMap {
+    Ark_Tag tag;
+    Array_PixelMap value;
+} Opt_Array_PixelMap;
+typedef struct Opt_AnimatedDrawableDescriptor {
+    Ark_Tag tag;
+    Ark_AnimatedDrawableDescriptor value;
+} Opt_AnimatedDrawableDescriptor;
+typedef struct Opt_PixelMapDrawableDescriptor {
+    Ark_Tag tag;
+    Ark_PixelMapDrawableDescriptor value;
+} Opt_PixelMapDrawableDescriptor;
+typedef struct Opt_LayeredDrawableDescriptor {
+    Ark_Tag tag;
+    Ark_LayeredDrawableDescriptor value;
+} Opt_LayeredDrawableDescriptor;
 typedef struct Opt_NativePointer {
     Ark_Tag tag;
     Ark_NativePointer value;
@@ -20292,10 +20336,10 @@ typedef struct GENERATED_ArkUISymbolGlyphModifier {
     void (*setMaxFontScale)(Ark_NativePointer node,
                             const Opt_Union_Number_Resource* value);
     void (*setSymbolEffect0)(Ark_NativePointer node,
-                             const Ark_SymbolEffect* symbolEffect,
+                             Ark_SymbolEffect symbolEffect,
                              const Opt_Boolean* isActive);
     void (*setSymbolEffect1)(Ark_NativePointer node,
-                             const Ark_SymbolEffect* symbolEffect,
+                             Ark_SymbolEffect symbolEffect,
                              const Opt_Number* triggerValue);
 } GENERATED_ArkUISymbolGlyphModifier;
 
@@ -21499,6 +21543,38 @@ typedef struct GENERATED_ArkUIFocusControllerAccessor {
     void (*requestFocus)(const Ark_String* key);
 } GENERATED_ArkUIFocusControllerAccessor;
 
+typedef struct GENERATED_ArkUIDrawableDescriptorAccessor {
+    void (*destroyPeer)(Ark_DrawableDescriptor peer);
+    Ark_DrawableDescriptor (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    Ark_PixelMap (*getPixelMap)(Ark_DrawableDescriptor peer);
+} GENERATED_ArkUIDrawableDescriptorAccessor;
+
+typedef struct GENERATED_ArkUILayeredDrawableDescriptorAccessor {
+    void (*destroyPeer)(Ark_LayeredDrawableDescriptor peer);
+    Ark_LayeredDrawableDescriptor (*ctor)(const Opt_DrawableDescriptor* foreground,
+                                          const Opt_DrawableDescriptor* background,
+                                          const Opt_DrawableDescriptor* mask);
+    Ark_NativePointer (*getFinalizer)();
+    Ark_DrawableDescriptor (*getForeground)(Ark_LayeredDrawableDescriptor peer);
+    Ark_DrawableDescriptor (*getBackground)(Ark_LayeredDrawableDescriptor peer);
+    Ark_DrawableDescriptor (*getMask)(Ark_LayeredDrawableDescriptor peer);
+    Ark_String (*getMaskClipPath)();
+} GENERATED_ArkUILayeredDrawableDescriptorAccessor;
+
+typedef struct GENERATED_ArkUIPixelMapDrawableDescriptorAccessor {
+    void (*destroyPeer)(Ark_PixelMapDrawableDescriptor peer);
+    Ark_PixelMapDrawableDescriptor (*ctor)(const Opt_PixelMap* src);
+    Ark_NativePointer (*getFinalizer)();
+} GENERATED_ArkUIPixelMapDrawableDescriptorAccessor;
+
+typedef struct GENERATED_ArkUIAnimatedDrawableDescriptorAccessor {
+    void (*destroyPeer)(Ark_AnimatedDrawableDescriptor peer);
+    Ark_AnimatedDrawableDescriptor (*ctor)(const Array_PixelMap* pixelMaps,
+                                           const Opt_AnimationOptions* options);
+    Ark_NativePointer (*getFinalizer)();
+} GENERATED_ArkUIAnimatedDrawableDescriptorAccessor;
+
 typedef struct GENERATED_ArkUIDrawingCanvasAccessor {
     void (*destroyPeer)(Ark_DrawingCanvas peer);
     Ark_DrawingCanvas (*ctor)(Ark_PixelMap pixelmap);
@@ -21681,6 +21757,13 @@ typedef struct GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor {
     Ark_Number (*measureText)(const Ark_MeasureOptions* options);
     Ark_SizeOptions (*measureTextSize)(const Ark_MeasureOptions* options);
 } GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor;
+
+typedef struct GENERATED_ArkUISymbolEffectAccessor {
+    void (*destroyPeer)(Ark_SymbolEffect peer);
+    Ark_SymbolEffect (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*dummyForAccessorGenerate)(Ark_SymbolEffect peer);
+} GENERATED_ArkUISymbolEffectAccessor;
 
 typedef struct GENERATED_ArkUIScaleSymbolEffectAccessor {
     void (*destroyPeer)(Ark_ScaleSymbolEffect peer);
@@ -23480,6 +23563,12 @@ typedef struct GENERATED_ArkUIBounceSymbolEffectAccessor {
                          Ark_EffectDirection direction);
 } GENERATED_ArkUIBounceSymbolEffectAccessor;
 
+typedef struct GENERATED_ArkUIPulseSymbolEffectAccessor {
+    void (*destroyPeer)(Ark_PulseSymbolEffect peer);
+    Ark_PulseSymbolEffect (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+} GENERATED_ArkUIPulseSymbolEffectAccessor;
+
 typedef struct GENERATED_ArkUITabsControllerAccessor {
     void (*destroyPeer)(Ark_TabsController peer);
     Ark_TabsController (*ctor)();
@@ -24381,6 +24470,10 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
     const GENERATED_ArkUISystemOpsAccessor* (*getSystemOpsAccessor)();
     const GENERATED_ArkUIFocusControllerAccessor* (*getFocusControllerAccessor)();
+    const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();
+    const GENERATED_ArkUILayeredDrawableDescriptorAccessor* (*getLayeredDrawableDescriptorAccessor)();
+    const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* (*getPixelMapDrawableDescriptorAccessor)();
+    const GENERATED_ArkUIAnimatedDrawableDescriptorAccessor* (*getAnimatedDrawableDescriptorAccessor)();
     const GENERATED_ArkUIDrawingCanvasAccessor* (*getDrawingCanvasAccessor)();
     const GENERATED_ArkUILengthMetricsAccessor* (*getLengthMetricsAccessor)();
     const GENERATED_ArkUIColorMetricsAccessor* (*getColorMetricsAccessor)();
@@ -24395,6 +24488,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIPathShapeAccessor* (*getPathShapeAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* (*getGlobalScope_ohos_fontAccessor)();
     const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* (*getGlobalScope_ohos_measure_utilsAccessor)();
+    const GENERATED_ArkUISymbolEffectAccessor* (*getSymbolEffectAccessor)();
     const GENERATED_ArkUIScaleSymbolEffectAccessor* (*getScaleSymbolEffectAccessor)();
     const GENERATED_ArkUIReplaceSymbolEffectAccessor* (*getReplaceSymbolEffectAccessor)();
     const GENERATED_ArkUIFrameNodeAccessor* (*getFrameNodeAccessor)();
@@ -24492,6 +24586,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIAppearSymbolEffectAccessor* (*getAppearSymbolEffectAccessor)();
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* (*getDisappearSymbolEffectAccessor)();
     const GENERATED_ArkUIBounceSymbolEffectAccessor* (*getBounceSymbolEffectAccessor)();
+    const GENERATED_ArkUIPulseSymbolEffectAccessor* (*getPulseSymbolEffectAccessor)();
     const GENERATED_ArkUITabsControllerAccessor* (*getTabsControllerAccessor)();
     const GENERATED_ArkUITabContentTransitionProxyAccessor* (*getTabContentTransitionProxyAccessor)();
     const GENERATED_ArkUITextControllerAccessor* (*getTextControllerAccessor)();
