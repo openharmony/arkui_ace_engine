@@ -1472,7 +1472,7 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
     }
 }
 
-void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
+void NavigationGroupNode::RemoveDialogDestination(bool isReplace, bool isTriggerByInteractiveCancel)
 {
     for (auto iter = hideNodes_.begin(); iter != hideNodes_.end(); iter++) {
         auto navDestination = iter->first;
@@ -1481,7 +1481,9 @@ void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
         }
         if (!iter->second) {
             auto type = navDestination->GetTransitionType();
-            if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
+            bool isEnterPage = (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP);
+            if (!isTriggerByInteractiveCancel && isEnterPage) {
+                // if tigger by interactive animation, The transition type is incorrect, ignore this case.
                 continue;
             }
             // navDestination node don't need to remove, update visibility invisible
