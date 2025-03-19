@@ -326,8 +326,8 @@ void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNod
     auto spinnerLayoutProperty = spinnerNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
     spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    CalcSize idealSize = { CalcLength(ConvertTitleFontScaleValue(pickerTheme->GetTitleStyle().GetFontSize())),
-        CalcLength(ConvertTitleFontScaleValue(pickerTheme->GetTitleStyle().GetFontSize())) };
+    CalcSize idealSize = { CalcLength(pickerTheme->GetTitleStyle().GetFontSize()),
+        CalcLength(pickerTheme->GetTitleStyle().GetFontSize()) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     spinnerLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
@@ -495,6 +495,7 @@ void DatePickerDialogView::SwitchDatePickerPage(const RefPtr<FrameNode>& dateNod
         auto dateStackNode = AceType::DynamicCast<FrameNode>(dateNode->GetChildAtIndex(index));
         CHECK_NULL_VOID(dateStackNode);
         auto layoutProperty = dateStackNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         for (uint32_t k = 0; k < dateStackNode->GetChildren().size(); k++) {
             auto dateChildNode = AceType::DynamicCast<FrameNode>(dateStackNode->GetChildAtIndex(k));
             CHECK_NULL_VOID(dateChildNode);
@@ -525,6 +526,7 @@ void DatePickerDialogView::UpdateTimePickerChildrenStatus(const RefPtr<FrameNode
         auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
         CHECK_NULL_VOID(childStackNode);
         auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
             auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
@@ -2007,8 +2009,11 @@ bool DatePickerDialogView::NeedAdaptForAging()
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
     if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
-        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit()) {
+        Dimension(pipeline->GetRootHeight()).ConvertToVp() > pickerTheme->GetDeviceHeightLimit() &&
+        (follow && (GreatOrEqual(maxAppFontScale, pickerTheme->GetMaxOneFontScale())))) {
         return true;
     }
     return false;
@@ -2035,7 +2040,10 @@ const Dimension DatePickerDialogView::ConvertFontScaleValue(
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
     float fontSizeScale = pipeline->GetFontScale();
     Dimension fontSizeValueResult = fontSizeValue;
-
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontSizeScale = std::min(fontSizeScale, maxAppFontScale);
+    }
     if (NeedAdaptForAging()) {
         if (fontSizeValue.Unit() == DimensionUnit::VP) {
             if (isUserSetFont) {
@@ -2072,10 +2080,19 @@ const Dimension DatePickerDialogView::ConvertFontSizeLimit(
     if (isUserSetFont == false) {
         return fontSizeValue;
     }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+    auto fontScale = pipeline->GetFontScale();
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontScale = std::min(fontScale, maxAppFontScale);
+        fontScale = std::min(2.0f, fontScale);
+    }
     Dimension fontSizeValueResult = fontSizeValue;
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
-        if (GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeLimit.ConvertToPx() / MARGIN_HALF)) {
-            fontSizeValueResult = fontSizeLimit / MARGIN_HALF;
+        if (!NearZero(fontScale) &&
+            GreatOrEqualCustomPrecision(fontSizeValue.ConvertToPx(), fontSizeLimit.ConvertToPx() / fontScale)) {
+            fontSizeValueResult = fontSizeLimit / fontScale;
         } else {
             fontSizeValueResult = fontSizeValue;
         }
@@ -2096,24 +2113,28 @@ const Dimension DatePickerDialogView::ConvertTitleFontScaleValue(const Dimension
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
-
-    double fontScale = pipeline->GetFontScale();
-    auto adjustedScale =
-        std::clamp(fontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetTitleFontScaleLimit());
-
+    auto fontScale = pipeline->GetFontScale();
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    if (pipeline->IsFollowSystem() && (!NearZero(maxAppFontScale))) {
+        fontScale = std::min(fontScale, maxAppFontScale);
+    }
+    if (NearZero(fontScale)) {
+        return fontSizeValue;
+    }
     if (NeedAdaptForAging()) {
         if (fontSizeValue.Unit() == DimensionUnit::VP) {
-            return (fontSizeValue * adjustedScale);
+            return (fontSizeValue * pickerTheme->GetTitleFontScaleLimit());
         } else {
-            if (GreatOrEqualCustomPrecision(pipeline->GetFontScale(), pickerTheme->GetTitleFontScaleLimit())) {
-                auto fontSizeScale = pickerTheme->GetTitleFontScaleLimit() / pipeline->GetFontScale();
+            if (GreatOrEqualCustomPrecision(fontScale, pickerTheme->GetTitleFontScaleLimit()) &&
+             (!NearZero(fontScale))) {
+                auto fontSizeScale = pickerTheme->GetTitleFontScaleLimit() / fontScale;
                 return (fontSizeValue * fontSizeScale);
             }
         }
     } else {
         if (GreatOrEqualCustomPrecision(fontScale, pickerTheme->GetMaxOneFontScale()) &&
-            fontSizeValue.Unit() != DimensionUnit::VP) {
-            return (fontSizeValue / pipeline->GetFontScale());
+            fontSizeValue.Unit() != DimensionUnit::VP && (!NearZero(fontScale))) {
+            return (fontSizeValue / fontScale);
         }
     }
     return fontSizeValue;
