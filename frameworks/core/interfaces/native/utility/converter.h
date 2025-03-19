@@ -519,6 +519,7 @@ namespace Converter {
     template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> std::map<std::string, std::string> Convert(const Map_String_String& src);
+    template<> std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
