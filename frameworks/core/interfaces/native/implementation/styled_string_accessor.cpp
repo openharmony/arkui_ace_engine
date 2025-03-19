@@ -159,12 +159,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetStringImpl(Ark_StyledString peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->spanString, {});
-    peer->spanString->GetString();
-    // string need to be returned
-    LOGE("StyledStringAccessor::GetStringImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    CHECK_NULL_RETURN(peer->spanString, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->spanString->GetString();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Array_SpanStyle GetStylesImpl(Ark_VMContext vmContext,
                               Ark_StyledString peer,
