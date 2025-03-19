@@ -399,4 +399,9 @@ void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src)
     dst.monoSpace = ArkValue<Ark_Boolean>(src.monoSpace);
     dst.symbolic = ArkValue<Ark_Boolean>(src.symbolic);
 }
+void AssignArkValue(Ark_Size& dst, const SizeF& src)
+{
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
 } // namespace OHOS::Ace::NG::Converter

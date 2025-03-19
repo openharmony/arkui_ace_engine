@@ -13,19 +13,58 @@
  * limitations under the License.
  */
 
+#include "base/memory/referenced.h"
+#include "core/common/container.h"
+#include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "drawing_rendering_context_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
-void DrawingRenderingContextPeerImpl::TriggerInvalidate()
+DrawingRenderingContextPeerImpl::DrawingRenderingContextPeerImpl()
 {
-    auto pattern = AceType::DynamicCast<NG::CanvasPattern>(pattern_);
-    if (!pattern) {
-        LOGE("ARKOALA DrawingRenderingContextPeerImpl::TriggerInvalidate pattern "
-            "not bound to component.");
-        return;
-    }
-    pattern->SetInvalidate();
+    SetInstanceId(Ace::Container::CurrentIdSafely());
 }
-
+void DrawingRenderingContextPeerImpl::SetOptions(const std::optional<CanvasUnit>& optUnit)
+{
+    if (optUnit && optUnit.value() == CanvasUnit::PX) {
+        SetUnit(CanvasUnit::PX);
+    }
+}
+void DrawingRenderingContextPeerImpl::SetInvalidate()
+{
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_);
+    CHECK_NULL_VOID(customPaintPattern);
+    customPaintPattern->SetInvalidate();
+}
+SizeF DrawingRenderingContextPeerImpl::GetSize()
+{
+    auto width = size_.Width().value_or(0.0);
+    auto height = size_.Height().value_or(0.0);
+    return SizeF(width, height);
+}
+std::shared_ptr<RSCanvas> DrawingRenderingContextPeerImpl::GetCanvas() const
+{
+    return rsCanvas_;
+}
+void DrawingRenderingContextPeerImpl::SetRSCanvasCallback(RefPtr<AceType>& canvasPattern)
+{
+    std::function<void(RSCanvas*, double, double)> callback =
+        [wp = WeakClaim(this)](RSCanvas* canvas, double width, double height) {
+        auto context = wp.Upgrade();
+        CHECK_NULL_VOID(context);
+        double density = context->GetDensity();
+        if (density == 0) {
+            return;
+        }
+        height /= density;
+        width /= density;
+        context->size_.SetHeight(height);
+        context->size_.SetWidth(width);
+        context->rsCanvas_ = std::shared_ptr<RSCanvas>(canvas);
+    };
+    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
+    if (customPaintPattern) {
+        customPaintPattern->SetRSCanvasCallback(callback);
+    }
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier
