@@ -351,7 +351,7 @@ export class ExceptionPrompt extends ViewPU {
                         Text.padding(0);
                         Text.margin(i18n.isRTL(i18n.System.getSystemLanguage()) ?
                             {
-                                right: {
+                                left: {
                                     'id': -1,
                                     'type': 10002,
                                     params: ['sys.float.ohos_id_text_paragraph_margin_s'],

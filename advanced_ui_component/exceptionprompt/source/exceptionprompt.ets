@@ -119,7 +119,7 @@ export struct ExceptionPrompt {
               .padding(0)
               .margin(
                 i18n.isRTL(i18n.System.getSystemLanguage()) ?
-                  { right: $r('sys.float.ohos_id_text_paragraph_margin_s') } :
+                  { left: $r('sys.float.ohos_id_text_paragraph_margin_s') } :
                   { right: $r('sys.float.ohos_id_text_paragraph_margin_s') })
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .flexShrink(1)
