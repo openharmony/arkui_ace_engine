@@ -5316,6 +5316,9 @@ struct ArkUISelectModifier {
     void (*resetAvoidance)(ArkUINodeHandle node);
     void (*setOnSelect)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
         int32_t index, ArkUI_CharPtr text));
+    void (*setMenuOutline)(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize,
+        const ArkUI_Uint32* color, ArkUI_Int32 colorSize);
+    void (*resetMenuOutline)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

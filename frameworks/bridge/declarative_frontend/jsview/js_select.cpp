@@ -25,11 +25,13 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_properties.h"
@@ -139,6 +141,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
     JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
     JSClass<JSSelect>::StaticMethod("dividerStyle", &JSSelect::SetDividerStyle);
+    JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -978,5 +981,30 @@ void JSSelect::SetDirection(const std::string& dir)
         direction = TextDirection::AUTO;
     }
     SelectModel::GetInstance()->SetLayoutDirection(direction);
+}
+
+void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto menuTheme = GetTheme<NG::MenuTheme>();
+    NG::MenuParam menuParam;
+    MenuDefaultParam(menuParam);
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        NG::BorderWidthProperty outlineWidth;
+        outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+        menuParam.outlineWidth = outlineWidth;
+        NG::BorderColorProperty outlineColor;
+        outlineColor.SetColor(menuTheme->GetOuterBorderColor());
+        menuParam.outlineColor = outlineColor;
+    } else {
+        auto menuOptions = JSRef<JSObject>::Cast(info[0]);
+        auto outlineWidthValue = menuOptions->GetProperty("width");
+        JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
+        auto outlineColorValue = menuOptions->GetProperty("color");
+        JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
+    }
+    SelectModel::GetInstance()->SetMenuOutline(menuParam);
 }
 } // namespace OHOS::Ace::Framework

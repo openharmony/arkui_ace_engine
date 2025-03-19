@@ -1018,6 +1018,10 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuBlurStyleOption(menuOptions, menuParam);
     JSViewPopups::ParseMenuEffectOption(menuOptions, menuParam);
     JSViewPopups::ParseMenuHapticFeedbackMode(menuOptions, menuParam);
+    auto outlineWidthValue = menuOptions->GetProperty("outlineWidth");
+    JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
+    auto outlineColorValue = menuOptions->GetProperty("outlineColor");
+    JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
 }
 
 void JSViewPopups::ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
@@ -2259,6 +2263,89 @@ void JSViewAbstract::SetDialogEffectOption(const JSRef<JSObject>& obj, DialogPro
             properties.effectOption.emplace();
         }
         JSViewAbstract::ParseEffectOption(effectOptionValue, properties.effectOption.value());
+    }
+}
+
+void JSViewPopups::ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, NG::MenuParam& menuParam)
+{
+    NG::BorderWidthProperty outlineWidth;
+    CalcDimension borderWidth;
+    if (JSViewAbstract::ParseJsDimensionVp(outlineWidthValue, borderWidth)) {
+        if (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT) {
+            borderWidth.Reset();
+        }
+        outlineWidth.SetBorderWidth(borderWidth);
+        menuParam.outlineWidth = outlineWidth;
+        return;
+    }
+    if (!outlineWidthValue->IsObject()) {
+        outlineWidth.SetBorderWidth(Dimension {});
+        menuParam.outlineWidth = outlineWidth;
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineWidthValue);
+    CalcDimension left;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("left"), left) && left.IsNonNegative()) {
+        if (left.Unit() == DimensionUnit::PERCENT) {
+            left.Reset();
+        }
+        outlineWidth.leftDimen = left;
+    }
+    CalcDimension right;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("right"), right) && right.IsNonNegative()) {
+        if (right.Unit() == DimensionUnit::PERCENT) {
+            right.Reset();
+        }
+        outlineWidth.rightDimen = right;
+    }
+    CalcDimension top;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("top"), top) && top.IsNonNegative()) {
+        if (top.Unit() == DimensionUnit::PERCENT) {
+            top.Reset();
+        }
+        outlineWidth.topDimen = top;
+    }
+    CalcDimension bottom;
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottom"), bottom) && bottom.IsNonNegative()) {
+        if (bottom.Unit() == DimensionUnit::PERCENT) {
+            bottom.Reset();
+        }
+        outlineWidth.bottomDimen = bottom;
+    }
+    menuParam.outlineWidth = outlineWidth;
+}
+
+void JSViewPopups::ParseMenuOutlineColor(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam)
+{
+    NG::BorderColorProperty outlineColor;
+    Color borderColor;
+    if (JSViewAbstract::ParseJsColor(outlineColorValue, borderColor)) {
+        outlineColor.SetColor(borderColor);
+        menuParam.outlineColor = outlineColor;
+        ViewAbstractModel::GetInstance()->SetOuterBorderColor(borderColor);
+    } else if (outlineColorValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineColorValue);
+        Color left;
+        if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left)) {
+            outlineColor.leftColor = left;
+        }
+        Color right;
+        if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right)) {
+            outlineColor.rightColor = right;
+        }
+        Color top;
+        if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top)) {
+            outlineColor.topColor = top;
+        }
+        Color bottom;
+        if (JSViewAbstract::ParseJsColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom)) {
+            outlineColor.bottomColor = bottom;
+        }
+        menuParam.outlineColor = outlineColor;
+    } else {
+        auto defaultColor = Color(0x19FFFFFF);
+        outlineColor.SetColor(defaultColor);
+        menuParam.outlineColor = outlineColor;
     }
 }
 }

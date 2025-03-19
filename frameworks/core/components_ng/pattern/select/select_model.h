@@ -115,6 +115,7 @@ public:
     virtual void BackgroundColor(const Color& color) = 0;
     virtual void ResetBackgroundColor() = 0;
     virtual void ResetFontColor() {};
+    virtual void SetMenuOutline(const NG::MenuParam& menuParam);
 
 private:
     static std::unique_ptr<SelectModel> instance_;

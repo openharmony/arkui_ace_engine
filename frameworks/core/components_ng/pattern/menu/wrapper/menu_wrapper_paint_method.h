@@ -49,7 +49,8 @@ public:
 
 private:
     void PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
-    void PaintAndClipSinglePath(RSCanvas& canvas, PaintWrapper* paintWrapper, const MenuPathParams& path);
+    void PaintInnerBorderAndClipSinglePath(RSCanvas& canvas, PaintWrapper* paintWrapper, const MenuPathParams& path);
+    void PaintOuterBorderAndClipSinglePath(RSCanvas& canvas, PaintWrapper* paintWrapper, const MenuPathParams& path);
     void BuildCompletePath(RSPath& rsPath, const MenuPathParams& params);
     void BuildTopLinePath(RSPath& rsPath, const MenuPathParams& params);
     void BuildRightLinePath(RSPath& rsPath, const MenuPathParams& params);
@@ -59,6 +60,8 @@ private:
     void BuildTopArrowPath(RSPath& rsPath, float arrowX, float arrowY);
     void BuildRightArrowPath(RSPath& rsPath, float arrowX, float arrowY);
     void BuildLeftArrowPath(RSPath& rsPath, float arrowX, float arrowY);
+    void PaintEdgeOuterBorder(
+        const MenuPathParams& params, RSCanvas& canvas, const MenuParam& menuParam, const RSPath& rsPath);
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPaintMethod);
 
 };
