@@ -95,7 +95,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
     SymbolModelNG::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 void SymbolEffect0Impl(Ark_NativePointer node,
-                       const Ark_SymbolEffect* symbolEffect,
+                       Ark_SymbolEffect symbolEffect,
                        const Opt_Boolean* isActive)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -104,7 +104,7 @@ void SymbolEffect0Impl(Ark_NativePointer node,
     LOGE("Ark_SymbolEffect is not implemented yet.");
 }
 void SymbolEffect1Impl(Ark_NativePointer node,
-                       const Ark_SymbolEffect* symbolEffect,
+                       Ark_SymbolEffect symbolEffect,
                        const Opt_Number* triggerValue)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
