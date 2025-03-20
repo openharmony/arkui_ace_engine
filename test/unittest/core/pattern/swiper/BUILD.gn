@@ -26,6 +26,7 @@ ace_unittest("swiper_test_ng") {
     "swiper_animation_test_ng.cpp",
     "swiper_arrow_test_ng.cpp",
     "swiper_attr_test_ng.cpp",
+    "swiper_circle_dot_indicator_modifier_test_ng.cpp",
     "swiper_common_test_ng.cpp",
     "swiper_controller_test_ng.cpp",
     "swiper_event_test_ng.cpp",
