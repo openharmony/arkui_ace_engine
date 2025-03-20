@@ -799,6 +799,9 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
     if (!point.isFalsified) {
         lastSourceTool_ = point.sourceTool;
     }
+    if (refereeNG_->IsScopesEmpty()) {
+        responseCtrl_->Reset();
+    }
 }
 
 void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
