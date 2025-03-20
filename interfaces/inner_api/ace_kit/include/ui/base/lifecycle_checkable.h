@@ -47,7 +47,14 @@ public:
     };
 
 protected:
-    ~LifeCycleCheckable();
+    ~LifeCycleCheckable()
+    {
+        if (usingCount_) {
+            OnDetectedObjDestroyInUse();
+        }
+    }
+
+    void OnDetectedObjDestroyInUse();
 
 private:
     std::atomic_int usingCount_ = 0;
