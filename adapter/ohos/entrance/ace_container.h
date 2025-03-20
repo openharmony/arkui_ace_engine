@@ -95,7 +95,7 @@ struct SingleHandTransform {
     SingleHandTransform() = default;
     SingleHandTransform(float x, float y, float scaleX, float scaleY)
         : x_(x), y_(y), scaleX_(scaleX), scaleY_(scaleY) {}
- 
+
     float x_ = 0.0f;
     float y_ = 0.0f;
     float scaleX_ = 1.0f;
@@ -598,7 +598,7 @@ public:
 
     void RemoveOnConfigurationChange(int32_t instanceId)
     {
-        configurationChangedCallbacks_.erase(instanceId_);
+        configurationChangedCallbacks_.erase(instanceId);
     }
 
     void HotReload() override;
