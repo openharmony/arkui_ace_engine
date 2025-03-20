@@ -1725,6 +1725,7 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
 
 void TextPickerColumnPattern::SetOptionShiftDistanceByIndex(int32_t index, const bool isLandscape)
 {
+    CHECK_EQUAL_VOID(optionProperties_.empty(), true);
     TextPickerOptionProperty& prop = optionProperties_[index];
     if (isLandscape) {
         prop.prevDistance = GetShiftDistanceForLandscape(index, ScrollDirection::UP);
@@ -1737,7 +1738,6 @@ void TextPickerColumnPattern::SetOptionShiftDistanceByIndex(int32_t index, const
 
 void TextPickerColumnPattern::SetOptionShiftDistance()
 {
-    CHECK_EQUAL_VOID(optionProperties_.empty(), true);
     int32_t itemCounts = static_cast<int32_t>(GetShowOptionCount());
     bool isLandscape = itemCounts == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
     for (int32_t i = 0; i < itemCounts; i++) {
