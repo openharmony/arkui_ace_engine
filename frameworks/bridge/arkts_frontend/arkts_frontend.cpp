@@ -143,7 +143,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
         return UIContentErrorCode::INVALID_URL;
     }
 
-    if ((state = env_->Object_CallMethod_Ref((ani_object)linkerRef, loadClassMethod, &entryClassRef, entryClassStr, isInit)) != ANI_OK) {
+    if ((state = env_->Object_CallMethod_Ref(
+             (ani_object)linkerRef, loadClassMethod, &entryClassRef, entryClassStr, isInit)) != ANI_OK) {
         LOGE("Object_CallMethod_Ref loadClassMethod failed");
         return UIContentErrorCode::INVALID_URL;
     }

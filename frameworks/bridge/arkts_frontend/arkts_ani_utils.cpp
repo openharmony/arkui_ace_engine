@@ -16,7 +16,6 @@
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 
 #include <ani.h>
-#include "arkts_ani_utils.h"
 
 #include "base/log/log.h"
 
@@ -42,7 +41,8 @@ int32_t ArktsAniUtils::CreateAniBoolean(ani_env* env, bool value, ani_object& re
     return static_cast<int32_t>(state);
 }
 
-int32_t ArktsAniUtils::GetNearestNonBootRuntimeLinker(ani_env* env, ani_ref& result) {
+int32_t ArktsAniUtils::GetNearestNonBootRuntimeLinker(ani_env* env, ani_ref& result)
+{
     ani_module stdCoreModule;
     auto state = env->FindModule("Lstd/core;", &stdCoreModule);
     if (state != ANI_OK) {
