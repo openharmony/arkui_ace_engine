@@ -40,7 +40,8 @@ void LinearIndicatorBridge::SetIndicatorStyleSize(
     auto jsStrokeRadius = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "strokeRadius"));
 
     CalcDimension space;
-    if (ArkTSUtils::ParseJsLengthMetrics(vm, jsSpace, space)) {
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, jsSpace, space) && GreatOrEqual(space.Value(), 0.0f) &&
+        space.Unit() != DimensionUnit::PERCENT) {
         GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleSpace(
             nativeNode, space.Value(), static_cast<int>(space.Unit()));
     } else {
@@ -48,7 +49,8 @@ void LinearIndicatorBridge::SetIndicatorStyleSize(
     }
 
     CalcDimension strokeWidth;
-    if (ArkTSUtils::ParseJsLengthMetrics(vm, jsStrokeWidth, strokeWidth)) {
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, jsStrokeWidth, strokeWidth) && GreatOrEqual(strokeWidth.Value(), 0.0f) &&
+        strokeWidth.Unit() != DimensionUnit::PERCENT) {
         GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleStrokeWidth(
             nativeNode, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
     } else {
@@ -57,7 +59,8 @@ void LinearIndicatorBridge::SetIndicatorStyleSize(
     }
 
     CalcDimension strokeRadius;
-    if (ArkTSUtils::ParseJsLengthMetrics(vm, jsStrokeRadius, strokeRadius)) {
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, jsStrokeRadius, strokeRadius) &&
+        GreatOrEqual(strokeRadius.Value(), 0.0f) && strokeRadius.Unit() != DimensionUnit::PERCENT) {
         GetArkUINodeModifiers()->getLinearIndicatorModifier()->setLinearIndicatorIndicatorStyleStrokeRadius(
             nativeNode, strokeRadius.Value(), static_cast<int>(strokeRadius.Unit()));
     } else {

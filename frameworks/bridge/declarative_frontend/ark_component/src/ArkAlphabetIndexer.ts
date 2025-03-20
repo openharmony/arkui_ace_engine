@@ -19,7 +19,8 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     super(nativePtr, classType);
   }
   onSelected(callback: (index: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnSelectedModifier.identity, OnSelectedModifier, callback);
+    return this;
   }
   color(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, ColorModifier.identity, ColorModifier, value);
@@ -85,13 +86,16 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     return this;
   }
   onSelect(callback: (index: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnSelectModifier.identity, OnSelectModifier, callback);
+    return this;
   }
   onRequestPopupData(callback: (index: number) => string[]): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnRequestPopupDataModifier.identity, OnRequestPopupDataModifier, callback);
+    return this;
   }
   onPopupSelect(callback: (index: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnPopupSelectModifier.identity, OnPopupSelectModifier, callback);
+    return this;
   }
   selected(index: number): this {
     modifierWithKey(this._modifiersWithKeys, AlphabetIndexerSelectedModifier.identity, AlphabetIndexerSelectedModifier, index);
@@ -242,6 +246,62 @@ class PopupItemBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class OnSelectedModifier extends ModifierWithKey<(index: number) => void> {
+  constructor(value: (index: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('onSelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetOnSelected(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setOnSelected(node, this.value);
+    }
+  }
+}
+
+class OnSelectModifier extends ModifierWithKey<(index: number) => void> {
+  constructor(value: (index: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('onSelect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {  
+      getUINativeModule().alphabetIndexer.resetOnSelect(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setOnSelect(node, this.value);
+    }
+  }
+}
+
+class OnRequestPopupDataModifier extends ModifierWithKey<(index: number) => string[]> {
+  constructor(value: (index: number) => string[]) {
+    super(value);
+  }
+  static identity = Symbol('onRequestPopupData');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetOnRequestPopupData(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setOnRequestPopupData(node, this.value);
+    }
+  }
+}
+
+class OnPopupSelectModifier extends ModifierWithKey<(index: number) => void> {
+  constructor(value: (index: number) => void) {
+    super(value);
+  }
+  static identity = Symbol('onPopupSelect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetOnPopupSelect(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setOnPopupSelect(node, this.value);
+    }
   }
 }
 
