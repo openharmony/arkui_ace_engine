@@ -742,10 +742,10 @@ BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
     }
     bool hasSetBorderRadius = topStartOpt || topEndOpt || bottomStartOpt || bottomEndOpt;
     auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
-    property.radiusTopLeft = isRtl ? topEnd : topStart;
-    property.radiusTopRight = isRtl ? topStart : topEnd;
-    property.radiusBottomLeft = isRtl ? bottomEnd : bottomStart;
-    property.radiusBottomRight = isRtl ? bottomStart : bottomEnd;
+    property.radiusTopStart = isRtl ? topEnd : topStart;
+    property.radiusTopEnd = isRtl ? topStart : topEnd;
+    property.radiusBottomStart = isRtl ? bottomEnd : bottomStart;
+    property.radiusBottomEnd = isRtl ? bottomStart : bottomEnd;
     property.multiValued = true;
     return property;
 }

@@ -20,6 +20,7 @@
 
 // sorted part of the code
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components/theme/theme_style.h"
 #include "core/gestures/drag_event.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
