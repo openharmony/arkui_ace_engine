@@ -5211,7 +5211,17 @@ void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t sta
 
 bool RichEditorPattern::NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record)
 {
+    CHECK_NULL_RETURN(record.IsValid(), false);
+    bool caretInSecondPos = caret == record.startOffset + 1;
+    bool caretNotInEndPos = caret != record.endOffset;
 
+    auto& curContent = record.previewContent;
+    auto& newContent = record.newPreviewContent;
+    auto enFilter = [](char c) { return isalpha(c) || c == '\''; };
+    bool curAllEn = std::all_of(curContent.begin(), curContent.end(), enFilter);
+    bool newAllEn = std::all_of(newContent.begin(), newContent.end(), enFilter);
+
+    return caretInSecondPos && caretNotInEndPos && curAllEn && newAllEn;
 }
 
 bool RichEditorPattern::UpdatePreviewText(const std::u16string& previewTextValue, const PreviewRange& range)
