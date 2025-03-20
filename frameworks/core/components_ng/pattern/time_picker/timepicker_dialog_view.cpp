@@ -193,7 +193,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     buttonTitleNode->MountToParent(contentColumn);
     timePickerNode->MountToParent(contentColumn);
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (timePickerNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         bool enableHaptic = settingData.isEnableHapticFeedback;
         timePickerRowPattern->SetIsEnableHaptic(enableHaptic);
         timePickerRowPattern->ColumnPatternInitHapticController();

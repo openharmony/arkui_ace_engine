@@ -161,11 +161,13 @@ bool TextClockPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 
 void TextClockPattern::OnModifyDone()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        Pattern::OnModifyDone();
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        Pattern::OnModifyDone();
+    }
+
     auto textNode = GetTextNode();
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -488,7 +490,9 @@ void TextClockPattern::ParseInputFormat()
             formatElementMap_[j] = tempFormatElement;
         }
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is12h) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is12h) {
         is24H_ = false;
     }
 }
