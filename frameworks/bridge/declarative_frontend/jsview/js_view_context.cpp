@@ -690,7 +690,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         // this case usually means there is no foreground container, need to figure out the reason.
         const char* funcName = immediately ? "animateToImmediately" : "animateTo";
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
-            "can not find currnet context ,%{pubic}s faild, please use uiContext.%{public}s to specify the context",
+            "can not find current context ,%{public}s faild, please use uiContext.%{public}s to specify the context",
             funcName, funcName);
         return;
     }
