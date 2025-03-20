@@ -310,7 +310,7 @@ HWTEST_F(WebModifierTest2, onOverrideUrlLoadingTest, TestSize.Level1)
             .resourceId = resourceId,
             .peer = parameter,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     OnOverrideUrlLoadingCallback arkCallback =
@@ -474,7 +474,7 @@ HWTEST_F(WebModifierTest2, onInterceptKeyboardAttachTest, TestSize.Level1)
             .peer = parameter.controller,
             .attributes = Converter::Convert<std::map<std::string, std::string>>(parameter.attributes)
         };
-        CallbackHelper(continuation).Invoke(Ark_WebKeyboardOptions {
+        CallbackHelper(continuation).InvokeSync(Ark_WebKeyboardOptions {
             .useSystemKeyboard = Converter::ArkValue<Ark_Boolean>(callResult),
             .enterKeyType = Converter::ArkValue<Opt_Number>(Ark_Empty()),
             .customKeyboard = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
@@ -529,7 +529,7 @@ HWTEST_F(WebModifierTest2, setOnInterceptKeyEventTest, TestSize.Level1)
             .code = info->GetKeyCode()
         };
         accessor->destroyPeer(peer);
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(nullptr, checkCallback, contextId);
     modifier_->setOnInterceptKeyEvent(node_, &arkCallback);

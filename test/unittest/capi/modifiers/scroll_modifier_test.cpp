@@ -1301,7 +1301,7 @@ HWTEST_F(ScrollModifierTest, setOnScrollFrameBeginTest, testing::ext::TestSize.L
         EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);
         ScrollFrameResult result;
         result.offset = Converter::Convert<Dimension>(offset);
-        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_OnScrollFrameBeginHandlerResult>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_OnScrollFrameBeginHandlerResult>(result));
     };
     auto arkFunc = Converter::ArkValue<OnScrollFrameBeginCallback>(
         nullptr, onScrollFrameBegin, expectedResId);

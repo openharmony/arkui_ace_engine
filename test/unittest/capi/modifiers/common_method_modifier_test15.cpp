@@ -110,7 +110,7 @@ public:
                 .parentNode = parentNode
             };
             if (uiNode) {
-                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+                CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode.value()));
             }
         };
         return Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, EXPECTED_CONTEXT_ID);
