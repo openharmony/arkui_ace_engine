@@ -14,9 +14,11 @@
  */
 
 #include "base/log/event_report.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
+FRCSceneFpsInfo EventReport::curFRCSceneFpsInfo_;
+int64_t EventReport::calTime_ = 0;
+int32_t EventReport::calFrameRate_ = 0;
 
 void EventReport::SendEvent(const EventInfo& eventInfo) {}
 
