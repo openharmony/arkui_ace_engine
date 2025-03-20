@@ -2387,8 +2387,18 @@ HWTEST_F(PanRecognizerTestNg, OnAcceptedTest001, TestSize.Level1)
     std::chrono::nanoseconds nanoseconds(currentTime);
     TimeStamp time(nanoseconds);
     panRecognizer.firstInputTime_ = time;
+    panRecognizer.lastTouchEvent_.time = time;
     panRecognizer.isTouchEventFinished_ = true;
     panRecognizer.SetEnabled(false);
+    panRecognizer.OnAccepted();
+    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::SUCCEED);
+    EXPECT_FALSE(panRecognizer.isStartTriggered_);
+
+    /**
+     * @tc.steps: step3. set lastTouchEvent_.sourceType is SourceType::TOUCH and call OnAccepted function.
+     * @tc.expected: result equals.
+     */
+    panRecognizer.lastTouchEvent_.sourceType = SourceType::TOUCH;
     panRecognizer.OnAccepted();
     EXPECT_EQ(panRecognizer.refereeState_, RefereeState::SUCCEED);
     EXPECT_FALSE(panRecognizer.isStartTriggered_);
