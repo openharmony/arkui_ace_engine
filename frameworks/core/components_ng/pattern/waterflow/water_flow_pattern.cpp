@@ -389,6 +389,10 @@ bool WaterFlowPattern::UpdateStartIndex(int32_t index)
     if (layoutInfo_->footerIndex_ == 0 && layoutInfo_->jumpIndex_ == childCount - 1) {
         SetScrollAlign(ScrollAlign::END);
     }
+    if (layoutInfo_->Mode() == LayoutMode::TOP_DOWN) {
+        // distinguish scrollToLastIndex and scrollToEdge in top-down mode.
+        layoutInfo_->jumpIndex_ = index;
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
