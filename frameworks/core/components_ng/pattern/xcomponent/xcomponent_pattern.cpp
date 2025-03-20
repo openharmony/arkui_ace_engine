@@ -307,10 +307,17 @@ void XComponentPattern::UpdateTransformHint()
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
+    initialContext_ = pipelineContext;
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
-    SetRotation(pipelineContext->GetTransformHint());
+    RegisterTransformHintCallback(AceType::RawPtr(pipelineContext));
+}
+
+void XComponentPattern::RegisterTransformHintCallback(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    SetRotation(context->GetTransformHint());
     auto callbackId =
-        pipelineContext->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
+        context->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
             auto pattern = weak.Upgrade();
             if (pattern) {
                 pattern->SetRotation(transform);
@@ -629,6 +636,15 @@ void XComponentPattern::OnAttachContext(PipelineContext* context)
     context->AddWindowStateChangedCallback(host->GetId());
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetInstanceId(context->GetInstanceId());
+    auto initialContext = initialContext_.Upgrade();
+    if (initialContext && initialContext != context) {
+        initialContext->RemoveWindowStateChangedCallback(host->GetId());
+        if (HasTransformHintChangedCallbackId()) {
+            initialContext->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value());
+            RegisterTransformHintCallback(context);
+        }
+        initialContext_ = nullptr;
+    }
 }
 
 void XComponentPattern::OnDetachContext(PipelineContext* context)
