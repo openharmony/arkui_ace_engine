@@ -5209,6 +5209,11 @@ void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t sta
     }
 }
 
+bool RichEditorPattern::NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record)
+{
+
+}
+
 bool RichEditorPattern::UpdatePreviewText(const std::u16string& previewTextValue, const PreviewRange& range)
 {
     auto& record = previewTextRecord_;

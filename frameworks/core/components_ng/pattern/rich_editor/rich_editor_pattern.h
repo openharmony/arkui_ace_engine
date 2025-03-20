@@ -303,6 +303,7 @@ public:
         WeakPtr<RichEditorPattern> pattern_;
     };
 
+    bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
 
     const PreviewTextInfo GetPreviewTextInfo() const;
