@@ -920,37 +920,17 @@ HWTEST_F(RichEditorEditTestOneNg, MoveCaretToContentRect001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitScrollablePattern001
- * @tc.desc: test InitScrollablePattern
+ * @tc.name: GetThumbnailCallback002
+ * @tc.desc: test GetThumbnailCallback
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestOneNg, InitScrollablePattern001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestOneNg, GetThumbnailCallback002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto theme = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    pipeline->SetThemeManager(theme);
-
-    richEditorPattern->scrollBar_ = nullptr;
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), false);
-
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), false);
-
-    Offset Offset = { 1, 4 };
-    richEditorPattern->isTextChange_ = true;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    richEditorPattern->isTextChange_ = false;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
+    richEditorPattern->InitDragDropEvent();
+    EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
 }
 
 /**

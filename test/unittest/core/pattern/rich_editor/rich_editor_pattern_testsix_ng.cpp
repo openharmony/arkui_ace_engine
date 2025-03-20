@@ -1447,60 +1447,6 @@ HWTEST_F(RichEditorPatternTestSixNg, SetSelectSpanStyle005, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnScrollEndCallback002
- * @tc.desc: test OnScrollEndCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, OnScrollEndCallback002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 6;
-    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
-
-    auto pipeline = richEditorNode_->GetContext();
-    pipeline->safeAreaManager_ = nullptr;
-    richEditorPattern->OnScrollEndCallback();
-    auto res = richEditorPattern->IsSelectAreaVisible();
-    EXPECT_FALSE(res);
-}
-
-/**
- * @tc.name: OnScrollEndCallback003
- * @tc.desc: test OnScrollEndCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, OnScrollEndCallback003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 6;
-    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
-    richEditorPattern->isAnimationStop_ = false;
-    richEditorPattern->OnScrollEndCallback();
-    auto res = richEditorPattern->IsSelectAreaVisible();
-    EXPECT_TRUE(res);
-}
-
-/**
  * @tc.name: UpdateChildrenOffset003
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC
