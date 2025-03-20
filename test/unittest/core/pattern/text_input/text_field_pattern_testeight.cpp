@@ -1154,4 +1154,159 @@ HWTEST_F(TextFieldPatternTestEight, HandleMouseEvent001, TestSize.Level0)
     pattern_->HandleMouseEvent(info);
     EXPECT_TRUE(pattern_->IsSelected());
 }
+
+/**
+ * @tc.name: HandleRightMousePressEvent001
+ * @tc.desc: test HandleRightMousePressEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, HandleRightMousePressEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    MouseInfo info;
+    pattern_->selectController_->firstHandleInfo_.index = 1;
+    pattern_->selectController_->secondHandleInfo_.index = 1;
+    pattern_->hasPreviewText_ = false;
+    auto focusHub = pattern_->GetFocusHub();
+    focusHub->focusType_ = FocusType::DISABLE;
+    pattern_->HandleRightMousePressEvent(info);
+    EXPECT_FALSE(focusHub->IsFocusable());
+}
+
+/**
+ * @tc.name: HandleLeftMousePressEvent001
+ * @tc.desc: test HandleLeftMousePressEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, HandleLeftMousePressEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    MouseInfo info;
+    pattern_->hasPreviewText_ = true;
+    pattern_->HandleLeftMousePressEvent(info);
+    EXPECT_TRUE(pattern_->blockPress_);
+
+    pattern_->hasPreviewText_ = false;
+    auto focusHub = pattern_->GetFocusHub();
+    focusHub->focusType_ = FocusType::DISABLE;
+    pattern_->HandleLeftMousePressEvent(info);
+    EXPECT_TRUE(pattern_->blockPress_);
+}
+
+/**
+ * @tc.name: HandleLeftMouseReleaseEvent001
+ * @tc.desc: test HandleLeftMouseReleaseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, HandleLeftMouseReleaseEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    MouseInfo info;
+    pattern_->blockPress_ = false;
+    pattern_->showKeyBoardOnFocus_ = true;
+    pattern_->showKeyBoardOnFocus_ = true;
+    auto host = pattern_->GetHost();
+    auto focusHub = host->GetOrCreateFocusHub();
+    focusHub->currentFocus_ = true;
+    pattern_->customKeyboard_ = nullptr;
+    pattern_->customKeyboardBuilder_ = nullptr;
+    auto client = AceType::MakeRefPtr<MockTextInputClient>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
+    pattern_->imeShown_ = true;
+    pattern_->HandleLeftMouseReleaseEvent(info);
+    EXPECT_TRUE(pattern_->RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::MOUSE_RELEASE));
+}
+
+/**
+ * @tc.name: RequestKeyboard001
+ * @tc.desc: test RequestKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, RequestKeyboard001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    bool forceClose = true;
+    bool isStopTwinkling = true;
+    auto client = AceType::MakeRefPtr<MockTextInputClient>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
+    pattern_->imeShown_ = true;
+    pattern_->CloseKeyboard(forceClose, isStopTwinkling);
+    EXPECT_EQ(pattern_->connection_, nullptr);
+}
+
+/**
+ * @tc.name: RequestCustomKeyboard001
+ * @tc.desc: test RequestCustomKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, RequestCustomKeyboard001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto client = AceType::MakeRefPtr<MockTextInputClient>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
+    pattern_->imeShown_ = true;
+    pattern_->customKeyboard_ = AceType::DynamicCast<NG::UINode>(
+        AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>()));
+    pattern_->customKeyboardBuilder_ = nullptr;
+    pattern_->selectController_->caretInfo_.rect.height_ = 1;
+    pattern_->selectController_->caretInfo_.rect.y_ = 2;
+    pattern_->RequestCustomKeyboard();
+    EXPECT_EQ(pattern_->connection_, nullptr);
+}
+
+/**
+ * @tc.name: InsertValueByController001
+ * @tc.desc: test InsertValueByController
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, InsertValueByController001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    std::u16string insertValue = u"test";
+    int32_t offset = 0;
+    auto host = pattern_->GetHost();
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    auto func = [](const ChangeValueInfo& info) {
+        return false;
+    };
+    eventHub->SetOnWillChangeEvent(func);
+    auto ret = pattern_->InsertValueByController(insertValue, offset);
+    EXPECT_FALSE(ret);
+
+    auto func1 = [](const ChangeValueInfo& info) {
+        return true;
+    };
+    eventHub->SetOnWillChangeEvent(func1);
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateMaxLength(123);
+    ret = pattern_->InsertValueByController(insertValue, offset);
+    EXPECT_EQ(pattern_->focusIndex_, FocuseIndex::TEXT);
+}
 } // namespace OHOS::Ace::NG,
