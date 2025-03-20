@@ -1332,7 +1332,7 @@ HWTEST_F(TextFieldPatternTestEight, PreferredTextHeight001, TestSize.Level0)
     Dimension offset = Dimension(-10000.0, DimensionUnit::PX);
     pattern_->adaptFontSize_ = offset;
     offset = Dimension(-10.0, DimensionUnit::VP);
-    auto textFieldTheme = pattern_->GetTheme(); 
+    auto textFieldTheme = pattern_->GetTheme();
     textFieldTheme->fontSize_ = offset;
     auto tmpHost = pattern_->GetHost();
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
