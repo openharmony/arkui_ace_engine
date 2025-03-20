@@ -38,6 +38,11 @@ public:
         return taskExecutor_;
     }
 
+    virtual void SetTaskExecutor(RefPtr<TaskExecutor> taskExecutor)
+    {
+        taskExecutor_ = taskExecutor;
+    }
+
     RefPtr<DisplayInfo> GetMockDisplayInfo()
     {
         return displayInfo_;

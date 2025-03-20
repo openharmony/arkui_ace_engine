@@ -4379,8 +4379,8 @@ void BindContextMenu0Impl(Ark_NativePointer node,
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     std::function<void()> previewBuildFunc = nullptr;
-    g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::NORMAL_TYPE;
+    g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
     if (type != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
