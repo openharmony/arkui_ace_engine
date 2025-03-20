@@ -38,7 +38,6 @@
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/grid_property.h"
 #include "core/event/axis_event.h"
@@ -7009,17 +7008,6 @@ void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
     ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
 }
 
-void SetOnSelectExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
-    int32_t index, ArkUI_CharPtr text))
-{
-    auto* uiNode = reinterpret_cast<UINode*>(node);
-    CHECK_NULL_VOID(uiNode);
-    auto onSelect = [node, eventReceiver](int32_t index, const std::string& text) {
-        eventReceiver(node, index, text.c_str());
-    };
-    SelectModelNG::SetOnSelect(reinterpret_cast<FrameNode*>(node), std::move(onSelect));
-}
-
 } // namespace
 
 namespace NodeModifier {
@@ -7459,7 +7447,6 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetPrivacySensitive = ResetPrivacySensitve,
         .freezeUINodeById = FreezeUINodeById,
         .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
-        .setOnSelect = SetOnSelectExt,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

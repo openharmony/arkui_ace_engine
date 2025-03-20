@@ -672,6 +672,17 @@ void ResetSelectDividerStyle(ArkUINodeHandle node)
     SelectModelNG::ResetDividerStyle(frameNode);
 }
 
+void SetOnSelectExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
+    int32_t index, ArkUI_CharPtr text))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onSelect = [node, eventReceiver](int32_t index, const std::string& text) {
+        eventReceiver(node, index, text.c_str());
+    };
+    SelectModelNG::SetOnSelect(reinterpret_cast<FrameNode*>(node), std::move(onSelect));
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -731,6 +742,7 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetSelectDirection = ResetSelectDirection,
         .setSelectDividerStyle = SetSelectDividerStyle,
         .resetSelectDividerStyle = ResetSelectDividerStyle,
+        .setOnSelect = SetOnSelectExt,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
