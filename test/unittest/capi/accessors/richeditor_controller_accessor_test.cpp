@@ -110,21 +110,15 @@ void AssignArkValue(Ark_Type_RichEditorController_updateSpanStyle_value& dst,
 void AssignArkValue(Ark_DecorationStyleInterface& dst, const Converter::TextDecorationStruct& src,
                     Converter::ConvContext *ctx)
 {
-    if (src.color) {
-        auto str = Converter::ArkValue<Ark_String>(src.color->ToString(), ctx);
-        dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(str);
-    }
-    if (src.style) {
-        dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.style);
-    }
+    dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.color, ctx);
+    dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.style);
     dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.textDecoration);
 }
 
 void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& style,
     Converter::ConvContext *ctx)
 {
-    auto str = Converter::ArkValue<Ark_String>(style.GetTextColor().ToString(), ctx);
-    dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(str);
+    dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(style.GetTextColor(), ctx);
     dst.fontSize = Converter::ArkUnion<Opt_Union_Length_Number, Ark_Length>(style.GetFontSize());
     dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(style.GetFontStyle());
     dst.fontWeight = Converter::ArkUnion<

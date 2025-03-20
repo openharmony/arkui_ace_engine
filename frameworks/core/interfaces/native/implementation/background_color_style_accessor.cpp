@@ -41,7 +41,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_TextBackgroundStyle GetTextBackgroundStyleImpl(Ark_BackgroundColorStyle peer)
 {
-    return {};
+    auto textBgStyleInvalid = TextBackgroundStyle();
+    Ark_TextBackgroundStyle invalidValue = Converter::ArkValue<Ark_TextBackgroundStyle>(textBgStyleInvalid);
+    CHECK_NULL_RETURN(peer && peer->span, invalidValue);
+    auto textBgStyle = peer->span->GetBackgroundColor();
+    return Converter::ArkValue<Ark_TextBackgroundStyle>(textBgStyle);
 }
 } // BackgroundColorStyleAccessor
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor()
