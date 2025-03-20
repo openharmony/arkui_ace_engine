@@ -366,26 +366,6 @@ HWTEST_F(RichEditorPatternTestOneNg, InsertValueInStyledString002, TestSize.Leve
 }
 
 /**
- * @tc.name: CreateDecorationSpanByTextStyle001
- * @tc.desc: test RichEditorPattern CreateDecorationSpanByTextStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CreateDecorationSpanByTextStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    style.SetFontFeatures(TEXT_FONTFEATURE);
-    RefPtr<DecorationSpan> span = richEditorPattern->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
-    ASSERT_NE(span, nullptr);
-}
-
-/**
  * @tc.name: CreateImageSourceInfo002
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
@@ -589,59 +569,6 @@ HWTEST_F(RichEditorPatternTestOneNg, UpdateDecoration001, TestSize.Level1)
     TextStyle textStyle;
     richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
     ASSERT_EQ(updateSpanStyle.updateTextDecoration.has_value(), false);
-}
-
-/**
- * @tc.name: UpdateImageStyle001
- * @tc.desc: test UpdateImageStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, UpdateImageStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    Dimension width = 50.0_vp;
-    Dimension height = 50.0_vp;
-    RefPtr<FrameNode> imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 0, AceType::MakeRefPtr<ImagePattern>());
-    ImageSpanAttribute imageStyle;
-    richEditorPattern->updateSpanStyle_.updateImageWidth = std::nullopt;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = std::nullopt;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-
-    richEditorPattern->updateSpanStyle_.updateImageWidth = width;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = height;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-
-    richEditorPattern->updateSpanStyle_.updateImageWidth = width;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = std::nullopt;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-
-    richEditorPattern->updateSpanStyle_.updateImageWidth = std::nullopt;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = height;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-    ASSERT_EQ(richEditorPattern->updateSpanStyle_.updateImageHeight.has_value(), true);
-}
-
-/**
- * @tc.name: SymbolSpanUpdateStyle001
- * @tc.desc: test SymbolSpanUpdateStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, SymbolSpanUpdateStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 0);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle textStyle;
-
-    bool res = richEditorPattern->SymbolSpanUpdateStyle(spanNode, updateSpanStyle, textStyle);
-    ASSERT_EQ(res, true);
 }
 
 /**

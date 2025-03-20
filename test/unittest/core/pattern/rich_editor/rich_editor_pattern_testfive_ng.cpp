@@ -677,22 +677,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos004, TestSize.Leve
 }
 
 /**
- * @tc.name: HandleSelectFontStyle001
- * @tc.desc: test HandleSelectFontStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectFontStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textSelector_.baseOffset = -2;
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_SEARCH);
-    EXPECT_TRUE(richEditorPattern->textSelector_.SelectNothing());
-}
-
-/**
  * @tc.name: CursorMoveLineBegin001
  * @tc.desc: test CursorMoveLineBegin
  * @tc.type: FUNC

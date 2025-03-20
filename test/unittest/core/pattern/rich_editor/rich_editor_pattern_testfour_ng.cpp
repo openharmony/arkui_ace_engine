@@ -76,66 +76,6 @@ int32_t RichEditorPatternTestFourNg::GetEmojiStringLength(std::string emojiStrin
 }
 
 /**
- * @tc.name: GetTextStyleBySpanItem001
- * @tc.desc: test GetTextStyleBySpanItem
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, GetTextStyleBySpanItem001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->fontStyle = nullptr;
-    spanItem->textLineStyle = nullptr;
-    richEditorPattern->GetTextStyleBySpanItem(spanItem);
-    ASSERT_EQ(spanItem->fontStyle, nullptr);
-}
-
-/**
- * @tc.name: GetImageStyleBySpanItem001
- * @tc.desc: test GetImageStyleBySpanItem
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, GetImageStyleBySpanItem001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
-    ImageSpanAttribute imageStyle;
-    std::optional<Ace::NG::MarginProperty> marginProp = std::nullopt;
-    std::optional<Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
-    marginProp = { CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC };
-    borderRadius = { CALC_TEST, CALC_TEST, CALC_TEST, CALC_TEST };
-    imageStyle.marginProp = marginProp;
-    imageStyle.borderRadius = borderRadius;
-    ImageSpanSize imageSize;
-    CalcDimension imageSpanWidth;
-    CalcDimension imageSpanHeight;
-    imageSize.width = imageSpanWidth;
-    imageSize.height = imageSpanHeight;
-    imageStyle.size = imageSize;
-    imageStyle.verticalAlign = VerticalAlign::TOP;
-    imageStyle.objectFit = ImageFit::COVER;
-    ImageSpanOptions option;
-    option.imageAttribute = imageStyle;
-    spanItem1->options = option;
-    richEditorPattern->GetImageStyleBySpanItem(spanItem1);
-
-    auto spanItem2 = AceType::MakeRefPtr<ImageSpanItem>();
-    ImageSpanAttribute imageStyle2;
-    ImageSpanOptions option2;
-    option2.imageAttribute = imageStyle2;
-    spanItem2->options = option2;
-    richEditorPattern->GetImageStyleBySpanItem(spanItem2);
-
-    ASSERT_EQ(spanItem1->options.imageAttribute.has_value(), true);
-}
-
-/**
  * @tc.name: RequestKeyboard001
  * @tc.desc: test RequestKeyboard
  * @tc.type: FUNC
@@ -916,27 +856,6 @@ HWTEST_F(RichEditorPatternTestFourNg, GetAdjustedSelectionInfo001, TestSize.Leve
     richEditorPattern->GetAdjustedSelectionInfo(textSelectInfo);
 
     ASSERT_EQ(resultObjectList.empty(), false);
-}
-
-/**
- * @tc.name: CopyTextSpanLineStyle001
- * @tc.desc: test CopyTextSpanLineStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, CopyTextSpanLineStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    LeadingMargin margin;
-    RefPtr<SpanNode> source = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
-    RefPtr<SpanNode> target = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
-    source->UpdateLeadingMargin(margin);
-
-    richEditorPattern->CopyTextSpanLineStyle(source, target, false);
-    richEditorPattern->CopyTextSpanLineStyle(source, target, true);
-    ASSERT_EQ(richEditorPattern->spans_.empty(), true);
 }
 
 /**

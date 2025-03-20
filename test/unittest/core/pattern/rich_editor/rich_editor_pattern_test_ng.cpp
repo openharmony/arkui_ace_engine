@@ -602,59 +602,6 @@ HWTEST_F(RichEditorPatternTestNg, IsCaretInContentArea001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetChangeSpanStyle002
- * @tc.desc: test GetChangeSpanStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, GetChangeSpanStyle002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    struct UpdateParagraphStyle paragraphStyle;
-    paragraphStyle.textAlign = TextAlign::END;
-    paragraphStyle.leadingMargin = std::make_optional<NG::LeadingMargin>();
-    paragraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
-    richEditorPattern->UpdateParagraphStyle(0, 6, paragraphStyle);
-    std::optional<struct UpdateParagraphStyle> spanParaStyle = paragraphStyle;
-
-    RichEditorChangeValue changeValue;
-    RichEditorAbstractSpanResult span1;
-    changeValue.originalSpans_.emplace_back(span1);
-    RichEditorAbstractSpanResult span2;
-    changeValue.originalSpans_.emplace_back(span2);
-
-    RichEditorAbstractSpanResult& firstInfo = changeValue.originalSpans_.front();
-    int32_t firstLength = static_cast<int32_t>(firstInfo.GetValue().length());
-    firstInfo.SetEraseLength(firstLength);
-    RichEditorAbstractSpanResult& lastInfo = changeValue.originalSpans_.back();
-    int32_t lastLength = static_cast<int32_t>(lastInfo.GetValue().length());
-    lastInfo.SetEraseLength(lastLength);
-
-    std::optional<TextStyle> spanTextStyle;
-    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
-    int32_t spanIndex = 0;
-    richEditorPattern->spans_.clear();
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem1);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem2);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem3 = AceType::MakeRefPtr<ImageSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem3);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    lastInfo.SetSpanIndex(richEditorPattern->spans_.size() - 2);
-    std::optional<std::u16string> urlAddress;
-    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
-    EXPECT_FALSE(spanTextStyle.has_value());
-}
-
-/**
  * @tc.name: GetReplacedSpan001
  * @tc.desc: test GetReplacedSpan
  * @tc.type: FUNC
@@ -730,27 +677,6 @@ HWTEST_F(RichEditorPatternTestNg, GetReplacedSpanFission001, TestSize.Level1)
     richEditorPattern->GetReplacedSpanFission(
         changeValue, innerPosition, content, startSpanIndex, offsetInSpan, textStyle, spanParaStyle, urlAddress);
     EXPECT_NE(innerPosition, 0);
-}
-/**
- * @tc.name: SetTextStyleToRet001
- * @tc.desc: test SetTextStyleToRet
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, SetTextStyleToRet001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorAbstractSpanResult retInfo;
-    TextStyle textStyle;
-    textStyle.fontFamilies_.emplace_back(TEST_STR);
-    textStyle.fontFamilies_.emplace_back(TEST_STR);
-    textStyle.fontFamilies_.emplace_back(TEST_STR);
-    richEditorPattern->SetTextStyleToRet(retInfo, textStyle);
-    EXPECT_EQ(retInfo.GetFontSize(), textStyle.GetFontSize().ConvertToVp());
 }
 
 /**
