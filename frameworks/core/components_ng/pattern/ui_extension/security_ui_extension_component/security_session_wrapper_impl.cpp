@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "accessibility_event_info.h"
+#include "extension/extension_business_info.h"
 #include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "transaction/rs_sync_transaction_controller.h"
@@ -394,6 +395,23 @@ void SecuritySessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wan
     AAFwk::WantParams wantParam(wantPtr->GetParams());
     wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     wantPtr->SetParams(wantParam);
+}
+
+void SecuritySessionWrapperImpl::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(session_);
+    auto dataHandler = session_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    AAFwk::WantParams configParam;
+    auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
+    CHECK_NULL_VOID(container);
+    container->GetExtensionConfig(configParam);
+    AAFwk::WantParams wantParam(customWant_->GetParams());
+    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    AAFwk::Want dataToSend;
+    dataToSend.SetParams(wantParam);
+    dataHandler->SendDataAsync(Rosen::SubSystemId::WM_UIEXT,
+        static_cast<uint32_t>(OHOS::Rosen::Extension::Businesscode::SYNC_WANT_PARAMS), dataToSend);
 }
 
 bool SecuritySessionWrapperImpl::IsSessionValid()
