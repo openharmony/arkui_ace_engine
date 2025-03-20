@@ -2214,12 +2214,12 @@ void DragDropManager::DragMoveAnimation(
     AnimationUtils::Animate(
         option,
         [renderContext, localPoint = newOffset, info = info_, overlayManager, menuRenderContext, menuPosition]() {
-            if (menuRenderContext && !menuPosition.NonOffset()) {
-                menuRenderContext->UpdatePosition(
-                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-            }
             if (info.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
                 !info.isMenuShow) {
+                if (menuRenderContext && !menuPosition.NonOffset()) {
+                    menuRenderContext->UpdatePosition(
+                        OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+                }
                 renderContext->UpdateTransformTranslate({ localPoint.GetX(), localPoint.GetY(), 0.0f });
                 UpdateGatherNodePosition(overlayManager, info.imageNode);
             }
@@ -2326,12 +2326,12 @@ void DragDropManager::DragStartAnimation(const Offset& newOffset, const RefPtr<O
     auto animateCallback = [data, renderContext, info = info_, newOffset, overlayManager, gatherNodeCenter,
                                menuRenderContext, menuPosition, animateProperty]() {
         CHECK_NULL_VOID(renderContext);
-        if (menuRenderContext && !menuPosition.NonOffset()) {
-            menuRenderContext->UpdatePosition(
-                OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        }
         if (data.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
             !info.isMenuShow) {
+            if (menuRenderContext && !menuPosition.NonOffset()) {
+                menuRenderContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+            }
             HandleDragPreviewUpdate(renderContext, info, newOffset, overlayManager);
         }
         GatherAnimationInfo gatherAnimationInfo = { info.scale, info.width, info.height, gatherNodeCenter,
