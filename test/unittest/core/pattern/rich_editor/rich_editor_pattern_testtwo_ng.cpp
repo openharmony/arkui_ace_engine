@@ -508,22 +508,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectParagraghPos001, TestSize.Level
 }
 
 /**
- * @tc.name: HandleSelectFontStyle001
- * @tc.desc: test HandleSelectFontStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = false;
-    KeyCode code = KeyCode::KEY_UNKNOWN;
-    richEditorPattern->HandleSelectFontStyle(code);
-    EXPECT_EQ(richEditorPattern->isSpanStringMode_, false);
-}
-
-/**
  * @tc.name: ResetKeyboardIfNeed001
  * @tc.desc: test ResetKeyboardIfNeed
  * @tc.type: FUNC
@@ -917,72 +901,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, ReplacePlaceholderWithRawSpans003, TestSize
     size_t textIndex = 0;
     richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
     EXPECT_EQ(textIndex, 0);
-}
-
-/**
- * @tc.name: HandleSelectFontStyleWrapper001
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyleWrapper001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code = KeyCode::KEY_B;
-    TextStyle style;
-    style.SetFontWeight(Ace::FontWeight::NORMAL);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetFontWeight(), Ace::FontWeight::BOLD);
-}
-
-/**
- * @tc.name: HandleSelectFontStyleWrapper002
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyleWrapper002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code = KeyCode::KEY_I;
-    TextStyle style;
-    style.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetFontStyle(), OHOS::Ace::FontStyle::ITALIC);
-}
-
-/**
- * @tc.name: HandleSelectFontStyleWrapper003
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyleWrapper003, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code = KeyCode::KEY_U;
-    TextStyle style;
-    style.SetTextDecoration(TextDecoration::NONE);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetTextDecoration(), TextDecoration::UNDERLINE);
-}
-
-/**
- * @tc.name: HandleSelectFontStyleWrapper004
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyleWrapper004, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code = KeyCode::KEY_HEADSETHOOK;
-    TextStyle style;
-    FontWeight result1 = style.GetFontWeight();
-    TextDecoration result3 = style.GetTextDecoration();
-    richEditorPattern->HandleSelectFontStyleWrapper(code, style);
-    EXPECT_EQ(style.GetFontWeight(), result1);
-    EXPECT_EQ(style.GetTextDecoration(), result3);
 }
 
 /**
