@@ -403,6 +403,8 @@ private:
     void UnregisterDisplayManagerCallback();
     void SubscribeEventsPassThroughMode();
     void UnSubscribeEventsPassThroughMode();
+    bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
+        OHOS::Rosen::WindowSizeChangeReason reason);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -452,6 +454,7 @@ private:
 
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
     std::mutex updateDecorVisibleMutex_;
+    OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
 };
 
 } // namespace OHOS::Ace

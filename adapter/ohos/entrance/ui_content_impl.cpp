@@ -2553,6 +2553,13 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
         rsTransaction == nullptr, avoidAreas.size(), stringifiedMap.c_str());
+
+    if (lastReason_ == OHOS::Rosen::WindowSizeChangeReason::UNDEFINED) {
+        lastReason_ = reason;
+    }
+    bool reasonDragFlag = GetWindowSizeChangeReason(lastReason_, reason);
+    lastReason_ = reason;
+
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
@@ -2597,7 +2604,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         context->FireSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
     }
 
-    if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr)) {
+    if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         taskExecutor->PostTask(
             [context, config, avoidAreas] {
                 if (avoidAreas.empty()) {
@@ -4205,5 +4212,24 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
             frameNode->SetTopWindowBoundary(true);
         },
         TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
+}
+
+bool UIContentImpl::GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
+    OHOS::Rosen::WindowSizeChangeReason reason)
+{
+    bool reasonDragFlag = true;
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::DRAG) {
+        reasonDragFlag = false;
+    }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::DRAG &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::DRAG) {
+        reasonDragFlag = false;
+    }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::DRAG &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
+        reasonDragFlag = false;
+    }
+    return reasonDragFlag;
 }
 } // namespace OHOS::Ace
