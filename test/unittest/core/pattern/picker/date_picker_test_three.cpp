@@ -1634,8 +1634,8 @@ HWTEST_F(DatePickerTestThree, DatePickerTest017, TestSize.Level1)
     auto pipeline = MockPipelineContext::GetCurrent();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
-    pickerTheme->disappearOptionStyle_.textColor_ = Color::RED;
-    pickerTheme->normalOptionStyle_.textColor_ = Color::RED;
+    pickerTheme->disappearOptionStyle_.propTextColor_ = Color::RED;
+    pickerTheme->normalOptionStyle_.propTextColor_ = Color::RED;
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();

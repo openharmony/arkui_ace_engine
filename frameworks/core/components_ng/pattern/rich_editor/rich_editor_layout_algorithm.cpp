@@ -49,7 +49,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
         auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(span);
         if (placeholderSpanItem) {
             TextStyle textStyle;
-            placeholderSpanItem->textStyle = textStyle;
+            placeholderSpanItem->textStyle_ = textStyle;
         }
         ++it;
     }
@@ -184,6 +184,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContentSize(
     CHECK_NULL_RETURN(layoutProperty, {});
     TextStyle textStyle;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
+    MeasureChildren(layoutWrapper, textStyle);
     CHECK_NULL_RETURN(BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper), {});
     pManager_->SetParagraphs(GetParagraphs());
     return SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
@@ -280,7 +281,7 @@ bool RichEditorLayoutAlgorithm::CreateParagraph(
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     // default paragraph style
-    auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
+    auto paraStyle = GetEditorParagraphStyle(textStyle, content, layoutWrapper);
     return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
 }
 
@@ -366,10 +367,10 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
     return richTextRect_.GetOffset();
 }
 
-ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
+ParagraphStyle RichEditorLayoutAlgorithm::GetEditorParagraphStyle(
     const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const
 {
-    auto style = MultipleParagraphLayoutAlgorithm::GetParagraphStyle(textStyle, content, layoutWrapper);
+    auto style = MultipleParagraphLayoutAlgorithm::GetParagraphStyle(textStyle);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();
     style.maxLines = textStyle.GetMaxLines();
     if (!pManager_->minParagraphFontSize.has_value() ||
@@ -433,12 +434,10 @@ void RichEditorLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& c
 }
 
 void RichEditorLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& child, const RefPtr<LayoutWrapper>& iterItem,
-    const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
-    const TextStyle& textStyle)
+    const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength)
 {
     if (!useParagraphCache_) {
-        MultipleParagraphLayoutAlgorithm::AddImageToParagraph(
-            child, iterItem, layoutConstrain, paragraph, spanTextLength, textStyle);
+        MultipleParagraphLayoutAlgorithm::AddImageToParagraph(child, iterItem, paragraph, spanTextLength);
         return;
     }
     spanTextLength += static_cast<int32_t>(child->content.length());
@@ -447,12 +446,10 @@ void RichEditorLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& child
 }
 
 void RichEditorLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& child,
-    const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
-    const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength)
+    const RefPtr<LayoutWrapper>& layoutWrapper, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength)
 {
     if (!useParagraphCache_) {
-        MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(
-            child, layoutWrapper, layoutConstrain, paragraph, spanTextLength);
+        MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(child, layoutWrapper, paragraph, spanTextLength);
         return;
     }
     spanTextLength += static_cast<int32_t>(child->content.length());
@@ -461,12 +458,11 @@ void RichEditorLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<PlaceholderSpan
 }
 
 void RichEditorLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& child,
-    LayoutWrapper* layoutWrapper, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
-    CustomSpanPlaceholderInfo& customSpanPlaceholder)
+    const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength, CustomSpanPlaceholderInfo& customSpanPlaceholder)
 {
     if (!useParagraphCache_) {
         MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(
-            child, layoutWrapper, paragraph, spanTextLength, customSpanPlaceholder);
+            child, paragraph, spanTextLength, customSpanPlaceholder);
         return;
     }
     spanTextLength += static_cast<int32_t>(child->content.length());

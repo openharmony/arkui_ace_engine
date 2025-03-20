@@ -1404,8 +1404,8 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
      * @tc.steps: step2. construct different child SpanNode.
      */
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto childFrameNode =
-        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     host->AddChild(childFrameNode);
     childFrameNode->SetParent(host);
 
