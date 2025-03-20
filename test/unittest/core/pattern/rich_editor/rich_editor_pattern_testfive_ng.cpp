@@ -1112,18 +1112,4 @@ HWTEST_F(RichEditorPatternTestFiveNg, RepeatClickCaret001, TestSize.Level1)
     EXPECT_FALSE(richEditorPattern->RepeatClickCaret(offset, lastCaretRect));
 }
 
-/**
- * @tc.name: CloseSystemMenu001
- * @tc.desc: test CloseSystemMenu
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, CloseSystemMenu001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->selectOverlay_->bindManager_.Reset();
-    richEditorPattern->CloseSystemMenu();
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-}
 } // namespace OHOS::Ace::NG

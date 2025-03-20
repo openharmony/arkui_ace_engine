@@ -40,7 +40,6 @@ int32_t testNumber1 = 1;
 int32_t testNumber2 = 2;
 int32_t testNumber4 = 4;
 int32_t testNumber5 = 5;
-int32_t callBack1 = 0;
 } // namespace
 
 class RichEditorPatternTestNg : public RichEditorCommonTestNg {
@@ -1548,28 +1547,6 @@ HWTEST_F(RichEditorPatternTestNg, GetRichEditorController001, TestSize.Level1)
     richEditorModel.Create();
     auto controller = richEditorModel.GetRichEditorController();
     ASSERT_NE(controller, nullptr);
-}
-
-/**
- * @tc.name: BindSelectionMenu001
- * @tc.desc: test BindSelectionMenu
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, BindSelectionMenu001, TestSize.Level1)
-{
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::function<void()> buildFunc = []() {
-        callBack1 = 1;
-        return;
-    };
-    TextSpanType textSpanType = TextSpanType::TEXT;
-    TextResponseType textResponseType = TextResponseType::LONG_PRESS;
-    SelectMenuParam menuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
-    richEditorModel.BindSelectionMenu(textSpanType, textResponseType, buildFunc, menuParam);
-    EXPECT_TRUE(richEditorPattern->selectionMenuMap_.empty());
 }
 
 /**

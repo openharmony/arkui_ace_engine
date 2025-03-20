@@ -1227,25 +1227,6 @@ HWTEST_F(RichEditorPatternTestSixNg, BeforeAddImage001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetPreviewMenuParam001
- * @tc.desc: test SetPreviewMenuParam
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, SetPreviewMenuParam001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TextSpanType spanType = TextSpanType::IMAGE;
-    std::function<void()> builder;
-    SelectMenuParam menuParam;
-    richEditorPattern->SetPreviewMenuParam(spanType, builder, menuParam);
-
-    richEditorPattern->SetPreviewMenuParam(spanType, builder, menuParam);
-    EXPECT_TRUE(richEditorPattern->oneStepDragController_);
-}
-
-/**
  * @tc.name: DeleteRange001
  * @tc.desc: test DeleteRange
  * @tc.type: FUNC

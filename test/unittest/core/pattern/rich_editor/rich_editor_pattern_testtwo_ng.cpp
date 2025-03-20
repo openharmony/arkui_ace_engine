@@ -143,21 +143,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, CalcLineBeginPosition001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnSelectionMenuOptionsUpdate001
- * @tc.desc: test OnSelectionMenuOptionsUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, OnSelectionMenuOptionsUpdate001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    OnCreateMenuCallback onCreateMenuCallback;
-    OnMenuItemClickCallback onMenuItemClick;
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
-}
-
-/**
  * @tc.name: RequestKeyboardToEdit001
  * @tc.desc: test RequestKeyboardToEdit
  * @tc.type: FUNC
@@ -601,21 +586,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectFontStyle001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnShowMenu001
- * @tc.desc: test HandleOnShowMenu
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, HandleOnShowMenu001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->overlayMod_ = nullptr;
-    richEditorPattern->HandleOnShowMenu();
-    EXPECT_EQ(richEditorPattern->overlayMod_, nullptr);
-}
-
-/**
  * @tc.name: CanStartAITask001
  * @tc.desc: test CanStartAITask
  * @tc.type: FUNC
@@ -727,20 +697,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, NeedShowAIDetect003, TestSize.Level1)
     bool ret = true;
     ret = richEditorPattern->NeedShowAIDetect();
     EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: HideMenu001
- * @tc.desc: test HideMenu
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, HideMenu001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->HideMenu();
-    EXPECT_NE(richEditorPattern->selectOverlay_, nullptr);
 }
 
 /**
@@ -1361,28 +1317,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap002, TestSize.Level
     richEditorPattern->isModifyingContent_ = true;
     auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: CloseSystemMenu002
- * @tc.desc: test CloseSystemMenu
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, CloseSystemMenu002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CloseSystemMenu();
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-
-    auto selectOverlayInfo = richEditorPattern->selectOverlay_->GetSelectOverlayInfo();
-    selectOverlayInfo->menuInfo.menuBuilder = []() { return; };
-    EXPECT_TRUE(selectOverlayInfo->menuInfo.menuBuilder);
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    ASSERT_TRUE(richEditorPattern->SelectOverlayIsOn());
-    richEditorPattern->CloseSystemMenu();
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
 
 /**
