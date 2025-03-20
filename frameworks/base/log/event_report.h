@@ -252,7 +252,7 @@ public:
     static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
     static void ReportClipboardFailEvent(const std::string& errorType);
     static void ReportReusedNodeSkipMeasureApp();
-    static void SendDiffFrameRatesDuring(const std::string& scene, const NG::FRCSceneFpsInfo& curFRCSceneFpsInfo_);
+    static void SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_);
     static void FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status);
     static void AddFrameRateDuration(int32_t frameRate, int32_t duration);
 
