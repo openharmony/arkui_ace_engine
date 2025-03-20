@@ -1230,11 +1230,11 @@ void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, const std::optional
     IconOptions options;
     if (iconOptions) {
         options = iconOptions.value();
-        pattern->SetCancelImageIcon(options);
+        pattern->SetSearchImageIcon(options);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
             pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
     } else {
-        pattern->SetCancelImageIcon(options);
+        pattern->SetSearchImageIcon(options);
         ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, frameNode);
     }
 }
