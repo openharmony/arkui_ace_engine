@@ -1287,4 +1287,144 @@ HWTEST_F(RotationRecognizerTestNg, RotationGestureLimitFingerTest002, TestSize.L
     EXPECT_EQ(rotationRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
 }
 
+/**
+ * @tc.name: OnAcceptedTest001
+ * @tc.desc: Test OnAccepted function
+ */
+HWTEST_F(RotationRecognizerTestNg, OnAcceptedTest001, TestSize.Level1)
+{
+    RotationGestureModelNG rotationGestureModelNG;
+    rotationGestureModelNG.Create(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_NOT_LIMIT_FINGER_COUNT);
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto rotationGestureNG = AceType::DynamicCast<NG::RotationGesture>(gestureProcessor->TopGestureNG());
+    RotationGesture rotationGesture = RotationGesture(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_NOT_LIMIT_FINGER_COUNT);
+
+    rotationGesture.priority_ = GesturePriority::Low;
+    rotationGesture.gestureMask_ = GestureMask::Normal;
+    auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    rotationRecognizer->firstInputTime_ = timeStape;
+    SystemProperties::traceInputEventEnable_ = true;
+    rotationRecognizer->OnAccepted();
+    EXPECT_NE(rotationRecognizer, nullptr);
+}
+
+/**
+ * @tc.name: HandleTouchUpEvent001
+ * @tc.desc: Test HandleTouchUpEvent function
+ */
+HWTEST_F(RotationRecognizerTestNg, HandleTouchUpEvent001, TestSize.Level1)
+{
+    RotationGestureModelNG rotationGestureModelNG;
+    rotationGestureModelNG.Create(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_NOT_LIMIT_FINGER_COUNT);
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto rotationGestureNG = AceType::DynamicCast<NG::RotationGesture>(gestureProcessor->TopGestureNG());
+    RotationGesture rotationGesture = RotationGesture(FINGER_NUMBER, ROTATION_GESTURE_ANGLE, IS_NOT_LIMIT_FINGER_COUNT);
+
+    rotationGesture.priority_ = GesturePriority::Low;
+    rotationGesture.gestureMask_ = GestureMask::Normal;
+    auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(rotationGesture.CreateRecognizer());
+    TouchEvent touchEvent;
+
+    rotationRecognizer->isNeedResetVoluntarily_ = true;
+    rotationRecognizer->currentFingers_ = 1;
+    rotationRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer->isNeedResetVoluntarily_, false);
+
+    rotationRecognizer->isNeedResetVoluntarily_ = false;
+    rotationRecognizer->currentFingers_ = 1;
+    rotationRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer->isNeedResetVoluntarily_, false);
+
+    rotationRecognizer->isNeedResetVoluntarily_ = true;
+    rotationRecognizer->currentFingers_ = 0;
+    rotationRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer->isNeedResetVoluntarily_, true);
+
+    rotationRecognizer->isNeedResetVoluntarily_ = false;
+    rotationRecognizer->currentFingers_ = 0;
+    rotationRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer->isNeedResetVoluntarily_, false);
+}
+
+/**
+ * @tc.name: HandleTouchUpEvent002
+ * @tc.desc: Test HandleTouchUpEvent function
+ */
+HWTEST_F(RotationRecognizerTestNg, HandleTouchUpEvent002, TestSize.Level1)
+{
+    int32_t DEFAULT_ROTATION_FINGERS = 2;
+    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    int32_t testId = 1;
+    int32_t testId2 = 2;
+    TouchEvent touchEvent;
+    touchEvent.id = testId;
+    rotationRecognizer->activeFingers_.push_front(testId);
+    rotationRecognizer->activeFingers_.push_front(testId2);
+    rotationRecognizer->refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer->activeFingers_.size(), DEFAULT_ROTATION_FINGERS - 1);
+    EXPECT_TRUE(rotationRecognizer->isNeedResetVoluntarily_);
+    rotationRecognizer->activeFingers_.push_front(testId);
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    rotationRecognizer->firstInputTime_ = timeStape;
+    SystemProperties::traceInputEventEnable_ = false;
+    rotationRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer->activeFingers_.size(), DEFAULT_ROTATION_FINGERS - 1);
+    EXPECT_TRUE(rotationRecognizer->isNeedResetVoluntarily_);
+
+    auto rotationRecognizer1 = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    rotationRecognizer1->activeFingers_.clear();
+    rotationRecognizer1->refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer1->activeFingers_.push_front(testId);
+    rotationRecognizer1->HandleTouchUpEvent(touchEvent);
+    EXPECT_FALSE(rotationRecognizer1->isNeedResetVoluntarily_);
+
+    auto rotationRecognizer2 = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    rotationRecognizer2->activeFingers_.clear();
+    rotationRecognizer2->activeFingers_.push_front(testId2);
+    rotationRecognizer2->activeFingers_.push_front(testId);
+    rotationRecognizer2->refereeState_ = RefereeState::FAIL;
+    rotationRecognizer2->HandleTouchUpEvent(touchEvent);
+    EXPECT_FALSE(rotationRecognizer2->isNeedResetVoluntarily_);
+
+    auto rotationRecognizer3 = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    int32_t testId3 = 3;
+    rotationRecognizer3->activeFingers_.clear();
+    rotationRecognizer3->activeFingers_.push_front(testId);
+    rotationRecognizer3->activeFingers_.push_front(testId2);
+    rotationRecognizer3->activeFingers_.push_front(testId3);
+    rotationRecognizer3->refereeState_ = RefereeState::FAIL;
+    rotationRecognizer3->HandleTouchUpEvent(touchEvent);
+    EXPECT_FALSE(rotationRecognizer3->isNeedResetVoluntarily_);
+}
+
+/**
+ * @tc.name: HandleTouchUpEvent003
+ * @tc.desc: Test HandleTouchUpEvent function
+ */
+HWTEST_F(RotationRecognizerTestNg, HandleTouchUpEvent003, TestSize.Level1)
+{
+    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    AxisEvent event;
+    event.isRotationEvent = true;
+    rotationRecognizer->refereeState_ = RefereeState::FAIL;
+    rotationRecognizer->HandleTouchUpEvent(event);
+    EXPECT_TRUE(rotationRecognizer->lastAxisEvent_.isRotationEvent);
+
+    rotationRecognizer->refereeState_ = RefereeState::READY;
+    rotationRecognizer->HandleTouchUpEvent(event);
+    EXPECT_TRUE(rotationRecognizer->lastAxisEvent_.isRotationEvent);
+
+    rotationRecognizer->refereeState_ = RefereeState::SUCCEED;
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    rotationRecognizer->firstInputTime_ = timeStape;
+    SystemProperties::traceInputEventEnable_ = true;
+    rotationRecognizer->HandleTouchUpEvent(event);
+    EXPECT_TRUE(rotationRecognizer->lastAxisEvent_.isRotationEvent);
+}
 } // namespace OHOS::Ace::NG
