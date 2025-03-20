@@ -44,7 +44,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 static constexpr float ARC_LIST_MAIN_POS_OFFSET = 200.f;
-static constexpr Dimension ARC_LIST_ITEM_SNAP_SIZE = 145.0_vp;
+static constexpr Dimension ARC_LIST_ITEM_SNAP_SIZE = 153.0_vp;
 static constexpr float FLOAT_TWO = 2.0f;
 static constexpr float HEADER_DIST = 40.f;
 static constexpr float TRANSPARENCY_DIST = 40.f;

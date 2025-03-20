@@ -242,7 +242,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
     CheckScrollable();
     if (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty))) {
-        OnMidIndexChanged(centerIndex_, listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+        OnMidIndexChanged();
     }
     bool indexChanged = false;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -3127,25 +3127,14 @@ SizeF ListPattern::GetChildrenExpandedSize()
     return SizeF();
 }
 
-void ListPattern::OnMidIndexChanged(int32_t lastIndex, int32_t curIndex)
+void ListPattern::OnMidIndexChanged()
 {
 #ifdef SUPPORT_DIGITAL_CROWN
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
-
-    StartVibrator(curIndex == 0 || curIndex == totalCnt - 1);
-#endif
-}
-
-#ifdef SUPPORT_DIGITAL_CROWN
-void ListPattern::StartVibrator(bool bEdge)
-{
-    if (!GetCrownEventDragging() || bEdge) {
+    if (!GetCrownEventDragging()) {
         return;
     }
-    const char* effectId = HAPTIC_STRENGTH1;
-    VibratorUtils::StartVibraFeedback(effectId);
-}
+    VibratorUtils::StartVibraFeedback(HAPTIC_STRENGTH1);
 #endif
+}
+
 } // namespace OHOS::Ace::NG
