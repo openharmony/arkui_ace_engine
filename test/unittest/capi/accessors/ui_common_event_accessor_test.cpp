@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-static const int expectedResId = 123;
+static const int RES_ID = 123;
 
 struct TestEvent {
     int32_t resourceId;
@@ -52,18 +52,18 @@ HWTEST_F(UICommonEventAccessorTest, setOnClickTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_ClickEvent_Void>(nullptr, onClickFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_ClickEvent_Void>(nullptr, onClickFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_Callback_ClickEvent_Void>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->setOnClick(peer_, &optCallback);
-    
+
     auto func = hub->GetClickEvent();
     ASSERT_NE(func, nullptr);
     OHOS::Ace::GestureEvent arg {};
     func(arg);
     ASSERT_TRUE(testEvent);
-    EXPECT_EQ(testEvent->resourceId, expectedResId);
+    EXPECT_EQ(testEvent->resourceId, RES_ID);
 }
 
 /**
@@ -85,7 +85,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnTouchTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_TouchEvent_Void>(nullptr, onTouchFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_TouchEvent_Void>(nullptr, onTouchFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_Callback_TouchEvent_Void>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
@@ -127,7 +127,7 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnAppearTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_Void>(onAppearFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(onAppearFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
@@ -135,7 +135,7 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnAppearTest, TestSize.Level1)
     // EventHub::FireOnAppear() puts the callback into taskSheduler
     hub->FireOnAppear();
     ASSERT_TRUE(testEvent);
-    EXPECT_EQ(testEvent->resourceId, expectedResId);
+    EXPECT_EQ(testEvent->resourceId, RES_ID);
 }
 
 /**
@@ -158,7 +158,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnDisappearTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_Void>(onDisappearFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(onDisappearFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
@@ -166,7 +166,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnDisappearTest, TestSize.Level1)
 
     hub->FireOnDisappear();
     ASSERT_TRUE(testEvent);
-    EXPECT_EQ(testEvent->resourceId, expectedResId);
+    EXPECT_EQ(testEvent->resourceId, RES_ID);
 }
 
 /**
@@ -187,12 +187,12 @@ HWTEST_F(UICommonEventAccessorTest, setOnFocusTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_Void>(onFocusFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(onFocusFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->setOnFocus(peer_, &optCallback);
-    
+
     ASSERT_NE(focusHub, nullptr);
     OHOS::Ace::NonPointerEvent evt {};
     focusHub->SetCurrentFocus(false);
@@ -202,7 +202,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnFocusTest, TestSize.Level1)
     focusHub->SetShow(true);
     focusHub->RequestFocusImmediately(FocusReason::DEFAULT);
     ASSERT_TRUE(testEvent);
-    EXPECT_EQ(testEvent->resourceId, expectedResId);
+    EXPECT_EQ(testEvent->resourceId, RES_ID);
 }
 
 /**
@@ -223,7 +223,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnBlurTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_Void>(onBlurFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_Void>(onBlurFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
@@ -234,7 +234,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnBlurTest, TestSize.Level1)
     focusHub->SetFocusType(FocusType::NODE);
     focusHub->LostFocus();
     ASSERT_TRUE(testEvent);
-    EXPECT_EQ(testEvent->resourceId, expectedResId);
+    EXPECT_EQ(testEvent->resourceId, RES_ID);
 }
 
 /**
@@ -258,7 +258,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnHoverTest, TestSize.Level1)
         };
     };
 
-    auto arkCallback = Converter::ArkValue<HoverCallback>(nullptr, onHoverFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<HoverCallback>(nullptr, onHoverFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_HoverCallback>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
@@ -275,7 +275,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnHoverTest, TestSize.Level1)
     target->HandleHoverEvent(true, ev);
 
     ASSERT_TRUE(testEvent);
-    EXPECT_EQ(testEvent->resourceId, expectedResId);
+    EXPECT_EQ(testEvent->resourceId, RES_ID);
 }
 
 /**
@@ -295,7 +295,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnMouseTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<Callback_MouseEvent_Void>(nullptr, onMouseFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<Callback_MouseEvent_Void>(nullptr, onMouseFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_Callback_MouseEvent_Void>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
@@ -312,7 +312,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnMouseTest, TestSize.Level1)
     target->HandleMouseEvent(ev);
 
     ASSERT_TRUE(testEvent);
-    EXPECT_EQ(testEvent->resourceId, expectedResId);
+    EXPECT_EQ(testEvent->resourceId, RES_ID);
 }
 
 /**
@@ -332,7 +332,7 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnVisibleAreaApproximateChangeTe
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-    auto arkCallback = Converter::ArkValue<VisibleAreaChangeCallback>(nullptr, onAreaChangeFunc, expectedResId);
+    auto arkCallback = Converter::ArkValue<VisibleAreaChangeCallback>(nullptr, onAreaChangeFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_VisibleAreaChangeCallback>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
