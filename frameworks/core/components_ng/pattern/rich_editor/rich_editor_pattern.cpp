@@ -5231,7 +5231,7 @@ bool RichEditorPattern::UpdatePreviewText(const std::u16string& previewTextValue
         record.replacedRange.Set(record.startOffset, record.endOffset);
         record.newPreviewContent = previewTextValue;
         record.needReplacePreviewText = true;
-        record.needUpdateCaret = caretPosition_ == record.endOffset;
+        record.needUpdateCaret = !NotUpdateCaretInPreview(caretPosition_, record);
         ProcessInsertValue(previewTextValue, OperationType::IME, false);
         record.previewContent = record.newPreviewContent;
         record.newPreviewContent.clear();
