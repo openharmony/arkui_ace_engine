@@ -1822,6 +1822,10 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog push animation end");
         auto navigation = weakNavigation.Upgrade();
         CHECK_NULL_VOID(navigation);
+        auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(weakPreNode.Upgrade());
+        if (preNavDestination && preNavDestination->NeedRemoveInPush()) {
+            navigation->hideNodes_.emplace_back(std::make_pair(preNavDestination, true));
+        }
         navigation->RemoveDialogDestination();
         navigation->CleanPushAnimations();
         auto curNode = weakCurNode.Upgrade();
