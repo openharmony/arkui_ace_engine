@@ -1087,12 +1087,12 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
 
 void ParsePreviewBorderRadiusParam(const JSRef<JSObject>& menuContentOptions, NG::MenuParam& menuParam)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     auto previewBorderRadiusValue = menuContentOptions->GetProperty("previewBorderRadius");
     NG::BorderRadiusProperty previewBorderRadius;
-    JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius);
+    JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius, false);
     menuParam.previewBorderRadius = previewBorderRadius;
 }
 
