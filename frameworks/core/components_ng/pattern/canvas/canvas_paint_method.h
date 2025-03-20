@@ -111,6 +111,7 @@ public:
     std::string GetJsonData(const std::string& path);
 
     void Reset();
+    TextDirection GetSystemDirection() override;
     std::string GetDumpInfo();
     void SetHostCustomNodeName();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
