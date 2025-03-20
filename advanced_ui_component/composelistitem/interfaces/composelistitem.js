@@ -2922,7 +2922,7 @@ export class ComposeListItem extends ViewPU {
     aboutToDisappear() {
         if (this.callbackId) {
             this.getUIContext()
-                .getHostContext()
+            ?.getHostContext()
             ?.getApplicationContext()
             ?.off('environment', this.callbackId);
             this.callbackId = void (0);
