@@ -1188,6 +1188,20 @@ std::vector<std::tuple<std::string, Ark_RepeatMode>> testFixtureEnumRepeatModeIn
     { "INT_MAX", static_cast<Ark_RepeatMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_SecurityComponentLayoutDirection, std::string>>
+    testFixtureEnumSecurityComponentLayoutDirectionValidValues = {
+        { "ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_HORIZONTAL", ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_HORIZONTAL,
+            "SecurityComponentLayoutDirection.HORIZONTAL" },
+        { "ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_VERTICAL", ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_VERTICAL,
+            "SecurityComponentLayoutDirection.VERTICAL" },
+    };
+
+std::vector<std::tuple<std::string, Ark_SecurityComponentLayoutDirection>>
+    testFixtureEnumSecurityComponentLayoutDirectionInvalidValues = {
+        { "-1", static_cast<Ark_SecurityComponentLayoutDirection>(-1) },
+        { "INT_MAX", static_cast<Ark_SecurityComponentLayoutDirection>(INT_MAX) },
+    };
+
 std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues = {
     { "ARK_SHADOW_TYPE_COLOR", ARK_SHADOW_TYPE_COLOR, "ShadowType.COLOR" },
     { "ARK_SHADOW_TYPE_BLUR", ARK_SHADOW_TYPE_BLUR, "ShadowType.BLUR" },

@@ -195,6 +195,10 @@ extern std::vector<std::tuple<std::string, Ark_RenderMode, std::string>> testFix
 extern std::vector<std::tuple<std::string, Ark_RenderMode>> testFixtureEnumRenderModeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_RepeatMode, std::string>> testFixtureEnumRepeatModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_RepeatMode>> testFixtureEnumRepeatModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_SecurityComponentLayoutDirection, std::string>>
+    testFixtureEnumSecurityComponentLayoutDirectionValidValues;
+extern std::vector<std::tuple<std::string, Ark_SecurityComponentLayoutDirection>>
+    testFixtureEnumSecurityComponentLayoutDirectionInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ShadowType, std::string>> testFixtureEnumShadowTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_ShadowType>> testFixtureEnumShadowTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_SharedTransitionEffectType, std::string>>

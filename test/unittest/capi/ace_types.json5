@@ -1401,6 +1401,283 @@
     ],
     "components": [
         {
+            "name": "SecurityComponentMethod",
+            "nodeTypes": ["SaveButton"],
+            "attributes": [
+                {
+                    "name": "id",
+                    "default": "",
+                    "fixtures": ["StringNoEmpty"],
+                },
+                {
+                    "name": "enabled",
+                    "default": "true",
+                },
+                {
+                    "name": "alignRules",
+                    "attributes": [
+                        {
+                            "name": "bias",
+                            "attributes": [
+                                {
+                                    "name": "horizontal",
+                                    "default": 0.5
+                                },
+                                {
+                                    "name": "vertical",
+                                    "default": 0.5
+                                },
+                            ]
+                        },
+                        {
+                            "name": "start",
+                            "attributes": [
+                                {
+                                    "name": "anchor",
+                                    "default": ""
+                                },
+                                {
+                                    "name": "align",
+                                    "default": ""
+                                }
+                            ]
+                        },
+                        {
+                            "name": "end",
+                            "attributes": [
+                                {
+                                    "name": "anchor",
+                                    "default": ""
+                                },
+                                {
+                                    "name": "align",
+                                    "default": ""
+                                }
+                            ]
+                        },
+                        {
+                            "name": "middle",
+                            "attributes": [
+                                {
+                                    "name": "anchor",
+                                    "default": ""
+                                },
+                                {
+                                    "name": "align",
+                                    "default": ""
+                                }
+                            ]
+                        },
+                        {
+                            "name": "top",
+                            "attributes": [
+                                {
+                                    "name": "anchor",
+                                    "default": ""
+                                },
+                                {
+                                    "name": "align",
+                                    "default": ""
+                                }
+                            ]
+                        },
+                        {
+                            "name": "bottom",
+                            "attributes": [
+                                {
+                                    "name": "anchor",
+                                    "default": ""
+                                },
+                                {
+                                    "name": "align",
+                                    "default": ""
+                                }
+                            ]
+                        },
+                        {
+                            "name": "center",
+                            "attributes": [
+                                {
+                                    "name": "anchor",
+                                    "default": ""
+                                },
+                                {
+                                    "name": "align",
+                                    "default": ""
+                                }
+                            ]
+                        },
+                        {
+                            "name": "left",
+                            "attributes": [
+                                {
+                                    "name": "anchor",
+                                    "default": ""
+                                },
+                                {
+                                    "name": "align",
+                                    "default": ""
+                                }
+                            ]
+                        },
+                        {
+                            "name": "right",
+                            "attributes": [
+                                {
+                                    "name": "anchor",
+                                    "default": ""
+                                },
+                                {
+                                    "name": "align",
+                                    "default": ""
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "remove": [
+                "setAlignRules0TestAlignRulesBiasHorizontalInvalidValues",
+                "setAlignRules0TestAlignRulesBiasVerticalInvalidValues",
+                "setAlignRules0TestAlignRulesBottomAlignInvalidValues",
+                "setAlignRules0TestAlignRulesCenterAlignInvalidValues",
+                "setAlignRules0TestAlignRulesLeftAlignInvalidValues",
+                "setAlignRules0TestAlignRulesMiddleAlignInvalidValues",
+                "setAlignRules0TestAlignRulesRightAlignInvalidValues",
+                "setAlignRules0TestAlignRulesTopAlignInvalidValues",
+                "setAlignRules1TestAlignRulesBiasHorizontalInvalidValues",
+                "setAlignRules1TestAlignRulesBiasVerticalInvalidValues",
+                "setAlignRules1TestAlignRulesBottomAlignInvalidValues",
+                "setAlignRules1TestAlignRulesCenterAlignInvalidValues",
+                "setAlignRules1TestAlignRulesEndAlignInvalidValues",
+                "setAlignRules1TestAlignRulesMiddleAlignInvalidValues",
+                "setAlignRules1TestAlignRulesStartAlignInvalidValues",
+                "setAlignRules1TestAlignRulesTopAlignInvalidValues",
+                "setAlignTestAlignDefaultValues",
+                "setAlignTestAlignInvalidValues",
+                "setAlignTestAlignValidValues",
+                "setAlignTestDefaultValues",
+                "setBackgroundColorTestBackgroundColorInvalidValues",
+                "setBackgroundColorTestBackgroundColorValidValues",
+                "setBackgroundColorTestDefaultValues",
+                "setBorderColorTestBorderColorInvalidValues",
+                "setBorderColorTestBorderColorValidValues",
+                "setBorderColorTestDefaultValues",
+                "setBorderRadius0TestBorderRadiusInvalidValues",
+                "setBorderRadius0TestBorderRadiusValidValues",
+                "setBorderRadius0TestDefaultValues",
+                "setBorderRadius1TestBorderRadiusBorderRadiusesBottomLeftInvalidValues",
+                "setBorderRadius1TestBorderRadiusBorderRadiusesBottomLeftValidValues",
+                "setBorderRadius1TestBorderRadiusBorderRadiusesBottomRightInvalidValues",
+                "setBorderRadius1TestBorderRadiusBorderRadiusesBottomRightValidValues",
+                "setBorderRadius1TestBorderRadiusBorderRadiusesTopLeftInvalidValues",
+                "setBorderRadius1TestBorderRadiusBorderRadiusesTopLeftValidValues",
+                "setBorderRadius1TestBorderRadiusBorderRadiusesTopRightInvalidValues",
+                "setBorderRadius1TestBorderRadiusBorderRadiusesTopRightValidValues",
+                "setBorderRadius1TestDefaultValues",
+                "setBorderStyleTestBorderStyleInvalidValues",
+                "setBorderStyleTestBorderStyleValidValues",
+                "setBorderStyleTestDefaultValues",
+                "setBorderWidthTestBorderWidthInvalidValues",
+                "setBorderWidthTestBorderWidthValidValues",
+                "setBorderWidthTestDefaultValues",
+                "setChainModeTestChainModeDirectionInvalidValues",
+                "setChainModeTestChainModeDirectionValidValues",
+                "setChainModeTestChainModeStyleInvalidValues",
+                "setChainModeTestChainModeStyleValidValues",
+                "setChainModeTestDefaultValues",
+                "setConstraintSizeTestConstraintSizeMaxHeightInvalidValues",
+                "setConstraintSizeTestConstraintSizeMaxHeightValidValues",
+                "setConstraintSizeTestConstraintSizeMaxWidthInvalidValues",
+                "setConstraintSizeTestConstraintSizeMaxWidthValidValues",
+                "setConstraintSizeTestConstraintSizeMinHeightInvalidValues",
+                "setConstraintSizeTestConstraintSizeMinHeightValidValues",
+                "setConstraintSizeTestConstraintSizeMinWidthInvalidValues",
+                "setConstraintSizeTestConstraintSizeMinWidthValidValues",
+                "setConstraintSizeTestDefaultValues",
+                "setFontColorTestDefaultValues",
+                "setFontColorTestFontColorInvalidValues",
+                "setFontColorTestFontColorValidValues",
+                "setFontFamilyTestDefaultValues",
+                "setFontFamilyTestFontFamilyInvalidValues",
+                "setFontFamilyTestFontFamilyValidValues",
+                "setFontSizeTestDefaultValues",
+                "setFontSizeTestFontSizeInvalidValues",
+                "setFontSizeTestFontSizeValidValues",
+                "setFontStyleTestDefaultValues",
+                "setFontStyleTestFontStyleInvalidValues",
+                "setFontStyleTestFontStyleValidValues",
+                "setFontWeightTestDefaultValues",
+                "setFontWeightTestFontWeightInvalidValues",
+                "setFontWeightTestFontWeightValidValues",
+                "setHeightAdaptivePolicyTestDefaultValues",
+                "setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues",
+                "setHeightAdaptivePolicyTestHeightAdaptivePolicyValidValues",
+                "setHeightTestDefaultValues",
+                "setHeightTestHeightInvalidValues",
+                "setHeightTestHeightValidValues",
+                "setIconColorTestDefaultValues",
+                "setIconColorTestIconColorInvalidValues",
+                "setIconColorTestIconColorValidValues",
+                "setIconSizeTestDefaultValues",
+                "setIconSizeTestIconSizeInvalidValues",
+                "setIconSizeTestIconSizeValidValues",
+                "setKeyTestDefaultValues",
+                "setKeyTestKeyValidValues",
+                "setLayoutDirectionTestDefaultValues",
+                "setLayoutDirectionTestLayoutDirectionInvalidValues",
+                "setLayoutDirectionTestLayoutDirectionValidValues",
+                "setMarkAnchorTestDefaultValues",
+                "setMarkAnchorTestMarkAnchorXInvalidValues",
+                "setMarkAnchorTestMarkAnchorXValidValues",
+                "setMarkAnchorTestMarkAnchorYInvalidValues",
+                "setMarkAnchorTestMarkAnchorYValidValues",
+                "setMaxFontScaleTestDefaultValues",
+                "setMaxFontScaleTestMaxFontScaleInvalidValues",
+                "setMaxFontScaleTestMaxFontScaleValidValues",
+                "setMaxFontSizeTestDefaultValues",
+                "setMaxFontSizeTestMaxFontSizeInvalidValues",
+                "setMaxFontSizeTestMaxFontSizeValidValues",
+                "setMaxLinesTestDefaultValues",
+                "setMaxLinesTestMaxLinesValidValues",
+                "setMinFontScaleTestDefaultValues",
+                "setMinFontScaleTestMinFontScaleInvalidValues",
+                "setMinFontScaleTestMinFontScaleValidValues",
+                "setMinFontSizeTestDefaultValues",
+                "setMinFontSizeTestMinFontSizeInvalidValues",
+                "setMinFontSizeTestMinFontSizeValidValues",
+                "setOffsetTestDefaultValues",
+                "setOffsetTestValidValues",
+                "setPaddingTestDefaultValues",
+                "setPaddingTestPaddingPaddingBottomInvalidValues",
+                "setPaddingTestPaddingPaddingBottomValidValues",
+                "setPaddingTestPaddingPaddingLeftInvalidValues",
+                "setPaddingTestPaddingPaddingLeftValidValues",
+                "setPaddingTestPaddingPaddingRightInvalidValues",
+                "setPaddingTestPaddingPaddingRightValidValues",
+                "setPaddingTestPaddingPaddingTopInvalidValues",
+                "setPaddingTestPaddingPaddingTopValidValues",
+                "setPositionTestDefaultValues",
+                "setPositionTestPositionXInvalidValues",
+                "setPositionTestPositionXValidValues",
+                "setPositionTestPositionYInvalidValues",
+                "setPositionTestPositionYValidValues",
+                "setSizeTestDefaultValues",
+                "setSizeTestSizeHeightInvalidValues",
+                "setSizeTestSizeHeightValidValues",
+                "setSizeTestSizeWidthInvalidValues",
+                "setSizeTestSizeWidthValidValues",
+                "setTextIconSpaceTestDefaultValues",
+                "setTextIconSpaceTestTextIconSpaceInvalidValues",
+                "setTextIconSpaceTestTextIconSpaceValidValues",
+                "setWidthTestDefaultValues",
+                "setWidthTestWidthInvalidValues",
+                "setWidthTestWidthValidValues",
+            ],
+            "disable": [
+            ],
+        },
+        {
             "name": "BaseSpan",
             "disable": [
                 "setBaselineOffsetTestDefaultValues", // new attribute

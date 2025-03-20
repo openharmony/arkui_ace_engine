@@ -34,6 +34,7 @@ generated_sources = [
   "radio_modifier_test.cpp",
   "rich_editor_modifier_test.cpp",
   "scrollable_common_method_modifier_test.cpp",
+  "security_component_method_modifier_test.cpp",
   "slider_modifier_test_1.cpp",
   "slider_modifier_test_2.cpp",
   "span_modifier_test.cpp",

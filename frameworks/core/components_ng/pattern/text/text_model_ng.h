@@ -110,7 +110,7 @@ public:
     static void SetTextDecorationColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetTextDecorationStyle(FrameNode* frameNode, const std::optional<TextDecorationStyle>& value);
     static void SetTextCase(FrameNode* frameNode, const std::optional<TextCase>& value);
-    static void SetMaxLines(FrameNode* frameNode, uint32_t value);
+    static void SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value);
