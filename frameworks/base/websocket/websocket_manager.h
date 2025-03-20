@@ -17,8 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_WEBSOCKET_MANAGER_H
 
 #include <string>
+#include <functional>
+
 #include "base/utils/macros.h"
-#include "jsnapi.h"
 #include "base/log/log.h"
 using ServerConnectCallback = void(*)(void);
 using AddInstanceCallBack = void(*)(int32_t);
