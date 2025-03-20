@@ -19,6 +19,7 @@ import sys
 import time
 import json
 import stat
+import types
 import argparse
 import subprocess
 import multiprocessing
@@ -34,6 +35,10 @@ def parse_xml(xml_file_path):
     root = tree.getroot()
     tests = root.attrib.get("tests")
     failures = root.attrib.get("failures")
+    disabled = root.attrib.get("disabled")
+    common_info = types.SimpleNamespace()
+    common_info.total = int(tests)
+    common_info.disabled = int(disabled)
     failed_info = {
         "test_suite_name": [],
         "total_count": tests,
@@ -46,11 +51,14 @@ def parse_xml(xml_file_path):
         if int(testsuite_failures):
             failed_info["test_suite_name"].append(testsuite_name)
         for testcase in testsuite.findall(".//testcase"):
+            testcase_status = testcase.attrib.get("status")
+            if testcase_status != "run":
+                continue
             testcase_name = testcase.attrib.get("name")
             failure = testcase.find("failure")
             if failure is not None:
                 failed_info["failed_testcase_name"].append(testcase_name)
-    return failed_info
+    return common_info, failed_info
 
 
 def run_command(test_binary_path: str, alter_cmds: list = None):
@@ -110,17 +118,20 @@ def run_tests_parallel(test_directory, path, output):
         "execute_time": 0,
         "total_execute_tests": 0,
         "failed_tests_count": 0,
+        "disabled_tests_count": 0,
         "crashed_tests_count": 0,
         "unavailable": [],
         "failed": []
     }
     total_tests_count = 0
     failed_tests_count = 0
+    disabled_tests_count = 0
     for test_binary in test_binaries:
         xml_file_path = "{}.xml".format(test_binary)
         if os.path.exists(xml_file_path):
-            failed_info = parse_xml(xml_file_path)
-            total_tests_count = total_tests_count + int(failed_info.get('total_count', '0'))
+            common_info, failed_info = parse_xml(xml_file_path)
+            total_tests_count += common_info.total
+            disabled_tests_count += common_info.disabled
             failed_tests_count = failed_tests_count + int(failed_info.get('failed_count', '0'))
             if int(failed_info.get('failed_count', '0')):
                 test_result['failed'].append(failed_info)
@@ -129,6 +140,7 @@ def run_tests_parallel(test_directory, path, output):
     test_result["execute_time"] = "{} seconds".format(round(end - start, 2))
     test_result['total_execute_tests'] = total_tests_count
     test_result['failed_tests_count'] = failed_tests_count
+    test_result['disabled_tests_count'] = disabled_tests_count
     test_result['crashed_tests_count'] = len(test_result["unavailable"])
     json_file_path = output if output else os.path.join(test_directory, "test_result.json")
     flags = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
