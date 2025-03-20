@@ -29,6 +29,12 @@
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
+#include "adapter/ohos/capability/html/span_to_html.h"
+#include "adapter/ohos/capability/html/html_to_span.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/common/ace_engine.h"
+
 #include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {
@@ -44,7 +50,7 @@ constexpr int TEST_START_BGCL = TEST_START_LNHT + TEST_LENGTH + 1;
 constexpr int TEST_START_URL = TEST_START_BGCL + TEST_LENGTH + 1;
 constexpr int TEST_START_PSST = TEST_START_URL + TEST_LENGTH + 1;
 constexpr int TEST_START_PSPM = TEST_START_PSST + TEST_LENGTH + 1;
-constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and more text to test it out.";
+constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and more text to test it out.\n";
 
 
 PixelMapPeer* CreatePixelMap()
