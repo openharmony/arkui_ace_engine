@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,6 +174,10 @@ private:
     void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
 
     void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward = true) const override;
+
+    void MeasureLazyChild(int32_t startIdx, int32_t endIdx);
+
+    bool IsForWard() const;
 
     RefPtr<WaterFlowSections> sections_;
 
