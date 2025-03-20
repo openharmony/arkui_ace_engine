@@ -906,13 +906,20 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringFromHtml, TestSize.Lev
 }
 
 /**
- * @tc.name:DISABLED_styledStringToHtml
+ * @tc.name: toHtmlTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringToHtml, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, toHtmlTest, TestSize.Level1)
 {
-    // not implement
+    ASSERT_NE(accessor_->toHtml, nullptr);
+    SpanToHtml toHtml;
+    auto htmlFromSpan = toHtml.ToHtml(*peer_->spanString);
+
+    Ark_String arkString = accessor_->toHtml(vmContext_, peer_);
+    auto result = Converter::Convert<std::string>(arkString);
+
+    EXPECT_EQ(result, htmlFromSpan);
 }
 
 /**
