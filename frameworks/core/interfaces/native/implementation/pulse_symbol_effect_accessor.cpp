@@ -18,27 +18,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace GlobalScope_ohos_fontAccessor {
-void RegisterFontImpl(const Ark_FontOptions* options)
+namespace PulseSymbolEffectAccessor {
+void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
 {
 }
-Array_String GetSystemFontListImpl()
+Ark_PulseSymbolEffect CtorImpl()
 {
-    return {};
+    return nullptr;
 }
-Ark_FontInfo GetFontByNameImpl(const Ark_String* fontName)
+Ark_NativePointer GetFinalizerImpl()
 {
-    return {};
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-} // GlobalScope_ohos_fontAccessor
-const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
+} // PulseSymbolEffectAccessor
+const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
 {
-    static const GENERATED_ArkUIGlobalScope_ohos_fontAccessor GlobalScope_ohos_fontAccessorImpl {
-        GlobalScope_ohos_fontAccessor::RegisterFontImpl,
-        GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
-        GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+    static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
+        PulseSymbolEffectAccessor::DestroyPeerImpl,
+        PulseSymbolEffectAccessor::CtorImpl,
+        PulseSymbolEffectAccessor::GetFinalizerImpl,
     };
-    return &GlobalScope_ohos_fontAccessorImpl;
+    return &PulseSymbolEffectAccessorImpl;
 }
 
 }

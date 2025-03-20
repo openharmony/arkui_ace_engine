@@ -18,27 +18,27 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace GlobalScope_ohos_fontAccessor {
-void RegisterFontImpl(const Ark_FontOptions* options)
+namespace PixelMapDrawableDescriptorAccessor {
+void DestroyPeerImpl(Ark_PixelMapDrawableDescriptor peer)
 {
 }
-Array_String GetSystemFontListImpl()
+Ark_PixelMapDrawableDescriptor CtorImpl(const Opt_PixelMap* src)
 {
-    return {};
+    return nullptr;
 }
-Ark_FontInfo GetFontByNameImpl(const Ark_String* fontName)
+Ark_NativePointer GetFinalizerImpl()
 {
-    return {};
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-} // GlobalScope_ohos_fontAccessor
-const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
+} // PixelMapDrawableDescriptorAccessor
+const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* GetPixelMapDrawableDescriptorAccessor()
 {
-    static const GENERATED_ArkUIGlobalScope_ohos_fontAccessor GlobalScope_ohos_fontAccessorImpl {
-        GlobalScope_ohos_fontAccessor::RegisterFontImpl,
-        GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
-        GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
+    static const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor PixelMapDrawableDescriptorAccessorImpl {
+        PixelMapDrawableDescriptorAccessor::DestroyPeerImpl,
+        PixelMapDrawableDescriptorAccessor::CtorImpl,
+        PixelMapDrawableDescriptorAccessor::GetFinalizerImpl,
     };
-    return &GlobalScope_ohos_fontAccessorImpl;
+    return &PixelMapDrawableDescriptorAccessorImpl;
 }
 
 }
