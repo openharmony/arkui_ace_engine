@@ -52,7 +52,11 @@ Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
 }
 Ark_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
 {
-    return {};
+    Ark_ResourceColor invalidValue = {};
+    CHECK_NULL_RETURN(peer && peer->span, invalidValue);
+    auto color = peer->span->GetColor();
+    auto value = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
+    return Converter::GetOpt(value).value_or(invalidValue);
 }
 Ark_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
 {

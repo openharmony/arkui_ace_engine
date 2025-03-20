@@ -394,9 +394,28 @@ void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>&
     }
     dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
 }
+
 void AssignArkValue(Ark_Size& dst, const SizeF& src)
 {
     dst.width = ArkValue<Ark_Number>(src.Width());
     dst.height = ArkValue<Ark_Number>(src.Height());
+}
+
+void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx)
+{
+    dst = ArkValue<Ark_String>(src.ToString(), ctx);
+}
+
+void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src)
+{
+    Ark_BorderRadiuses borderRadiuses;
+    if (src.backgroundRadius.has_value()) {
+        borderRadiuses.topLeft = ArkValue<Opt_Length>(src.backgroundRadius.value().radiusTopLeft);
+        borderRadiuses.topRight = ArkValue<Opt_Length>(src.backgroundRadius.value().radiusTopRight);
+        borderRadiuses.bottomLeft = ArkValue<Opt_Length>(src.backgroundRadius.value().radiusBottomLeft);
+        borderRadiuses.bottomRight = ArkValue<Opt_Length>(src.backgroundRadius.value().radiusBottomRight);
+    }
+    dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(borderRadiuses);
+    dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, Converter::FC);
 }
 } // namespace OHOS::Ace::NG::Converter

@@ -16,11 +16,16 @@
 #include "core/components/common/layout/constants.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "accessor_test_base.h"
+#include "accessor_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
- 
+
 namespace OHOS::Ace::NG {
 namespace {
+    constexpr auto DEFAULT_COLOR = "#FFFFFFFF";
+    constexpr auto COLORS_RES_0_ID = 100001;
+    constexpr auto COLORS_RES_0_STR = "COLORS_RES_0_STR";
+
     const std::vector<std::tuple<std::string, TextDecoration,
         Ark_TextDecorationType>> testFixtureTextDecorationValues = {
         { "TextDecoration::NONE", TextDecoration::NONE, Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE },
@@ -54,6 +59,51 @@ namespace {
             static_cast<Ark_TextDecorationStyle>(-1) },
     };
 
+    std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureColorsStrValidValues = {
+        { "\"#123\"", Converter::ArkValue<Ark_String>("#123"), "#FF112233" },
+        { "\"#11223344\"", Converter::ArkValue<Ark_String>("#11223344"), "#11223344" },
+        { "\"#123456\"", Converter::ArkValue<Ark_String>("#123456"), "#FF123456" },
+        { "\"65535\"", Converter::ArkValue<Ark_String>("65535"), "#FF00FFFF" },
+        { "\"#abcdef\"", Converter::ArkValue<Ark_String>("#abcdef"), "#FFABCDEF" },
+        { "\"#aBcdeF\"", Converter::ArkValue<Ark_String>("#aBcdeF"), "#FFABCDEF" },
+        { "\"rgb(255, 100, 55)\"", Converter::ArkValue<Ark_String>("rgb(255, 100, 55)"), "#FFFF6437" },
+        { "\"rgba(255, 100, 255, 0.5)\"", Converter::ArkValue<Ark_String>("rgba(255, 100, 255, 0.5)"), "#80FF64FF" },
+    };
+
+    std::vector<std::tuple<std::string, Ark_String>> testFixtureColorsStrInvalidValues = {
+        { "\"invalid\"", Converter::ArkValue<Ark_String>("invalid") },
+        { "\"\"", Converter::ArkValue<Ark_String>("") },
+        { "\"rgb(270, 0xf1, 755.5f)\"", Converter::ArkValue<Ark_String>("rgb(270, 0xf1, 755.5f)") },
+        { "\"RgbA(255, 100, 255, 0.5)\"", Converter::ArkValue<Ark_String>("RgbA(255, 100, 255, 0.5)") },
+    };
+
+    const auto TEST_COLOR_BLUE = Color::BLUE;
+    const auto TEST_COLOR_RED = Color::RED;
+    std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureColorsResValidValues = {
+        { "ResId:COLORS_RES_0_ID", CreateResource(COLORS_RES_0_ID, Converter::ResourceType::COLOR), "#FF0000FF" },
+        { "ResName:COLORS_RES_0_STR", CreateResource(COLORS_RES_0_STR, Converter::ResourceType::COLOR), "#FFFF0000" },
+    };
+
+    std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues = {
+        { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { "ARK_COLOR_BLACK", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
+        { "ARK_COLOR_BLUE", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+        { "ARK_COLOR_BROWN", Converter::ArkValue<Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
+        { "ARK_COLOR_GRAY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
+        { "ARK_COLOR_GREEN", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
+        { "ARK_COLOR_GREY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
+        { "ARK_COLOR_ORANGE", Converter::ArkValue<Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
+        { "ARK_COLOR_PINK", Converter::ArkValue<Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
+        { "ARK_COLOR_RED", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+        { "ARK_COLOR_YELLOW", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
+        { "ARK_COLOR_TRANSPARENT", Converter::ArkValue<Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+    };
+
+    std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValues = {
+        { "static_cast<Ark_Color>(-1)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(-1)) },
+        { "static_cast<Ark_Color>(INT_MAX)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(INT_MAX)) },
+    };
+
 }
  
 using namespace testing;
@@ -63,6 +113,12 @@ class DecorationStyleAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUIDecorationStyleAccessor,
         &GENERATED_ArkUIAccessors::getDecorationStyleAccessor, DecorationStylePeer> {
 public:
+    static void SetUpTestCase()
+    {
+        AccessorTestBaseParent::SetUpTestCase();
+        AddResource(COLORS_RES_0_ID, TEST_COLOR_BLUE);
+        AddResource(COLORS_RES_0_STR, TEST_COLOR_RED);
+    }
     void* CreatePeerInstance() override
     {
         return accessor_->ctor(nullptr);
@@ -110,6 +166,50 @@ HWTEST_F(DecorationStyleAccessorTest, getStyleTest, TestSize.Level1)
         auto style = accessor_->getStyle(peer_);
         EXPECT_EQ(expected, style) <<
             "Input value is: " << input << ", method: getStyle";
+    }
+}
+
+/**
+ * @tc.name: getColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DecorationStyleAccessorTest, getColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getColor, nullptr);
+    Ark_DecorationStyleInterface* stylePtr = new Ark_DecorationStyleInterface();
+    stylePtr->type = Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE;
+    auto checkValue =
+        [this, stylePtr](const std::string& input, const Opt_ResourceColor& value, const std::string& expectedStr) {
+        DestroyPeer(peer_);
+        stylePtr->color = value;
+        peer_ = accessor_->ctor(stylePtr);
+        auto arkResColor = accessor_->getColor(peer_);
+        auto colorOpt = Converter::OptConvert<Color>(arkResColor);
+        ASSERT_TRUE(colorOpt.has_value());
+        EXPECT_EQ(expectedStr, colorOpt.value().ToString()) <<
+            "Input value is: " << input << ", method: getColor";
+    };
+
+    Converter::ConvContext ctx;
+    for (auto& [input, value, expected] : testFixtureColorsStrValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value, &ctx), expected);
+    }
+
+    for (auto& [input, value] : testFixtureColorsStrInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value, &ctx), DEFAULT_COLOR);
+    }
+
+    for (auto& [input, value, expected] : testFixtureColorsResValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(value), expected);
+    }
+
+    for (auto& [input, value, expected] : testFixtureColorsEnumValidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value), expected);
+    }
+
+    for (auto& [input, value] : testFixtureColorsEnumInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value), DEFAULT_COLOR);
     }
 }
 

@@ -232,7 +232,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
-    void AssignArkValue(Ark_ResourceColor& dst, const std::string& src);
     void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue& src);
     void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);
@@ -261,13 +260,14 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_SslError& dst, const SslError& src);
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
+    void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx);
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src);
     void AssignArkValue(Ark_String& dst, const std::u16string& src, ConvContext *ctx);
     void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
-    void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& src);
+    void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src);
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
