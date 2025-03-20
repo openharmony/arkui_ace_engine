@@ -21,6 +21,7 @@ import { Importer, isOhosImport } from './Importer'
 import {
     adaptorClassName,
     adaptorComponentName,
+    adaptorEtsAttributeName,
     adaptorEtsName,
     backingField,
     backingFieldName,
@@ -921,6 +922,10 @@ export class StructTransformer extends AbstractVisitor {
         if (ts.isIdentifier(name)) {
             const newName = adaptorEtsName(name)
             this.importer.addAdaptorImport(ts.idText(newName))
+            const attributeName = adaptorEtsAttributeName(name)
+            if (!ts.idText(attributeName).includes("Page")) {
+                this.importer.addAdaptorImport(ts.idText(attributeName))
+            }
             return newName
         } else {
             return name

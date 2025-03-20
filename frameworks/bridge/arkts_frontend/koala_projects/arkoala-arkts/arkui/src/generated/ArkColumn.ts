@@ -49,12 +49,25 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./ArkGestureInterfaces"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { ColumnOptions, ColumnAttribute } from "./ArkColumnInterfaces"
+import { ColumnOptions, ColumnAttribute, ColumnInterface } from "./ArkColumnInterfaces"
+import { AttributeUpdater } from "../handwritten/modifiers/ArkAttributeUpdater"
+import { ArkColumnNode } from "../handwritten/modifiers/ArkColumnNode"
+import { ArkColumnAttributeSet,ColumnModifier } from "../handwritten/modifiers/ArkColumnModifier"
+import { applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 /** @memo:stable */
 export class ArkColumnComponent extends ArkCommonMethodComponent {
     getPeer(): ArkColumnPeer {
         return (this.peer as ArkColumnPeer)
     }
+
+    getModifierHost(): ArkColumnNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkColumnNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost as ArkColumnNode
+    }
+
     /** @memo */
     public setColumnOptions(options?: ColumnOptions): this {
         if (this.checkPriority("setColumnOptions")) {
@@ -64,6 +77,33 @@ export class ArkColumnComponent extends ArkCommonMethodComponent {
         }
         return this
     }
+    
+    attributeModifier(modifier: AttributeModifier<ColumnAttribute>): this {
+        let peerNode = this.getPeer();
+        let attributeSet = peerNode._attributeSet;
+        let isAttributeUpdater = modifier instanceof AttributeUpdater
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as AttributeUpdater<ColumnAttribute>;
+            attributeUpdater.attribute = this.getModifierHost();
+            if (!attributeSet) {
+                attributeSet = new ArkColumnAttributeSet();
+                peerNode._attributeSet = attributeSet;
+            }
+            attributeUpdater.initializeModifier((peerNode._attributeSet as Object) as ColumnAttribute)
+        } else {
+            let attributeModifier = ((modifier as Object) as AttributeModifier<ColumnAttribute>);
+            let columnModifier = (attributeModifier as Object) as ColumnModifier;
+            if (!attributeSet) {
+                attributeSet = new ArkColumnAttributeSet();
+                attributeSet._modifiersWithKeys = columnModifier._modifiersWithKeys;
+                peerNode._attributeSet = attributeSet;
+            }
+        }
+        applyUIAttributes(modifier, peerNode);
+        peerNode._attributeSet!.applyModifierPatch(peerNode);
+        return this;
+    }
+
     /** @memo */
     public alignItems(value: HorizontalAlign): this {
         if (this.checkPriority("alignItems")) {

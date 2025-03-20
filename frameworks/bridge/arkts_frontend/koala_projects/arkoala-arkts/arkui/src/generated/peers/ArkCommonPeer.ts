@@ -65,7 +65,11 @@ import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
 import { BottomTabBarStyle } from "./../ArkBottomTabBarStyleBuilder"
+import { ArkCommonAttributeSet } from '../../handwritten/modifiers/ArkCommonModifier'
+
 export class ArkCommonMethodPeer extends PeerNode {
+    _attributeSet?: ArkCommonAttributeSet
+    private supportedUIState: number = 0;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -2861,6 +2865,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         }
         ArkUIGeneratedNativeModule._CommonMethod_keyboardShortcut(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()
+    }
+    getCurrentState():number {
+        return this.supportedUIState;
+    }
+    setSupportedUIState(sate: number):void {
+       this.supportedUIState = sate;
     }
 }
 export interface ArkCommonMethodAttributes {

@@ -34,6 +34,9 @@
             "#arkstate": ["../../../arkoala/arkui-common/build/unmemoized/src"]
         }
     },
+    "files": [
+        "../../arkui/types/index-full.d.ts"
+    ],
     "include": [
         "./build/unmemoized/**/*.ts"
     ]
