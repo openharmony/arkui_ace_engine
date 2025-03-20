@@ -255,27 +255,6 @@ void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSc
         EVENT_KEY_DURATION_72, frameRateDuring_72_ms,
         EVENT_KEY_DURATION_60, frameRateDuring_60_ms);
 }
- 
-void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_)
-{
-    auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
-    std::string eventName = "FRC_SCENE_INFO";
-    if (packageName.size() > MAX_PACKAGE_NAME_LENGTH) {
-        StrTrim(packageName);
-    }
-    auto frameRateDuring_60_ms = curFRCSceneFpsInfo_.duration_60 / NS_TO_MS;
-    auto frameRateDuring_72_ms = curFRCSceneFpsInfo_.duration_72 / NS_TO_MS;
-    auto frameRateDuring_90_ms = curFRCSceneFpsInfo_.duration_90 / NS_TO_MS;
-    auto frameRateDuring_120_ms = curFRCSceneFpsInfo_.duration_120 / NS_TO_MS;
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        EVENT_KEY_SCENE, scene,
-        EVENT_KEY_PACNAME, packageName,
-        EVENT_KEY_DURATION_120, frameRateDuring_120_ms,
-        EVENT_KEY_DURATION_90, frameRateDuring_90_ms,
-        EVENT_KEY_DURATION_72, frameRateDuring_72_ms,
-        EVENT_KEY_DURATION_60, frameRateDuring_60_ms);
-}
 
 void EventReport::SendAppStartException(AppStartExcepType type)
 {
