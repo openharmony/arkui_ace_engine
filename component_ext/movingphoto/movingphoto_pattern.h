@@ -109,6 +109,11 @@ public:
         dynamicRangeMode_ = rangeMode;
     }
 
+    void SetWaterMask(bool enabled)
+    {
+        isPlayWithMask_ = enabled;
+    }
+
     int64_t GetCurrentDateModified()
     {
         return currentDateModified_;
@@ -245,6 +250,7 @@ private:
     bool isVisible_ = false;
     bool isChangePlayMode_ = false;
     bool needUpdateImageNode_ = false;
+    bool isPlayWithMask_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;

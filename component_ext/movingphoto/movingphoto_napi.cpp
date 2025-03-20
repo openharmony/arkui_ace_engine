@@ -96,6 +96,14 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
         NG::MovingPhotoModelNG::GetInstance()->SetDynamicRangeMode(rangeMode);
     }
 
+    napi_value jsWaterMask = nullptr;
+    napi_get_named_property(env, argv[0], "playWithMask", &jsWaterMask);
+    bool waterMask = false;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsWaterMask, napi_boolean)) {
+        waterMask = ExtNapiUtils::GetBool(env, jsWaterMask);
+        NG::MovingPhotoModelNG::GetInstance()->SetWaterMask(waterMask);
+    }
+
     napi_value getUri = nullptr;
     napi_get_named_property(env, jsData, "getUri", &getUri);
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, getUri, napi_function)) {
