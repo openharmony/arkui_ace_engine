@@ -1668,9 +1668,12 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     dragDropManager->SetIsDragWithContextMenu(data.isMenuShow);
 
     // create text node
-    auto subWindowOffset = isExpandDisplay ? subWindow->GetWindowRect().GetOffset() : OffsetF();
-    auto textNode = DragAnimationHelper::CreateBadgeTextNode(data.badgeNumber);
-    data.textNode = textNode;
+    auto textRowNode = DragAnimationHelper::CreateBadgeTextNode(data.badgeNumber);
+    data.textRowNode = textRowNode;
+    RefPtr<OHOS::Ace::NG::FrameNode> textNode = nullptr;
+    if (textRowNode) {
+        textNode = AceType::DynamicCast<FrameNode>(textRowNode->GetChildAtIndex(0));
+    }
     DragAnimationHelper::SetNodeVisible(textNode, false);
     // create gatherNode
     auto originGatherNode = overlayManager->GetGatherNode();
@@ -1691,7 +1694,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
         subWindowOverlayManager, eventHub->GetOrCreateGestureEventHub(), data, true);
 
     // update position
-    UpdateNodePositionBeforeStartAnimation(frameNode, data, subWindowOffset);
+    UpdateNodePositionBeforeStartAnimation(frameNode, data);
     HideMenu();
     pipeline->FlushSyncGeometryNodeTasks();
     overlayManager->RemovePixelMap();
@@ -1704,12 +1707,11 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
 }
 
 void GestureEventHub::UpdateNodePositionBeforeStartAnimation(const RefPtr<FrameNode>& frameNode,
-    PreparedInfoForDrag& data, const OffsetF& subWindowOffset)
+    PreparedInfoForDrag& data)
 {
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT || !data.isMenuShow) {
-        DragAnimationHelper::UpdateBadgeTextNodePosition(frameNode, data.textNode, data.badgeNumber, data.previewScale,
-            data.dragPreviewOffsetToScreen - subWindowOffset);
+    if ((frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT || !data.isMenuShow) &&
+        !data.textRowNode) {
         DragDropFuncWrapper::UpdateNodePositionToScreen(data.imageNode, data.dragPreviewOffsetToScreen);
         DragAnimationHelper::PreLayout(data.imageNode);
     } else {

@@ -7553,13 +7553,13 @@ RefPtr<FrameNode> OverlayManager::GetDragPixelMapBadgeNode() const
     CHECK_NULL_RETURN(column, nullptr);
     auto frameNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
     CHECK_NULL_RETURN(frameNode, nullptr);
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
-        return frameNode;
-    }
     auto textRowNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
     CHECK_NULL_RETURN(textRowNode, nullptr);
     auto textNode = AceType::DynamicCast<FrameNode>(textRowNode->GetLastChild());
     CHECK_NULL_RETURN(textNode, nullptr);
+    if (textNode->GetTag() != V2::TEXT_ETS_TAG) {
+        return nullptr;
+    }
     return textNode;
 }
 

@@ -93,7 +93,7 @@ struct PreparedInfoForDrag {
     RefPtr<FrameNode> imageNode;
     RefPtr<FrameNode> relativeContainerNode { nullptr };
     RefPtr<FrameNode> menuPreviewNode { nullptr };
-    RefPtr<FrameNode> textNode { nullptr };
+    RefPtr<FrameNode> textRowNode { nullptr };
     RefPtr<FrameNode> gatherNode { nullptr };
     RectF menuPreviewRect;
     RectF dragPreviewRect;
@@ -405,7 +405,7 @@ private:
         int32_t& exclusiveIndex);
 
     void UpdateNodePositionBeforeStartAnimation(const RefPtr<FrameNode>& frameNode,
-        PreparedInfoForDrag& data, const OffsetF& subWindowOffset);
+        PreparedInfoForDrag& data);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
