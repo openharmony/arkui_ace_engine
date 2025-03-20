@@ -618,7 +618,7 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
 }
 
 void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
-    int32_t appearingTimeWithContinuousOperation)
+    int32_t appearingTimeWithContinuousOperation, bool isSubwindow)
 {
     popupTargetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -632,7 +632,7 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    overlayManager->ShowTips(targetId, popupInfo, appearingTime, appearingTimeWithContinuousOperation);
+    overlayManager->ShowTips(targetId, popupInfo, appearingTime, appearingTimeWithContinuousOperation, isSubwindow);
     window_->SetFocusable(true);
 }
 

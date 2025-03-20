@@ -1980,7 +1980,15 @@ void ViewAbstract::BindPopup(
             subwindow->GetPopupInfoNG(targetId, popupInfo);
         }
         if (popupInfo.popupNode) {
-            showInSubWindow = true;
+            if (popupInfo.isTips && subwindow) {
+                auto overlayManager1 = subwindow->GetOverlayManager();
+                CHECK_NULL_VOID(overlayManager1);
+                overlayManager1->ErasePopup(targetId);
+                popupInfo = {};
+                overlayManager1->HideTips(targetId, popupInfo, 0);
+            } else {
+                showInSubWindow = true;
+            }
         }
     }
     if (popupInfo.popupNode && popupInfo.isTips) {
@@ -2207,7 +2215,7 @@ void ViewAbstract::AddHoverEventForTips(
                 return;
             }
             overlayManager->ShowTips(
-                targetId, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation());
+                targetId, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation(), false);
         } else {
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HideTipsNG(targetId, param->GetDisappearingTime());

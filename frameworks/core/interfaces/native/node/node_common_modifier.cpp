@@ -2356,6 +2356,7 @@ void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptio
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
     std::string messageString = message;
     tipsParam->SetMessage(messageString);
+    tipsParam->SetShowInSubWindow(true);
     tipsParam->SetAppearingTime(timeOptions.appearingTime);
     tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
     tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
