@@ -1319,4 +1319,75 @@ HWTEST_F(WaterFlowTopDownScrollerTestNg, GetInfo001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetItemRect(5), Rect()));
     EXPECT_TRUE(IsEqual(GetItemRect(15), Rect(0, 300.0f, 240.0f, 200.0f)));
 }
+
+/**
+ * @tc.name: ScrollEdge001
+ * @tc.desc: Test ScrollEdge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTopDownScrollerTestNg, ScrollEdge001, TestSize.Level1)
+{
+    /**
+     *  Test ScrollEdge when bottom like this:
+     *  ------ ------
+     *  - 11 - - 12 -
+     *  - 11 - ------
+     *  ------
+     */
+
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(13);
+    bool isReachEnd = false;
+    auto reachEnd = [&isReachEnd]() { isReachEnd = true; };
+    model.SetOnReachEnd(reachEnd);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(GetChildY(frameNode_, 12), 600);
+    EXPECT_EQ(GetChildHeight(frameNode_, 12), 100);
+    EXPECT_EQ(GetChildY(frameNode_, 11), 600);
+    EXPECT_EQ(GetChildHeight(frameNode_, 11), 200);
+    EXPECT_EQ(isReachEnd, true);
+}
+
+/**
+ * @tc.name: ScrollEdge002
+ * @tc.desc: Test ScrollEdge in segmented layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTopDownScrollerTestNg, ScrollEdge002, TestSize.Level1)
+{
+    /** Test ScrollEdge when bottom like this:
+     *
+     *  ------ ------
+     *  - 11 - - 12 -
+     *  - 11 - ------
+     *  ------
+     */
+
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(13);
+    const std::vector<WaterFlowSections::Section> SECTIONS = {
+        { .itemsCount = 13,
+            .crossCount = 2,
+            .onGetItemMainSizeByIndex = [](int32_t idx) { return idx & 1 ? 200.0f : 100.0f; } },
+    };
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTIONS);
+    bool isReachEnd = false;
+    auto reachEnd = [&isReachEnd]() { isReachEnd = true; };
+    model.SetOnReachEnd(reachEnd);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(GetChildY(frameNode_, 12), 600);
+    EXPECT_EQ(GetChildHeight(frameNode_, 12), 100);
+    EXPECT_EQ(GetChildY(frameNode_, 11), 600);
+    EXPECT_EQ(GetChildHeight(frameNode_, 11), 200);
+    EXPECT_EQ(isReachEnd, true);
+}
 } // namespace OHOS::Ace::NG

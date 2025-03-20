@@ -109,17 +109,13 @@ void XComponentBridge::ParseParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_
     Local<JSValueRef> paramsArg = runtimeCallInfo->GetCallArgRef(ARG_TYPE);
     CHECK_NULL_VOID(paramsArg->IsObject(vm));
     auto obj = Local<panda::ObjectRef>(paramsArg);
-    auto idStr = panda::StringRef::NewFromUtf8(vm, "id");
-    auto typeStr = panda::StringRef::NewFromUtf8(vm, "type");
-    auto librarynameStr = panda::StringRef::NewFromUtf8(vm, "libraryname");
-    auto controllerStr = panda::StringRef::NewFromUtf8(vm, "controller");
-    auto imageAIOptionsStr = panda::StringRef::NewFromUtf8(vm, "imageAIOptions");
 
-    auto idArg = obj->Get(vm, idStr);
-    auto typeArg = obj->Get(vm, typeStr);
-    auto libraryNameArg = obj->Get(vm, librarynameStr);
-    auto controllerArg = obj->Get(vm, controllerStr);
-    auto imageAIOptionsArg = obj->Get(vm, imageAIOptionsStr);
+    auto idArg = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
+    auto typeArg = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
+    auto libraryNameArg = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "libraryname"));
+    auto controllerArg = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "controller"));
+    auto imageAIOptionsArg = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "imageAIOptions"));
+    auto screenIdArg = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "screenId"));
 
     xcParams->id = idArg->IsString(vm) ? idArg->ToString(vm)->ToString(vm) : "";
     if (libraryNameArg->IsString(vm)) {
@@ -152,6 +148,9 @@ void XComponentBridge::ParseParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_
         Framework::ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
         napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
         xcParams->aiOptions = optionsValue;
+    }
+    if (screenIdArg->IsNumber()) {
+        xcParams->screenId = screenIdArg->ToNumber(vm)->Value();
     }
 }
 

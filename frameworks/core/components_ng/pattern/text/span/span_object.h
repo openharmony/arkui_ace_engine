@@ -41,7 +41,7 @@ enum class SpanType {
     LineHeight = 5,
     BackgroundColor = 6,
     Url = 7,
-    HalfLeading = 8,
+    HalfLeading,
     Gesture = 100,
     ParagraphStyle = 200,
     Image = 300,
@@ -56,11 +56,13 @@ struct SpanParagraphStyle {
     std::optional<TextOverflow> textOverflow;
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<Dimension> textIndent;
+    std::optional<Dimension> paragraphSpacing;
 
     bool Equal(const SpanParagraphStyle& other) const
     {
         auto flag = align == other.align && maxLines == other.maxLines && wordBreak == other.wordBreak &&
-                    textOverflow == other.textOverflow && textIndent == other.textIndent;
+                    textOverflow == other.textOverflow && textIndent == other.textIndent &&
+                    paragraphSpacing == other.paragraphSpacing;
         if (leadingMargin.has_value() && other.leadingMargin.has_value()) {
             flag &= leadingMargin.value().CheckLeadingMargin(other.leadingMargin.value());
         } else if (!leadingMargin.has_value() && !other.textOverflow.has_value()) {
@@ -416,8 +418,7 @@ public:
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
     std::string ToString() const override;
-    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem,
-        SpanOperation operation) const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
 private:
     void AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem);

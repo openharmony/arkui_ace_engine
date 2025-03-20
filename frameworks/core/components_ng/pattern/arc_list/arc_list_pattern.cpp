@@ -50,10 +50,6 @@ constexpr float ARC_LIST_DRAG_OVER_RATES = 0.6f;
 constexpr float ARC_LIST_DRAG_OVER_KVALUE = 0.84f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
-#ifdef SUPPORT_DIGITAL_CROWN
-constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
-constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.base.short.6";
-#endif
 } // namespace
 
 ArcListPattern::ArcListPattern()
@@ -517,27 +513,5 @@ float ArcListPattern::GetScrollUpdateFriction(float overScroll)
     }
     return -exp(-ARC_LIST_DRAG_OVER_KVALUE * scale) + 1;
 }
-
-void ArcListPattern::OnMidIndexChanged(int32_t lastIndex, int32_t curIndex)
-{
-#ifdef SUPPORT_DIGITAL_CROWN
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
-
-    StartVibrator(curIndex == 0 || curIndex == totalCnt - 1);
-#endif
-}
-
-#ifdef SUPPORT_DIGITAL_CROWN
-void ArcListPattern::StartVibrator(bool bEdge)
-{
-    if (!GetCrownEventDragging()) {
-        return;
-    }
-    const char* effectId = bEdge ? HAPTIC_STRENGTH5 : HAPTIC_STRENGTH1;
-    VibratorUtils::StartVibraFeedback(effectId);
-}
-#endif
 
 } // namespace OHOS::Ace::NG

@@ -117,6 +117,10 @@ public:
     void DetachFromMainTree(bool recursive = false);
     virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
+
+    // Return value: 0 indicates successful execution, non - zero indicates failed execution.
+    virtual int32_t OnRecvCommand(const std::string& command) { return 0; }
+
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
     // process offscreen process.
@@ -268,17 +272,6 @@ public:
         hostPageId_ = id;
         for (auto& child : children_) {
             child->SetHostPageId(id);
-        }
-    }
-
-    void SetHostPageIdByParent(int32_t id)
-    {
-        if (tag_ == V2::ROOT_ETS_TAG || tag_ == V2::PAGE_ETS_TAG || tag_ == V2::STAGE_ETS_TAG) {
-            return;
-        }
-        hostPageId_ = id;
-        for (auto& child : children_) {
-            child->SetHostPageIdByParent(id);
         }
     }
 
@@ -895,8 +888,20 @@ public:
     }
     virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
 
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     bool GreatOrEqualAPITargetVersion(PlatformVersion version) const;
 
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     bool LessThanAPITargetVersion(PlatformVersion version) const;
 
     bool IsArkTsRenderNode() const

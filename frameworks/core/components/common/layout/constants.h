@@ -669,6 +669,11 @@ enum class PixelRoundCalcPolicy {
     FORCE_FLOOR = 2,
 };
 
+enum class PixelRoundMode {
+    PIXEL_ROUND_ON_LAYOUT_FINISH = 0,
+    PIXEL_ROUND_AFTER_MEASURE = 1,
+};
+
 enum class LayoutCalPolicy {
     NO_MATCH = 0,
     MATCH_PARENT = 1,
@@ -1081,7 +1086,20 @@ enum class Orientation : uint32_t {
     AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
     AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
     LOCKED = 11,
-    END = LOCKED,
+    FOLLOW_RECENT = 12,
+    AUTO_ROTATION_UNSPECIFIED = 13,
+    USER_ROTATION_PORTRAIT = 14,
+    USER_ROTATION_LANDSCAPE = 15,
+    USER_ROTATION_PORTRAIT_INVERTED = 16,
+    USER_ROTATION_LANDSCAPE_INVERTED = 17,
+    FOLLOW_DESKTOP = 18,
+    END = FOLLOW_DESKTOP,
+};
+
+enum class SystemBarType : uint32_t {
+    STATUS = 1,
+    NAVIGATION = 2,
+    NAVIGATION_INDICATOR = 4,
 };
 
 enum class NodeRenderType : uint32_t {

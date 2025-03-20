@@ -384,6 +384,8 @@ public:
         const GestureEvent& event, const RefPtr<GestureEventHub>& gestureHub, PreparedInfoForDrag& data);
     void DragStartAnimation(const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager,
         const OffsetF& gatherNodeCenter, PreparedInfoForDrag& data, Point point = { 1, 1 });
+    void SetDragStartAnimationOption(AnimationOption& option, int32_t containerId);
+    void HandleStartDragAnimationFinish(int32_t containerId);
     void DragAnimationCurve(RefPtr<Curve> curve);
     void DragStartTransitionAnimation(
         PreparedInfoForDrag& data, const Offset& newOffset, const DragPreviewInfo& info, AnimationOption option);
@@ -445,6 +447,8 @@ public:
     static OffsetF GetTouchOffsetRelativeToSubwindow(int32_t containerId, int32_t x = 0, int32_t y = 0);
     static RectF GetMenuPreviewRect();
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
+    static void HandleDragPreviewUpdate(const RefPtr<RenderContext>& renderContext, const DragPreviewInfo& info,
+        const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
         const RefPtr<FrameNode>& imageNode);
     static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
@@ -483,6 +487,16 @@ public:
     void SetDragDropPointerEvent(const DragPointerEvent& dragDropPointerEvent)
     {
         dragDropPointerEvent_ = dragDropPointerEvent;
+    }
+
+    const DragPointerEvent& GetDragAnimationPointerEvent() const
+    {
+        return dragAnimationPointerEvent_;
+    }
+
+    void SetDragAnimationPointerEvent(const DragPointerEvent& pointerEvent)
+    {
+        dragAnimationPointerEvent_ = pointerEvent;
     }
 
     bool IsDragFwkShow() const
@@ -638,6 +652,13 @@ public:
         isReDragStart_ = isReDragStart;
     }
 
+    void SetDragStartAnimationRate(float rate)
+    {
+        dragStartAnimationRate_ = rate;
+    }
+    
+    bool CheckIsFolderSubwindowBoundary(float x, float y, int32_t instanceId);
+
     bool CheckIsUIExtensionBoundary(float x, float y, int32_t instanceId);
 
 private:
@@ -646,6 +667,8 @@ private:
     Offset CalcDragMoveOffset(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
     Offset CalcContentTrationOffset(
+        const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
+    Offset CalcDragMoveOffsetWithTextNode(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
     Offset CalculateNewOffset(
         const RefPtr<FrameNode>& frameNode, const GestureEvent& event, bool isDragStartPending);
@@ -738,12 +761,14 @@ private:
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
     DragPointerEvent dragDropPointerEvent_;
+    DragPointerEvent dragAnimationPointerEvent_;
     bool isDragFwkShow_ = true;
     OffsetF pixelMapOffset_;
     OffsetF curPointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
+    float dragStartAnimationRate_ = 0.0f;
     int32_t badgeNumber_ = -1;
     int32_t currentAnimationCnt_ = 0;
     int32_t allAnimationCnt_ = 0;

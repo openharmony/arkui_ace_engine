@@ -733,10 +733,13 @@ void setGestureInterrupterToNodeWithUserData(
     ArkUINodeHandle node, void* userData, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     auto onGestureRecognizerJudgeBegin =
-        [frameNode, userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
+        [weak = AceType::WeakClaim(frameNode), userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
             const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        auto node = weak.Upgrade();
+        CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
         GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
@@ -747,11 +750,7 @@ void setGestureInterrupterToNodeWithUserData(
         interruptInfo.isSystemGesture = gestureInfo->IsSystemGesture();
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
         interruptInfo.event = &gestureEvent;
-        if (userData) {
-            interruptInfo.userData = userData;
-        } else {
-            interruptInfo.userData = gestureInfo->GetUserData();
-        }
+        interruptInfo.userData = userData ? userData : gestureInfo->GetUserData();
         ArkUIGestureRecognizer* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
         interruptInfo.userData = reinterpret_cast<void*>(currentArkUIGestureRecognizer);
         auto count = static_cast<int32_t>(others.size());
@@ -771,8 +770,7 @@ void setGestureInterrupterToNodeWithUserData(
         ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
         interruptInfo.inputEvent = &inputEvent;
         interruptInfo.gestureEvent = &arkUIGestureEvent;
-
-        auto touchRecognizers = CreateTouchRecognizers(frameNode, info, interruptInfo);
+        auto touchRecognizers = CreateTouchRecognizers(AceType::RawPtr(node), info, interruptInfo);
         auto result = interrupter(&interruptInfo);
         delete[] othersRecognizer;
         DestroyTouchRecognizers(touchRecognizers, interruptInfo);

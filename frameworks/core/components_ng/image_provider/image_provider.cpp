@@ -16,6 +16,7 @@
 #include "core/components_ng/image_provider/image_provider.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/network/download_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/image_provider/adapter/image_decoder.h"
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
@@ -120,50 +121,48 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceIn
     return imageObj;
 }
 
-void ImageProvider::FailCallback(const std::string& key, const std::string& errorMsg, bool sync)
+void ImageProvider::FailCallback(
+    const std::string& key, const std::string& errorMsg, bool sync, int32_t containerId)
 {
     auto ctxs = EndTask(key);
-    for (auto&& it : ctxs) {
-        auto ctx = it.Upgrade();
-        if (!ctx) {
-            continue;
-        }
 
-        if (sync) {
+    auto notifyLoadFailTask = [ctxs, errorMsg] {
+        for (auto&& it : ctxs) {
+            auto ctx = it.Upgrade();
+            if (!ctx) {
+                continue;
+            }
             ctx->FailCallback(errorMsg);
-        } else {
-            // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadFailTask = [it, errorMsg] {
-                auto ctx = it.Upgrade();
-                CHECK_NULL_VOID(ctx);
-                ctx->FailCallback(errorMsg);
-            };
-            ImageUtils::PostToUI(std::move(notifyLoadFailTask), "ArkUIImageProviderFail", ctx->GetContainerId());
         }
+    };
+
+    if (sync) {
+        notifyLoadFailTask();
+    } else {
+        ImageUtils::PostToUI(std::move(notifyLoadFailTask), "ArkUIImageProviderFail", containerId);
     }
 }
 
-void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync)
+void ImageProvider::SuccessCallback(
+    const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync, int32_t containerId)
 {
     canvasImage->Cache(key);
     auto ctxs = EndTask(key);
     // when upload success, pass back canvasImage to LoadingContext
-    for (auto&& it : ctxs) {
-        auto ctx = it.Upgrade();
-        if (!ctx) {
-            continue;
-        }
-        if (sync) {
+    auto notifyLoadSuccess = [ctxs, canvasImage] {
+        for (auto&& it : ctxs) {
+            auto ctx = it.Upgrade();
+            if (!ctx) {
+                continue;
+            }
             ctx->SuccessCallback(canvasImage->Clone());
-        } else {
-            // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadSuccess = [it, canvasImage] {
-                auto ctx = it.Upgrade();
-                CHECK_NULL_VOID(ctx);
-                ctx->SuccessCallback(canvasImage->Clone());
-            };
-            ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId());
         }
+    };
+
+    if (sync) {
+        notifyLoadSuccess();
+    } else {
+        ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", containerId);
     }
 }
 
@@ -174,20 +173,20 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
-        FailCallback(src.GetKey(), "Failed to create image loader.", sync);
+        FailCallback(src.GetTaskKey(), "Failed to create image loader.", sync, src.GetContainerId());
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
     if (!data) {
-        FailCallback(src.GetKey(), "Failed to load image data", sync);
+        FailCallback(src.GetTaskKey(), "Failed to load image data", sync, src.GetContainerId());
         return;
     }
 
     // build ImageObject
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
     if (!imageObj) {
-        FailCallback(src.GetKey(), "Failed to build image object", sync);
+        FailCallback(src.GetTaskKey(), "Failed to build image object", sync, src.GetContainerId());
         return;
     }
 
@@ -198,24 +197,23 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 
     CacheImageObject(cloneImageObj);
 
-    auto ctxs = EndTask(src.GetKey());
+    auto ctxs = EndTask(src.GetTaskKey());
+
     // callback to LoadingContext
-    for (auto&& it : ctxs) {
-        auto ctx = it.Upgrade();
-        if (!ctx) {
-            continue;
-        }
-        if (sync) {
+    auto notifyDataReadyTask = [ctxs, imageObj, src] {
+        for (auto&& it : ctxs) {
+            auto ctx = it.Upgrade();
+            if (!ctx) {
+                continue;
+            }
             ctx->DataReadyCallback(imageObj);
-        } else {
-            // NOTE: contexts may belong to different arkui pipelines
-            auto notifyDataReadyTask = [it, imageObj, src] {
-                auto ctx = it.Upgrade();
-                CHECK_NULL_VOID(ctx);
-                ctx->DataReadyCallback(imageObj);
-            };
-            ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", ctx->GetContainerId());
         }
+    };
+
+    if (sync) {
+        notifyDataReadyTask();
+    } else {
+        ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", src.GetContainerId());
     }
 }
 
@@ -239,7 +237,7 @@ bool ImageProvider::RegisterTask(const std::string& key, const WeakPtr<ImageLoad
     return true;
 }
 
-std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string& key)
+std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string& key, bool isErase)
 {
     if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
@@ -258,37 +256,170 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
     if (ctxs.empty()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "registered task has empty context %{private}s", key.c_str());
     }
-    tasks_.erase(it);
+    if (isErase) {
+        tasks_.erase(it);
+    }
     return ctxs;
 }
 
-void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
+bool ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
 {
     if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without cancelTask access.",
             MAX_WAITING_TIME_FOR_TASKS);
-        return;
+        return false;
     }
     // Adopt the already acquired lock
     std::scoped_lock lock(std::adopt_lock, taskMtx_);
     auto it = tasks_.find(key);
-    CHECK_NULL_VOID(it != tasks_.end());
-    CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
+    CHECK_NULL_RETURN(it != tasks_.end(), false);
+    CHECK_NULL_RETURN(it->second.ctxs_.find(ctx) != it->second.ctxs_.end(), false);
     // only one LoadingContext waiting for this task, can just cancel
     if (it->second.ctxs_.size() == 1) {
         // task should be deleted regardless of whether the cancellation is successful or not
         it->second.bgTask_.Cancel();
         tasks_.erase(it);
-        return;
+        return true;
     }
     // other LoadingContext still waiting for this task, remove ctx from set
     it->second.ctxs_.erase(ctx);
+    return false;
+}
+
+void ImageProvider::DownLoadSuccessCallback(
+    const RefPtr<ImageObject>& imageObj, const std::string& key, bool sync, int32_t containerId)
+{
+    ImageProvider::CacheImageObject(imageObj);
+    auto ctxs = EndTask(key);
+    auto notifyDownLoadSuccess = [ctxs, imageObj] {
+        for (auto&& it : ctxs) {
+            auto ctx = it.Upgrade();
+            if (!ctx) {
+                continue;
+            }
+            ctx->DataReadyCallback(imageObj);
+        }
+    };
+
+    if (sync) {
+        notifyDownLoadSuccess();
+    } else {
+        ImageUtils::PostToUI(std::move(notifyDownLoadSuccess), "ArkUIImageProviderDownLoadSuccess", containerId);
+    }
+}
+
+void ImageProvider::DownLoadOnProgressCallback(
+    const std::string& key, bool sync, const uint32_t& dlNow, const uint32_t& dlTotal, int32_t containerId)
+{
+    auto ctxs = EndTask(key, false);
+    auto notifyDownLoadOnProgressCallback = [ctxs, dlNow, dlTotal] {
+        for (auto&& it : ctxs) {
+            auto ctx = it.Upgrade();
+            if (!ctx) {
+                continue;
+            }
+            ctx->DownloadOnProgress(dlNow, dlTotal);
+        }
+    };
+
+    if (sync) {
+        notifyDownLoadOnProgressCallback();
+    } else {
+        ImageUtils::PostToUI(
+            std::move(notifyDownLoadOnProgressCallback), "ArkUIImageDownloadOnProcessCallback", containerId);
+    }
+}
+
+RefPtr<ImageData> ImageProvider::QueryDataFromCache(const ImageSourceInfo& src)
+{
+    ACE_FUNCTION_TRACE();
+    std::string result;
+    if (DownloadManager::GetInstance()->fetchCachedResult(src.GetSrc(), result)) {
+        auto data = ImageData::MakeFromDataWithCopy(result.data(), result.size());
+        return data;
+    }
+    return nullptr;
+}
+
+void ImageProvider::DownLoadImage(const UriDownLoadConfig& downLoadConfig)
+{
+    auto queryData = QueryDataFromCache(downLoadConfig.src);
+    if (queryData) {
+        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, queryData);
+        if (imageObj) {
+            ImageProvider::DownLoadSuccessCallback(
+                imageObj, downLoadConfig.taskKey, downLoadConfig.sync, downLoadConfig.src.GetContainerId());
+            return;
+        }
+    }
+    DownloadCallback downloadCallback;
+    downloadCallback.successCallback = [downLoadConfig, containerId = downLoadConfig.src.GetContainerId()](
+                                           const std::string&& imageData, bool async, int32_t instanceId) {
+        ContainerScope scope(instanceId);
+        ACE_SCOPED_TRACE("DownloadImageSuccess %s, [%zu]", downLoadConfig.imageDfxConfig.ToStringWithSrc().c_str(),
+            imageData.size());
+        if (!GreatNotEqual(imageData.size(), 0)) {
+            ImageProvider::FailCallback(downLoadConfig.taskKey, "The length of imageData from netStack is not positive",
+                downLoadConfig.sync, containerId);
+            return;
+        }
+        auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
+        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, data);
+        if (!imageObj) {
+            ImageProvider::FailCallback(downLoadConfig.taskKey, "After download successful, imageObject Create fail",
+                downLoadConfig.sync, containerId);
+            return;
+        }
+        ImageProvider::DownLoadSuccessCallback(imageObj, downLoadConfig.taskKey, downLoadConfig.sync, containerId);
+    };
+    downloadCallback.failCallback = [taskKey = downLoadConfig.taskKey, sync = downLoadConfig.sync,
+                                        containerId = downLoadConfig.src.GetContainerId()](
+                                        std::string errorMessage, bool async, int32_t instanceId) {
+        ContainerScope scope(instanceId);
+        ImageProvider::FailCallback(taskKey, errorMessage, sync, containerId);
+    };
+    downloadCallback.cancelCallback = downloadCallback.failCallback;
+    if (downLoadConfig.hasProgressCallback) {
+        downloadCallback.onProgressCallback = [taskKey = downLoadConfig.taskKey, sync = downLoadConfig.sync,
+                                                  containerId = downLoadConfig.src.GetContainerId()](
+                                                  uint32_t dlTotal, uint32_t dlNow, bool async, int32_t instanceId) {
+            ContainerScope scope(instanceId);
+            ImageProvider::DownLoadOnProgressCallback(taskKey, sync, dlNow, dlTotal, containerId);
+        };
+    }
+    NetworkImageLoader::DownloadImage(std::move(downloadCallback), downLoadConfig.src.GetSrc(), downLoadConfig.sync);
 }
 
 void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync)
 {
-    if (!RegisterTask(src.GetKey(), ctxWp)) {
+    if (src.GetSrcType() == SrcType::NETWORK && SystemProperties::GetDownloadByNetworkEnabled()) {
+        auto ctx = ctxWp.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        const std::string taskKey = src.GetTaskKey() + (ctx->GetOnProgressCallback() ? "1" : "0");
+        if (!RegisterTask(taskKey, ctxWp)) {
+            // task is already running, only register callbacks
+            return;
+        }
+        UriDownLoadConfig downloadConfig = {
+            .src = src,
+            .imageDfxConfig = ctx->GetImageDfxConfig(),
+            .taskKey = taskKey,
+            .sync = sync,
+            .hasProgressCallback = static_cast<bool>(ctx->GetOnProgressCallback())
+        };
+        if (sync) {
+            DownLoadImage(downloadConfig);
+        } else {
+            auto downloadConfigPtr = std::make_shared<UriDownLoadConfig>(std::move(downloadConfig));
+            auto downloadImageTask = [downloadConfigPtr]() {
+                DownLoadImage(*downloadConfigPtr);
+            };
+            ImageUtils::PostToBg(downloadImageTask, "ArkUIImageDownload", src.GetContainerId());
+        }
+        return;
+    }
+    if (!RegisterTask(src.GetTaskKey(), ctxWp)) {
         // task is already running, only register callbacks
         return;
     }
@@ -307,7 +438,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
         task.Reset([src] { ImageProvider::CreateImageObjHelper(src); });
-        tasks_[src.GetKey()].bgTask_ = task;
+        tasks_[src.GetTaskKey()].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);
         ImageUtils::PostToBg(task, "ArkUIImageProviderCreateImageObject", ctx->GetContainerId());
@@ -391,20 +522,25 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
 void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& size, const std::string& key,
     const ImageDecoderOptions& imageDecoderOptions)
 {
-    ImageDecoder decoder(obj, size, imageDecoderOptions.forceResize);
-    RefPtr<CanvasImage> image;
+    RefPtr<CanvasImage> image = nullptr;
+    ImageDecoderConfig imageDecoderConfig = {
+        .desiredSize_ = size,
+        .forceResize_ = imageDecoderOptions.forceResize,
+        .imageQuality_ = imageDecoderOptions.imageQuality,
+        .isHdrDecoderNeed_ = imageDecoderOptions.isHdrDecoderNeed,
+        .photoDecodeFormat_ = imageDecoderOptions.photoDecodeFormat,
+    };
     // preview and ohos platform
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality, imageDecoderOptions.isHdrDecoderNeed,
-            imageDecoderOptions.photoDecodeFormat);
+        image = ImageDecoder::MakePixmapImage(obj, imageDecoderConfig);
     } else {
-        image = decoder.MakeDrawingImage();
+        image = ImageDecoder::MakeDrawingImage(obj, imageDecoderConfig);
     }
 
     if (image) {
-        SuccessCallback(image, key, imageDecoderOptions.sync);
+        SuccessCallback(image, key, imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     } else {
-        FailCallback(key, "Failed to decode image");
+        FailCallback(key, "Failed to decode image", imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     }
 }
 } // namespace OHOS::Ace::NG

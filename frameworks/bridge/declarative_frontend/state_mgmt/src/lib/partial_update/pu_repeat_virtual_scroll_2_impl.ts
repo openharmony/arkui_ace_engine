@@ -895,6 +895,10 @@ class __RepeatVirtualScroll2Impl<T> {
                 stateMgmtConsole.debug(`correcting key of activeDataItem index ${prevIndex} from `,
                     `'${activateDataItems[prevIndex].key}' to '${prevKey}'.`);
                 activateDataItems[prevIndex].key = prevKey;
+
+                if (!this.rerenderOngoing_) {
+                    this.owningViewV2_.uiNodeNeedUpdateV2(this.repeatElmtId_);
+                }
             }
         }
         stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}): `,
@@ -1009,7 +1013,9 @@ class __RepeatVirtualScroll2Impl<T> {
 
         try {
             // execute item builder function
+            const isTemplate: boolean = (ttype !== RepeatEachFuncTtype);
             itemGenFunc(repeatItem);
+            RepeatVirtualScroll2Native.setCreateByTemplate(isTemplate);
         } catch (e) {
             this.stopRecordDependencies();
             

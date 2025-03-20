@@ -143,9 +143,7 @@ template("build_component_ng") {
         if (!is_arkui_x && defined(use_rosen_drawing) && use_rosen_drawing) {
           external_deps += [ "graphic_2d:2d_graphics" ]
         } else {
-          if (enable_graphic_text_gine) {
-            external_deps += [ "graphic_2d:2d_graphics_new" ]
-          } else {
+          if (!enable_graphic_text_gine) {
             deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
           }
         }

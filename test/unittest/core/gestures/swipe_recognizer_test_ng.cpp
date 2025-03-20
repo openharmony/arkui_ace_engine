@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
+#include "ui/base/ace_type.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -45,21 +46,22 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest001, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.OnAccepted();
-    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::SUCCEED);
+    swipeRecognizer->OnAccepted();
+    EXPECT_EQ(swipeRecognizer->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
      * @tc.expected: step3. result equals.
      */
-    swipeRecognizer.OnRejected();
-    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::FAIL);
+    swipeRecognizer->OnRejected();
+    EXPECT_EQ(swipeRecognizer->refereeState_, RefereeState::FAIL);
 }
 
 /**
@@ -73,23 +75,24 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest002, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchDown function
      * @tc.expected: step2. result equals.
      */
     TouchEvent touchEvent;
-    swipeRecognizer.fingers_ = 1;
-    swipeRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
-    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::DETECTING);
+    swipeRecognizer->fingers_ = 1;
+    swipeRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
+    EXPECT_EQ(swipeRecognizer->refereeState_, RefereeState::DETECTING);
 
     AxisEvent axisEvent;
-    swipeRecognizer.HandleTouchDownEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0.0);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0.0);
-    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::DETECTING);
+    swipeRecognizer->HandleTouchDownEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetX(), 0.0);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetY(), 0.0);
+    EXPECT_EQ(swipeRecognizer->refereeState_, RefereeState::DETECTING);
 }
 
 /**
@@ -103,25 +106,26 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest003, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchUp function
      * @tc.expected: step2. result equals.
      */
     TouchEvent touchEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), touchEvent.y);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
     AxisEvent axisEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), axisEvent.y);
 }
 
 /**
@@ -135,28 +139,29 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchUpEventTest001, TestSi
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function
      * @tc.expected: step2. result equals.
      */
     TouchEvent touchEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), touchEvent.y);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), touchEvent.y);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 }
 
 /**
@@ -170,22 +175,23 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchUpEventTest002, TestSi
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchUp function
      * @tc.expected: step2. result equals.
      */
     AxisEvent axisEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.HandleTouchUpEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), axisEvent.y);
 
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.HandleTouchUpEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), axisEvent.y);
 }
 
 /**
@@ -199,17 +205,18 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchCancelEventTest001, Te
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchUp function
      * @tc.expected: step2. result equals.
      */
     AxisEvent axisEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.HandleTouchCancelEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->HandleTouchCancelEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), axisEvent.y);
 }
 
 /**
@@ -223,7 +230,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -231,8 +239,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     std::unique_ptr<GestureEventFunc> onAction;
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -240,8 +248,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>();
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -249,8 +257,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -258,9 +266,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     TouchEvent touchEvent;
-    swipeRecognizer.touchPoints_[touchEvent.id] = touchEvent;
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 1);
+    swipeRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 1);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -269,9 +277,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.
      */
     touchEvent.tiltX = 0.0f;
     touchEvent.tiltY = 0.0f;
-    swipeRecognizer.touchPoints_[touchEvent.id] = touchEvent;
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 1);
+    swipeRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 1);
 }
 
 /**
@@ -285,7 +293,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest002, TestSize.
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
     std::unique_ptr<GestureEventFunc> onAction;
 
     /**
@@ -294,9 +303,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest002, TestSize.
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
-    swipeRecognizer.deviceType_ = SourceType::MOUSE;
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+    swipeRecognizer->deviceType_ = SourceType::MOUSE;
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -304,10 +313,10 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest002, TestSize.
      * @tc.expected: step2. result equals.
      */
     TouchEvent touchEvent;
-    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
-    swipeRecognizer.touchPoints_[touchEvent.id] = touchEvent;
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 1);
+    swipeRecognizer->prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    swipeRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 1);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -317,13 +326,13 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerSendCallbackMsgTest002, TestSize.
     touchEvent.tiltX = 0.0f;
     touchEvent.tiltY = 0.0f;
     TouchEvent touchEvent1;
-    swipeRecognizer.deviceType_ = SourceType::MOUSE;
-    swipeRecognizer.lastTouchEvent_ = touchEvent1;
-    swipeRecognizer.lastTouchEvent_.tiltX = std::make_optional(0.0f);
-    swipeRecognizer.lastTouchEvent_.tiltY = std::make_optional(0.0f);
-    swipeRecognizer.touchPoints_[touchEvent.id] = touchEvent;
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 1);
+    swipeRecognizer->deviceType_ = SourceType::MOUSE;
+    swipeRecognizer->lastTouchEvent_ = touchEvent1;
+    swipeRecognizer->lastTouchEvent_.tiltX = std::make_optional(0.0f);
+    swipeRecognizer->lastTouchEvent_.tiltY = std::make_optional(0.0f);
+    swipeRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 1);
 }
 
 /**
@@ -337,18 +346,19 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchMoveEventTest001, Test
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchMove function
      * @tc.expected: step2. result equals.
      */
     AxisEvent axisEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetY(), 0);
 }
 
 /**
@@ -362,7 +372,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest004, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchMove function
@@ -371,27 +382,27 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest004, TestSize.Level1)
     TouchEvent touchEvent;
     touchEvent.x = 0;
     touchEvent.y = 1;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), 0);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), 0);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), 0);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
-    swipeRecognizer.refereeState_ = RefereeState::DETECTING;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), 0);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), 0);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
     AxisEvent axisEvent;
-    swipeRecognizer.refereeState_ = RefereeState::DETECTING;
-    swipeRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), axisEvent.y);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetY(), 0);
 }
 
 /**
@@ -405,15 +416,16 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest005, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call CheckAngle function
      * @tc.steps: case1: prevAngle has value, prevAngle - angle > 45
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
-    auto result = swipeRecognizer.CheckAngle(0);
+    swipeRecognizer->prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    auto result = swipeRecognizer->CheckAngle(0);
     EXPECT_EQ(result, false);
 
     /**
@@ -421,8 +433,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest005, TestSize.Level1)
      * @tc.steps: case2: prevAngle has value, prevAngle - angle < 45
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
-    result = swipeRecognizer.CheckAngle(VERTICAL_ANGLE);
+    swipeRecognizer->prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    result = swipeRecognizer->CheckAngle(VERTICAL_ANGLE);
     EXPECT_EQ(result, true);
 
     /**
@@ -430,9 +442,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest005, TestSize.Level1)
      * @tc.steps: case2: prevAngle has no value, direction is HORIZONTAL, angle > 45
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.prevAngle_ = std::optional<double>();
-    swipeRecognizer.direction_.type = SwipeDirection::HORIZONTAL;
-    result = swipeRecognizer.CheckAngle(VERTICAL_ANGLE);
+    swipeRecognizer->prevAngle_ = std::optional<double>();
+    swipeRecognizer->direction_.type = SwipeDirection::HORIZONTAL;
+    result = swipeRecognizer->CheckAngle(VERTICAL_ANGLE);
     EXPECT_EQ(result, false);
 
     /**
@@ -440,9 +452,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest005, TestSize.Level1)
      * @tc.steps: case3: prevAngle has no value, direction is HORIZONTAL, angle < 45
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.prevAngle_ = std::optional<double>();
-    swipeRecognizer.direction_.type = SwipeDirection::HORIZONTAL;
-    result = swipeRecognizer.CheckAngle(0);
+    swipeRecognizer->prevAngle_ = std::optional<double>();
+    swipeRecognizer->direction_.type = SwipeDirection::HORIZONTAL;
+    result = swipeRecognizer->CheckAngle(0);
     EXPECT_EQ(result, true);
 
     /**
@@ -450,9 +462,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest005, TestSize.Level1)
      * @tc.steps: case4: prevAngle has no value, direction is VERTICAL, angle > 135
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
-    swipeRecognizer.direction_.type = SwipeDirection::VERTICAL;
-    result = swipeRecognizer.CheckAngle(HORIZONTAL_ANGLE);
+    swipeRecognizer->prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    swipeRecognizer->direction_.type = SwipeDirection::VERTICAL;
+    result = swipeRecognizer->CheckAngle(HORIZONTAL_ANGLE);
     EXPECT_EQ(result, false);
 
     /**
@@ -460,9 +472,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest005, TestSize.Level1)
      * @tc.steps: case5: prevAngle has no value, direction is VERTICAL, angle < 135
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
-    swipeRecognizer.direction_.type = SwipeDirection::VERTICAL;
-    result = swipeRecognizer.CheckAngle(VERTICAL_ANGLE);
+    swipeRecognizer->prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    swipeRecognizer->direction_.type = SwipeDirection::VERTICAL;
+    result = swipeRecognizer->CheckAngle(VERTICAL_ANGLE);
     EXPECT_EQ(result, true);
 }
 
@@ -477,7 +489,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchMoveEventTest002, Test
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchMove function
@@ -486,26 +499,26 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchMoveEventTest002, Test
     TouchEvent touchEvent;
     touchEvent.x = 0;
     touchEvent.y = 1;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), 0);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), 0);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), 0);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
-    swipeRecognizer.refereeState_ = RefereeState::DETECTING;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
     AxisEvent axisEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetY(), 0);
 }
 
 /**
@@ -519,7 +532,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchMoveEventTest003, Test
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchMove function
@@ -528,26 +542,26 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchMoveEventTest003, Test
     TouchEvent touchEvent;
     touchEvent.x = 0;
     touchEvent.y = -1;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), 0);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), 0);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), 0);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
-    swipeRecognizer.refereeState_ = RefereeState::DETECTING;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
     AxisEvent axisEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetY(), 0);
 }
 
 /**
@@ -561,7 +575,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchMoveEventTest004, Test
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchMove function
@@ -570,24 +585,24 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchMoveEventTest004, Test
     TouchEvent touchEvent;
     touchEvent.x = -1;
     touchEvent.y = -1;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
-    swipeRecognizer.refereeState_ = RefereeState::DETECTING;
-    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->lastTouchEvent_.id, touchEvent.id);
 
     AxisEvent axisEvent;
-    swipeRecognizer.refereeState_ = RefereeState::FAIL;
-    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
-    swipeRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0);
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->currentFingers_ = swipeRecognizer->fingers_;
+    swipeRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetX(), 0);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetY(), 0);
 }
 
 /**
@@ -601,18 +616,19 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest006, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call OnResetStatus function
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.OnResetStatus();
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetX(), 0.0);
-    EXPECT_EQ(swipeRecognizer.axisOffset_.GetY(), 0.0);
-    EXPECT_EQ(swipeRecognizer.resultSpeed_, 0.0);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), 0.0);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), 0.0);
+    swipeRecognizer->OnResetStatus();
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetX(), 0.0);
+    EXPECT_EQ(swipeRecognizer->axisOffset_.GetY(), 0.0);
+    EXPECT_EQ(swipeRecognizer->resultSpeed_, 0.0);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0.0);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetY(), 0.0);
 }
 
 /**
@@ -626,7 +642,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest007, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
     RefPtr<SwipeRecognizer> swipeRecognizerPtr =
         AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
@@ -635,7 +652,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest007, TestSize.Level1)
      * @tc.steps: case1: input is nullptr
      * @tc.expected: step2. result equals.
      */
-    auto result = swipeRecognizer.ReconcileFrom(nullptr);
+    auto result = swipeRecognizer->ReconcileFrom(nullptr);
     EXPECT_EQ(result, false);
 
     /**
@@ -643,7 +660,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest007, TestSize.Level1)
      * @tc.steps: case2: input is same
      * @tc.expected: step2. result equals.
      */
-    result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
+    result = swipeRecognizer->ReconcileFrom(swipeRecognizerPtr);
     EXPECT_EQ(result, true);
 
     /**
@@ -651,8 +668,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest007, TestSize.Level1)
      * @tc.steps: case3: curr->fingers != fingers
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.fingers_ = swipeRecognizerPtr->fingers_ + 1;
-    result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
+    swipeRecognizer->fingers_ = swipeRecognizerPtr->fingers_ + 1;
+    result = swipeRecognizer->ReconcileFrom(swipeRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -660,9 +677,9 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest007, TestSize.Level1)
      * @tc.steps: case4: curr->fingers = fingers, direction type not same
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.fingers_ = swipeRecognizerPtr->fingers_;
-    swipeRecognizer.direction_.type = SwipeDirection::HORIZONTAL;
-    result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
+    swipeRecognizer->fingers_ = swipeRecognizerPtr->fingers_;
+    swipeRecognizer->direction_.type = SwipeDirection::HORIZONTAL;
+    result = swipeRecognizer->ReconcileFrom(swipeRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -670,10 +687,10 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest007, TestSize.Level1)
      * @tc.steps: case5:direction type is same, speed is not same
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.fingers_ = swipeRecognizerPtr->fingers_;
-    swipeRecognizer.direction_.type = swipeRecognizerPtr->direction_.type;
-    swipeRecognizer.speed_ = 1;
-    result = swipeRecognizer.ReconcileFrom(swipeRecognizerPtr);
+    swipeRecognizer->fingers_ = swipeRecognizerPtr->fingers_;
+    swipeRecognizer->direction_.type = swipeRecognizerPtr->direction_.type;
+    swipeRecognizer->speed_ = 1;
+    result = swipeRecognizer->ReconcileFrom(swipeRecognizerPtr);
     EXPECT_EQ(result, false);
 }
 
@@ -688,16 +705,17 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest008, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call HandleTouchCancelEvent function
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.refereeState_ = RefereeState::SUCCEED;
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED;
     TouchEvent touchEvent;
-    swipeRecognizer.HandleTouchCancelEvent(touchEvent);
-    EXPECT_EQ(swipeRecognizer.refereeState_, RefereeState::SUCCEED);
+    swipeRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -711,15 +729,16 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest009, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
      * @tc.steps: case1: callback is null
      * @tc.expected: step2. result equals.
      */
-    swipeRecognizer.SendCallbackMsg(nullptr);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+    swipeRecognizer->SendCallbackMsg(nullptr);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -728,10 +747,10 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest009, TestSize.Level1)
      */
     std::unique_ptr<GestureEventFunc> onAction;
     TouchEvent touchEvent1;
-    swipeRecognizer.deviceType_ = SourceType::MOUSE;
-    swipeRecognizer.lastTouchEvent_ = touchEvent1;
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+    swipeRecognizer->deviceType_ = SourceType::MOUSE;
+    swipeRecognizer->lastTouchEvent_ = touchEvent1;
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -740,10 +759,10 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest009, TestSize.Level1)
      */
     TouchEvent touchEvent2;
     touchEvent2.tiltX = 0;
-    swipeRecognizer.deviceType_ = SourceType::TOUCH;
-    swipeRecognizer.lastTouchEvent_ = touchEvent2;
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+    swipeRecognizer->deviceType_ = SourceType::TOUCH;
+    swipeRecognizer->lastTouchEvent_ = touchEvent2;
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -753,11 +772,11 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest009, TestSize.Level1)
     TouchEvent touchEvent3;
     touchEvent3.tiltX = 0;
     touchEvent3.tiltY = 0;
-    swipeRecognizer.deviceType_ = SourceType::TOUCH;
-    swipeRecognizer.lastTouchEvent_ = touchEvent3;
-    swipeRecognizer.prevAngle_ = std::make_optional(0);
-    swipeRecognizer.SendCallbackMsg(onAction);
-    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+    swipeRecognizer->deviceType_ = SourceType::TOUCH;
+    swipeRecognizer->lastTouchEvent_ = touchEvent3;
+    swipeRecognizer->prevAngle_ = std::make_optional(0);
+    swipeRecognizer->SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer->touchPoints_.size(), 0);
 }
 
 /**
@@ -771,7 +790,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest010, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
         swipeDirection, SWIPE_SPEED);
     ASSERT_NE(swipeRecognizer, nullptr);
     /**
@@ -806,7 +826,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerTest011, TestSize.Level1)
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
         swipeDirection, SWIPE_SPEED);
     ASSERT_NE(swipeRecognizer, nullptr);
 
@@ -920,7 +941,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchDownEventTest001, Test
      * @tc.steps: step1. create LongPressRecognizer.
      */
     SwipeDirection swipeDirection;
-    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
         swipeDirection, SWIPE_SPEED);
     TouchEvent touchEvent;
     touchEvent.x = 100.0;
@@ -951,7 +973,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchDownEventTest002, Test
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
         swipeDirection, SWIPE_SPEED);
     TouchEvent touchEvent;
     touchEvent.x = 100.0;
@@ -983,7 +1006,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchUpEventTest003, TestSi
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
         swipeDirection, SWIPE_SPEED);
     TouchEvent touchEvent;
     touchEvent.x = 100.0;
@@ -1009,7 +1033,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchUpEventTest006, TestSi
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
         swipeDirection, SWIPE_SPEED);
     TouchEvent touchEvent;
     touchEvent.x = 100.0;
@@ -1058,7 +1083,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchUpEventTest005, TestSi
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
         swipeDirection, SWIPE_SPEED);
     TouchEvent touchEvent;
     touchEvent.x = 100.0;
@@ -1106,7 +1132,8 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeRecognizerHandleTouchCancelEventTest005, Te
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+    RefPtr<SwipeRecognizer> swipeRecognizer =
+        AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
         swipeDirection, SWIPE_SPEED);
     TouchEvent touchEvent;
     touchEvent.x = 100.0;

@@ -82,12 +82,14 @@ public:
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
-    virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
+    virtual void SetBackgroundBlurStyle(
+        const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) = 0;
+    virtual void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions()) {}
     virtual void SetBackgroundImageSyncMode(bool syncMode) {}
-    virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) = 0;
-    virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
-    virtual void SetForegroundEffect(float radius) {}
+    virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions())
+    {}
+    virtual void SetForegroundEffect(float radius, const SysOptions& sysOptions = SysOptions()) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
     virtual void SetLightUpEffect(double radio) {}
@@ -228,7 +230,8 @@ public:
 
     // effects
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
-    virtual void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
+    virtual void SetBackdropBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
 
     virtual void SetDynamicDim(float DimDegree) = 0;
@@ -236,7 +239,8 @@ public:
     virtual void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
     virtual void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
 
-    virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
+    virtual void SetFrontBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) = 0;
     virtual void SetMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetBlendMode(BlendMode blendMode) = 0;

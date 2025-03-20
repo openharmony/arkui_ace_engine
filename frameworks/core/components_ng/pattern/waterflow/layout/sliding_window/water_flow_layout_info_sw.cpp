@@ -555,7 +555,7 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
         }
         const float startPos = SectionStartPos(lanes_[i]);
         if (std::any_of(lanes_[i].begin(), lanes_[i].end(),
-                [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
+            [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos, 0.01); })) {
             return true;
         }
         if (lanes_[i].empty() || lanes_[i][0].items_.empty()) {
@@ -877,7 +877,7 @@ bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t i
 {
     using std::abs, std::round, std::clamp;
     const float offset = StartPos() + delta_;
-    if (LessOrEqual(abs(offset), viewport * 2.0f)) {
+    if (LessOrEqual(abs(delta_), viewport * 2.0f)) {
         return false;
     }
     const int32_t startIdx = StartIndex();
@@ -981,5 +981,58 @@ const Lane* WaterFlowLayoutInfoSW::GetLane(int32_t itemIdx) const
         return nullptr;
     }
     return &lane;
+}
+
+float WaterFlowLayoutInfoSW::GetDistanceToTop(int32_t itemIdx, int32_t laneIdx, float mainGap) const
+{
+    if (!ItemInView(itemIdx)) {
+        int32_t seg = GetSegment(itemIdx);
+        return lanes_[seg][laneIdx].endPos;
+    }
+    return DistanceToTop(itemIdx, mainGap);
+}
+
+float WaterFlowLayoutInfoSW::GetDistanceToBottom(int32_t itemIdx, int32_t laneIdx, float mainSize, float mainGap) const
+{
+    if (!ItemInView(itemIdx)) {
+        int32_t seg = GetSegment(itemIdx);
+        return lanes_[seg][laneIdx].startPos;
+    }
+    return DistanceToTop(itemIdx, mainGap) + GetCachedHeightInLanes(itemIdx);
+}
+
+float WaterFlowLayoutInfoSW::GetCachedHeightInLanes(int32_t idx) const
+{
+    const auto* lane = GetLane(idx);
+    CHECK_NULL_RETURN(lane, 0.0f);
+    for (const auto& item : lane->items_) {
+        if (item.idx == idx) {
+            return item.mainSize;
+        }
+    }
+    return 0.0f;
+}
+
+void WaterFlowLayoutInfoSW::SetHeightInLanes(int32_t idx, int32_t mainHeight)
+{
+    auto* lane = GetMutableLane(idx);
+    CHECK_NULL_VOID(lane);
+    for (auto& item : lane->items_) {
+        if (item.idx == idx) {
+            item.mainSize = mainHeight;
+        }
+    }
+}
+
+bool WaterFlowLayoutInfoSW::HaveRecordIdx(int32_t idx) const
+{
+    const auto* lane = GetLane(idx);
+    CHECK_NULL_RETURN(lane, false);
+    for (const auto& item : lane->items_) {
+        if (item.idx == idx) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

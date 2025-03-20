@@ -65,6 +65,8 @@
       OHOS::Ace::Platform::AceApplicationInfoImpl::*;
       OHOS::Ace::Platform::AceContainer::*;
       OHOS::Ace::Platform::FlutterAceView::*;
+      "OHOS::Ace::Platform::WindowFreeContainer::CreateWindowFreeContainer(void*, void*)";
+      "OHOS::Ace::Platform::WindowFreeContainer::DestroyWindowFreeContainer()";
       OHOS::Ace::PluginComponentManager::*;
       OHOS::Ace::Scheduler::*;
       OHOS::Ace::ScopedDelegate::*;
@@ -424,7 +426,7 @@
       OHOS::Ace::ShadowTheme::*;
       OHOS::Ace::TouchLocationInfo::*;
       OHOS::Ace::ACE_FORCE_EXPORT::*;
-      OHOS::Ace::LifeCycleCheckable::~LifeCycleCheckable*;
+      OHOS::Ace::LifeCycleCheckable::*;
       OHOS::Ace::Kit::ViewStackProcessor::*;
       OHOS::Ace::Kit::AbstractViewFactory::*;
       OHOS::Ace::Kit::BoxLayoutAlgorithm::*;
@@ -527,6 +529,8 @@
       "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
       "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
       "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
+      OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
+      OHOS::Ace::TouchEventTarget::GetAttachedNode*;
     };
   local:
     *;

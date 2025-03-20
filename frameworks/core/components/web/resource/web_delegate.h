@@ -795,6 +795,7 @@ public:
     void HideWebView();
     void OnRenderToBackground();
     void OnRenderToForeground();
+    void SetSurfaceDensity(const double& density);
     void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
@@ -850,6 +851,7 @@ public:
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
+    void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
@@ -959,7 +961,7 @@ public:
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
-    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType);
+    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler, int videoNaturalWidth,
@@ -1164,6 +1166,8 @@ public:
             keyboardHandler_->Close();
         }
     }
+
+    bool SetFocusByPosition(float x, float y);
 
     void StartVibraFeedback(const std::string& vibratorType);
 

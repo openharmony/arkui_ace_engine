@@ -72,6 +72,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     delta = -FireOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkScrollBarProxyDirty();
     return true;
 };
 
@@ -387,6 +388,10 @@ bool WaterFlowPattern::UpdateStartIndex(int32_t index)
     // if target index is footer, fix align because it will jump after fillViewport.
     if (layoutInfo_->footerIndex_ == 0 && layoutInfo_->jumpIndex_ == childCount - 1) {
         SetScrollAlign(ScrollAlign::END);
+    }
+    if (layoutInfo_->Mode() == LayoutMode::TOP_DOWN) {
+        // distinguish scrollToLastIndex and scrollToEdge in top-down mode.
+        layoutInfo_->jumpIndex_ = index;
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;

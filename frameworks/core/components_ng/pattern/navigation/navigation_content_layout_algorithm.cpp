@@ -63,7 +63,8 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 continue;
             }
             UpdatePropertyIfNeedForceMeasure(navDestinationNode);
-            child->Measure(layoutConstraint);
+            auto constraint = navDestinationNode->AdjustLayoutConstarintIfNeeded(layoutConstraint);
+            child->Measure(constraint);
             children.emplace_back(child);
         }
     }
@@ -85,13 +86,17 @@ void NavigationContentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild(false)) {
-        auto childNode = child->GetHostNode();
-        if (childNode && childNode->IsVisible()) {
-            SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
-            auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
-            child->GetGeometryNode()->SetMarginFrameOffset(translate);
-            child->Layout();
+        auto navDest = AceType::DynamicCast<NavDestinationGroupNode>(child->GetHostNode());
+        if (!navDest) {
+            continue;
         }
+        if (!navDest->IsVisible()) {
+            continue;
+        }
+        SizeF childSize = navDest->GetGeometryNode()->GetMarginFrameSize();
+        auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
+        navDest->GetGeometryNode()->SetMarginFrameOffset(translate);
+        navDest->Layout();
     }
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();

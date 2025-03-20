@@ -15,8 +15,6 @@
 
 #include "base/ressched/ressched_report.h"
 
-#define LIKELY(x) __builtin_expect(!!(x), 1)
-
 namespace OHOS::Ace {
 namespace Ressched {
 constexpr uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
@@ -42,12 +40,14 @@ constexpr int32_t SLIDE_OFF_EVENT = 0;
 constexpr int32_t SLIDE_DETECTING = 2;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
 constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
+constexpr int32_t MOVE_DETECTING = 7;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
 constexpr int32_t PUSH_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t POP_PAGE_EVENT = 0;
 constexpr int32_t AXIS_OFF_EVENT = 1;
 constexpr int32_t AXIS_IS_PAD = 0;
 constexpr int32_t AXIS_IS_MOUSE = 1;
+constexpr int64_t TIME_INTERVAL = 300;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -352,6 +352,16 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSlide_ = true;
     }
+    static uint64_t lastTime = 0;
+    auto now = std::chrono::steady_clock::now();
+    uint64_t curMs = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
+    if (isInSlide_ && curMs - lastTime >= TIME_INTERVAL) {
+        lastTime = curMs;
+        std::unordered_map<std::string, std::string> payload;
+        LoadAceApplicationContext(payload);
+        ResSchedDataReport(RES_TYPE_SLIDE, MOVE_DETECTING, payload);
+    }
 }
 
 void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent)
@@ -401,7 +411,7 @@ double ResSchedReport::GetUpVelocity(const ResEventInfo& lastMoveInfo,
 
 void ResSchedReport::LoadPageEvent(int32_t value)
 {
-    if (LIKELY((value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)
+    if (ACE_LIKELY((value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)
         || (value == ResDefine::LOAD_PAGE_NO_REQUEST_FRAME_EVENT && loadPageRequestFrameOn_ == false))) {
         return;
     } else if (value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == true) {

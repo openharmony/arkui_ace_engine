@@ -16,14 +16,23 @@
 #include "interfaces/inner_api/ace_kit/include/ui/base/lifecycle_checkable.h"
 
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
 
 namespace OHOS::Ace {
 
-LifeCycleCheckable::~LifeCycleCheckable()
+void LifeCycleCheckable::OnDetectedObjDestroyInUse()
 {
-    if (usingCount_ && SystemProperties::DetectObjDestroyInUse()) {
+    if (SystemProperties::DetectObjDestroyInUse()) {
         LOGF_ABORT("this object is still in use by %{public}p@%{public}p, use_count=%{public}d",
             lastStack_ ? *(void**)lastStack_.load() : nullptr, lastStack_.load(), usingCount_.load());
+    }
+}
+
+void Referenced::OnDetectedClaimDeathObj(bool isNewOrRecycle)
+{
+    if (SystemProperties::DetectClaimDeathObj()) {
+        LOGF_ABORT("invalid claim: refCount=%{public}d, isNewOrRecycle=%{public}d", RefCount(), isNewOrRecycle);
     }
 }
 

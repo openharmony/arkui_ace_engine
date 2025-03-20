@@ -82,6 +82,9 @@ declare_args() {
 
   # Enable ace_engine circle feature
   ace_engine_enable_circle_feature = true
+
+  # Enable long press gesture extra handling
+  ace_engine_feature_enable_long_press_gesture_extra_handling = false
 }
 
 enable_dump_drawcmd = false
@@ -91,7 +94,8 @@ use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
           "${current_os}_${current_cpu}" == "mac_arm64"
 use_ios = "${current_os}_${current_cpu}" == "ios_x64" ||
           "${current_os}_${current_cpu}" == "ios_arm64"
-use_linux = "${current_os}_${current_cpu}" == "linux_x64"
+use_linux = "${current_os}_${current_cpu}" == "linux_x64" ||
+            "${current_os}_${current_cpu}" == "linux_arm64"
 
 use_hilog = is_mingw || is_mac || is_linux || is_ohos || is_ohos_standard_system
 

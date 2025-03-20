@@ -252,6 +252,12 @@ public:
         return startIdx == 0 || startIdx == Infinity<int32_t>();
     }
 
+    float GetDistanceToTop(int32_t itemIdx, int32_t laneIdx, float mainGap) const;
+    float GetDistanceToBottom(int32_t itemIdx, int32_t laneIdx, float mainSize, float mainGap) const;
+    float GetCachedHeightInLanes(int32_t idx) const;
+    void SetHeightInLanes(int32_t idx, int32_t mainHeight);
+    bool HaveRecordIdx(int32_t idx) const;
+
     /**
      * @brief lanes in multiple sections.
      * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.

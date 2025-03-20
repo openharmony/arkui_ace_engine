@@ -302,7 +302,7 @@ public:
 
     // accessibility
     void InitializeAccessibility();
-    void UninitializeAccessibility();
+    void UninitializeAccessibility(FrameNode* frameNode);
     bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
     bool OnAccessibilityChildTreeDeregister();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
@@ -325,10 +325,11 @@ public:
     void StopImageAnalyzer();
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
-    void OnSurfaceDestroyed();
+    void OnSurfaceDestroyed(FrameNode* frameNode = nullptr);
     void SetRenderFit(RenderFit renderFit);
+    void SetScreenId(uint64_t screenId);
     void HandleSurfaceCreated();
-    void HandleSurfaceDestroyed();
+    void HandleSurfaceDestroyed(FrameNode* frameNode = nullptr);
     void ChangeSurfaceCallbackMode(SurfaceCallbackMode mode)
     {
         if (surfaceCallbackModeChangeEvent_) {
@@ -359,6 +360,8 @@ protected:
     static std::string XComponentTypeToString(XComponentType type);
     static std::string XComponentNodeTypeToString(XComponentNodeType type);
     void AdjustNativeWindowSize(float width, float height);
+    bool IsSupportImageAnalyzerFeature();
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
 
     std::optional<std::string> id_;
     XComponentType type_;
@@ -376,6 +379,7 @@ protected:
     RefPtr<RenderContext> renderContextForSurface_;
     std::optional<int32_t> transformHintChangedCallbackId_;
     std::string surfaceId_;
+    bool isOnTree_ = false;
 
 private:
     void OnAreaChangedInner() override;
@@ -429,11 +433,9 @@ private:
     bool StopTextureExport();
     void InitializeRenderContext();
     void SetSurfaceNodeToGraphic();
-    bool IsSupportImageAnalyzerFeature();
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
-    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
@@ -448,6 +450,7 @@ private:
     std::optional<std::string> libraryname_;
     std::shared_ptr<InnerXComponentController> xcomponentController_;
     std::optional<std::string> soPath_;
+    std::optional<uint64_t> screenId_;
 
     RefPtr<RenderContext> handlingSurfaceRenderContext_;
     WeakPtr<XComponentPattern> extPattern_;
@@ -497,7 +500,6 @@ private:
     // record displaySync_->DelFromPipelineOnContainer() from OnDetachFromMainTree
     bool needRecoverDisplaySync_ = false;
     bool isNativeImageAnalyzing_ = false;
-    bool isOnTree_ = false;
 };
 } // namespace OHOS::Ace::NG
 

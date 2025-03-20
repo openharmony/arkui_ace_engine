@@ -18,76 +18,48 @@
 
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
+namespace OHOS::Ace::Framework {
+class JSIndicatorController;
+}
 namespace OHOS::Ace::NG {
-using CommonFunc = std::function<void()>;
-using ChangeIndexImpl = std::function<void(const int32_t, bool)>;
-
+class IndicatorPattern;
 class IndicatorController : public virtual AceType {
     DECLARE_ACE_TYPE(IndicatorController, AceType);
 
 public:
-    void ShowPrevious() const
+    void ShowPrevious() const;
+
+    void ShowNext() const;
+
+    void ChangeIndex(int32_t index, bool useAnimation) const;
+
+    void ResetJSIndicatorController();
+
+    void SetJSIndicatorController(std::function<void()> resetFunc);
+
+    void SetIndicatorPattern(const RefPtr<IndicatorPattern>& indicatorPattern);
+
+    void SetSwiperNode(const RefPtr<FrameNode>& swiperNode);
+
+    void SetSwiperNode(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& indicatorNode)
     {
-        if (showPrevImpl_) {
-            showPrevImpl_();
-        }
+        SetSwiperNode(swiperNode);
     }
 
-    void SetShowPrevImpl(const CommonFunc& showPrevImpl)
-    {
-        showPrevImpl_ = showPrevImpl;
-    }
-
-    void ShowNext() const
-    {
-        if (showNextImpl_) {
-            showNextImpl_();
-        }
-    }
-
-    void SetShowNextImpl(const CommonFunc& showNextImpl)
-    {
-        showNextImpl_ = showNextImpl;
-    }
-
-    void ChangeIndex(int32_t index, bool useAnimation)
-    {
-        if (changeIndexImpl_) {
-            changeIndexImpl_(index, useAnimation);
-        }
-    }
-
-    void SetChangeIndexImpl(const ChangeIndexImpl& changeIndexImpl)
-    {
-        changeIndexImpl_ = changeIndexImpl;
-    }
-
-    void SetSwiperNode(const WeakPtr<NG::UINode>& swiperNode, const WeakPtr<NG::UINode>& indicatorNode)
-    {
-        swiperNode_ = swiperNode;
-        auto refUINode = swiperNode_.Upgrade();
-        CHECK_NULL_VOID(refUINode);
-        auto frameNode = DynamicCast<NG::FrameNode>(refUINode);
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<NG::SwiperPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetIndicatorNode(indicatorNode);
-    }
-
-    const WeakPtr<NG::UINode>& GetSwiperNode() const
-    {
-        return swiperNode_;
-    }
+    const WeakPtr<FrameNode>& GetSwiperNode() const;
 
     void ResetSwiperNode()
     {
         swiperNode_ = nullptr;
     }
+
+    void ResetIndicatorControllor(
+        const RefPtr<IndicatorController>& controller, const RefPtr<FrameNode>& indicatorNode);
+
 private:
-    CommonFunc showPrevImpl_;
-    CommonFunc showNextImpl_;
-    ChangeIndexImpl changeIndexImpl_;
-    WeakPtr<NG::UINode> swiperNode_;
+    std::function<void()> resetFunc_;
+    WeakPtr<IndicatorPattern> indicatorPattern_;
+    WeakPtr<FrameNode> swiperNode_;
 };
 
 } // namespace OHOS::Ace

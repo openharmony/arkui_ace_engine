@@ -23,6 +23,7 @@ import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import accessibility from '@ohos.accessibility';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
+import { i18n } from '@kit.LocalizationKit';
 
 const TITLE_MAX_LINES: number = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
@@ -513,6 +514,7 @@ export struct SelectDialogV2 {
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
+                      .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndexInner === index)
@@ -1106,9 +1108,15 @@ struct CustomDialogContentComponent {
   }
 
   aboutToAppear(): void {
-    let uiContext: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-    this.appMaxFontScale = uiContext.getMaxFontScale();
+    try {
+      let uiContext: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
+      this.appMaxFontScale = uiContext?.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+    }
     this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
   }

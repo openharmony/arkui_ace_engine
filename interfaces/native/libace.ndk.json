@@ -2760,11 +2760,11 @@
         "name": "OH_ArkUI_XComponent_StopImageAnalyzer"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_KeyframeAnimateOption_GetExpectedFrameRate"
     },
     {

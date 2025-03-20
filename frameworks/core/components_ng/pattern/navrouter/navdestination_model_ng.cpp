@@ -424,7 +424,8 @@ void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
 
 void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
     const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-    const std::vector<std::string>& nameList)
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+    const std::string& backButtonAccessibilityText)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -441,6 +442,14 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<N
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    if (userDefinedAccessibilityText) {
+        NavigationTitleUtil::SetAccessibility(backButtonNode, backButtonAccessibilityText);
+    } else {
+        std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+        NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+    }
 }
 
 void NavDestinationModelNG::SetSubtitle(const std::string& subtitle)
@@ -1177,5 +1186,58 @@ void NavDestinationModelNG::SetOnNewParam(NG::NavDestinationOnNewParamCallback&&
     auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnNewParam(std::move(onNewParamCallback));
+}
+
+void NavDestinationModelNG::SetPreferredOrientation(const std::optional<Orientation>& ori)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetOrientation(ori);
+}
+
+void NavDestinationModelNG::SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetOrientation(ori);
+}
+
+void NavDestinationModelNG::SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetStatusBarConfig(statusBar);
+}
+
+void NavDestinationModelNG::SetEnableStatusBar(
+    FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetStatusBarConfig(statusBar);
+}
+
+void NavDestinationModelNG::SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavigationIndicatorConfig(navigationIndicator);
+}
+
+void NavDestinationModelNG::SetEnableNavigationIndicator(
+    FrameNode* frameNode, const std::optional<bool>& navigationIndicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavigationIndicatorConfig(navigationIndicator);
 }
 } // namespace OHOS::Ace::NG

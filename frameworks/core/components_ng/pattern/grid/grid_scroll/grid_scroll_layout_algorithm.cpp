@@ -65,6 +65,14 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     frameSize_.AddHeight(info_.contentEndPadding_);
     auto&& safeAreaOpts = gridLayoutProperty->GetSafeAreaExpandOpts();
     expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
+    auto host = layoutWrapper->GetHostNode();
+    if (host) {
+        auto pipeline = host->GetContext();
+        if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+            frameSize_.SetWidth(round(frameSize_.Width()));
+            frameSize_.SetHeight(round(frameSize_.Height()));
+        }
+    }
 
     InitialItemsCrossSize(gridLayoutProperty, frameSize_, info_.childrenCount_);
 
@@ -327,6 +335,10 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             cacheEnd = cache.second; // only use counting method when last line not completely filled
         }
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
+        info_.times_ = (info_.times_ + 1) % GRID_CHECK_INTERVAL;
+        if (info_.times_ == 0) {
+            info_.CheckGridMatrix(cacheCount);
+        }
     }
     UpdateOverlay(layoutWrapper);
 }
@@ -402,6 +414,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
 
     if (!info_.lastCrossCount_) {
         info_.lastCrossCount_ = crossCount_;
+        reason_ = GridReloadReason::INIT;
     }
 
     CheckReset(mainSize, crossSize, layoutWrapper);
@@ -466,8 +479,9 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
     info_.startIndex_ = firstItem;
     currentMainLineIndex_ = (firstItem == 0 ? 0 : info_.startMainLineIndex_) - 1;
     info_.endIndex_ = firstItem - 1;
-    TAG_LOGI(AceLogTag::ACE_GRID, "data reload begin, firstItem:%{public}d, currentItemIndex:%{public}d", firstItem,
-        currentItemIndex);
+    TAG_LOGI(AceLogTag::ACE_GRID,
+        "data reload begin, firstItem:%{public}d, currentItemIndex:%{public}d, reason:%{public}s", firstItem,
+        currentItemIndex, GetReloadReasonStr(reason_).c_str());
     while (info_.endIndex_ < currentItemIndex) {
         auto lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         if (LessNotEqual(lineHeight, 0.0)) {
@@ -485,6 +499,7 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
     }
     TAG_LOGI(AceLogTag::ACE_GRID, "data reload end, startIndex_:%{public}d, startMainLineIndex_:%{public}d",
         info_.startIndex_, info_.startMainLineIndex_);
+    reason_ = GridReloadReason::DATA_RELOAD;
 }
 
 void GridScrollLayoutAlgorithm::ReloadFromUpdateIdxToStartIndex(
@@ -963,6 +978,7 @@ void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, 
     auto grid = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(grid);
     grid->ChildrenUpdatedFrom(0);
+    reason_ = GridReloadReason::SCROLL_TO_INDEX;
     GetTargetIndexInfoWithBenchMark(layoutWrapper, isTargetBackward, targetIndex);
     moveToEndLineIndex_ = isTargetBackward ? targetIndex : moveToEndLineIndex_;
 }
@@ -1000,6 +1016,7 @@ void GridScrollLayoutAlgorithm::ScrollToIndexStart(LayoutWrapper* layoutWrapper,
     auto grid = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(grid);
     grid->ChildrenUpdatedFrom(0);
+    reason_ = GridReloadReason::SCROLL_TO_INDEX;
     GetTargetIndexInfoWithBenchMark(layoutWrapper, isTargetBackward, targetIndex);
 }
 
@@ -1168,6 +1185,7 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         auto grid = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(grid);
         grid->ChildrenUpdatedFrom(0);
+        reason_ = GridReloadReason::SKIP_LARGE_OFFSET;
     }
 }
 
@@ -1214,6 +1232,7 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         auto grid = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(grid);
         grid->ChildrenUpdatedFrom(0);
+        reason_ = GridReloadReason::SKIP_LARGE_OFFSET;
     }
 }
 
@@ -2121,10 +2140,11 @@ public:
     {}
     ~TempLayoutRange()
     {
+        const int32_t diff = CalcDiff();
         info_.startIndex_ = subStart_;
-        info_.startMainLineIndex_ = subStartLine_;
+        info_.startMainLineIndex_ = subStartLine_ - diff;
         info_.endIndex_ = subEnd_;
-        info_.endMainLineIndex_ = subEndLine_;
+        info_.endMainLineIndex_ = subEndLine_ - diff;
     }
 
     const int32_t subStart_;
@@ -2134,6 +2154,21 @@ public:
 
 private:
     GridLayoutInfo& info_;
+
+    /**
+     * @brief after SyncPreload, need adjust startMainLineIdx and endMainLineIdx according to startIndex_.
+     * Because in AddForwardLines, it may change the gridMatrix_ and make the original start/endMainLineIdx invalid.
+     */
+    int32_t CalcDiff()
+    {
+        if (subStartLine_ > subEndLine_) {
+            // need not adjust when there has no items in viewport.
+            return 0;
+        }
+        auto newStartMainLineIdx = subStartLine_;
+        info_.GetLineIndexByIndex(subStart_, newStartMainLineIdx);
+        return subStartLine_ - newStartMainLineIdx;
+    }
 
     ACE_DISALLOW_COPY_AND_MOVE(TempLayoutRange);
 };
@@ -2211,6 +2246,9 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
     // [resetFromStart,resetFromUpdate]
     std::pair<bool, bool> resetMode = GetResetMode(layoutWrapper, updateIdx);
     if (info_.lastCrossCount_ != crossCount_ || resetMode.first || info_.IsResetted()) {
+        if (info_.lastCrossCount_ != crossCount_) {
+            reason_ = GridReloadReason::CROSS_COUNT_CHANGE;
+        }
         info_.lastCrossCount_ = crossCount_;
         info_.lineHeightMap_.clear();
         info_.gridMatrix_.clear();
@@ -2222,6 +2260,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         info_.clearStretch_ = true;
         isChildrenUpdated_ = true;
         info_.hasMultiLineItem_ = false;
+        info_.times_ = 0;
         ResetFocusedIndex(layoutWrapper);
         if (info_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);

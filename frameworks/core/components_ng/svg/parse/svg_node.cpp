@@ -364,47 +364,89 @@ RSPath SvgNode::AsRSPath(const Size& viewPort) const
     return {};
 }
 
-void SvgNode::InitStyle(const SvgBaseAttribute& attr)
+void SvgNode::ProcessSvgStyle(RefPtr<SvgNode> svgNode, const SvgBaseAttribute& attr)
 {
-    InheritAttr(attr);
-    if (hrefFill_) {
-        auto href = attributes_.fillState.GetHref();
+    svgNode->InheritAttr(attr);
+    auto& svgAttributes = svgNode->attributes_;
+    if (svgNode->hrefFill_) {
+        auto href = svgAttributes.fillState.GetHref();
         if (!href.empty()) {
-            auto gradient = GetGradient(href);
+            auto gradient = svgNode->GetGradient(href);
             if (gradient) {
-                attributes_.fillState.SetGradient(gradient.value());
+                svgAttributes.fillState.SetGradient(gradient.value());
             }
         }
-        href = attributes_.strokeState.GetHref();
+        href = svgAttributes.strokeState.GetHref();
         if (!href.empty()) {
-            auto gradient = GetGradient(href);
+            auto gradient = svgNode->GetGradient(href);
             if (gradient) {
-                attributes_.strokeState.SetGradient(gradient.value());
+                svgAttributes.strokeState.SetGradient(gradient.value());
             }
         }
     }
-    if (hrefRender_) {
-        hrefClipPath_ = attributes_.clipState.GetHref();
-        opacity_ = OpacityDoubleToUint8(attributes_.opacity);
-        transform_ = attributes_.transform;
-        hrefMaskId_ = ParseIdFromUrl(attributes_.maskId);
-        hrefFilterId_ = ParseIdFromUrl(attributes_.filterId);
+    if (svgNode->hrefRender_) {
+        svgNode->hrefClipPath_ = svgAttributes.clipState.GetHref();
+        svgNode->opacity_ = OpacityDoubleToUint8(svgAttributes.opacity);
+        svgNode->transform_ = svgAttributes.transform;
+        svgNode->hrefMaskId_ = ParseIdFromUrl(svgAttributes.maskId);
+        svgNode->hrefFilterId_ = ParseIdFromUrl(svgAttributes.filterId);
     }
-    OnInitStyle();
-    if (passStyle_) {
-        for (auto& node : children_) {
-            CHECK_NULL_VOID(node);
-            // pass down style only if child inheritStyle_ is true
-            node->InitStyle((node->inheritStyle_) ? attributes_ : SvgBaseAttribute());
-        }
-    }
-    for (auto& child : children_) {
+    svgNode->OnInitStyle();
+}
+
+void SvgNode::ProcessChildAnimations(const RefPtr<SvgNode>& currentSvgNode)
+{
+    for (auto& child : currentSvgNode->children_) {
         auto svgAnimate = DynamicCast<SvgAnimation>(child);
         if (svgAnimate) {
             svgAnimate->UpdateAttr();
-            PrepareAnimation(svgAnimate);
+            currentSvgNode->PrepareAnimation(svgAnimate);
         }
     }
+}
+
+bool SvgNode::ProcessChildStyle(SvgInitStyleProcessInfo& currentSvgNodeInfo,
+    std::stack<std::pair<SvgInitStyleProcessInfo, const SvgBaseAttribute*>>& initStyleTaskSt)
+{
+    auto currentSvgNode = currentSvgNodeInfo.svgNode;
+    if (currentSvgNode->passStyle_ &&
+        currentSvgNodeInfo.childIndex < static_cast<int32_t>(currentSvgNode->children_.size())) {
+        auto child = currentSvgNode->children_[currentSvgNodeInfo.childIndex];
+        if (child) {
+            // pass down style only if child inheritStyle_ is true
+            initStyleTaskSt.emplace(
+                child, (child->inheritStyle_) ? &(currentSvgNode->attributes_) : nullptr);
+        }
+        ++currentSvgNodeInfo.childIndex;
+        return false;
+    }
+    return true;
+}
+
+void SvgNode::InitStyleDfs(const WeakPtr<SvgNode>& root, const SvgBaseAttribute& attr)
+{
+    auto parentNode = root.Upgrade();
+    if (!parentNode) {
+        return;
+    }
+    std::stack<std::pair<SvgInitStyleProcessInfo, const SvgBaseAttribute*>> initStyleTaskSt;
+    initStyleTaskSt.emplace(parentNode, &attr);
+    while (!initStyleTaskSt.empty()) {
+        auto& [currentSvgNodeInfo, currentAttr] = initStyleTaskSt.top();
+        if (currentSvgNodeInfo.childIndex == 0) {
+            currentSvgNodeInfo.svgNode->ProcessSvgStyle(
+                currentSvgNodeInfo.svgNode, currentAttr ? *currentAttr : SvgBaseAttribute());
+        }
+        if (currentSvgNodeInfo.svgNode->ProcessChildStyle(currentSvgNodeInfo, initStyleTaskSt)) {
+            currentSvgNodeInfo.svgNode->ProcessChildAnimations(currentSvgNodeInfo.svgNode);
+            initStyleTaskSt.pop();
+        }
+    }
+}
+
+void SvgNode::InitStyle(const SvgBaseAttribute& attr)
+{
+    InitStyleDfs(WeakClaim(this), attr);
 }
 
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
@@ -975,31 +1017,39 @@ Offset SvgNode::CalcGlobalPivot(const std::pair<Dimension, Dimension>& transform
     return Offset(x, y);
 }
 
-SvgLengthScaleRule SvgNode::TransformForCurrentOBB(RSCanvas& canvas,
-    const SvgCoordinateSystemContext& context, SvgLengthScaleUnit contentUnits, float offsetX, float offsetY)
+SvgLengthScaleRule SvgNode::BuildContentScaleRule(const SvgCoordinateSystemContext& parentContext,
+    SvgLengthScaleUnit contentUnits)
 {
     if (contentUnits == SvgLengthScaleUnit::USER_SPACE_ON_USE) {
-        return context.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
+        return parentContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    }
+    // create default rect to draw graphic
+    auto squareWH = std::min(parentContext.GetContainerRect().Width(), parentContext.GetContainerRect().Height());
+    Rect defaultRect(0, 0, squareWH, squareWH);
+    SvgLengthScaleRule ContentRule (defaultRect,
+        parentContext.GetViewPort(), SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    return ContentRule;
+}
+
+void SvgNode::TransformForCurrentOBB(RSCanvas& canvas, const SvgLengthScaleRule& contentRule,
+    const Size& ContainerSize, const Offset& offset)
+{
+    if (contentRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) {
+        return;
     }
     float scaleX = 0.0f;
     float scaleY = 0.0f;
     float translateX = 0.0f;
     float translateY = 0.0f;
-    // create default rect to draw graphic
-    auto squareWH = std::min(context.GetContainerRect().Width(), context.GetContainerRect().Height());
-    Rect defaultRect(0, 0, squareWH, squareWH);
-    SvgLengthScaleRule ContentRule = SvgLengthScaleRule(defaultRect, context.GetViewPort(),
-        SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
-    
     SvgPreserveAspectRatio preserveAspectRatio;
     preserveAspectRatio.svgAlign = SvgAlign::ALIGN_NONE;
-    SvgAttributesParser::ComputeScale(defaultRect.GetSize(), context.GetContainerRect().GetSize(),
+    SvgAttributesParser::ComputeScale(contentRule.GetContainerRect().GetSize(), ContainerSize,
         preserveAspectRatio, scaleX, scaleY);
-    SvgAttributesParser::ComputeTranslate(defaultRect.GetSize(), context.GetContainerRect().GetSize(), scaleX, scaleY,
-        preserveAspectRatio.svgAlign, translateX, translateY);
+    SvgAttributesParser::ComputeTranslate(contentRule.GetContainerRect().GetSize(),
+        ContainerSize, scaleX, scaleY, preserveAspectRatio.svgAlign,
+        translateX, translateY);
     // scale the graphic content of the given element non-uniformly
-    canvas.Translate(translateX  + offsetX, translateY + offsetY);
+    canvas.Translate(translateX  + offset.GetX(), translateY + offset.GetY());
     canvas.Scale(scaleX, scaleY);
-    return ContentRule;
 }
 } // namespace OHOS::Ace::NG

@@ -1068,7 +1068,7 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             menuParam.hasPreviewTransitionEffect = true;
             menuParam.previewTransition = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
         }
-        if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
+        if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::CUSTOM ||
             menuParam.hasPreviewTransitionEffect || menuParam.hasTransitionEffect ||
             menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
@@ -1190,8 +1190,7 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
 {
-    if (info.Length() < PARAMETER_LENGTH_SECOND || (!info[NUM_ZERO]->IsString() && !info[NUM_ZERO]->IsObject()) ||
-        !info[NUM_FIRST]->IsObject()) {
+    if (info.Length() < PARAMETER_LENGTH_FIRST || (!info[NUM_ZERO]->IsString() && !info[NUM_ZERO]->IsObject())) {
         return;
     }
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
@@ -1199,11 +1198,18 @@ void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
     // Set message to tipsParam
     tipsParam->SetMessage(info[0]->ToString());
     // Set bindTipsOptions to tipsParam
-    auto tipsObj = JSRef<JSObject>::Cast(info[1]);
+    JSRef<JSObject> tipsObj;
+    if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
+        tipsObj = JSRef<JSObject>::Cast(info[1]);
+    } else {
+        tipsObj = JSRef<JSObject>::New();
+    }
     // Parse bindTipsOptions param
     ParseTipsParam(tipsObj, tipsParam);
-    ParseTipsArrowPositionParam(tipsObj, tipsParam);
-    ParseTipsArrowSizeParam(tipsObj, tipsParam);
+    if (tipsParam->EnableArrow()) {
+        ParseTipsArrowPositionParam(tipsObj, tipsParam);
+        ParseTipsArrowSizeParam(tipsObj, tipsParam);
+    }
     ViewAbstractModel::GetInstance()->BindTips(tipsParam);
 }
 
@@ -1348,7 +1354,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
     // arrow is disabled for contextMenu with preview
-    if (menuParam.previewMode != MenuPreviewMode::NONE) {
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE) {
         menuParam.enableArrow = false;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
@@ -2004,7 +2010,10 @@ bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight&
     }
     if (!ParseJsDimensionVpNG(args, sheetHeight)) {
         if (!isReset) {
-            detent.sheetMode = NG::SheetMode::LARGE;
+            auto sheetTheme = GetTheme<OHOS::Ace::NG::SheetTheme>();
+            detent.sheetMode = sheetTheme != nullptr
+                                   ? static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode())
+                                   : NG::SheetMode::LARGE;
         }
         return false;
     }
@@ -2094,8 +2103,8 @@ void JSViewAbstract::ParseContentMenuCommonParam(
     auto preview = menuObj->GetProperty("preview");
     if (preview->IsNumber()) {
         auto previewMode = preview->ToNumber<int32_t>();
+        menuParam.previewMode = static_cast<MenuPreviewMode>(previewMode);
         if (previewMode == static_cast<int32_t>(MenuPreviewMode::IMAGE)) {
-            menuParam.previewMode = static_cast<MenuPreviewMode>(previewMode);
             ParseContentPreviewAnimationOptionsParam(info, menuObj, menuParam);
         }
     }
@@ -2152,7 +2161,7 @@ void AppearDialogEvent(const JSCallbackInfo& info, DialogProperties& dialogPrope
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
     if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
         auto didAppearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Popups.onDidAppear");
@@ -2163,7 +2172,7 @@ void AppearDialogEvent(const JSCallbackInfo& info, DialogProperties& dialogPrope
     }
     auto onWillAppear = paramObject->GetProperty("onWillAppear");
     if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
         auto willAppearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Popups.onWillAppear");
@@ -2183,7 +2192,7 @@ void DisappearDialogEvent(const JSCallbackInfo& info, DialogProperties& dialogPr
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
     if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
         auto didDisappearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Popups.onDidDisappear");
@@ -2194,7 +2203,7 @@ void DisappearDialogEvent(const JSCallbackInfo& info, DialogProperties& dialogPr
     }
     auto onWillDisappear = paramObject->GetProperty("onWillDisappear");
     if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
         auto willDisappearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Popups.onWillDisappear");

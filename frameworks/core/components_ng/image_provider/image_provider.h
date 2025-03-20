@@ -58,6 +58,14 @@ struct ImageDecoderOptions {
     ImageDfxConfig imageDfxConfig;
 };
 
+struct UriDownLoadConfig {
+    ImageSourceInfo src;
+    ImageDfxConfig imageDfxConfig;
+    std::string taskKey;
+    bool sync;
+    bool hasProgressCallback;
+};
+
 class ImageObject;
 
 // load & decode images
@@ -97,11 +105,13 @@ public:
     static RefPtr<ImageObject> QueryImageObjectFromCache(const ImageSourceInfo& src);
 
     // cancel a scheduled background task
-    static void CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
+    static bool CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
     static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 
     static void CacheImageObject(const RefPtr<ImageObject>& obj);
+
+    static RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src);
 
 private:
     /** Check if task is already running and register task in the task map,
@@ -115,19 +125,27 @@ private:
     static bool RegisterTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
     // mark a task as finished, erase from map and retrieve corresponding ctxs
-    static std::set<WeakPtr<ImageLoadingContext>> EndTask(const std::string& key);
+    static std::set<WeakPtr<ImageLoadingContext>> EndTask(const std::string& key, bool isErase = true);
 
     static RefPtr<ImageObject> QueryThumbnailCache(const ImageSourceInfo& src);
 
     // helper function to create image object from ImageSourceInfo
     static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false);
 
+    static void DownLoadSuccessCallback(
+        const RefPtr<ImageObject>& imageObj, const std::string& key, bool sync = false, int32_t containerId = 0);
+    static void DownLoadOnProgressCallback(
+        const std::string& key, bool sync, const uint32_t& dlNow, const uint32_t& dlTotal, int32_t containerId = 0);
+    static void DownLoadImage(const UriDownLoadConfig& downLoadConfig);
+
     static void MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& targetSize, const std::string& key,
         const ImageDecoderOptions& imagedecoderOptions);
 
     // helper functions to end task and callback to LoadingContexts
-    static void SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false);
-    static void FailCallback(const std::string& key, const std::string& errorMsg, bool sync = false);
+    static void SuccessCallback(
+        const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false, int32_t containerId = 0);
+    static void FailCallback(
+        const std::string& key, const std::string& errorMsg, bool sync = false, int32_t containerId = 0);
 
     struct Task {
         CancelableCallback<void()> bgTask_;

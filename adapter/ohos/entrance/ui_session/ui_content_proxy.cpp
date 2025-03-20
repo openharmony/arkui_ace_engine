@@ -180,6 +180,42 @@ int32_t UIContentServiceProxy::RegisterWebUnfocusEventCallback(
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::SendCommand(int32_t id, const std::string& command)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCommand write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(id) || !data.WriteString(command)) {
+        LOGW("SendCommand write data failed");
+        return FAILED;
+    }
+    if (Remote()->SendRequest(SENDCOMMAND_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("SendCommand send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::SendCommandAsync(int32_t id, const std::string& command)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCommand Async write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(id) || !data.WriteString(command)) {
+        LOGW("SendCommand Async write data failed");
+        return FAILED;
+    }
+    return Remote()->SendRequest(SENDCOMMAND_ASYNC_EVENT, data, reply, option);
+}
+
 int32_t UIContentServiceProxy::UnregisterClickEventCallback()
 {
     MessageParcel data;
@@ -384,7 +420,7 @@ int32_t UIContentServiceProxy::GetWebViewCurrentLanguage(const EventCallback& ev
         LOGW("GetWebViewCurrentLanguage send request failed");
         return REPLY_ERROR;
     }
-    return REPLY_ERROR;
+    return NO_ERROR;
 }
 
 int32_t UIContentServiceProxy::GetCurrentPageName(const std::function<void(std::string)>& finishCallback)
@@ -409,7 +445,7 @@ int32_t UIContentServiceProxy::GetCurrentPageName(const std::function<void(std::
         LOGW("GetCurrentPageName send request failed");
         return REPLY_ERROR;
     }
-    return REPLY_ERROR;
+    return NO_ERROR;
 }
 
 int32_t UIContentServiceProxy::StartWebViewTranslate(

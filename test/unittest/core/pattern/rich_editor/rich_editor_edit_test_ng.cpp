@@ -213,25 +213,6 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorUpdateSelectionByTouchMove001, Test
 }
 
 /**
- * @tc.name: TestRichEditorHandleTripleClickEvent001
- * @tc.desc: test HandleTripleClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleTripleClickEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    richEditorPattern->HandleTripleClickEvent(info);
-    EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
-    EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
-}
-
-/**
  * @tc.name: TestRichEditorGetAllChildren001
  * @tc.desc: test GetAllChildren
  * @tc.type: FUNC
@@ -246,64 +227,6 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorGetAllChildren001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->GetAllChildren();
     EXPECT_EQ(richEditorPattern->childNodes_.size(), 0);
-}
-
-/**
- * @tc.name: TestRichEditorHandleSelectFontStyleWrapper001
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleSelectFontStyleWrapper001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TextStyle spanStyle;
-    KeyCode code = KeyCode::KEY_UNKNOWN;
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontWeight(), FontWeight::NORMAL);
-}
-
-/**
- * @tc.name: TestRichEditorHandleOnShowMenu001
- * @tc.desc: test HandleOnShowMenu
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleOnShowMenu001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto tempOffset = richEditorPattern->selectionMenuOffsetByMouse_;
-    richEditorPattern->parentGlobalOffset_.x_ = 10.0f;
-    richEditorPattern->parentGlobalOffset_.y_ = 20.0f;
-    richEditorPattern->HandleOnShowMenu();
-    ASSERT_NE(richEditorPattern->selectionMenuOffsetByMouse_, tempOffset);
-}
-
-/**
- * @tc.name: TestRichEditorHandleSelectFontStyle001
- * @tc.desc: test HandleSelectFontStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleSelectFontStyle001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    KeyCode code = KeyCode::KEY_UNKNOWN;
-    richEditorPattern->HandleSelectFontStyle(code);
-    EXPECT_EQ(richEditorPattern->isSpanStringMode_, true);
 }
 
 /**
@@ -469,48 +392,6 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
     richEditorPattern->moveLength_ = 2;
     richEditorPattern->CalcInsertValueObj(info, richEditorPattern->caretPosition_, true);
     EXPECT_EQ(info.spanIndex_, 0);
-}
-
-/**
- * @tc.name: RedoDrag001
- * @tc.desc: test RedoDrag
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, RedoDrag001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    RichEditorPattern::OperationRecord record;
-    record.beforeCaretPosition = 0;
-    record.addText = u"test123";
-    richEditorPattern->RedoDrag(record);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-}
-
-/**
- * @tc.name: UndoDrag001
- * @tc.desc: test UndoDrag
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, UndoDrag001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    RichEditorPattern::OperationRecord record;
-    record.deleteCaretPostion = 0;
-    record.addText = u"test123";
-    richEditorPattern->UndoDrag(record);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 7);
 }
 
 /**
@@ -699,99 +580,6 @@ HWTEST_F(RichEditorEditTestNg, GetCaretColor001, TestSize.Level1)
     richEditorPattern->caretColor_.reset();
     auto ret = richEditorPattern->GetCaretColor();
     EXPECT_NE(ret.GetValue(), 0);
-}
-
-/**
- * @tc.name: RedoDrag002
- * @tc.desc: test RedoDrag
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, RedoDrag002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-
-    RichEditorPattern::OperationRecord record;
-    record.deleteCaretPostion = 0;
-    record.addText = u"test123";
-    richEditorPattern->RedoDrag(record);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
-}
-/**
- * @tc.name: HandleOnDragDropTextOperation001
- * @tc.desc: test HandleOnDragDropTextOperation
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, HandleOnDragDropTextOperation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-
-    auto temp = richEditorPattern->caretPosition_;
-    richEditorPattern->HandleOnDragDropTextOperation(INIT_VALUE_1, false);
-    EXPECT_NE(richEditorPattern->caretPosition_, temp);
-}
-
-/**
- * @tc.name: UndoDrag002
- * @tc.desc: test UndoDrag
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, UndoDrag002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-
-    RichEditorPattern::OperationRecord record;
-    record.deleteCaretPostion = -1;
-    richEditorPattern->UndoDrag(record);
-    EXPECT_FALSE(record.addText.has_value());
-}
-
-/**
- * @tc.name: HandleOnDragInsertValueOperation001
- * @tc.desc: test HandleOnDragInsertValueOperation
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, HandleOnDragInsertValueOperation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-
-    struct UpdateSpanStyle typingStyle;
-    TextStyle textStyle(5);
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    std::u16string insertValue = u"test123";
-    richEditorPattern->HandleOnDragInsertValueOperation(insertValue);
-    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
 }
 
 /**

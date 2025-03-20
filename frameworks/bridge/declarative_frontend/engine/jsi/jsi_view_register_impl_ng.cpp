@@ -76,6 +76,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_indexer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
@@ -332,8 +333,9 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
     if (cleanUpIdleTask->IsFunction()) {
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
+        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
+            jsFunc->Call(globalObject, params.size(), params.data());
         };
         ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }
@@ -354,6 +356,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSStack::JSBind(globalObj);
     JSImage::JSBind(globalObj);
     JSLazyForEach::JSBind(globalObj);
+    JSLazyVGridLayout::JSBind(globalObj);
     JSList::JSBind(globalObj);
     JSListItem::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
@@ -472,7 +475,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #ifndef ARKUI_WEARABLE
     JSStepper::JSBind(globalObj);
     JSStepperItem::JSBind(globalObj);
-    JSSideBar::JSBind(globalObj);
 #endif
     JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
@@ -501,6 +503,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTextArea::JSBind(globalObj);
     JSTextInput::JSBind(globalObj);
     JSTextClock::JSBind(globalObj);
+    JSSideBar::JSBind(globalObj);
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
     JSGauge::JSBind(globalObj);

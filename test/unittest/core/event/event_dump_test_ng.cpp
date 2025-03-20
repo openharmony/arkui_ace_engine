@@ -29,6 +29,11 @@ constexpr int32_t NODEID = 1;
 constexpr int32_t DEFAULT_HITTEST_MODE = 0;
 constexpr int32_t DEFAULT_DEPTH = 1;
 constexpr int64_t DEFAULT_TIME_STAMP = 65536;
+const std::string JSON_KEY_COM_ID = "comId";
+const std::string ID_0 = "0x0";
+const std::string ID_1 = "0x1";
+const std::string PARENT_ID_0 = "0x0";
+const std::string PARENT_ID_1 = "0x1";
 const std::string TAG = "column";
 } // namespace
 
@@ -403,6 +408,186 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg010, TestSize.Level1)
     std::list<std::pair<int32_t, std::string>> dumpList;
     EXPECT_TRUE(dumpList.empty());
     eventTreeRecord->Dump(dumpList, DEFAULT_DEPTH);
+    EXPECT_FALSE(dumpList.empty());
+}
+
+/**
+ * @tc.name: EventDumpTestNg011
+ * @tc.desc: FrameNodeSnapshot Dump function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNodeSnapshot instance and init value.
+     */
+    auto frameNodeSnapshotInstance = CreateFrameNodeSnapshotWithInitValue();
+
+    /**
+     * @tc.steps: step2. set frameNodeSnapshotInstance->comId is "" and call Dump function.
+     * @tc.expected: comId does not exist in json.
+     */
+    ASSERT_NE(frameNodeSnapshotInstance, nullptr);
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    frameNodeSnapshotInstance->comId = "";
+    frameNodeSnapshotInstance->Dump(json);
+    EXPECT_FALSE(json->Contains(JSON_KEY_COM_ID));
+
+    /**
+     * @tc.steps: step3. set frameNodeSnapshotInstance->comId is "comId_02" and call Dump function.
+     * @tc.expected: comId exists in json.
+     */
+    frameNodeSnapshotInstance->comId = "comId_02";
+    frameNodeSnapshotInstance->Dump(json);
+    EXPECT_TRUE(json->Contains(JSON_KEY_COM_ID));
+}
+
+/**
+ * @tc.name: EventDumpTestNg012
+ * @tc.desc: MountToParent function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+
+    /**
+     * @tc.steps: step2. call MountToParent function.
+     * @tc.expected: expected value does not exist in json.
+     */
+    std::vector<std::pair<std::string, std::pair<std::string, std::unique_ptr<JsonValue>>>> stateInfoList;
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    eventTreeRecord->MountToParent(std::move(stateInfoList), json);
+    EXPECT_FALSE(json->Contains(("detail_" + ID_0).c_str()));
+
+    /**
+     * @tc.steps: step3. set stateInfoList not empty and call MountToParent function.
+     * @tc.expected: expected value exists in json.
+     */
+    stateInfoList.push_back(std::make_pair(ID_0, std::make_pair(PARENT_ID_0, JsonUtil::Create(true))));
+    stateInfoList.push_back(std::make_pair(ID_1, std::make_pair(PARENT_ID_1, JsonUtil::Create(true))));
+    eventTreeRecord->MountToParent(std::move(stateInfoList), json);
+    EXPECT_TRUE(json->Contains(("detail_" + ID_0).c_str()));
+}
+
+/**
+ * @tc.name: EventDumpTestNg013
+ * @tc.desc: EventTreeRecord Dump function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance and fill touch event vale to eventTree.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+    TouchEvent event;
+    event.type = Ace::TouchType::DOWN;
+    event.id = 1;
+    FillTouchDownEventToEventTree(eventTreeRecord, event, MAX_EVENT_TREE_RECORD_CNT + 1, 0, 0);
+
+    /**
+     * @tc.steps: step2. set startNumber is -1 and call Dump function.
+     * @tc.expected: "event tree_0" exists in json.
+     */
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    int32_t depth = 0;
+    int32_t startNumber = -1;
+    std::string header = "event tree_0";
+    eventTreeRecord->Dump(json, depth, startNumber);
+    EXPECT_TRUE(json->Contains(header));
+
+    /**
+     * @tc.steps: step3. set startNumber is 1 and call Dump function.
+     * @tc.expected: "event tree_1" exists in json.
+     */
+    startNumber = 1;
+    header = "event tree_1";
+    eventTreeRecord->Dump(json, depth, startNumber);
+    EXPECT_TRUE(json->Contains(header));
+}
+
+/**
+ * @tc.name: EventDumpTestNg014
+ * @tc.desc: BuildGestureTree function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+
+    /**
+     * @tc.steps: step2. call BuildGestureTree function.
+     * @tc.expected: "event procedures" exists in json.
+     */
+    auto gestureSnapshot = AceType::MakeRefPtr<GestureSnapshot>();
+    std::list<RefPtr<GestureSnapshot>> gestureSnapshotList;
+    gestureSnapshotList.push_back(gestureSnapshot);
+
+    std::map<int32_t, std::list<RefPtr<GestureSnapshot>>> gestureTreeMap;
+    gestureTreeMap.insert({1, gestureSnapshotList});
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    eventTreeRecord->BuildGestureTree(gestureTreeMap, json);
+    EXPECT_TRUE(json->Contains("event procedures"));
+}
+
+/**
+ * @tc.name: EventDumpTestNg015
+ * @tc.desc: FrameNodeSnapshot Dump function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNodeSnapshot instance and init value.
+     */
+    auto frameNodeSnapshotInstance = CreateFrameNodeSnapshotWithInitValue();
+    ASSERT_NE(frameNodeSnapshotInstance, nullptr);
+
+    /**
+     * @tc.steps: step2. set comId is "" and call Dump function.
+     * @tc.expected: dump list exist data, size is not empty.
+     */
+    frameNodeSnapshotInstance->comId = "";
+    std::list<std::pair<int32_t, std::string>> dumpList;
+    frameNodeSnapshotInstance->Dump(dumpList, DEFAULT_DEPTH);
+    EXPECT_FALSE(dumpList.empty());
+}
+
+/**
+ * @tc.name: EventDumpTestNg016
+ * @tc.desc: EventTreeRecord Dump function test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventDumpTestNg, EventDumpTestNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create EventTreeRecord instance and fill touch event vale to eventTree.
+     */
+    auto eventTreeRecord = CreateEventTreeRecord();
+    ASSERT_NE(eventTreeRecord, nullptr);
+    TouchEvent event;
+    event.type = Ace::TouchType::DOWN;
+    event.id = 1;
+    FillTouchDownEventToEventTree(eventTreeRecord, event, MAX_EVENT_TREE_RECORD_CNT + 1, 0, 0);
+
+    /**
+     * @tc.steps: step2. call Dump function.
+     * @tc.expected: dump list exist data, size is not empty.
+     */
+    std::list<std::pair<int32_t, std::string>> dumpList;
+    EXPECT_TRUE(dumpList.empty());
+    int32_t startNumber = 1;
+    eventTreeRecord->Dump(dumpList, DEFAULT_DEPTH, startNumber);
     EXPECT_FALSE(dumpList.empty());
 }
 } // namespace OHOS::Ace::NG

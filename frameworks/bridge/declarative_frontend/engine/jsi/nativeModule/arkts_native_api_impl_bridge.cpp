@@ -115,6 +115,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_relative_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_lazy_grid_layout_bridge.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollbar_bridge.h"
@@ -622,6 +623,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetGeometryTransition));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGeometryTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetGeometryTransition));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBindTips"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBindTips));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBindTips"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBindTips));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBindMenu"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBindMenu));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setClip"),
@@ -1657,6 +1662,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetEnableHapticFeedback));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetEnableHapticFeedback));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoCapitalizationMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchAutoCapitalizationMode));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoCapitalizationMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchAutoCapitalizationMode));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStopBackPress"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetStopBackPress));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStopBackPress"),
@@ -2159,6 +2168,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetEnterKeyType));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnterKeyType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetEnterKeyType));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoCapitalizationMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetTextAreAutoCapitalizationMode));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoCapitalizationMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetTextAreAutoCapitalizationMode));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInputFilter"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetInputFilter));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInputFilter"),
@@ -2490,6 +2503,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetTextInputEnterKeyType));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnterKeyType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetTextInputEnterKeyType));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoCapitalizationMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetTextInputAutoCapitalizationMode));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoCapitalizationMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetTextInputAutoCapitalizationMode));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetTextInputFontWeight));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
@@ -2779,7 +2796,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSystemTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm),
         NavDestinationBridge::ResetNavDestinationSystemTransition));
-
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPreferredOrientation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetPreferredOrientation));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPreferredOrientation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetPreferredOrientation));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableStatusBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetEnableStatusBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableStatusBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetEnableStatusBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableNavigationIndicator"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetEnableNavigationIndicator));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableNavigationIndicator"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetEnableNavigationIndicator));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);
@@ -2899,11 +2927,11 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterPathAttributes(object, vm);
     RegisterPolygonAttributes(object, vm);
     RegisterPolylineAttributes(object, vm);
+    RegisterSideBarContainerAttributes(object, vm);
     RegisterCalendarPickerAttributes(object, vm);
     RegisterTabAttributes(object, vm);
     RegisterTabContentAttributes(object, vm);
 #ifndef ARKUI_WEARABLE
-    RegisterSideBarContainerAttributes(object, vm);
     RegisterStepperItemAttributes(object, vm);
 #endif
     RegisterHyperlinkAttributes(object, vm);
@@ -2966,6 +2994,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #ifdef WEB_SUPPORTED
     RegisterWebAttributes(object, vm);
 #endif
+    RegisterLazyVGridLayoutAttributes(object, vm);
     return object;
 }
 
@@ -4279,7 +4308,6 @@ void ArkUINativeModule::RegisterPolylineAttributes(Local<panda::ObjectRef> objec
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "polyline"), polyline);
 }
 
-#ifndef ARKUI_WEARABLE
 void ArkUINativeModule::RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto sideBarContainer = panda::ObjectRef::New(vm);
@@ -4325,7 +4353,6 @@ void ArkUINativeModule::RegisterSideBarContainerAttributes(Local<panda::ObjectRe
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SideBarContainerBridge::ResetDivider));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "sideBarContainer"), sideBarContainer);
 }
-#endif
 
 void ArkUINativeModule::RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
@@ -4558,6 +4585,34 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetCachedMaxCount));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCachedMaxCount"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetCachedMaxCount));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOnChange));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOnChange));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOnTabBarClick"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOnTabBarClick));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnTabBarClick"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOnTabBarClick));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOnAnimationStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOnAnimationStart));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnAnimationStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOnAnimationStart));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOnAnimationEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOnAnimationEnd));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnAnimationEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOnAnimationEnd));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOnGestureSwipe"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOnGestureSwipe));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnGestureSwipe"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOnGestureSwipe));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOnContentWillChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOnContentWillChange));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOnContentWillChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOnContentWillChange));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsCustomContentTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsCustomContentTransition));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsCustomContentTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsCustomContentTransition));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
 }
 
@@ -4600,6 +4655,14 @@ void ArkUINativeModule::RegisterTabContentAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentHeight));
     tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabContentSize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentSize));
+    tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabContentOnWillShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabContentOnWillShow));
+    tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabContentOnWillShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentOnWillShow));
+    tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabContentOnWillHide"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::SetTabContentOnWillHide));
+    tabContent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabContentOnWillHide"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabContentBridge::ResetTabContentOnWillHide));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabContent"), tabContent);
 }
 
@@ -4618,6 +4681,18 @@ void ArkUINativeModule::RegisterRefreshAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetPullDownRatio));
     refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPullDownRatio"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetPullDownRatio));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnOffsetChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetOnOffsetChange));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnOffsetChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetOnOffsetChange));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnStateChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetOnStateChange));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnStateChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetOnStateChange));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRefreshing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetOnRefreshing));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRefreshing"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetOnRefreshing));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "refresh"), refresh);
 }
 
@@ -4927,6 +5002,22 @@ void ArkUINativeModule::RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetEnableHapticFeedback));
     alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetEnableHapticFeedback));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetOnSelected));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetOnSelected));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSelect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetOnSelect));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetOnSelect));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRequestPopupData"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetOnRequestPopupData));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRequestPopupData"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetOnRequestPopupData));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPopupSelect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetOnPopupSelect));
+    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPopupSelect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetOnPopupSelect));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "alphabetIndexer"), alphabetIndexer);
 }
 
@@ -5186,6 +5277,10 @@ void ArkUINativeModule::RegisterGridItemAttributes(Local<panda::ObjectRef> objec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridItemBridge::ResetGridItemColumnEnd));
     gridItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridItemOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridItemBridge::SetGridItemOptions));
+    gridItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridItemOnSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridItemBridge::SetGridItemOnSelected));
+    gridItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGridItemOnSelected"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridItemBridge::ResetGridItemOnSelected));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gridItem"), gridItem);
 }
 
@@ -5488,6 +5583,10 @@ void ArkUINativeModule::RegisterListItemAttributes(Local<panda::ObjectRef> objec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::SetSwipeAction));
     listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwipeAction"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::ResetSwipeAction));
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSelect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::SetOnSelect));
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::ResetOnSelect));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItem"), listItem);
 }
 
@@ -6064,5 +6163,26 @@ void ArkUINativeModule::RegisterImageAnimatorAttributes(Local<panda::ObjectRef> 
     imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageAnimatorOnFinish"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetImageAnimatorOnFinish));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageAnimator"), imageAnimator);
+}
+
+void ArkUINativeModule::RegisterLazyVGridLayoutAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto lazyGridLayout = panda::ObjectRef::New(vm);
+    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColumnsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetColumnsGap));
+    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetColumnsGap));
+    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRowsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::SetRowsGap));
+    lazyGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRowsGap"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyGridLayoutBridge::ResetRowsGap));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "lazyGridLayout"), lazyGridLayout);
+
+    auto lazyVGridLayout = panda::ObjectRef::New(vm);
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColumnsTemplate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::SetColumnsTemplate));
+    lazyVGridLayout->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColumnsTemplate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LazyVGridLayoutBridge::ResetColumnsTemplate));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "lazyVGridLayout"), lazyVGridLayout);
 }
 } // namespace OHOS::Ace::NG

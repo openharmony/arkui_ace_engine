@@ -76,10 +76,6 @@ DragEventActuator::DragEventActuator(
     const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance)
     : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers), distance_(distance)
 {
-    auto gestureHub = gestureEventHub_.Upgrade();
-    if (gestureHub && gestureHub->IsDragNewFwk()) {
-        return;
-    }
     if (fingers_ < PAN_FINGER) {
         fingers_ = PAN_FINGER;
     }
@@ -567,7 +563,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     };
     panRecognizer_->SetOnReject(panOnReject);
     panRecognizer_->SetIsForDrag(true);
-    panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE.ConvertToPx());
+    auto dragPanDistanceMouse = DRAG_PAN_DISTANCE_MOUSE;
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    if (appTheme) {
+        dragPanDistanceMouse = appTheme->GetDragPanDistanceMouse();
+    }
+    panRecognizer_->SetMouseDistance(dragPanDistanceMouse.ConvertToPx());
     actionCancel_ = actionCancel;
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);

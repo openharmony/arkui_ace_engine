@@ -379,6 +379,19 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHe
     return res;
 }
 
+ParagraphManager::ParagraphInfo ParagraphManager::GetParagrahInfo(int32_t position) const
+{
+    CHECK_EQUAL_RETURN(paragraphs_.empty(), true, {});
+    auto it = std::find_if(paragraphs_.begin(), paragraphs_.end(), [position](const ParagraphInfo& info) {
+        return (info.start <= position) && (position < info.end);
+    });
+    if (position == paragraphs_.back().end) {
+        --it;
+    }
+    CHECK_EQUAL_RETURN(it == paragraphs_.end(), true, {});
+    return (*it);
+}
+
 std::vector<std::pair<std::vector<RectF>, TextDirection>> ParagraphManager::GetParagraphsRects(
     int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
@@ -485,7 +498,7 @@ std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::Get
     int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
     SelectData selectData;
-    selectData.secondResult = CalcCaretMetricsByPosition(end, selectData.secondMetrics, TextAffinity::UPSTREAM);
+    selectData.secondResult = CalcCaretMetricsByPosition(end, selectData.secondMetrics, TextAffinity::DOWNSTREAM);
     std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
     selectData.y = 0.0f;
     for (auto&& info : paragraphs_) {
@@ -507,6 +520,7 @@ std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::Get
                 rect.SetTop(rect.Top() + selectData.y);
             }
             paragraphsRects.emplace_back(std::make_pair(rects, info.paragraphStyle));
+            selectData.paragraphSpacing = info.paragraphStyle.paragraphSpacing.ConvertToPx();
         }
         selectData.y += info.paragraph->GetHeight();
     }
@@ -542,6 +556,9 @@ void ParagraphManager::MakeBlankRectsInRichEditor(std::vector<RectF>& result, co
         RectF rect(caretMetrics.offset.GetX(), caretMetrics.offset.GetY(), 0.0f, caretMetrics.height);
         height  = rect.Top();
         rects.emplace_back(rect);
+        if (auto spacing = selectData.paragraphSpacing; index == 0 && !NearZero(spacing)) {
+            rects.emplace_back(caretMetrics.offset.GetX(), caretMetrics.offset.GetY() - spacing, 0, spacing);
+        }
     }
     std::reverse(rects.begin(), rects.end());
     result.insert(result.end(), rects.begin(), rects.end());
@@ -566,16 +583,16 @@ bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
 {
     for (auto iter = paragraphs_.begin(); iter != paragraphs_.end(); iter++) {
         auto curParagraph = *iter;
-        if (curParagraph.paragraph && curParagraph.paragraph->GetParagraphStyle().leadingMargin &&
-            curParagraph.start == start) {
-            return true;
+        if (auto paragraph = curParagraph.paragraph; curParagraph.start == start && paragraph) {
+            auto leadingMargin = paragraph->GetParagraphStyle().leadingMargin;
+            CHECK_EQUAL_RETURN(leadingMargin && leadingMargin.value().IsValid(), true, true);
         }
         auto next = std::next(iter);
         if (next != paragraphs_.end()) {
             auto nextParagraph = *next;
-            if (nextParagraph.paragraph && nextParagraph.paragraph->GetParagraphStyle().leadingMargin &&
-                nextParagraph.start == start + 1) {
-                return true;
+            if (auto paragraph = nextParagraph.paragraph; nextParagraph.start == start + 1) {
+                auto leadingMargin = paragraph->GetParagraphStyle().leadingMargin;
+                CHECK_EQUAL_RETURN(leadingMargin && leadingMargin.value().IsValid(), true, true);
             }
         }
     }

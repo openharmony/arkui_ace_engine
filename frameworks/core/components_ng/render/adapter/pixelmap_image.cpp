@@ -337,8 +337,6 @@ void PixelMapImage::DrawToRSCanvas(
         return;
     }
     const auto& config = GetPaintConfig();
-    ACE_SCOPED_TRACE("DrawToRSCanvas %s-[%d x %d]-[%s]", dfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(),
-        pixmap->GetHeight(), dfxConfig.borderRadiusValue_.c_str());
     RSBrush brush;
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);

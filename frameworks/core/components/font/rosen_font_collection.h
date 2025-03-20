@@ -34,7 +34,7 @@ public:
 
     void LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName);
 
-    void LoadFontFamily(const char* fontFamily, const char* familySrc);
+    void LoadFontFamily(const char* fontFamily, const std::vector<std::string>& familySrc);
 
     void VaryFontCollectionWithFontWeightScale(float fontWeightScale);
 
@@ -43,7 +43,9 @@ public:
     void SetIsZawgyiMyanmar(bool isZawgyiMyanmar);
 
 private:
-    void LoadThemeFont(const char* fontFamily, std::unique_ptr<char[]> buffer, size_t size);
+    void LoadThemeFont(const char* fontFamily, const std::vector<std::pair<const uint8_t*, size_t>>& data);
+    bool LoadFontBuffers(
+        const std::vector<std::string>& familySrc, std::vector<std::pair<std::unique_ptr<char[]>, size_t>>& buffers);
 
     void InitializeFontCollection();
 
@@ -52,7 +54,7 @@ private:
     std::shared_ptr<Rosen::FontCollection> fontCollection_;
     std::unordered_set<std::string> families_;
 
-    std::string currentFamily_;
+    std::vector<std::string> currentFamily_;
 
     bool isZawgyiMyanmar_ = false;
     std::once_flag fontFlag_;

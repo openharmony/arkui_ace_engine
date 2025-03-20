@@ -56,6 +56,12 @@ struct AceBundleInfo {
     std::string versionName;
 };
 
+enum class TouchPassMode: int32_t {
+    DEFAULT = 0,
+    PASS_THROUGH,
+    ACCELERATE,
+};
+
 class ACE_FORCE_EXPORT AceApplicationInfo : public NonCopyable {
 public:
     ACE_EXPORT static AceApplicationInfo& GetInstance();
@@ -231,16 +237,16 @@ public:
         useNewPipeline_.emplace(useNewPipeline);
     }
 
-    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    void SetTouchEventPassMode(TouchPassMode mode)
     {
-        std::unique_lock<std::shared_mutex> lock(eventsPassThroughMutex_);
-        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
+        std::unique_lock<std::shared_mutex> lock(eventsPassMutex_);
+        touchPassMode_ = mode;
     }
 
-    bool IsTouchEventsPassThrough() const
+    TouchPassMode GetTouchEventPassMode() const
     {
-        std::shared_lock<std::shared_mutex> lock(eventsPassThroughMutex_);
-        return isTouchEventsPassThrough_;
+        std::shared_lock<std::shared_mutex> lock(eventsPassMutex_);
+        return touchPassMode_;
     }
 
     void SetReusedNodeSkipMeasure(bool reusedNodeSkipMeasure)
@@ -283,8 +289,8 @@ protected:
     std::string versionName_;
     uint32_t versionCode_ = 0;
     int32_t missionId_ = -1;
-    mutable std::shared_mutex eventsPassThroughMutex_;
-    bool isTouchEventsPassThrough_ = false;
+    mutable std::shared_mutex eventsPassMutex_;
+    TouchPassMode touchPassMode_ = TouchPassMode::DEFAULT;
     bool reusedNodeSkipMeasure_ = false;
 };
 

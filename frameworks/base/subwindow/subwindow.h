@@ -72,6 +72,7 @@ public:
     virtual void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) = 0;
     virtual bool ShowPreviewNG(bool isStartDraggingFromSubWindow) = 0;
+    virtual void SetWindowTouchable(bool touchable) = 0;
     virtual void HidePreviewNG() = 0;
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
@@ -94,6 +95,7 @@ public:
     virtual void ClearMenu() {};
     virtual void ClearMenuNG(int32_t targetId = -1, bool inWindow = true, bool showAnimation = false) = 0;
     virtual void ClearPopupNG() = 0;
+    virtual void ClearPopupNG(bool isForceClear) {}
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNGWithNode(

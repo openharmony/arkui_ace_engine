@@ -244,6 +244,9 @@ void ScrollablePattern::SetAxis(Axis axis)
             scrollBarOverlayModifier_->SetPositionMode(positionMode);
         }
     }
+    if (useDefaultBackToTop_) {
+        ResetBackToTop();
+    }
     auto gestureHub = GetGestureHub();
     CHECK_NULL_VOID(gestureHub);
     if (scrollableEvent_) {
@@ -554,6 +557,9 @@ void ScrollablePattern::AddScrollEvent()
         InitScrollBarClickEvent();
     }
     InitRatio();
+    if (useDefaultBackToTop_) {
+        ResetBackToTop();
+    }
 }
 
 void ScrollablePattern::SetHandleScrollCallback(const RefPtr<Scrollable>& scrollable)
@@ -2626,17 +2632,27 @@ float ScrollablePattern::GetMainContentSize() const
 
 void ScrollablePattern::SetBackToTop(bool backToTop)
 {
-    backToTop_ = backToTop;
+    if (backToTop_ == backToTop) {
+        return;
+    }
     auto* eventProxy = StatusBarEventProxy::GetInstance();
     if (!eventProxy) {
         TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StatusBarEventProxy is null");
         return;
     }
+    backToTop_ = backToTop;
     if (backToTop_) {
         eventProxy->Register(WeakClaim(this));
     } else {
         eventProxy->UnRegister(WeakClaim(this));
     }
+}
+
+void ScrollablePattern::ResetBackToTop()
+{
+    bool backToTop =
+        GetAxis() == Axis::VERTICAL && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+    SetBackToTop(backToTop);
 }
 
 void ScrollablePattern::OnStatusBarClick()
@@ -2649,7 +2665,7 @@ void ScrollablePattern::OnStatusBarClick()
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!pipeline->GetOnShow() || !host->IsActive()) {
+    if (!pipeline->GetOnShow() || !host->IsActive() || !pipeline->IsWindowFocused()) {
         return;
     }
 
@@ -2918,6 +2934,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             };
             taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay, "NotifyResponseRegionChanged");
         }
+        SetUiDvsyncSwitch(false);
     } else {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStop, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
@@ -4157,5 +4174,12 @@ bool ScrollablePattern::IsScrollableSpringEffect() const
 const RefPtr<ScrollEdgeEffect>& ScrollablePattern::GetScrollEdgeEffect() const
 {
     return scrollEffect_;
+}
+
+void ScrollablePattern::MarkScrollBarProxyDirty()
+{
+    if (scrollBarProxy_) {
+        scrollBarProxy_->MarkScrollBarDirty();
+    }
 }
 } // namespace OHOS::Ace::NG

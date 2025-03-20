@@ -49,6 +49,7 @@ HWTEST_F(TabsAccessibilityTestNg, TabBarAccessibilityProperty001, TestSize.Level
     /**
      * @tc.steps: step2. TabBar at middle
      */
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.rbegin()->first;
     tabBarAccessibilityProperty_->ActActionScrollForward(); // scroll to middle
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 1), 0);
@@ -62,6 +63,7 @@ HWTEST_F(TabsAccessibilityTestNg, TabBarAccessibilityProperty001, TestSize.Level
     /**
      * @tc.steps: step3. TabBar at bottom
      */
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.rbegin()->first;
     tabBarAccessibilityProperty_->ActActionScrollForward(); // scroll to end
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 0);
@@ -104,17 +106,7 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_FALSE(tabBarAccessibilityProperty_->IsScrollable());
 
     /**
-     * @tc.steps: step2. Call Action
-     * @tc.expected: Has no effect
-     */
-    tabBarAccessibilityProperty_->ActActionScrollForward();
-    EXPECT_FALSE(tabBarPattern_->accessibilityScroll_);
-
-    tabBarAccessibilityProperty_->ActActionScrollBackward();
-    EXPECT_FALSE(tabBarPattern_->accessibilityScroll_);
-
-    /**
-     * @tc.steps: step3. Check some info
+     * @tc.steps: step2. Check some info
      */
     EXPECT_EQ(tabBarAccessibilityProperty_->GetCollectionItemCounts(), TABCONTENT_NUMBER);
     EXPECT_EQ(tabBarAccessibilityProperty_->GetBeginIndex(), 0);
@@ -125,7 +117,7 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_EQ(tabBarAccessibilityProperty_->GetCurrentIndex(), 1);
 
     /**
-     * @tc.steps: step4. Check some info
+     * @tc.steps: step3. Check some info
      */
     tabBarAccessibilityProperty_->ResetSupportAction();
     std::unordered_set<AceAction> expectedActions = {};
@@ -150,17 +142,7 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
     EXPECT_FALSE(tabBarAccessibilityProperty_->IsScrollable());
 
     /**
-     * @tc.steps: step2. Call Action
-     * @tc.expected: Has no effect
-     */
-    tabBarAccessibilityProperty_->ActActionScrollForward();
-    EXPECT_FALSE(tabBarPattern_->accessibilityScroll_);
-
-    tabBarAccessibilityProperty_->ActActionScrollBackward();
-    EXPECT_FALSE(tabBarPattern_->accessibilityScroll_);
-
-    /**
-     * @tc.steps: step3. Check some info
+     * @tc.steps: step2. Check some info
      */
     EXPECT_EQ(tabBarAccessibilityProperty_->GetCollectionItemCounts(), 0);
     EXPECT_EQ(tabBarAccessibilityProperty_->GetBeginIndex(), -1); // default
@@ -168,7 +150,7 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
     EXPECT_EQ(tabBarAccessibilityProperty_->GetEndIndex(), -1);
 
     /**
-     * @tc.steps: step4. Check some info
+     * @tc.steps: step3. Check some info
      */
     EXPECT_FALSE(tabBarPattern_->IsAtTop());
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
@@ -206,22 +188,17 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest003, TestSize.Level1)
     // index 0
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 22.0f);
     // index 1
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.rbegin()->first;
     tabBarAccessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 10.0f);
     // index 2
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.rbegin()->first;
     tabBarAccessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), -2.0f);
     // index 3
-    tabBarAccessibilityProperty_->ActActionScrollForward();
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), -2.0f);
-    // index 4
-    tabBarAccessibilityProperty_->ActActionScrollForward();
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), -2.0f);
-    // index 4
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.rbegin()->first;
     tabBarAccessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), -2.0f);
@@ -231,22 +208,17 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest003, TestSize.Level1)
      * @tc.expected: Check index:2 item position, because the item is always visible
      */
     // index 3
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.begin()->first;
     tabBarAccessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 10.0f);
     // index 2
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.begin()->first;
     tabBarAccessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 22.0f);
     // index 1
-    tabBarAccessibilityProperty_->ActActionScrollBackward();
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), 22.0f);
-    // index 0
-    tabBarAccessibilityProperty_->ActActionScrollBackward();
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), 22.0f);
-    // index 0
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.begin()->first;
     tabBarAccessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 22.0f);
@@ -283,22 +255,17 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest004, TestSize.Level1)
     // index 0
     EXPECT_EQ(GetChildX(tabBarNode_, 2), -2.0f);
     // index 1
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.rbegin()->first;
     tabBarAccessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 10.0f);
     // index 2
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.rbegin()->first;
     tabBarAccessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 22.0f);
     // index 3
-    tabBarAccessibilityProperty_->ActActionScrollForward();
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), 22.0f);
-    // index 4
-    tabBarAccessibilityProperty_->ActActionScrollForward();
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), 22.0f);
-    // index 4
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.rbegin()->first;
     tabBarAccessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 22.0f);
@@ -308,22 +275,17 @@ HWTEST_F(TabsAccessibilityTestNg, PerformActionTest004, TestSize.Level1)
      * @tc.expected: Check index:2 item position, because the item is always visible
      */
     // index 3
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.begin()->first;
     tabBarAccessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 10.0f);
     // index 2
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.begin()->first;
     tabBarAccessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), -2.0f);
     // index 1
-    tabBarAccessibilityProperty_->ActActionScrollBackward();
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), -2.0f);
-    // index 0
-    tabBarAccessibilityProperty_->ActActionScrollBackward();
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(tabBarNode_, 2), -2.0f);
-    // index 0
+    tabBarPattern_->accessibilityFocusIndicator_ = tabBarPattern_->visibleItemPosition_.begin()->first;
     tabBarAccessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
     EXPECT_EQ(GetChildX(tabBarNode_, 2), -2.0f);

@@ -137,6 +137,8 @@ constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
 static std::list<PipelineContext::PredictTask> predictTasks_;
 static Rect windowRect_;
+static bool g_isDragging = false;
+static bool hasModalButtonsRect_;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
@@ -152,6 +154,7 @@ void MockPipelineContext::SetUp()
     pipeline_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     pipeline_->SetupRootElement();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
+    hasModalButtonsRect_ = true;
 }
 
 void MockPipelineContext::TearDown()
@@ -177,6 +180,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 void MockPipelineContext::SetInstanceId(int32_t instanceId)
 {
     pipeline_->instanceId_ = instanceId;
+}
+
+void MockPipelineContext::SetContainerModalButtonsRect(bool hasModalButtonsRect)
+{
+    hasModalButtonsRect_ = hasModalButtonsRect;
 }
 
 void MockPipelineContext::SetCurrentWindowRect(Rect rect)
@@ -294,7 +302,7 @@ void PipelineContext::SendEventToAccessibilityWithNode(
 {}
 
 void PipelineContext::OnTouchEvent(
-    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe, bool isEventsPassThrough)
+    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe)
 {}
 
 void PipelineContext::ReDispatch(KeyEvent& keyEvent) {}
@@ -305,7 +313,7 @@ void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, cons
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe, bool isEventsPassThrough) {}
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
@@ -902,10 +910,13 @@ void PipelineContext::OpenFrontendAnimation(
 
 bool PipelineContext::IsDragging() const
 {
-    return false;
+    return g_isDragging;
 }
 
-void PipelineContext::SetIsDragging(bool isDragging) {}
+void PipelineContext::SetIsDragging(bool isDragging)
+{
+    g_isDragging = isDragging;
+}
 
 void PipelineContext::ResetDragging() {}
 
@@ -997,7 +1008,7 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
 
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
-    return true;
+    return hasModalButtonsRect_;
 }
 
 ColorMode PipelineContext::GetColorMode() const

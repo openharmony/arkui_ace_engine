@@ -150,6 +150,17 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
     }
 }
 
+void ImagePaintMethod::UpdatePaintMethod(
+    const RefPtr<CanvasImage>& canvasImage, const ImagePaintMethodConfig& imagePainterMethodConfig)
+{
+    selected_ = imagePainterMethodConfig.selected;
+    selected_ = imagePainterMethodConfig.selected;
+    sensitive_ = imagePainterMethodConfig.sensitive, canvasImage_ = canvasImage;
+    interpolationDefault_ = imagePainterMethodConfig.interpolation;
+    imageOverlayModifier_ = imagePainterMethodConfig.imageOverlayModifier;
+    imageContentModifier_ = imagePainterMethodConfig.imageContentModifier;
+}
+
 RefPtr<Modifier> ImagePaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
 {
     return imageOverlayModifier_;

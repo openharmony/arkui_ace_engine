@@ -765,13 +765,6 @@ void SwitchPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
-    CHECK_NULL_VOID(switchTheme);
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
-    switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
@@ -859,39 +852,5 @@ RefPtr<FrameNode> SwitchPattern::BuildContentModifierNode()
     }
     ToggleConfiguration toggleConfiguration(enabled, isOn);
     return (makeFunc_.value())(toggleConfiguration);
-}
-
-RefPtr<NodePaintMethod> SwitchPattern::CreateNodePaintMethod()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    if (!paintMethod_) {
-        paintMethod_ = MakeRefPtr<SwitchPaintMethod>();
-    }
-    paintMethod_->SetUseContentModifier(UseContentModifier());
-    paintMethod_->SetDirection(direction_);
-    paintMethod_->SetIsSelect(isOn_.value_or(false));
-    paintMethod_->SetDragOffsetX(dragOffsetX_);
-    paintMethod_->SetTouchHoverAnimationType(touchHoverType_);
-    paintMethod_->SetIsDragEvent(isDragEvent_);
-    paintMethod_->SetShowHoverEffect(showHoverEffect_);
-    paintMethod_->SetUseContentModifier(UseContentModifier());
-    return paintMethod_;
-}
-
-FocusPattern SwitchPattern::GetFocusPattern() const
-{
-    FocusPaintParam focusPaintParams;
-
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, FocusPattern());
-    auto switchTheme = pipelineContext->GetTheme<SwitchTheme>(GetThemeScopeId());
-    CHECK_NULL_RETURN(switchTheme, FocusPattern());
-
-    auto focusPaintcolor = switchTheme->GetActiveColor();
-    focusPaintParams.SetPaintColor(focusPaintcolor);
-    focusPaintParams.SetFocusPadding(switchTheme->GetSwitchFocuPadding());
-
-    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
 }
 } // namespace OHOS::Ace::NG

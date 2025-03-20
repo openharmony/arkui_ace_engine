@@ -44,6 +44,10 @@ struct AISpan {
     int32_t end = 0;
     std::string content = "";
     TextDataDetectType type = TextDataDetectType::PHONE_NUMBER;
+    bool operator==(const AISpan& span) const
+    {
+        return start == span.start && end == span.end && content == span.content && type == span.type;
+    }
 };
 class DataDetectorAdapter : public AceType {
     DECLARE_ACE_TYPE(DataDetectorAdapter, AceType);
@@ -64,7 +68,6 @@ public:
     void FireOnResult(const std::string& result)
     {
         if (onResult_) {
-            TAG_LOGD(AceLogTag::ACE_TEXT, "Data detect result: %{public}s.", result.c_str());
             onResult_(result);
         }
     }

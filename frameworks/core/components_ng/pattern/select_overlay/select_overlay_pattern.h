@@ -207,6 +207,7 @@ public:
         }
     }
     void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {

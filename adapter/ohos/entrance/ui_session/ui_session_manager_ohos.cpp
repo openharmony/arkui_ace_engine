@@ -249,10 +249,30 @@ void UiSessionManagerOhos::NotifyAllWebPattern(bool isRegister)
     notifyWebFunction_(isRegister);
 }
 
+void UiSessionManagerOhos::NotifySendCommandPattern(int32_t id, const std::string& command)
+{
+    notifySendCommandFunction_(id, command);
+}
+
+int32_t UiSessionManagerOhos::NotifySendCommandAsyncPattern(int32_t id, const std::string& command)
+{
+    return notifySendCommandAsyncFunction_(id, command);
+}
+
 void UiSessionManagerOhos::SaveRegisterForWebFunction(NotifyAllWebFunction&& function)
 {
     std::unique_lock<std::mutex> lock(mutex_);
     notifyWebFunction_ = std::move(function);
+}
+
+void UiSessionManagerOhos::SaveForSendCommandFunction(NotifySendCommandFunction&& function)
+{
+    notifySendCommandFunction_ = std::move(function);
+}
+
+void UiSessionManagerOhos::SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function)
+{
+    notifySendCommandAsyncFunction_ = std::move(function);
 }
 
 bool UiSessionManagerOhos::GetWebFocusRegistered()
@@ -311,8 +331,9 @@ void UiSessionManagerOhos::GetWebViewLanguage()
     }
 }
 
-void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback)
+void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     pipelineContextPageNameCallback_ = std::move(callback);
 }
 
@@ -324,9 +345,9 @@ void UiSessionManagerOhos::GetCurrentPageName()
     }
 }
 
-void UiSessionManagerOhos::SendCurrentPageName(const std::string result)
+void UiSessionManagerOhos::SendCurrentPageName(const std::string& result)
 {
-    for (auto pair : reportObjectMap_) {
+    for (auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
             reportService->SendCurrentPageName(result);

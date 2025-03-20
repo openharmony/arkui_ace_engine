@@ -297,6 +297,7 @@ private:
     void InitKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleSliderKeyEvent(const KeyEventInfo& event);
+    void AddChild();
 
     // Set properties for media player.
     void PrepareMediaPlayer();
@@ -351,7 +352,6 @@ private:
     void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
     void ResetStatus();
     void HiddenChange(bool hidden);
-    void PrintPlayerStatus(PlaybackStatus status);
 
     void UpdateFsState();
     void checkNeedAutoPlay();
@@ -374,7 +374,7 @@ private:
 #endif
 
     void RegisterRenderContextCallBack();
-    void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
+    void ChangePlayerStatus(const PlaybackStatus& status);
 
     bool IsSupportImageAnalyzer();
     bool ShouldUpdateImageAnalyzer();

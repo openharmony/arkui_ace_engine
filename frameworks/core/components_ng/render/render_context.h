@@ -170,7 +170,7 @@ public:
 
     virtual void SetFrameWithoutAnimation(const RectF& paintRect) {};
 
-    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
+    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) {}
     virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
 
     virtual void OnModifyDone() {}
@@ -301,14 +301,26 @@ public:
     virtual void SetSecurityLayer(bool isSecure) {}
     virtual void SetHDRBrightness(float hdrBrightness) {}
     virtual void SetTransparentLayer(bool isTransparentLayer) {}
+    virtual void SetScreenId(uint64_t screenId) {}
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
-    virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
-    virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
-    virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateBackBlurStyle(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())
+    {}
+    virtual void UpdateBackgroundEffect(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions())
+    {}
+    virtual void UpdateBackBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions())
+    {}
     virtual void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) {}
-    virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
-    virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
+    virtual void UpdateFrontBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions())
+    {}
+    virtual void UpdateFrontBlurStyle(
+        const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions = SysOptions())
+    {}
+    virtual void UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions = SysOptions()) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
@@ -758,6 +770,17 @@ public:
 
     virtual void SetRenderFit(RenderFit renderFit) {}
 
+    virtual OffsetF GetBaseTransalteInXY() const
+    {
+        return OffsetF{0.0f, 0.0f};
+    }
+    virtual void SetBaseTranslateInXY(const OffsetF& offset) {}
+    virtual float GetBaseRotateInZ() const
+    {
+        return 0.0f;
+    }
+    virtual void SetBaseRotateInZ(float degree) {}
+
     virtual void UpdateWindowBlur() {}
     virtual size_t GetAnimationsCount() const
     {
@@ -765,20 +788,12 @@ public:
     }
     virtual void MarkUiFirstNode(bool isUiFirstNode) {}
 
-    virtual OffsetF GetRectOffsetWithPositionEdges(
-        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference)
-    {
-        return OffsetF();
-    }
-
     virtual bool AddNodeToRsTree()
     {
         return false;
     }
 
     virtual void SetDrawNode() {}
-
-    virtual void SetDrawNodeChangeCallback() {}
 
 protected:
     RenderContext() = default;

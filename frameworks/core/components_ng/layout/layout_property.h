@@ -297,8 +297,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
 
 public:
-    void UpdateVisibility(const VisibleType& value, bool allowTransition = false);
-    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false);
+    void UpdateVisibility(const VisibleType& value, bool allowTransition = false, bool isUserSet = false);
+    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false, bool isUserSet = false);
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty);
 
@@ -381,6 +381,18 @@ public:
     {
         markAnchorStart_ = markAnchorStart;
     }
+
+    void SetNeedLazyLayout(bool value)
+    {
+        needLazyLayout_ = true;
+    }
+
+    bool GetNeedLazyLayout() const
+    {
+        return needLazyLayout_;
+    }
+
+    void ConstraintViewPosRef(ViewPosReference& viewPosRef);
 
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
     void CheckMarkAnchorPosition(TextDirection layoutDirection);
@@ -468,6 +480,7 @@ private:
     bool widthPercentSensitive_ = false;
     bool needPositionLocalizedEdges_ = false;
     bool needOffsetLocalizedEdges_ = false;
+    bool needLazyLayout_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

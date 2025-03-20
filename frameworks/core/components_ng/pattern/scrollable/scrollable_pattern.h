@@ -462,14 +462,6 @@ public:
 
     void SetScrollSource(int32_t scrollSource)
     {
-        if (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) {
-            if (scrollBar_ && scrollBar_->IsScrollable() && scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
-                scrollBar_->ScheduleDisappearDelayTask();
-            }
-            StopScrollBarAnimatorByProxy();
-            StartScrollBarAnimatorByProxy();
-        }
         if (scrollSource == SCROLL_FROM_NONE) {
             if (lastScrollSource_ != scrollSource_) {
                 AddScrollableFrameInfo(scrollSource_);
@@ -505,9 +497,7 @@ public:
 
     float CalculateFriction(float gamma)
     {
-        if (GreatOrEqual(gamma, 1.0)) {
-            gamma = 1.0f;
-        }
+        gamma = std::clamp(gamma, 0.0f, 1.0f);
         return exp(-ratio_.value_or(1.848f) * gamma);
     }
     virtual float GetMainContentSize() const;
@@ -750,14 +740,6 @@ public:
         CHECK_NULL_RETURN(scrollable, false);
         return scrollable->GetCrownEventDragging();
     }
-
-    void SetReachBoundary(bool flag)
-    {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID(scrollable);
-        scrollable->SetReachBoundary(flag);
-    }
 #endif
 
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
@@ -812,9 +794,16 @@ public:
 
     void SetBackToTop(bool backToTop);
 
+    void ResetBackToTop();
+
     bool GetBackToTop() const
     {
         return backToTop_;
+    }
+
+    void UseDefaultBackToTop(bool useDefaultBackToTop)
+    {
+        useDefaultBackToTop_ = useDefaultBackToTop;
     }
 
     void OnStatusBarClick() override;
@@ -830,6 +819,8 @@ public:
     {
         return DisplayMode::AUTO;
     }
+
+    void MarkScrollBarProxyDirty();
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -1154,6 +1145,7 @@ private:
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
 
     bool backToTop_ = false;
+    bool useDefaultBackToTop_ = true;
 };
 } // namespace OHOS::Ace::NG
 

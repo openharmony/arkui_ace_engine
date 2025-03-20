@@ -21,6 +21,7 @@ import { CheckboxGroupBootcamp } from './CheckboxGroupBootcamp';
 import { DatePickerBootcamp } from './DatePickerBootcamp';
 import { RadioBootcamp } from './RadioBootcamp';
 import { RatingBootcamp } from './RatingBootcamp';
+import { SegmentButtonBootcamp } from './SegmentButtonBootcamp';
 import { SelectBootcamp } from './SelectBootcamp';
 import { SliderBootcamp } from './SliderBootcamp';
 import { TextPickerBootcamp } from './TextPickerBootcamp';
@@ -33,6 +34,7 @@ export const buttonsAndSelectionsRoute: RouteGroup = {
   label: '按钮与选择',
   children: [
     { name: 'Button', label: '按钮/Button' },
+    { name: 'SegmentButton', label: '分段按钮/SegmentButton' },
     { name: 'Toggle', label: '切换按钮/Toggle' },
     { name: 'Checkbox', label: '多选框/Checkbox' },
     { name: 'CheckboxGroup', label: '勾选文本/CheckboxGroup' },
@@ -52,7 +54,9 @@ export const buttonsAndSelectionsRoute: RouteGroup = {
 export function buttonsAndSelectionsDestination(name: string, route: Route) {
   if (name === 'ButtonsAndSelections/Button') {
     ButtonBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/Toggle'){
+  }else if (name === 'ButtonsAndSelections/SegmentButton'){
+    SegmentButtonBootcamp({title: route.label})
+  } else if (name === 'ButtonsAndSelections/Toggle'){
     ToggleBootcamp({title: route.label})
   }else if (name === 'ButtonsAndSelections/Checkbox'){
     CheckboxBootcamp({title: route.label})

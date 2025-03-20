@@ -118,7 +118,7 @@ public:
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
     std::u16string GetParagraphText() override;
     const ParagraphStyle& GetParagraphStyle() const override;
-    bool empty() const
+    bool empty() const override
     {
         return GetParagraphLength() == 0;
     }
@@ -140,6 +140,7 @@ public:
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
 
 protected:
+    virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);
     ParagraphStyle paraStyle_;
     RSParagraph* GetParagraph();
     Rosen::RSSymbolAnimation rsSymbolAnimation_;
@@ -156,7 +157,7 @@ private:
         return text_.length() + placeholderCnt_;
     }
     float MakeEmptyOffsetX(bool isLtr);
-    bool HandleCaretWhenEmpty(CaretMetricsF& result);
+    bool HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
     void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,

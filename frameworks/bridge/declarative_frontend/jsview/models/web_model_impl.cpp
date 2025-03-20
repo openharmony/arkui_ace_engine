@@ -587,6 +587,13 @@ void WebModelImpl::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     webComponent->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void WebModelImpl::SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
+}
+
 void WebModelImpl::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

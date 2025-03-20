@@ -202,6 +202,8 @@ public:
     void CallOnWillDismiss(int32_t reason)
     {
         if (onWillDismiss_) {
+            TAG_LOGD(AceLogTag::ACE_OVERLAY,
+                "Popup CallOnWillDismiss, reason: %{public}d", reason);
             onWillDismiss_(reason);
         }
     }
@@ -308,6 +310,7 @@ private:
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
     void PopBubble();
+    void PopTipsBubble();
     void Animation(
         RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
 

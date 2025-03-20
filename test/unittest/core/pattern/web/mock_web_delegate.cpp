@@ -664,6 +664,7 @@ void WebDelegate::UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAcce
 void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled) {}
 void WebDelegate::UpdateOverlayScrollbarEnabled(bool isEnabled) {}
 void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled) {}
+void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) {}
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag) {}
 void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}
@@ -674,6 +675,7 @@ void WebDelegate::OnWebviewHide() {}
 void WebDelegate::OnWebviewShow() {}
 void WebDelegate::OnRenderToForeground() {}
 void WebDelegate::OnRenderToBackground() {}
+void WebDelegate::SetSurfaceDensity(const double& density) {}
 void WebDelegate::OnOnlineRenderToForeground() {}
 void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should) {}
 void WebDelegate::NotifyMemoryLevel(int32_t level) {}
@@ -774,7 +776,9 @@ bool WebDelegate::OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& i
 void WebDelegate::OnDownloadStart(const std::string& url, const std::string& userAgent,
     const std::string& contentDisposition, const std::string& mimetype, long contentLength)
 {}
-void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType) {}
+void WebDelegate::OnAccessibilityEvent(
+    int64_t accessibilityId, AccessibilityEventType eventType, const std::string& argument)
+{}
 void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId) {}
 void WebDelegate::WebComponentClickReport(int64_t accessibilityId) {}
 void WebDelegate::TextBlurReportByBlurEvent(int64_t accessibilityId) {}
@@ -1217,6 +1221,10 @@ bool WebDelegate::IsActivePolicyDisable()
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled) {}
+bool WebDelegate::SetFocusByPosition(float x, float y)
+{
+    return false;
+}
 std::string WebDelegate::GetCurrentLanguage()
 {
     return "";

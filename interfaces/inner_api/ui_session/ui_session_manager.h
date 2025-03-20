@@ -37,6 +37,8 @@ public:
     using InspectorFunction = std::function<void()>;
     using NotifyAllWebFunction = std::function<void(bool isRegister)>;
     using GetPixelMapFunction = std::function<void()>;
+    using NotifySendCommandFunction = std::function<void(int32_t id, const std::string& command)>;
+    using NotifySendCommandAsyncFunction = std::function<int32_t(int32_t id, const std::string& command)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -82,10 +84,14 @@ public:
     virtual void AddValueForTree(int32_t id, const std::string& value) {};
     virtual void WebTaskNumsChange(int32_t num) {};
     virtual void ReportInspectorTreeValue(const std::string& value) {};
+    virtual void SaveForSendCommandFunction(NotifySendCommandFunction&& function) {};
+    virtual void SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function) {};
     virtual void SaveInspectorTreeFunction(InspectorFunction&& function) {};
     virtual void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) {};
     virtual void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) {};
     virtual void NotifyAllWebPattern(bool isRegister) {};
+    virtual void NotifySendCommandPattern(int32_t id, const std::string& command) {};
+    virtual int32_t NotifySendCommandAsyncPattern(int32_t id, const std::string& command) { return 11; };
     virtual void SetClickEventRegistered(bool status) {};
     virtual void SetSearchEventRegistered(bool status) {};
     virtual void OnRouterChange(const std::string& path, const std::string& event) {};
@@ -116,9 +122,9 @@ public:
     virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
     virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager) {};
     virtual void GetWebViewLanguage() {};
-    virtual void RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback) {};
+    virtual void RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback) {};
     virtual void GetCurrentPageName() {};
-    virtual void SendCurrentPageName(const std::string result) {};
+    virtual void SendCurrentPageName(const std::string& result) {};
     virtual void SendCurrentLanguage(std::string result) {};
     virtual void SaveProcessId(std::string key, int32_t id) {};
     virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
@@ -146,6 +152,8 @@ protected:
     InspectorFunction inspectorFunction_ = 0;
     NotifyAllWebFunction notifyWebFunction_ = 0;
     GetPixelMapFunction getPixelMapFunction_ = 0;
+    NotifySendCommandFunction notifySendCommandFunction_ = 0;
+    NotifySendCommandAsyncFunction notifySendCommandAsyncFunction_ = 0;
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
     std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;

@@ -1540,7 +1540,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest002, TestSize.Level1
 
     std::vector<RangeContent> options { { "icon", "text" } };
     pickerColumnPattern->SetOptions(options);
-    pickerColumnPattern->columnkind_ = 0x00;
+    pickerColumnPattern->columnKind_ = TEXT;
     /**
      * @tc.cases: case3. cover branch KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN.
      */

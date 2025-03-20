@@ -361,6 +361,18 @@ class ArkSharedTransition {
   }
 }
 
+class ArkBindTipsOptions {
+  message: ResourceStr | StyledString | undefined;
+  options: TipsOptions | undefined;
+  constructor() {
+    this.message = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkBindTipsOptions): boolean {
+    return (this.options === another.options) && (this.options === another.options);
+  }
+}
+
 class ArkChainMode {
   direction: Axis | undefined;
   style: ChainStyle | undefined;
@@ -745,6 +757,20 @@ class ArkSafeAreaExpandOpts {
   edges: string | number | undefined = undefined;
   isEqual(another: ArkSafeAreaExpandOpts): boolean {
     return (this.type === another.type) && (this.edges === another.edges);
+  }
+}
+
+class ArkEnableStatusBar {
+  enable: boolean | undefined = undefined;
+  animated?: boolean | undefined = undefined;
+
+  constructor() {
+    this.enable = undefined;
+    this.animated = undefined;
+  }
+
+  isEqual(another: ArkEnableStatusBar): boolean {
+    return (this.enable === another.enable) && (this.animated === another.animated);
   }
 }
 
@@ -1366,6 +1392,39 @@ class ArkBindMenu{
 
   isEqual(another: ArkBindMenu): boolean {
     return (this.content === another.content && this.options === another.options);
+  }
+}
+
+class ArkSearchAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkSearchAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
+class ArkTextAreaAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkTextAreaAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
+  }
+}
+
+class ArkTextInputAutoCapitalization{
+  autoCapitalizationMode: AutoCapitalizationMode;
+  constructor() {
+    this.autoCapitalizationMode = undefined;
+  }
+
+  isEqual(another: ArkTextAreaAutoCapitalization): boolean {
+    return (this.autoCapitalizationMode === another.autoCapitalizationMode);
   }
 }
 
