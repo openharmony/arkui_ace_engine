@@ -256,7 +256,7 @@ void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSc
         EVENT_KEY_DURATION_60, frameRateDuring_60_ms);
 }
  
-void EventReport::SendDiffFrameRatesDuring(const std::string &scene, const FRCSceneFpsInfo &curFRCSceneFpsInfo_)
+void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_)
 {
     auto packageName = AceApplicationInfo::GetInstance().GetPackageName();
     std::string eventName = "FRC_SCENE_INFO";
