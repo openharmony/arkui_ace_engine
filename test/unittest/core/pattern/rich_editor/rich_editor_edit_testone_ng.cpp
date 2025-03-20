@@ -282,7 +282,7 @@ HWTEST_F(RichEditorEditTestOneNg, DeleteValueSetTextSpan, TestSize.Level1)
     auto spanItem = it->GetSpanItem();
     spanItem->position = 0;
     spanItem->textStyle_ = TextStyle();
-    spanItem->textStyle_.value().fontFamilies_.push_back("test1");
+    spanItem->textStyle_.value().propFontFamilies_.push_back("test1");
     RichEditorAbstractSpanResult spanResult;
     spanResult.SetSpanIndex(0);
     richEditorPattern->DeleteValueSetTextSpan(spanItem, 0, 1, spanResult);
