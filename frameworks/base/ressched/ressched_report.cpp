@@ -184,7 +184,7 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
     const std::unordered_map<std::string, std::string>& payload)
 {
     if (!reportDataFunc_) {
-        LOGW("reportDataFunc_ is null!");
+        LOGD("reportDataFunc_ is null!");
         return;
     }
     reportDataFunc_(resType, value, payload);
@@ -194,7 +194,7 @@ void ResSchedReport::ResScheSyncEventReport(const uint32_t resType, const int64_
     const std::unordered_map<std::string, std::string>& payload, std::unordered_map<std::string, std::string>& reply)
 {
     if (!reportSyncEventFunc_) {
-        LOGW("reportSyncEventFunc_ is null!");
+        LOGD("reportSyncEventFunc_ is null!");
         return;
     }
     reportSyncEventFunc_(resType, value, payload, reply);
