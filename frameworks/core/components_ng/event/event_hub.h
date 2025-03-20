@@ -454,6 +454,8 @@ public:
     void SetKeyboardShortcut(
         const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction)
     {
+        TAG_LOGI(
+            AceLogTag::ACE_KEYBOARD, "SetKeyboardShortcut value = %{public}s, keys = %{public}d", value.c_str(), keys);
         KeyboardShortcut keyboardShortcut;
         for (auto&& ch : value) {
             keyboardShortcut.value.push_back(static_cast<char>(std::toupper(ch)));
