@@ -40,10 +40,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_String GetIdImpl(Ark_EventTargetInfo peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    const auto result = Converter::ArkValue<Ark_String>(peer->id); // Return result if it is possible.
-    LOGE("EventTargetInfoAccessor: GetIdImpl (blocked) result: %{public}s",
-        Converter::Convert<std::string>(result).c_str());
-    return result;
+    return Converter::ArkValue<Ark_String>(peer->id, Converter::FC);
 }
 } // EventTargetInfoAccessor
 const GENERATED_ArkUIEventTargetInfoAccessor* GetEventTargetInfoAccessor()

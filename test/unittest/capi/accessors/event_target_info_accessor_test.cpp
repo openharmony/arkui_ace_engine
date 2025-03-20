@@ -51,17 +51,24 @@ HWTEST_F(EventTargetInfoAccessorTest, ctorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: DISABLED_getIdTest
+ * @tc.name: getIdTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(EventTargetInfoAccessorTest, DISABLED_getIdTest, TestSize.Level1)
+HWTEST_F(EventTargetInfoAccessorTest, getIdTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getId, nullptr);
-    static constexpr auto testedId = "EventTargetInfo ID";
-    peer_->id = testedId;
-    // Call accessor_->getId with peer_ and check the result with testedId if it possible.
-    EXPECT_EQ(peer_->id, testedId);
+    const std::vector<std::string> TEST_PLAN {
+        "EventTargetInfo ID", "0", "test", ""
+    };
+    for (const auto& id : TEST_PLAN) {
+        peer_->id = id;
+        const auto result = accessor_->getId(peer_);
+        EXPECT_EQ(peer_->id, id);
+        EXPECT_EQ(Converter::Convert<std::string>(result), id);
+    }
+    const auto result = accessor_->getId(nullptr);
+    EXPECT_EQ(Converter::Convert<std::string>(result), "");
 }
 
 } // namespace OHOS::Ace::NG
