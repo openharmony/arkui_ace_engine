@@ -406,7 +406,7 @@ void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx)
     dst = ArkValue<Ark_String>(src.ToString(), ctx);
 }
 
-void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src)
+void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx)
 {
     Ark_BorderRadiuses borderRadiuses;
     if (src.backgroundRadius.has_value()) {
@@ -416,6 +416,6 @@ void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src
         borderRadiuses.bottomRight = ArkValue<Opt_Length>(src.backgroundRadius.value().radiusBottomRight);
     }
     dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(borderRadiuses);
-    dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, Converter::FC);
+    dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, ctx);
 }
 } // namespace OHOS::Ace::NG::Converter
