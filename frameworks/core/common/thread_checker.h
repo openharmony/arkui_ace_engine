@@ -33,7 +33,7 @@
 
 namespace OHOS::Ace {
 
-bool ACE_EXPORT CheckThread(TaskExecutor::TaskType threadType);
+bool ACE_FORCE_EXPORT CheckThread(TaskExecutor::TaskType threadType);
 
 } // namespace OHOS::Ace
 
