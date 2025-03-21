@@ -26,6 +26,10 @@ void ParallelRecognizer::OnAccepted()
         currentBatchRecognizer_->AboutToAccept();
         currentBatchRecognizer_.Reset();
     }
+    if (succeedBlockRecognizer_ && succeedBlockRecognizer_->GetGestureState() == RefereeState::SUCCEED_BLOCKED) {
+        succeedBlockRecognizer_->AboutToAccept();
+        succeedBlockRecognizer_.Reset();
+    }
 }
 
 void ParallelRecognizer::OnRejected()
@@ -49,6 +53,7 @@ void ParallelRecognizer::OnRejected()
             recognizer->OnRejectBridgeObj();
         }
     }
+    succeedBlockRecognizer_.Reset();
 }
 
 void ParallelRecognizer::OnPending()
@@ -66,6 +71,9 @@ void ParallelRecognizer::OnBlocked()
         refereeState_ = RefereeState::SUCCEED_BLOCKED;
         if (currentBatchRecognizer_) {
             currentBatchRecognizer_->OnBlocked();
+            if (currentBatchRecognizer_->GetGestureState() == RefereeState::SUCCEED_BLOCKED) {
+                succeedBlockRecognizer_ = currentBatchRecognizer_;
+            }
             currentBatchRecognizer_.Reset();
         }
         return;
@@ -216,6 +224,7 @@ void ParallelRecognizer::CleanRecognizerState()
         disposal_ = GestureDisposal::NONE;
     }
     currentBatchRecognizer_ = nullptr;
+    succeedBlockRecognizer_ = nullptr;
 }
 
 void ParallelRecognizer::ForceCleanRecognizer()
@@ -227,6 +236,7 @@ void ParallelRecognizer::ForceCleanRecognizer()
     }
     MultiFingersRecognizer::ForceCleanRecognizer();
     currentBatchRecognizer_ = nullptr;
+    succeedBlockRecognizer_ = nullptr;
 }
 
 void ParallelRecognizer::CleanRecognizerStateVoluntarily()
