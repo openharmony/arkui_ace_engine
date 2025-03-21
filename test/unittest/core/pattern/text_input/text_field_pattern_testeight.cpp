@@ -1759,4 +1759,115 @@ HWTEST_F(TextFieldPatternTestEight, IsReachedBoundary001, TestSize.Level0)
     pattern_->IsReachedBoundary(offset);
     EXPECT_TRUE(layoutProperty->HasMaxLines());
 }
+
+/**
+ * @tc.name: OnAttachToFrameNode001
+ * @tc.desc: test OnAttachToFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, OnAttachToFrameNode001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto frameNode = pattern_->GetHost();
+    auto pipeline = frameNode->GetContext();
+    pipeline->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
+    pattern_->OnAttachToFrameNode();
+    EXPECT_NE(pipeline->GetFontManager(), nullptr);
+}
+
+/**
+ * @tc.name: ProcessCancelButton001
+ * @tc.desc: test ProcessCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ProcessCancelButton001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    auto tmpHost = pattern_->GetHost();
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateMaxLines(1);
+    layoutProperty->UpdateIsShowCancelButton(true);
+    RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
+    pattern_->cleanNodeResponseArea_ = AceType::DynamicCast<CleanNodeResponseArea>(responseArea);
+    pattern_->ProcessCancelButton();
+    EXPECT_TRUE(pattern_->cleanNodeResponseArea_);
+}
+
+/**
+ * @tc.name: ProcessResponseArea001
+ * @tc.desc: test ProcessResponseArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ProcessResponseArea001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutProperty->UpdateShowPasswordIcon(false);
+
+    pattern_->ProcessResponseArea();
+    EXPECT_FALSE(pattern_->IsShowPasswordIcon());
+
+    RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
+    pattern_->responseArea_ = AceType::DynamicCast<PasswordResponseArea>(responseArea);
+    layoutProperty->UpdateShowPasswordIcon(false);
+    pattern_->ProcessResponseArea();
+    EXPECT_FALSE(pattern_->IsShowPasswordIcon());
+}
+
+/**
+ * @tc.name: GetInnerFocusPaintRect001
+ * @tc.desc: test GetInnerFocusPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, GetInnerFocusPaintRect001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    RoundRect paintRect;
+    pattern_->focusIndex_ = FocuseIndex::CANCEL;
+    RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
+    pattern_->cleanNodeResponseArea_ = AceType::DynamicCast<CleanNodeResponseArea>(responseArea);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(20020);
+    auto container = Container::Current();
+    container->apiTargetVersion_ = 20;
+    pattern_->GetInnerFocusPaintRect(paintRect);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN));
+}
+
+/**
+ * @tc.name: ScrollToSafeArea001
+ * @tc.desc: test ScrollToSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ScrollToSafeArea001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto host = pattern_->GetHost();
+    auto pipeline = host->GetContext();
+    pipeline->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    pattern_->ScrollToSafeArea();
+    EXPECT_TRUE(pipeline->UsingCaretAvoidMode());
+}
 } // namespace OHOS::Ace::NG,
