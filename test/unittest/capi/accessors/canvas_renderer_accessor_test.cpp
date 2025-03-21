@@ -265,6 +265,28 @@ std::vector<std::tuple<Ark_String, TextBaseline>> TEXT_BASE_LINE_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>("invalid"), Ace::TextBaseline::ALPHABETIC },
     { Converter::ArkValue<Ark_String>(""), Ace::TextBaseline::ALPHABETIC },
 };
+std::vector<std::tuple<Ark_Union_LengthMetrics_String, Dimension, bool>> STR_LETTER_SPACING_TEST_PLAN = {
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("123.0vp"), 123.0_vp, true },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("0.0vp"), 0.0_vp, true },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("-1.23vp"), -1.23_vp, true },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("123.0px"), 123.0_px, true },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("0.0px"), 0.0_px, true },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("-1.23px"), -1.23_px, true },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("0.0fp"), 0.0_fp, false },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("123.0pct"), 123.0_px, false },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("invalid"), 0.0_vp, false },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>(""), 0.0_vp, false },
+};
+const std::vector<std::tuple<Ark_Union_LengthMetrics_String, Dimension>> DIM_LETTER_SPACING_TEST_PLAN = {
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(123.0_vp), 123.0_vp },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(0.0_vp), 0.0_vp },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(-1.23_vp), -1.23_vp },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(123.0_px), 123.0_px },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(0.0_px), 0.0_px },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(-1.23_px), -1.23_px },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(123.0_fp), 0.0_px },
+    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(123.5_pct), 0.0_px },
+};
 class MockPixelMap : public PixelMap {
 public:
     MOCK_METHOD(bool, GetPixelsVec, (std::vector<uint8_t> & data), (const override));
@@ -338,6 +360,7 @@ public:
     MOCK_METHOD(void, SetShadowOffsetX, (double), (override));
     MOCK_METHOD(void, SetShadowOffsetY, (double), (override));
     MOCK_METHOD(void, SetStrokeRuleForPath2D, (const CanvasFillRule&, const RefPtr<CanvasPath2D>&), (override));
+    MOCK_METHOD(void, SetLetterSpacing, (const Dimension&), (override));
 };
 class MockCanvasRenderingContext2DPeer : public GeneratedModifier::CanvasRenderingContext2DPeerImpl {
 public:
@@ -2111,5 +2134,30 @@ HWTEST_F(CanvasRendererAccessorTest, DISABLED_setTextBaselineTest, TestSize.Leve
         EXPECT_EQ(*holder->baseline, expected);
     }
     holder->TearDown();
+}
+/**
+ * @tc.name: setLetterSpacingTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setLetterSpacingTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setLetterSpacing, nullptr);
+    for (const auto& [actual, expected, valid] : STR_LETTER_SPACING_TEST_PLAN) {
+        Dimension target;
+        if (!valid) {
+            EXPECT_CALL(*renderingModel_, SetLetterSpacing(_)).Times(0);
+            accessor_->setLetterSpacing(peer_, &actual);
+        } else {
+            EXPECT_CALL(*renderingModel_, SetLetterSpacing(_)).WillOnce(DoAll(SaveArg<0>(&target)));
+            accessor_->setLetterSpacing(peer_, &actual);
+        }
+    }
+    for (const auto& [actual, expected] : DIM_LETTER_SPACING_TEST_PLAN) {
+        Dimension target;
+        EXPECT_CALL(*renderingModel_, SetLetterSpacing(_)).WillOnce(DoAll(SaveArg<0>(&target)));
+        accessor_->setLetterSpacing(peer_, &actual);
+        EXPECT_EQ(target, expected);
+    }
 }
 } // namespace OHOS::Ace::NG

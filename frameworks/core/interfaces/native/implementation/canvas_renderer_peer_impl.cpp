@@ -948,6 +948,27 @@ void CanvasRendererPeerImpl::SetTextBaseline(const std::string& baselineStr)
     paintState_.SetTextBaseline(baseline);
     renderingContext2DModel_->SetTextBaseline(baseline);
 }
+void CanvasRendererPeerImpl::SetLetterSpacing(const std::string& letterSpacingStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (!letterSpacingStr.empty() && IsValidLetterSpacing(letterSpacingStr)) {
+        if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
+            renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
+            return;
+        }
+        renderingContext2DModel_->SetLetterSpacing(
+            Dimension(StringUtils::StringToDouble(letterSpacingStr) * GetDensity()));
+    }
+}
+void CanvasRendererPeerImpl::SetLetterSpacing(const Ace::Dimension& letterSpacing)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    auto letterSpacingCal = CalcDimension(letterSpacing.Value(), letterSpacing.Unit());
+    if (letterSpacingCal.Unit() != DimensionUnit::PX && letterSpacingCal.Unit() != DimensionUnit::VP) {
+        letterSpacingCal.Reset();
+    }
+    renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
+}
 // inheritance
 void CanvasRendererPeerImpl::ResetPaintState()
 {
@@ -1090,5 +1111,10 @@ void CanvasRendererPeerImpl::ParseImageData(Ace::ImageData& imageData, const Put
     if (params.dirtyHeight) {
         imageData.dirtyHeight = static_cast<int32_t>(GetDimensionValue(*params.dirtyHeight).Value());
     }
+}
+bool CanvasRendererPeerImpl::IsValidLetterSpacing(const std::string& letterSpacing)
+{
+    std::regex pattern(R"(^[+-]?(\d+(\.\d+)?|\.\d+)((vp|px)$)?$)", std::regex::icase);
+    return std::regex_match(letterSpacing, pattern);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

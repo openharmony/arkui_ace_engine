@@ -794,6 +794,21 @@ Ark_Union_LengthMetrics_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
 void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
                           const Ark_Union_LengthMetrics_String* letterSpacing)
 {
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(letterSpacing);
+    Converter::VisitUnion(
+        *letterSpacing,
+        [peerImpl](const Ark_String& str) {
+            auto spacing = Converter::Convert<std::string>(str);
+            peerImpl->SetLetterSpacing(spacing);
+        },
+        [peerImpl](const Ark_LengthMetrics& metrics) {
+            Dimension spacing = Converter::OptConvert<Dimension>(metrics).value_or(Dimension());
+            peerImpl->SetLetterSpacing(spacing);
+        },
+        []() {});
 }
 Ark_Number GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
 {
