@@ -243,7 +243,10 @@ void AddSetAppColorModeToResConfig(
 std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     std::stringstream ss;
-    ss << "[";
+    if (avoidAreas.empty()) {
+        return ss.str();
+    }
+    ss << "updateAvoidAreas size: " << avoidAreas.size() << "[";
     std::for_each(avoidAreas.begin(), avoidAreas.end(), [&ss](const auto& avoidArea) {
         ss << "(" << static_cast<int32_t>(avoidArea.first) << "," << avoidArea.second.ToString() << ")";
     });
@@ -2296,16 +2299,21 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
     auto pipeline = container->GetPipelineContext();
-    bool isSystemWindow = GetIsSystemWindow(container) &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+    bool isSystemWindow =
+        GetIsSystemWindow(container) && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         if (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow() || isSystemWindow) {
             avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
             window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
-            pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
-            pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
-            pipeline->UpdateNavSafeArea(
-                container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+            auto systemInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM);
+            auto cutoutInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT);
+            auto navInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+            pipeline->UpdateSystemSafeArea(systemInsets);
+            pipeline->UpdateCutoutSafeArea(cutoutInsets);
+            pipeline->UpdateNavSafeArea(navInsets);
+            TAG_LOGI(ACE_LAYOUT,
+                "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s",
+                systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
         }
     }
 }
@@ -3041,9 +3049,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
     TAG_LOGI(ACE_LAYOUT,
         "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
-        "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
+        "rsTransaction nullptr %{public}d, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
-        rsTransaction == nullptr, avoidAreas.size(), stringifiedMap.c_str());
+        rsTransaction == nullptr, stringifiedMap.c_str());
     if (reason == OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "save PAGE_ROTATION as ROTATION");
         reason = OHOS::Rosen::WindowSizeChangeReason::ROTATION;
