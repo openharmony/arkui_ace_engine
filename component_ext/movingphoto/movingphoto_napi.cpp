@@ -114,7 +114,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
 napi_value SetWaterMask(napi_env env, napi_value object)
 {
     napi_value jsWaterMask = nullptr;
-    napi_get_named_property(env, argv[0], "playWithMask", &jsWaterMask);
+    napi_get_named_property(env, object, "playWithMask", &jsWaterMask);
     bool waterMask = false;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, jsWaterMask, napi_boolean)) {
         waterMask = ExtNapiUtils::GetBool(env, jsWaterMask);
