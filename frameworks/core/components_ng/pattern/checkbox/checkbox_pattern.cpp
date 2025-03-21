@@ -849,9 +849,8 @@ bool CheckBoxPattern::IsSquareStyleBox()
     if (paintProperty->HasCheckBoxSelectedStyle()) {
         checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
     } else {
-        checkboxStyle = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
-                            ? CheckBoxStyle::CIRCULAR_STYLE
-                            : CheckBoxStyle::SQUARE_STYLE;
+        checkboxStyle = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ?
+            CheckBoxStyle::CIRCULAR_STYLE : CheckBoxStyle::SQUARE_STYLE;
     }
     return checkboxStyle == CheckBoxStyle::SQUARE_STYLE;
 }
@@ -1064,23 +1063,34 @@ void CheckBoxPattern::DumpInfo()
 {
     auto eventHub = GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
-    DumpLog::GetInstance().AddDesc("Name: " + eventHub->GetName().c_str());
-    DumpLog::GetInstance().AddDesc("GroupName: " + eventHub->GetGroupName().c_str());
+    DumpLog::GetInstance().AddDesc("Name: " + eventHub->GetName());
+    DumpLog::GetInstance().AddDesc("GroupName: " + eventHub->GetGroupName());
 
     auto checkBoxPaintProperty = GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(checkBoxPaintProperty);
     DumpLog::GetInstance().AddDesc(
-        "Select: " + checkBoxPaintProperty->GetCheckBoxSelectValue().ToString().c_str());
+        "Shape: " + checkBoxPaintProperty->GetCheckBoxSelectedStyleValue().ToString());
     DumpLog::GetInstance().AddDesc(
-        "SelectedColor: " + checkBoxPaintProperty->GetCheckBoxSelectedColorValue().ToString().c_str());
+        "Select: " + std::string(checkBoxPaintProperty->GetCheckBoxSelectValue() ? "true" : "false"));
     DumpLog::GetInstance().AddDesc(
-        "UnSelectedColor: " + checkBoxPaintProperty->GetCheckBoxUnSelectedColorValue().ToString().c_str());
+        "SelectedColor: " + checkBoxPaintProperty->GetCheckBoxSelectedColorValue().ToString());
     DumpLog::GetInstance().AddDesc(
-        "MarkColor: " + checkBoxPaintProperty->GetCheckBoxCheckMarkColorValue().ToString().c_str());
+        "UnSelectedColor: " + checkBoxPaintProperty->GetCheckBoxUnSelectedColorValue().ToString());
     DumpLog::GetInstance().AddDesc(
-        "MarkSize: " + checkBoxPaintProperty->GetCheckBoxCheckMarkSizeValue().ToString().c_str());
+        "MarkSize: " + checkBoxPaintProperty->GetCheckBoxCheckMarkSizeValue().ToString());
     DumpLog::GetInstance().AddDesc(
-        "MarkWidth: " + checkBoxPaintProperty->GetCheckBoxCheckMarkWidthValue().ToString().c_str());
+        "MarkWidth: " + checkBoxPaintProperty->GetCheckBoxCheckMarkWidthValue().ToString());
+    DumpLog::GetInstance().AddDesc(
+        "MarkColor: " + checkBoxPaintProperty->GetCheckBoxCheckMarkColorValue().ToString());
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto responseRegion = gesture->GetResponseRegion();
+    DumpLog::GetInstance().AddDesc(
+        "responseRegion: " + responseRegion[0].ToString());
+
 }
 
 void CheckBoxPattern::SetPrePageIdToLastPageId()
