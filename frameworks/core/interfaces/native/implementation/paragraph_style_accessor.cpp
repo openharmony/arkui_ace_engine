@@ -130,6 +130,14 @@ Ark_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
 }
 Ark_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
 {
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(peer->span, {});
+    auto style = peer->span->GetParagraphStyle();
+    std::optional<NG::LeadingMargin>& leadingMargin = style.leadingMargin;
+    if (leadingMargin) {
+        return Converter::ArkUnion<Ark_Union_Number_LeadingMarginPlaceholder,
+            Ark_LeadingMarginPlaceholder>(*leadingMargin);
+    }
     return {};
 }
 } // ParagraphStyleAccessor
