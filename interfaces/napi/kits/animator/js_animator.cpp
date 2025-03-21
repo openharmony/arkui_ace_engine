@@ -1118,7 +1118,7 @@ static napi_value SimpleOptionsConstructor(napi_env env, napi_callback_info info
     double end = ANIMATOR_DEFALUT_END;
     ParseDoubleSimpleOptions(env, argv[0], begin, ANIMATOR_DEFALUT_BEGIN);
     ParseDoubleSimpleOptions(env, argv[1], end, ANIMATOR_DEFALUT_END);
-    auto me = new (std::nothrow) JsSimpleAnimatorOption();
+    auto me = new JsSimpleAnimatorOption();
     me->SetBegin(begin);
     me->SetEnd(end);
     napi_wrap(
