@@ -89,7 +89,8 @@ public:
     std::shared_ptr<OHOS::Ace::Gradient> CreateConicGradient(double x, double y, double startangle);
     void CreateImageData(
         std::vector<uint8_t>& vbuffer, double fWidth, double fHeight, uint32_t& width, uint32_t& height);
-    void CreateImageData(std::vector<uint8_t>& vbuffer, uint32_t& width, uint32_t& height);
+    void CreateImageData(
+        std::vector<uint8_t>& vbuffer, const Ace::ImageData& imageData, uint32_t& width, uint32_t& height);
     void GetImageData(std::vector<uint8_t>& vbuffer, Ace::ImageSize& imageSize, uint32_t& width, uint32_t& height);
     RefPtr<Ace::PixelMap> GetPixelMap(const double x, const double y, const double width, const double height);
     void PutImageData(Ace::ImageData& src, const PutImageDataParam& params);
