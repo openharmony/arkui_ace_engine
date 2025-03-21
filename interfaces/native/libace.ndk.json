@@ -2832,11 +2832,11 @@
         "name": "OH_ArkUI_GetGestureParam_distanceThreshold"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_AxisEvent_SetPropagation"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_AxisEvent_GetScrollStep"
     },
     {
