@@ -44,8 +44,8 @@ export async function ColumnStart(done:Function){
     await scrollSearch.click()
     await driver.delayMs(1000);
 
-    let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
-    await Buttons[1].click()
+    let buttons: Component[] = await driver.findComponents(ON.type('Button'));
+    await buttons[1].click()
     await driver.delayMs(1000);
 
   } catch (err) {
