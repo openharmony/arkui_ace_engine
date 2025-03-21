@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
+#include "core/components_ng/event/event_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -752,7 +753,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest009, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     std::unique_ptr<GestureEventFunc> onAction;
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
 
     /**
@@ -761,7 +762,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest009, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     onAction = std::make_unique<GestureEventFunc>();
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
 
     /**
@@ -771,7 +772,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest009, TestSize.Level1)
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
     panRecognizer.inputEventType_ = InputEventType::AXIS;
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
 
     /**
@@ -781,7 +782,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest009, TestSize.Level1)
      */
     TouchEvent touchEvent;
     panRecognizer.lastTouchEvent_ = touchEvent;
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
 
     /**
@@ -792,7 +793,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest009, TestSize.Level1)
     touchEvent.tiltX = 0.0f;
     touchEvent.tiltY = 0.0f;
     panRecognizer.lastTouchEvent_ = touchEvent;
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
 }
 
@@ -818,7 +819,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest002, TestSize.Leve
     panRecognizer.HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
     std::unique_ptr<GestureEventFunc> onAction;
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
 }
 
@@ -842,7 +843,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest001, TestSize.Leve
      */
     std::unique_ptr<GestureEventFunc> onAction = std::make_unique<GestureEventFunc>();
     panRecognizer.inputEventType_ = InputEventType::TOUCH_SCREEN;
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
 }
 
@@ -1351,7 +1352,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest003, TestSize.Leve
      */
     onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
     panRecognizer.inputEventType_ = InputEventType::AXIS;
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
 
     /**
@@ -1362,7 +1363,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest003, TestSize.Leve
     TouchEvent touchEvent;
     panRecognizer.lastTouchEvent_ = touchEvent;
     panRecognizer.inputEventType_ = InputEventType::AXIS;
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
 
     /**
@@ -1375,7 +1376,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest003, TestSize.Leve
     panRecognizer.lastTouchEvent_ = touchEvent;
     panRecognizer.touchPoints_[touchEvent.id] = touchEvent;
     panRecognizer.inputEventType_ = InputEventType::AXIS;
-    panRecognizer.SendCallbackMsg(onAction);
+    panRecognizer.SendCallbackMsg(onAction, GestureCallbackType::START);
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
 }
 
