@@ -116,9 +116,13 @@ void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShad
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowOption, frameNode);
 }
 
-void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors)
+void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::optional<std::vector<Gradient>>& valueColors)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors, frameNode);
+    if (valueColors.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, frameNode);
+    }
 }
 
 void DataPanelModelNG::SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& makeFunc)

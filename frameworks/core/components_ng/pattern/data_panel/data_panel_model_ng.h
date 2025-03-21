@@ -52,7 +52,7 @@ public:
     static void SetTrackBackground(FrameNode* frameNode, const std::optional<Color>& trackBackgroundColor);
     static void SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& strokeWidth);
     static void SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption);
-    static void SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors);
+    static void SetValueColors(FrameNode* frameNode, const std::optional<std::vector<Gradient>>& valueColors);
     static void SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& jsMake);
 };
 } // namespace OHOS::Ace::NG
