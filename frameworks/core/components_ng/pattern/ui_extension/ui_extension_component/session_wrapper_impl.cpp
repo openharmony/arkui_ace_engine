@@ -747,6 +747,23 @@ void SessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr)
     wantPtr->SetParams(wantParam);
 }
 
+void SessionWrapperImpl::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(session_);
+    auto dataHandler = session_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    AAFwk::WantParams configParam;
+    auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
+    CHECK_NULL_VOID(container);
+    container->GetExtensionConfig(configParam);
+    AAFwk::WantParams wantParam(customWant_->GetParams());
+    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    AAFwk::Want dataToSend;
+    dataToSend.SetParams(wantParam);
+    dataHandler->SendDataAsync(Rosen::SubSystemId::WM_UIEXT,
+        static_cast<uint32_t>(OHOS::Rosen::Extension::Businesscode::SYNC_WANT_PARAMS), dataToSend);
+}
+
 bool SessionWrapperImpl::IsSessionValid()
 {
     return session_ != nullptr;
