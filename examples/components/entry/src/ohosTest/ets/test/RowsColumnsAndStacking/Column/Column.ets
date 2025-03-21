@@ -40,7 +40,7 @@ export async function ColumnStart(done:Function){
     await atomDisplays.click();
     await driver.delayMs(1000);
 
-    let scrollSearch: Component = await driver.findComponent(ON.text('弹性布局/Flex'))
+    let scrollSearch: Component = await driver.findComponent(ON.text('纵向布局/Column'))
     await scrollSearch.click()
     await driver.delayMs(1000);
 
