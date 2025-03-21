@@ -15,7 +15,9 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -55,6 +57,62 @@ DataPanelOptions Convert(const Ark_DataPanelOptions& src)
         .max = Converter::OptConvert<float>(src.max),
         .type = Converter::OptConvert<DataPanelType>(src.type)
     };
+}
+
+template<>
+Gradient Convert(const Ark_Union_ResourceColor_LinearGradient& src)
+{
+    Gradient dst;
+    Converter::VisitUnion(src,
+        [&dst](const Ark_ResourceColor& value) {
+            auto colorOpt = Converter::OptConvert<Color>(value);
+            auto gradientOpt = colorOpt.has_value() ?
+                std::optional<Gradient>{SliderModelNG::CreateSolidGradient(colorOpt.value())} : std::nullopt;
+            if (gradientOpt.has_value()) {
+                dst = gradientOpt.value();
+            }
+        },
+        [&dst](const Ark_LinearGradient& value) {
+            auto gradientOpt = Converter::OptConvert<Gradient>(value);
+            if (gradientOpt.has_value()) {
+                dst = gradientOpt.value();
+            }
+        },
+        []() {}
+    );
+    return dst;
+}
+
+template<>
+DataPanelShadow Convert(const Ark_DataPanelShadowOptions& src)
+{
+    DataPanelShadow shadow;
+    auto radiusOpt = Converter::OptConvert<float>(src.radius);
+    Validator::ValidatePositive(radiusOpt);
+    if (radiusOpt.has_value()) {
+        shadow.radius = FloatToDouble(radiusOpt.value()).value();
+    }
+
+    auto offsetXOpt = FloatToDouble(Converter::OptConvert<float>(src.offsetX));
+    if (offsetXOpt.has_value()) {
+        shadow.offsetX = offsetXOpt.value();
+    }
+
+    auto offsetYOpt = FloatToDouble(Converter::OptConvert<float>(src.offsetY));
+    if (offsetYOpt.has_value()) {
+        shadow.offsetY = offsetYOpt.value();
+    }
+
+    auto colorsOpt = Converter::OptConvert<std::vector<Gradient>>(src.colors);
+    if (colorsOpt.has_value()) {
+        const auto &colors = *colorsOpt;
+        if (find_if(colors.begin(), colors.end(), [](auto item) {return item.GetColors().size() == 0;})
+            == colors.end()) {
+            shadow.colors = std::move(colorsOpt.value());
+        }
+    }
+
+    return shadow;
 }
 }
 
@@ -102,9 +160,18 @@ void ValueColorsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //DataPanelModelNG::SetValueColors(frameNode, convValue);
-    LOGE("DataPanel::ValueColorsImpl isn't implemented yet.");
+
+    auto convArray = Converter::Convert<std::vector<Gradient>>(*value);
+    if (convArray.size() > 0) {
+        if (find_if(convArray.begin(), convArray.end(), [](auto item) {return item.GetColors().size() == 0;})
+            != convArray.end()) {
+            DataPanelModelNG::SetValueColors(frameNode, std::nullopt);
+            return;
+        }
+        DataPanelModelNG::SetValueColors(frameNode, convArray);
+    } else {
+        DataPanelModelNG::SetValueColors(frameNode, std::nullopt);
+    }
 }
 void TrackBackgroundColorImpl(Ark_NativePointer node,
                               const Ark_ResourceColor* value)
@@ -130,10 +197,9 @@ void TrackShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //DataPanelModelNG::SetTrackShadow(frameNode, convValue);
-    LOGW("DataPanel::TrackShadowImpl isn't implemented yet.");
+    auto convValue = value ? Converter::Convert<DataPanelShadow>(*value)
+        : DataPanelShadow { .isShadowVisible = false };
+    DataPanelModelNG::SetShadowOption(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* value)
