@@ -73,7 +73,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_ResourceColor GetFontColorImpl(Ark_TextStyle_styled_string peer)
 {
-    return {};
+    Ark_ResourceColor invalidValue = {};
+    CHECK_NULL_RETURN(peer && peer->span, invalidValue);
+    auto color = peer->span->GetFont().fontColor;
+    auto value = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
+    return Converter::GetOpt(value).value_or(invalidValue);
 }
 Ark_String GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
 {

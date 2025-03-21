@@ -140,4 +140,20 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontStyleTest, TestSize.Level1)
     EXPECT_EQ(fontStyleOpt.value(), g_fontSyle);
 }
 
+/*
+ * @tc.name: getFontColorTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextStyleStyledStringAccessorTest, getFontColorTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getFontColor, nullptr);
+    Ark_ResourceColor arkResColor = accessor_->getFontColor(peer_);
+    auto colorOpt = Converter::OptConvert<Color>(arkResColor);
+    auto expectedColor = Converter::OptConvert<Color>(g_fontColor);
+    ASSERT_TRUE(colorOpt.has_value());
+    ASSERT_TRUE(expectedColor.has_value());
+    EXPECT_EQ(expectedColor.value().ToString(), colorOpt.value().ToString());
+}
+
 } // namespace OHOS::Ace::NG

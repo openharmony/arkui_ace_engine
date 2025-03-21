@@ -152,6 +152,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BaseGestureEvent& dst, const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
+    void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src);
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src);
     void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src);
@@ -238,7 +239,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src);
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
-    void AssignArkValue(Ark_ResourceColor& dst, const std::string& src);
     void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue& src);
     void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);
@@ -267,11 +267,12 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_SslError& dst, const SslError& src);
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
+    void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx);
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
-    void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& src);
+    void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx);
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);

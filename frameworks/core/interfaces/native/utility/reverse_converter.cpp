@@ -399,9 +399,32 @@ void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src)
     dst.monoSpace = ArkValue<Ark_Boolean>(src.monoSpace);
     dst.symbolic = ArkValue<Ark_Boolean>(src.symbolic);
 }
+
 void AssignArkValue(Ark_Size& dst, const SizeF& src)
 {
     dst.width = ArkValue<Ark_Number>(src.Width());
     dst.height = ArkValue<Ark_Number>(src.Height());
+}
+
+void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx)
+{
+    dst = ArkValue<Ark_String>(src.ToString(), ctx);
+}
+
+void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src)
+{
+    Ark_BorderRadiuses arkBorder = {
+        .topLeft = ArkValue<Opt_Length>(src.radiusTopLeft),
+        .topRight = ArkValue<Opt_Length>(src.radiusTopRight),
+        .bottomLeft = ArkValue<Opt_Length>(src.radiusBottomLeft),
+        .bottomRight = ArkValue<Opt_Length>(src.radiusBottomRight),
+    };
+    dst = arkBorder;
+}
+
+void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx)
+{
+    dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(src.backgroundRadius);
+    dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, ctx);
 }
 } // namespace OHOS::Ace::NG::Converter
