@@ -66,6 +66,11 @@ public:
     void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
     bool ShowPreviewNG(bool isStartDraggingFromSubWindow = false) override;
+    void SetWindowTouchable(bool touchable) override
+    {
+        CHECK_NULL_VOID(window_);
+        window_->SetTouchable(touchable);
+    }
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
