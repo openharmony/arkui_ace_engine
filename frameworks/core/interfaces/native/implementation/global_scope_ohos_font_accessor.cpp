@@ -15,16 +15,36 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_fontAccessor {
 void RegisterFontImpl(const Ark_FontOptions* options)
 {
+    CHECK_NULL_VOID(options);
+    std::string familyName;
+    if (auto familyNameOpt = Converter::OptConvert<Converter::FontFamilies>(options->familyName); familyNameOpt) {
+        familyName = !familyNameOpt->families.empty() ? familyNameOpt->families.front() : "";
+    }
+    std::string familySrc;
+    if (auto familySrcOpt = Converter::OptConvert<Converter::FontFamilies>(options->familySrc); familySrcOpt) {
+        familySrc = !familySrcOpt->families.empty() ? familySrcOpt->families.front() : "";
+    }
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->RegisterFont(familyName, familySrc);
+    }
 }
 Array_String GetSystemFontListImpl()
 {
-    return {};
+    StringArray fontList;
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->GetSystemFontList(fontList);
+    }
+    return Converter::ArkValue<Array_String>(fontList, Converter::FC);
 }
 Ark_FontInfo GetFontByNameImpl(const Ark_String* fontName)
 {
@@ -40,5 +60,4 @@ const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAcce
     };
     return &GlobalScope_ohos_fontAccessorImpl;
 }
-
 }
