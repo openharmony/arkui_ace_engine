@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "color_metrics_peer.h"
 
@@ -37,7 +38,7 @@ Ark_ColorMetrics NumericImpl(const Ark_Number* value)
     auto* peer = new ColorMetricsPeer();
     CHECK_NULL_RETURN(peer, peer);
     CHECK_NULL_RETURN(value, peer);
-    peer->colorValue.value = Converter::Convert<uint32_t>(*value);
+    peer->colorValue.value = static_cast<uint32_t>(Converter::Convert<int32_t>(*value));
     return peer;
 }
 Ark_ColorMetrics RgbaImpl(const Ark_Number* red,
@@ -47,10 +48,11 @@ Ark_ColorMetrics RgbaImpl(const Ark_Number* red,
 {
     auto* peer = new ColorMetricsPeer();
     CHECK_NULL_RETURN(peer, peer);
-    peer->colorValue.argb.red = red ? Converter::Convert<uint32_t>(*red) : 0x00;
-    peer->colorValue.argb.green = green ? Converter::Convert<uint32_t>(*green) : 0x00;
-    peer->colorValue.argb.blue = blue ? Converter::Convert<uint32_t>(*blue) : 0x00;
-    peer->colorValue.argb.alpha = alpha ? Converter::Convert<uint32_t>(*alpha) : 0xff;
+    peer->colorValue.argb.red = red ? static_cast<uint8_t>(Converter::Convert<int32_t>(*red)) : 0x00;
+    peer->colorValue.argb.green = green ? static_cast<uint8_t>(Converter::Convert<int32_t>(*green)) : 0x00;
+    peer->colorValue.argb.blue = blue ? static_cast<uint8_t>(Converter::Convert<int32_t>(*blue)) : 0x00;
+    auto optAlpha = alpha ? Converter::OptConvert<int32_t>(*alpha) : std::nullopt;
+    peer->colorValue.argb.alpha = optAlpha.has_value() ? static_cast<uint8_t>(optAlpha.value()) : 0xff;
     return peer;
 }
 Ark_ColorMetrics ResourceColorImpl(const Ark_ResourceColor* color)
@@ -58,39 +60,46 @@ Ark_ColorMetrics ResourceColorImpl(const Ark_ResourceColor* color)
     auto* peer = new ColorMetricsPeer();
     CHECK_NULL_RETURN(peer, peer);
     CHECK_NULL_RETURN(color, peer);
-    OHOS::Ace::Color aceColor = Converter::Convert<OHOS::Ace::Color>(*color);
-    peer->colorValue.value = color.GetValue();
+    auto optColor = Converter::OptConvert<OHOS::Ace::Color>(*color);
+    if (optColor.has_value()) {
+        peer->colorValue.value = optColor.value().GetValue();
+    }
     return peer;
 }
 Ark_ColorMetrics BlendColorImpl(Ark_ColorMetrics peer,
                                 Ark_ColorMetrics overlayColor)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    CHECK_NULL_RETURN(overlayColor, peer);
+    auto aceOverlayColor = OHOS::Ace::Color(overlayColor->colorValue.value);
+    auto aceColor = OHOS::Ace::Color(peer->colorValue.value);
+    peer->colorValue.value = aceColor.BlendColor(aceOverlayColor).GetValue();
+    return peer;
 }
 Ark_String GetColorImpl(Ark_ColorMetrics peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    return Ace::Color(peer->colorValue.value).ToString();
+    return Converter::ArkValue<Ark_String>(Ace::Color(peer->colorValue.value).ToString(), Converter::FC);
 }
 Ark_Number GetRedImpl(Ark_ColorMetrics peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue(0));
-    return Converter::ArkValue(peer->colorValue.argb.red);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
+    return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.red);
 }
 Ark_Number GetGreenImpl(Ark_ColorMetrics peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue(0));
-    return Converter::ArkValue(peer->colorValue.argb.green);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
+    return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.green);
 }
 Ark_Number GetBlueImpl(Ark_ColorMetrics peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue(0));
-    return Converter::ArkValue(peer->colorValue.argb.blue);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
+    return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.blue);
 }
 Ark_Number GetAlphaImpl(Ark_ColorMetrics peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue(0xff));
-    return Converter::ArkValue(peer->colorValue.argb.alpha);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0xff));
+    return Converter::ArkValue<Ark_Number>(peer->colorValue.argb.alpha);
 }
 } // ColorMetricsAccessor
 const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor()

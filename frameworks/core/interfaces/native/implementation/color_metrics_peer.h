@@ -20,4 +20,4 @@
 
 struct ColorMetricsPeer {
     OHOS::Ace::ColorParam colorValue { .value = 0xff000000 };
-}
+};
