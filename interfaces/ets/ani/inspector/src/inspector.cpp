@@ -24,6 +24,10 @@
 namespace {
 const char LAYOUT_TYPE[] = "layout";
 const char DRAW_TYPE[] = "draw";
+const char ANI_INSPECTOR_NS[] = "L@ohos/arkui/inspector/inspector;";
+const char ANI_COMPONENT_OBSERVER_CLS[] = "L@ohos/arkui/inspector/inspector/ComponentObserverImpl;";
+const char KOALA_INSPECTOR_CLS[] = "L@koalaui/arkts-arkui/generated/arkts/ohos/arkui/inspector/Inspector;";
+const char KOALA_COMPONENT_CLS[] = "L@koalaui/arkts-arkui/generated/arkts/ohos/arkui/inspector/ComponentObserver;";
 } // namespace
  
 namespace OHOS::Ace {
@@ -236,9 +240,8 @@ static ani_string AniGetInspectorByKey([[maybe_unused]] ani_env *env, ani_string
     return ani_str;
 }
 
-static ani_object CreateComponentObserver([[maybe_unused]] ani_env *env, ani_string id)
+static ani_object CreateComponentObserver([[maybe_unused]] ani_env *env, ani_string id, const char *className)
 {
-    static const char *className = "L@ohos/arkui/inspector/inspector/ComponentObserverImpl;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         LOGE("inspector-ani not found class");
@@ -281,37 +284,42 @@ static ani_object CreateComponentObserver([[maybe_unused]] ani_env *env, ani_str
     arkTsFrontend->RegisterDrawInspectorCallback(observer->GetInspectorFuncByType(DRAW_TYPE), key);
     return context_object;
 }
+
+static ani_object CreateComponentObserverForAni([[maybe_unused]] ani_env *env, ani_string id)
+{
+    return CreateComponentObserver(env, id, ANI_COMPONENT_OBSERVER_CLS);
+}
+
+static ani_object CreateComponentObserverForKoala([[maybe_unused]] ani_env *env,
+    [[maybe_unused]] ani_object object, ani_string id)
+{
+    return CreateComponentObserver(env, id, KOALA_COMPONENT_CLS);
+}
 } // namespace OHOS::Ace
 
-ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+bool ANI_ConstructorForAni(ani_env *env)
 {
-    ani_env *env;
-    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        LOGE("inspector-ani Unsupported ANI_VERSION_1");
-        return ANI_ERROR;
-    }
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/arkui/inspector/inspector;", &ns)) {
+    if (ANI_OK != env->FindNamespace(ANI_INSPECTOR_NS, &ns)) {
         LOGE("inspector-ani Not found ns");
-        return ANI_ERROR;
+        return false;
     }
     std::array methods = {
         ani_native_function {"createComponentObserver", nullptr,
-            reinterpret_cast<void *>(OHOS::Ace::CreateComponentObserver)},
+            reinterpret_cast<void *>(OHOS::Ace::CreateComponentObserverForAni)},
         ani_native_function {"getInspectorByKey", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorByKey)},
     };
     
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         LOGE("inspector-ani Namespace_BindNativeFunctions error");
-        return ANI_ERROR;
+        return false;
     }
     
-    static const char *classNameInspector = "L@ohos/arkui/inspector/inspector/ComponentObserverImpl;";
     ani_class clsInspector;
-    if (ANI_OK != env->FindClass(classNameInspector, &clsInspector)) {
+    if (ANI_OK != env->FindClass(ANI_COMPONENT_OBSERVER_CLS, &clsInspector)) {
         LOGE("inspector-ani not found class");
-        return ANI_ERROR;
+        return false;
     }
     
     std::array methodsInspector = {
@@ -321,9 +329,53 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     
     if (ANI_OK != env->Class_BindNativeMethods(clsInspector, methodsInspector.data(), methodsInspector.size())) {
         LOGE("inspector-ani Class_BindNativeFunctions error");
-        return ANI_ERROR;
+        return false;
+    }
+    return true;
+}
+
+bool ANI_ConstructorForKoala(ani_env *env)
+{
+    ani_class clsInspector;
+    if (ANI_OK != env->FindClass(KOALA_INSPECTOR_CLS, &clsInspector)) {
+        LOGE("inspector-koala not found class");
+        return false;
+    }
+    std::array methodsInspector = {
+        ani_native_function {"createComponentObserver", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::CreateComponentObserverForKoala)},
+    };
+    if (ANI_OK != env->Class_BindNativeMethods(clsInspector, methodsInspector.data(), methodsInspector.size())) {
+        LOGE("inspector-koala Class_BindNativeFunctions error");
+        return false;
     }
     
-    *result = ANI_VERSION_1;
-    return ANI_OK;
+    ani_class clsObserver;
+    if (ANI_OK != env->FindClass(KOALA_COMPONENT_CLS, &clsObserver)) {
+        LOGE("inspector-koala not found class");
+        return false;
+    }
+    std::array methodsObserver = {
+        ani_native_function {"on", nullptr, reinterpret_cast<void *>(OHOS::Ace::On)},
+        ani_native_function {"off", nullptr, reinterpret_cast<void *>(OHOS::Ace::Off)},
+    };
+    if (ANI_OK != env->Class_BindNativeMethods(clsObserver, methodsObserver.data(), methodsObserver.size())) {
+        LOGE("inspector-koala Class_BindNativeFunctions error");
+        return false;
+    }
+    return true;
+}
+
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    ani_env *env;
+    if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+        LOGE("inspector-ani Unsupported ANI_VERSION_1");
+        return ANI_ERROR;
+    }
+    if (ANI_ConstructorForAni(env) || ANI_ConstructorForKoala(env)) {
+        *result = ANI_VERSION_1;
+        return ANI_OK;
+    }
+    return ANI_ERROR;
 }
