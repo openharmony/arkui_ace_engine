@@ -134,6 +134,11 @@ public:
         CHECK_NULL_RETURN(companionNode, nullptr);
         return companionNode->GetVMContext();
     }
+
+    const CallbackType GetCallback()
+    {
+        return callback_;
+    }
 protected:
     CallbackType callback_  = {
         .resource = {.hold = nullptr, .release = nullptr},
