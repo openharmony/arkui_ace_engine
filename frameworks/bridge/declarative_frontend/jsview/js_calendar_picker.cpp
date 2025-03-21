@@ -436,14 +436,18 @@ void JSCalendarPicker::ParseDisabledDateRange(
     JSRef<JSArray> array = JSRef<JSArray>::Cast(disabledDateRangeVal);
     for (size_t i = 0; i < array->Length(); i++) {
         JSRef<JSVal> dateRangeValue = array->GetValueAt(i);
+        if (!dateRangeValue->IsObject()) {
+            continue;
+        }
         auto dateRangeObj = JSRef<JSObject>::Cast(dateRangeValue);
         auto startValue = dateRangeObj->GetProperty("start");
         auto endValue = dateRangeObj->GetProperty("end");
         if (startValue->IsObject() && endValue->IsObject()) {
             auto startDate = ParseDate(startValue, false);
             auto endDate = ParseDate(endValue, false);
-            if (startDate.GetYear() == 0 || endDate.GetYear() == 0 || endDate < startDate)
+            if (startDate.GetYear() == 0 || endDate.GetYear() == 0 || endDate < startDate) {
                 continue;
+            }
             std::pair<PickerDate, PickerDate> pickerDateRange;
             pickerDateRange.first = startDate;
             pickerDateRange.second = endDate;
