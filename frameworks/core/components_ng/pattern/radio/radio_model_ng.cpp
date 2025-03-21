@@ -169,9 +169,13 @@ void RadioModelNG::SetHoverEffect(HoverEffectType hoverEffect)
     pattern->SetShowHoverEffect(hoverEffect != HoverEffectType::NONE);
 }
 
-void RadioModelNG::SetChecked(FrameNode* frameNode, bool isChecked)
+void RadioModelNG::SetChecked(FrameNode* frameNode, const std::optional<bool> isChecked)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked, frameNode);
+    if (isChecked) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, frameNode);
+    }
 }
 
 void RadioModelNG::SetCheckedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)

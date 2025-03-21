@@ -85,8 +85,8 @@ void Checked1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RadioModelNG::SetChecked1(frameNode, convValue);
+    auto isChecked = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    RadioModelNG::SetChecked(frameNode, isChecked);
 }
 void OnChange0Impl(Ark_NativePointer node,
                    const Callback_Boolean_Void* value)
@@ -105,8 +105,15 @@ void OnChange1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RadioModelNG::SetOnChange1(frameNode, convValue);
+    std::optional<OnRadioChangeCallback> optCallback = value ? Converter::GetOpt(*value) : std::nullopt;
+    ChangeEvent onEvent = {};
+    if (optCallback.has_value()) {
+        onEvent = [arkCallback = CallbackHelper(*optCallback)](const bool param) {
+            auto arkValue = Converter::ArkValue<Ark_Boolean>(param);
+            arkCallback.Invoke(arkValue);
+        };
+    }
+    RadioModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
 void RadioStyleImpl(Ark_NativePointer node,
                     const Opt_RadioStyle* value)
