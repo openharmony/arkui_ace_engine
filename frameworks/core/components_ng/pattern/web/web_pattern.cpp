@@ -459,6 +459,7 @@ WebPattern::WebPattern()
     renderMode_ = RenderMode::ASYNC_RENDER;
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    RegisterSurfaceDensityCallback();
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
@@ -469,6 +470,7 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    RegisterSurfaceDensityCallback();
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
@@ -479,6 +481,7 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    RegisterSurfaceDensityCallback();
 }
 
 WebPattern::~WebPattern()
@@ -511,6 +514,11 @@ WebPattern::~WebPattern()
     UninitializeAccessibility();
     HideMagnifier();
     OnTooltip("");
+
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
+    }
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -1421,6 +1429,16 @@ void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
 {
+    if (info.GetAction() != MouseAction::MOVE) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebPattern::HandleMouseEvent, web id %{public}d, Action %{public}d, Button %{public}d",
+            GetWebId(), static_cast<int32_t>(info.GetAction()), static_cast<int32_t>(info.GetButton()));
+    }
+
+    ACE_SCOPED_TRACE(
+        "WebPattern::HandleMouseEvent, web id %d, Action %d, Button %d",
+        GetWebId(), static_cast<int32_t>(info.GetAction()), static_cast<int32_t>(info.GetButton()));
+
     isMouseEvent_ = true;
     WebOnMouseEvent(info);
 
@@ -2642,7 +2660,6 @@ void WebPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(geometryNode);
     auto rect = renderContext->GetPaintRectWithoutTransform();
     auto size = Size(rect.Width(), rect.Height());
-    delegate_->OnAreaChange({ resizeOffset.GetX(), resizeOffset.GetY(), size.Width(), size.Height() });
     if (CheckSafeAreaIsExpand() &&
         ((size.Width() != areaChangeSize_.Width()) || (size.Height() != areaChangeSize_.Height()))) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
@@ -3415,6 +3432,14 @@ void WebPattern::OnModifyDone()
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
         InitInOfflineMode();
     }
+    if (delegate_) {
+        delegate_->SetSurfaceDensity(density_);
+    }
+}
+
+void WebPattern::SetSurfaceDensity(double density)
+{
+    density_ = density;
 }
 
 extern "C" {
@@ -5250,6 +5275,11 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         WindowMaximize();
         return;
     }
+    if (type == WindowSizeChangeReason::ROTATION) {
+        if (delegate_) {
+            delegate_->MaximizeResize();
+        }
+    }
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (!isSmoothDragResizeEnabled) {
                 return;
@@ -6618,7 +6648,7 @@ void WebPattern::RemoveDataListNode()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->DeleteMenu(dataListNode->GetId());
-    
+
     auto parent = dataListNode->GetParent();
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(dataListNode);
@@ -7191,6 +7221,19 @@ void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
 {
     if (delegate_) {
         delegate_->UpdateEnableFollowSystemFontWeight(value);
+    }
+}
+
+void WebPattern::RegisterSurfaceDensityCallback()
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        density_ = pipeline->GetDensity();
+        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([weak = WeakClaim(this)](double density) {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->SetSurfaceDensity(density);
+        });
     }
 }
 } // namespace OHOS::Ace::NG

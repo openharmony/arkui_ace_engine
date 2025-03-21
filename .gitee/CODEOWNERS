@@ -188,12 +188,12 @@ advanced_ui_component/arcslider/
 advanced_ui_component/atomicservicenavigation/ @giteewzp
 advanced_ui_component/atomicservicetabs/ @giteewzp
 advanced_ui_component/atomicserviceweb/ @giteewzp
-advanced_ui_component/BUILD.gn @arkuipopupwindow
-advanced_ui_component/chipgroup/ @arkuipopupwindow
-advanced_ui_component/chip/ @arkuipopupwindow
+advanced_ui_component/BUILD.gn @arkuistatemgmt
+advanced_ui_component/chipgroup/ @arkuistatemgmt
+advanced_ui_component/chip/ @arkuistatemgmt
 advanced_ui_component/composelistitem/ @guozonghao11
 advanced_ui_component/composetitlebar/ @guozonghao11
-advanced_ui_component/counter/ @arkuipopupwindow
+advanced_ui_component/counter/ @arkuistatemgmt
 advanced_ui_component/dialog/ @guozonghao11
 advanced_ui_component/dialogv2/ @guozonghao11
 advanced_ui_component/downloadfilebutton/
@@ -208,7 +208,8 @@ advanced_ui_component/interstitialdialogaction/ @giteewzp
 advanced_ui_component/popup/ @arkuipopupwindow
 advanced_ui_component/progressbutton/ @guozonghao11
 advanced_ui_component/progressbuttonv2/ @guozonghao11
-advanced_ui_component/segmentbutton/ @arkuipopupwindow
+advanced_ui_component/segmentbutton/ @arkuistatemgmt
+advanced_ui_component/segmentbuttonv2/ @arkuistatemgmt
 advanced_ui_component/selectionmenu/ @huawei_g_five
 advanced_ui_component/selecttitlebar/ @guozonghao11
 advanced_ui_component/splitlayout/ @guozonghao11
@@ -2468,7 +2469,7 @@ frameworks/core/components_ng/pattern/particle/ @arkui_superman
 frameworks/core/components_ng/pattern/pattern.h @arkui_architecture
 frameworks/core/components_ng/pattern/patternlock/ @arkui_image
 frameworks/core/components_ng/pattern/picker/ @arkui_image
-frameworks/core/components_ng/pattern/plugin/ @arkuilayout
+frameworks/core/components_ng/pattern/plugin/ @arkuiabilitygroup
 frameworks/core/components_ng/pattern/preview_mock/ @arkuistatemgmt
 frameworks/core/components_ng/pattern/progress/ @arkui_image
 frameworks/core/components_ng/pattern/qrcode/ @arkui_image
@@ -3020,7 +3021,7 @@ interfaces/inner_api/ace/viewport_config.h @arkuiframework
 interfaces/inner_api/BUILD.gn @arkui_architecture
 interfaces/inner_api/drawable_descriptor/ @arkui_image
 interfaces/inner_api/form_render/ @arondave
-interfaces/inner_api/ui_service_manager/ @arkuiframework
+interfaces/inner_api/ui_service_manager/ @arkuiabilitygroup
 interfaces/inner_api/ui_session/ @arkuiframework
 interfaces/inner_api/xcomponent_controller/ @arkuilayout
 interfaces/inner_api/ace_kit/include/ @arkui_architecture
@@ -3048,7 +3049,7 @@ interfaces/napi/kits/napi_lib.gni @arkui_architecture
 interfaces/napi/kits/observer/ @arkuiframework
 interfaces/napi/kits/overlay/ @arkuipopupwindow
 interfaces/napi/kits/performancemonitor/ @arkuiframework
-interfaces/napi/kits/plugincomponent/ @arkuilayout
+interfaces/napi/kits/plugincomponent/ @arkuiabilitygroup
 interfaces/napi/kits/promptaction/ @arkuipopupwindow
 interfaces/napi/kits/prompt/ @arkuipopupwindow
 interfaces/napi/kits/router/ @arkui_superman
@@ -3147,8 +3148,8 @@ test/unittest/core/pattern/overlay/ @arkuipopupwindow
 test/unittest/core/pattern/panel/ @arkuipopupwindow
 test/unittest/core/pattern/patternlock/ @arkui_image
 test/unittest/core/pattern/picker/ @arkui_image
-test/unittest/core/pattern/plugin/ @arkuilayout
-test/unittest/core/pattern/plugin/mock/ @arkuilayout
+test/unittest/core/pattern/plugin/ @arkuiabilitygroup
+test/unittest/core/pattern/plugin/mock/ @arkuiabilitygroup
 test/unittest/core/pattern/progress/ @arkui_image
 test/unittest/core/pattern/qrcode/ @arkui_image
 test/unittest/core/pattern/radio/ @arkuipopupwindow

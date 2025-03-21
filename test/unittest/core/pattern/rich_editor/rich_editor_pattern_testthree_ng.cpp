@@ -1319,25 +1319,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, FireOnSelectionChange003, TestSize.Level0
 }
 
 /**
- * @tc.name: SetTypingStyle001
- * @tc.desc: test SetTypingStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, SetTypingStyle001, TestSize.Level0)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    UpdateSpanStyle typingStyle;
-    TextStyle textStyle;
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem);
-    richEditorPattern->previewTextRecord_.previewContent = u"";
-    auto layout = richEditorNode_->layoutProperty_;
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    EXPECT_TRUE(layout == richEditorNode_->layoutProperty_);
-}
-
-/**
  * @tc.name: SetResultObjectText001
  * @tc.desc: test SetResultObjectText
  * @tc.type: FUNC

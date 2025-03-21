@@ -17693,6 +17693,15 @@ class ArkSafeAreaExpandOpts {
     return (this.type === another.type) && (this.edges === another.edges);
   }
 }
+class ArkEnableStatusBar {
+  constructor() {
+    this.enable = undefined;
+    this.animated = undefined;
+  }
+  isEqual(another) {
+    return (this.enable === another.enable) && (this.animated === another.animated);
+  }
+}
 class ArkButtonStyle {
   constructor() {
     this.left = 16;
@@ -19154,10 +19163,12 @@ class ArkRefreshComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   onStateChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RefreshOnStateChangeModifier.identity, RefreshOnStateChangeModifier, callback);
+    return this;
   }
   onRefreshing(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RefreshOnRefreshingModifier.identity, RefreshOnRefreshingModifier, callback);
+    return this;
   }
   refreshOffset(value) {
     modifierWithKey(this._modifiersWithKeys, RefreshOffsetModifier.identity, RefreshOffsetModifier, value);
@@ -19171,7 +19182,50 @@ class ArkRefreshComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, PullDownRatioModifier.identity, PullDownRatioModifier, value);
     return this;
   }
+  onOffsetChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, RefreshOnOffsetChangeModifier.identity, RefreshOnOffsetChangeModifier, callback);
+    return this;
+  }
 }
+class RefreshOnOffsetChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetOnOffsetChange(node);
+    } else {
+      getUINativeModule().refresh.setOnOffsetChange(node, this.value);
+    }
+  }
+}
+RefreshOnOffsetChangeModifier.identity = Symbol('onOffsetChange');
+class RefreshOnStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetOnStateChange(node);
+    } else {
+      getUINativeModule().refresh.setOnStateChange(node, this.value);
+    }
+  }
+}
+RefreshOnStateChangeModifier.identity = Symbol('onStateChange');
+class RefreshOnRefreshingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetOnRefreshing(node);
+    } else {
+      getUINativeModule().refresh.setOnRefreshing(node, this.value);
+    }
+  }
+}
+RefreshOnRefreshingModifier.identity = Symbol('onRefreshing');
 class RefreshOffsetModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -22990,6 +23044,21 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
     return this;
   }
+  preferredOrientation(orientation) {
+    modifierWithKey(this._modifiersWithKeys, PreferredOrientationModifier.identity, PreferredOrientationModifier, orientation);
+    return this;
+  }
+  enableStatusBar(enable, animated) {
+    let statusBar = new ArkEnableStatusBar();
+    statusBar.enable = enable;
+    statusBar.animated = animated;
+    modifierWithKey(this._modifiersWithKeys, EnableStatusBarModifier.identity, EnableStatusBarModifier, statusBar);
+    return this;
+  }
+  enableNavigationIndicator(enable) {
+    modifierWithKey(this._modifiersWithKeys, EnableNavigationIndicatorModifier.identity, EnableNavigationIndicatorModifier, enable);
+    return this;
+  }
 }
 
 class HideTitleBarModifier extends ModifierWithKey {
@@ -23120,6 +23189,55 @@ class NavDestinationMenusModifier extends ModifierWithKey {
   }
 }
 NavDestinationMenusModifier.identity = Symbol('menus');
+
+class PreferredOrientationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetPreferredOrientation(node);
+    } else {
+      getUINativeModule().navDestination.setPreferredOrientation(node, this.value);
+    }
+  }
+}
+PreferredOrientationModifier.identity = Symbol('preferredOrientation');
+
+class EnableStatusBarModifier extends ModifierWithKey {
+  constructor(statusBar) {
+    super(statusBar);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetEnableStatusBar(node);
+    } else {
+      getUINativeModule().navDestination.setEnableStatusBar(node, this.value?.enable, this.value?.animated);
+    }
+  }
+
+  checkObjectDiff() {
+    return this.value.enable !== this.stageValue.enable || this.value.animated !== this.stageValue.animated;
+  }
+}
+EnableStatusBarModifier.identity = Symbol('enableStatusBar');
+
+class EnableNavigationIndicatorModifier extends ModifierWithKey {
+  constructor(navigationIndicator) {
+    super(navigationIndicator);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetEnableNavigationIndicator(node);
+    } else {
+      getUINativeModule().navDestination.setEnableNavigationIndicator(node, this.value);
+    }
+  }
+}
+EnableNavigationIndicatorModifier.identity = Symbol('enableNavigationIndicator');
 
 //@ts-ignore
 if (globalThis.NavDestination !== undefined) {
@@ -24471,7 +24589,8 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   onSelected(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnSelectedModifier.identity, OnSelectedModifier, callback);
+    return this;
   }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, ColorModifier.identity, ColorModifier, value);
@@ -24537,13 +24656,16 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     return this;
   }
   onSelect(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnSelectModifier.identity, OnSelectModifier, callback);
+    return this;
   }
   onRequestPopupData(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnRequestPopupDataModifier.identity, OnRequestPopupDataModifier, callback);
+    return this;
   }
   onPopupSelect(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, OnPopupSelectModifier.identity, OnPopupSelectModifier, callback);
+    return this;
   }
   selected(index) {
     modifierWithKey(this._modifiersWithKeys, AlphabetIndexerSelectedModifier.identity, AlphabetIndexerSelectedModifier, index);
@@ -24694,6 +24816,58 @@ class PopupItemBackgroundColorModifier extends ModifierWithKey {
   }
 }
 PopupItemBackgroundColorModifier.identity = Symbol('popupItemBackgroundColor');
+class OnSelectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetOnSelected(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setOnSelected(node, this.value);
+    }
+  }
+}
+OnSelectedModifier.identity = Symbol('onSelected');
+class OnSelectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetOnSelect(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setOnSelect(node, this.value);
+    }
+  }
+}
+OnSelectedModifier.identity = Symbol('onSelect');
+class OnRequestPopupDataModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetOnRequestPopupData(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setOnRequestPopupData(node, this.value);
+    }
+  }
+}
+OnRequestPopupDataModifier.identity = Symbol('onRequestPopupData');
+class OnPopupSelectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().alphabetIndexer.resetOnPopupSelect(node);
+    } else {
+      getUINativeModule().alphabetIndexer.setOnPopupSelect(node, this.value);
+    }
+  }
+}
+OnPopupSelectModifier.identity = Symbol('onPopupSelect');
 class ColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -29339,6 +29513,19 @@ class GridItemOptionsModifier extends ModifierWithKey {
   }
 }
 GridItemOptionsModifier.identity = Symbol('gridItemOptions');
+class GridItemOnSelectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridItem.resetGridItemOnSelected(node);
+    } else {
+      getUINativeModule().gridItem.setGridItemOnSelected(node, this.value);
+    }
+  }
+}
+GridItemOnSelectedModifier.identity = Symbol('gridItemOnSelected');
 class ArkGridItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -29380,7 +29567,8 @@ class ArkGridItemComponent extends ArkComponent {
     return this;
   }
   onSelect(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridItemOnSelectedModifier.identity, GridItemOnSelectedModifier, event);
+    return this;
   }
 }
 // @ts-ignore
@@ -30342,6 +30530,19 @@ class ListItemSwipeActionModifier extends ModifierWithKey {
   }
 }
 ListItemSwipeActionModifier.identity = Symbol('listItemSwipeAction');
+class ListItemOnSelectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().listItem.resetOnSelect(node);
+    } else {
+      getUINativeModule().listItem.setOnSelect(node, this.value);
+    }
+  }
+}
+ListItemOnSelectModifier.identity = Symbol('listItemOnSelect');
 class ArkListItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -30368,7 +30569,8 @@ class ArkListItemComponent extends ArkComponent {
     return this;
   }
   onSelect(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ListItemOnSelectModifier.identity, ListItemOnSelectModifier, event);
+    return this;
   }
 }
 // @ts-ignore
@@ -31655,14 +31857,21 @@ class ArkTabsComponent extends ArkComponent {
     }
     return this;
   }
-  onAnimationStart(handler) {
-    throw new Error('Method not implemented.');
+  onAnimationStart(value) {
+    modifierWithKey(this._modifiersWithKeys, TabsOnAnimationStartModifier.identity, TabsOnAnimationStartModifier, value);
+    return this;
   }
-  onAnimationEnd(handler) {
-    throw new Error('Method not implemented.');
+  onAnimationEnd(value) {
+    modifierWithKey(this._modifiersWithKeys, TabsOnAnimationEndModifier.identity, TabsOnAnimationEndModifier, value);
+    return this;
   }
-  onGestureSwipe(handler) {
-    throw new Error('Method not implemented.');
+  onGestureSwipe(value) {
+    modifierWithKey(this._modifiersWithKeys, TabsOnGestureSwipeModifier.identity, TabsOnGestureSwipeModifier, value);
+    return this;
+  }
+  customContentTransition(value) {
+    modifierWithKey(this._modifiersWithKeys, TabsCustomContentTransitionModifier.identity, TabsCustomContentTransitionModifier, value);
+    return this;
   }
   vertical(value) {
     modifierWithKey(this._modifiersWithKeys, TabsVerticalModifier.identity, TabsVerticalModifier, value);
@@ -31705,14 +31914,20 @@ class ArkTabsComponent extends ArkComponent {
     return this;
   }
   onChange(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabsOnChangeModifier.identity, TabsOnChangeModifier, event);
+    return this;
   }
   onSelected(event) {
     modifierWithKey(this._modifiersWithKeys, TabsOnSelectedModifier.identity, TabsOnSelectedModifier, event);
     return this;
   }
   onTabBarClick(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabsOnTabBarClickModifier.identity, TabsOnTabBarClickModifier, event);
+    return this;
+  }
+  onContentWillChange(event) {
+    modifierWithKey(this._modifiersWithKeys, TabsOnContentWillChangeModifier.identity, TabsOnContentWillChangeModifier, event);
+    return this;
   }
   onUnselected(value) {
     modifierWithKey(this._modifiersWithKeys, TabsOnUnselectedModifier.identity, TabsOnUnselectedModifier, value);
@@ -32053,6 +32268,124 @@ class TabsOptionsControllerModifier extends ModifierWithKey {
   }
 }
 TabsOptionsControllerModifier.identity = Symbol('tabsOptionsController');
+class TabsOnAnimationStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnAnimationStart(node);
+    }
+    else {
+      getUINativeModule().tabs.setTabsOnAnimationStart(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnAnimationStartModifier.identity = Symbol('tabsonanimationstart');
+class TabsOnAnimationEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnAnimationEnd(node);
+    }
+    else {
+      getUINativeModule().tabs.setTabsOnAnimationEnd(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnAnimationEndModifier.identity = Symbol('tabsonanimationend');
+class TabsOnGestureSwipeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnGestureSwipe(node);
+    }
+    else {
+      getUINativeModule().tabs.setTabsOnGestureSwipe(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnGestureSwipeModifier.identity = Symbol('tabsongestureswipe');
+class TabsOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnChange(node);
+    }
+    else {
+      getUINativeModule().tabs.setTabsOnChange(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnChangeModifier.identity = Symbol('tabsonchange');
+class TabsOnTabBarClickModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnTabBarClick(node);
+    }
+    else {
+      getUINativeModule().tabs.setTabsOnTabBarClick(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnTabBarClickModifier.identity = Symbol('tabsontabbarclick');
+class TabsOnContentWillChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnContentWillChange(node);
+    }
+    else {
+      getUINativeModule().tabs.setTabsOnContentWillChange(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnContentWillChangeModifier.identity = Symbol('tabsoncontentwillchange');
+class TabsCustomContentTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsCustomContentTransition(node);
+    } else {
+      getUINativeModule().tabs.setTabsCustomContentTransition(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsOnContentWillChangeModifier.identity = Symbol('tabscustomcontenttransition');
 class TabsHideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -32277,6 +32610,14 @@ class ArkTabContentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TabContentHeightModifier.identity, TabContentHeightModifier, value);
     return this;
   }
+  onWillShow(value) {
+    modifierWithKey(this._modifiersWithKeys, TabContentOnWillShowModifier.identity, TabContentOnWillShowModifier, value);
+    return this;
+  }
+  onWillHide(value) {
+    modifierWithKey(this._modifiersWithKeys, TabContentOnWillHideModifier.identity, TabContentOnWillHideModifier, value);
+    return this;
+  }
 }
 class TabContentTabBarModifier extends ModifierWithKey {
   constructor(value) {
@@ -32346,6 +32687,34 @@ class TabContentSizeModifier extends ModifierWithKey {
   }
 }
 TabContentSizeModifier.identity = Symbol('tabcontentsize');
+class TabContentOnWillShowModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabContent.resetTabContentOnWillShow(node);
+    }
+    else {
+      getUINativeModule().tabContent.setTabContentOnWillShow(node, this.value);
+    }
+  }
+}
+TabContentOnWillShowModifier.identity = Symbol('tabcontentonwillshow');
+class TabContentOnWillHideModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabContent.resetTabContentOnWillHide(node);
+    }
+    else {
+      getUINativeModule().tabContent.setTabContentOnWillHide(node, this.value);
+    }
+  }
+}
+TabContentOnWillHideModifier.identity = Symbol('tabcontentonwillhide');
 // @ts-ignore
 if (globalThis.TabContent !== undefined) {
   globalThis.TabContent.attributeModifier = function (modifier) {

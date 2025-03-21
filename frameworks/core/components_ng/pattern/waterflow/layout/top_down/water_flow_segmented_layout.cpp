@@ -319,11 +319,10 @@ void WaterFlowSegmentedLayout::InitFooter(float crossSize)
 
 void WaterFlowSegmentedLayout::MeasureOnOffset()
 {
-    const float prevOffset = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetPrevOffset();
-    const bool forward = LessOrEqual(info_->currentOffset_, prevOffset) || info_->endIndex_ == -1;
-    if (forward) {
-        Fill(info_->endIndex_ + 1);
+    const bool forward = IsForWard();
+    if (IsForWard()) {
         MeasureLazyChild(info_->startIndex_, info_->endIndex_);
+        Fill(info_->endIndex_ + 1);
     }
 
     const int32_t oldStart = info_->startIndex_;
@@ -347,7 +346,7 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
             }
         }
         if (!heightChange) {
-            MeasureLazyChild(bound + 1, info_->endIndex_);
+            MeasureRemainingLazyChild(bound + 1, info_->endIndex_);
         }
     }
 }
@@ -382,7 +381,12 @@ void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
     if (info_->align_ == ScrollAlign::AUTO) {
         info_->align_ = TransformAutoScroll(item);
     }
-    info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_.value_or(0.0f);
+    if (info_->jumpIndex_ == LAST_ITEM) {
+        auto maxHeight = info_->GetMaxMainHeight() - info_->margins_.back().bottom.value_or(0.0f);
+        info_->currentOffset_ = SolveJumpOffset({ 0, maxHeight, 0 }) + postJumpOffset_.value_or(0.0f);
+    } else {
+        info_->currentOffset_ = SolveJumpOffset(item) + postJumpOffset_.value_or(0.0f);
+    }
 
     Fill(jumpIdx);
     info_->Sync(mainSize_, false, false);
@@ -512,6 +516,12 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
         item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, ref, props_,
             item));
+        auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(item);
+        if (IsForWard()) {
+            info_->currentOffset_ -= adjustOffset.start;
+        } else {
+            info_->currentOffset_ -= adjustOffset.end;
+        }
     }
     if (isCache) {
         item->Layout();
@@ -574,10 +584,11 @@ void WaterFlowSegmentedLayout::SyncPreloadItem(LayoutWrapper* host, int32_t item
     }
 }
 
-void WaterFlowSegmentedLayout::MeasureLazyChild(int32_t startIdx, int32_t endIdx) const
+void WaterFlowSegmentedLayout::MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward) const
 {
     for (int32_t idx = startIdx; idx <= endIdx; idx++) {
         auto item = wrapper_->GetChildByIndex(idx);
+        CHECK_NULL_VOID(item);
         auto itemLayoutProperty = item->GetLayoutProperty();
         if (itemLayoutProperty->GetNeedLazyLayout()) {
             int32_t seg = info_->GetSegment(idx);
@@ -585,5 +596,32 @@ void WaterFlowSegmentedLayout::MeasureLazyChild(int32_t startIdx, int32_t endIdx
                 WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, idx), false);
         }
     }
+}
+
+void WaterFlowSegmentedLayout::MeasureLazyChild(int32_t startIdx, int32_t endIdx)
+{
+    for (int32_t idx = startIdx; idx <= endIdx; idx++) {
+        auto item = wrapper_->GetChildByIndex(idx);
+        CHECK_NULL_VOID(item);
+        auto itemLayoutProperty = item->GetLayoutProperty();
+        if (itemLayoutProperty->GetNeedLazyLayout()) {
+            int32_t seg = info_->GetSegment(idx);
+            MeasureItem(idx, { info_->itemInfos_[idx].crossIdx, info_->itemInfos_[idx].mainOffset },
+                WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, idx), false);
+            if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[idx].mainSize)) {
+                // refill from [idx] if height doesn't match record
+                info_->ClearCacheAfterIndex(idx - 1);
+                Fill(idx);
+                info_->Sync(mainSize_, canOverScrollStart_, canOverScrollEnd_);
+                break;
+            }
+        }
+    }
+}
+
+bool WaterFlowSegmentedLayout::IsForWard() const
+{
+    const float prevOffset = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetPrevOffset();
+    return LessOrEqual(info_->currentOffset_, prevOffset) || info_->endIndex_ == -1;
 }
 } // namespace OHOS::Ace::NG

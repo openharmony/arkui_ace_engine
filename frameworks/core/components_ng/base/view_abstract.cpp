@@ -1716,7 +1716,7 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateVisibility(visible, true);
+        layoutProperty->UpdateVisibility(visible, true, true);
     }
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -1983,7 +1983,12 @@ void ViewAbstract::BindPopup(
             showInSubWindow = true;
         }
     }
-
+    if (popupInfo.popupNode && popupInfo.isTips) {
+        // subwindow need to handle
+        overlayManager->ErasePopup(targetId);
+        popupInfo = {};
+        overlayManager->HideTips(targetId, popupInfo, 0);
+    }
     auto popupId = popupInfo.popupId;
     auto popupNode = popupInfo.popupNode;
     RefPtr<BubblePattern> popupPattern;
@@ -2098,13 +2103,20 @@ void ViewAbstract::BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameN
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto tipsInfo = overlayManager->GetPopupInfo(targetId);
-    auto showInSubWindow = param->IsShowInSubWindow();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
-    if (subwindow) {
-        subwindow->GetPopupInfoNG(targetId, tipsInfo);
+    if (tipsInfo.isTips) {
+        return;
     }
+    auto showInSubWindow = param->IsShowInSubWindow();
     if (tipsInfo.popupNode) {
-        showInSubWindow = true;
+        showInSubWindow = false;
+    } else {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+        if (subwindow) {
+            subwindow->GetPopupInfoNG(targetId, tipsInfo);
+        }
+        if (tipsInfo.popupNode) {
+            showInSubWindow = true;
+        }
     }
     HandleHoverTipsInfo(param, targetNode, tipsInfo, showInSubWindow, instanceId);
 }
@@ -2118,6 +2130,9 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     auto targetTag = targetNode->GetTag();
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
+    if (!tipsInfo.isTips && popupNode) {
+        return;
+    }
     RefPtr<BubblePattern> popupPattern;
     tipsInfo.markNeedUpdate = true;
     popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
@@ -2149,6 +2164,7 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     tipsInfo.popupId = popupId;
     tipsInfo.popupNode = popupNode;
     tipsInfo.isBlockEvent = param->IsBlockEvent();
+    tipsInfo.isTips = true;
     if (popupNode) {
         popupNode->MarkModifyDone();
     }
@@ -2165,6 +2181,10 @@ void ViewAbstract::AddHoverEventForTips(
     tipsInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
+    CHECK_NULL_VOID(popupNode);
+    auto bubbleRenderProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(bubbleRenderProp);
+    bubbleRenderProp->UpdateAutoCancel(false);
     auto targetId = targetNode->GetId();
     auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
@@ -2175,6 +2195,9 @@ void ViewAbstract::AddHoverEventForTips(
     CHECK_NULL_VOID(inputHub);
     auto hoverTask = [targetNode, targetId, tipsInfo, param, overlayManager, showInSubWindow, popupId, popupNode](
                          bool isHover) {
+        if (!overlayManager->GetPopupInfo(targetId).isTips && overlayManager->GetPopupInfo(targetId).popupNode) {
+            return;
+        }
         if (isHover) {
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2389,7 +2412,7 @@ void ViewAbstract::DismissDialog()
     auto dialogId = DialogManager::GetInstance().GetDismissDialogId();
     auto dialogTag = DialogManager::GetInstance().GetDialogTag();
     if (dialogId && !dialogTag.empty()) {
-        dialogNode = FrameNode::GetFrameNode(dialogTag, dialogId);
+        dialogNode = FrameNode::GetFrameNodeOnly(dialogTag, dialogId);
     }
     if (!dialogNode) {
         if (overlayManager->GetDismissDialogId()) {
@@ -4009,7 +4032,7 @@ void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateVisibility(visible, true);
+        layoutProperty->UpdateVisibility(visible, true, true);
     }
 
     auto focusHub = frameNode->GetOrCreateFocusHub();

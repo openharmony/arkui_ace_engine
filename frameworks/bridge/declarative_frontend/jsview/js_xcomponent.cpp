@@ -234,6 +234,10 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         XComponentModel::GetInstance()->SetSoPath(soPath);
     }
     ParseImageAIOptions(aiOptions);
+
+    if (options.xcomponentType == XComponentType::SURFACE && options.screenId.has_value()) {
+        XComponentModel::GetInstance()->SetScreenId(options.screenId.value());
+    }
 }
 
 void JSXComponent::ExtractInfoToXComponentOptions(
@@ -244,6 +248,7 @@ void JSXComponent::ExtractInfoToXComponentOptions(
     auto type = paramObject->GetProperty("type");
     auto libraryNameValue = paramObject->GetProperty("libraryname");
     auto controller = paramObject->GetProperty("controller");
+    auto screenIdValue = paramObject->GetProperty("screenId");
 
     if (id->IsString()) {
         options.id = id->ToString();
@@ -260,6 +265,9 @@ void JSXComponent::ExtractInfoToXComponentOptions(
     } else if (type->IsNumber()) {
         options.xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
     }
+    if (screenIdValue->IsNumber()) {
+        options.screenId = screenIdValue->ToNumber<uint64_t>();
+    }
 }
 
 void* JSXComponent::Create(const XComponentParams& params)
@@ -271,6 +279,7 @@ void* JSXComponent::Create(const XComponentParams& params)
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(params.elmtId,
         static_cast<float>(params.width), static_cast<float>(params.height), params.xcomponentId,
         static_cast<XComponentType>(params.xcomponentType), params.libraryName, xcomponentController));
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->SetIsArkTsFrameNode(true);
     auto pattern = frameNode->GetPattern<NG::XComponentPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);

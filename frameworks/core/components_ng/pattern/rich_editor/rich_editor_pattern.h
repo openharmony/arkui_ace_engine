@@ -303,6 +303,7 @@ public:
         WeakPtr<RichEditorPattern> pattern_;
     };
 
+    bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
 
     const PreviewTextInfo GetPreviewTextInfo() const;
@@ -1222,6 +1223,14 @@ public:
         return aiSpanMap;
     }
 
+    void SetTextDetectEnable(bool enable) override
+    {
+        auto currentEnable = textDetectEnable_;
+        TextPattern::SetTextDetectEnable(enable);
+        CHECK_NULL_VOID(enable && !currentEnable && CanStartAITask());
+        IF_TRUE(!dataDetectorAdapter_->aiDetectInitialized_, dataDetectorAdapter_->StartAITask());
+    }
+
 protected:
     bool CanStartAITask() override;
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
@@ -1669,6 +1678,7 @@ private:
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
+    bool isInterceptMouseRightRelease_ = false;
     bool isEditing_ = false;
     int32_t dragPosition_ = 0;
     // Action when "enter" pressed.

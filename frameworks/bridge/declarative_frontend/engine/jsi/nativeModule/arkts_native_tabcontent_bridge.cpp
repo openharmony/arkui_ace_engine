@@ -73,4 +73,74 @@ ArkUINativeModuleValue TabContentBridge::ResetTabContentSize(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TabContentBridge::SetTabContentOnWillShow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTabContentModifier()->resetTabContentOnWillShow(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        func->Call(vm, func.ToLocal(), nullptr, 0);
+    };
+    GetArkUINodeModifiers()->getTabContentModifier()->setTabContentOnWillShow(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabContentBridge::ResetTabContentOnWillShow(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabContentModifier()->resetTabContentOnWillShow(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabContentBridge::SetTabContentOnWillHide(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTabContentModifier()->resetTabContentOnWillHide(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        func->Call(vm, func.ToLocal(), nullptr, 0);
+    };
+    GetArkUINodeModifiers()->getTabContentModifier()->setTabContentOnWillHide(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabContentBridge::ResetTabContentOnWillHide(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabContentModifier()->resetTabContentOnWillHide(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

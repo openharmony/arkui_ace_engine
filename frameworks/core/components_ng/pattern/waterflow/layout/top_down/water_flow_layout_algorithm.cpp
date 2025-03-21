@@ -119,6 +119,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             layoutInfo_->JumpTo(layoutInfo_->items_[0][crossIndex][layoutInfo_->jumpIndex_]);
         }
+    } else if (layoutInfo_->jumpIndex_ == LAST_ITEM) {
+        // jump to bottom.
     } else {
         layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
     }
@@ -351,7 +353,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
     auto position = GetItemPosition(currentIndex);
     bool fill = false;
     while (LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, expandMainSize) ||
-           layoutInfo_->jumpIndex_ >= 0) {
+           layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
         if (!itemWrapper) {
             break;
@@ -373,10 +375,10 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             };
             itemWrapper->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
                 { itemCrossSize->second, mainSize_, axis_ }, ref, layoutProperty, itemWrapper));
+            auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(itemWrapper);
+            layoutInfo_->currentOffset_ -= adjustOffset.start;
         }
 
-        auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(itemWrapper);
-        layoutInfo_->currentOffset_ -= adjustOffset.start;
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
         auto item = layoutInfo_->items_[0][position.crossIndex].find(currentIndex);
@@ -426,13 +428,13 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         footerMainStartPos_ = maxItemHeight;
         footerMainSize_ = WaterFlowLayoutUtils::MeasureFooter(layoutWrapper, axis_);
         maxItemHeight += footerMainSize_;
-        if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
-            if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
-                layoutInfo_->extraOffset_.reset();
-            }
-            layoutInfo_->itemStart_ = false;
-            layoutInfo_->JumpTo({ footerMainStartPos_, footerMainSize_ });
+    }
+    if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+        if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
+            layoutInfo_->extraOffset_.reset();
         }
+        layoutInfo_->itemStart_ = false;
+        layoutInfo_->JumpTo({ maxItemHeight, 0 });
     }
     layoutInfo_->maxHeight_ = maxItemHeight;
 

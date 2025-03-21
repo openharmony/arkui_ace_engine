@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,6 +128,7 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "screen_session_manager_client.h"
+#include "pointer_event.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1542,6 +1543,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         container->UpdateFormSharedImage(formImageDataMap_);
         container->UpdateFormData(formData_);
         isFormRenderInit_ = true;
+        TAG_LOGI(AceLogTag::ACE_FORM, "isFormRenderInit_ true");
     }
 
     if (isFormRender_) {
@@ -3042,6 +3044,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
         rsTransaction == nullptr, avoidAreas.size(), stringifiedMap.c_str());
+    if (reason == OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "save PAGE_ROTATION as ROTATION");
+        reason = OHOS::Rosen::WindowSizeChangeReason::ROTATION;
+    }
     if (lastReason_ == OHOS::Rosen::WindowSizeChangeReason::UNDEFINED) {
         lastReason_ = reason;
     }
@@ -3879,7 +3885,7 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
 
 void UIContentImpl::SetFontScaleFollowSystem(const bool fontScaleFollowSystem)
 {
-    LOGI("SetFontScaleFollowSystem: %{public}d", fontScaleFollowSystem);
+    LOGD("SetFontScaleFollowSystem: %{public}d", fontScaleFollowSystem);
     fontScaleFollowSystem_ = fontScaleFollowSystem;
 }
 

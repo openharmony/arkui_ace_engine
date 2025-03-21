@@ -89,6 +89,9 @@ public:
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) {}
     virtual void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) {}
     virtual void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) {}
+    virtual void SetPreferredOrientation(const std::optional<Orientation>& ori) {}
+    virtual void SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar) {}
+    virtual void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) {}
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

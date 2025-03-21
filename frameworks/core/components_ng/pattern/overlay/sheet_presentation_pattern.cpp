@@ -1373,7 +1373,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
 
 float SheetPresentationPattern::GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme)
 {
-    auto closeIconX = sheetSize.Width() - static_cast<float>(SHEET_CLOSE_ICON_WIDTH.ConvertToPx()) -
+    auto closeIconX = sheetSize.Width() - static_cast<float>(sheetTheme->GetCloseIconButtonWidth().ConvertToPx()) -
                       static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
     if (AceApplicationInfo::GetInstance().IsRightToLeft() &&
         AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1458,8 +1458,9 @@ void SheetPresentationPattern::UpdateTitlePadding()
 
     // The title bar area is reserved for the close button area size by default.
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto sheetCloseIconTitleSpace = sheetTheme->IsOuterBorderEnable() ? 0.0_vp : SHEET_CLOSE_ICON_TITLE_SPACE_NEW;
-        padding.end = CalcLength(showCloseIcon ? sheetCloseIconTitleSpace + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
+        auto sheetCloseIconTitleSpace = sheetTheme->GetSheetCloseIconTitleSpaceNew();
+        padding.end =
+            CalcLength(showCloseIcon ? sheetCloseIconTitleSpace + sheetTheme->GetCloseIconButtonWidth() : 0.0_vp);
     } else {
         padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
     }
@@ -1969,6 +1970,8 @@ SheetType SheetPresentationPattern::GetSheetType()
         GetSheetTypeWithAuto(sheetType);
     } else if (sheetThemeType_ == "popup") {
         GetSheetTypeWithPopup(sheetType);
+    } else if (sheetThemeType_ == "center") {
+        GetSheetTypeWithCenter(sheetType);
     }
     return sheetType;
 }
@@ -2048,6 +2051,29 @@ void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
     }
     if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
         sheetType = SheetType::SHEET_CENTER;
+    }
+}
+
+void SheetPresentationPattern::GetSheetTypeWithCenter(SheetType& sheetType)
+{
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.sheetType.has_value()) {
+        sheetType = sheetStyle.sheetType.value();
+        return;
+    }
+    double rootWidth = 0.0;
+    if (windowSize_.has_value()) {
+        rootWidth = windowSize_.value().Width();
+    } else {
+        rootWidth = PipelineContext::GetCurrentRootWidth();
+    }
+    if (GreatOrEqual(rootWidth, SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+        sheetType = SheetType::SHEET_CENTER;
+    } else {
+        // SHEET_BOTTOMLANDSPACE need to adapt
+        sheetType = SheetType::SHEET_BOTTOM;
     }
 }
 

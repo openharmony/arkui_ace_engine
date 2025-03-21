@@ -99,6 +99,17 @@ const char* GetEngineSharedLibrary()
 }
 #endif
 
+std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    std::string res = "[";
+    std::for_each(avoidAreas.begin(), avoidAreas.end(), [&res](const auto& avoidArea) {
+        res =
+            res + "(" + std::to_string(static_cast<int32_t>(avoidArea.first)) + "," + avoidArea.second.ToString() + ")";
+    });
+    res = res + "]";
+    return res;
+}
+
 class FrontendOrientationListener : public OHOS::Rosen::IPreferredOrientationChangeListener  {
 public:
     explicit FrontendOrientationListener(int32_t instanceId, WeakPtr<NG::NavigationManager> mgr)
@@ -2354,6 +2365,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
 #endif
     RegisterOrientationUpdateListener();
     RegisterOrientationChangeListener();
+    InitSystemBarConfig();
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
     RegisterAvoidInfoCallback();
@@ -3200,6 +3212,8 @@ void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExe
             picNameArray.push_back(imageData.first);
             fileDescriptorArray.push_back(imageData.second->GetAshmemFd());
             byteLenArray.push_back(imageData.second->GetAshmemSize());
+            TAG_LOGI(ACE_FORM, "picName:%{public}s, fd:%{public}d, size:%{public}d", imageData.first.c_str(),
+                imageData.second->GetAshmemFd(), imageData.second->GetAshmemSize());
         }
         GetNamesOfSharedImage(picNameArray);
         UpdateSharedImage(picNameArray, byteLenArray, fileDescriptorArray);
@@ -4163,13 +4177,84 @@ void AceContainer::RegisterAvoidInfoDataProcessCallback()
 
 RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
 {
-    return nullptr;
+    CHECK_NULL_RETURN(uiWindow_, nullptr);
+    auto config = AceType::MakeRefPtr<PageViewportConfigOhos>();
+    CHECK_NULL_RETURN(config, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(context, nullptr);
+    auto mgr = context->GetSafeAreaManager();
+    CHECK_NULL_RETURN(mgr, nullptr);
+    config->SetPipelineContext(WeakPtr(context));
+
+    ViewportConfig viewportConfig;
+    // the position is not needed, set it to (0, 0)
+    viewportConfig.SetPosition(0, 0);
+    int32_t width = static_cast<int32_t>(context->GetRootWidth());
+    int32_t height = static_cast<int32_t>(context->GetRootHeight());
+    auto displayOri = static_cast<int32_t>(GetCurrentDisplayOrientation());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "current displayOri:%{public}d, width:%{public}d, height:%{public}d",
+        displayOri, width, height);
+    viewportConfig.SetSize(width, height);
+    viewportConfig.SetOrientation(displayOri);
+    config->SetViewportConfig(viewportConfig);
+
+    AvoidAreaInfo avoidAreas;
+    auto insets = mgr->GetSystemSafeArea();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TYPE_SYSTEM safeArea:%{public}s", insets.ToString().c_str());
+    auto systemAvoidArea = ConvertAvoidArea(insets, width, height);
+    avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
+    insets = mgr->GetCutoutSafeArea();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TYPE_CUTOUT safeArea:%{public}s", insets.ToString().c_str());
+    auto cutoutArea = ConvertAvoidArea(insets, width, height);
+    avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutArea);
+    insets = mgr->GetNavSafeArea();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TYPE_NAVIGATION_INDICATOR safeArea:%{public}s", insets.ToString().c_str());
+    auto navArea = ConvertAvoidArea(insets, width, height);
+    avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, navArea);
+    config->SetAvoidAreas(avoidAreas);
+
+    return config;
 }
 
 RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation orientation,
     bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
 {
-    return nullptr;
+    CHECK_NULL_RETURN(uiWindow_, nullptr);
+    auto config = AceType::MakeRefPtr<PageViewportConfigOhos>();
+    CHECK_NULL_RETURN(config, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(context, nullptr);
+    config->SetPipelineContext(WeakPtr(context));
+
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    auto statusBarProperty = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
+    statusBarProperty.enable_ = enableStatusBar;
+    statusBarProperty.enableAnimation_ = statusBarAnimated;
+    properties.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty);
+    auto navigationIndicatorProperty =
+        uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    navigationIndicatorProperty.enable_ = enableNavigationIndicator;
+    properties.emplace(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, navigationIndicatorProperty);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "enableStatusBar:%{public}d, statusBarAnimated:%{public}d, enableNavIndicator:%{public}d",
+        enableStatusBar, statusBarAnimated, enableNavigationIndicator);
+
+    ViewportConfig viewportConfig;
+    AvoidAreaInfo avoidAreas;
+    auto ret = uiWindow_->GetTargetOrientationConfigInfo(
+        static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation)), properties, viewportConfig, avoidAreas);
+    if (Rosen::WMError::WM_OK != ret) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to get targetOrientationInfo from window, error:%{public}d",
+            static_cast<int32_t>(ret));
+        return nullptr;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ViewportConfig: %{public}s, SafeAreas:%{public}s",
+        viewportConfig.ToString().c_str(), StringifyAvoidAreas(avoidAreas).c_str());
+    config->SetViewportConfig(viewportConfig);
+    config->SetAvoidAreas(avoidAreas);
+
+    return config;
 }
 
 void AceContainer::SetRequestedOrientation(Orientation orientation, bool needAnimation)
@@ -4216,6 +4301,22 @@ void AceContainer::RegisterOrientationChangeListener()
     if (uiWindow_->RegisterOrientationChangeListener(listener) != Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to register Orientation change listener");
     }
+}
+
+void AceContainer::InitSystemBarConfig()
+{
+    CHECK_NULL_VOID(uiWindow_);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    auto navigationMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationMgr);
+    auto property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set initial statusBar, enabled:%{public}d, animated:%{public}d",
+        property.enable_, property.enableAnimation_);
+    navigationMgr->SetStatusBarConfigByWindowApi(std::make_pair(property.enable_, property.enableAnimation_));
+    property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set initial navigationIndicator, enabled:%{public}d", property.enable_);
+    navigationMgr->SetNavigationIndicatorConfigByWindowApi(property.enable_);
 }
 
 bool AceContainer::IsPcOrPadFreeMultiWindowMode() const

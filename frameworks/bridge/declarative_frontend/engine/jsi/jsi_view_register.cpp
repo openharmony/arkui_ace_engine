@@ -104,6 +104,7 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
         ContainerScope scope(id);
         const EcmaVM* vm = storage->GetEcmaVM();
         CHECK_NULL_VOID(vm);
+        TAG_LOGI(AceLogTag::ACE_FORM, "setOrCreate, dataList length: %{public}zu", data.length());
         std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
         CHECK_NULL_VOID(jsonRoot);
         auto child = jsonRoot->GetChild();

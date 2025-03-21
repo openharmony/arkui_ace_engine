@@ -22,6 +22,8 @@
 namespace OHOS::Ace::NG {
 constexpr Dimension ITEM_BOTTOM_TOP_PADDING = 8.0_vp;
 constexpr int32_t PADDING_MULTIPLE = 2;
+// The maximum width of the right row is 1/3 of content area width
+constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 3;
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -124,9 +126,42 @@ std::pair<float, float> MenuItemLayoutAlgorithm::MeasureRightRow(LayoutWrapper* 
     CHECK_NULL_RETURN(layoutWrapper, defaultPair);
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_RETURN(rightRow, defaultPair);
+    auto children = rightRow->GetAllChildrenWithBuild();
+    CHECK_EQUAL_RETURN(children.empty(), true, defaultPair);
     rightRow->Measure(childConstraint);
+
+    auto itemNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(itemNode, defaultPair);
+    auto pipeline = itemNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, defaultPair);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, defaultPair);
+    float iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
+    float spaceWidth = childConstraint.maxSize.Width();
+    float rowWidth = 0.0f;
+    float rowHeight = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) ?
+        theme->GetMenuChildMinHeight().ConvertToPx() : minItemHeight_;
+    for (auto it = children.rbegin(); it != children.rend();++it) {
+        const auto& child = *it;
+        if (child != children.front()) {
+            child->Measure(childConstraint);
+        } else {
+            auto labelConstraint = childConstraint;
+            labelConstraint.maxSize.SetWidth(spaceWidth);
+            child->Measure(labelConstraint);
+        }
+        auto childGeometryNode = child->GetGeometryNode();
+        CHECK_NULL_RETURN(childGeometryNode, defaultPair);
+        auto childSize = childGeometryNode->GetMarginFrameSize();
+        spaceWidth -= childSize.Width() + iconContentPadding;
+        rowWidth += childSize.Width() + iconContentPadding;
+        rowHeight = std::max(rowHeight, childSize.Height());
+    }
+    rowWidth -= iconContentPadding;
     auto rightRowGeometryNode = rightRow->GetGeometryNode();
     CHECK_NULL_RETURN(rightRowGeometryNode, defaultPair);
+    rightRowGeometryNode->SetFrameSize(SizeF(rowWidth, rowHeight));
+    
     auto marginFrameSize = rightRowGeometryNode->GetMarginFrameSize();
     return {marginFrameSize.Width(), marginFrameSize.Height()};
 }
@@ -165,11 +200,9 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
 {
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
-    childConstraint.maxSize.SetWidth(leftRow->GetGeometryNode()->GetFrameSize().Width()
-        // Cannot cover left icon
-        ? maxRowWidth_ - middleSpace_ - static_cast<float>(iconSize_)
-        : maxRowWidth_);
+
     // measure right row
+    childConstraint.maxSize.SetWidth((maxRowWidth_ - middleSpace_) / RIGHT_ROW_MAX_WIDTH_WEIGHT);
     auto [rightRowWidth, rightRowHeight] = MeasureRightRow(layoutWrapper, childConstraint);
     
     // measure left row

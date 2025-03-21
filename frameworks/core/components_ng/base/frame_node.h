@@ -116,6 +116,8 @@ public:
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
+    static RefPtr<FrameNode> GetFrameNodeOnly(const std::string& tag, int32_t nodeId);
+
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
 
@@ -296,6 +298,12 @@ public:
     template<typename T>
     T* GetPatternPtr() const
     {
+        if (ACE_UNLIKELY(pattern_ &&
+            SystemProperties::DetectAceObjTypeConvertion() &&
+            !DynamicCast<T>(pattern_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
+                GetPatternTypeName(), T::TypeName());
+        }
         return reinterpret_cast<T*>(RawPtr(pattern_));
     }
 
@@ -314,6 +322,12 @@ public:
     template<typename T>
     T* GetLayoutPropertyPtr() const
     {
+        if (ACE_UNLIKELY(layoutProperty_ &&
+            SystemProperties::DetectAceObjTypeConvertion() &&
+            !DynamicCast<T>(layoutProperty_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
+                GetLayoutPropertyTypeName(), T::TypeName());
+        }
         return reinterpret_cast<T*>(RawPtr(layoutProperty_));
     }
 
@@ -326,6 +340,12 @@ public:
     template<typename T>
     T* GetPaintPropertyPtr() const
     {
+        if (ACE_UNLIKELY(paintProperty_ &&
+            SystemProperties::DetectAceObjTypeConvertion() &&
+            !DynamicCast<T>(paintProperty_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
+                GetPaintPropertyTypeName(), T::TypeName());
+        }
         return reinterpret_cast<T*>(RawPtr(paintProperty_));
     }
 
@@ -1315,6 +1335,10 @@ public:
         layoutProperty_->SetNeedLazyLayout(value);
     }
 
+    void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
+
+    std::string PrintVisibilityDumpInfo() const;
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1454,6 +1478,10 @@ private:
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
     void ResetPredictNodes();
+
+    const char* GetPatternTypeName() const;
+    const char* GetLayoutPropertyTypeName() const;
+    const char* GetPaintPropertyTypeName() const;
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
@@ -1601,6 +1629,7 @@ private:
     friend class Pattern;
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
+    std::deque<std::pair<uint64_t, std::pair<VisibleType, bool>>> visibilityDumpInfos_;
 
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);

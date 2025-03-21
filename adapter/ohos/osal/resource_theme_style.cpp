@@ -135,6 +135,7 @@ static const std::unordered_set<std::string> stringAttrs = {
     "general_pre_month",
     "prev_arrow_accessibility_text",
     "next_arrow_accessibility_text",
+    "menu_haptic_feedback",
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

@@ -409,7 +409,8 @@ bool SvgNode::ProcessChildStyle(SvgInitStyleProcessInfo& currentSvgNodeInfo,
     std::stack<std::pair<SvgInitStyleProcessInfo, const SvgBaseAttribute*>>& initStyleTaskSt)
 {
     auto currentSvgNode = currentSvgNodeInfo.svgNode;
-    if (currentSvgNode->passStyle_ && currentSvgNodeInfo.childIndex < currentSvgNode->children_.size()) {
+    if (currentSvgNode->passStyle_ &&
+        currentSvgNodeInfo.childIndex < static_cast<int32_t>(currentSvgNode->children_.size())) {
         auto child = currentSvgNode->children_[currentSvgNodeInfo.childIndex];
         if (child) {
             // pass down style only if child inheritStyle_ is true

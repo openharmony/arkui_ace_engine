@@ -287,6 +287,7 @@ public:
     void SetSecurityLayer(bool isSecure) override;
     void SetHDRBrightness(float hdrBrightness) override;
     void SetTransparentLayer(bool isTransparentLayer) override;
+    void SetScreenId(uint64_t screenId) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
@@ -447,8 +448,6 @@ public:
     void UpdateWindowBlur() override;
     void MarkUiFirstNode(bool isUiFirstNode) override;
 
-    OffsetF GetRectOffsetWithPositionEdges(
-        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference) override;
     void SetDrawNode() override;
     bool AddNodeToRsTree() override;
     static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
@@ -625,6 +624,8 @@ protected:
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
     OffsetF GetRectOffsetWithOffsetEdges(
         const EdgesParam& offsetEdges, float widthPercentReference, float heightPercentReference);
+    OffsetF GetRectOffsetWithPositionEdges(
+        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference);
 
     void InitEventClickEffect();
     RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);

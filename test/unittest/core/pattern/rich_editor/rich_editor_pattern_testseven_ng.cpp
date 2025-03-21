@@ -421,27 +421,4 @@ HWTEST_F(RichEditorPatternTestSevenNg, ShiftMultipleSelection001, TestSize.Level
     EXPECT_FALSE(richEditorPattern->shiftFlag_);
 }
 
-/**
- * @tc.name: PageScrollTest001
- * @tc.desc: test richEditor pageup and pagedown function
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSevenNg, PageScrollTest001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto geometryNode = richEditorNode_->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetFrameSize(SizeF(150.0f, 150.0f));
-    richEditorPattern->richTextRect_ = RectF(0, 0, 150.0f, 400.0f);
-    richEditorPattern->contentRect_ = RectF(0, 0, 150.0f, 150.0f);
-
-    richEditorPattern->HandleOnPageDown();
-    EXPECT_EQ(richEditorPattern->scrollOffset_, -150.0f);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -150.0f);
-    richEditorPattern->HandleOnPageUp();
-    EXPECT_EQ(richEditorPattern->scrollOffset_, 0);
-    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
-}
 } // namespace OHOS::Ace::NG

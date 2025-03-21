@@ -31,10 +31,6 @@ public:
     Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest) override;
     void Layout(float width) override;
     float GetHeight() override;
-    bool IsEndAddParagraphSpacing() override
-    {
-        return true;
-    }
 
 private:
     float height_ = 0.0f;

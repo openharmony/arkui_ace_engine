@@ -2010,7 +2010,10 @@ bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight&
     }
     if (!ParseJsDimensionVpNG(args, sheetHeight)) {
         if (!isReset) {
-            detent.sheetMode = NG::SheetMode::LARGE;
+            auto sheetTheme = GetTheme<OHOS::Ace::NG::SheetTheme>();
+            detent.sheetMode = sheetTheme != nullptr
+                                   ? static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode())
+                                   : NG::SheetMode::LARGE;
         }
         return false;
     }

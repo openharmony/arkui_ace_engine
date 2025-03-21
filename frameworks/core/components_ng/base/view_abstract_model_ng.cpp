@@ -19,6 +19,7 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -39,17 +40,17 @@ constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
 } // namespace
 
-void StartVirator(const MenuParam& menuParam, bool isMenu)
+void StartVirator(const MenuParam& menuParam, bool isMenu, const std::string& menuHapticFeedback)
 {
     if (menuParam.hapticFeedbackMode == HapticFeedbackMode::ENABLED) {
-        VibratorUtils::StartViratorDirectly("haptic.long_press_medium");
+        VibratorUtils::StartViratorDirectly(menuHapticFeedback);
         return;
     }
     if (isMenu) {
         return;
     }
     if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO && menuParam.previewMode != MenuPreviewMode::NONE) {
-        VibratorUtils::StartViratorDirectly("haptic.long_press_medium");
+        VibratorUtils::StartViratorDirectly(menuHapticFeedback);
     }
 }
 
@@ -68,9 +69,13 @@ void ViewAbstractModelNG::BindMenuGesture(
                 TAG_LOGI(AceLogTag::ACE_MENU, "skip menu show with params %{public}d", targetNode->GetId());
                 return;
             }
+            auto pipelineContext = targetNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+            CHECK_NULL_VOID(menuTheme);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            StartVirator(menuParam, true);
+            StartVirator(menuParam, true, menuTheme->GetMenuHapticFeedback());
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
         };
     } else if (buildFunc) {
@@ -81,9 +86,13 @@ void ViewAbstractModelNG::BindMenuGesture(
                 TAG_LOGI(AceLogTag::ACE_MENU, "skip menu show with builder %{public}d", targetNode->GetId());
                 return;
             }
+            auto pipelineContext = targetNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+            CHECK_NULL_VOID(menuTheme);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            StartVirator(menuParam, true);
+            StartVirator(menuParam, true, menuTheme->GetMenuHapticFeedback());
             std::function<void()> previewBuildFunc;
             NG::ViewAbstract::BindMenuWithCustomNode(
                 std::move(builderFunc), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
@@ -203,7 +212,11 @@ void ViewAbstractModelNG::BindMenu(
     if (CheckMenuIsShow(menuParam, targetId, targetNode)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
     } else if (menuParam.isShow) {
-        StartVirator(menuParam, true);
+        auto pipelineContext = targetNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
+        StartVirator(menuParam, true, menuTheme->GetMenuHapticFeedback());
         if (!params.empty()) {
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
         } else if (buildFunc) {
@@ -266,7 +279,11 @@ void CreateCustomMenuWithPreview(
         gestureHub->SetPixelMap(pixelMap);
     }
     auto refTargetNode = AceType::Claim<NG::FrameNode>(targetNode);
-    StartVirator(menuParam, false);
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    StartVirator(menuParam, false, menuTheme->GetMenuHapticFeedback());
     NG::ViewAbstract::BindMenuWithCustomNode(
         std::move(buildFunc), refTargetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
 }
@@ -388,7 +405,11 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
                             std::function<void()> previewBuildFunc;
                             TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
-                            StartVirator(menuParam, false);
+                            auto pipelineContext = targetNode->GetContext();
+                            CHECK_NULL_VOID(pipelineContext);
+                            auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+                            CHECK_NULL_VOID(menuTheme);
+                            StartVirator(menuParam, false, menuTheme->GetMenuHapticFeedback());
                             NG::ViewAbstract::BindMenuWithCustomNode(
                                 std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
                         },
@@ -415,6 +436,8 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         CHECK_NULL_VOID(targetNode);
                         auto pipelineContext = targetNode->GetContext();
                         CHECK_NULL_VOID(pipelineContext);
+                        auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+                        CHECK_NULL_VOID(menuTheme);
                         if (pipelineContext->IsDragging()) {
                             TAG_LOGI(AceLogTag::ACE_MENU, "TargetNode is dragging, menu is no longer show");
                             return;
@@ -430,7 +453,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         }
                         NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                             info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-                        StartVirator(menuParam, false);
+                        StartVirator(menuParam, false, menuTheme->GetMenuHapticFeedback());
                         NG::ViewAbstract::BindMenuWithCustomNode(
                             std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
                     },

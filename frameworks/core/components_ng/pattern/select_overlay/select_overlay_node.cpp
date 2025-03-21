@@ -1321,6 +1321,14 @@ void SelectOverlayNode::MoreOrBackAnimation(bool isMore, bool noAnimation)
     CHECK_NULL_VOID(backButton_);
     if (isMore && !isExtensionMenu_) {
         MoreAnimation(noAnimation);
+        auto context = GetContext();
+        if (context) {
+            context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(extensionMenu_))]() {
+                auto menuNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(menuNode);
+                menuNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
+            });
+        }
     } else if (!isMore && isExtensionMenu_) {
         BackAnimation(noAnimation);
     }

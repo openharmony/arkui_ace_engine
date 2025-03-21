@@ -230,64 +230,6 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorGetAllChildren001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestRichEditorHandleSelectFontStyleWrapper001
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleSelectFontStyleWrapper001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TextStyle spanStyle;
-    KeyCode code = KeyCode::KEY_UNKNOWN;
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontWeight(), FontWeight::NORMAL);
-}
-
-/**
- * @tc.name: TestRichEditorHandleOnShowMenu001
- * @tc.desc: test HandleOnShowMenu
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleOnShowMenu001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto tempOffset = richEditorPattern->selectionMenuOffsetByMouse_;
-    richEditorPattern->parentGlobalOffset_.x_ = 10.0f;
-    richEditorPattern->parentGlobalOffset_.y_ = 20.0f;
-    richEditorPattern->HandleOnShowMenu();
-    ASSERT_NE(richEditorPattern->selectionMenuOffsetByMouse_, tempOffset);
-}
-
-/**
- * @tc.name: TestRichEditorHandleSelectFontStyle001
- * @tc.desc: test HandleSelectFontStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorHandleSelectFontStyle001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    KeyCode code = KeyCode::KEY_UNKNOWN;
-    richEditorPattern->HandleSelectFontStyle(code);
-    EXPECT_EQ(richEditorPattern->isSpanStringMode_, true);
-}
-
-/**
  * @tc.name: TestRichEditorCursorMoveLineBegin001
  * @tc.desc: test CursorMoveLineBegin
  * @tc.type: FUNC

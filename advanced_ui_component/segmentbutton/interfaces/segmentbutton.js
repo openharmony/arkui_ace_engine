@@ -31,6 +31,11 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
 
+const curves = globalThis.requireNativeModule('ohos.curves');
+const KeyCode = globalThis.requireNapi('multimodalInput.keyCode').KeyCode;
+const util = globalThis.requireNapi('util');
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const I18n = requireNapi('i18n');
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
 const DEFAULT_MAX_FONT_SCALE = 1;

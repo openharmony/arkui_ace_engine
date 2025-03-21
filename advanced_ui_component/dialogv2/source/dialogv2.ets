@@ -1108,9 +1108,15 @@ struct CustomDialogContentComponent {
   }
 
   aboutToAppear(): void {
-    let uiContext: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-    this.appMaxFontScale = uiContext.getMaxFontScale();
+    try {
+      let uiContext: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
+      this.appMaxFontScale = uiContext?.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+    }
     this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
   }

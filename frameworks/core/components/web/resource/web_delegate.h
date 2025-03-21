@@ -795,6 +795,7 @@ public:
     void HideWebView();
     void OnRenderToBackground();
     void OnRenderToForeground();
+    void SetSurfaceDensity(const double& density);
     void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
@@ -1424,6 +1425,7 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
+    Offset windowRelativeOffset_;
 #endif
 };
 

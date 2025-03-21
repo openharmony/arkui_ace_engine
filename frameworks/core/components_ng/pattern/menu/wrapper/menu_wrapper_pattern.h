@@ -396,6 +396,7 @@ public:
         dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
         dumpInfo_.menuType = dumpInfo.menuType;
         dumpInfo_.enableArrow = dumpInfo.enableArrow;
+        dumpInfo_.offset = dumpInfo.offset;
         dumpInfo_.targetNode = dumpInfo.targetNode;
         dumpInfo_.targetOffset = dumpInfo.targetOffset;
         dumpInfo_.targetSize = dumpInfo.targetSize;

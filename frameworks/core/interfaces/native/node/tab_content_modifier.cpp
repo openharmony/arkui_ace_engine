@@ -45,6 +45,44 @@ void SetTabContentLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
     TabContentModelNG::SetTabBarLabel(frameNode, label);
 }
 
+void SetTabContentOnWillShow(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillShow = reinterpret_cast<std::function<void()>*>(callback);
+        TabContentModelNG::SetOnWillShow(frameNode, std::move(*onWillShow));
+    } else {
+        TabContentModelNG::SetOnWillShow(frameNode, nullptr);
+    }
+}
+
+void ResetTabContentOnWillShow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabContentModelNG::SetOnWillShow(frameNode, nullptr);
+}
+
+void SetTabContentOnWillHide(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillHide = reinterpret_cast<std::function<void()>*>(callback);
+        TabContentModelNG::SetOnWillHide(frameNode, std::move(*onWillHide));
+    } else {
+        TabContentModelNG::SetOnWillHide(frameNode, nullptr);
+    }
+}
+
+void ResetTabContentOnWillHide(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabContentModelNG::SetOnWillHide(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUITabContentModifier* GetTabContentModifier()
 {
@@ -52,6 +90,10 @@ const ArkUITabContentModifier* GetTabContentModifier()
     static const ArkUITabContentModifier modifier = {
         .setTabContentBuilder = SetTabContentBuilder,
         .setTabContentLabel = SetTabContentLabel,
+        .setTabContentOnWillShow = SetTabContentOnWillShow,
+        .resetTabContentOnWillShow = ResetTabContentOnWillShow,
+        .setTabContentOnWillHide = SetTabContentOnWillHide,
+        .resetTabContentOnWillHide = ResetTabContentOnWillHide,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

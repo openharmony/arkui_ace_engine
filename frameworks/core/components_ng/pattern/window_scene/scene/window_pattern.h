@@ -43,6 +43,7 @@ public:
         startingWindowLayoutHelper_.Reset();
     }
 
+    bool BorderUnoccupied() const override;
     std::vector<Rosen::Rect> GetHotAreas();
     sptr<Rosen::Session> GetSession();
     void CheckAndMeasureStartingWindow(const SizeF& currentParentSize);

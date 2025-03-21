@@ -1142,6 +1142,7 @@ export struct ComposeListItem {
   @State isFocus: boolean = false;
   @State isChecked: boolean = false;
   @State @Watch('onWrapChange') isWrapText: boolean = false;
+  @State listScale: ScaleOptions = { x: 1, y: 1 };
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -1244,7 +1245,7 @@ export struct ComposeListItem {
   aboutToDisappear(): void {
     if (this.callbackId) {
       this.getUIContext()
-        .getHostContext()
+      ?.getHostContext()
       ?.getApplicationContext()
       ?.off('environment', this.callbackId);
       this.callbackId = void (0);
@@ -1477,7 +1478,8 @@ export struct ComposeListItem {
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-          this.frontColor = isHover ? this.hoveringColor : NORMAL_BG_COLOR;
+          this.frontColor = isHover ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
+          isHover ? this.zoomIn() : this.zoomOut();
         }
       })
       .stateStyles({
@@ -1508,10 +1510,12 @@ export struct ComposeListItem {
     .onFocus(() => {
       this.isFocus = true;
       this.frontColor = FOCUSED_BG_COLOR;
+      this.zoomIn();
     })
     .onBlur(() => {
       this.isFocus = false;
       this.frontColor = NORMAL_BG_COLOR;
+      this.zoomOut();
     })
     .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : $r('sys.float.composeListItem_radius'))
     .onClick(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : () => {
@@ -1526,10 +1530,7 @@ export struct ComposeListItem {
         this.operateItem.arrow.action();
       }
     })
-    .scale({
-      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE),
-      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE)
-    })
+    .scale(this.listScale)
     .shadow(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW))
     .margin({
       left: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined,
@@ -1539,5 +1540,19 @@ export struct ComposeListItem {
       left: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0,
       right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
     })
+  }
+
+  private zoomIn(): void {
+    this.listScale = {
+      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : FOCUSED_ITEM_SCALE,
+      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : FOCUSED_ITEM_SCALE
+    };
+  }
+
+  private zoomOut(): void {
+    this.listScale = {
+      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : RECOVER_ITEM_SCALE,
+      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : RECOVER_ITEM_SCALE
+    };
   }
 }

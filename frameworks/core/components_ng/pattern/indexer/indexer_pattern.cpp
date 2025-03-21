@@ -72,6 +72,7 @@ void IndexerPattern::OnModifyDone()
     bool autoCollapseModeChanged = true;
     bool itemCountChanged = false;
     InitArrayValue(autoCollapseModeChanged, itemCountChanged);
+    ReportSelectEvent();
     BuildArrayValueItems();
     bool removeBubble = false;
     auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
@@ -1685,6 +1686,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
+    ReportPoupSelectEvent();
     if (onPopupSelected) {
         onPopupSelected(index);
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected");
@@ -2005,9 +2007,14 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
             onCreatChangeEvent(actualIndex);
         }
         auto onSelected = indexerEventHub->GetOnSelected();
-        if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
-            TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
-            onSelected(actualIndex); // fire onSelected with an item's index from original array
+        if ((selectIndex >= 0) && (selectIndex < itemCount_)) {
+            if (onSelected) {
+                TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
+                onSelected(actualIndex); // fire onSelected with an item's index from original array
+            }
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+            TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER,
+                "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected", GetHost()->GetId());
         }
     }
     selectedChangedForHaptic_ = lastFireSelectIndex_ != selected_;
@@ -2166,5 +2173,21 @@ void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ActualItemCount", itemCount_);
     json->Put("FullItemCount", static_cast<int32_t>(fullArrayValue_.size()));
     json->Put("MaxContentHeight", maxContentHeight_);
+}
+
+void IndexerPattern::ReportSelectEvent()
+{
+    if (initialized_ && selectChanged_) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+        TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected",
+            GetHost()->GetId());
+    }
+}
+
+void IndexerPattern::ReportPoupSelectEvent()
+{
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onPopupSelect");
+    TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onPopupSelect",
+        GetHost()->GetId());
 }
 } // namespace OHOS::Ace::NG

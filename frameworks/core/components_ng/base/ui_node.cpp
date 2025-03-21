@@ -443,7 +443,7 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    SetDepth(1);
+    depth_= -1;
     UpdateThemeScopeId(0);
 }
 

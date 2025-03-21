@@ -138,6 +138,7 @@ constexpr double DISPLAY_HEIGHT = 1280;
 static std::list<PipelineContext::PredictTask> predictTasks_;
 static Rect windowRect_;
 static bool g_isDragging = false;
+static bool hasModalButtonsRect_;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
@@ -153,6 +154,7 @@ void MockPipelineContext::SetUp()
     pipeline_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     pipeline_->SetupRootElement();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
+    hasModalButtonsRect_ = true;
 }
 
 void MockPipelineContext::TearDown()
@@ -178,6 +180,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 void MockPipelineContext::SetInstanceId(int32_t instanceId)
 {
     pipeline_->instanceId_ = instanceId;
+}
+
+void MockPipelineContext::SetContainerModalButtonsRect(bool hasModalButtonsRect)
+{
+    hasModalButtonsRect_ = hasModalButtonsRect;
 }
 
 void MockPipelineContext::SetCurrentWindowRect(Rect rect)
@@ -1001,7 +1008,7 @@ int32_t PipelineContext::GetContainerModalTitleHeight()
 
 bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
-    return true;
+    return hasModalButtonsRect_;
 }
 
 ColorMode PipelineContext::GetColorMode() const

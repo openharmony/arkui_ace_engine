@@ -27,28 +27,6 @@ constexpr float DEFAULT_COUNT = 2.0f;
 IndicatorPattern::IndicatorPattern()
 {
     indicatorController_ = MakeRefPtr<IndicatorController>();
-    InitIndicatorController();
-}
-
-void IndicatorPattern::InitIndicatorController()
-{
-    indicatorController_->SetShowNextImpl([weak = WeakClaim(this)]() {
-        auto indicator = weak.Upgrade();
-        CHECK_NULL_VOID(indicator);
-        indicator->ShowNext();
-    });
-
-    indicatorController_->SetShowPrevImpl([weak = WeakClaim(this)]() {
-        auto indicator = weak.Upgrade();
-        CHECK_NULL_VOID(indicator);
-        indicator->ShowPrevious();
-    });
-
-    indicatorController_->SetChangeIndexImpl([weak = WeakClaim(this)](int32_t index, bool useAnimation) {
-        auto indicator = weak.Upgrade();
-        CHECK_NULL_VOID(indicator);
-        indicator->ChangeIndex(index, useAnimation);
-    });
 }
 
 void IndicatorPattern::SetSwiperDigitalParameters(const SwiperDigitalParameters& swiperDigitalParameters)

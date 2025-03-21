@@ -66,6 +66,7 @@ ohos_unittest("plugin_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/exclusive_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.cpp",
+    "$ace_root/frameworks/core/components_ng/gestures/recognizers/gestures_extra_handler.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/multi_fingers_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/pan_recognizer.cpp",

@@ -343,6 +343,14 @@ template("ace_core_source_set") {
       sources += [ "event/event_info_convertor.cpp" ]
     }
 
+    if (ace_engine_feature_enable_long_press_gesture_extra_handling && defined(
+            vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling)) {
+      sources += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling
+    } else {
+      sources +=
+          [ "components_ng/gestures/recognizers/gestures_extra_handler.cpp" ]
+    }
+
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -962,6 +970,13 @@ template("ace_core_ng_source_set") {
       external_deps += vendor_configs.ace_engine_advanced_enable_event_compatible_handling_deps
     } else {
       sources += [ "event/event_info_convertor.cpp" ]
+    }
+    if (ace_engine_feature_enable_long_press_gesture_extra_handling && defined(
+            vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling)) {
+      sources += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling
+    } else {
+      sources +=
+          [ "components_ng/gestures/recognizers/gestures_extra_handler.cpp" ]
     }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]

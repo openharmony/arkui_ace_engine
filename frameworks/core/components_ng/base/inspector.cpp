@@ -454,12 +454,12 @@ RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notD
     }
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     if (!context) {
-        LOGW("Internal error! Context is null. key: %{public}s", key.c_str());
+        LOGW("Internal error! Context is null.");
         return nullptr;
     }
     auto rootNode = context->GetRootElement();
     if (!rootNode) {
-        LOGW("Internal error! RootNode is null. key: %{public}s", key.c_str());
+        LOGW("Internal error! RootNode is null.");
         return nullptr;
     }
 
@@ -497,13 +497,14 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 {
     auto frameNode = Inspector::GetFrameNodeByKey(key, true);
     if (!frameNode) {
-        LOGW("Can't find component:%{public}s, check your parameters", key.c_str());
+        LOGW("Can't find component, check your parameters");
         return;
     }
     rectangle.size = frameNode->GetGeometryNode()->GetFrameSize();
     auto context = frameNode->GetRenderContext();
     if (!context) {
-        LOGW("Internal error! Component(id=%{public}s) is null", key.c_str());
+        LOGW("Internal error! Component(id=%{public}d, tag=%{public}s) is null",
+            frameNode->GetId(), frameNode->GetTag().c_str());
         return;
     }
     rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
@@ -519,7 +520,7 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
     ACE_SCOPED_TRACE("Inspector::GetRectangleById_Id=%d_Tag=%s_Key=%s",
         frameNode->GetId(), frameNode->GetTag().c_str(), key.c_str());
-    LOGI("GetRectangleById Id:%{public}d key:%{public}s localOffset:%{public}s"
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetRectangleById Id:%{public}d key:%{public}s localOffset:%{public}s"
          "screenRect:%{public}s",
         frameNode->GetId(), key.c_str(), rectangle.localOffset.ToString().c_str(),
         rectangle.screenRect.ToString().c_str());

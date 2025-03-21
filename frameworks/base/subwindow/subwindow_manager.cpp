@@ -198,7 +198,7 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindowById(int32_t subinstanceId
         return result->second;
     }
 
-    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in instanceSubwindowMap_, subinstanceId is %{public}d",
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in instanceSubwindowMap_, subinstanceId is %{public}d",
         subinstanceId);
     return nullptr;
 }
@@ -1180,7 +1180,7 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
             subwindow->Close();
             return;
         }
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
         return;
     }
     auto subContainerId = GetSubContainerId(instanceId);
@@ -1327,7 +1327,7 @@ void SubwindowManager::HideSystemTopMostWindow()
     if (subwindow) {
         subwindow->HideSubWindowNG();
     } else {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when hide window");
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when hide window");
     }
 }
 
@@ -1354,7 +1354,7 @@ void SubwindowManager::ClearToastInSystemSubwindow()
     if (subwindow) {
         subwindow->ClearToast();
     } else {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when clear system toast");
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "can not find systemTopMost window when clear system toast");
     }
 }
 

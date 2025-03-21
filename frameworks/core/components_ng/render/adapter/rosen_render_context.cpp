@@ -1724,7 +1724,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto parent = frameNode->GetAncestorNodeOfFrame(false);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         CHECK_NULL_VOID(parentRenderContext);
@@ -1733,7 +1733,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
             scale[0] *= parentScale.value().x;
             scale[1] *= parentScale.value().y;
         }
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     scaleX = scale[0];
     scaleY = scale[1];
@@ -5217,6 +5217,14 @@ void RosenRenderContext::SetTransparentLayer(bool isTransparentLayer)
     rsSurfaceNode->SetHardwareEnableHint(isTransparentLayer);
 }
 
+void RosenRenderContext::SetScreenId(uint64_t screenId)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSourceVirtualDisplayId(screenId);
+}
+
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -6484,12 +6492,12 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint16_t flag)
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
     if (!SystemProperties::GetPixelRoundEnabled()) {
-        //isRound is the switch of pixelRound of lower version
+        // isRound is the switch of pixelRound of lower version
         isRound = false;
-        //flag is the switch of pixelRound of upper version
+        // flag is the switch of pixelRound of upper version
         flag = NO_FORCE_ROUND;
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         OnePixelRounding(flag);
     } else {
         if (isRound && flag == 0) {

@@ -138,10 +138,6 @@ public:
     void TxtGetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
-    virtual bool IsEndAddParagraphSpacing()
-    {
-        return false;
-    }
 
 protected:
     virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);

@@ -635,18 +635,24 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     };
     if (image_) {
         image_->SetDrawCompleteCallback(std::move(drawCompleteCallback));
-        return MakeRefPtr<ImagePaintMethod>(image_, imagePaintMethodConfig);
+        imagePaintMethod_->UpdatePaintMethod(image_, imagePaintMethodConfig);
+        return imagePaintMethod_;
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
         altImage_->SetDrawCompleteCallback(std::move(drawCompleteCallback));
-        return MakeRefPtr<ImagePaintMethod>(altImage_, imagePaintMethodConfig);
+        imagePaintMethod_->UpdatePaintMethod(altImage_, imagePaintMethodConfig);
+        return imagePaintMethod_;
     }
     CreateObscuredImage();
     if (obscuredImage_) {
         obscuredImage_->SetDrawCompleteCallback(std::move(drawCompleteCallback));
-        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, imagePaintMethodConfig);
+        imagePaintMethod_->UpdatePaintMethod(obscuredImage_, imagePaintMethodConfig);
+        return imagePaintMethod_;
     }
-    return MakeRefPtr<ImagePaintMethod>(nullptr, imagePaintMethodConfig);
+    imagePaintMethodConfig.imageContentModifier = nullptr;
+    imagePaintMethodConfig.imageOverlayModifier = nullptr;
+    imagePaintMethod_->UpdatePaintMethod(nullptr, imagePaintMethodConfig);
+    return imagePaintMethod_;
 }
 
 void ImagePattern::CreateModifier()
@@ -1384,6 +1390,7 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderCtx);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
+    imagePaintMethod_ = MakeRefPtr<ImagePaintMethod>(nullptr);
     if (GetIsAnimation()) {
         renderCtx->SetClipToFrame(true);
     } else {
@@ -1398,6 +1405,7 @@ void ImagePattern::OnAttachToFrameNode()
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     selectedColor_ = textTheme->GetSelectedColor();
+    overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
     auto imageTheme = pipeline->GetTheme<ImageTheme>();
     CHECK_NULL_VOID(imageTheme);
     smoothEdge_ = imageTheme->GetMinEdgeAntialiasing();

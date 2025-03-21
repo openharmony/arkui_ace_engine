@@ -194,7 +194,7 @@ public:
         return contentMod_;
     }
 
-    void SetTextDetectEnable(bool enable);
+    virtual void SetTextDetectEnable(bool enable);
     bool GetTextDetectEnable()
     {
         return textDetectEnable_;

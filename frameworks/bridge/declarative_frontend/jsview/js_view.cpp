@@ -682,6 +682,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         jsView->jsViewFunction_->ExecuteOnDumpInfo(params);
     };
 
@@ -689,6 +690,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, "");
         ContainerScope scope(jsView->GetInstanceId());
+        CHECK_NULL_RETURN(jsView->jsViewFunction_, "");
         return jsView->jsViewFunction_->ExecuteOnDumpInfo();
     };
 

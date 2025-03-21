@@ -166,7 +166,7 @@ private:
     static inline uint32_t showCount_ = 0;
     static inline std::shared_mutex showCountMutex_;
     static inline std::shared_mutex isSingleMutex_;
-    static inline uint32_t columnkind_ = TEXT;
+    static inline uint32_t columnKind_ = TEXT;
 };
 
 class ACE_EXPORT TextPickerDialogModelNG : public TextPickerDialogModel {
