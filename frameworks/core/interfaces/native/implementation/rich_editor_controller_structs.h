@@ -19,7 +19,6 @@
 
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
 struct TextSpanOptionsForUpdate {
@@ -45,7 +44,5 @@ struct RichEditorSymbolSpanStyle {
     std::optional<Dimension> fontSize;
 };
 
-void AssignArkValue(Ark_Materialized& dst, const std::string& src);
-void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src);
 } // namespace OHOS::Ace::NG::Converter
 #endif

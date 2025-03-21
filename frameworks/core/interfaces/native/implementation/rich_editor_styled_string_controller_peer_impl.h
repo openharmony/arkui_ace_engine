@@ -20,61 +20,52 @@
 #include "base/utils/utils.h"
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/implementation/rich_editor_base_controller_peer_impl.h"
 #include "rich_editor_controller_structs.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-class RichEditorStyledStringControllerPeerImpl {
+class RichEditorStyledStringControllerPeerImpl : public RichEditorBaseControllerPeer {
 public:
     RichEditorStyledStringControllerPeerImpl() = default;
     virtual ~RichEditorStyledStringControllerPeerImpl() = default;
 
-    void AddTargetController(const WeakPtr<RichEditorStyledStringController> &handler)
-    {
-        handler_ = handler;
-    }
-
     RefPtr<SpanStringBase> GetStyledString()
     {
-        if (auto controller = handler_.Upgrade(); controller) {
-            return controller->GetStyledString();
-        }
         RefPtr<SpanStringBase> empty;
+        if (auto controller = handler_.Upgrade(); controller) {
+            auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+            CHECK_NULL_RETURN(styledStringController, empty);
+            return styledStringController->GetStyledString();
+        }
         return empty;
     }
 
     void SetStyledString(const RefPtr<SpanStringBase>& spanString)
     {
         if (auto controller = handler_.Upgrade(); controller) {
-            controller->SetStyledString(spanString);
+            auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+            CHECK_NULL_VOID(styledStringController);
+            styledStringController->SetStyledString(spanString);
         }
     }
 
     void SetOnWillChange(std::function<bool(const StyledStringChangeValue&)> && func)
     {
         if (auto controller = handler_.Upgrade(); controller) {
-            controller->SetOnWillChange(std::move(func));
+            auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+            CHECK_NULL_VOID(styledStringController);
+            styledStringController->SetOnWillChange(std::move(func));
         }
     }
 
     void SetOnDidChange(std::function<void(const StyledStringChangeValue&)> && func)
     {
         if (auto controller = handler_.Upgrade(); controller) {
-            controller->SetOnDidChange(std::move(func));
+            auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+            CHECK_NULL_VOID(styledStringController);
+            styledStringController->SetOnDidChange(std::move(func));
         }
     }
-
-    void SetPattern(const WeakPtr<RichEditorPattern>& pattern)
-    {
-        if (auto controller = handler_.Upgrade(); controller) {
-            controller->SetPattern(pattern);
-        }
-    }
-
-private:
-    Ace::WeakPtr<RichEditorStyledStringController> handler_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 
