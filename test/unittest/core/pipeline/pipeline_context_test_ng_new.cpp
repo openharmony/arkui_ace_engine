@@ -2032,5 +2032,322 @@ HWTEST_F(PipelineContextTestNg, PipelineOnHoverMove002, TestSize.Level1)
     bool ret = penHoverMoveEventTarget_->HandlePenHoverMoveEvent(event);
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: GetCurrentPageNameCallback
+ * @tc.desc: Test GetCurrentPageNameCallback of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg201, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps: make stageManager_ is nullptr.
+     */
+    context_->stageManager_ = nullptr;
+    EXPECT_EQ(context_->stageManager_, nullptr);
+
+    std::string res = context_->GetCurrentPageNameCallback();
+    EXPECT_EQ(res, "");
+}
+
+/**
+ * @tc.name: GetCurrentPageNameCallback
+ * @tc.desc: Test GetCurrentPageNameCallback of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg202, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    auto ONE =
+        FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: Ensure that stageManager_ is not nullptr.
+     */
+    context_->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
+    ASSERT_NE(context_->stageManager_, nullptr);
+    RefPtr<FrameNode> pageNode = context_->stageManager_->GetLastPage();
+    EXPECT_EQ(pageNode, nullptr);
+
+    std::string res = context_->GetCurrentPageNameCallback();
+    EXPECT_EQ(res, "");
+}
+
+/**
+ * @tc.name: GetCurrentPageNameCallback
+ * @tc.desc: Test GetCurrentPageNameCallback of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg203, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode("testFrameNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+   
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    /**
+     * @tc.steps: Ensure that stageManager_->GetLastPage() is not nullptr.
+     */
+    stageManager->PushPage(firstNode);
+    stageManager->PushPage(secondNode);
+    /**
+     * @tc.steps: Ensure that stageManager_ is not nullptr.
+     */
+    context_->stageManager_ = stageManager;
+    ASSERT_NE(context_->stageManager_, nullptr);
+    ASSERT_NE(context_->stageManager_->GetLastPage(), nullptr);
+
+    auto pagePattern = secondNode->GetPattern<PagePattern>();
+    ASSERT_NE(pagePattern, nullptr);
+    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    EXPECT_EQ(pageId, 0);
+    auto it = context_->pageToNavigationNodes_.find(pageId);
+    bool empty = it == context_->pageToNavigationNodes_.end() || it->second.empty();
+    EXPECT_EQ(empty, true);
+
+    std::string res = context_->GetCurrentPageNameCallback();
+    EXPECT_EQ(res, "");
+
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(1, "testUrl", "testPath");
+    /**
+     * @tc.steps: Ensure that pagePattern->GetPageInfo() is not nullptr.
+     */
+    pagePattern->pageInfo_ = pageInfo;
+    ASSERT_NE(pagePattern->GetPageInfo(), nullptr);
+    int32_t pageId2 = pagePattern->GetPageInfo()->GetPageId();
+    EXPECT_EQ(pageId2, 1);
+
+    auto it2 = context_->pageToNavigationNodes_.find(pageId);
+    bool empty2 = it2  == context_->pageToNavigationNodes_.end() || it->second.empty();
+    EXPECT_EQ(empty2, true);
+    std::string res2 = context_->GetCurrentPageNameCallback();
+    EXPECT_EQ(res2, "");
+}
+
+/**
+ * @tc.name: GetCurrentPageNameCallback
+ * @tc.desc: Test GetCurrentPageNameCallback of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg204, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode("testFrameNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto secondNode =
+        FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+   
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    /**
+     * @tc.steps: Ensure that stageManager_->GetLastPage() is not nullptr.
+     */
+    stageManager->PushPage(firstNode);
+    stageManager->PushPage(secondNode);
+    /**
+     * @tc.steps: Ensure that stageManager_ is not nullptr.
+     */
+    context_->stageManager_ = stageManager;
+    std::string res = context_->GetCurrentPageNameCallback();
+    auto pagePattern = secondNode->GetPattern<PagePattern>();
+ 
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(1, "testUrl", "testPath");
+    /**
+     * @tc.steps: Ensure that pagePattern->GetPageInfo() is not nullptr.
+     */
+    pagePattern->pageInfo_ = pageInfo;
+     /**
+     * @tc.steps: make it->second has value.
+     */
+    context_->pageToNavigationNodes_[1].push_back(firstNode);
+    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    auto it = context_->pageToNavigationNodes_.find(pageId);
+    bool empty = it == context_->pageToNavigationNodes_.end() || it->second.empty();
+    EXPECT_EQ(empty, false);
+
+    RefPtr<NavigationGroupNode> navigationNode = nullptr;
+    for (auto iter = it->second.begin(); iter != it->second.end() && !navigationNode; ++iter) {
+        navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
+    }
+    /**
+     * @tc.steps: it->second is firstNode, can not DynamicCast to NavigationGroupNode.
+     */
+    EXPECT_EQ(navigationNode, nullptr);
+
+    std::string res2 = context_->GetCurrentPageNameCallback();
+    EXPECT_EQ(res2, "");
+}
+
+/**
+ * @tc.name: GetCurrentPageNameCallback
+ * @tc.desc: Test GetCurrentPageNameCallback of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg205, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode("testFrameNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    /**
+     * @tc.steps: Ensure that stageManager_->GetLastPage() is not nullptr.
+     */
+    stageManager->PushPage(firstNode);
+    /**
+     * @tc.steps: Ensure that stageManager_ is not nullptr.
+     */
+    context_->stageManager_ = stageManager;
+    std::string res = context_->GetCurrentPageNameCallback();
+    auto pagePattern = firstNode->GetPattern<PagePattern>();
+ 
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(1, "testUrl", "testPath");
+    /**
+     * @tc.steps: Ensure that pagePattern->GetPageInfo() is not nullptr.
+     */
+    pagePattern->pageInfo_ = pageInfo;
+
+     /**
+     * @tc.steps: make it->second has value and type is navigationNode.
+     */
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    RefPtr<NavigationPattern> navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    WeakPtr<UINode> navigationGroupNodeVal = AceType::WeakClaim(AceType::RawPtr(navigationGroupNode));
+
+    context_->pageToNavigationNodes_[1].push_back(navigationGroupNodeVal);
+    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    auto it = context_->pageToNavigationNodes_.find(pageId);
+    bool empty = it == context_->pageToNavigationNodes_.end() || it->second.empty();
+    EXPECT_EQ(empty, false);
+
+    RefPtr<NavigationGroupNode> navigationNode = nullptr;
+    for (auto iter = it->second.begin(); iter != it->second.end() && !navigationNode; ++iter) {
+        navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
+    }
+    /**
+     * @tc.steps: it->second is navigationNode, can DynamicCast to NavigationGroupNode.
+     */
+    EXPECT_NE(navigationNode, nullptr);
+    ASSERT_NE(navigationNode->GetPattern(), nullptr);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+
+    const auto& navDestinationNodes = pattern->GetAllNavDestinationNodes();
+    /**
+     * @tc.steps: navDestinationNodes is  navPathList in navigationPattern->navigationStack_, is nullptr.
+     */
+    int32_t size = static_cast<int32_t>(navDestinationNodes.size());
+    EXPECT_EQ(size, 0);
+
+    std::string res2 = context_->GetCurrentPageNameCallback();
+    EXPECT_EQ(res2, "");
+}
+
+/**
+ * @tc.name: GetCurrentPageNameCallback
+ * @tc.desc: Test GetCurrentPageNameCallback of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg206, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    auto stageNode = FrameNode::CreateFrameNode("testFrameNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto firstNode =
+        FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    /**
+     * @tc.steps: Ensure that stageManager_->GetLastPage() is not nullptr.
+     */
+    stageManager->PushPage(firstNode);
+    /**
+     * @tc.steps: Ensure that stageManager_ is not nullptr.
+     */
+    context_->stageManager_ = stageManager;
+    auto pagePattern = firstNode->GetPattern<PagePattern>();
+ 
+    auto pageInfo = AceType::MakeRefPtr<PageInfo>(1, "testUrl", "testPath");
+    /**
+     * @tc.steps: Ensure that pagePattern->GetPageInfo() is not nullptr.
+     */
+    pagePattern->pageInfo_ = pageInfo;
+     /**
+     * @tc.steps: make it->second has value and type is navigationNode.
+     */
+
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigationNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); }
+    );
+    RefPtr<NavigationPattern> navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    WeakPtr<UINode> navigationGroupNodeVal = AceType::WeakClaim(AceType::RawPtr(navigationGroupNode));
+
+    context_->pageToNavigationNodes_[1].push_back(navigationGroupNodeVal);
+    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    auto it = context_->pageToNavigationNodes_.find(pageId);
+    bool empty = it == context_->pageToNavigationNodes_.end() || it->second.empty();
+    EXPECT_EQ(empty, false);
+
+    RefPtr<NavigationGroupNode> navigationNode = nullptr;
+    for (auto iter = it->second.begin(); iter != it->second.end() && !navigationNode; ++iter) {
+        navigationNode = AceType::DynamicCast<NavigationGroupNode>((*iter).Upgrade());
+    }
+    /**
+     * @tc.steps: it->second is navigationNode, can  DynamicCast to NavigationGroupNode.
+     */
+    EXPECT_NE(navigationNode, nullptr);
+    ASSERT_NE(navigationNode->GetPattern(), nullptr);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: make navigationPattern->navigationStack_ not nullptr.
+     */
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", nullptr));
+    navPathList.emplace_back(std::make_pair("pageTwo", nullptr));
+    navPathList.emplace_back(std::make_pair("pageThree", nullptr));
+    navPathList.emplace_back(std::make_pair("pageFour", nullptr));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+
+    const auto& navDestinationNodes = pattern->GetAllNavDestinationNodes();
+    int32_t size = static_cast<int32_t>(navDestinationNodes.size());
+    EXPECT_NE(size, 0);
+
+    std::string res = context_->GetCurrentPageNameCallback();
+    EXPECT_EQ(res, "pageFour");
+}
+
 } // namespace NG
 } // namespace OHOS::Ace
