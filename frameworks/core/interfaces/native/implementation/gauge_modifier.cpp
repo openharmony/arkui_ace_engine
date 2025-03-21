@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -53,62 +54,30 @@ ColorStopArray Convert(const Ark_ResourceColor& src)
 template<>
 ColorStopArray Convert(const Ark_LinearGradient& src)
 {
-    LOGE("OHOS::Ace::NG::Converter::Convert, Ark_LinearGradient to ColorStopArray is not implemented yet\n");
-    return ColorStopArray();
-}
-
-struct GaugeColors {
-    std::vector<ColorStopArray> gradient;
-    std::vector<float> weights;
-    GaugeType type;
-
-    explicit GaugeColors(GaugeType t) : type(t) {}
-};
-
-template<>
-void AssignTo(std::optional<GaugeColors>& dst, const Ark_ResourceColor& src)
-{
-    auto colorStop = Convert<ColorStopArray>(src);
-    if (!colorStop.empty()) {
-        if (!dst) {
-            dst = GaugeColors(GaugeType::TYPE_CIRCULAR_MONOCHROME);
+    ColorStopArray result;
+    CHECK_NULL_RETURN(src, result);
+    result.reserve(src->colorStops.size());
+    for (const auto& color : src->colorStops) {
+        if (color.first.has_value()) {
+            result.emplace_back(std::make_pair(color.first.value(), color.second));
         }
-        dst->gradient.emplace_back(colorStop);
     }
+    return result;
 }
 
+using ColorWithWeight = std::tuple<ColorStopArray, float>;
 template<>
-void AssignTo(std::optional<GaugeColors>& dst, const Ark_LinearGradient& src)
+ColorWithWeight Convert(const Ark_Tuple_Union_ResourceColor_LinearGradient_Number& src)
 {
-    auto colorStop = Convert<ColorStopArray>(src);
-    if (!colorStop.empty()) {
-        if (!dst) {
-            dst = GaugeColors(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
-        }
-        dst->gradient.emplace_back(colorStop);
-    }
-}
-
-template<>
-void AssignCast(std::optional<GaugeColors>& dst, const Ark_Tuple_Union_ResourceColor_LinearGradient_Number& src)
-{
-    AssignTo(dst, src.value0);
-    if (dst && dst->weights.size() < dst->gradient.size()) {
-        dst->weights.emplace_back(Convert<float>(src.value1));
-    }
-}
-
-template<>
-void AssignCast(std::optional<GaugeColors>& dst,
-    const Array_Tuple_Union_ResourceColor_LinearGradient_Number& src)
-{
-    const auto length = std::min(Convert<int32_t>(src.length), COLORS_MAX_COUNT);
-    for (int i = 0; i < length; ++i) {
-        AssignTo(dst, src.array[i]);
-    }
-    if (dst) {
-        dst->type = GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
-    }
+    ColorStopArray colors;
+    Converter::VisitUnion(src.value0,
+        [&colors](const auto& value) {
+            colors = Convert<ColorStopArray>(value);
+        },
+        []() {}
+    );
+    const auto weight = Convert<float>(src.value1);
+    return {colors, weight};
 }
 
 template<>
@@ -211,8 +180,43 @@ void ColorsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto gaugeColors = Converter::OptConvert<Converter::GaugeColors>(*value);
-    if (gaugeColors) {
+    struct GaugeColors {
+        std::vector<ColorStopArray> gradient;
+        std::vector<float> weights;
+        GaugeType type;
+    };
+    std::optional<GaugeColors> gaugeColors;
+    Converter::VisitUnion(*value,
+        [&gaugeColors](const Ark_ResourceColor& color) {
+            gaugeColors = GaugeColors {
+                .gradient = std::vector<ColorStopArray> {Converter::Convert<ColorStopArray>(color)},
+                .type = GaugeType::TYPE_CIRCULAR_MONOCHROME
+            };
+        },
+        [&gaugeColors](const Ark_LinearGradient& color) {
+            gaugeColors = GaugeColors {
+                .gradient = std::vector<ColorStopArray> {Converter::Convert<ColorStopArray>(color)},
+                .type = GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT
+            };
+        },
+        [&gaugeColors](const Array_Tuple_Union_ResourceColor_LinearGradient_Number& colorsArray) {
+            gaugeColors = GaugeColors {
+                .type = GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT
+            };
+            const auto colors = Converter::Convert<std::vector<Converter::ColorWithWeight>>(colorsArray);
+            const auto colorsSize = std::min(static_cast<int32_t>(colors.size()), COLORS_MAX_COUNT);
+            gaugeColors->gradient.reserve(colorsSize);
+            gaugeColors->weights.reserve(colorsSize);
+            for (int32_t i = 0; i < colorsSize; ++i) {
+                const auto [gradient, weight] = colors[i];
+                gaugeColors->gradient.emplace_back(gradient);
+                gaugeColors->weights.emplace_back(weight);
+            }
+        },
+        []() {
+            LOGE("Arkoala. Converter::AssignCast for Ark_Type_GaugeAttribute_colors_colors. Unexpected type.");
+        });
+    if (gaugeColors.has_value()) {
         SortColorStopOffset(gaugeColors->gradient);
         GaugeModelNG::SetGradientColors(frameNode, gaugeColors->gradient, gaugeColors->weights, gaugeColors->type);
     } else {
