@@ -4,10 +4,10 @@ export * from "./ArkPageTransitionData"
 export * from "./Router"
 export * from "./ForeignFunctions"
 export * from "./resources"
+export * from "./AttributeModifier"
 
 
 // TODO: implement this
-export interface AttributeModifier<T> {}
 export interface SubscribaleAbstract {}
 export interface CommonTransition {}
 export interface AbstractProperty {}

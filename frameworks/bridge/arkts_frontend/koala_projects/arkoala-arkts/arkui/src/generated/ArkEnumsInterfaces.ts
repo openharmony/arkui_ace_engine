@@ -308,11 +308,8 @@ export enum Axis {
     Horizontal = 1
 }
 export enum HorizontalAlign {
-    START = 0,
     Start = 0,
-    CENTER = 1,
     Center = 1,
-    END = 2,
     End = 2
 }
 export enum FlexAlign {

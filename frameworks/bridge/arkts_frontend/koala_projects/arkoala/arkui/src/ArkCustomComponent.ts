@@ -4,6 +4,8 @@
  * context. To avoid that the annotated `ArkCustomComponent` subclass should be used instead.
  */
 export abstract class ArkCustomComponent extends CustomComponent {
+    
+    setInstanceId(value: number): void {}
     /** @memo */
     abstract build(): void;
     /** @memo */

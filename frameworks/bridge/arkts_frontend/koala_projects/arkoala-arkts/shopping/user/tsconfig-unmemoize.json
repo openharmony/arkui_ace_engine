@@ -31,6 +31,9 @@
             "@koalaui/arkts-arkui/ohos.arkui.UIContext": [
                 "../../arkui/src/ohos.arkui.UIContext.ts"
             ],
+            "@koalaui/arkts-arkui/ohos.arkui.modifier": [
+                "../../arkui/src/ohos.arkui.modifier.ts"
+            ],
             "app/*": [
                 "./build/generated/*"
             ]

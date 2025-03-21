@@ -22,6 +22,8 @@ import { NodeAttach, remember } from "@koalaui/runtime"
 import { VP, ResourceStr, Dimension } from "./ArkUnitsInterfaces"
 import { ImageFit, Curve } from "./ArkEnumsInterfaces"
 import { ICurve } from "./ArkICurveMaterialized"
+import { CommonMethod } from "./ArkCommonInterfaces"
+
 export type ParticleTuple<T1,T2> = [
     T1,
     T2

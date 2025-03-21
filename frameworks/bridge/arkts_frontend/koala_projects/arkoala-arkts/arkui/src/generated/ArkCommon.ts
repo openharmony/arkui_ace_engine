@@ -24,7 +24,7 @@ import { TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonShapeMethodPeer, ArkCommonPeer, ArkScrollableCommonMethodPeer } from "./peers/ArkCommonPeer"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
-import { Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, CommonMethod, CommonAttribute, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions } from "./ArkCommonInterfaces"
+import { Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, CommonMethod, CommonAttribute, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, CommonInterface } from "./ArkCommonInterfaces"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, EdgeEffect } from "./ArkEnumsInterfaces"
 import { Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void } from "./SyntheticDeclarations"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
@@ -49,8 +49,26 @@ import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./Ark
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./ArkScrollInterfaces"
+import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
+import { AttributeUpdater } from "../handwritten/modifiers/ArkAttributeUpdater"
+import { applyUIAttributes, ArkCommonAttributeSet, CommonModifier } from "../handwritten/modifiers/ArkCommonModifier"
 /** @memo:stable */
 export class ArkCommonMethodComponent extends ComponentBase {
+
+    protected _modifierHost: ComponentBase | undefined
+
+    setModifierHost(value: ComponentBase): void {
+        this._modifierHost = value
+    }
+
+    getModifierHost(): ArkBaseNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkBaseNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost as ArkBaseNode
+    }
+
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
     }
@@ -1795,7 +1813,27 @@ export class ArkCommonMethodComponent extends ComponentBase {
         }
         return this
     }
-    attributeModifier(modifier: AttributeModifier<object>): this { throw new Error("not implemented") }
+    attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
+        let peerNode = this.getPeer()
+        if (!peerNode._attributeSet) {
+            peerNode._attributeSet = new ArkCommonAttributeSet()
+        }
+        applyUIAttributes(modifier, peerNode);
+        let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as AttributeUpdater<CommonAttribute, CommonInterface>
+            attributeUpdater.initializeModifier(peerNode._attributeSet as CommonAttribute);
+            attributeUpdater.attribute = this.getModifierHost()
+            attributeUpdater.updateConstructorParams = () => { return this.getModifierHost()! as CommonAttribute };
+            peerNode._attributeSet!.applyModifierPatch(peerNode);
+        }
+        let isAttributeset = (modifier instanceof ArkCommonAttributeSet);
+        if (isAttributeset) {
+            let attributeSet: ArkCommonAttributeSet = (modifier as object) as ArkCommonAttributeSet;
+            attributeSet.applyModifierPatch(peerNode);
+        }
+        return this
+    }
     public applyAttributesFinish(): void {
         // we calls this function outside of class, so need to make it public
         super.applyAttributesFinish()
