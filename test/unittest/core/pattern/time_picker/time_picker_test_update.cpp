@@ -78,6 +78,13 @@ const double CURRENT_YOFFSET2 = 200.f;
 const double DEFAULT_YOFFSET1 = 1.f;
 const double NEXT_DISTANCE = 7.f;
 const double PREVIOUS_DISTANCE = 5.f;
+const uint32_t PM_INDEX = 1;
+const uint32_t INDEX_HOUR_9 = 9;
+const uint32_t INDEX_HOUR_10 = 10;
+const uint32_t INDEX_HOUR_22 = 22;
+const uint32_t INDEX_HOUR_23 = 23;
+const uint32_t INDEX_MINUTE_50 = 50;
+const uint32_t INDEX_SECOND_50 = 50;
 
 RefPtr<Theme> GetTheme(ThemeType type)
 {
@@ -2035,6 +2042,118 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest010, TestSize.Level1)
     PickerTime value23 { 23, 40, 42 };
     hour = timePickerRowPattern->ParseHourOf24(value23.GetHour());
     EXPECT_EQ(hour, 11);
+}
+
+/**
+ * @tc.name: TimePickerModelNGTest011
+ * @tc.desc: Test TimePickerModelNG SetEndTime, SetHour24 and format has second.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest011, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create timePickerModelNG, set end time and selected time.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    PickerTime valuBoundary { 23, 50, 50 };
+    TimePickerModelNG::GetInstance()->SetEndTime(valuBoundary);
+    PickerTime selectedTime { 22, 50, 50 };
+    TimePickerModelNG::GetInstance()->SetSelectedTime(selectedTime);
+    TimePickerModelNG::GetInstance()->SetHour24(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. check hour_, minute_ and second_ of end time.
+     * @tc.expected: hour_ is 23, minute_ is 50, and second_ is 50.
+     */
+    auto timeBoundary = timePickerRowPattern->GetEndTime();
+    EXPECT_EQ(timeBoundary.hour_, INDEX_HOUR_23);
+    EXPECT_EQ(timeBoundary.minute_, INDEX_MINUTE_50);
+    EXPECT_EQ(timeBoundary.second_, INDEX_SECOND_50);
+    timePickerRowPattern->OnModifyDone();
+    EXPECT_EQ(timePickerRowPattern->GetHour24(), true);
+
+    /**
+     * @tc.steps: step3. check hour_, minute_ and second_ of current time are set as selected time.
+     * @tc.expected: hour_ is 22, minute_ is 50, and second_ is 50.
+     */
+    auto currentTime = timePickerRowPattern->GetCurrentTime();
+    EXPECT_EQ(currentTime.hour_, INDEX_HOUR_22);
+    EXPECT_EQ(currentTime.minute_, INDEX_MINUTE_50);
+    EXPECT_EQ(currentTime.second_, INDEX_SECOND_50);
+    auto hasSecond = timePickerRowPattern->GetHasSecond();
+    EXPECT_EQ(hasSecond, true);
+}
+
+/**
+ * @tc.name: TimePickerModelNGTest012
+ * @tc.desc: Test TimePickerModelNG, SetEndTime and handle column change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest012, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create timePickerModelNG, set end time and selected time.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme, true);
+    PickerTime valuBoundary { 23, 50, 50 };
+    TimePickerModelNG::GetInstance()->SetEndTime(valuBoundary);
+    PickerTime selectedTime { 22, 50, 50 };
+    TimePickerModelNG::GetInstance()->SetSelectedTime(selectedTime);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. check ampm column, hour column, minute column and second column are set as the seleted time.
+     * @tc.expected: ampm column's index is 1, hour column's index is 10, minute column's index is 50, and second
+     * column's index is 50.
+     */
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto amPmColumn = allChildNode["amPm"].Upgrade();
+    ASSERT_NE(amPmColumn, nullptr);
+    auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(amPmColumnPattern, nullptr);
+    EXPECT_EQ(amPmColumnPattern->GetCurrentIndex(), PM_INDEX); // PM
+
+    auto hourColumn = allChildNode["hour"].Upgrade();
+    ASSERT_NE(hourColumn, nullptr);
+    auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(hourColumnPattern, nullptr);
+    EXPECT_EQ(hourColumnPattern->GetCurrentIndex(), INDEX_HOUR_10); // 22 => 10 PM
+
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+    EXPECT_EQ(minuteColumnPattern->GetCurrentIndex(), INDEX_MINUTE_50);
+
+    auto secondColumn = allChildNode["second"].Upgrade();
+    ASSERT_NE(secondColumn, nullptr);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(secondColumnPattern, nullptr);
+    EXPECT_EQ(secondColumnPattern->GetCurrentIndex(), INDEX_SECOND_50);
+
+    /**
+     * @tc.steps: step3. set hour column to 9 then check ampm column, hour column, minute column and second column are
+     * set as the seleted time except the changed hour column.
+     * @tc.expected: ampm column's index is PM_INDEX, hour column's index is 9, minute column's index is 50, and second
+     * column's index is 50.
+     */
+    hourColumnPattern->SetCurrentIndex(INDEX_HOUR_9);
+    timePickerRowPattern->HandleColumnsChangeTimeRange(hourColumn);
+    EXPECT_EQ(amPmColumnPattern->GetCurrentIndex(), PM_INDEX);
+    EXPECT_EQ(hourColumnPattern->GetCurrentIndex(), INDEX_HOUR_9);
+    EXPECT_EQ(minuteColumnPattern->GetCurrentIndex(), INDEX_MINUTE_50);
+    EXPECT_EQ(secondColumnPattern->GetCurrentIndex(), INDEX_SECOND_50);
 }
 
 /**
