@@ -43,7 +43,7 @@ public:
 
     static WeakPtr<PixelMap> GetFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size);
     static void RemoveFromPixelMapCache(const ImageSourceInfo& imageSourceInfo, const SizeF& size);
-
+    static void ClearPixelMapCache();
 private:
     static void AddToPixelMapCache(
         const ImageSourceInfo& imageSourceInfo, const SizeF& size, WeakPtr<PixelMap> weakPixelMap);
