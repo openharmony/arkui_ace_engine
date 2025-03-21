@@ -51,10 +51,10 @@ HWTEST_F(BackgroundColorStyleAccessorTest, CtorTest, TestSize.Level1)
         { "#11223344", Dimension(10.0, DimensionUnit::VP) },
         { "#00FF0000", Dimension(0.0, DimensionUnit::VP) }
     };
+    Converter::ConvContext ctx;
     for (auto& value : TEST_PLAN) {
         Ark_TextBackgroundStyle arkValue;
-        arkValue.color = Converter::ArkValue<Opt_ResourceColor>(
-            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(value.first));
+        arkValue.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value.first, &ctx);
         auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value.second);
         arkValue.radius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(radiusUnion);
         peer_ = accessor_->ctor(&arkValue);
@@ -78,6 +78,37 @@ HWTEST_F(BackgroundColorStyleAccessorTest, CtorTest, TestSize.Level1)
     EXPECT_FALSE(result.backgroundColor.has_value());
     EXPECT_FALSE(result.backgroundRadius.has_value());
     finalyzer_(peer_);
+}
+
+/**
+ * @tc.name: GetTextBackgroundStyleTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(BackgroundColorStyleAccessorTest, GetTextBackgroundStyleTest, TestSize.Level1)
+{
+    const std::vector<std::pair<std::string, Dimension>> TEST_PLAN = {
+        { "#FF0000FF", Dimension(10.0, DimensionUnit::PX) },
+        { "#FF123456", Dimension(100.0, DimensionUnit::PX) },
+        { "#11223344", Dimension(10.0, DimensionUnit::VP) },
+        { "#00FF0000", Dimension(0.0, DimensionUnit::VP) }
+    };
+    Converter::ConvContext ctx;
+    for (auto& value : TEST_PLAN) {
+        Ark_TextBackgroundStyle arkValue;
+        arkValue.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value.first, &ctx);
+        auto radiusUnion = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(value.second);
+        arkValue.radius = Converter::ArkValue<Opt_Union_Dimension_BorderRadiuses>(radiusUnion);
+        peer_ = accessor_->ctor(&arkValue);
+        ASSERT_NE(peer_, nullptr);
+        Ark_TextBackgroundStyle style = accessor_->getTextBackgroundStyle(peer_);
+        auto aceStyle = Converter::Convert<TextBackgroundStyle>(style);
+        ASSERT_TRUE(aceStyle.backgroundColor.has_value());
+        EXPECT_EQ(aceStyle.backgroundColor.value().ToString(), value.first);
+        ASSERT_TRUE(aceStyle.backgroundRadius.has_value());
+        EXPECT_EQ(aceStyle.backgroundRadius, BorderRadiusProperty(value.second));
+        finalyzer_(peer_);
+    }
 }
 
 }
