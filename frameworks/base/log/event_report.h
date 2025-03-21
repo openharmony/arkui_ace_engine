@@ -21,7 +21,7 @@
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/frame_scene_status.h"
 
 namespace OHOS::Ace {
 
