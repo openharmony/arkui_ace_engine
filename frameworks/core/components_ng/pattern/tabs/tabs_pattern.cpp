@@ -656,7 +656,6 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
     if (indexSetByUser >= tabContentNum) {
         indexSetByUser = 0;
     }
-    SetLastWeakFocusNode(tabsNode, tabBarNode, tabsLayoutProperty, indexSetByUser);
     if (!tabsLayoutProperty->GetIndex().has_value()) {
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
     } else {
@@ -673,29 +672,6 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
         AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
         tabBarPattern->SetMaskAnimationByCreate(true);
         UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
-    }
-}
-
-void TabsPattern::SetLastWeakFocusNode(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
-    const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int32_t index)
-{
-    auto tabsFocusNode = tabsNode->GetFocusHub();
-    CHECK_NULL_VOID(tabsFocusNode);
-    auto tabBarFocusNode = tabBarNode->GetFocusHub();
-    CHECK_NULL_VOID(tabBarFocusNode);
-    if (!tabsFocusNode->IsCurrentFocus() && !tabsFocusNode->GetLastWeakFocusNode().Upgrade()) {
-        auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
-        if (tabBarPosition == BarPosition::START) {
-            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
-        }
-        if (!tabBarFocusNode->IsCurrentFocus() && !tabBarFocusNode->GetLastWeakFocusNode().Upgrade()) {
-            auto childNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
-            CHECK_NULL_VOID(childNode);
-            auto childFocusNode = childNode->GetFocusHub();
-            CHECK_NULL_VOID(childFocusNode);
-            childFocusNode->SetFocusDependence(FocusDependence::SELF);
-            tabBarFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(childFocusNode)));
-        }
     }
 }
 
