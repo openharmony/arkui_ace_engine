@@ -99,6 +99,7 @@ const std::vector<LinearFocusingDirectCase> LINEAR_FOCUSING_DIRECT_CASES = { Lin
 
 const std::vector<LinearFocusingHomeCase> LINEAR_FOCUSING_HOME_CASES = { LinearFocusingHomeCase(
     { "C", false, false, false, "HOME键走焦", "C" }) };
+
 class LinearFocusingTestNG : public FocusTestBaseNg, public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -109,16 +110,13 @@ public:
     void HomeOrTabFocusExpect(int caseNum, const LinearFocusingCase& testCase, RefPtr<FocusHub> focusHub);
     void Test02Focus(int caseNum, const LinearFocusingDirectCase& testCase, RefPtr<FocusHub> focusHub);
     void Test02FocusExpect(int caseNum, const LinearFocusingDirectCase& testCase, RefPtr<FocusHub> focusHub);
-    void HandleFocusAndExecuteTest(int32_t caseNum, const LinearFocusingDirectCase& testCase, 
-        RefPtr<FocusHub> focusHubB, RefPtr<FocusHub> focusHubC, RefPtr<FocusHub> focusHubD,
-        RefPtr<FocusHub> focusHubE, RefPtr<FocusHub> focusHubF);
-    void CreateAndInitNodes(RefPtr<FrameNode>& rootNode, RefPtr<FocusHub>& rootNodeFocusHub, 
-            RefPtr<FrameNode>& nodeA, RefPtr<FocusHub>& focusHubA,
-            RefPtr<FrameNode>& nodeB, RefPtr<FocusHub>& focusHubB,
-            RefPtr<FrameNode>& nodeC, RefPtr<FocusHub>& focusHubC,
-            RefPtr<FrameNode>& nodeD, RefPtr<FocusHub>& focusHubD,
-            RefPtr<FrameNode>& nodeE, RefPtr<FocusHub>& focusHubE,
-            RefPtr<FrameNode>& nodeF, RefPtr<FocusHub>& focusHubF);
+    void HandleFocusAndExecuteTest(int32_t caseNum, const LinearFocusingDirectCase& testCase,
+        RefPtr<FocusHub> focusHubB, RefPtr<FocusHub> focusHubC, RefPtr<FocusHub> focusHubD, RefPtr<FocusHub> focusHubE,
+        RefPtr<FocusHub> focusHubF);
+    void CreateAndInitNodes(RefPtr<FrameNode>& rootNode, RefPtr<FocusHub>& rootNodeFocusHub, RefPtr<FrameNode>& nodeA,
+        RefPtr<FocusHub>& focusHubA, RefPtr<FrameNode>& nodeB, RefPtr<FocusHub>& focusHubB, RefPtr<FrameNode>& nodeC,
+        RefPtr<FocusHub>& focusHubC, RefPtr<FrameNode>& nodeD, RefPtr<FocusHub>& focusHubD, RefPtr<FrameNode>& nodeE,
+        RefPtr<FocusHub>& focusHubE, RefPtr<FrameNode>& nodeF, RefPtr<FocusHub>& focusHubF);
 };
 } // namespace OHOS::Ace::NG
 
