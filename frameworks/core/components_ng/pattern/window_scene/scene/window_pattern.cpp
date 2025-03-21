@@ -545,6 +545,10 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
     imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
     snapshotWindow_->SetHitTestMode(HitTestMode::HTMNONE);
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
 
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
@@ -579,6 +583,17 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "load snapshot failed: %{public}s", info.GetErrorMessage().c_str());
             auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
             self->snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+            self->snapshotWindow_->MarkNeedRenderOnly();
+        });
+        eventHub->SetOnComplete([weakThis = WeakClaim(this)](const LoadImageSuccessEvent& info) {
+            if (info.GetLoadingStatus() != 1) {
+                return;
+            }
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self && self->snapshotWindow_);
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "load snapshot complete id: %{public}s",
+                self->session_->GetPersistentId());
+            self->snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
