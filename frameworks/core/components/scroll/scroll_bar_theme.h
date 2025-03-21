@@ -64,18 +64,7 @@ public:
                 LOGW("find pattern of scroll_bar fail");
                 return;
             }
-            theme->shapeMode_ = static_cast<ShapeMode>(pattern->GetAttr<double>("scroll_bar_shape_mode", 0.0));
-            theme->normalWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_width", 0.0_vp);
-            theme->activeWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_width", 0.0_vp);
-            theme->minHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_height", 0.0_vp);
-            theme->minDynamicHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_dynamic_height", 0.0_vp);
-            theme->reservedHeight_ = pattern->GetAttr<Dimension>("scroll_bar_reserved_height", 0.0_vp);
-            theme->touchWidth_ = pattern->GetAttr<Dimension>("scroll_bar_touch_width", 0.0_vp);
-            auto padding = pattern->GetAttr<Dimension>("scroll_bar_margin", Dimension(4.0, DimensionUnit::VP));
-            theme->padding_ = Edge(padding.Value(), 0.0, padding.Value(), padding.Value(), padding.Unit());
-            theme->scrollBarMargin_ = padding;
-            theme->defaultWidth_ = pattern->GetAttr<Dimension>("scroll_bar_default_width", 16.0_vp);
-            theme->defaultHeight_ = pattern->GetAttr<Dimension>("scroll_bar_default_height", 16.0_vp);
+            parseNormalThemeStyle(pattern, theme);
 #ifdef ARKUI_CIRCLE_FEATURE
             theme->normalBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_background_width", 4.0_vp);
             theme->activeBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_background_width", 24.0_vp);
@@ -99,6 +88,27 @@ public:
                 Color::TRANSPARENT).BlendOpacity(blendOpacity);
             theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
 #endif // ARKUI_CIRCLE_FEATURE
+        }
+
+        void parseNormalThemeStyle(const RefPtr<ThemeStyle>& pattern, const RefPtr<ScrollBarTheme>& theme) const
+        {
+            theme->shapeMode_ = static_cast<ShapeMode>(pattern->GetAttr<double>("scroll_bar_shape_mode", 0.0));
+            theme->normalWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_width", 0.0_vp);
+            theme->activeWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_width", 0.0_vp);
+            theme->minHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_height", 0.0_vp);
+            theme->minDynamicHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_dynamic_height", 0.0_vp);
+            theme->reservedHeight_ = pattern->GetAttr<Dimension>("scroll_bar_reserved_height", 0.0_vp);
+            theme->touchWidth_ = pattern->GetAttr<Dimension>("scroll_bar_touch_width", 0.0_vp);
+            auto padding = pattern->GetAttr<Dimension>("scroll_bar_margin", Dimension(4.0, DimensionUnit::VP));
+            theme->padding_ = Edge(padding.Value(), 0.0, padding.Value(), padding.Value(), padding.Unit());
+            theme->scrollBarMargin_ = padding;
+            theme->defaultWidth_ = pattern->GetAttr<Dimension>("scroll_bar_default_width", 16.0_vp);
+            theme->defaultHeight_ = pattern->GetAttr<Dimension>("scroll_bar_default_height", 16.0_vp);
+
+            theme->foregroundHoverBlendColor_ =
+                pattern->GetAttr<Color>("scroll_bar_foreground_hover_blend_color", Color::TRANSPARENT);
+            theme->foregroundPressedBlendColor_ =
+                pattern->GetAttr<Color>("scroll_bar_foreground_pressed_blend_color", PRESSED_BLEND_COLOR);
         }
     };
 
@@ -142,6 +152,16 @@ public:
     const Color& GetForegroundColor() const
     {
         return foregroundColor_;
+    }
+
+    const Color& GetForegroundHoverBlendColor() const
+    {
+        return foregroundHoverBlendColor_;
+    }
+
+    const Color& GetForegroundPressedBlendColor() const
+    {
+        return foregroundPressedBlendColor_;
     }
 
     ShapeMode GetShapeMode() const
@@ -220,6 +240,8 @@ private:
     Dimension defaultHeight_;
     Color backgroundColor_;
     Color foregroundColor_;
+    Color foregroundHoverBlendColor_;
+    Color foregroundPressedBlendColor_;
     Edge padding_;
 #ifdef ARKUI_CIRCLE_FEATURE
     Dimension normalBackgroundWidth_;
