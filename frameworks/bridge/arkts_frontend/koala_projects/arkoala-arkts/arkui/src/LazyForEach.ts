@@ -159,8 +159,8 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
-    let startIndex = rememberMutableState<int32>(-1)
-    let endIndex = rememberMutableState<int32>(-1)
+    let current = rememberMutableState<int32>(-1)
+    let mark = rememberMutableState<pointer>(nullptr)
 	let version = rememberMutableState<int32>(0)
 	// console.log(`LazyForEach current=${current.value} version=${version.value} mark=${mark.value}`)
 
@@ -170,15 +170,14 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
     let listener = remember(() => new InternalListener(parent.peer.ptr, version))
     const changeIndex = listener.flush(offset) // first item index that's affected by DataChange
 
-    const localStart = startIndex.value >= 0 ? Math.max(startIndex.value - offset, 0) as int32 : -1; // translated to local index
-    const localEnd = localStart + endIndex.value - startIndex.value
-    const visibleRange = new VisibleRange(parent, localStart, localEnd)
+    const currentLocal = current.value >= 0 ? Math.max(current.value - offset, 0) as int32 : -1; // translated to local index
+    const visibleRange = new VisibleRange(parent, currentLocal, currentLocal)
     remember(() => {
         dataSource.registerDataChangeListener(listener)
-        LazyForEachManager.OnRangeUpdate(visibleRange.parent, dataSource.totalCount() as int32, (start: int32, currentMark: pointer, end: int32) => {
+        LazyForEachManager.OnRangeUpdate(visibleRange.parent, dataSource.totalCount() as int32, (currentIndex: int32, currentMark: pointer, end: int32) => {
             // console.log(`LazyForEach[${parent}]: current updated to ${currentIndex} ${currentMark} end=${end}`)
-            startIndex.value = start
-            endIndex.value = end
+            current.value = currentIndex
+            mark.value = currentMark
             version.value++
         })
     })
@@ -189,7 +188,7 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
     let index: number = visibleRange.indexUp as number
 
     LazyForEachManager.Prepare(parent, dataSource.totalCount() as int32, offset)
-    LazyForEachManager.SetInsertMark(parent, nullptr, false)
+    LazyForEachManager.SetInsertMark(parent, mark.value, false)
 	while (true) {
         // console.log(`LazyForEach[${parent}]: index=${index}`)
         if (index < 0 || index >= dataSource.totalCount()) break
@@ -205,12 +204,11 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
         let moreUp = visibleRange.needFillUp()
         if (moreUp && visibleRange.indexUp > 0) {
             index = --visibleRange.indexUp
-        } else if (index < visibleRange.indexDown) {
-            ++index // to prune unnecessary interops. These are existing scopes, so SetInsertMark can be arbitrary
         } else if (visibleRange.needFillDown()) {
             index = ++visibleRange.indexDown
         } else {
-            index = -1 // terminate
+            // console.log("No more needed")
+            index = -1
         }
         LazyForEachManager.SetInsertMark(parent, moreUp ? visibleRange.markUp : visibleRange.markDown, moreUp)
 	}

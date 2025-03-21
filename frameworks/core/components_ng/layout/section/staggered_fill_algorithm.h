@@ -48,7 +48,7 @@ public:
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
-    ItemRange GetRange() const override;
+    int32_t GetMarkIndex() override;
 
     void MarkJump() override;
 
