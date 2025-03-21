@@ -80,6 +80,7 @@ struct SelectHandleInfo {
     bool needLayout = false;
     bool isPaintHandleWithPoints = false;
     bool isCircleShow = true;
+    bool isTouchable = true;
     // in Global coordinates.
     RectF paintRect;
     RectF localPaintRect;
